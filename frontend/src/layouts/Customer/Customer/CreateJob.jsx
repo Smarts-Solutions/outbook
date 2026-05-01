@@ -8,8 +8,8 @@ import {
   GetOfficerDetails,
   JobType
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
-import axios from "axios";
 import sweatalert from "sweetalert2";
+import axios from "axios";
 import * as XLSX from "xlsx";
 import { base_url } from "../../../Utils/Config";
 import { Modal, Button, Table, Form } from "react-bootstrap";
@@ -24,9 +24,14 @@ const CreateJob = () => {
   const dispatch = useDispatch();
   const role = JSON.parse(localStorage.getItem("role"));
 
+
+
+
+
   const token = JSON.parse(localStorage.getItem("token"));
   const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
+ 
   const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] });
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -71,183 +76,338 @@ const CreateJob = () => {
     type: ""
   });
 
+  const handleViewChecklist = async (checklistId, title, type) => {
+
+
+    if (!checklistId) return;
+
+    setChecklistModal(prev => ({ ...prev, show: true, loading: true, title, type: type }));
+
+    // If we already have data for this type, use it instead of fetching and resetting
+    if (checklistModal[type] && checklistModal[type].length > 0) {
+      setChecklistModal(prev => ({
+        ...prev,
+        loading: false,
+        data: [...prev[type]] // Backup current data
+      }));
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${base_url}downloadChecklist/${checklistId}`, {
+        responseType: 'arraybuffer'
+      });
+
+
+      const data = new Uint8Array(response.data);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+      const dataRows = json.slice(1);
+
+      const formattedRows = dataRows
+        .filter(row => row && row[1]) // Filter empty rows or rows without questions
+        .map((row) => ({
+          s_no: row[0],
+          question: row[1],
+          answer: '',
+          comment: '',
+          date: ""
+        }));
+
+
+      setChecklistModal(prev => ({
+        ...prev,
+        loading: false,
+        [type]: formattedRows,  // Set the main data
+        data: formattedRows // Backup for cancel action
+      }));
+
+
+    } catch (error) {
+      console.error("Error loading checklist file:", error);
+      sweatalert.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to load checklist file'
+      });
+      setChecklistModal(prev => ({ ...prev, show: false, loading: false }));
+    }
+  };
+
+  const handleChecklistAnswerChange = (index, answer, type, attribute) => {
+    setChecklistModal(prev => {
+      const newData = [...prev[type]];
+      newData[index] = {
+        ...newData[index],
+        [attribute]: answer,
+        date: (attribute === "answer" && !answer) ? "" : new Date().toISOString().split('T')[0] 
+      };
+      return {
+        ...prev,
+        [type]: newData
+      };
+    });
+  };
+
+  const handleCancelChecklist = () => {
+    const type = checklistModal.type;
+    const backup = checklistModal.data;
+    setChecklistModal(prev => ({
+      ...prev,
+      [type]: backup,
+      show: false
+    }));
+  };
+
+  const handleSubmitChecklist = () => {
+    setChecklistModal(prev => ({
+      ...prev,
+      show: false
+    }));
+
+    sweatalert.fire({
+      icon: 'success',
+      title: 'Success',
+      text: 'Checklist saved.',
+      timer: 1500,
+      showConfirmButton: false
+    });
+  };
+
+
+
+  const [serviceFieldsData, setServiceFieldsData] = useState([]);
+  const [allStaffData, setAllStaffData] = useState([]);
+  const [selectedStaffData, setSelectedStaffData] = useState([]);
+  const [allClientDetails, setAllClientDetails] = useState([]);
+  const [clientInfoCompanyDetails, setClientInfoCompanyDetails] = useState({});
+  const [clientType, setClientType] = useState("");
+
+
+
+
+
   const [jobData, setJobData] = useState({
+    CustomerDetails: [],
     AccountManager: "",
     Customer: "",
     Client: "",
+    client_id: "",
     ClientJobCode: "",
     CustomerAccountManager: "",
     Service: "",
     JobType: "",
+    BudgetedHours: "",
     Reviewer: "",
     AllocatedTo: "",
-    AllocatedOn: new Date().toISOString().slice(0, 10),
-    DateReceivedOn: new Date().toISOString().slice(0, 10),
+    AllocatedOn: "",
+    DateReceivedOn: new Date().toISOString().split("T")[0],
+    YearEnd: "",
+    TotalPreparationTime: "",
+    ReviewTime: "",
+    FeedbackIncorporationTime: "",
+    TotalTime: "",
+    EngagementModel: "",
     ExpectedDeliveryDate: "",
     DueOn: "",
     SubmissionDeadline: "",
     CustomerDeadlineDate: "",
     SLADeadlineDate: "",
     InternalDeadlineDate: "",
-    job_priority: "normal",
-    FilingWithCompaniesHouseRequired: "",
+
+    FilingWithCompaniesHouseRequired: "0",
     CompaniesHouseFilingDate: "",
-    FilingWithHMRCRequired: "",
+    FilingWithHMRCRequired: "0",
     HMRCFilingDate: "",
-    YearEnd: "",
-    EngagementModel: "",
+    OpeningBalanceAdjustmentRequired: "0",
+    OpeningBalanceAdjustmentDate: "",
+
+    NumberOfTransactions: "",
+    NumberOfTrialBalanceItems: "",
+    Turnover: "",
+    NoOfEmployees: "",
+    VATReconciliation: "0",
+    Bookkeeping: "0",
+    ProcessingType: "0",
+    Invoiced: "0",
+    Currency: "0",
+    InvoiceValue: "0",
+    InvoiceDate: "",
+    InvoiceHours: "",
+    InvoiceRemark: "",
+    notes: "",
+    job_priority: "normal",
+
+    Bookkeeping_Frequency_id_2: "Daily",
+
     processing_checklist: null,
-    reviewing_checklist: null,
+    reviewing_checklist: null
 
-    // Service-specific fields
-    Turnover_Period_id_0: "",
-    Turnover_Currency_id_0: "",
-    Turnover_id_0: "",
-    VAT_Registered_id_0: "",
-    VAT_Frequency_id_0: "",
-
-    Who_Did_The_Bookkeeping_id_1: "",
-    PAYE_Registered_id_1: "",
-    Number_of_Trial_Balance_Items_id_1: "",
-    Year_Ending_id_1: "",
-
-    Bookkeeping_Frequency_id_2: "",
-    Day_Date_id_2: "",
-    Week_Year_id_2: "",
-    Week_Month_id_2: "",
-    Week_id_2: "",
-    Fortnight_Year_id_2: "",
-    Fortnight_Month_id_2: "",
-    Fortnight_id_2: "",
-    Month_Year_id_2: "",
-    Month_id_2: "",
-    Quarter_Year_id_2: "",
-    Quarter_id_2: "",
-    Year_id_2: "",
-    Other_FromDate_id_2: "",
-    Other_ToDate_id_2: "",
-    Number_of_Total_Transactions_id_2: "",
-    Number_of_Bank_Transactions_id_2: "",
-    Number_of_Purchase_Invoices_id_2: "",
-    Number_of_Sales_Invoices_id_2: "",
-    Number_of_Petty_Cash_Transactions_id_2: "",
-    Number_of_Journal_Entries_id_2: "",
-    Number_of_Other_Transactions_id_2: "",
-    Transactions_Posting_id_2: "",
-    Quality_of_Paperwork_id_2: "",
-    Number_of_Integration_Software_Platforms_id_2: "",
-    CIS_id_2: "",
-    Posting_Payroll_Journals_id_2: "",
-    Department_Tracking_id_2: "",
-    Sales_Reconciliation_Required_id_2: "",
-    Factoring_Account_id_2: "",
-    Payment_Methods_id_2: "",
-
-    Payroll_Frequency_id_3: "",
-    Payroll_Week_Year_id_3: "",
-    Payroll_Week_Month_id_3: "",
-    Payroll_Week_id_3: "",
-    Payroll_Fortnight_Year_id_3: "",
-    Payroll_Fortnight_Month_id_3: "",
-    Payroll_Fortnight_id_3: "",
-    Payroll_Month_Year_id_3: "",
-    Payroll_Month_id_3: "",
-    Payroll_Quarter_Year_id_3: "",
-    Payroll_Quarter_id_3: "",
-    Payroll_Year_id_3: "",
-    Type_of_Payslip_id_3: "",
-    Percentage_of_Variable_Payslips_id_3: "",
-    Is_CIS_Required_id_3: "",
-    CIS_Frequency_id_3: "",
-    Number_of_Sub_contractors_id_3: "",
-
-    Whose_Tax_Return_is_it_id_4: "",
-    Number_of_Income_Sources_id_4: "",
-    If_Landlord_Number_of_Properties_id_4: "",
-    If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "",
-    Tax_Year_id_4: "",
-
-    Management_Accounts_Frequency_id_6: "",
-    Management_Accounts_FromDate_id_6: "",
-    Management_Accounts_ToDate_id_6: "",
-
-    Year_id_33: "",
-
-    Period_id_32: "",
-    Day_Date_id_32: "",
-    Week_Year_id_32: "",
-    Week_Month_id_32: "",
-    Week_id_32: "",
-    Fortnight_Year_id_32: "",
-    Fortnight_Month_id_32: "",
-    Fortnight_id_32: "",
-    Month_Year_id_32: "",
-    Month_id_32: "",
-    Quarter_Year_id_32: "",
-    Quarter_id_32: "",
-    Year_id_32: "",
-    Other_FromDate_id_32: "",
-    Other_ToDate_id_32: "",
-
-    Payroll_Frequency_id_31: "",
-    Payroll_Week_Year_id_31: "",
-    Payroll_Week_Month_id_31: "",
-    Payroll_Week_id_31: "",
-    Payroll_Fortnight_Year_id_31: "",
-    Payroll_Fortnight_Month_id_31: "",
-    Payroll_Fortnight_id_31: "",
-    Payroll_Month_Year_id_31: "",
-    Payroll_Month_id_31: "",
-    Payroll_Quarter_Year_id_31: "",
-    Payroll_Quarter_id_31: "",
-    Payroll_Year_id_31: "",
-
-    Audit_Year_Ending_id_27: "",
-
-    Filing_Frequency_id_8: "",
-    Period_Ending_Date_id_8: "",
-    Filing_Date_id_8: "",
-
-    Year_id_28: "",
   });
 
-  const [allClientDetails, setAllClientDetails] = useState([]);
-  const [clientType, setClientType] = useState("");
-  const [serviceFieldsData, setServiceFieldsData] = useState([]);
-  const [allStaffData, setAllStaffData] = useState([]);
-  const [selectedStaffData, setSelectedStaffData] = useState([]);
 
-  const getMonths = () => [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
 
-  const getQuarters = () => ["Q1 (Jan-Mar)", "Q2 (Apr-Jun)", "Q3 (Jul-Sep)", "Q4 (Oct-Dec)"];
 
-  const getLastFiveYears = () => {
-    const currentYear = new Date().getFullYear();
-    return Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
+  useEffect(() => {
+    setJobData((prevState) => ({
+      ...prevState,
+      AccountManager: AllJobData?.data?.Manager?.[0]?.manager_name || "",
+      Customer: AllJobData?.data?.customer?.customer_trading_name || "",
+      CustomerDetails: AllJobData?.data?.customerDetails || [],
+      Client:
+        location.state?.goto == "Customer"
+          ? ""
+          : location.state?.clientName?.client_name || "",
+      client_id: location.state?.goto == "Customer"
+        ? "" : location.state?.clientName?.id || "",
+    }));
+  }, [AllJobData]);
+
+  const GetJobData = async () => {
+    const custId = location.state?.customer_id || sessionStorage.getItem("cust_id_sidebar") || localStorage.getItem("customer_id");
+    const req = { customer_id: custId || "" };
+    const data = { req: req, authToken: token };
+    await dispatch(GetAllJabData(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setAllJobData({
+            loading: true,
+            data: response.data,
+          });
+
+          setJobData((prevState) => ({
+            ...prevState,
+            Service: response.data?.services?.[0]?.service_id,
+            CustomerAccountManager: response.data?.customer_account_manager?.[0]?.customer_account_manager_officer_id?.toString() || "",
+            EngagementModel: response.data?.engagement_model?.[0] ? (Object.entries(response.data.engagement_model[0]).find(([key, value]) => value === "1")?.[0] || "") : "",
+          }));
+
+          setAllStaffData(response?.data?.allStaff || []);
+          setAllClientDetails(response?.data?.client || []);
+
+
+          if (location?.state?.goto != "Customer") {
+            const clientInfo = response?.data?.client?.find((client) => Number(client?.client_id) == Number(location.state?.clientName?.id)) || "";
+            setClientType(clientInfo?.client_client_type || "");
+            if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
+
+              if (response.data?.services?.[0]?.service_id == 1) {
+
+                await get_information_company_number(clientInfo?.client_company_number, response.data?.services?.[0]?.service_id);
+              }
+              else if ([4, 8].includes(Number(response.data?.services?.[0]?.service_id))) {
+                const dueOn = await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
+                if (dueOn) setJobData(prev => ({ ...prev, DueOn: dueOn }));
+              }
+            }
+
+            else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
+
+              if (response.data?.services?.[0]?.service_id == 1) {
+                await get_information_company_number(clientInfo?.company_number, response.data?.services?.[0]?.service_id);
+              }
+              else if ([4, 8].includes(Number(response.data?.services?.[0]?.service_id))) {
+                await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
+              }
+            }
+
+            else if (clientInfo != "" && ["1", "3", "7"].includes(clientInfo?.client_client_type)) {
+              await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
+            }
+            else if ([1, 4, 8].includes(Number(response.data?.services?.[0]?.service_id))) {
+              await dueOn_date_set(clientInfo?.client_client_type, response.data?.services?.[0]?.service_id);
+            }
+
+          }
+        } else {
+          setAllJobData({
+            loading: true,
+            data: [],
+          });
+          setAllStaffData([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
   };
 
-  const getDueDate = (date, months) => {
-    if (!date) return "";
-    const d = new Date(date);
-    d.setMonth(d.getMonth() + months + 1);
-    d.setDate(0);
-    return d.toISOString().slice(0, 10);
+  useEffect(() => {
+    GetJobData();
+  }, []);
+
+
+
+  const get_information_company_number = async (company_number, service_id) => {
+
+    const data = { company_number: company_number, type: 'company_info' };
+    await dispatch(GetOfficerDetails(data))
+      .unwrap()
+      .then((res) => {
+        if (res.status) {
+          setClientInfoCompanyDetails(res.data);
+          if (!['', null, undefined].includes(service_id) && Number(service_id) == 1) {
+            setJobData((prevState) => ({
+              ...prevState,
+              Year_Ending_id_1: res.data?.accounts?.next_accounts?.period_end_on,
+              DueOn: res.data?.accounts?.next_accounts?.due_on,
+            }));
+          }
+
+        } else {
+          setClientInfoCompanyDetails({});
+
+        }
+      })
+      .catch((err) => {
+        return;
+      }
+      );
   };
 
-  const dueOn_date_set = async (type, service_id) => {
-    if (type == "2") {
+  const dueOn_date_set = async (client_type, service_id) => {
+
+    let due_date = getDueDate(client_type, service_id);
+    due_date = ['', null, undefined].includes(due_date) ? null : due_date;
+    setJobData((prevState) => ({
+      ...prevState,
+      DueOn: due_date,
+    }));
+  }
+
+  function getDueDate(client_type, service_id) {
+    if (["1", "3", "7"].includes(client_type)) {
+      // Service Account Production
       if (Number(service_id) === 1) {
         const d = new Date();
+        const year = d.getFullYear();
+        let dueYear = year;
+        // If created date is AFTER Jan 31 → next year's Jan 31
+        if (d > new Date(`${year}-01-31`)) {
+          dueYear = year + 1;
+        }
+        return `${dueYear}-01-31`;
+      }
+      // Service Personal Tax Return
+      else if (Number(service_id) === 4) {
+
+        //const d = new Date('2026-02-31'); // Example date
+        const d = new Date(); // Example date
         const y = d.getFullYear();
         const m = d.getMonth() + 1;
         if (m >= 4 || m <= 1) {
           return `${m >= 4 ? y + 1 : y}-01-31`;
         }
         return `${y}-01-31`;
-      } else if (Number(service_id) === 8) {
+      }
+
+      // 1 month + 7 day added for this service
+      else if (Number(service_id) === 8) {
+
         const today = new Date();
         const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
         const nextNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 1);
@@ -256,10 +416,14 @@ const CreateJob = () => {
         const m = String(nextNextMonth.getMonth() + 1).padStart(2, "0");
         const d = String(nextNextMonth.getDate()).padStart(2, "0");
         return `${y}-${m}-${d}`;
-      } else {
+
+      }
+      else {
         return null;
       }
-    } else {
+    }
+    else {
+      // 1 month + 7 day added for this service
       if (Number(service_id) === 8) {
         const today = new Date();
         const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
@@ -269,199 +433,74 @@ const CreateJob = () => {
         const m = String(nextNextMonth.getMonth() + 1).padStart(2, "0");
         const d = String(nextNextMonth.getDate()).padStart(2, "0");
         return `${y}-${m}-${d}`;
-      } else if (Number(service_id) === 4) {
-        const d = new Date();
+
+      }
+      // Service Personal Tax Return
+      else if (Number(service_id) === 4) {
+        //const d = new Date('2026-02-31'); // Example date
+        const d = new Date(); // Example date
         const y = d.getFullYear();
         const m = d.getMonth() + 1;
         if (m >= 4 || m <= 1) {
           return `${m >= 4 ? y + 1 : y}-01-31`;
         }
         return `${y}-01-31`;
-      } else {
+      }
+      else {
         return null;
       }
-    }
-  };
 
-  const get_information_company_number = async (company_number, service_id) => {
-    try {
-      const response = await axios.get(`${base_url}get_information_company_number/${company_number}`);
-      if (response.data.status) {
-        const next_accounts = response.data.data.next_accounts;
-        const period_end_on = next_accounts.period_end_on;
-        setJobData((prev) => ({
-          ...prev,
-          YearEnd: period_end_on,
-          Year_Ending_id_1: period_end_on,
-          DueOn: next_accounts.due_on,
-          SLADeadlineDate: next_accounts.due_on,
-        }));
-      }
-    } catch (error) {
-      console.error("Error fetching company info:", error);
-    }
-  };
-
-  const handleViewChecklist = async (checklistId, title, type) => {
-    if (!checklistId) return;
-
-    setChecklistModal(prev => ({ ...prev, show: true, loading: true, title, type: type }));
-
-    if (checklistModal[type] && checklistModal[type].length > 0) {
-      setChecklistModal(prev => ({
-        ...prev,
-        loading: false,
-        data: [...prev[type]]
-      }));
-      return;
     }
 
-    try {
-      const response = await axios.get(`${base_url}downloadChecklist/${checklistId}`, {
-        responseType: 'arraybuffer'
-      });
-      const data = new Uint8Array(response.data);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-      const formattedTasks = jsonData.slice(1)
-        .filter(row => row[0])
-        .map((row, index) => ({
-          id: index + 1,
-          task_name: row[0],
-          status: "pending",
-          remark: ""
-        }));
-
-      setChecklistModal(prev => ({
-        ...prev,
-        loading: false,
-        data: formattedTasks,
-        [type]: formattedTasks
-      }));
-    } catch (error) {
-      console.error("Error downloading checklist:", error);
-      setChecklistModal(prev => ({ ...prev, loading: false }));
-      sweatalert.fire("Error", "Could not load checklist tasks", "error");
-    }
-  };
-
-  const handleTaskStatusChange = (taskId, status) => {
-    setChecklistModal(prev => ({
-      ...prev,
-      data: prev.data.map(task =>
-        task.id === taskId ? { ...task, status } : task
-      )
-    }));
-  };
-
-  const handleTaskRemarkChange = (taskId, remark) => {
-    setChecklistModal(prev => ({
-      ...prev,
-      data: prev.data.map(task =>
-        task.id === taskId ? { ...task, remark } : task
-      )
-    }));
-  };
-
-  const handleSubmitChecklist = () => {
-    const type = checklistModal.type;
-    setChecklistModal(prev => ({
-      ...prev,
-      show: false,
-      [type]: [...prev.data]
-    }));
-    sweatalert.fire("Success", `${checklistModal.title} saved in session`, "success");
-  };
-
-  const GetJobData = async (forcedCustId = null) => {
-    const custId = forcedCustId || location.state?.customer_id || sessionStorage.getItem("cust_id_sidebar") || localStorage.getItem("customer_id");
-    const clientId = location.state?.clientName?.id || location.state?.client_id;
-
-    const req = {
-      action: "get",
-      customer_id: custId || "",
-      client_id: clientId || ""
-    };
-    const data = { req: req, authToken: token };
-    await dispatch(GetAllJabData(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          setAllJobData({ loading: true, data: response.data });
-          const clientIdFromState = clientId || location.state?.clientName?.id || location.state?.client_id;
-          const customerAccountManager = response.data?.customer_account_manager?.[0]?.customer_account_manager_officer_id || "";
-          const firstService = response.data?.services?.[0]?.service_id || "";
-
-          setAllClientDetails(response.data?.client || []);
-          setAllStaffData(response.data?.allStaff || []);
-
-          setJobData((prev) => ({
-            ...prev,
-            AccountManager: response.data?.customer?.customer_officer_name || prev.AccountManager,
-            Customer: response.data?.customer?.customer_name || prev.Customer,
-            Client: clientIdFromState || prev.Client,
-            CustomerAccountManager: prev.CustomerAccountManager || customerAccountManager,
-            Service: prev.Service || firstService,
-            EngagementModel: Object.entries(response.data?.engagement_model?.[0] || {}).find(([key, value]) => value === "1")?.[0] || prev.EngagementModel,
-          }));
-        }
-      })
-      .catch(() => { });
-  };
-
-  useEffect(() => {
-    GetJobData();
-  }, []);
-
-  const GetJobType = async () => {
-    if (!jobData.Service) return;
-    const req = { action: "get", service_id: jobData.Service };
-    const data = { req: req, authToken: token };
-    await dispatch(JobType(data))
-      .unwrap()
-      .then(async (response) => {
-        if (response.status) {
-          setJob_Type({ loading: true, data: response.data });
-        } else {
-          setJob_Type({ loading: true, data: [] });
-        }
-      })
-      .catch(() => { });
-  };
-
-  useEffect(() => {
-    GetJobType();
-  }, [jobData.Service]);
+  }
 
   const getAllChecklist = async () => {
     if (
-      jobData.Client &&
-      jobData.Service &&
+      AllJobData?.data?.client?.[0]?.client_id &&
+      jobData?.Service &&
       AllJobData?.data?.customer?.customer_id &&
-      jobData.JobType
+      jobData?.JobType
     ) {
       const req = {
         action: "getByServiceWithJobType",
         service_id: jobData.Service,
-        customer_id: AllJobData?.data?.customer?.customer_id || sessionStorage.getItem("cust_id_sidebar") || localStorage.getItem("customer_id"),
+        customer_id: AllJobData?.data?.customer?.customer_id,
         job_type_id: jobData.JobType,
-        clientId: Number(jobData.Client),
+        // clientId: AllJobData?.data?.client[0]?.client_id,
+        clientId:
+          location?.state?.goto == "Customer"
+            ? Number(jobData.Client)
+            : location?.state?.clientName?.id,
       };
       const data = { req: req, authToken: token };
+
+
+
       await dispatch(GET_ALL_CHECKLIST(data))
         .unwrap()
-        .then((response) => {
+        .then(async (response) => {
           if (response.status) {
-            setAllChecklistData({ loading: true, data: response.data });
+            if (response.data.length > 0) {
+
+              setAllChecklistData({
+                loading: true,
+                data: response.data,
+              });
+            } else {
+              setAllChecklistData({
+                loading: true,
+                data: [],
+              });
+            }
           } else {
-            setAllChecklistData({ loading: true, data: [] });
+            setAllChecklistData({
+              loading: true,
+              data: [],
+            });
           }
         })
-        .catch(() => {
-          setAllChecklistData({ loading: true, data: [] });
+        .catch((error) => {
+          return;
         });
     }
   };
@@ -470,196 +509,571 @@ const CreateJob = () => {
     getAllChecklist();
   }, [jobData.JobType, AllJobData?.data]);
 
+
+  const GetJobType = async () => {
+    const req = { action: "get", service_id: jobData.Service };
+    const data = { req: req, authToken: token };
+    await dispatch(JobType(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setJob_Type({
+            loading: true,
+            data: response.data,
+          });
+        } else {
+          setJob_Type({
+            loading: true,
+            data: [],
+          });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
+  useEffect(() => {
+    GetJobType();
+  }, [jobData.Service]);
+
+  const getChecklistData = async () => {
+    const req = {
+      action: "getById",
+      checklist_id: getChecklistId && getChecklistId,
+    };
+
+
+    const data = { req: req, authToken: token };
+    await dispatch(GET_ALL_CHECKLIST(data))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setAllChecklistData({
+            loading: true,
+            data: response.data.task || [],
+          });
+        } else {
+          setAllChecklistData({
+            loading: true,
+            data: [],
+          });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
+  useEffect(() => {
+    getChecklistData();
+  }, [getChecklistId]);
+
   const HandleChange = async (e) => {
     let name = e.target.name;
     let value = e.target.value;
 
-    if (name === 'Client') {
-      const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) === Number(value)) || "";
+    if (name == 'Client') {
+      const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) == Number(value)) || "";
       setClientType(clientInfo?.client_client_type || "");
+      if (clientInfo != "" && clientInfo?.client_company_number != undefined, clientInfo?.client_client_type == "2") {
 
-      if (clientInfo?.customer_id) {
-        setJobData(prev => ({
-          ...prev,
-          [name]: value,
-          Customer: clientInfo.customer_name || prev.Customer
-        }));
-        // If customer_id was missing, reload all data for this specific customer
-        if (!location.state?.customer_id && !sessionStorage.getItem("cust_id_sidebar")) {
-          GetJobData(clientInfo.customer_id);
+        if (Number(jobData?.Service) == 1) {
+          await get_information_company_number(clientInfo?.client_company_number, jobData?.Service);
         }
-      } else {
-        setJobData(prev => ({ ...prev, [name]: value }));
+        else if ([4, 8].includes(Number(jobData?.Service))) {
+          const dueOn = await dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
+          if (dueOn) setJobData(prev => ({ ...prev, DueOn: dueOn }));
+        }
+
+      }
+      else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
+
+        if (Number(jobData?.Service) == 1) {
+          await get_information_company_number(clientInfo?.company_number, jobData?.Service);
+        }
+        else if ([4, 8].includes(Number(jobData?.Service))) {
+          await dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
+        }
+
       }
 
-      // Existing company information and due date logic
-      if (clientInfo !== "" && clientInfo?.client_company_number && clientInfo?.client_client_type === "2") {
-        if (Number(jobData?.Service) === 1) {
-          await get_information_company_number(clientInfo?.client_company_number, jobData?.Service);
-        } else if ([4, 8].includes(Number(jobData?.Service))) {
-          const dueOn = await dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
-          if (dueOn) setJobData(prev => ({ ...prev, DueOn: dueOn, SLADeadlineDate: dueOn }));
-        }
-      } else if (clientInfo !== "" && ["5"].includes(clientInfo?.client_client_type)) {
-        if (Number(jobData?.Service) === 1) {
-          await get_information_company_number(clientInfo?.company_number, jobData?.Service);
-        } else if ([4, 8].includes(Number(jobData?.Service))) {
-          const dueOn = await dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
-          if (dueOn) setJobData(prev => ({ ...prev, DueOn: dueOn, SLADeadlineDate: dueOn }));
-        }
-      } else if (["1", "3", "7"].includes(clientInfo?.client_client_type)) {
-        if ([4, 8].includes(Number(jobData?.Service))) {
-          const dueOn = await dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
-          if (dueOn) setJobData(prev => ({ ...prev, DueOn: dueOn, SLADeadlineDate: dueOn }));
-        }
+      else if (["1", "3", "7"].includes(clientInfo?.client_client_type)) {
+        dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
+      }
+
+      else if ([1, 4, 8].includes(Number(jobData?.Service))) {
+        dueOn_date_set(clientInfo?.client_client_type, jobData?.Service);
       }
     }
 
-    if (name === "Service") {
-      setJobData(prev => ({
-        ...prev,
-        [name]: value,
-        JobType: "",
-        processing_checklist: null,
-        reviewing_checklist: null
-      }));
-      setChecklistModal(prev => ({ ...prev, processing: [], reviewing: [] }));
+    if (name === "JobType") {
+      if (!['', 'undefined', undefined, null, 'null'].includes(jobData.JobType) && Number(jobData.JobType) === Number(value) && AddTaskArr.length > 0) {
 
-      const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) === Number(jobData.Client)) || "";
-      if (clientInfo) {
-        if (Number(value) === 1 && clientInfo.client_company_number) {
-          await get_information_company_number(clientInfo.client_company_number, value);
-        } else if ([4, 8].includes(Number(value))) {
-          const dueOn = await dueOn_date_set(clientInfo.client_client_type, value);
-          if (dueOn) setJobData(prev => ({ ...prev, DueOn: dueOn, SLADeadlineDate: dueOn }));
+      } else {
+        setAddTaskArr([]);
+      }
+    }
+
+    const date = new Date();
+    if (name == "Service") {
+       
+      if ([1, 2, 3, 4, 8].includes(Number(value))) {
+
+        if (value == 1) {
+
+          const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) == Number(jobData.client_id)) || "";
+
+          if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
+            await get_information_company_number(clientInfo?.client_company_number, value);
+          }
+          else if (clientInfo != "" && ["5"].includes(clientInfo?.client_client_type)) {
+            await get_information_company_number(clientInfo?.company_number, value);
+          } else {
+            await dueOn_date_set(clientType, value);
+          }
+
+          date.setDate(date.getDate() + 28);
+          setJobData((prevState) => ({
+            ...prevState,
+            SLADeadlineDate: date.toISOString().split("T")[0],
+          }));
+          if (clientInfoCompanyDetails && Object.keys(clientInfoCompanyDetails).length > 0) {
+            setJobData((prevState) => ({
+              ...prevState,
+              Year_Ending_id_1: clientInfoCompanyDetails?.accounts?.next_accounts?.period_end_on,
+              DueOn: clientInfoCompanyDetails?.accounts?.next_accounts?.due_on,
+            }));
+          }
+        } else {
+          setJobData((prevState) => ({
+            ...prevState,
+            Year_Ending_id_1: null,
+            DueOn: null,
+          }));
+        }
+
+        if (value == 2) {
+          date.setDate(date.getDate() + 1);
+          setJobData((prevState) => ({
+            ...prevState,
+            SLADeadlineDate: date.toISOString().split("T")[0],
+          }));
+        }
+        else if (value == 3) {
+          date.setDate(date.getDate() + 5);
+          setJobData((prevState) => ({
+            ...prevState,
+            SLADeadlineDate: date.toISOString().split("T")[0],
+          }));
+        }
+        else if (value == 4) {
+          await dueOn_date_set(clientType, value);
+          date.setDate(date.getDate() + 5);
+          setJobData((prevState) => ({
+            ...prevState,
+            SLADeadlineDate: date.toISOString().split("T")[0],
+          }));
+        }
+        else if (value == 8) {
+          await dueOn_date_set(clientType, value);
+          date.setDate(date.getDate() + 10);
+          setJobData((prevState) => ({
+            ...prevState,
+            SLADeadlineDate: date.toISOString().split("T")[0],
+          }));
+        }
+
+      } else {
+
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: null,
+        }));
+      }
+
+
+
+    }
+
+    if (jobData.Service == 2 && name == "Bookkeeping_Frequency_id_2") {
+
+
+
+      if (value == "Daily") {
+        date.setDate(date.getDate() + 1);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == "Weekly") {
+        date.setDate(date.getDate() + 3);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == "Monthly") {
+        date.setDate(date.getDate() + 10);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == "Quarterly") {
+        date.setDate(date.getDate() + 15);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      } else if (value == "Yearly") {
+        date.setDate(date.getDate() + 30);
+        setJobData((prevState) => ({
+          ...prevState,
+          SLADeadlineDate: date.toISOString().split("T")[0],
+        }));
+      }
+    }
+
+    if (
+      name == "NumberOfTransactions" ||
+      name == "NumberOfTrialBalanceItems" ||
+      name == "Turnover"
+    ) {
+      if (!/^[0-9+]*$/.test(value)) {
+        return;
+      }
+    }
+    if (
+      [
+        "BudgetedHours",
+        "TotalPreparationTime",
+        "ReviewTime",
+        "FeedbackIncorporationTime",
+      ].includes(name)
+    ) {
+      value = value.replace(":", "");
+    }
+
+    setJobData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+
+    validate(name, value);
+  };
+
+
+
+  const validate = (name, value, isSubmitting = false) => {
+    const newErrors = { ...errors };
+
+    if (isSubmitting) {
+      for (const key in CreateJobErrorMessage) {
+        if (
+          !jobData[key] &&
+          key != "NumberOfTransactions" &&
+          key != "NumberOfTrialBalanceItems" &&
+          key != "Turnover"
+        ) {
+          newErrors[key] = CreateJobErrorMessage[key];
         }
       }
     } else {
-      setJobData((prevState) => ({
-        ...prevState,
-        [name]: value,
-      }));
-    }
-
-    if (errors[name]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
+      if (
+        !value &&
+        name != "NumberOfTransactions" &&
+        name != "NumberOfTrialBalanceItems" &&
+        name != "Turnover"
+      ) {
+        if (CreateJobErrorMessage[name]) {
+          newErrors[name] = CreateJobErrorMessage[name];
+        }
+      } else if (name == "NumberOfTransactions" && value > 1000000) {
+        newErrors[name] = CreateJobErrorMessage[name];
+      } else if (name == "NumberOfTrialBalanceItems" && value > 5000) {
+        newErrors[name] = CreateJobErrorMessage[name];
+      } else if (name == "Turnover" && value > 200000000) {
+        newErrors[name] = CreateJobErrorMessage[name];
+      } else {
         delete newErrors[name];
-        return newErrors;
-      });
-    }
-  };
-
-  const openJobModal = (e) => {
-    const value = e.target.value;
-    const selectedJobType = get_Job_Type?.data?.find((item) => Number(item.id) === Number(value));
-    if (selectedJobType) {
-      setAddTaskArr(selectedJobType.task || []);
-      jobModalSetStatus(true);
-    }
-  };
-
-  const shouldShowField = (field, currentJobData) => {
-    if (!field.showIf) return true;
-    return Object.entries(field.showIf).every(([key, expectedValue]) => {
-      const actualValue = currentJobData[key];
-      if (Array.isArray(expectedValue)) {
-        return expectedValue.includes(actualValue);
       }
-      return actualValue === expectedValue;
-    });
-  };
-
-  const validateAllFields = () => {
-    const newErrors = {};
-    const requiredFields = [
-      "AccountManager", "Customer", "Client", "CustomerAccountManager",
-      "Service", "JobType", "DateReceivedOn"
-    ];
-
-    requiredFields.forEach(field => {
-      if (!jobData[field]) {
-        newErrors[field] = CreateJobErrorMessage[field];
-      }
-    });
-
-    if (Number(jobData.Service) === 1 && !jobData.Year_Ending_id_1) {
-      newErrors["Year_Ending_id_1"] = "Year Ending is required";
     }
 
+    ScrollToViewFirstError(newErrors);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitted(true);
+  const validateAllFields = () => {
+    let isValid = true;
+    for (const key in jobData) {
+      if (!validate(key, jobData[key], true)) {
+        isValid = false;
+      }
+    }
+    return isValid;
+  };
 
-    if (!validateAllFields()) {
-      ScrollToViewFirstError();
+  function formatTime(hours, minutes) {
+    const formattedHours =
+      hours != "" || hours != null ? String(hours).padStart(2, "0") : "00";
+    const formattedMinutes =
+      minutes != "" || minutes != null
+        ? String(minutes).padStart(2, "0")
+        : "00";
+    return `${formattedHours}:${formattedMinutes}`;
+  }
+
+  let budgeted_hour_totalTime = { hours: "", minutes: "" };
+  // if (AddTaskArr.length > 0) {
+  //   budgeted_hour_totalTime = AddTaskArr?.reduce(
+  //     (acc, task) => {
+  //       const [hours, minutes] = task?.budgeted_hour?.split(":").map(Number);
+
+  //       acc.hours += hours;
+  //       acc.minutes += minutes;
+
+  //       // Convert every 60 minutes into an hour
+  //       if (acc.minutes >= 60) {
+  //         acc.hours += Math.floor(acc.minutes / 60);
+  //         acc.minutes = acc.minutes % 60;
+  //       }
+  //       return acc;
+  //     },
+  //     { hours: 0, minutes: 0 }
+  //   );
+  // }
+  if (AddTaskArr.length > 0) {
+    budgeted_hour_totalTime = AddTaskArr.reduce(
+      (acc, task) => {
+        // safe split with default "0:0" if null/undefined/empty
+        const [hours, minutes] = (task?.budgeted_hour || "0:0")
+          .split(":")
+          .map(Number);
+
+        acc.hours += hours;
+        acc.minutes += minutes;
+
+        // Convert every 60 minutes into an hour
+        if (acc.minutes >= 60) {
+          acc.hours += Math.floor(acc.minutes / 60);
+          acc.minutes = acc.minutes % 60;
+        }
+
+        return acc;
+      },
+      { hours: 0, minutes: 0 }
+    );
+  }
+
+
+  useEffect(() => {
+    setBudgetedHours({
+      hours: budgeted_hour_totalTime.hours || "0",
+      minutes: budgeted_hour_totalTime.minutes || "0",
+    });
+  }, [AddTaskArr]);
+
+
+
+  const handleSubmit = async () => {
+
+
+
+    let checklist_modal_data = null;
+    let processing_checklist_status = "2";
+    let reviewing_checklist_status = "2";
+
+    // processing Type
+    if (Array.isArray(checklistModal?.processing) && checklistModal?.processing?.length) {
+      checklist_modal_data = JSON.stringify(checklistModal)
+      let isNotChecked = checklistModal?.processing?.find(val => val.answer == "")
+      if (isNotChecked) {
+        processing_checklist_status = "2"
+      } else {
+        processing_checklist_status = "1"
+      }
+    }
+
+
+    if (Array.isArray(checklistModal?.reviewing) && checklistModal?.reviewing?.length) {
+      checklist_modal_data = JSON.stringify(checklistModal)
+      let isNotChecked = checklistModal?.reviewing?.find(val => val.answer == "")
+      if (isNotChecked) {
+        reviewing_checklist_status = "2"
+      } else {
+        reviewing_checklist_status = "1"
+      }
+    }
+
+
+
+    if (["", null, undefined ,0].includes(jobData?.processing_checklist)) {
+      processing_checklist_status = "0"
+    }
+
+    if (["", null, undefined ,0].includes(jobData?.reviewing_checklist)) {
+      reviewing_checklist_status = "0"
+    }
+
+
+
+    if (AddTaskArr.length === 0) {
+      sweatalert.fire({
+        icon: "error",
+        title: "Please add at least one task.",
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500,
+      });
       return;
     }
 
-    const submissionAddTaskArr = AddTaskArr.map(task => {
-      const [h, m] = (task.budgeted_hour || "0:0").split(":");
-      const totalMin = (Number(h) || 0) * 60 + (Number(m) || 0);
-      return { ...task, budgeted_hour: totalMin };
-    });
+    if (["", null, undefined].includes(jobData.DateReceivedOn)) {
+      sweatalert.fire({
+        icon: "error",
+        title: "Please select Date Received On.",
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500,
+      });
+      return;
+    }
 
-    const payload = {
+
+    const req = {
       ...jobData,
-      AllocatedOn: jobData.AllocatedOn || null,
-      ExpectedDeliveryDate: jobData.ExpectedDeliveryDate || null,
-      SubmissionDeadline: jobData.SubmissionDeadline || null,
-      CustomerDeadlineDate: jobData.CustomerDeadlineDate || null,
-      InternalDeadlineDate: jobData.InternalDeadlineDate || null,
-      CompaniesHouseFilingDate: jobData.CompaniesHouseFilingDate || null,
-      HMRCFilingDate: jobData.HMRCFilingDate || null,
-      YearEnd: jobData.YearEnd || null,
+      selectedStaffData: selectedStaffData,
+      staffCreatedId: staffCreatedId,
+      account_manager_id: AllJobData?.data?.Manager?.[0]?.manager_id,
+      customer_id: AllJobData?.data?.customer?.customer_id,
+      Client_id: jobData.client_id,
+      client_id:
+        location?.state?.goto == "Customer"
+          ? Number(jobData.Client)
+          : location?.state?.clientName?.id,
+      client_job_code: jobData.ClientJobCode,
+      customer_contact_details_id: Number(jobData.CustomerAccountManager),
+      service_id: Number(jobData.Service),
+      job_type_id: Number(jobData.JobType),
+      budgeted_hours: formatTime(budgetedHours.hours, budgetedHours.minutes),
+      reviewer: Number(jobData.Reviewer),
+      allocated_to: Number(jobData.AllocatedTo),
+      allocated_on: jobData.AllocatedOn
+        ? jobData.AllocatedOn
+        : new Date().toISOString().split("T")[0],
+      date_received_on: jobData.DateReceivedOn
+        ? jobData.DateReceivedOn
+        : new Date().toISOString().split("T")[0],
+      year_end: jobData.YearEnd,
+      total_preparation_time: formatTime(
+        PreparationTimne.hours,
+        PreparationTimne.minutes
+      ),
+      review_time: formatTime(reviewTime.hours, reviewTime.minutes),
+      feedback_incorporation_time: formatTime(
+        FeedbackIncorporationTime.hours,
+        FeedbackIncorporationTime.minutes
+      ),
+      total_time: formatTime(Math.floor(totalHours / 60), totalHours % 60),
+      engagement_model: jobData.EngagementModel,
+      expected_delivery_date: jobData.ExpectedDeliveryDate,
+      due_on: jobData.DueOn,
+      submission_deadline: jobData.SubmissionDeadline,
+      customer_deadline_date: jobData.CustomerDeadlineDate,
 
-      TotalPreparationTime: (Number(PreparationTimne.hours) || 0) * 60 + (Number(PreparationTimne.minutes) || 0),
-      review_time: (Number(reviewTime.hours) || 0) * 60 + (Number(reviewTime.minutes) || 0),
-      FeedbackIncorporationTime: (Number(FeedbackIncorporationTime.hours) || 0) * 60 + (Number(FeedbackIncorporationTime.minutes) || 0),
-      budgeted_hour: (Number(budgetedHours.hours) || 0) * 60 + (Number(budgetedHours.minutes) || 0),
 
-      staff: selectedStaffData?.map(s => s.value).join(",") || null,
-      addTaskArr: submissionAddTaskArr,
+      // sla_deadline_date: jobData?.SLADeadlineDate
+      //   ? jobData?.SLADeadlineDate
+      //   : new Date().toISOString().split("T")[0],
+      sla_deadline_date: jobData?.SLADeadlineDate,
+      internal_deadline_date: jobData.InternalDeadlineDate,
 
-      processing_checklist_status: checklistModal.processing ? JSON.stringify(checklistModal.processing) : null,
-      reviewing_checklist_status: checklistModal.reviewing ? JSON.stringify(checklistModal.reviewing) : null,
+      filing_Companies_required: jobData.FilingWithCompaniesHouseRequired,
+      filing_Companies_date: jobData.CompaniesHouseFilingDate,
+      filing_hmrc_required: jobData.FilingWithHMRCRequired,
+      filing_hmrc_date: jobData.HMRCFilingDate,
+      opening_balance_required: jobData.OpeningBalanceAdjustmentRequired,
+      opening_balance_date: jobData.OpeningBalanceAdjustmentDate,
 
-      action: "add",
-      customer_id: location.state?.customer_id || sessionStorage.getItem("cust_id_sidebar") || localStorage.getItem("customer_id")
+      number_of_transaction: Number(jobData.NumberOfTransactions),
+      number_of_balance_items: Number(jobData.NumberOfTrialBalanceItems),
+      turnover: Number(jobData.Turnover),
+      number_of_employees: Number(jobData.NoOfEmployees),
+      vat_reconciliation: jobData.VATReconciliation,
+      bookkeeping: jobData.Bookkeeping,
+      processing_type: jobData.ProcessingType,
+      invoiced: jobData.Invoiced,
+      currency: jobData.Currency,
+      invoice_value: jobData.InvoiceValue,
+      invoice_date: jobData.InvoiceDate,
+      invoice_hours: formatTime(invoiceTime.hours, invoiceTime.minutes),
+      invoice_remark: jobData.InvoiceRemark,
+      notes: jobData.notes,
+      tasks: {
+        checklist_id: getChecklistId,
+        task: AddTaskArr,
+      },
+
+      processing_checklist: jobData?.processing_checklist == null ? 0 : jobData?.processing_checklist,
+      reviewing_checklist: jobData?.reviewing_checklist == null ? 0 : jobData?.reviewing_checklist,
+      processing_checklist_status: processing_checklist_status,
+      reviewing_checklist_status: reviewing_checklist_status,
+      checklist_modal_data: checklist_modal_data,
+
+
     };
 
-    const data = { req: payload, authToken: token };
 
-    sweatalert.fire({
-      title: "Are you sure?",
-      text: "You want to create this job!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, create it!",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        await dispatch(AddAllJobType(data))
-          .unwrap()
-          .then((response) => {
-            if (response.status) {
-              sweatalert.fire("Success", response.message, "success");
-              navigate("/Customer/JobList", { state: { activeTab: "1" } });
-            } else {
-              sweatalert.fire("Error", response.message, "error");
-            }
-          })
-          .catch((error) => {
-            sweatalert.fire("Error", error.message || "Something went wrong", "error");
-          });
-      }
-    });
+    const data = { req: req, authToken: token };
+    setIsSubmitted(true);
+    const isValid = validateAllFields();
+    if (isValid) {
+      await dispatch(AddAllJobType(data))
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            sweatalert.fire({
+              icon: "success",
+              title: response.message,
+              timerProgressBar: true,
+              showConfirmButton: true,
+              timer: 1500,
+            });
+            setTimeout(() => {
+              sessionStorage.setItem("activeTab", location.state.activeTab);
+              window.history.back();
+            }, 1500);
+          }
+
+          else if (response.data === "W") {
+            sweatalert.fire({
+              title: "Warning",
+              text: response.message,
+              icon: "warning",
+              confirmButtonText: "Ok",
+              timer: 3000,
+              timerProgressBar: true,
+            });
+          }
+          
+          else {
+            sweatalert.fire({
+              icon: "error",
+              title: response.message,
+              timerProgressBar: true,
+              showConfirmButton: true,
+              timer: 1500,
+            });
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+    } else {
+    }
   };
+
+
 
   const RearrangeEngagementOptionArr = [];
   const filteredData = AllJobData.data?.engagement_model?.[0]
@@ -672,193 +1086,1310 @@ const CreateJob = () => {
           adhoc_payg_hourly: "Adhoc Payg Hourly",
           customised_pricing: "Customised Pricing",
         };
+
         if (keyMapping[key]) {
           RearrangeEngagementOptionArr.push(keyMapping[key]);
         }
+
         obj[key] = AllJobData.data.engagement_model[0][key];
         return obj;
       }, {})
     : {};
 
   const totalHours =
-    (Number(PreparationTimne.hours) || 0) * 60 +
-    (Number(PreparationTimne.minutes) || 0) +
-    (Number(reviewTime.hours) || 0) * 60 +
-    (Number(reviewTime.minutes) || 0) +
-    (Number(FeedbackIncorporationTime.hours) || 0) * 60 +
-    (Number(FeedbackIncorporationTime.minutes) || 0);
+    Number(PreparationTimne.hours) * 60 +
+    Number(PreparationTimne.minutes) +
+    Number(reviewTime.hours) * 60 +
+    Number(reviewTime.minutes) +
+    Number(FeedbackIncorporationTime.hours) * 60 +
+    Number(FeedbackIncorporationTime.minutes);
 
   useEffect(() => {
     setTotalTime({
+      ...Totaltime,
       hours: Math.floor(totalHours / 60),
       minutes: totalHours % 60,
     });
-  }, [PreparationTimne, reviewTime, FeedbackIncorporationTime]);
+  }, [totalHours]);
+
+  const openJobModal = (e) => {
+    if (e.target.value != "") {
+      jobModalSetStatus(true);
+    }
+  };
+
+  const AddTask = (id) => {
+    const filterData = AllChecklistData.data.find((data) => data.task_id == id);
+
+    if (!filterData) {
+      return;
+    }
+
+    setAddTaskArr((prevTasks) => {
+      const taskExists = prevTasks.some(
+        (task) => task.task_id === filterData.task_id
+      );
+
+      if (taskExists) {
+        return prevTasks;
+      } else {
+        return [...prevTasks, filterData];
+      }
+    });
+  };
+
+  const RemoveTask = (id) => {
+    setAddTaskArr((prevTasks) =>
+      prevTasks.filter((task) => task.task_id !== id)
+    );
+  };
+
+  const handleChange1 = (e) => {
+    const { name, value } = e.target;
+    const validate = (field, setter, message) => {
+      if (value.trim() === "" || isNaN(value) || value <= 0) {
+        setter(message);
+      } else {
+        setter("");
+      }
+    };
+
+    if (name === "taskname") {
+      setTaskName(value);
+      setTaskNameError(value.trim() === "" ? "Please Enter Task Name" : "");
+    } else if (name === "budgeted_hour") {
+      validate(name, setBudgetedHourError, "Required");
+      if (value === "" || Number(value) >= 0) {
+        setBudgetedHoursAddTask({ ...BudgetedHoursAddTask, hours: value });
+      }
+    } else if (name === "budgeted_minute") {
+      validate(name, setBudgetedMinuteError, "Required");
+      if (value === "" || (Number(value) >= 0 && Number(value) <= 59)) {
+        setBudgetedHoursAddTask({ ...BudgetedHoursAddTask, minutes: value });
+      }
+    }
+  };
+
+  const handleAddTask = () => {
+    const errors = {
+      taskNameError: taskName.trim() ? "" : "Please Enter Task Name",
+      budgetedHourError:
+        BudgetedHoursAddTask.hours && BudgetedHoursAddTask.hours > 0
+          ? ""
+          : "Required",
+      budgetedMinuteError:
+        BudgetedHoursAddTask.minutes &&
+          BudgetedHoursAddTask.minutes >= 0 &&
+          BudgetedHoursAddTask.minutes <= 59
+          ? ""
+          : "Required",
+    };
+
+    setTaskNameError(errors.taskNameError);
+    setBudgetedHourError(errors.budgetedHourError);
+    setBudgetedMinuteError(errors.budgetedMinuteError);
+
+    if (
+      !errors.taskNameError &&
+      !errors.budgetedHourError &&
+      !errors.budgetedMinuteError
+    ) {
+      const req = {
+        task_id: "",
+        task_name: taskName,
+        budgeted_hour: `${BudgetedHoursAddTask.hours}:${BudgetedHoursAddTask.minutes}`,
+      };
+      setAddTaskArr([...AddTaskArr, req]);
+      HandleReset();
+      setShowAddJobModal(false);
+    }
+  };
+
+  const HandleReset = () => {
+    setBudgetedHoursAddTask({
+      ...BudgetedHoursAddTask,
+      hours: "",
+      minutes: "",
+    });
+    setTaskName("");
+  };
+
+  const HandleReset1 = () => {
+    setAddTaskArr([]);
+    setChecklistId("");
+  };
+
+  const [errorsBudgetTimeTask, setErrorsBudgetTimeTask] = useState({});
+  const validateBudgetedHours = (tasks) => {
+    const newErrors = {};
+
+    tasks.forEach((task) => {
+      const value = task.budgeted_hour || "";
+      const [hours, minutes] = value.split(":");
+
+      // Convert safely to numbers (default to 0 if NaN or empty)
+      const h = Number(hours) || 0;
+      const m = Number(minutes) || 0;
+
+      // Condition: invalid if missing ":" or both hour and minute are 0 or blank
+      if (
+        !value.includes(":") ||          // missing colon
+        hours === undefined ||           // missing hours
+        minutes === undefined ||         // missing minutes
+        hours.trim() === "" ||           // empty hours
+        minutes.trim() === "" ||         // empty minutes
+        (h === 0 && m === 0)             // both zero
+      ) {
+        newErrors[task.task_id] = "Please enter valid hours or minutes.";
+      }
+    });
+
+    setErrorsBudgetTimeTask(newErrors);
+    // Return true if all valid
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleAddCheckList = () => {
+
+    if (AddTaskArr.length === 0) {
+      sweatalert.fire({
+        icon: "warning",
+        title: "Please add at least one task.",
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500,
+      });
+      return;
+    }
+
+    const isValid = validateBudgetedHours(AddTaskArr);
+    if (!isValid) {
+      return;
+    }
+
+    jobModalSetStatus(false);
+  };
+
+  // Years (last 5 + current)
+  const getLastFiveYears = () => {
+    const currentYear = new Date().getFullYear();
+    return Array.from({ length: 6 }, (_, i) => (currentYear - i).toString());
+  };
+
+  // Months
+  const getMonths = () => [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  // Quarters
+  const getQuarters = () => ["Q1", "Q2", "Q3", "Q4"];
+
+
+  // helper functions (copy once globally)
+  const matchesCondition = (expected, actual) => {
+    if (Array.isArray(expected)) return expected.map(String).includes(String(actual));
+    return String(expected) === String(actual);
+  };
+
+  const shouldShowField = (field, values) => {
+    if (!field.showIf) return true; // no condition → always show
+    return Object.entries(field.showIf).every(([depKey, depVal]) => {
+      return matchesCondition(depVal, values[depKey]);
+    });
+  };
 
   const serviceFields = [
     {
-      id: 0,
+      id: 0, // Common fields (default)
       fields: [
-        { name: "Turnover Period", key: "Turnover_Period_id_0", type: "dropdown", options: ["Monthly", "Quarterly", "Yearly"] },
-        { name: "Turnover Currency", key: "Turnover_Currency_id_0", type: "dropdown", options: ["GBP", "USD", "INR", "EUR", "JPY", "SGD", "CNY", "Other"] },
-        { name: "Turnover", key: "Turnover_id_0", type: "number", min: 0, max: 1000000000 },
-        { name: "VAT Registered", key: "VAT_Registered_id_0", type: "dropdown", options: ["No", "Cash", "Accrual", "Flat Rate", "TOMS", "Margin", "Other"] },
-        { name: "VAT Frequency", key: "VAT_Frequency_id_0", type: "dropdown", options: ["Quarterly", "Monthly", "Yearly", "NA"] },
+        {
+          name: "Turnover Period",
+          key: "Turnover_Period_id_0",
+          type: "dropdown",
+          options: ["Monthly", "Quarterly", "Yearly"],
+        },
+        {
+          name: "Turnover Currency",
+          key: "Turnover_Currency_id_0",
+          type: "dropdown",
+          options: ["GBP", "USD", "INR", "EUR", "JPY", "SGD", "CNY", "Other"],
+        },
+        {
+          name: "Turnover",
+          key: "Turnover_id_0",
+          type: "number",
+          min: 0,
+          max: 1000000000,
+        },
+        {
+          name: "VAT Registered",
+          key: "VAT_Registered_id_0",
+          type: "dropdown",
+          options: [
+            "No",
+            "Cash",
+            "Accrual",
+            "Flat Rate",
+            "TOMS",
+            "Margin",
+            "Other",
+          ],
+        },
+        {
+          name: "VAT Frequency",
+          key: "VAT_Frequency_id_0",
+          type: "dropdown",
+          options: ["Quarterly", "Monthly", "Yearly", "NA"],
+        },
       ],
     },
     {
-      id: 1,
+      id: 1, // Accounts Production
       fields: [
-        { name: "Who Did The Bookkeeping", key: "Who_Did_The_Bookkeeping_id_1", type: "dropdown", options: ["Outbooks", "Customer", "Client", "Other Outsourced Bookkeeper", "Internal Bookkeeper", "Other"] },
-        { name: "PAYE Registered", key: "PAYE_Registered_id_1", type: "dropdown", options: ["No", "0", "1 to 5", "6 to 10", "11 to 20", "21 to 50", "51 to 100", "100+"] },
-        { name: "Number of Trial Balance Items", key: "Number_of_Trial_Balance_Items_id_1", type: "dropdown", options: ["1 to 5", "6 to 10", "11 to 20", "21 to 30", "31 to 40", "41 to 50", "51 to 75", "75 to 100", "101 to 200", "201 to 300", "301 to 400", "401 to 500", "500+"] },
-        { name: "Year Ending", key: "Year_Ending_id_1", type: "date" },
+        {
+          name: "Who Did The Bookkeeping",
+          key: "Who_Did_The_Bookkeeping_id_1",
+          type: "dropdown",
+          options: [
+            "Outbooks",
+            "Customer",
+            "Client",
+            "Other Outsourced Bookkeeper",
+            "Internal Bookkeeper",
+            "Other",
+          ],
+        },
+        {
+          name: "PAYE Registered",
+          key: "PAYE_Registered_id_1",
+          type: "dropdown",
+          options: [
+            "No",
+            "0",
+            "1 to 5",
+            "6 to 10",
+            "11 to 20",
+            "21 to 50",
+            "51 to 100",
+            "100+",
+          ],
+        },
+        {
+          name: "Number of Trial Balance Items",
+          key: "Number_of_Trial_Balance_Items_id_1",
+          type: "dropdown",
+          options: [
+            "1 to 5",
+            "6 to 10",
+            "11 to 20",
+            "21 to 30",
+            "31 to 40",
+            "41 to 50",
+            "51 to 75",
+            "75 to 100",
+            "101 to 200",
+            "201 to 300",
+            "301 to 400",
+            "401 to 500",
+            "500+",
+          ],
+        },
+        {
+          name: "Year Ending",
+          key: "Year_Ending_id_1",
+          type: "date",   // date input field
+        },
       ],
     },
     {
-      id: 2,
+      id: 2, // Bookkeeping
       fields: [
-        { name: "Frequency", key: "Bookkeeping_Frequency_id_2", type: "dropdown", options: ["Daily", "Weekly", "Fortnightly", "Monthly", "Quarterly", "Yearly", "Other"] },
-        { name: "Select Date", key: "Day_Date_id_2", type: "date", showIf: { Bookkeeping_Frequency_id_2: "Daily" } },
-        { name: "Year", key: "Week_Year_id_2", type: "dropdown", options: getLastFiveYears(), showIf: { Bookkeeping_Frequency_id_2: "Weekly" } },
-        { name: "Month", key: "Week_Month_id_2", type: "dropdown", options: getMonths(), showIf: { Bookkeeping_Frequency_id_2: "Weekly" } },
-        { name: "Week", key: "Week_id_2", type: "dropdown", options: ["Week 1", "Week 2", "Week 3", "Week 4"], showIf: { Bookkeeping_Frequency_id_2: "Weekly" } },
-        { name: "Year", key: "Fortnight_Year_id_2", type: "dropdown", options: getLastFiveYears(), showIf: { Bookkeeping_Frequency_id_2: "Fortnight" } },
-        { name: "Month", key: "Fortnight_Month_id_2", type: "dropdown", options: getMonths(), showIf: { Bookkeeping_Frequency_id_2: "Fortnight" } },
-        { name: "Fortnight", key: "Fortnight_id_2", type: "dropdown", options: ["1st Half", "2nd Half"], showIf: { Bookkeeping_Frequency_id_2: "Fortnight" } },
-        { name: "Year", key: "Month_Year_id_2", type: "dropdown", options: getLastFiveYears(), showIf: { Bookkeeping_Frequency_id_2: "Month" } },
-        { name: "Month", key: "Month_id_2", type: "dropdown", options: getMonths(), showIf: { Bookkeeping_Frequency_id_2: "Month" } },
-        { name: "Year", key: "Quarter_Year_id_2", type: "dropdown", options: getLastFiveYears(), showIf: { Bookkeeping_Frequency_id_2: "Quarter" } },
-        { name: "Quarter", key: "Quarter_id_2", type: "dropdown", options: getQuarters(), showIf: { Bookkeeping_Frequency_id_2: "Quarter" } },
-        { name: "Year", key: "Year_id_2", type: "dropdown", options: getLastFiveYears(), showIf: { Bookkeeping_Frequency_id_2: "Yearly" } },
-        { name: "From Date", key: "Other_FromDate_id_2", type: "date", showIf: { Bookkeeping_Frequency_id_2: "Other" } },
-        { name: "To Date", key: "Other_ToDate_id_2", type: "date", showIf: { Bookkeeping_Frequency_id_2: "Other" } },
-        { name: "Number of Total Transactions", key: "Number_of_Total_Transactions_id_2", type: "number", min: 0, max: 100000 },
-        { name: "Number of Bank Transactions", key: "Number_of_Bank_Transactions_id_2", type: "number", min: 0, max: 100000 },
-        { name: "Number of Purchase Invoices", key: "Number_of_Purchase_Invoices_id_2", type: "number", min: 0, max: 100000 },
-        { name: "Number of Sales Invoices", key: "Number_of_Sales_Invoices_id_2", type: "number", min: 0, max: 100000 },
-        { name: "Number of Petty Cash Transactions", key: "Number_of_Petty_Cash_Transactions_id_2", type: "number", min: 0, max: 100000 },
-        { name: "Number of Journal Entries", key: "Number_of_Journal_Entries_id_2", type: "number", min: 0, max: 100000 },
-        { name: "Number of Other Transactions", key: "Number_of_Other_Transactions_id_2", type: "number", min: 0, max: 100000 },
-        { name: "Transactions Posting", key: "Transactions_Posting_id_2", type: "dropdown", options: ["Manual", "Dext", "Hubdoc", "Auto Entry", "Other"] },
-        { name: "Quality of Paperwork", key: "Quality_of_Paperwork_id_2", type: "dropdown", options: ["Bad", "Good", "Excellent"] },
-        { name: "Number of Integration Software Platforms", key: "Number_of_Integration_Software_Platforms_id_2", type: "dropdown", options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "9+"] },
-        { name: "CIS", key: "CIS_id_2", type: "dropdown", options: ["No", "Yes"] },
-        { name: "Posting Payroll Journals", key: "Posting_Payroll_Journals_id_2", type: "dropdown", options: ["Yes", "No"] },
-        { name: "Department Tracking", key: "Department_Tracking_id_2", type: "dropdown", options: ["No", "Yes"] },
-        { name: "Sales Reconciliation Required", key: "Sales_Reconciliation_Required_id_2", type: "dropdown", options: ["No", "Yes"] },
-        { name: "Factoring Account", key: "Factoring_Account_id_2", type: "dropdown", options: ["Provider Deducts Commission Only", "Rapid Cash Account", "Provider Deducts Fixed Percentage", "No Factoring Account"] },
-        { name: "Payment Methods", key: "Payment_Methods_id_2", type: "dropdown", options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "9+"] },
+        {
+          name: "Bookkeeping Frequency",
+          key: "Bookkeeping_Frequency_id_2",
+          type: "dropdown",
+          options: [
+            "Daily",
+            "Weekly",
+            "Fortnightly",
+            "Monthly",
+            "Quarterly",
+            "Yearly",
+            "Other",
+          ],
+        },
+
+
+        // Day
+        {
+          name: "Select Date",
+          key: "Day_Date_id_2",
+          type: "date",
+          showIf: { Bookkeeping_Frequency_id_2: "Daily" },
+        },
+        // Week
+        {
+          name: "Year",
+          key: "Week_Year_id_2",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Bookkeeping_Frequency_id_2: "Weekly" },
+        },
+        {
+          name: "Month",
+          key: "Week_Month_id_2",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Bookkeeping_Frequency_id_2: "Weekly" },
+        },
+        {
+          name: "Week",
+          key: "Week_id_2",
+          type: "dropdown",
+          options: ["Week 1", "Week 2", "Week 3", "Week 4"],
+          showIf: { Bookkeeping_Frequency_id_2: "Weekly" },
+        },
+        // Fortnight
+        {
+          name: "Year",
+          key: "Fortnight_Year_id_2",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly" },
+        },
+        {
+          name: "Month",
+          key: "Fortnight_Month_id_2",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly" },
+        },
+        {
+          name: "Fortnight",
+          key: "Fortnight_id_2",
+          type: "dropdown",
+          options: ["1st Half", "2nd Half"],
+          showIf: { Bookkeeping_Frequency_id_2: "Fortnightly" },
+        },
+        // Month
+        {
+          name: "Year",
+          key: "Month_Year_id_2",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Bookkeeping_Frequency_id_2: "Monthly" },
+        },
+        {
+          name: "Month",
+          key: "Month_id_2",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Bookkeeping_Frequency_id_2: "Monthly" },
+        },
+        // Quarter
+        {
+          name: "Year",
+          key: "Quarter_Year_id_2",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Bookkeeping_Frequency_id_2: "Quarterly" },
+        },
+        {
+          name: "Quarter",
+          key: "Quarter_id_2",
+          type: "dropdown",
+          options: getQuarters(),
+          showIf: { Bookkeeping_Frequency_id_2: "Quarterly" },
+        },
+        // Year
+        {
+          name: "Year",
+          key: "Year_id_2",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Bookkeeping_Frequency_id_2: "Yearly" },
+        },
+        // Other
+        {
+          name: "From Date",
+          key: "Other_FromDate_id_2",
+          type: "date",
+          showIf: { Bookkeeping_Frequency_id_2: "Other" },
+        },
+        {
+          name: "To Date",
+          key: "Other_ToDate_id_2",
+          type: "date",
+          showIf: { Bookkeeping_Frequency_id_2: "Other" },
+        },
+
+
+
+
+        {
+          name: "Number of Total Transactions",
+          key: "Number_of_Total_Transactions_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Bank Transactions",
+          key: "Number_of_Bank_Transactions_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Purchase Invoices",
+          key: "Number_of_Purchase_Invoices_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Sales Invoices",
+          key: "Number_of_Sales_Invoices_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Petty Cash Transactions",
+          key: "Number_of_Petty_Cash_Transactions_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Journal Entries",
+          key: "Number_of_Journal_Entries_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Number of Other Transactions",
+          key: "Number_of_Other_Transactions_id_2",
+          type: "number",
+          min: 0,
+          max: 100000,
+        },
+        {
+          name: "Transactions Posting",
+          key: "Transactions_Posting_id_2",
+          type: "dropdown",
+          options: ["Manual", "Dext", "Hubdoc", "Auto Entry", "Other"],
+        },
+        {
+          name: "Quality of Paperwork",
+          key: "Quality_of_Paperwork_id_2",
+          type: "dropdown",
+          options: ["Bad", "Good", "Excellent"],
+        },
+        {
+          name: "Number of Integration Software Platforms",
+          key: "Number_of_Integration_Software_Platforms_id_2",
+          type: "dropdown",
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "9+"],
+        },
+        {
+          name: "CIS",
+          key: "CIS_id_2",
+          type: "dropdown",
+          options: ["No", "Yes"],
+        },
+        {
+          name: "Posting Payroll Journals",
+          key: "Posting_Payroll_Journals_id_2",
+          type: "dropdown",
+          options: ["Yes", "No"],
+        },
+        {
+          name: "Department Tracking",
+          key: "Department_Tracking_id_2",
+          type: "dropdown",
+          options: ["No", "Yes"],
+        },
+        {
+          name: "Sales Reconciliation Required",
+          key: "Sales_Reconciliation_Required_id_2",
+          type: "dropdown",
+          options: ["No", "Yes"],
+        },
+        {
+          name: "Factoring Account",
+          key: "Factoring_Account_id_2",
+          type: "dropdown",
+          options: [
+            "Provider Deducts Commission Only",
+            "Rapid Cash Account",
+            "Provider Deducts Fixed Percentage",
+            "No Factoring Account",
+          ],
+        },
+        {
+          name: "Payment Methods",
+          key: "Payment_Methods_id_2",
+          type: "dropdown",
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "9+"],
+        },
       ],
     },
     {
-      id: 3,
+      id: 3, // Payroll
       fields: [
-        { name: "Payroll Frequency", key: "Payroll_Frequency_id_3", type: "dropdown", options: ["Weekly", "Monthly", "Fortnightly", "Quarterly", "Yearly"] },
-        { name: "Year", key: "Payroll_Week_Year_id_3", type: "dropdown", options: getLastFiveYears(), showIf: { Payroll_Frequency_id_3: "Weekly" } },
-        { name: "Month", key: "Payroll_Week_Month_id_3", type: "dropdown", options: getMonths(), showIf: { Payroll_Frequency_id_3: "Weekly" } },
-        { name: "Week", key: "Payroll_Week_id_3", type: "dropdown", options: ["Week 1", "Week 2", "Week 3", "Week 4"], showIf: { Payroll_Frequency_id_3: "Weekly" } },
-        { name: "Year", key: "Payroll_Fortnight_Year_id_3", type: "dropdown", options: getLastFiveYears(), showIf: { Payroll_Frequency_id_3: "Fortnightly" } },
-        { name: "Month", key: "Payroll_Fortnight_Month_id_3", type: "dropdown", options: getMonths(), showIf: { Payroll_Frequency_id_3: "Fortnightly" } },
-        { name: "Fortnight", key: "Payroll_Fortnight_id_3", type: "dropdown", options: ["1st Half", "2nd Half"], showIf: { Payroll_Frequency_id_3: "Fortnightly" } },
-        { name: "Year", key: "Payroll_Month_Year_id_3", type: "dropdown", options: getLastFiveYears(), showIf: { Payroll_Frequency_id_3: "Monthly" } },
-        { name: "Month", key: "Payroll_Month_id_3", type: "dropdown", options: getMonths(), showIf: { Payroll_Frequency_id_3: "Monthly" } },
-        { name: "Year", key: "Payroll_Quarter_Year_id_3", type: "dropdown", options: getLastFiveYears(), showIf: { Payroll_Frequency_id_3: "Quarterly" } },
-        { name: "Quarter", key: "Payroll_Quarter_id_3", type: "dropdown", options: getQuarters(), showIf: { Payroll_Frequency_id_3: "Quarterly" } },
-        { name: "Year", key: "Payroll_Year_id_3", type: "dropdown", options: getLastFiveYears(), showIf: { Payroll_Frequency_id_3: "Yearly" } },
-        { name: "Type of Payslip", key: "Type_of_Payslip_id_3", type: "dropdown", options: ["Wages Only", "Wages Pension"] },
-        { name: "Percentage of Variable Payslips", key: "Percentage_of_Variable_Payslips_id_3", type: "dropdown", options: ["0%", "up to 25%", "25.1 to 50%", "50.1 to 75%", "75.1 to 100%"] },
-        { name: "Is CIS Required", key: "Is_CIS_Required_id_3", type: "dropdown", options: ["No", "Yes"] },
-        { name: "CIS Frequency", key: "CIS_Frequency_id_3", type: "dropdown", options: ["Weekly", "Monthly", "Weekly & Monthly", "Quarterly"] },
-        { name: "Number of Sub-contractors", key: "Number_of_Sub_contractors_id_3", type: "number", min: 0, max: 10000 },
+        {
+          name: "Payroll Frequency",
+          key: "Payroll_Frequency_id_3",
+          type: "dropdown",
+          options: [
+            "Weekly",
+            "Monthly",
+            "Fortnightly",
+            "Quarterly",
+            "Yearly",
+          ],
+        },
+
+        // ==================== WEEKLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Week_Year_id_3",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_3: "Weekly" },
+        },
+        {
+          name: "Month",
+          key: "Payroll_Week_Month_id_3",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Payroll_Frequency_id_3: "Weekly" },
+        },
+        {
+          name: "Week",
+          key: "Payroll_Week_id_3",
+          type: "dropdown",
+          options: ["Week 1", "Week 2", "Week 3", "Week 4"],
+          showIf: { Payroll_Frequency_id_3: "Weekly" },
+        },
+
+        // ==================== FORTNIGHTLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Fortnight_Year_id_3",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_3: "Fortnightly" },
+        },
+        {
+          name: "Month",
+          key: "Payroll_Fortnight_Month_id_3",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Payroll_Frequency_id_3: "Fortnightly" },
+        },
+        {
+          name: "Fortnight",
+          key: "Payroll_Fortnight_id_3",
+          type: "dropdown",
+          options: ["1st Half", "2nd Half"],
+          showIf: { Payroll_Frequency_id_3: "Fortnightly" },
+        },
+
+        // ==================== MONTHLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Month_Year_id_3",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_3: "Monthly" },
+        },
+        {
+          name: "Month",
+          key: "Payroll_Month_id_3",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Payroll_Frequency_id_3: "Monthly" },
+        },
+
+        // ==================== QUARTERLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Quarter_Year_id_3",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_3: "Quarterly" },
+        },
+        {
+          name: "Quarter",
+          key: "Payroll_Quarter_id_3",
+          type: "dropdown",
+          options: getQuarters(),
+          showIf: { Payroll_Frequency_id_3: "Quarterly" },
+        },
+
+        // ==================== YEARLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Year_id_3",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_3: "Yearly" },
+        },
+
+
+
+
+
+
+        {
+          name: "Type of Payslip",
+          key: "Type_of_Payslip_id_3",
+          type: "dropdown",
+          options: ["Wages Only", "Wages Pension"],
+        },
+        {
+          name: "Percentage of Variable Payslips",
+          key: "Percentage_of_Variable_Payslips_id_3",
+          type: "dropdown",
+          options: [
+            "0%",
+            "up to 25%",
+            "25.1 to 50%",
+            "50.1 to 75%",
+            "75.1 to 100%",
+          ],
+        },
+        {
+          name: "Is CIS Required",
+          key: "Is_CIS_Required_id_3",
+          type: "dropdown",
+          options: ["No", "Yes"],
+        },
+        {
+          name: "CIS Frequency",
+          key: "CIS_Frequency_id_3",
+          type: "dropdown",
+          options: ["Weekly", "Monthly", "Weekly & Monthly", "Quarterly"],
+        },
+        {
+          name: "Number of Sub-contractors",
+          key: "Number_of_Sub_contractors_id_3",
+          type: "number",
+          min: 0,
+          max: 10000,
+        },
       ],
     },
     {
-      id: 4,
+      id: 4, // Personal Tax Return
       fields: [
-        { name: "Whose Tax Return is it", key: "Whose_Tax_Return_is_it_id_4", type: "dropdown", options: ["Director", "Sole Trader", "Individual Earning more than £100k", "Partner in Partnership", "Landlord", "Other"] },
-        { name: "Number of Income Sources", key: "Number_of_Income_Sources_id_4", type: "dropdown", options: ["1", "2", "3", "4", "5", "6", "7", "8", "9+"] },
-        { name: "If Landlord, Number of Properties", key: "If_Landlord_Number_of_Properties_id_4", type: "dropdown", options: Array.from({ length: 30 }, (_, i) => (i + 1).toString()).concat(["30+"]) },
-        { name: "If Sole Trader, Who is doing Bookkeeping", key: "If_Sole_Trader_Who_is_doing_Bookkeeping_id_4", type: "dropdown", options: ["Outbooks", "Customer", "Client", "Other Outsourced Bookkeeper", "Internal Bookkeeper", "Other"] },
-        { name: "Tax Year", key: "Tax_Year_id_4", type: "dropdown", options: ["2018/19", "2019/20", "2020/21", "2021/22", "2022/23", "2023/24", "2024/25", "2025/26", "2026/27", "2027/28"] },
+        {
+          name: "Whose Tax Return is it",
+          key: "Whose_Tax_Return_is_it_id_4",
+          type: "dropdown",
+          options: [
+            "Director",
+            "Sole Trader",
+            "Individual Earning more than £100k",
+            "Partner in Partnership",
+            "Landlord",
+            "Other",
+          ],
+        },
+        {
+          name: "Number of Income Sources",
+          key: "Number_of_Income_Sources_id_4",
+          type: "dropdown",
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9+"],
+        },
+        {
+          name: "If Landlord, Number of Properties",
+          key: "If_Landlord_Number_of_Properties_id_4",
+          type: "dropdown",
+          options: [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26",
+            "27",
+            "28",
+            "29",
+            "30",
+            "30+",
+          ],
+        },
+        {
+          name: "If Sole Trader, Who is doing Bookkeeping",
+          key: "If_Sole_Trader_Who_is_doing_Bookkeeping_id_4",
+          type: "dropdown",
+          options: [
+            "Outbooks",
+            "Customer",
+            "Client",
+            "Other Outsourced Bookkeeper",
+            "Internal Bookkeeper",
+            "Other",
+          ],
+        },
+        {
+          name: "Tax Year",
+          key: "Tax_Year_id_4",
+          type: "dropdown",
+          options: [
+            "2018/19",
+            "2019/20",
+            "2020/21",
+            "2021/22",
+            "2022/23",
+            "2023/24",
+            "2024/25",
+            "2025/26",
+            "2026/27",
+            "2027/28",
+          ],
+        },
       ],
     },
-    { id: 5, fields: [] },
     {
-      id: 6,
-      fields: [
-        { name: "Management Accounts Frequency", key: "Management_Accounts_Frequency_id_6", type: "dropdown", options: ["Quarterly", "Yearly", "Monthly", "Weekly", "Fortnightly"] },
-        { name: "From Date", key: "Management_Accounts_FromDate_id_6", type: "date" },
-        { name: "To Date", key: "Management_Accounts_ToDate_id_6", type: "date" },
-      ],
-    },
-    { id: 7, fields: [] },
-    {
-      id: 33,
-      fields: [
-        { name: "Year", key: "Year_id_33", type: "dropdown", options: getLastFiveYears() },
-      ],
+      id: 5, // Admin Support
+      fields: [],
     },
     {
-      id: 32,
+      id: 6, // Management Accounts
       fields: [
-        { name: "Period", key: "Period_id_32", type: "dropdown", options: ["Day", "Week", "Fortnight", "Month", "Quarter", "Year", "Other"] },
-        { name: "Select Date", key: "Day_Date_id_32", type: "date", showIf: { Period_id_32: "Day" } },
-        { name: "Year", key: "Week_Year_id_32", type: "dropdown", options: getLastFiveYears(), showIf: { Period_id_32: "Week" } },
-        { name: "Month", key: "Week_Month_id_32", type: "dropdown", options: getMonths(), showIf: { Period_id_32: "Week" } },
-        { name: "Week", key: "Week_id_32", type: "dropdown", options: ["Week 1", "Week 2", "Week 3", "Week 4"], showIf: { Period_id_32: "Week" } },
-        { name: "Year", key: "Fortnight_Year_id_32", type: "dropdown", options: getLastFiveYears(), showIf: { Period_id_32: "Fortnight" } },
-        { name: "Month", key: "Fortnight_Month_id_32", type: "dropdown", options: getMonths(), showIf: { Period_id_32: "Fortnight" } },
-        { name: "Fortnight", key: "Fortnight_id_32", type: "dropdown", options: ["1st Half", "2nd Half"], showIf: { Period_id_32: "Fortnight" } },
-        { name: "Year", key: "Month_Year_id_32", type: "dropdown", options: getLastFiveYears(), showIf: { Period_id_32: "Month" } },
-        { name: "Month", key: "Month_id_32", type: "dropdown", options: getMonths(), showIf: { Period_id_32: "Month" } },
-        { name: "Year", key: "Quarter_Year_id_32", type: "dropdown", options: getLastFiveYears(), showIf: { Period_id_32: "Quarter" } },
-        { name: "Quarter", key: "Quarter_id_32", type: "dropdown", options: getQuarters(), showIf: { Period_id_32: "Quarter" } },
-        { name: "Year", key: "Year_id_32", type: "dropdown", options: getLastFiveYears(), showIf: { Period_id_32: "Year" } },
-        { name: "From Date", key: "Other_FromDate_id_32", type: "date", showIf: { Period_id_32: "Other" } },
-        { name: "To Date", key: "Other_ToDate_id_32", type: "date", showIf: { Period_id_32: "Other" } },
+        {
+          name: "Management Accounts Frequency",
+          key: "Management_Accounts_Frequency_id_6",
+          type: "dropdown",
+          options: ["Quarterly", "Yearly", "Monthly", "Weekly", "Fortnightly"],
+        },
+        {
+          name: "From Date",
+          key: "Management_Accounts_FromDate_id_6",
+          type: "date",
+        },
+        {
+          name: "To Date",
+          key: "Management_Accounts_ToDate_id_6",
+          type: "date",
+        },
       ],
     },
     {
-      id: 31,
+      id: 7, // Company Secretarial
+      fields: [],
+    },
+    {
+      id: 33, // Aus - Compliance
       fields: [
-        { name: "Frequency", key: "Payroll_Frequency_id_31", type: "dropdown", options: ["Weekly", "Fortnightly", "Monthly", "Quarterly", "Yearly"] },
-        { name: "Year", key: "Payroll_Week_Year_id_31", type: "dropdown", options: getLastFiveYears(), showIf: { Payroll_Frequency_id_31: "Weekly" } },
-        { name: "Month", key: "Payroll_Week_Month_id_31", type: "dropdown", options: getMonths(), showIf: { Payroll_Frequency_id_31: "Weekly" } },
-        { name: "Week", key: "Payroll_Week_id_31", type: "dropdown", options: ["Week 1", "Week 2", "Week 3", "Week 4"], showIf: { Payroll_Frequency_id_31: "Weekly" } },
-        { name: "Year", key: "Payroll_Fortnight_Year_id_31", type: "dropdown", options: getLastFiveYears(), showIf: { Payroll_Frequency_id_31: "Fortnightly" } },
-        { name: "Month", key: "Payroll_Fortnight_Month_id_31", type: "dropdown", options: getMonths(), showIf: { Payroll_Frequency_id_31: "Fortnightly" } },
-        { name: "Fortnight", key: "Payroll_Fortnight_id_31", type: "dropdown", options: ["1st Half", "2nd Half"], showIf: { Payroll_Frequency_id_31: "Fortnightly" } },
-        { name: "Year", key: "Payroll_Month_Year_id_31", type: "dropdown", options: getLastFiveYears(), showIf: { Payroll_Frequency_id_31: "Monthly" } },
-        { name: "Month", key: "Payroll_Month_id_31", type: "dropdown", options: getMonths(), showIf: { Payroll_Frequency_id_31: "Monthly" } },
-        { name: "Year", key: "Payroll_Quarter_Year_id_31", type: "dropdown", options: getLastFiveYears(), showIf: { Payroll_Frequency_id_31: "Quarterly" } },
-        { name: "Quarter", key: "Payroll_Quarter_id_31", type: "dropdown", options: getQuarters(), showIf: { Payroll_Frequency_id_31: "Quarterly" } },
-        { name: "Year", key: "Payroll_Year_id_31", type: "dropdown", options: getLastFiveYears(), showIf: { Payroll_Frequency_id_31: "Yearly" } },
+        {
+          name: "Year",
+          key: "Year_id_33",
+          type: "dropdown",
+          options: Array.from({ length: 5 }, (_, i) => {
+            const year = new Date().getFullYear() - (i + 1);
+            return year.toString();
+          }),
+        },
       ],
     },
     {
-      id: 27,
+      id: 32, // Aus - Bookkeeping
       fields: [
-        { name: "Year Ending", key: "Audit_Year_Ending_id_27", type: "date" },
+        {
+          name: "Period",
+          key: "Period_id_32",
+          type: "dropdown",
+          options: ["Day", "Week", "Fortnight", "Month", "Quarter", "Year", "Other"],
+        },
+        // Day
+        {
+          name: "Select Date",
+          key: "Day_Date_id_32",
+          type: "date",
+          showIf: { Period_id_32: "Day" },
+        },
+        // Week
+        {
+          name: "Year",
+          key: "Week_Year_id_32",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Period_id_32: "Week" },
+        },
+        {
+          name: "Month",
+          key: "Week_Month_id_32",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Period_id_32: "Week" },
+        },
+        {
+          name: "Week",
+          key: "Week_id_32",
+          type: "dropdown",
+          options: ["Week 1", "Week 2", "Week 3", "Week 4"],
+          showIf: { Period_id_32: "Week" },
+        },
+        // Fortnight
+        {
+          name: "Year",
+          key: "Fortnight_Year_id_32",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Period_id_32: "Fortnight" },
+        },
+        {
+          name: "Month",
+          key: "Fortnight_Month_id_32",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Period_id_32: "Fortnight" },
+        },
+        {
+          name: "Fortnight",
+          key: "Fortnight_id_32",
+          type: "dropdown",
+          options: ["1st Half", "2nd Half"],
+          showIf: { Period_id_32: "Fortnight" },
+        },
+        // Month
+        {
+          name: "Year",
+          key: "Month_Year_id_32",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Period_id_32: "Month" },
+        },
+        {
+          name: "Month",
+          key: "Month_id_32",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Period_id_32: "Month" },
+        },
+        // Quarter
+        {
+          name: "Year",
+          key: "Quarter_Year_id_32",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Period_id_32: "Quarter" },
+        },
+        {
+          name: "Quarter",
+          key: "Quarter_id_32",
+          type: "dropdown",
+          options: getQuarters(),
+          showIf: { Period_id_32: "Quarter" },
+        },
+        // Year
+        {
+          name: "Year",
+          key: "Year_id_32",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Period_id_32: "Year" },
+        },
+        // Other
+        {
+          name: "From Date",
+          key: "Other_FromDate_id_32",
+          type: "date",
+          showIf: { Period_id_32: "Other" },
+        },
+        {
+          name: "To Date",
+          key: "Other_ToDate_id_32",
+          type: "date",
+          showIf: { Period_id_32: "Other" },
+        },
       ],
     },
     {
-      id: 8,
+      id: 31, // Aus - Payroll
       fields: [
-        { name: "Filing Frequency", key: "Filing_Frequency_id_8", type: "dropdown", options: ["Monthly", "Quarterly", "Yearly"] },
-        { name: "Period Ending Date", key: "Period_Ending_Date_id_8", type: "date", showIf: { Filing_Frequency_id_8: ["Monthly", "Quarterly", "Yearly"] } },
-        { name: "Filing Date", key: "Filing_Date_id_8", type: "date", showIf: { Filing_Frequency_id_8: ["Monthly", "Quarterly", "Yearly"] } },
+        {
+          name: "Frequency",
+          key: "Payroll_Frequency_id_31",
+          type: "dropdown",
+          options: ["Weekly", "Fortnightly", "Monthly", "Quarterly", "Yearly"],
+        },
+
+        // ==================== WEEKLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Week_Year_id_31",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_31: "Weekly" },
+        },
+        {
+          name: "Month",
+          key: "Payroll_Week_Month_id_31",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Payroll_Frequency_id_31: "Weekly" },
+        },
+        {
+          name: "Week",
+          key: "Payroll_Week_id_31",
+          type: "dropdown",
+          options: ["Week 1", "Week 2", "Week 3", "Week 4"],
+          showIf: { Payroll_Frequency_id_31: "Weekly" },
+        },
+
+        // ==================== FORTNIGHTLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Fortnight_Year_id_31",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_31: "Fortnightly" },
+        },
+        {
+          name: "Month",
+          key: "Payroll_Fortnight_Month_id_31",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Payroll_Frequency_id_31: "Fortnightly" },
+        },
+        {
+          name: "Fortnight",
+          key: "Payroll_Fortnight_id_31",
+          type: "dropdown",
+          options: ["1st Half", "2nd Half"],
+          showIf: { Payroll_Frequency_id_31: "Fortnightly" },
+        },
+
+        // ==================== MONTHLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Month_Year_id_31",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_31: "Monthly" },
+        },
+        {
+          name: "Month",
+          key: "Payroll_Month_id_31",
+          type: "dropdown",
+          options: getMonths(),
+          showIf: { Payroll_Frequency_id_31: "Monthly" },
+        },
+
+        // ==================== QUARTERLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Quarter_Year_id_31",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_31: "Quarterly" },
+        },
+        {
+          name: "Quarter",
+          key: "Payroll_Quarter_id_31",
+          type: "dropdown",
+          options: getQuarters(),
+          showIf: { Payroll_Frequency_id_31: "Quarterly" },
+        },
+
+        // ==================== YEARLY ====================
+        {
+          name: "Year",
+          key: "Payroll_Year_id_31",
+          type: "dropdown",
+          options: getLastFiveYears(),
+          showIf: { Payroll_Frequency_id_31: "Yearly" },
+        },
       ],
     },
     {
-      id: 28,
+      id: 27, // Audit
       fields: [
-        { name: "Year", key: "Year_id_28", type: "dropdown", options: getLastFiveYears() },
+        {
+          name: "Year Ending",
+          key: "Audit_Year_Ending_id_27",
+          type: "date",   // date input field
+        },
+      ],
+    },
+    {
+      id: 8, // VAT Returns
+      fields: [
+        {
+          name: "Filing Frequency",
+          key: "Filing_Frequency_id_8",
+          type: "dropdown",
+          options: ["Monthly", "Quarterly", "Yearly"],
+        },
+        {
+          name: "Period Ending Date",
+          key: "Period_Ending_Date_id_8",
+          type: "date",
+          showIf: { Filing_Frequency_id_8: ["Monthly", "Quarterly", "Yearly"] },
+        },
+        {
+          name: "Filing Date",
+          key: "Filing_Date_id_8",
+          type: "date",
+          showIf: { Filing_Frequency_id_8: ["Monthly", "Quarterly", "Yearly"] },
+        },
+      ],
+    },
+    {
+      id: 28, // Aus - SMSF
+      fields: [
+        {
+          name: "Year",
+          key: "Year_id_28",
+          type: "dropdown",
+          options: Array.from({ length: 5 }, (_, i) => {
+            const year = new Date().getFullYear() - (i + 1);
+            return year.toString();
+          }),
+        },
       ],
     }
+
+
+
   ];
 
-  const serviceOptions = [
+
+
+
+
+  useEffect(() => {
+
+
+    setServiceFieldsData(
+      //  serviceFields[jobData?.Service]?.fields || serviceFields[0]?.fields
+      serviceFields?.find(item => item.id === jobData?.Service)?.fields || serviceFields?.[0]?.fields
+    );
+
+    // if (jobData?.Service == 2 && jobData.Bookkeeping_Frequency_id_2 == "Daily") {
+    //   const date = new Date();
+    //   date.setDate(date.getDate() + 1);
+    //   setJobData((prevState) => ({
+    //     ...prevState,
+    //     SLADeadlineDate: date.toISOString().split("T")[0],
+    //   }));
+    // }
+
+
+    const date = new Date();
+    if (Number(jobData?.Service) == 1) {
+      date.setDate(date.getDate() + 28);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    }
+    else if (Number(jobData?.Service) == 2) {
+      date.setDate(date.getDate() + 1);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    }
+    else if (Number(jobData?.Service) == 3) {
+      date.setDate(date.getDate() + 5);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    }
+    else if (Number(jobData?.Service) == 4) {
+      date.setDate(date.getDate() + 5);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    }
+
+    else if (Number(jobData?.Service) == 8) {
+      date.setDate(date.getDate() + 10);
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: date.toISOString().split("T")[0],
+      }));
+    } 
+    else {
+
+      setJobData((prevState) => ({
+        ...prevState,
+        SLADeadlineDate: null,
+      }));
+    }
+
+    dueOn_date_set(clientType, jobData?.Service);
+
+  }, [jobData?.Service, clientType]);
+
+
+
+
+  useEffect(() => {
+
+    setJobData((prevState) => ({
+      ...prevState,
+      Turnover_Period_id_0: "Monthly",
+      Turnover_Currency_id_0: "GBP",
+      Turnover_id_0: 0,
+      VAT_Registered_id_0: "No",
+      VAT_Frequency_id_0: "Quarterly",
+      Who_Did_The_Bookkeeping_id_1: "Outbooks",
+      PAYE_Registered_id_1: "No",
+      Number_of_Trial_Balance_Items_id_1: "1 to 5",
+
+      Bookkeeping_Frequency_id_2: "Daily",
+      Number_of_Total_Transactions_id_2: 0,
+      Number_of_Bank_Transactions_id_2: 0,
+      Number_of_Purchase_Invoices_id_2: 0,
+      Number_of_Sales_Invoices_id_2: 0,
+      Number_of_Petty_Cash_Transactions_id_2: 0,
+      Number_of_Journal_Entries_id_2: 0,
+      Number_of_Other_Transactions_id_2: 0,
+      Transactions_Posting_id_2: "Manual",
+      Quality_of_Paperwork_id_2: "Bad",
+      Number_of_Integration_Software_Platforms_id_2: "1",
+      CIS_id_2: "No",
+      Posting_Payroll_Journals_id_2: "Yes",
+      Department_Tracking_id_2: "No",
+      Sales_Reconciliation_Required_id_2: "No",
+      Factoring_Account_id_2: "Provider Deducts Commission Only",
+      Payment_Methods_id_2: "1",
+      // Payroll_Frequency_id_3: "Weekly",
+      Type_of_Payslip_id_3: "Wages Only",
+      Percentage_of_Variable_Payslips_id_3: "0%",
+      Is_CIS_Required_id_3: "No",
+      CIS_Frequency_id_3: "Weekly",
+      Number_of_Sub_contractors_id_3: 0,
+      Whose_Tax_Return_is_it_id_4: "Director",
+      Number_of_Income_Sources_id_4: "1",
+      If_Landlord_Number_of_Properties_id_4: "1",
+      If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "Outbooks",
+
+
+      Management_Accounts_Frequency_id_6: "Quarterly",
+
+      ////////////////////////// 
+      Year_Ending_id_1: null,
+
+      Day_Date_id_2: null,
+      Week_Year_id_2: null,
+      Week_Month_id_2: null,
+      Week_id_2: null,
+      Fortnight_Year_id_2: null,
+      Fortnight_Month_id_2: null,
+      Fortnight_id_2: null,
+      Month_Year_id_2: null,
+      Month_id_2: null,
+      Quarter_Year_id_2: null,
+      Quarter_id_2: null,
+      Year_id_2: null,
+      Other_FromDate_id_2: null,
+      Other_ToDate_id_2: null,
+
+
+      Payroll_Week_Year_id_3: null,
+      Payroll_Week_Month_id_3: null,
+      Payroll_Week_id_3: null,
+      Payroll_Fortnight_Year_id_3: null,
+      Payroll_Fortnight_Month_id_3: null,
+      Payroll_Fortnight_id_3: null,
+      Payroll_Month_Year_id_3: null,
+      Payroll_Month_id_3: null,
+      Payroll_Quarter_Year_id_3: null,
+      Payroll_Quarter_id_3: null,
+      Payroll_Year_id_3: null,
+
+
+
+      Tax_Year_id_4: null,
+
+      Management_Accounts_FromDate_id_6: null,
+      Management_Accounts_ToDate_id_6: null,
+
+      Year_id_33: null,
+
+      Period_id_32: null,
+      Day_Date_id_32: null,
+      Week_Year_id_32: null,
+      Week_Month_id_32: null,
+      Week_id_32: null,
+      Fortnight_Year_id_32: null,
+      Fortnight_Month_id_32: null,
+      Fortnight_id_32: null,
+      Month_Year_id_32: null,
+      Month_id_32: null,
+      Quarter_Year_id_32: null,
+      Quarter_id_32: null,
+      Year_id_32: null,
+      Other_FromDate_id_32: null,
+      Other_ToDate_id_32: null,
+
+
+      Payroll_Frequency_id_31: null,
+      Payroll_Week_Year_id_31: null,
+      Payroll_Week_Month_id_31: null,
+      Payroll_Week_id_31: null,
+      Payroll_Fortnight_Year_id_31: null,
+      Payroll_Fortnight_Month_id_31: null,
+      Payroll_Fortnight_id_31: null,
+      Payroll_Month_Year_id_31: null,
+      Payroll_Month_id_31: null,
+      Payroll_Quarter_Year_id_31: null,
+      Payroll_Quarter_id_31: null,
+      Payroll_Year_id_31: null,
+
+      Audit_Year_Ending_id_27: null,
+
+      Filing_Frequency_id_8: null,
+      Period_Ending_Date_id_8: null,
+      Filing_Date_id_8: null,
+
+      Year_id_28: null,
+
+
+
+
+
+    }));
+  }, []);
+
+
+
+  // SELECT OPTION 
+  // 1. Build service options
+  let serviceOptions = [
     { value: '', label: 'Select Service' },
     ...(AllJobData?.data?.services || []).map((service) => ({
       value: service.service_id,
@@ -866,6 +2397,34 @@ const CreateJob = () => {
     }))
   ];
 
+ 
+  // let isAssignDetails = jobData?.CustomerDetails.find(
+  //   (detail) => detail.assigned_source === "assign_customer_service"
+  // );
+
+  // if (isAssignDetails != undefined) {
+  //   serviceOptions = serviceOptions.filter((option) => Number(option.value) === Number(isAssignDetails?.service_id_assign));
+  // }
+
+
+
+
+  /////////////////////////////////
+  let assignDetails = jobData?.CustomerDetails?.filter(
+    (detail) => detail.assigned_source === "assign_customer_service"
+  );
+
+  let assignedServiceIds = assignDetails?.map((d) => Number(d.service_id_assign));
+
+  if (assignedServiceIds != undefined && Array.isArray(assignedServiceIds) && assignedServiceIds.length > 0) {
+    serviceOptions = serviceOptions.filter((option) =>
+      assignedServiceIds.includes(Number(option.value))
+    );
+  }
+
+
+
+  // 2. Build job type options based on selected service
   const jobTypeOptions = [
     { value: '', label: 'Select Job Type' },
     ...(get_Job_Type?.data || []).map((jobtype) => ({
@@ -874,6 +2433,7 @@ const CreateJob = () => {
     }))
   ];
 
+  // 3. Build reviewer options
   const reviewerOptions = [
     { value: '', label: 'Select Reviewer' },
     ...(AllJobData?.data?.reviewer || []).map((reviewer) => ({
@@ -882,6 +2442,8 @@ const CreateJob = () => {
     }))
   ];
 
+
+  // 4. Build allocated to options
   const allocatedStaffOptions = [
     { value: '', label: 'Select Staff' },
     ...(AllJobData?.data?.allocated || []).map((staff) => ({
@@ -890,6 +2452,8 @@ const CreateJob = () => {
     }))
   ];
 
+
+  // 5. Build customer account manager options
   const customerAccountManagerOptions = [
     { value: '', label: 'Select Customer Account Manager' },
     ...(AllJobData?.data?.customer_account_manager || []).map((manager) => ({
@@ -898,6 +2462,7 @@ const CreateJob = () => {
     }))
   ];
 
+  // 6. Build client options
   const clientOptions = [
     { value: '', label: 'Select Client' },
     ...(AllJobData?.data?.client || []).map((client) => ({
@@ -906,545 +2471,2156 @@ const CreateJob = () => {
     }))
   ];
 
+
+
+
+  const handleBudgetTime = (e, index, row, type) => {
+    const { value } = e.target;
+
+    const isValid = /^\d*$/.test(value);
+    if (!isValid) {
+      return;
+    }
+
+    setAddTaskArr((prev) => {
+      // Copy array
+      const updated = [...prev];
+
+      // Split current budgeted_hour into [hour, minute]
+      const budgetedValue = updated[index]?.budgeted_hour || "0:0";
+      let [hour, minute] = budgetedValue?.split(":");
+
+      if (type === "hour") {
+        //hour = value.padStart(2, "0");
+        hour = value
+      } else if (type === "minute") {
+        // minute = value.padStart(2, "0");
+
+        let numValue = Number(value);
+        if (isNaN(numValue) || numValue < 0) numValue = 0;
+        if (numValue > 59) numValue = 59;
+        minute = numValue.toString()
+      }
+
+      // Update budgeted_hour
+      updated[index] = {
+        ...updated[index],
+        budgeted_hour: `${hour}:${minute}`,
+      };
+
+      return updated;
+    });
+  };
+
+
+
+
   return (
-    <div className="container-fluid">
-      <div className="row mt-4">
-        <div className="col-xl-12">
-          <div className="card">
-            <div className="card-header step-header-blue d-flex align-items-center">
-              <button
-                type="button"
-                className="btn p-0"
-                onClick={() => navigate(-1)}
-              >
-                <ArrowLeft size={16} />
-              </button>
-              <h3 className="card-title mb-0 ms-2">Create New Job</h3>
-            </div>
+    <div>
+      <div className="container-fluid">
+        <div className="row mt-4">
+          <div className="col-xl-12">
+            <div className="card">
+              <div className="card-header step-header-blue d-flex align-items-center">
+                <button
+                  type="button "
+                  className="btn p-0"
+                  onClick={() => {
+                    sessionStorage.setItem(
+                      "activeTab",
+                      location.state.activeTab
+                    );
+                    window.history.back();
+                  }}
+                >
+                  <ArrowLeft size={16} />{" "}
+                </button>
+                <h3 className="card-title mb-0">Create New Job</h3>
+              </div>
 
-            <div className="card-body form-steps">
-              <div className="row">
-                <div className="col-lg-12">
-                  <div className="card card_shadow">
-                    <div className="card-header card-header-light-blue align-items-center d-flex">
-                      <h4 className="card-title mb-0 flex-grow-1 fs-16">Job Information</h4>
-                    </div>
-                    <div className="card-body">
-                      <div className="row">
-                        <div className="mb-3 col-lg-4">
-                          <label className="form-label">Account Manager <span className="text-danger">*</span></label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            disabled
-                            value={jobData.AccountManager}
-                          />
-                        </div>
-                        <div className="mb-3 col-lg-4">
-                          <label className="form-label">Customer <span className="text-danger">*</span></label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            disabled
-                            value={jobData.Customer}
-                          />
-                        </div>
-                        <div className="mb-3 col-lg-4">
-                          <label className="form-label">Client <span className="text-danger">*</span></label>
-                          <Select
-                            options={clientOptions}
-                            value={clientOptions.find(opt => String(opt.value) === String(jobData.Client))}
-                            onChange={(opt) => HandleChange({ target: { name: "Client", value: opt.value } })}
-                            className={errors["Client"] ? "error-field" : ""}
-                            isDisabled={!!(location.state?.clientName?.id || location.state?.client_id)}
-                          />
-                          {errors["Client"] && <div className="error-text">{errors["Client"]}</div>}
-                        </div>
-                        <div className="mb-3 col-lg-4">
-                          <label className="form-label">Client Job Code</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            name="ClientJobCode"
-                            value={jobData.ClientJobCode}
-                            onChange={HandleChange}
-                          />
-                        </div>
-                        <div className="mb-3 col-lg-4">
-                          <label className="form-label">Customer Account Manager <span className="text-danger">*</span></label>
-                          <Select
-                            options={customerAccountManagerOptions}
-                            value={customerAccountManagerOptions.find(opt => String(opt.value) === String(jobData.CustomerAccountManager))}
-                            onChange={(opt) => HandleChange({ target: { name: "CustomerAccountManager", value: opt.value } })}
-                            className={errors["CustomerAccountManager"] ? "error-field" : ""}
-                            isDisabled={true}
-                          />
-                          {errors["CustomerAccountManager"] && <div className="error-text">{errors["CustomerAccountManager"]}</div>}
-                        </div>
-                        <div className="mb-3 col-lg-4">
-                          <label className="form-label">Service <span className="text-danger">*</span></label>
-                          <Select
-                            options={serviceOptions}
-                            value={serviceOptions.find(opt => String(opt.value) === String(jobData.Service))}
-                            onChange={(opt) => HandleChange({ target: { name: "Service", value: opt.value } })}
-                            className={errors["Service"] ? "error-field" : ""}
-                            isDisabled={!jobData.Client}
-                          />
-                          {errors["Service"] && <div className="error-text">{errors["Service"]}</div>}
-                        </div>
-                        <div className="mb-3 col-lg-4">
-                          <label className="form-label">Job Type <span className="text-danger">*</span></label>
-                          <Select
-                            options={jobTypeOptions}
-                            value={jobTypeOptions.find(opt => String(opt.value) === String(jobData.JobType))}
-                            onChange={(opt) => {
-                              HandleChange({ target: { name: "JobType", value: opt.value } });
-                              openJobModal({ target: { value: opt.value } });
-                            }}
-                            className={errors["JobType"] ? "error-field" : ""}
-                          />
-                          {errors["JobType"] && <div className="error-text">{errors["JobType"]}</div>}
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Budgeted Time</label>
-                          <div className="input-group">
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="H"
-                              value={budgetedHours.hours}
-                              onChange={(e) => setBudgetedHours({ ...budgetedHours, hours: e.target.value })}
-                            />
-                            <span className="input-group-text">H</span>
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="M"
-                              value={budgetedHours.minutes}
-                              onChange={(e) => setBudgetedHours({ ...budgetedHours, minutes: Math.min(59, Math.max(0, e.target.value)) })}
-                            />
-                            <span className="input-group-text">M</span>
-                          </div>
-                        </div>
-                        <div className="mb-3 col-lg-4">
-                          <label className="form-label">Reviewer</label>
-                          <Select
-                            options={reviewerOptions}
-                            value={reviewerOptions.find(opt => String(opt.value) === String(jobData.Reviewer))}
-                            onChange={(opt) => HandleChange({ target: { name: "Reviewer", value: opt.value } })}
-                          />
-                        </div>
-                        <div className="mb-3 col-lg-4">
-                          <label className="form-label">Allocated To</label>
-                          <Select
-                            options={allocatedStaffOptions}
-                            value={allocatedStaffOptions.find(opt => String(opt.value) === String(jobData.AllocatedTo))}
-                            onChange={(opt) => HandleChange({ target: { name: "AllocatedTo", value: opt.value } })}
-                          />
-                        </div>
-                        <div className="mb-3 col-lg-4">
-                          <label className="form-label">Allocated On</label>
-                          <input
-                            type="date"
-                            className="form-control"
-                            name="AllocatedOn"
-                            value={jobData.AllocatedOn}
-                            onChange={HandleChange}
-                          />
-                        </div>
-                        <div className="mb-3 col-lg-4">
-                          <label className="form-label">Date Received On <span className="text-danger">*</span></label>
-                          <input
-                            type="date"
-                            className="form-control"
-                            name="DateReceivedOn"
-                            value={jobData.DateReceivedOn}
-                            onChange={HandleChange}
-                          />
-                          {errors["DateReceivedOn"] && <div className="error-text">{errors["DateReceivedOn"]}</div>}
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Preparation Time</label>
-                          <div className="input-group">
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="H"
-                              value={PreparationTimne.hours}
-                              onChange={(e) => setPreparationTimne({ ...PreparationTimne, hours: e.target.value })}
-                            />
-                            <span className="input-group-text">H</span>
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="M"
-                              value={PreparationTimne.minutes}
-                              onChange={(e) => setPreparationTimne({ ...PreparationTimne, minutes: Math.min(59, Math.max(0, e.target.value)) })}
-                            />
-                            <span className="input-group-text">M</span>
-                          </div>
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Review Time</label>
-                          <div className="input-group">
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="H"
-                              value={reviewTime.hours}
-                              onChange={(e) => setReviewTime({ ...reviewTime, hours: e.target.value })}
-                            />
-                            <span className="input-group-text">H</span>
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="M"
-                              value={reviewTime.minutes}
-                              onChange={(e) => setReviewTime({ ...reviewTime, minutes: Math.min(59, Math.max(0, e.target.value)) })}
-                            />
-                            <span className="input-group-text">M</span>
-                          </div>
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Feedback Incorporation Time</label>
-                          <div className="input-group">
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="H"
-                              value={FeedbackIncorporationTime.hours}
-                              onChange={(e) => setFeedbackIncorporationTime({ ...FeedbackIncorporationTime, hours: e.target.value })}
-                            />
-                            <span className="input-group-text">H</span>
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="M"
-                              value={FeedbackIncorporationTime.minutes}
-                              onChange={(e) => setFeedbackIncorporationTime({ ...FeedbackIncorporationTime, minutes: Math.min(59, Math.max(0, e.target.value)) })}
-                            />
-                            <span className="input-group-text">M</span>
-                          </div>
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Total Time</label>
-                          <div className="input-group">
-                            <input type="text" className="form-control" disabled value={Totaltime.hours} />
-                            <span className="input-group-text">H</span>
-                            <input type="text" className="form-control" disabled value={Totaltime.minutes} />
-                            <span className="input-group-text">M</span>
-                          </div>
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Engagement Model</label>
-                          <select
-                            className="form-select"
-                            name="EngagementModel"
-                            value={jobData.EngagementModel}
-                            onChange={HandleChange}
-                          >
-                            <option value="">Select Engagement Model</option>
-                            {Object.keys(filteredData).map((key, index) => (
-                              <option key={key} value={key}>{RearrangeEngagementOptionArr[index]}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Allocated to (Other)</label>
-                          <Select
-                            options={allStaffData.map(s => ({ label: s.full_name, value: s.id }))}
-                            isMulti
-                            value={selectedStaffData}
-                            onChange={setSelectedStaffData}
-                            placeholder="Select options"
-                          />
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Job Priority</label>
-                          <select className="form-select" name="job_priority" value={jobData.job_priority} onChange={HandleChange}>
-                            <option value="normal">Normal</option>
-                            <option value="urgent">Urgent</option>
-                          </select>
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Processing Checklist</label>
-                          <select
-                            className="form-select"
-                            name="processing_checklist"
-                            value={jobData.processing_checklist || ""}
-                            onChange={HandleChange}
-                          >
-                            <option value="">-- Select --</option>
-                            <option value="0">Not Required</option>
-                            {AllJobData?.data?.processing_checklist_data
-                              ?.filter(item => {
-                                const serviceIds = item.service_id?.split(",").map(Number) || [];
-                                const jobTypeIds = item.job_type_id?.split(",").map(Number) || [];
-                                return serviceIds.includes(Number(jobData.Service)) && jobTypeIds.includes(Number(jobData.JobType));
-                              })
-                              .map(item => <option key={item.id} value={item.id}>{item.check_list_name}</option>)
-                            }
-                          </select>
-                          {jobData.processing_checklist && jobData.processing_checklist !== "0" && (
-                            <button
-                              type="button"
-                              className="btn btn-link p-0 fs-12 text-primary mt-1"
-                              onClick={() => {
-                                const selected = AllJobData?.data?.processing_checklist_data?.find(i => Number(i.id) === Number(jobData.processing_checklist));
-                                handleViewChecklist(selected.id, selected.check_list_name, "processing");
-                              }}
-                            >
-                              <ExternalLink size={12} className="me-1" /> Fill checklist
-                            </button>
-                          )}
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Reviewing Checklist</label>
-                          <select
-                            className="form-select"
-                            name="reviewing_checklist"
-                            value={jobData.reviewing_checklist || ""}
-                            onChange={HandleChange}
-                          >
-                            <option value="">-- Select --</option>
-                            <option value="0">Not Required</option>
-                            {AllJobData?.data?.reviewing_checklist_data
-                              ?.filter(item => {
-                                const serviceIds = item.service_id?.split(",").map(Number) || [];
-                                const jobTypeIds = item.job_type_id?.split(",").map(Number) || [];
-                                return serviceIds.includes(Number(jobData.Service)) && jobTypeIds.includes(Number(jobData.JobType));
-                              })
-                              .map(item => <option key={item.id} value={item.id}>{item.check_list_name}</option>)
-                            }
-                          </select>
-                          {jobData.reviewing_checklist && jobData.reviewing_checklist !== "0" && (
-                            <button
-                              type="button"
-                              className="btn btn-link p-0 fs-12 text-primary mt-1"
-                              onClick={() => {
-                                const selected = AllJobData?.data?.reviewing_checklist_data?.find(i => Number(i.id) === Number(jobData.reviewing_checklist));
-                                handleViewChecklist(selected.id, selected.check_list_name, "reviewing");
-                              }}
-                            >
-                              <ExternalLink size={12} className="me-1" /> Fill checklist
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <div className="card-body form-steps">
+                <div>
+                  <div className="tab-content">
+                    <div className="tab-pane fade show active">
+                      <div>
+                        <div className="row">
+                          <div className="col-lg-12">
+                            <div className="card card_shadow">
+                              <div className="card-header card-header-light-blue align-items-center d-flex">
+                                <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                                  Job Information
+                                </h4>
+                              </div>
+                              <div className="card-body">
+                                <div className="row">
+                                  <div className="mb-3 col-lg-4">
+                                    <label className="form-label">
+                                      {" "}
+                                      Outbook Account Manager
+                                      <span className="text-danger">*</span>
+                                    </label>
+                                    <input
+                                      type="text"
+                                      //   className="form-control"
+                                      className={
+                                        errors["AccountManager"]
+                                          ? "error-field form-control"
+                                          : "form-control"
+                                      }
+                                      placeholder="Account Manager"
+                                      disabled
+                                      name="AccountManager"
+                                      id="AccountManager"
+                                      onChange={HandleChange}
+                                      value={jobData.AccountManager}
+                                    />
+                                    {errors["AccountManager"] && (
+                                      <div className="error-text">
+                                        {errors["AccountManager"]}
+                                      </div>
+                                    )}
+                                  </div>
 
-                {/* Dynamic Service Fields Section */}
-                {serviceFields.find(s => s.id === Number(jobData.Service))?.fields.length > 0 && (
-                  <div className="col-lg-12">
-                    <div className="card card_shadow">
-                      <div className="card-header card-header-light-blue">
-                        <h4 className="card-title mb-0 fs-16">Other Data</h4>
-                      </div>
-                      <div className="card-body">
-                        <div className="row mt-3">
-                          {serviceFields.find(s => s.id === Number(jobData.Service))?.fields.map((field, idx) => {
-                            if (!shouldShowField(field, jobData)) return null;
-                            return (
-                              <div className="col-lg-4 mb-3" key={idx}>
-                                <label className="form-label">{field.name}</label>
-                                {field.type === "dropdown" ? (
-                                  <select
-                                    className="form-select"
-                                    name={field.key}
-                                    value={jobData[field.key] || ""}
-                                    onChange={HandleChange}
+                                  <div
+                                    id="invoiceremark"
+                                    className="mb-3 col-lg-4"
                                   >
-                                    <option value="">-- Select --</option>
-                                    {field.options?.map((opt, i) => <option key={i} value={opt}>{opt}</option>)}
-                                  </select>
-                                ) : (
-                                  <input
-                                    type={field.type || "text"}
-                                    className="form-control"
-                                    name={field.key}
-                                    value={jobData[field.key] || ""}
-                                    onChange={HandleChange}
-                                    min={field.min}
-                                    max={field.max}
-                                  />
+                                    <label className="form-label">
+                                      Customer
+                                      <span className="text-danger">*</span>
+                                    </label>
+                                    <input
+                                      type="text"
+                                      className={
+                                        errors["Customer"]
+                                          ? "error-field form-control"
+                                          : "form-control"
+                                      }
+                                      placeholder="Customer"
+                                      disabled
+                                      name="Customer"
+                                      id="Customer"
+                                      onChange={HandleChange}
+                                      value={jobData.Customer}
+                                    />
+                                    {errors["Customer"] && (
+                                      <div className="error-text">
+                                        {errors["Customer"]}
+                                      </div>
+                                    )}
+                                  </div>
+                                  {location.state.goto == "Customer" ? (
+                                    <div className="col-lg-4 mb-3">
+                                      <label className="form-label">
+                                        Client
+                                        <span className="text-danger">*</span>
+                                      </label>
+
+                                      {/* <select
+                                        className={
+                                          errors["Client"]
+                                            ? "error-field form-select"
+                                            : "form-select"
+                                        }
+                                        name="Client"
+                                        id="Client"
+                                        onChange={HandleChange}
+                                        value={jobData.Client}
+                                      >
+                                        <option value="">Select Client</option>
+                                        {(AllJobData?.data?.client || []).map(
+                                          (client) => (
+                                            <option
+                                              value={client.client_id}
+                                              key={client.client_id}
+                                            >
+                                              {client.client_trading_name}
+                                            </option>
+                                          )
+                                        )}
+                                      </select> */}
+                                      <Select
+                                        name="Client"
+                                        id="Client"
+                                        options={clientOptions}
+                                        value={clientOptions.find(
+                                          (opt) => String(opt.value) === String(jobData.Client)
+                                        )}
+                                        onChange={(selectedOption) => {
+                                          const e = {
+                                            target: {
+                                              name: 'Client',
+                                              value: selectedOption.value
+                                            }
+                                          };
+                                          HandleChange(e); // Original handler
+                                        }}
+                                        className={errors["Client"] ? "error-field react-select basic-multi-select" : "react-select basic-multi-select"}
+                                        classNamePrefix="react-select"
+                                        isSearchable
+                                      />
+
+                                      {errors["Client"] && (
+                                        <div className="error-text">
+                                          {errors["Client"]}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div className="col-lg-4">
+                                      <label className="form-label">
+                                        Client
+                                        <span className="text-danger">*</span>
+                                      </label>
+                                      <input
+                                        type="text"
+                                        className={
+                                          errors["Client"]
+                                            ? "error-field form-control"
+                                            : "form-control"
+                                        }
+                                        placeholder="Client Job Code"
+                                        name="Client"
+                                        id="Client"
+                                        onChange={HandleChange}
+                                        value={jobData.Client}
+                                        disabled
+                                      />
+
+                                      {errors["Client"] && (
+                                        <div className="error-text">
+                                          {errors["Client"]}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  <div className="mb-3 col-lg-4">
+                                    <label className="form-label">
+                                      Client Job Code
+                                    </label>
+                                    <input
+                                      type="text"
+                                      className={
+                                        errors["ClientJobCode"]
+                                          ? "error-field form-control"
+                                          : "form-control"
+                                      }
+                                      placeholder="Client Job Code"
+                                      name="ClientJobCode"
+                                      id="ClientJobCode"
+                                      autoFocus={true}
+                                      onChange={HandleChange}
+                                      maxLength={50}
+                                      value={jobData.ClientJobCode}
+                                    />
+                                    {errors["ClientJobCode"] && (
+                                      <div className="error-text">
+                                        {errors["ClientJobCode"]}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="col-lg-4 mb-3">
+                                    <label className="form-label">
+                                      Customer Account Manager(Officer)
+                                      <span className="text-danger">*</span>
+                                    </label>
+                                    {/* <select
+                                      className={
+                                        errors["CustomerAccountManager"]
+                                          ? "error-field form-select"
+                                          : "form-select"
+                                      }
+                                      name="CustomerAccountManager"
+                                      id="CustomerAccountManager"
+                                      onChange={HandleChange}
+                                      value={jobData.CustomerAccountManager}
+                                    >
+                                      <option value="">
+                                        Select Customer Account Manager
+                                      </option>
+                                      {(
+                                        AllJobData?.data
+                                          ?.customer_account_manager || []
+                                      ).map((customer_account_manager) => (
+                                        <option
+                                          value={
+                                            customer_account_manager.customer_account_manager_officer_id
+                                          }
+                                          key={
+                                            customer_account_manager.customer_account_manager_officer_id
+                                          }
+                                        >
+                                          {
+                                            customer_account_manager.customer_account_manager_officer_name
+                                          }
+                                        </option>
+                                      ))}
+                                    </select> */}
+
+                                    <Select
+                                      name="CustomerAccountManager"
+                                      id="CustomerAccountManager"
+                                      options={customerAccountManagerOptions}
+                                      value={customerAccountManagerOptions.find(
+                                        (opt) => String(opt.value) === String(jobData.CustomerAccountManager)
+                                      )}
+                                      onChange={(selectedOption) => {
+                                        const e = {
+                                          target: {
+                                            name: 'CustomerAccountManager',
+                                            value: selectedOption.value
+                                          }
+                                        };
+                                        HandleChange(e);
+                                      }}
+                                      className={
+                                        errors["CustomerAccountManager"]
+                                          ? "error-field react-select basic-multi-select"
+                                          : "react-select basic-multi-select"
+                                      }
+                                      classNamePrefix="react-select"
+                                      isSearchable
+                                    />
+
+                                    {errors["CustomerAccountManager"] && (
+                                      <div className="error-text">
+                                        {errors["CustomerAccountManager"]}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="col-lg-4 mb-3">
+                                    <label className="form-label">
+                                      Service
+                                      <span className="text-danger">*</span>
+                                    </label>
+                                    {/* <select
+                                      className={
+                                        errors["Service"]
+                                          ? "error-field form-select"
+                                          : "form-select"
+                                      }
+                                      name="Service"
+                                      id="Service"
+                                      onChange={HandleChange}
+                                      value={jobData.Service}
+                                      disabled={
+                                        jobData.Client == "" ? true : false
+                                      }
+                                    >
+                                      <option value="">Select Service</option>
+                                      {(AllJobData?.data?.services || []).map(
+                                        (service) => (
+                                          <option
+                                            value={service.service_id}
+                                            key={service.service_id}
+                                          >
+                                            {service.service_name}
+                                          </option>
+                                        )
+                                      )}
+                                    </select> */}
+
+
+
+                                    <Select
+                                      name="Service"
+                                      id="Service"
+                                      options={serviceOptions}
+                                      value={serviceOptions.find(
+                                        (opt) => String(opt.value) === String(jobData.Service)
+                                      )}
+                                      onChange={(selectedOption) => {
+                                        const e = {
+                                          target: {
+                                            name: 'Service',
+                                            value: selectedOption.value
+                                          }
+                                        };
+                                        HandleChange(e);
+                                      }}
+                                      isDisabled={jobData.Client === ""}
+                                      className={errors["Service"] ? "error-field react-select basic-multi-select" : "basic-multi-select react-select"}
+                                      classNamePrefix="react-select"
+                                      isSearchable
+                                    />
+                                    {errors["Service"] && (
+                                      <div className="error-text">
+                                        {errors["Service"]}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="col-lg-4 mb-3">
+                                    <label className="form-label">
+                                      Job Type{" "}
+                                      <span className="text-danger">*</span>
+                                    </label>
+                                    {/* <select
+                                      className={
+                                        errors["JobType"]
+                                          ? "error-field form-select  jobtype"
+                                          : "form-select  jobtype"
+                                      }
+                                      name="JobType"
+                                      id="JobType"
+                                      onChange={(e) => {
+                                        HandleChange(e);
+                                        openJobModal(e);
+                                      }}
+                                      value={jobData.JobType}
+                                    >
+                                      <option value="">Select Job Type</option>
+                                      {get_Job_Type.loading &&
+                                        get_Job_Type.data &&
+                                        get_Job_Type.data.map((jobtype) => (
+                                          <option
+                                            value={jobtype.id}
+                                            key={jobtype.id}
+                                          >
+                                            {jobtype.type}
+                                          </option>
+                                        ))}
+                                    </select> */}
+                                    <Select
+                                      name="JobType"
+                                      id="JobType"
+                                      options={jobTypeOptions}
+                                      value={jobTypeOptions.find(opt => String(opt.value) === String(jobData.JobType))}
+                                      onChange={(selectedOption) => {
+                                        const e = {
+                                          target: {
+                                            name: 'JobType',
+                                            value: selectedOption.value
+                                          }
+                                        };
+                                        HandleChange(e);
+                                        openJobModal(e);
+                                      }}
+                                      isLoading={get_Job_Type.loading}
+                                      className={errors["JobType"] ? "error-field react-select jobtype basic-multi-select" : "basic-multi-select react-select jobtype"}
+                                      classNamePrefix="react-select"
+                                      isSearchable
+                                    />
+
+                                    {errors["JobType"] && (
+                                      <div className="error-text">
+                                        {errors["JobType"]}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="col-lg-4">
+                                    <div className="mb-3">
+                                      <label className="form-label">
+                                        Budgeted Time
+                                      </label>
+                                      <div className="input-group">
+                                        {/* Hours Input */}
+                                        <div className="hours-div">
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Hours"
+                                            onChange={(e) => {
+                                              const value = e.target.value;
+
+                                              // Only allow non-negative numbers for hours
+                                              if (
+                                                value === "" ||
+                                                Number(value) >= 0
+                                              ) {
+                                                setBudgetedHours({
+                                                  ...budgetedHours,
+                                                  hours: value,
+                                                });
+                                              }
+                                            }}
+                                            value={budgetedHours?.hours || ""}
+                                          />
+                                          <span
+                                            className="input-group-text"
+                                            id="basic-addon2"
+                                          >
+                                            H
+                                          </span>
+                                        </div>
+
+                                        {/* Minutes Input */}
+                                        <div className="hours-div">
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Minutes"
+                                            onChange={(e) => {
+                                              const value = e.target.value;
+
+                                              // Only allow minutes between 0 and 59
+                                              if (
+                                                value === "" ||
+                                                (Number(value) >= 0 &&
+                                                  Number(value) <= 59)
+                                              ) {
+                                                setBudgetedHours({
+                                                  ...budgetedHours,
+                                                  minutes: value,
+                                                });
+                                              }
+                                            }}
+                                            value={budgetedHours?.minutes || ""}
+                                          />
+                                          <span
+                                            className="input-group-text"
+                                            id="basic-addon2"
+                                          >
+                                            M
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="col-lg-4 mb-3">
+                                    <label className="form-label">
+                                      Reviewer
+                                    </label>
+                                    {/* <select
+                                      className={
+                                        errors["Reviewer"]
+                                          ? "error-field form-select"
+                                          : "form-select"
+                                      }
+                                      name="Reviewer"
+                                      onChange={HandleChange}
+                                      value={jobData.Reviewer}
+                                    >
+                                      <option value=""> Select Reviewer</option>
+                                      {(AllJobData?.data?.reviewer || []).map(
+                                        (reviewer) => (
+                                          <option
+                                            value={reviewer.reviewer_id}
+                                            key={reviewer.reviewer_id}
+                                          >
+                                            {reviewer.reviewer_name +
+                                              " (" +
+                                              reviewer?.reviewer_email +
+                                              ")"}
+                                          </option>
+                                        )
+                                      )}
+                                    </select> */}
+                                    <Select
+                                      name="Reviewer"
+                                      id="Reviewer"
+                                      options={reviewerOptions}
+                                      value={reviewerOptions.find(
+                                        (opt) => String(opt.value) === String(jobData.Reviewer)
+                                      )}
+                                      onChange={(selectedOption) => {
+                                        const e = {
+                                          target: {
+                                            name: 'Reviewer',
+                                            value: selectedOption.value
+                                          }
+                                        };
+                                        HandleChange(e);
+                                      }}
+                                      className={errors["Reviewer"] ? "error-field react-select basic-multi-select" : "react-select basic-multi-select"}
+                                      classNamePrefix="react-select"
+                                      isSearchable
+                                    />
+                                    {errors["Reviewer"] && (
+                                      <div className="error-text">
+                                        {errors["Reviewer"]}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="col-lg-4 mb-3">
+                                    <label className="form-label">
+                                      Allocated To
+                                    </label>
+
+                                    <Select
+                                      name="AllocatedTo"
+                                      id="AllocatedTo"
+                                      options={allocatedStaffOptions}
+                                      value={allocatedStaffOptions.find(
+                                        (opt) => String(opt.value) === String(jobData.AllocatedTo)
+                                      )}
+                                      onChange={(selectedOption) => {
+                                        const e = {
+                                          target: {
+                                            name: 'AllocatedTo',
+                                            value: selectedOption.value
+                                          }
+                                        };
+                                        HandleChange(e);
+                                      }}
+                                      className={errors["AllocatedTo"] ? "error-field react-select basic-multi-select" : "basic-multi-select react-select"}
+                                      classNamePrefix="react-select"
+                                      isSearchable
+                                    // Uncomment below if you want to enable/disable based on role
+                                    // isDisabled={role !== "SUPERADMIN"}
+                                    />
+                                    {errors["AllocatedTo"] && (
+                                      <div className="error-text">
+                                        {errors["AllocatedTo"]}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="col-lg-4 mb-3">
+                                    <label className="form-label">
+                                      {" "}
+                                      Allocated On{" "}
+                                    </label>
+                                    <input
+                                      type="date"
+                                      className={
+                                        errors["AllocatedOn"]
+                                          ? "error-field form-control"
+                                          : "form-control"
+                                      }
+                                      placeholder="DD-MM-YYYY"
+                                      name="AllocatedOn"
+                                      min={new Date().toISOString().slice(0, 10)}
+                                      onChange={HandleChange}
+                                      value={jobData.AllocatedOn}
+                                    />
+                                    {errors["AllocatedOn"] && (
+                                      <div className="error-text">
+                                        {errors["AllocatedOn"]}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="col-lg-4 mb-3">
+                                    <label className="form-label">
+                                      Date Received On
+                                    </label>
+                                    <span className="text-danger">*</span>
+                                    <input
+                                      type="date"
+
+                                      className={
+                                        errors["DateReceivedOn"]
+                                          ? "error-field form-control"
+                                          : "form-control"
+                                      }
+                                      placeholder="DD-MM-YYYY"
+                                      name="DateReceivedOn"
+                                      min={new Date().toISOString().slice(0, 10)}
+                                      onChange={HandleChange}
+                                      value={jobData.DateReceivedOn || new Date().toISOString().slice(0, 10)}
+                                    />
+                                    {errors["DateReceivedOn"] && (
+                                      <div className="error-text">
+                                        {errors["DateReceivedOn"]}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* <div className="col-lg-4">
+                                    <div className="mb-3">
+                                      <label className="form-label">
+                                        Year End
+                                      </label>
+                                      <input
+                                        type="month"
+                                        className="form-control"
+                                        placeholder="MM/YYYY"
+                                        name="YearEnd"
+                                        onChange={HandleChange}
+                                        value={jobData.YearEnd}
+                                      />
+                                      {errors["YearEnd"] && (
+                                        <div className="error-text">
+                                          {errors["YearEnd"]}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div> */}
+                                  <div className="col-lg-4">
+                                    <div className="mb-3">
+                                      <label className="form-label">
+                                        Total Preparation Time
+                                      </label>
+                                      <div className="input-group">
+                                        <div className="hours-div">
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Hours"
+                                            onChange={(e) => {
+                                              const value = e.target.value;
+                                              if (
+                                                value === "" ||
+                                                Number(value) >= 0
+                                              ) {
+                                                setPreparationTimne({
+                                                  ...PreparationTimne,
+                                                  hours: value,
+                                                });
+                                              }
+                                            }}
+                                            value={PreparationTimne.hours}
+                                          />
+                                          <span
+                                            className="input-group-text"
+                                            id="basic-addon2"
+                                          >
+                                            H
+                                          </span>
+                                        </div>
+                                        <div className="hours-div">
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Minutes"
+                                            onChange={(e) => {
+                                              const value = e.target.value;
+                                              if (
+                                                value === "" ||
+                                                (Number(value) >= 0 &&
+                                                  Number(value) <= 59)
+                                              ) {
+                                                setPreparationTimne({
+                                                  ...PreparationTimne,
+                                                  minutes: value,
+                                                });
+                                              }
+                                            }}
+                                            value={PreparationTimne.minutes}
+                                          />
+                                          <span
+                                            className="input-group-text"
+                                            id="basic-addon2"
+                                          >
+                                            M
+                                          </span>
+                                        </div>
+                                      </div>
+                                      {errors["TotalPreparationTime"] && (
+                                        <div className="error-text">
+                                          {errors["TotalPreparationTime"]}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <div className="col-lg-4">
+                                    <div className="mb-3">
+                                      <label className="form-label">
+                                        Review Time
+                                      </label>
+                                      <div className="input-group">
+                                        <div className="hours-div">
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Hours"
+                                            onChange={(e) => {
+                                              const value = e.target.value;
+                                              if (
+                                                value === "" ||
+                                                Number(value) >= 0
+                                              ) {
+                                                setReviewTime({
+                                                  ...reviewTime,
+                                                  hours: value,
+                                                });
+                                              }
+                                            }}
+                                            value={reviewTime.hours}
+                                          />
+                                          <span
+                                            className="input-group-text"
+                                            id="basic-addon2"
+                                          >
+                                            H
+                                          </span>
+                                        </div>
+
+                                        <div className="hours-div">
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Minutes"
+                                            onChange={(e) => {
+                                              const value = e.target.value;
+                                              if (
+                                                value === "" ||
+                                                (Number(value) >= 0 &&
+                                                  Number(value) <= 59)
+                                              ) {
+                                                setReviewTime({
+                                                  ...reviewTime,
+                                                  minutes: value,
+                                                });
+                                              }
+                                            }}
+                                            value={reviewTime.minutes}
+                                          />
+                                          <span
+                                            className="input-group-text"
+                                            id="basic-addon2"
+                                          >
+                                            M
+                                          </span>
+                                        </div>
+                                      </div>
+
+                                      {errors["TotalPreparationTime"] && (
+                                        <div className="error-text">
+                                          {errors["TotalPreparationTime"]}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="col-lg-4">
+                                    <div className="mb-3">
+                                      <label className="form-label">
+                                        Feedback Incorporation Time
+                                      </label>
+                                      <div className="input-group">
+                                        <div className="hours-div">
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Hours"
+                                            onChange={(e) => {
+                                              const value = e.target.value;
+                                              if (
+                                                value === "" ||
+                                                /^[0-9]*$/.test(value)
+                                              ) {
+                                                setFeedbackIncorporationTime({
+                                                  ...FeedbackIncorporationTime,
+                                                  hours: value,
+                                                });
+                                              }
+                                            }}
+                                            value={
+                                              FeedbackIncorporationTime.hours
+                                            }
+                                          />
+                                          <span
+                                            className="input-group-text"
+                                            id="basic-addon2"
+                                          >
+                                            H
+                                          </span>
+                                        </div>
+                                        <div className="hours-div">
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Minutes"
+                                            onChange={(e) => {
+                                              const value = e.target.value;
+                                              if (
+                                                value === "" ||
+                                                (Number(value) >= 0 &&
+                                                  Number(value) <= 59)
+                                              ) {
+                                                setFeedbackIncorporationTime({
+                                                  ...FeedbackIncorporationTime,
+                                                  minutes: value,
+                                                });
+                                              }
+                                            }}
+                                            value={
+                                              FeedbackIncorporationTime.minutes
+                                            }
+                                          />
+                                          <span
+                                            className="input-group-text"
+                                            id="basic-addon2"
+                                          >
+                                            M
+                                          </span>
+                                        </div>
+                                      </div>
+                                      {errors["TotalPreparationTime"] && (
+                                        <div className="error-text">
+                                          {errors["TotalPreparationTime"]}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <div className="col-lg-4">
+                                    <div className="mb-3">
+                                      <label className="form-label">
+                                        Total Time
+                                      </label>
+                                      <div className="input-group">
+                                        <div className="hours-div">
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Hours"
+                                            disabled
+                                            onChange={(e) => {
+                                              const value = e.target.value;
+                                              if (
+                                                value === "" ||
+                                                /^[0-9]*$/.test(value)
+                                              ) {
+                                                setTotalTime({
+                                                  ...Totaltime,
+                                                  hours: value,
+                                                });
+                                              }
+                                            }}
+                                            value={Totaltime.hours}
+                                          />
+                                          <span
+                                            className="input-group-text"
+                                            id="basic-addon2"
+                                          >
+                                            H
+                                          </span>
+                                        </div>
+                                        <div className="hours-div">
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Minutes"
+                                            disabled
+                                            onChange={(e) => {
+                                              const value = e.target.value;
+                                              if (
+                                                value === "" ||
+                                                (Number(value) >= 0 &&
+                                                  Number(value) <= 59)
+                                              ) {
+                                                setTotalTime({
+                                                  ...Totaltime,
+                                                  minutes: value,
+                                                });
+                                              }
+                                            }}
+                                            value={Totaltime.minutes}
+                                          />
+                                          <span
+                                            className="input-group-text"
+                                            id="basic-addon2"
+                                          >
+                                            M
+                                          </span>
+                                        </div>
+                                      </div>
+                                      {errors["TotalPreparationTime"] && (
+                                        <div className="error-text">
+                                          {errors["TotalPreparationTime"]}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <div
+                                    id="invoice_type"
+                                    className="col-lg-4 mb-3"
+                                  >
+                                    <label
+                                      htmlFor="firstNameinput"
+                                      className="form-label"
+                                    >
+                                      Engagement Model
+                                    </label>
+                                    <select
+                                      className="form-select invoice_type_dropdown"
+                                      name="EngagementModel"
+                                      onChange={HandleChange}
+                                      value={jobData.EngagementModel}
+                                    >
+                                      <option value="">
+                                        Please Select Engagement Model
+                                      </option>
+                                      {Object.keys(filteredData).map(
+                                        (key, index) => (
+                                          <option key={key} value={key}>
+                                            {
+                                              RearrangeEngagementOptionArr[
+                                              index
+                                              ]
+                                            }
+                                          </option>
+                                        )
+                                      )}
+                                    </select>
+                                    {errors["EngagementModel"] && (
+                                      <div className="error-text">
+                                        {errors["EngagementModel"]}
+                                      </div>
+                                    )}
+                                  </div>
+
+
+                                  <div
+                                    id="satff"
+                                    className="col-lg-4 mb-3"
+                                  >
+                                    <label
+                                      htmlFor="firstNameinput"
+                                      className="form-label"
+                                    >
+                                      Allocated to (Other)
+                                    </label>
+
+                                    <Select
+                                      // options={allStaffData
+                                      //   ?.filter(data => 
+                                      //     // data.id !== jobData.AllocatedTo && 
+                                      //     // data.id !== jobData.Reviewer && 
+                                      //     data.id !== staffCreatedId
+                                      //   )
+                                      //   ?.map((data) => {
+                                      //     return { label: data.full_name, value: data.id };
+                                      //   })}
+                                      options={allStaffData
+                                        ?.map((data) => {
+                                          return { label: data.full_name, value: data.id };
+                                        })}
+                                      isMulti
+                                      closeMenuOnSelect={false}
+                                      className="basic-multi-select"
+                                      name="staff"
+                                      id="staff"
+                                      value={selectedStaffData}
+                                      onChange={(e) => {
+                                        setSelectedStaffData(e);
+                                      }}
+                                      placeholder="Select options"
+                                    />
+                                  </div>
+
+
+                                  <div className="col-lg-4">
+                                    <div className="mb-3">
+                                      <label className="form-label">
+                                        Job Priority
+                                      </label>
+                                      <select
+                                        className="form-select"
+                                        name="job_priority"
+                                        onChange={HandleChange}
+                                        value={
+                                          jobData.job_priority
+                                        }
+                                      >
+                                        <option value="normal">Normal</option>
+                                        <option value="urgent">Urgent</option>
+                                      </select>
+                                      {errors[
+                                        "job_priority"
+                                      ] && (
+                                          <div className="error-text">
+                                            {
+                                              errors[
+                                              "job_priority"
+                                              ]
+                                            }
+                                          </div>
+                                        )}
+                                    </div>
+                                  </div>
+
+                                  {/* Checklist Work */}
+                                  <div className="col-lg-4">
+                                    <div className="mb-3">
+                                      <label className="form-label">
+                                        Processing Type CheckList
+                                      </label>
+                                      <select
+                                        className="form-select"
+                                        name="processing_checklist"
+                                        onChange={(e) =>
+                                          HandleChange({
+                                            target: {
+                                              name: e.target.name,
+                                              value: e.target.value === "" ? null : e.target.value
+                                            }
+                                          })
+                                        }
+                                        value={jobData.processing_checklist ?? ""}
+                                        // onChange={HandleChange}
+                                        // value={
+                                        //   jobData.processing_checklist
+                                        // }
+                                      >
+                                        <option value={""}>-- Select --</option>
+
+                                        <option value={0}>Not Required</option>
+                                        {AllJobData?.data?.processing_checklist_data
+                                          ?.filter((item) => {
+
+                                            // Service Filter
+                                            let serviceMatch = true
+                                            if (item.service_id) {
+                                              const serviceIds = item.service_id.split(",").map(Number)
+                                              serviceMatch = serviceIds.includes(jobData.Service)
+                                            }
+
+                                            // Job Type Filter
+                                            let jobTypeMatch = true
+                                            if (item.job_type_id) {
+                                              const jobTypeIds = item.job_type_id.split(",").map(Number)
+                                              jobTypeMatch = jobTypeIds.includes(jobData.JobType)
+                                            }
+
+                                            return serviceMatch && jobTypeMatch
+                                          })
+                                          ?.map((item, index) => (
+                                            <option key={index} value={item.id}>
+                                              {item.check_list_name}
+                                            </option>
+                                          ))}
+                                      </select>
+                                      {jobData.processing_checklist && jobData.processing_checklist !== "0" && (
+                                        <div className="mt-1">
+                                          {(() => {
+                                            const selected = AllJobData?.data?.processing_checklist_data?.find(
+                                              (item) => Number(item.id) === Number(jobData.processing_checklist)
+                                            );
+                                            return selected?.upload_checklist_name ? (
+                                              <button
+                                                type="button"
+                                                className="btn btn-link p-0 fs-12 text-primary d-flex align-items-center"
+                                                onClick={() => handleViewChecklist(selected.id, selected.check_list_name, "processing")}
+                                              >
+                                                <ExternalLink size={12} className="me-1" /> Fill checklist
+                                              </button>
+                                            ) : (
+                                              <span className="text-muted fs-12">PDF Not Available</span>
+                                            );
+                                          })()}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+
+                                  <div className="col-lg-4">
+                                    <div className="mb-3">
+                                      <label className="form-label">
+                                        Reviewing Type CheckList
+                                      </label>
+                                      <select
+                                        className="form-select"
+                                        name="reviewing_checklist"
+                                        onChange={(e) =>
+                                          HandleChange({
+                                            target: {
+                                              name: e.target.name,
+                                              value: e.target.value === "" ? null : e.target.value
+                                            }
+                                          })
+                                        }
+                                        value={jobData.reviewing_checklist ?? ""}
+                                        // onChange={HandleChange}
+                                        // value={
+                                        //   jobData.reviewing_checklist
+                                        // }
+                                      >
+                                        <option value={""}>-- Select --</option>
+                                        <option value={0}>Not Required</option>
+                                        {AllJobData?.data?.reviewing_checklist_data
+                                          ?.filter((item) => {
+
+                                            // Service Filter
+                                            let serviceMatch = true
+                                            if (item.service_id) {
+                                              const serviceIds = item.service_id.split(",").map(Number)
+                                              serviceMatch = serviceIds.includes(jobData.Service)
+                                            }
+
+                                            // Job Type Filter
+                                            let jobTypeMatch = true
+                                            if (item.job_type_id) {
+                                              const jobTypeIds = item.job_type_id.split(",").map(Number)
+                                              jobTypeMatch = jobTypeIds.includes(jobData.JobType)
+                                            }
+
+                                            return serviceMatch && jobTypeMatch
+                                          })
+                                          ?.map((item, index) => (
+                                            <option key={index} value={item.id}>
+                                              {item.check_list_name}
+                                            </option>
+                                          ))}
+                                      </select>
+                                      {jobData.reviewing_checklist && jobData.reviewing_checklist !== "0" && (
+                                        <div className="mt-1">
+                                          {(() => {
+                                            const selected = AllJobData?.data?.reviewing_checklist_data?.find(
+                                              (item) => Number(item.id) === Number(jobData.reviewing_checklist)
+                                            );
+                                            return selected?.upload_checklist_name ? (
+                                              <button
+                                                type="button"
+                                                className="btn btn-link p-0 fs-12 text-primary d-flex align-items-center"
+                                                onClick={() => handleViewChecklist(selected.id, selected.check_list_name, "reviewing")}
+                                              >
+                                                <ExternalLink size={12} className="me-1" /> Fill checklist
+                                              </button>
+                                            ) : (
+                                              <span className="text-muted fs-12">PDF Not Available</span>
+                                            );
+                                          })()}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          {serviceFieldsData?.length > 0 && (
+                            <div className="col-lg-12">
+                              <div className="card card_shadow">
+                                <div className="card-header card-header-light-blue align-items-center d-flex">
+                                  <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                                    Other Data{" "}
+                                  </h4>
+                                </div>
+                                <div className="card-body">
+                                  <div className="" style={{ marginTop: 15 }}>
+                                    {/* <div className="row">
+                                  {serviceFieldsData?.length > 0 &&
+                                    serviceFieldsData?.map((field, index) => (
+                                      <div
+                                        className="col-lg-4 mb-3"
+                                        key={index}
+                                      >
+                                        <label className="form-label">
+                                          {field.name}
+                                        </label>
+                                        {field.type === "dropdown" ? (
+                                          <select
+                                            className="form-control"
+                                            name={field.key}
+                                            onChange={(e) => HandleChange(e)}
+                                            value={jobData[field.key]}
+                                          >
+                                            {field.options?.map(
+                                              (option, i) => (
+                                                <option
+                                                  value={option}
+                                                  key={i}
+                                                >
+                                                  {option}
+                                                </option>
+                                              )
+                                            )}
+                                          </select>
+                                        ) : (
+                                          <input
+                                            type={field.type || "text"}
+                                            className="form-control"
+                                            placeholder={field.name}
+                                            name={field.key}
+                                            min={field.min}
+                                            max={field.max}
+                                            onChange={(e) => HandleChange(e)}
+                                            value={jobData[field.key]}
+
+                                          />
+                                        )}
+                                      </div>
+                                    ))}
+                                </div> */}
+                                    <div className="row">
+                                      {serviceFieldsData?.length > 0 &&
+                                        serviceFieldsData?.map((field, index) => {
+                                          // 👇 check if field should be visible
+                                          const isVisible = shouldShowField(field, jobData);
+                                          if (!isVisible) return null;
+
+                                          return (
+                                            <div className="col-lg-4 mb-3" key={index}>
+                                              <label className="form-label">{field.name}</label>
+                                              {field.type === "dropdown" ? (
+                                                <select
+                                                  className="form-control"
+                                                  name={field.key}
+                                                  onChange={(e) => HandleChange(e)}
+                                                  value={jobData[field.key] || ""}
+                                                >
+                                                  <option value="">-- Select --</option>
+                                                  {field.options?.map((option, i) => (
+                                                    <option value={option} key={i}>
+                                                      {option}
+                                                    </option>
+                                                  ))}
+                                                </select>
+                                              ) : (
+                                                <input
+                                                  type={field.type || "text"}
+                                                  className="form-control"
+                                                  placeholder={field.name}
+                                                  name={field.key}
+                                                  min={field.min}
+                                                  max={field.max}
+                                                  onChange={(e) => HandleChange(e)}
+                                                  value={jobData[field.key] || ""}
+                                                />
+                                              )}
+                                            </div>
+                                          );
+                                        })}
+                                    </div>
+
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="col-lg-12">
+                            <div className="card card_shadow">
+                              <div className="card-header align-items-center d-flex card-header-light-blue">
+                                <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                                  Deadline
+                                </h4>
+                              </div>
+                              <div className="card-body">
+                                <div className="" style={{ marginTop: 15 }}>
+                                  <div className="row">
+                                    <div className="col-lg-4 mb-3">
+                                      <label className="form-label">
+                                        Expected Delivery Date
+                                      </label>
+                                      <input
+                                        type="date"
+                                        className="form-control"
+                                        placeholder="DD-MM-YYYY"
+                                        name="ExpectedDeliveryDate"
+                                        min={new Date().toISOString().slice(0, 10)}
+                                        onChange={HandleChange}
+                                        value={jobData.ExpectedDeliveryDate}
+                                      />
+                                      {errors["ExpectedDeliveryDate"] && (
+                                        <div className="error-text">
+                                          {errors["ExpectedDeliveryDate"]}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="col-lg-4 mb-3">
+                                      <label className="form-label">
+                                        Due On
+                                      </label>
+                                      <input
+                                        type="date"
+                                        className="form-control"
+                                        placeholder="DD-MM-YYYY"
+                                        name="DueOn"
+                                        onChange={HandleChange}
+                                        defaultValue={jobData.DueOn}
+                                      />
+                                      {errors["DueOn"] && (
+                                        <div className="error-text">
+                                          {errors["DueOn"]}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="col-lg-4 mb-3">
+                                      <label className="form-label">
+                                        Submission Deadline
+                                      </label>
+                                      <input
+                                        type="date"
+                                        className="form-control"
+                                        placeholder="DD-MM-YYYY"
+                                        name="SubmissionDeadline"
+                                        min={new Date().toISOString().slice(0, 10)}
+
+                                        onChange={HandleChange}
+                                        value={jobData.SubmissionDeadline}
+                                      />
+                                      {errors["SubmissionDeadline"] && (
+                                        <div className="error-text">
+                                          {errors["SubmissionDeadline"]}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="col-lg-4 mb-3">
+                                      <label className="form-label">
+                                        Customer Deadline Date
+                                      </label>
+                                      <input
+                                        type="date"
+                                        className="form-control"
+                                        placeholder="DD-MM-YYYY"
+                                        name="CustomerDeadlineDate"
+                                        min={new Date().toISOString().slice(0, 10)}
+
+                                        onChange={HandleChange}
+                                        value={jobData.CustomerDeadlineDate}
+                                      />
+                                      {errors["CustomerDeadlineDate"] && (
+                                        <div className="error-text">
+                                          {errors["CustomerDeadlineDate"]}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="col-lg-4 mb-3">
+                                      <label className="form-label">
+                                        SLA Deadline Date
+                                      </label>
+                                      <input
+                                        type="date"
+                                        className="form-control"
+                                        placeholder="DD-MM-YYYY"
+                                        name="SLADeadlineDate"
+                                        onChange={HandleChange}
+                                        defaultValue={jobData.SLADeadlineDate}
+                                      />
+                                      {errors["SLADeadlineDate"] && (
+                                        <div className="error-text">
+                                          {errors["SLADeadlineDate"]}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <label className="form-label">
+                                        Internal Deadline Date
+                                      </label>
+                                      <input
+                                        type="date"
+                                        className="form-control"
+                                        placeholder="DD-MM-YYYY"
+                                        name="InternalDeadlineDate"
+                                        min={new Date().toISOString().slice(0, 10)}
+
+                                        onChange={HandleChange}
+                                        value={jobData.InternalDeadlineDate}
+                                      />
+                                      {errors["InternalDeadlineDate"] && (
+                                        <div className="error-text">
+                                          {errors["InternalDeadlineDate"]}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="col-lg-12">
+                            <div className="card card_shadow">
+                              <div className="card-header card-header-light-blue align-items-center d-flex">
+                                <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                                  Other Task
+                                </h4>
+                              </div>
+                              <div className="card-body">
+                                <div className="" style={{ marginTop: 15 }}>
+                                  <div className="row">
+                                    <div className="col-lg-4">
+                                      <div className="mb-3">
+                                        <label className="form-label">
+                                          Filing With Companies House Required?
+                                        </label>
+                                        <select
+                                          className="form-select"
+                                          name="FilingWithCompaniesHouseRequired"
+                                          onChange={HandleChange}
+                                          value={
+                                            jobData.FilingWithCompaniesHouseRequired
+                                          }
+                                        >
+                                          <option value="">
+                                            Please Select Companies House
+                                            Required
+                                          </option>
+                                          <option value="1">Yes</option>
+                                          <option value="0">No</option>
+                                        </select>
+                                        {errors[
+                                          "FilingWithCompaniesHouseRequired"
+                                        ] && (
+                                            <div className="error-text">
+                                              {
+                                                errors[
+                                                "FilingWithCompaniesHouseRequired"
+                                                ]
+                                              }
+                                            </div>
+                                          )}
+                                      </div>
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <div className="mb-3">
+                                        <label className="form-label">
+                                          Companies House Filing Date
+                                        </label>
+                                        <input
+                                          type="date"
+                                          className="form-control"
+                                          name="CompaniesHouseFilingDate"
+                                          onChange={HandleChange}
+                                          value={
+                                            jobData.CompaniesHouseFilingDate
+                                          }
+                                        />
+                                        {errors["CompaniesHouseFilingDate"] && (
+                                          <div className="error-text">
+                                            {errors["CompaniesHouseFilingDate"]}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="col-lg-4 mb-3">
+                                      <label className="form-label">
+                                        Filing with HMRC Required?
+                                      </label>
+                                      <select
+                                        className="form-select invoice_type_dropdown"
+                                        name="FilingWithHMRCRequired"
+                                        onChange={HandleChange}
+                                        value={jobData.FilingWithHMRCRequired}
+                                      >
+                                        <option value="">
+                                          Please Select HMRC Required
+                                        </option>
+                                        <option value="1">Yes</option>
+                                        <option value="0">No</option>
+                                      </select>
+                                      {errors["FilingWithHMRCRequired"] && (
+                                        <div className="error-text">
+                                          {errors["FilingWithHMRCRequired"]}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <div className="mb-3">
+                                        <label className="form-label">
+                                          HMRC Filing Date
+                                        </label>
+                                        <input
+                                          type="date"
+                                          className="form-control"
+                                          name="HMRCFilingDate"
+                                          onChange={HandleChange}
+                                          value={jobData.HMRCFilingDate}
+                                        />
+                                        {errors["HMRCFilingDate"] && (
+                                          <div className="error-text">
+                                            {errors["HMRCFilingDate"]}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <div className="mb-3">
+                                        <label className="form-label">
+                                          Opening Balance Adjustment Required
+                                        </label>
+                                        <select
+                                          className="form-select"
+                                          name="OpeningBalanceAdjustmentRequired"
+                                          onChange={HandleChange}
+                                          value={
+                                            jobData.OpeningBalanceAdjustmentRequired
+                                          }
+                                        >
+                                          <option value="">
+                                            Please Select Opening Balance
+                                            Adjustment
+                                          </option>
+                                          <option value="1">Yes</option>
+                                          <option value="0">No</option>
+                                        </select>
+                                        {errors[
+                                          "OpeningBalanceAdjustmentRequired"
+                                        ] && (
+                                            <div className="error-text">
+                                              {
+                                                errors[
+                                                "OpeningBalanceAdjustmentRequired"
+                                                ]
+                                              }
+                                            </div>
+                                          )}
+                                      </div>
+                                    </div>
+                                    <div className="col-lg-4">
+                                      <div className="mb-3">
+                                        <label className="form-label">
+                                          Opening Balance Adjustment Date
+                                        </label>
+                                        <input
+                                          type="date"
+                                          className="form-control"
+                                          name="OpeningBalanceAdjustmentDate"
+                                          onChange={HandleChange}
+                                          value={
+                                            jobData.OpeningBalanceAdjustmentDate
+                                          }
+                                        />
+                                        {errors[
+                                          "OpeningBalanceAdjustmentDate"
+                                        ] && (
+                                            <div className="error-text">
+                                              {
+                                                errors[
+                                                "OpeningBalanceAdjustmentDate"
+                                                ]
+                                              }
+                                            </div>
+                                          )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+
+
+                          <div className="col-lg-12">
+                            <div className="card card_shadow">
+                              <div className="card-header align-items-center d-flex card-header-light-blue">
+                                <h4 className="card-title mb-0 flex-grow-1 fs-16">
+                                  Notes
+                                </h4>
+                              </div>
+                              <div className="card-body">
+                                <div className="" style={{ marginTop: 15 }}>
+                                  <div className="row">
+                                    <div className="mb-3 col-lg-12">
+                                      <textarea
+                                        type="text"
+                                        className={
+                                          errors["notes"]
+                                            ? "error-field form-control"
+                                            : "form-control"
+                                        }
+                                        placeholder="Enter Notes"
+                                        name="notes"
+                                        id="notes"
+                                        onChange={HandleChange}
+                                        value={jobData.notes}
+                                      />
+                                      {errors["notes"] && (
+                                        <div className="error-text">
+                                          {errors["notes"]}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {jobModalStatus && (
+                      <Modal
+                        show={jobModalStatus}
+                        onHide={(e) => {
+                          jobModalSetStatus(false);
+                          HandleReset1();
+                          setAddTaskArr([]);
+                        }}
+                        centered
+                        size="xl"
+                      >
+                        <Modal.Header closeButton>
+                          <Modal.Title>Tasks</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                          <div className="tablelist-form">
+                            <div className="">
+                              <div className="row">
+                                <div
+                                  className="col-md-12"
+                                  style={{ display: "flex" }}
+                                >
+                                  <div className="col-lg-6">
+
+                                  </div>
+                                  <div className="col-lg-6">
+                                    <div className="col-sm-auto">
+                                      <button
+                                        className="btn btn-info float-end mb-3"
+                                        // disabled={getChecklistId == ""}
+                                        onClick={() => setShowAddJobModal(true)}
+                                      >
+                                        <Plus size={16} /> Add
+                                        Task
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="col-lg-6 column" id="column1">
+                                  <div className="card">
+                                    <div className="card-body">
+                                      <div id="customerList">
+                                        <div className="table-responsive table-card mt-3 mb-1">
+                                          <table
+                                            className="table align-middle table-nowrap"
+                                            id="customerTable"
+                                          >
+                                            <thead className="table-light">
+                                              <tr>
+                                                <th>Task Name</th>
+                                                <th>Budgeted Hour</th>
+                                                <th>Action</th>
+                                              </tr>
+                                            </thead>
+                                            <tbody className="list form-check-all">
+                                              {AllChecklistData?.data &&
+                                                AllChecklistData?.data.map(
+                                                  (checklist) => (
+                                                    <tr className="">
+                                                      <td>
+                                                        {checklist?.task_name}{" "}
+                                                      </td>
+
+                                                      <td>
+                                                        {checklist?.budgeted_hour
+                                                          ? `${checklist.budgeted_hour.split(":")[0]}h ${checklist.budgeted_hour.split(":")[1]}m`
+                                                          : ""}
+                                                      </td>
+                                                      <td>
+                                                        <div className="add">
+                                                          {AddTaskArr &&
+                                                            AddTaskArr?.find(
+                                                              (task) =>
+                                                                task?.task_id ==
+                                                                checklist?.task_id
+                                                            ) ? (
+                                                            ""
+                                                          ) : (
+                                                            <button
+                                                              className=" btn-info text-white blue-btn"
+                                                              onClick={() =>
+                                                                AddTask(
+                                                                  checklist?.task_id
+                                                                )
+                                                              }
+                                                            >
+                                                              +
+                                                            </button>
+                                                          )}
+                                                        </div>
+                                                      </td>
+                                                    </tr>
+                                                  )
+                                                )}
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="col-lg-6 column" id="column2">
+                                  <div className="card">
+                                    <div className="card-body">
+                                      <div id="customerList">
+                                        <div className="table-responsive table-card mt-3 mb-1">
+                                          <table
+                                            className="table align-middle table-nowrap"
+                                            id="customerTable"
+                                          >
+                                            <thead className="table-light">
+                                              <tr>
+                                                <th>Task Name</th>
+                                                <th>Budgeted Hour</th>
+                                                <th>Action</th>
+                                              </tr>
+                                            </thead>
+
+                                            <tbody className="list form-check-all">
+                                              {AddTaskArr &&
+                                                AddTaskArr.map((checklist, index) => {
+                                                  // split hours and minutes safely
+                                                  const [hours, minutes] = (checklist?.budgeted_hour || "0:0").split(":");
+                                                  const error = errorsBudgetTimeTask[checklist.task_id];
+
+                                                  return (
+                                                    <tr key={checklist.task_id || index}>
+                                                      <td>{checklist.task_name} </td>
+
+                                                      {/* Editable Budgeted Hour/Minutes */}
+                                                      <td>
+                                                        <div className="input-group">
+                                                          {/* Hours */}
+                                                          <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            value={hours}
+                                                            onChange={(e) => handleBudgetTime(e, index, checklist, "hour")}
+                                                            style={{ width: "80px", marginRight: "5px" }}
+                                                          />
+                                                          <span className="input-group-text">h</span>
+
+                                                          {/* Minutes */}
+                                                          <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            value={minutes}
+                                                            onChange={(e) => handleBudgetTime(e, index, checklist, "minute")}
+                                                            style={{ width: "80px", marginRight: "5px" }}
+
+
+                                                          />
+                                                          <span className="input-group-text">m</span>
+                                                        </div>
+                                                        {error && (
+                                                          <div className="error-text text-danger">
+                                                            {error}
+                                                          </div>
+                                                        )}
+                                                      </td>
+
+                                                      <td>
+                                                        <div className="add">
+                                                          <button className="delete-icon">
+                                                            <i
+                                                              className="ti-trash text-danger"
+                                                              onClick={() => RemoveTask(checklist.task_id)}
+                                                            ></i>
+                                                          </button>
+                                                        </div>
+                                                      </td>
+                                                    </tr>
+                                                  );
+                                                })}
+                                            </tbody>
+
+                                          </table>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </Modal.Body>
+                        <Modal.Footer>
+                          <Button
+                            variant="secondary"
+                            onClick={() => {
+                              jobModalSetStatus(false);
+                              HandleReset1();
+                              setAddTaskArr([]);
+                            }}
+                          >
+                            < X size={16} />
+                            Close
+                          </Button>
+                          <Button
+                            variant="btn btn-outline-success float-end "
+                            onClick={handleAddCheckList}
+                          >
+                            <Save size={16} />
+                            Submit
+                          </Button>
+                        </Modal.Footer>
+                      </Modal>
+                    )}
+
+                    {showAddJobModal && (
+                      <Modal
+                        show={showAddJobModal}
+                        onHide={() => {
+                          setShowAddJobModal(false);
+                          HandleReset();
+                        }}
+                        centered
+                        size="sm"
+                      >
+                        <Modal.Header closeButton>
+                          <Modal.Title>Add Task</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                          <div className="row">
+                            <div className="col-lg-12">
+                              <label className="form-label ">Task Name</label>
+                              <div>
+                                <input
+                                  type="text"
+                                  placeholder="Enter Task name"
+                                  name="taskname"
+                                  className={
+                                    taskNameError
+                                      ? "error-field form-control"
+                                      : "form-control"
+                                  }
+                                  onChange={handleChange1}
+                                  value={taskName}
+                                />
+                                {taskNameError && (
+                                  <div className="error-text text-danger">
+                                    {taskNameError}
+                                  </div>
                                 )}
                               </div>
-                            );
-                          })}
-                        </div>
-                      </div>
+                            </div>
+                            <div className="col-lg-12 mt-2">
+                              <div className="mb-3">
+                                <label className="form-label">
+                                  Budgeted Time
+                                </label>
+                                <div className="input-group">
+                                  <div className="hours-div">
+                                    <input
+                                      type="text"
+                                      className={
+                                        BudgetedHoureError
+                                          ? "error-field form-control"
+                                          : "form-control"
+                                      }
+                                      placeholder="Hours"
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (
+                                          value === "" ||
+                                          /^[0-9]*$/.test(value)
+                                        ) {
+                                          setBudgetedHoursAddTask({
+                                            ...BudgetedHoursAddTask,
+                                            hours: value,
+                                          });
+                                          setBudgetedHourError("");
+                                        }
+                                      }}
+                                      value={BudgetedHoursAddTask.hours}
+                                    />
+                                    <span
+                                      className="input-group-text"
+                                      id="basic-addon2"
+                                    >
+                                      H
+                                    </span>
+                                  </div>
+                                  <div className="hours-div">
+                                    <input
+                                      type="text"
+                                      className={
+                                        BudgetedMinuteError
+                                          ? "error-field form-control"
+                                          : "form-control"
+                                      }
+                                      placeholder="Minutes"
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (
+                                          value === "" ||
+                                          (Number(value) >= 0 &&
+                                            Number(value) <= 59)
+                                        ) {
+                                          setBudgetedHoursAddTask({
+                                            ...BudgetedHoursAddTask,
+                                            minutes: value,
+                                          });
+                                          setBudgetedMinuteError("");
+                                        }
+                                      }}
+                                      value={BudgetedHoursAddTask.minutes}
+                                    />
+                                    <span
+                                      className="input-group-text"
+                                      id="basic-addon2"
+                                    >
+                                      M
+                                    </span>
+                                  </div>
+                                </div>
+                                {BudgetedHoureError && (
+                                  <div className="error-text">
+                                    {BudgetedHoureError}
+                                  </div>
+                                )}
+                                {BudgetedMinuteError && (
+                                  <div className="error-text">
+                                    {BudgetedMinuteError}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </Modal.Body>
+                        <Modal.Footer>
+                          <Button
+                            variant="label-danger"
+                            className="btn btn-outline-danger float-end"
+                            onClick={() => {
+                              setShowAddJobModal(false);
+                              HandleReset();
+                            }}
+                          >
+                            < X size={16} /> Close
+                          </Button>
+                          <Button
+                            variant="btn btn-outline-success float-end "
+                            onClick={handleAddTask}
+                          >
+                            <Save size={16} /> Submit
+                          </Button>
+                        </Modal.Footer>
+                      </Modal>
+                    )}
+
+                    {/* Checklist Preview Modal */}
+                    <Modal
+                      show={checklistModal.show}
+                      onHide={handleCancelChecklist}
+                      size="xl"
+                      centered
+                      scrollable
+                    >
+                      <Modal.Header closeButton className="bg-light">
+                        <Modal.Title className="fs-16">{checklistModal.title}</Modal.Title>
+                      </Modal.Header>
+                      <Modal.Body>
+                        {checklistModal.loading ? (
+                          <div className="text-center p-5">
+                            <div className="spinner-border text-primary" role="status">
+                              <span className="visually-hidden">Loading...</span>
+                            </div>
+                            <p className="mt-2 text-muted">Loading checklist data...</p>
+                          </div>
+                        ) : (
+                          <div className="table-responsive">
+                            <Table bordered hover className="align-middle fs-13">
+                              <thead className="table-light text-nowrap">
+                                <tr>
+                                  <th style={{ width: '50px' }}>S.No</th>
+                                  <th>Question</th>
+                                  <th className="text-center" style={{ width: '250px' }}>Options</th>
+                                  <th style={{ width: '200px' }}>Comment</th>
+                                  <th style={{ width: '120px' }}>Date</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {
+                                  checklistModal[checklistModal.type]?.length > 0 ? (
+                                    checklistModal[checklistModal.type]?.map((row, index) => (
+                                      <tr key={index}>
+                                        <td className="text-center">{row.s_no || index + 1}</td>
+                                        <td>{row.question}</td>
+                                        <td>
+                                          <div className="d-flex justify-content-around align-items-center">
+                                            <Form.Check
+                                              type="radio"
+                                              label="Yes"
+                                              name={`ans-${index}`}
+                                              id={`yes-${index}`}
+                                              className="fs-12 mb-0"
+                                              checked={row.answer === 'Yes'}
+                                              onChange={() => handleChecklistAnswerChange(index, 'Yes', checklistModal.type, "answer")}
+                                            />
+                                            <Form.Check
+                                              type="radio"
+                                              label="No"
+                                              name={`ans-${index}`}
+                                              id={`no-${index}`}
+                                              className="fs-12 mb-0"
+                                              checked={row.answer === 'No'}
+                                              onChange={() => handleChecklistAnswerChange(index, 'No', checklistModal.type, "answer")}
+                                            />
+                                            <Form.Check
+                                              type="radio"
+                                              label="N/A"
+                                              name={`ans-${index}`}
+                                              id={`na-${index}`}
+                                              className="fs-12 mb-0"
+                                              checked={row.answer === 'N/A'}
+                                              onChange={() => handleChecklistAnswerChange(index, 'N/A', checklistModal.type, "answer")}
+                                            />
+                                            <button
+                                              type="button"
+                                              className="btn btn-link p-0 text-danger ms-2"
+                                              onClick={() => handleChecklistAnswerChange(index, '', checklistModal.type, "answer")}
+                                              title="Clear selection"
+                                            >
+                                              <RotateCcw size={14} />
+                                            </button>
+                                          </div>
+                                        </td>
+                                        <td>
+                                          <textarea
+                                            className="form-control form-control-sm"
+                                            rows="1"
+                                            placeholder="Add comment"
+                                            value={row.comment}
+                                            onChange={(e) => handleChecklistAnswerChange(index, e.target.value, checklistModal.type, "comment")}
+                                          ></textarea>
+                                        </td>
+                                        <td>
+                                          <input
+                                            type="date"
+                                            className="form-control form-control-sm"
+                                            value={row.date}
+                                            readOnly
+                                          />
+                                        </td>
+                                      </tr>
+                                    ))
+                                  ) : (
+                                    <tr>
+                                      <td colSpan="5" className="text-center py-4 text-muted">No questions found in this file.</td>
+                                    </tr>
+                                  )}
+                              </tbody>
+                            </Table>
+                          </div>
+                        )}
+                      </Modal.Body>
+                      <Modal.Footer className="justify-content-end gap-2">
+                        <Button
+                          variant="outline-danger"
+                          className="rounded-pill px-4"
+                          style={{ borderWidth: '2px', fontWeight: '600' }}
+                          onClick={handleCancelChecklist}
+                        >
+                          <X size={18} className="me-1" />
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="outline-success"
+                          className="rounded-pill px-4"
+                          style={{ borderWidth: '2px', fontWeight: '600' }}
+                          onClick={handleSubmitChecklist}
+                        >
+                          <Save size={18} className="me-1" />
+                          Save
+                        </Button>
+                      </Modal.Footer>
+                    </Modal>
+
+                    <div className="hstack gap-2 justify-content-end">
+                      <button
+                        type="button"
+                        className="btn btn-info text-white float-end blue-btn"
+                        onClick={handleSubmit}
+                      >
+                        <Plus size={16} /> Add Job
+                      </button>
                     </div>
                   </div>
-                )}
-
-                {/* Deadline Section */}
-                <div className="col-lg-12">
-                  <div className="card card_shadow">
-                    <div className="card-header card-header-light-blue">
-                      <h4 className="card-title mb-0 fs-16">Deadline</h4>
-                    </div>
-                    <div className="card-body">
-                      <div className="row mt-3">
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Expected Delivery Date</label>
-                          <input type="date" className="form-control" name="ExpectedDeliveryDate" value={jobData.ExpectedDeliveryDate} onChange={HandleChange} />
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Due On</label>
-                          <input type="date" className="form-control" name="DueOn" value={jobData.DueOn} onChange={HandleChange} />
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Submission Deadline</label>
-                          <input type="date" className="form-control" name="SubmissionDeadline" value={jobData.SubmissionDeadline} onChange={HandleChange} />
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Customer Deadline Date</label>
-                          <input type="date" className="form-control" name="CustomerDeadlineDate" value={jobData.CustomerDeadlineDate} onChange={HandleChange} />
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">SLA Deadline Date</label>
-                          <input type="date" className="form-control" name="SLADeadlineDate" value={jobData.SLADeadlineDate} onChange={HandleChange} />
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Internal Deadline Date</label>
-                          <input type="date" className="form-control" name="InternalDeadlineDate" value={jobData.InternalDeadlineDate} onChange={HandleChange} />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Other Task Section */}
-                <div className="col-lg-12">
-                  <div className="card card_shadow">
-                    <div className="card-header card-header-light-blue">
-                      <h4 className="card-title mb-0 fs-16">Other Task</h4>
-                    </div>
-                    <div className="card-body">
-                      <div className="row mt-3">
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Filing With Companies House Required?</label>
-                          <select className="form-select" name="FilingWithCompaniesHouseRequired" value={jobData.FilingWithCompaniesHouseRequired} onChange={HandleChange}>
-                            <option value="">Please Select</option>
-                            <option value="1">Yes</option>
-                            <option value="0">No</option>
-                          </select>
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Companies House Filing Date</label>
-                          <input type="date" className="form-control" name="CompaniesHouseFilingDate" value={jobData.CompaniesHouseFilingDate} onChange={HandleChange} />
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">Filing with HMRC Required?</label>
-                          <select className="form-select" name="FilingWithHMRCRequired" value={jobData.FilingWithHMRCRequired} onChange={HandleChange}>
-                            <option value="">Please Select</option>
-                            <option value="1">Yes</option>
-                            <option value="0">No</option>
-                          </select>
-                        </div>
-                        <div className="col-lg-4 mb-3">
-                          <label className="form-label">HMRC Filing Date</label>
-                          <input type="date" className="form-control" name="HMRCFilingDate" value={jobData.HMRCFilingDate} onChange={HandleChange} />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="col-lg-12 text-end mb-4">
-                  <button type="button" className="btn btn-light me-2" onClick={() => navigate(-1)}>Cancel</button>
-                  <button type="submit" className="btn btn-primary" onClick={handleSubmit}>Create Job</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Checklist Modal */}
-      <Modal show={checklistModal.show} onHide={() => setChecklistModal(prev => ({ ...prev, show: false }))} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>{checklistModal.title}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {checklistModal.loading ? (
-            <div className="text-center p-5">Loading tasks...</div>
-          ) : (
-            <Table responsive striped bordered hover>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Task Name</th>
-                  <th>Status</th>
-                  <th>Remark</th>
-                </tr>
-              </thead>
-              <tbody>
-                {checklistModal.data.map((task, index) => (
-                  <tr key={task.id}>
-                    <td>{index + 1}</td>
-                    <td>{task.task_name}</td>
-                    <td>
-                      <Form.Select
-                        size="sm"
-                        value={task.status}
-                        onChange={(e) => handleTaskStatusChange(task.id, e.target.value)}
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="completed">Completed</option>
-                        <option value="n/a">N/A</option>
-                      </Form.Select>
-                    </td>
-                    <td>
-                      <Form.Control
-                        size="sm"
-                        type="text"
-                        placeholder="Remark"
-                        value={task.remark}
-                        onChange={(e) => handleTaskRemarkChange(task.id, e.target.value)}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setChecklistModal(prev => ({ ...prev, show: false }))}>Close</Button>
-          <Button variant="primary" onClick={handleSubmitChecklist}>Save Checklist</Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Tasks Modal (triggered by Job Type selection) */}
-      <Modal show={jobModalStatus} onHide={() => jobModalSetStatus(false)} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>Tasks for Job Type</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Table responsive bordered>
-            <thead>
-              <tr>
-                <th>Task Name</th>
-                <th>Budgeted Time (H:M)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {AddTaskArr.map((task, index) => (
-                <tr key={index}>
-                  <td>{task.task_name}</td>
-                  <td>{task.budgeted_hour}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => jobModalSetStatus(false)}>Close</Button>
-        </Modal.Footer>
-      </Modal>
     </div>
   );
 };
