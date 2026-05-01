@@ -1275,7 +1275,7 @@ const customerClientAction = async (dashboard) => {
         ip: ip,
         date: currentDate.toISOString().split("T")[0],
         module_name: "client",
-        log_message: `deleted client profile. client code :`,
+        log_message: `deleted client profile. client code:`,
         permission_type: "deleted",
         module_id: effectiveClientId,
       });
@@ -1320,7 +1320,7 @@ const customerClientAction = async (dashboard) => {
           ip: dashboard.ip,
           date: new Date().toISOString().split("T")[0],
           module_name: "client",
-          log_message: `uploaded ${uploadedFiles.length} document(s) to client profile. client code :`,
+          log_message: `uploaded ${uploadedFiles.length} document(s) to client profile. client code:`,
           permission_type: "updated",
           module_id: effectiveClientId,
         });
@@ -1553,7 +1553,7 @@ const customerJobAction = async (dashboard) => {
           ip: ip,
           date: currentDate.toISOString().split("T")[0],
           module_name: "job",
-          log_message: `deletes job code:`,
+          log_message: `deleted job code:`,
           permission_type: "deleted",
           module_id: job_id,
         });
