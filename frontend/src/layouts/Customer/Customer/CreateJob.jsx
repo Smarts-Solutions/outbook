@@ -35,6 +35,7 @@ const CreateJob = () => {
   const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] });
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [ip, setIp] = useState("");
   const [PreparationTimne, setPreparationTimne] = useState({
     hours: "",
     minutes: "",
@@ -250,6 +251,18 @@ const CreateJob = () => {
 
 
 
+
+  useEffect(() => {
+    const getIp = async () => {
+      try {
+        const response = await axios.get("https://api.ipify.org?format=json");
+        setIp(response.data.ip);
+      } catch (error) {
+        console.error("Error fetching IP:", error);
+      }
+    };
+    getIp();
+  }, []);
 
   useEffect(() => {
     const clients = AllJobData?.data?.client || [];
@@ -957,6 +970,8 @@ const CreateJob = () => {
       ...jobData,
       selectedStaffData: selectedStaffData,
       staffCreatedId: staffCreatedId,
+      StaffUserId: staffCreatedId,
+      ip: ip,
       account_manager_id: AllJobData?.data?.Manager?.[0]?.manager_id,
       customer_id: AllJobData?.data?.customer?.customer_id,
       Client_id: jobData.client_id,

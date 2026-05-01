@@ -245,6 +245,8 @@ const customerJobAdd = async (job) => {
     reviewer,
     allocated_to,
     status_type: initial_status_type,
+    StaffUserId,
+    ip,
     // ... other fields (mapping from job object)
   } = job;
 
@@ -276,11 +278,11 @@ const customerJobAdd = async (job) => {
 
     const values = [
       staffCreatedId, job_id_code, job.account_manager_id, customer_id, client_id, job.client_job_code,
-      job.customer_contact_details_id, service_id, job_type_id, job.budgeted_hour, reviewer,
-      allocated_to, job.AllocatedOn, job.DateReceivedOn, job.YearEnd, job.TotalPreparationTime,
-      job.review_time, job.FeedbackIncorporationTime, job.total_time, job.EngagementModel,
-      job.ExpectedDeliveryDate, job.ExpectedDeliveryDate, job.DueOn, job.SubmissionDeadline,
-      job.CustomerDeadlineDate, job.SLADeadlineDate, job.InternalDeadlineDate,
+      job.customer_contact_details_id, service_id, job_type_id, job.budgeted_hours, reviewer,
+      allocated_to, job.allocated_on, job.date_received_on, job.year_end, job.total_preparation_time,
+      job.review_time, job.feedback_incorporation_time, job.total_time, job.engagement_model,
+      job.expected_delivery_date, job.expected_delivery_date, job.due_on, job.submission_deadline,
+      job.customer_deadline_date, job.sla_deadline_date, job.internal_deadline_date,
       job.filing_Companies_required, job.filing_Companies_date, job.filing_hmrc_required, job.filing_hmrc_date,
       job.job_priority || 'normal', job.processing_checklist, job.reviewing_checklist, status_type, job.notes || ""
     ].map(handleUndefined);
@@ -293,7 +295,7 @@ const customerJobAdd = async (job) => {
 
       await SatffLogUpdateOperation({
         staff_id: StaffUserId,
-        ip: job.ip,
+        ip: ip,
         date: new Date().toISOString().split("T")[0],
         module_name: "job",
         log_message: `created job code:`,
