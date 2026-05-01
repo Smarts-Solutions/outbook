@@ -490,6 +490,7 @@ const Setting = () => {
       delete_service_id: deleteServiceInfo?.id,
       jobs_data: allJobsData.map((job) => ({
         job_id: job.job_id,
+        client_id: job.client_id,
         service_id: job.service_id,
         job_type_id: job.job_type_id,
         task_ids: job.selectedTasks.map((task) => task.value),
@@ -500,21 +501,19 @@ const Setting = () => {
       }))
     };
 
-    console.log("Payload", payload)
+   //console.log("Payload", payload)
 
-    return;
-
-    setLoading(true);
-    const req = { action: "deleteServiceAndReassign", data: payload };
+   // setLoading(true);
+    const req = { action: "deletExistingJob", data: payload };
     await dispatch(Service({ req: req, authToken: token }))
       .unwrap()
-      .then((response) => {
+      .then(async (response) => {
         setLoading(false);
+       
         if (response.status) {
           setDeleteServiceModal(false);
           sweatalert.fire({
-            title: "Success",
-            text: response.message,
+            title: response.message,
             icon: "success",
             timer: 2000,
           });
@@ -523,16 +522,15 @@ const Setting = () => {
           }, 2000);
         } else {
           sweatalert.fire({
-            title: "Error",
-            text: response.message,
+            title: response.message,
             icon: "error",
             timer: 2000,
           });
         }
+
       })
       .catch((error) => {
-        setLoading(false);
-        console.error("Submission error:", error);
+        return;
       });
   };
 
@@ -690,7 +688,6 @@ const Setting = () => {
         await GetAllJobsName(req);
         return; // Exit the function to prevent the dispatch from being called
       }
-
     }
 
     await dispatch(Service({ req: req, authToken: token }))
@@ -1253,6 +1250,7 @@ const Setting = () => {
                     <i className="ti-pencil" />
                   </button>
                 )}
+                {/* && row.job_service_exists === null */}
                 {row.is_disable == 0 && (
 
                   <button
