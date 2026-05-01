@@ -2062,7 +2062,7 @@ const Timesheet = () => {
 
       sweatalert
         .fire({
-          icon: "error",
+          icon: "warning",
           title: "Entry already exists",
           text: "Entry already exists. Redirecting to the original record.",
         })
