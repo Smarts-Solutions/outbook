@@ -1544,7 +1544,7 @@ const CustomerClientProfile = () => {
                       </ul>
                     </div>
                   </div>
-                  {getAccessDataClient.update == 1 && (
+                  {/* {getAccessDataClient.update == 1 && (
                     <div className="text-end mt-3">
                       <button
                         className="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1"
@@ -1559,7 +1559,7 @@ const CustomerClientProfile = () => {
                         <Pencil size={14} /> Edit
                       </button>
                     </div>
-                  )}
+                  )} */}
                 </div>
               </div>
             </div>

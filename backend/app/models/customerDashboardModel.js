@@ -1381,7 +1381,12 @@ const customerClientAction = async (dashboard) => {
         clients.customer_id AS customer_id, 
         clients.client_industry_id AS client_industry_id, 
         clients.trading_name AS trading_name, 
-        clients.client_code AS client_code, 
+        CONCAT(
+          'cli_', 
+          SUBSTRING(customers.trading_name, 1, 3), '_',
+          SUBSTRING(clients.trading_name, 1, 3), '_',
+          SUBSTRING(clients.client_code, 1, 15)
+        ) AS client_code, 
         clients.trading_address AS trading_address, 
         clients.vat_registered AS vat_registered, 
         clients.vat_number AS vat_number, 
@@ -1390,13 +1395,7 @@ const customerClientAction = async (dashboard) => {
         clients.status AS status, 
         clients.service_address,
         clients.charity_commission_number,
-        clients.company_number,
-        CONCAT(
-          'cli_', 
-          SUBSTRING(customers.trading_name, 1, 3), '_',
-          SUBSTRING(clients.trading_name, 1, 3), '_',
-          SUBSTRING(clients.client_code, 1, 15)
-        ) AS full_client_code
+        clients.company_number
       `;
 
       if (client_type == "1" || client_type == "3" || client_type == "4" || client_type == "6") {
