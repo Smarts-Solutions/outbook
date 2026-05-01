@@ -5,11 +5,11 @@ import {
   GetAllJabData,
   AddAllJobType,
   GET_ALL_CHECKLIST,
-  GetOfficerDetails
+  GetOfficerDetails,
+  JobType
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
-import sweatalert from "sweetalert2";
-import { JobType } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import axios from "axios";
+import sweatalert from "sweetalert2";
 import * as XLSX from "xlsx";
 import { base_url } from "../../../Utils/Config";
 import { Modal, Button, Table, Form } from "react-bootstrap";
@@ -376,10 +376,14 @@ const CreateJob = () => {
     sweatalert.fire("Success", `${checklistModal.title} saved in session`, "success");
   };
 
-  const GetJobData = async () => {
+  const GetJobData = async (forcedCustId = null) => {
+    const custId = forcedCustId || location.state?.customer_id || sessionStorage.getItem("cust_id_sidebar") || localStorage.getItem("customer_id");
+    const clientId = location.state?.clientName?.id || location.state?.client_id;
+
     const req = {
       action: "get",
-      customer_id: location.state.customer_id
+      customer_id: custId || "",
+      client_id: clientId || ""
     };
     const data = { req: req, authToken: token };
     await dispatch(GetAllJabData(data))
@@ -387,18 +391,25 @@ const CreateJob = () => {
       .then(async (response) => {
         if (response.status) {
           setAllJobData({ loading: true, data: response.data });
+          const clientIdFromState = clientId || location.state?.clientName?.id || location.state?.client_id;
+          const customerAccountManager = response.data?.customer_account_manager?.[0]?.customer_account_manager_officer_id || "";
+          const firstService = response.data?.services?.[0]?.service_id || "";
+
           setAllClientDetails(response.data?.client || []);
-          setAllStaffData(response.data?.staff_other || []);
+          setAllStaffData(response.data?.allStaff || []);
 
           setJobData((prev) => ({
             ...prev,
-            AccountManager: response.data?.customer?.customer_officer_name || "",
-            Customer: response.data?.customer?.customer_name || "",
-            EngagementModel: Object.entries(response.data?.engagement_model[0] || {}).find(([key, value]) => value === "1")?.[0] || "",
+            AccountManager: response.data?.customer?.customer_officer_name || prev.AccountManager,
+            Customer: response.data?.customer?.customer_name || prev.Customer,
+            Client: clientIdFromState || prev.Client,
+            CustomerAccountManager: prev.CustomerAccountManager || customerAccountManager,
+            Service: prev.Service || firstService,
+            EngagementModel: Object.entries(response.data?.engagement_model?.[0] || {}).find(([key, value]) => value === "1")?.[0] || prev.EngagementModel,
           }));
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   };
 
   useEffect(() => {
@@ -418,7 +429,7 @@ const CreateJob = () => {
           setJob_Type({ loading: true, data: [] });
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   };
 
   useEffect(() => {
@@ -435,15 +446,23 @@ const CreateJob = () => {
       const req = {
         action: "getByServiceWithJobType",
         service_id: jobData.Service,
-        customer_id: AllJobData?.data?.customer?.customer_id,
+        customer_id: AllJobData?.data?.customer?.customer_id || sessionStorage.getItem("cust_id_sidebar") || localStorage.getItem("customer_id"),
         job_type_id: jobData.JobType,
         clientId: Number(jobData.Client),
       };
       const data = { req: req, authToken: token };
       await dispatch(GET_ALL_CHECKLIST(data))
         .unwrap()
-        .then(() => {})
-        .catch(() => {});
+        .then((response) => {
+          if (response.status) {
+            setAllChecklistData({ loading: true, data: response.data });
+          } else {
+            setAllChecklistData({ loading: true, data: [] });
+          }
+        })
+        .catch(() => {
+          setAllChecklistData({ loading: true, data: [] });
+        });
     }
   };
 
@@ -459,6 +478,21 @@ const CreateJob = () => {
       const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) === Number(value)) || "";
       setClientType(clientInfo?.client_client_type || "");
 
+      if (clientInfo?.customer_id) {
+        setJobData(prev => ({
+          ...prev,
+          [name]: value,
+          Customer: clientInfo.customer_name || prev.Customer
+        }));
+        // If customer_id was missing, reload all data for this specific customer
+        if (!location.state?.customer_id && !sessionStorage.getItem("cust_id_sidebar")) {
+          GetJobData(clientInfo.customer_id);
+        }
+      } else {
+        setJobData(prev => ({ ...prev, [name]: value }));
+      }
+
+      // Existing company information and due date logic
       if (clientInfo !== "" && clientInfo?.client_company_number && clientInfo?.client_client_type === "2") {
         if (Number(jobData?.Service) === 1) {
           await get_information_company_number(clientInfo?.client_company_number, jobData?.Service);
@@ -490,7 +524,7 @@ const CreateJob = () => {
         reviewing_checklist: null
       }));
       setChecklistModal(prev => ({ ...prev, processing: [], reviewing: [] }));
-      
+
       const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) === Number(jobData.Client)) || "";
       if (clientInfo) {
         if (Number(value) === 1 && clientInfo.client_company_number) {
@@ -582,24 +616,24 @@ const CreateJob = () => {
       CompaniesHouseFilingDate: jobData.CompaniesHouseFilingDate || null,
       HMRCFilingDate: jobData.HMRCFilingDate || null,
       YearEnd: jobData.YearEnd || null,
-      
+
       TotalPreparationTime: (Number(PreparationTimne.hours) || 0) * 60 + (Number(PreparationTimne.minutes) || 0),
       review_time: (Number(reviewTime.hours) || 0) * 60 + (Number(reviewTime.minutes) || 0),
       FeedbackIncorporationTime: (Number(FeedbackIncorporationTime.hours) || 0) * 60 + (Number(FeedbackIncorporationTime.minutes) || 0),
       budgeted_hour: (Number(budgetedHours.hours) || 0) * 60 + (Number(budgetedHours.minutes) || 0),
-      
+
       staff: selectedStaffData?.map(s => s.value).join(",") || null,
       addTaskArr: submissionAddTaskArr,
-      
+
       processing_checklist_status: checklistModal.processing ? JSON.stringify(checklistModal.processing) : null,
       reviewing_checklist_status: checklistModal.reviewing ? JSON.stringify(checklistModal.reviewing) : null,
-      
+
       action: "add",
-      customer_id: location.state.customer_id
+      customer_id: location.state?.customer_id || sessionStorage.getItem("cust_id_sidebar") || localStorage.getItem("customer_id")
     };
 
     const data = { req: payload, authToken: token };
-    
+
     sweatalert.fire({
       title: "Are you sure?",
       text: "You want to create this job!",
@@ -922,6 +956,7 @@ const CreateJob = () => {
                             value={clientOptions.find(opt => String(opt.value) === String(jobData.Client))}
                             onChange={(opt) => HandleChange({ target: { name: "Client", value: opt.value } })}
                             className={errors["Client"] ? "error-field" : ""}
+                            isDisabled={!!(location.state?.clientName?.id || location.state?.client_id)}
                           />
                           {errors["Client"] && <div className="error-text">{errors["Client"]}</div>}
                         </div>
@@ -942,6 +977,7 @@ const CreateJob = () => {
                             value={customerAccountManagerOptions.find(opt => String(opt.value) === String(jobData.CustomerAccountManager))}
                             onChange={(opt) => HandleChange({ target: { name: "CustomerAccountManager", value: opt.value } })}
                             className={errors["CustomerAccountManager"] ? "error-field" : ""}
+                            isDisabled={true}
                           />
                           {errors["CustomerAccountManager"] && <div className="error-text">{errors["CustomerAccountManager"]}</div>}
                         </div>

@@ -1,6 +1,6 @@
 const customerDashboardModel = require('../../models/customerDashboardModel');
 const customerClientModel = require('../../models/customerClientModel');
-const jobModel = require('../../models/jobModel');
+const customerJobModel = require('../../models/customerJobModel');
 const jobTypeTaskService = require('../jobTypeTask/jobTypeTaskService');
 const axios = require('axios');
 const path = require('path');
@@ -83,19 +83,23 @@ const customerDocumentAction = async (data) => {
 };
 
 const getCustomerAddJobData = async (data) => {
-  return await jobModel.getAddJobData(data);
+  return await customerJobModel.getCustomerAddJobData(data);
 };
 
 const customerJobAdd = async (data) => {
-  return await jobModel.jobAdd(data);
+  return await customerJobModel.customerJobAdd(data);
 };
 
 const customerChecklistAction = async (data) => {
+  const { action } = data;
+  if (action === "getByServiceWithJobType") {
+    return await customerJobModel.getByServiceWithJobType(data);
+  }
   return await jobTypeTaskService.checklistAction(data);
 };
 
 const customerJobType = async (data) => {
-  return await jobTypeTaskService.getJobType(data);
+  return await customerJobModel.getJobType(data);
 };
 
 const customerGetOfficerDetails = async (data) => {
