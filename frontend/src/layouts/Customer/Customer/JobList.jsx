@@ -1278,15 +1278,15 @@ const ClientList = () => {
                           </div>
                         )}
 
+                        <Datatable
+                          columns={columns}
+                          data={customerData}
+                          filter={false}
+                          pagination={false}
+                        />
+
                         {customerData && customerData.length > 0 && (
                           <>
-                            <Datatable
-                              columns={columns}
-                              data={customerData}
-                              filter={false}
-                              pagination={false}
-                            />
-
                             <ReactPaginate
                               previousLabel={"Previous"}
                               nextLabel={"Next"}
