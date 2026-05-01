@@ -6,6 +6,7 @@ const {
   QueryRoleHelperFunction,
   JobStatusUpdate
 } = require("../../app/utils/helper");
+const { CustomerLogUpdateOperation } = require("../../app/utils/customerHelper");
 
 const getCustomerAddJobData = async (job) => {
   let { customer_id, StaffUserId, job_id, client_id } = job;
@@ -293,7 +294,7 @@ const customerJobAdd = async (job) => {
       const status_update_date = new Date().toLocaleString('sv-SE');
       await JobStatusUpdate(result.insertId, status_type, status_update_date);
 
-      await SatffLogUpdateOperation({
+      await CustomerLogUpdateOperation({
         staff_id: StaffUserId,
         ip: ip,
         date: new Date().toISOString().split("T")[0],

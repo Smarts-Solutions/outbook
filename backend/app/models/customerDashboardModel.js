@@ -1,5 +1,6 @@
 const pool = require('../config/database');
 const { getDateRange, SatffLogUpdateOperation, generateNextUniqueCode, JobStatusUpdate } = require('../utils/helper');
+const { CustomerLogUpdateOperation } = require('../utils/customerHelper');
 const { getCompanyOfficerDetailsFun } = require('../controllers/companies/companyController');
 
 const getCustomerDashboardData = async (dashboard) => {
@@ -431,7 +432,7 @@ const updateJobStatus = async (data) => {
         , [oldStatusType, status_type, oldStatusType, status_type]);
 
       const currentDate = new Date();
-      await SatffLogUpdateOperation({
+      await CustomerLogUpdateOperation({
         staff_id: StaffUserId,
         ip: ip,
         date: currentDate.toISOString().split("T")[0],
@@ -1269,8 +1270,7 @@ const customerClientAction = async (dashboard) => {
   if (action === "delete") {
     if (parseInt(effectiveClientId) > 0) {
       const currentDate = new Date();
-      const SatffLogUpdateOperation = require('../../app/utils/helper').SatffLogUpdateOperation;
-      await SatffLogUpdateOperation({
+      await CustomerLogUpdateOperation({
         staff_id: StaffUserId,
         ip: ip,
         date: currentDate.toISOString().split("T")[0],
@@ -1315,8 +1315,7 @@ const customerClientAction = async (dashboard) => {
           await pool.execute(insertQuery, [effectiveClientId, file_name, original_name, file_type, file_size, web_url]);
         }
         // Log document upload
-        const SatffLogUpdateOperation = require('../../app/utils/helper').SatffLogUpdateOperation;
-        await SatffLogUpdateOperation({
+        await CustomerLogUpdateOperation({
           staff_id: StaffUserId,
           ip: dashboard.ip,
           date: new Date().toISOString().split("T")[0],
@@ -1549,7 +1548,7 @@ const customerJobAction = async (dashboard) => {
     try {
       if (parseInt(job_id) > 0) {
         const currentDate = new Date();
-        await SatffLogUpdateOperation({
+        await CustomerLogUpdateOperation({
           staff_id: StaffUserId,
           ip: ip,
           date: currentDate.toISOString().split("T")[0],
@@ -1765,7 +1764,7 @@ const customerJobUpdate = async (job) => {
         // Log status change (non-blocking)
         try {
           const [StatusName] = await pool.execute(`SELECT name FROM master_status WHERE id = ?`, [updateRow[field]]);
-          SatffLogUpdateOperation({
+          CustomerLogUpdateOperation({
             staff_id: StaffUserId,
             ip: ip,
             date: new Date().toISOString().split("T")[0],
@@ -1838,7 +1837,7 @@ const customerJobUpdate = async (job) => {
     }
 
     // Log full job update (non-blocking)
-    SatffLogUpdateOperation({
+    CustomerLogUpdateOperation({
       staff_id: StaffUserId,
       ip: ip,
       date: new Date().toISOString().split("T")[0],
