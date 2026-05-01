@@ -1001,11 +1001,24 @@ const getCustomerClientList = async (dashboard) => {
     // Support both staff_id and StaffUserId
     const effectiveStaffId = staff_id || StaffUserId;
 
+    const clientCodeExpr = `
+      CONCAT(
+        'cli_',
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(clients.trading_name, 1, 3), '_',
+        SUBSTRING(clients.client_code, 1, 15)
+      )
+    `;
+
     if (action === "getByid" && client_id) {
       const query = `
-        SELECT clients.*, client_types.type AS client_type_name
+        SELECT 
+          clients.*, 
+          client_types.type AS client_type_name,
+          ${clientCodeExpr} AS client_code
         FROM clients 
         LEFT JOIN client_types ON clients.client_type = client_types.id
+        LEFT JOIN customers ON clients.customer_id = customers.id
         WHERE clients.id = ?`;
       const [clientRows] = await pool.execute(query, [client_id]);
 
@@ -1031,15 +1044,6 @@ const getCustomerClientList = async (dashboard) => {
     limit = parseInt(limit) || 10;
     const offset = (page - 1) * limit;
     search = search ? search.trim() : "";
-
-    const clientCodeExpr = `
-      CONCAT(
-        'cli_',
-        SUBSTRING(customers.trading_name, 1, 3), '_',
-        SUBSTRING(clients.trading_name, 1, 3), '_',
-        SUBSTRING(clients.client_code, 1, 15)
-      )
-    `;
 
     let assignedCondition = "";
     if (customer_id && customer_id !== "") {
