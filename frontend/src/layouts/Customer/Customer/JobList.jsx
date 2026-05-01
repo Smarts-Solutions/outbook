@@ -383,7 +383,7 @@ const ClientList = () => {
             }}
             style={{ cursor: "pointer", color: "#26bdf0" }}
           >
-            {row.client_trading_name || "-"}
+          {row.client_trading_name || "-"}
           </a>
         </div>
       ),
@@ -520,14 +520,14 @@ const ClientList = () => {
       cell: (row) => (
         <div className="d-flex">
           {(getAccessDataJob.update == 1 || role === "SUPERADMIN") && (
-            <button className="edit-icon" onClick={() => handleEdit(row)}>
-              <i className="ti-pencil" />
-            </button>
+              <button className="edit-icon" onClick={() => handleEdit(row)}>
+                <i className="ti-pencil" />
+              </button>
           )}
 
-          <button className="copy-icon" onClick={() => copyRow(row)}>
-            <i className="ti-files"></i>
-          </button>
+              <button className="copy-icon" onClick={() => copyRow(row)}>
+                <i className="ti-files"></i>
+              </button>
 
           {row.timesheet_job_id == null
             ? (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
@@ -1237,9 +1237,23 @@ const ClientList = () => {
               <div className="">
                 <div className="report-data mt-4 ">
                   <div className="d-flex justify-content-between align-items-center">
-                    <div className="tab-title mb-3">
-                      <h4 className="mt-0">Assigned Jobs</h4>
-                    </div>
+                    <ul className="nav nav-tabs border-0 mb-3" role="tablist">
+                      <li className="nav-item" role="presentation">
+                        <button
+                          className="nav-link active"
+                          id="assignedjob-tab"
+                          data-bs-toggle="pill"
+                          data-bs-target="#assignedjob"
+                          type="button"
+                          role="tab"
+                          aria-controls="assignedjob"
+                          aria-selected="true"
+                          tabIndex={-1}
+                        >
+                          Assigned Jobs
+                        </button>
+                      </li>
+                    </ul>
 
                     {customerData && customerData.length > 0 && (
                       <div className="col-md-2">
