@@ -252,18 +252,24 @@ const CreateJob = () => {
 
 
   useEffect(() => {
+    const clients = AllJobData?.data?.client || [];
+    const autoClient = clients.length === 1 ? clients[0].client_id : "";
+    const stateClientId = location.state?.clientName?.id || location.state?.client_id;
+
     setJobData((prevState) => ({
       ...prevState,
       AccountManager: AllJobData?.data?.Manager?.[0]?.manager_name || "",
       Customer: AllJobData?.data?.customer?.customer_trading_name || "",
       CustomerDetails: AllJobData?.data?.customerDetails || [],
-      Client:
-        location.state?.goto == "Customer"
-          ? ""
-          : location.state?.clientName?.client_name || "",
-      client_id: location.state?.goto == "Customer"
-        ? "" : location.state?.clientName?.id || "",
+      Client: prevState.Client || stateClientId || autoClient || "",
+      client_id: prevState.client_id || stateClientId || autoClient || "",
     }));
+
+    // If we have a client selected now but didn't have full data yet, fetch it
+    const currentClientId = stateClientId || autoClient;
+    if (currentClientId && !AllJobData?.data?.services) {
+        GetJobData(null, currentClientId);
+    }
   }, [AllJobData]);
 
   const GetJobData = async (cid = null, clid = null) => {
@@ -294,8 +300,9 @@ const CreateJob = () => {
           setAllClientDetails(response?.data?.client || []);
 
 
-          if (location?.state?.goto != "Customer") {
-            const clientInfo = response?.data?.client?.find((client) => Number(client?.client_id) == Number(location.state?.clientName?.id)) || "";
+          if (location?.state?.goto != "Customer" || (response.data?.client?.length > 0)) {
+            const currentClientId = location.state?.clientName?.id || location.state?.client_id || (response.data?.client?.length === 1 ? response.data.client[0].client_id : null);
+            const clientInfo = response?.data?.client?.find((client) => Number(client?.client_id) == Number(currentClientId)) || "";
             setClientType(clientInfo?.client_client_type || "");
             if (clientInfo != "" && clientInfo?.client_company_number != undefined && clientInfo?.client_client_type == "2") {
 
@@ -2635,6 +2642,7 @@ const CreateJob = () => {
                                       className={errors["Client"] ? "error-field react-select basic-multi-select" : "react-select basic-multi-select"}
                                       classNamePrefix="react-select"
                                       isSearchable
+                                      isDisabled={location.state?.clientName?.id || location.state?.client_id || AllJobData?.data?.client?.length === 1 ? true : false}
                                     />
                                     {errors["Client"] && (
                                       <div className="error-text">
