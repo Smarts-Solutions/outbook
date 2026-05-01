@@ -266,9 +266,13 @@ const CreateJob = () => {
     }));
   }, [AllJobData]);
 
-  const GetJobData = async () => {
-    const custId = location.state?.customer_id || sessionStorage.getItem("cust_id_sidebar") || localStorage.getItem("customer_id");
-    const req = { customer_id: custId || "" };
+  const GetJobData = async (cid = null, clid = null) => {
+    const custId = cid || location.state?.customer_id || sessionStorage.getItem("cust_id_sidebar") || localStorage.getItem("customer_id");
+    const clientId = clid || location.state?.clientName?.id || location.state?.client_id || "";
+    const req = { 
+      customer_id: custId || "",
+      client_id: clientId || ""
+    };
     const data = { req: req, authToken: token };
     await dispatch(GetAllJabData(data))
       .unwrap()
@@ -574,6 +578,8 @@ const CreateJob = () => {
     let value = e.target.value;
 
     if (name == 'Client') {
+      setJobData(prev => ({ ...prev, client_id: value }));
+      GetJobData(null, value);
       const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) == Number(value)) || "";
       setClientType(clientInfo?.client_client_type || "");
       if (clientInfo != "" && clientInfo?.client_company_number != undefined, clientInfo?.client_client_type == "2") {
@@ -2555,13 +2561,11 @@ const CreateJob = () => {
                                 <div className="row">
                                   <div className="mb-3 col-lg-4">
                                     <label className="form-label">
-                                      {" "}
                                       Outbook Account Manager
                                       <span className="text-danger">*</span>
                                     </label>
                                     <input
                                       type="text"
-                                      //   className="form-control"
                                       className={
                                         errors["AccountManager"]
                                           ? "error-field form-control"
@@ -2581,10 +2585,7 @@ const CreateJob = () => {
                                     )}
                                   </div>
 
-                                  <div
-                                    id="invoiceremark"
-                                    className="mb-3 col-lg-4"
-                                  >
+                                  <div className="mb-3 col-lg-4">
                                     <label className="form-label">
                                       Customer
                                       <span className="text-danger">*</span>
@@ -2609,91 +2610,38 @@ const CreateJob = () => {
                                       </div>
                                     )}
                                   </div>
-                                  {location.state.goto == "Customer" ? (
-                                    <div className="col-lg-4 mb-3">
-                                      <label className="form-label">
-                                        Client
-                                        <span className="text-danger">*</span>
-                                      </label>
 
-                                      {/* <select
-                                        className={
-                                          errors["Client"]
-                                            ? "error-field form-select"
-                                            : "form-select"
-                                        }
-                                        name="Client"
-                                        id="Client"
-                                        onChange={HandleChange}
-                                        value={jobData.Client}
-                                      >
-                                        <option value="">Select Client</option>
-                                        {(AllJobData?.data?.client || []).map(
-                                          (client) => (
-                                            <option
-                                              value={client.client_id}
-                                              key={client.client_id}
-                                            >
-                                              {client.client_trading_name}
-                                            </option>
-                                          )
-                                        )}
-                                      </select> */}
-                                      <Select
-                                        name="Client"
-                                        id="Client"
-                                        options={clientOptions}
-                                        value={clientOptions.find(
-                                          (opt) => String(opt.value) === String(jobData.Client)
-                                        )}
-                                        onChange={(selectedOption) => {
-                                          const e = {
-                                            target: {
-                                              name: 'Client',
-                                              value: selectedOption.value
-                                            }
-                                          };
-                                          HandleChange(e); // Original handler
-                                        }}
-                                        className={errors["Client"] ? "error-field react-select basic-multi-select" : "react-select basic-multi-select"}
-                                        classNamePrefix="react-select"
-                                        isSearchable
-                                      />
-
-                                      {errors["Client"] && (
-                                        <div className="error-text">
-                                          {errors["Client"]}
-                                        </div>
+                                  <div className="mb-3 col-lg-4">
+                                    <label className="form-label">
+                                      Client
+                                      <span className="text-danger">*</span>
+                                    </label>
+                                    <Select
+                                      name="Client"
+                                      id="Client"
+                                      options={clientOptions}
+                                      value={clientOptions.find(
+                                        (opt) => String(opt.value) === String(jobData.Client)
                                       )}
-                                    </div>
-                                  ) : (
-                                    <div className="col-lg-4">
-                                      <label className="form-label">
-                                        Client
-                                        <span className="text-danger">*</span>
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className={
-                                          errors["Client"]
-                                            ? "error-field form-control"
-                                            : "form-control"
-                                        }
-                                        placeholder="Client Job Code"
-                                        name="Client"
-                                        id="Client"
-                                        onChange={HandleChange}
-                                        value={jobData.Client}
-                                        disabled
-                                      />
-
-                                      {errors["Client"] && (
-                                        <div className="error-text">
-                                          {errors["Client"]}
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
+                                      onChange={(selectedOption) => {
+                                        const e = {
+                                          target: {
+                                            name: 'Client',
+                                            value: selectedOption.value
+                                          }
+                                        };
+                                        HandleChange(e);
+                                      }}
+                                      className={errors["Client"] ? "error-field react-select basic-multi-select" : "react-select basic-multi-select"}
+                                      classNamePrefix="react-select"
+                                      isSearchable
+                                    />
+                                    {errors["Client"] && (
+                                      <div className="error-text">
+                                        {errors["Client"]}
+                                      </div>
+                                    )}
+                                  </div>
 
                                   <div className="mb-3 col-lg-4">
                                     <label className="form-label">
@@ -2709,7 +2657,6 @@ const CreateJob = () => {
                                       placeholder="Client Job Code"
                                       name="ClientJobCode"
                                       id="ClientJobCode"
-                                      autoFocus={true}
                                       onChange={HandleChange}
                                       maxLength={50}
                                       value={jobData.ClientJobCode}
@@ -2726,39 +2673,6 @@ const CreateJob = () => {
                                       Customer Account Manager(Officer)
                                       <span className="text-danger">*</span>
                                     </label>
-                                    {/* <select
-                                      className={
-                                        errors["CustomerAccountManager"]
-                                          ? "error-field form-select"
-                                          : "form-select"
-                                      }
-                                      name="CustomerAccountManager"
-                                      id="CustomerAccountManager"
-                                      onChange={HandleChange}
-                                      value={jobData.CustomerAccountManager}
-                                    >
-                                      <option value="">
-                                        Select Customer Account Manager
-                                      </option>
-                                      {(
-                                        AllJobData?.data
-                                          ?.customer_account_manager || []
-                                      ).map((customer_account_manager) => (
-                                        <option
-                                          value={
-                                            customer_account_manager.customer_account_manager_officer_id
-                                          }
-                                          key={
-                                            customer_account_manager.customer_account_manager_officer_id
-                                          }
-                                        >
-                                          {
-                                            customer_account_manager.customer_account_manager_officer_name
-                                          }
-                                        </option>
-                                      ))}
-                                    </select> */}
-
                                     <Select
                                       name="CustomerAccountManager"
                                       id="CustomerAccountManager"
@@ -2783,7 +2697,6 @@ const CreateJob = () => {
                                       classNamePrefix="react-select"
                                       isSearchable
                                     />
-
                                     {errors["CustomerAccountManager"] && (
                                       <div className="error-text">
                                         {errors["CustomerAccountManager"]}
@@ -2791,40 +2704,11 @@ const CreateJob = () => {
                                     )}
                                   </div>
 
-                                  <div className="col-lg-4 mb-3">
+                                  <div className="mb-3 col-lg-4">
                                     <label className="form-label">
                                       Service
                                       <span className="text-danger">*</span>
                                     </label>
-                                    {/* <select
-                                      className={
-                                        errors["Service"]
-                                          ? "error-field form-select"
-                                          : "form-select"
-                                      }
-                                      name="Service"
-                                      id="Service"
-                                      onChange={HandleChange}
-                                      value={jobData.Service}
-                                      disabled={
-                                        jobData.Client == "" ? true : false
-                                      }
-                                    >
-                                      <option value="">Select Service</option>
-                                      {(AllJobData?.data?.services || []).map(
-                                        (service) => (
-                                          <option
-                                            value={service.service_id}
-                                            key={service.service_id}
-                                          >
-                                            {service.service_name}
-                                          </option>
-                                        )
-                                      )}
-                                    </select> */}
-
-
-
                                     <Select
                                       name="Service"
                                       id="Service"
@@ -2853,42 +2737,18 @@ const CreateJob = () => {
                                     )}
                                   </div>
 
-                                  <div className="col-lg-4 mb-3">
+                                  <div className="mb-3 col-lg-4">
                                     <label className="form-label">
                                       Job Type{" "}
                                       <span className="text-danger">*</span>
                                     </label>
-                                    {/* <select
-                                      className={
-                                        errors["JobType"]
-                                          ? "error-field form-select  jobtype"
-                                          : "form-select  jobtype"
-                                      }
-                                      name="JobType"
-                                      id="JobType"
-                                      onChange={(e) => {
-                                        HandleChange(e);
-                                        openJobModal(e);
-                                      }}
-                                      value={jobData.JobType}
-                                    >
-                                      <option value="">Select Job Type</option>
-                                      {get_Job_Type.loading &&
-                                        get_Job_Type.data &&
-                                        get_Job_Type.data.map((jobtype) => (
-                                          <option
-                                            value={jobtype.id}
-                                            key={jobtype.id}
-                                          >
-                                            {jobtype.type}
-                                          </option>
-                                        ))}
-                                    </select> */}
                                     <Select
                                       name="JobType"
                                       id="JobType"
                                       options={jobTypeOptions}
-                                      value={jobTypeOptions.find(opt => String(opt.value) === String(jobData.JobType))}
+                                      value={jobTypeOptions.find(
+                                        (opt) => String(opt.value) === String(jobData.JobType)
+                                      )}
                                       onChange={(selectedOption) => {
                                         const e = {
                                           target: {
@@ -2899,12 +2759,11 @@ const CreateJob = () => {
                                         HandleChange(e);
                                         openJobModal(e);
                                       }}
-                                      isLoading={get_Job_Type.loading}
-                                      className={errors["JobType"] ? "error-field react-select jobtype basic-multi-select" : "basic-multi-select react-select jobtype"}
+                                      isDisabled={jobData.Service === ""}
+                                      className={errors["JobType"] ? "error-field react-select basic-multi-select" : "basic-multi-select react-select"}
                                       classNamePrefix="react-select"
                                       isSearchable
                                     />
-
                                     {errors["JobType"] && (
                                       <div className="error-text">
                                         {errors["JobType"]}
@@ -2986,31 +2845,6 @@ const CreateJob = () => {
                                     <label className="form-label">
                                       Reviewer
                                     </label>
-                                    {/* <select
-                                      className={
-                                        errors["Reviewer"]
-                                          ? "error-field form-select"
-                                          : "form-select"
-                                      }
-                                      name="Reviewer"
-                                      onChange={HandleChange}
-                                      value={jobData.Reviewer}
-                                    >
-                                      <option value=""> Select Reviewer</option>
-                                      {(AllJobData?.data?.reviewer || []).map(
-                                        (reviewer) => (
-                                          <option
-                                            value={reviewer.reviewer_id}
-                                            key={reviewer.reviewer_id}
-                                          >
-                                            {reviewer.reviewer_name +
-                                              " (" +
-                                              reviewer?.reviewer_email +
-                                              ")"}
-                                          </option>
-                                        )
-                                      )}
-                                    </select> */}
                                     <Select
                                       name="Reviewer"
                                       id="Reviewer"
@@ -3062,8 +2896,6 @@ const CreateJob = () => {
                                       className={errors["AllocatedTo"] ? "error-field react-select basic-multi-select" : "basic-multi-select react-select"}
                                       classNamePrefix="react-select"
                                       isSearchable
-                                    // Uncomment below if you want to enable/disable based on role
-                                    // isDisabled={role !== "SUPERADMIN"}
                                     />
                                     {errors["AllocatedTo"] && (
                                       <div className="error-text">
@@ -3074,8 +2906,7 @@ const CreateJob = () => {
 
                                   <div className="col-lg-4 mb-3">
                                     <label className="form-label">
-                                      {" "}
-                                      Allocated On{" "}
+                                      Allocated On
                                     </label>
                                     <input
                                       type="date"
@@ -3100,11 +2931,10 @@ const CreateJob = () => {
                                   <div className="col-lg-4 mb-3">
                                     <label className="form-label">
                                       Date Received On
+                                      <span className="text-danger">*</span>
                                     </label>
-                                    <span className="text-danger">*</span>
                                     <input
                                       type="date"
-
                                       className={
                                         errors["DateReceivedOn"]
                                           ? "error-field form-control"
@@ -3114,7 +2944,7 @@ const CreateJob = () => {
                                       name="DateReceivedOn"
                                       min={new Date().toISOString().slice(0, 10)}
                                       onChange={HandleChange}
-                                      value={jobData.DateReceivedOn || new Date().toISOString().slice(0, 10)}
+                                      value={jobData.DateReceivedOn || ""}
                                     />
                                     {errors["DateReceivedOn"] && (
                                       <div className="error-text">
