@@ -370,21 +370,7 @@ const ClientList = () => {
       name: "Client Name",
       cell: (row) => (
         <div title={row.client_trading_name || "-"}>
-          <a
-            onClick={() => {
-              navigate("/customer/client/profile", {
-                state: {
-                  Client_id: row.id || row.client_id,
-                  activeTab: "NoOfJobs",
-                  customer_id: row.customer_id,
-                  data: { ...hararchyData, client: row },
-                },
-              });
-            }}
-            style={{ cursor: "pointer", color: "#26bdf0" }}
-          >
           {row.client_trading_name || "-"}
-          </a>
         </div>
       ),
       selector: (row) => row.client_trading_name || "-",

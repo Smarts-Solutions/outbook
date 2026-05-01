@@ -1193,15 +1193,18 @@ const getCustomerJobList = async (dashboard) => {
 
     const query = `
       SELECT 
+        customers.trading_name AS customers_trading_name,
+        clients.trading_name AS client_trading_name,
+        job_types.type AS job_type_name,
+        jobs.job_id AS jobs_job_id,
+        ${jobCodeExpr} AS job_code_id,
         jobs.id AS job_id,
         timesheet.job_id AS timesheet_job_id,
-        job_types.type AS job_type_name,
         jobs.status_type AS status_type,
         jobs.job_priority AS job_priority,
         customer_contact_details.id AS account_manager_officer_id,
         customer_contact_details.first_name AS account_manager_officer_first_name,
         customer_contact_details.last_name AS account_manager_officer_last_name,
-        clients.trading_name AS client_trading_name,
         jobs.client_job_code AS client_job_code,
         jobs.invoiced AS invoiced,
         jobs.total_hours AS total_hours,
@@ -1223,7 +1226,6 @@ const getCustomerJobList = async (dashboard) => {
         CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
         DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
         DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
-        ${jobCodeExpr} AS job_code_id,
         CASE 
             WHEN EXISTS (
                 SELECT 1 
@@ -1251,10 +1253,19 @@ const getCustomerJobList = async (dashboard) => {
 
     const [rows] = await pool.execute(query, [...searchParams, limit, offset]);
 
+    // Sort keys of each row alphabetically
+    const sortedRows = rows.map(row => {
+      const sortedRow = {};
+      Object.keys(row).sort().forEach(key => {
+        sortedRow[key] = row[key];
+      });
+      return sortedRow;
+    });
+
     return {
       status: true,
       message: "Success.",
-      data: rows,
+      data: sortedRows,
       pagination: { total, page, limit, totalPages: Math.ceil(total / limit), search }
     };
   } catch (error) {
