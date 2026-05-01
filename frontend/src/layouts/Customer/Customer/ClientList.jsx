@@ -536,6 +536,8 @@ const ClientLists = () => {
                   selectCustomerId(selected.value, selectedCustomer?.trading_name);
                 }}
                 placeholder="All"
+                menuPortalTarget={document.body}
+                styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
               />
             </div>
 
@@ -571,15 +573,16 @@ const ClientLists = () => {
             </div>
           </div>
         </div>
+      </div>
 
-        {customerId && (
-          <CustomerHierarchy
-            show={["Customer", activeTab.charAt(0).toUpperCase() + activeTab.slice(1)]}
-            active={1}
-            data={hararchyData}
-            NumberOfActive={totalRecords}
-          />
-        )}
+      {customerId && (
+        <CustomerHierarchy
+          show={["Customer", activeTab.charAt(0).toUpperCase() + activeTab.slice(1)]}
+          active={1}
+          data={hararchyData}
+          NumberOfActive={totalRecords}
+        />
+      )}
 
         <div className="tab-content mt-4">
           <div className="report-data">
@@ -634,12 +637,11 @@ const ClientLists = () => {
                   <option value={100}>100</option>
                 </select>
               </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default ClientLists;
