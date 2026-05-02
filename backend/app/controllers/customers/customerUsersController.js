@@ -80,6 +80,9 @@ const getAllCustomerUsers = async (req, res) => {
     }
     else if (action === 'addCustomerUsers') {
 
+      console.log("customerUsers", customerUsers);
+      
+
       let customer_contact_person_role_id = customerUsers.customer_contact_person_role_id || 1;
       let first_name = customerUsers.first_name;
       let last_name = customerUsers.last_name;
@@ -95,6 +98,7 @@ const getAllCustomerUsers = async (req, res) => {
       let StaffUserId = customerUsers.StaffUserId;
       let password = "abc@123456";
       const hashedPassword = await bcrypt.hash(password, 10);
+      let created_by = customerUsers.created_by;
 
       // Call the service function to add customer user
       const checkQuery = `SELECT id FROM staffs WHERE email = ?`;
@@ -104,10 +108,10 @@ const getAllCustomerUsers = async (req, res) => {
       }
       // insert customer user
       const insertQuery = `INSERT INTO staffs 
-        (role_id, customer_contact_person_role_id, first_name, last_name, email, phone, phone_code, status, password, created_at) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`;
+        (role_id, customer_contact_person_role_id, first_name, last_name, email, phone, phone_code, status, password,created_by, created_at) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`;
       const [insertResult] = await pool.execute(insertQuery,
-        [12, customer_contact_person_role_id, first_name, last_name, email, phone, phone_code, status, hashedPassword]);
+        [12, customer_contact_person_role_id, first_name, last_name, email, phone, phone_code, status, hashedPassword,created_by]);
       const newCustomerUserId = insertResult.insertId;
 
       // insert into customer_access table
