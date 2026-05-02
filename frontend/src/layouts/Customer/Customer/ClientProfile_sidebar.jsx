@@ -913,7 +913,11 @@ const CustomerClientProfile = () => {
                   timer: 1500,
                 });
 
-                GetAllJobList(clientDetailSingle.id);
+                if (clientDetailSingle.id) {
+                  GetAllJobList(clientDetailSingle.id);
+                } else {
+                  GetAllJobListByCustomer(customerDetails.id);
+                }
               } else {
                 sweatalert.fire({
                   title: "Failed",
@@ -1029,7 +1033,11 @@ const CustomerClientProfile = () => {
             showConfirmButton: false,
             timer: 1500,
           });
-          GetAllJobListByCustomer(customerDetails.id, 1, pageSize, "");
+          if (clientDetailSingle.id) {
+            GetAllJobList(clientDetailSingle.id, 1, pageSize, "");
+          } else {
+            GetAllJobListByCustomer(customerDetails.id, 1, pageSize, "");
+          }
         } else {
           sweatalert.fire({
             title: "Failed",
