@@ -771,7 +771,7 @@ const getByCustomerJob = async (dashboard) => {
       WHERE customers.id IN (${idsStr})
       ${filterCondition}
       ${searchCondition}
-      ORDER BY jobs.id DESC
+      ORDER BY job_code_id ASC
       LIMIT ? OFFSET ?;
     `;
 
@@ -1251,7 +1251,7 @@ const getCustomerJobList = async (dashboard) => {
       LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
       WHERE 1=1 ${assignedCondition} ${searchCondition}
       GROUP BY jobs.id
-      ORDER BY customers_trading_name ASC, client_trading_name ASC, job_type_name ASC, job_id DESC
+      ORDER BY job_code_id ASC
       LIMIT ? OFFSET ?
     `;
 
