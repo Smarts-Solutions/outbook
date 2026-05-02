@@ -80,7 +80,7 @@ const getAllCustomerUsers = async (req, res) => {
     }
     else if (action === 'addCustomerUsers') {
 
-      console.log("customerUsers", customerUsers);
+     
       
 
       let customer_contact_person_role_id = customerUsers.customer_contact_person_role_id || 1;
