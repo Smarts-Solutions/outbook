@@ -5,7 +5,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   GET_ALL_CHECKLIST,
   CustomerJobAction,
-  updateCustomerJobStatus
+  updateCustomerJobStatus,
+  GetAllJabData,
+  JobType
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import { getCustomerMasterStatus } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
@@ -21,7 +23,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
   const location = useLocation();
-  const [AllJobData, setAllJobData] = useState([]);
+  const [AllJobData, setAllJobData] = useState({});
   const dispatch = useDispatch();
   const [budgetedhours, setBudgetedHours] = useState({
     hours: "",
@@ -238,7 +240,9 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
       .unwrap()
       .then(async (response) => {
         if (response.status) {
-          setSelectedStaffData(response.data.selectedStaffData || []);
+          const staffList = response.data.selectedStaffData || [];
+          // Note: labels will be populated after allStaffData is fetched
+          setSelectedStaffData(staffList.map(id => ({ value: id, label: "" })));
           setBudgetedHours({
             hours: response.data.budgeted_hours ? response.data.budgeted_hours.split(":")[0] : "00",
             minutes: response.data.budgeted_hours ? response.data.budgeted_hours.split(":")[1] : "00",
@@ -457,11 +461,65 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
           }));
           setStatusId(response.data.status_type);
           setStatusHistory(response.data.status_history || []);
-          setAllJobData({
-            status: response.status,
-            data: response.data,
-            message: response.message,
-          });
+
+          // Fetch additional dropdown data (services, job types, staff)
+          const dropdownReq = {
+            customer_id: response.data.customer_id,
+            client_id: response.data.client_id
+          };
+          const dropdownData = { req: dropdownReq, authToken: token };
+          
+          await dispatch(GetAllJabData(dropdownData))
+            .unwrap()
+            .then((dropdownResponse) => {
+              if (dropdownResponse.status) {
+                const allStaff = dropdownResponse.data?.allStaff || [];
+                setAllStaffData(allStaff);
+
+                // Update labels for already selected staff
+                const staffIds = response.data.selectedStaffData || [];
+                const formattedSelectedStaff = staffIds.map(id => {
+                  const staffMember = allStaff.find(s => s.id === id);
+                  return {
+                    value: id,
+                    label: staffMember ? staffMember.full_name : `Staff ID: ${id}`
+                  };
+                });
+                setSelectedStaffData(formattedSelectedStaff);
+
+                setAllJobData({
+                  status: response.status,
+                  data: {
+                    ...response.data,
+                    services: dropdownResponse.data?.services || [],
+                    job_type: dropdownResponse.data?.job_type || [],
+                    reviewer: dropdownResponse.data?.reviewer || [],
+                    allocated: dropdownResponse.data?.allocated || [],
+                    allStaff: dropdownResponse.data?.allStaff || [],
+                    customer_account_manager: dropdownResponse.data?.customer_account_manager || [],
+                    engagement_model: dropdownResponse.data?.engagement_model || [],
+                    currency: dropdownResponse.data?.currency || [],
+                    Manager: dropdownResponse.data?.Manager || [],
+                    processing_checklist_data: dropdownResponse.data?.processing_checklist_data || [],
+                    reviewing_checklist_data: dropdownResponse.data?.reviewing_checklist_data || []
+                  },
+                  message: response.message,
+                });
+              } else {
+                setAllJobData({
+                  status: response.status,
+                  data: response.data,
+                  message: response.message,
+                });
+              }
+            })
+            .catch(() => {
+              setAllJobData({
+                status: response.status,
+                data: response.data,
+                message: response.message,
+              });
+            });
         }
       })
       .catch((error) => {
