@@ -226,6 +226,13 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
 
 
 
+  const formatDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return "";
+    return d.toISOString().split("T")[0];
+  };
+
   useEffect(() => {
     if (job_id || location.state?.job_id) {
       JobDetails();
@@ -294,31 +301,31 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
             CustomerAccountManager: response.data.account_manager_officer_id,
             Service: response.data.service_id,
             JobType: response.data.job_type_id,
-            Reviewer: response.data.reviewer_id,
-            AllocatedTo: response.data.allocated_id,
-            AllocatedOn: response.data.allocated_on,
-            DateReceivedOn: response.data.date_received_on,
-            YearEnd: response.data.year_end,
+            Reviewer: response.data.reviewer,
+            AllocatedTo: response.data.allocated_to,
+            AllocatedOn: formatDate(response.data.allocated_on),
+            DateReceivedOn: formatDate(response.data.date_received_on),
+            YearEnd: formatDate(response.data.year_end),
             TotalPreparationTime: response.data.total_preparation_time,
             ReviewTime: response.data.review_time,
             FeedbackIncorporationTime:
               response.data.feedback_incorporation_time,
             TotalTime: response.data.total_time,
             EngagementModel: response.data.engagement_model,
-            ExpectedDeliveryDate: response.data.expected_delivery_date,
-            DueOn: response.data.due_on,
-            SubmissionDeadline: response.data.submission_deadline,
-            CustomerDeadlineDate: response.data.customer_deadline_date,
-            SLADeadlineDate: response.data.sla_deadline_date,
-            InternalDeadlineDate: response.data.internal_deadline_date,
+            ExpectedDeliveryDate: formatDate(response.data.expected_delivery_date),
+            DueOn: formatDate(response.data.due_on),
+            SubmissionDeadline: formatDate(response.data.submission_deadline),
+            CustomerDeadlineDate: formatDate(response.data.customer_deadline_date),
+            SLADeadlineDate: formatDate(response.data.sla_deadline_date),
+            InternalDeadlineDate: formatDate(response.data.internal_deadline_date),
             FilingWithCompaniesHouseRequired:
               response.data.filing_Companies_required,
-            CompaniesHouseFilingDate: response.data.filing_Companies_date,
+            CompaniesHouseFilingDate: formatDate(response.data.filing_Companies_date),
             FilingWithHMRCRequired: response.data.filing_hmrc_required,
-            HMRCFilingDate: response.data.filing_hmrc_date,
+            HMRCFilingDate: formatDate(response.data.filing_hmrc_date),
             OpeningBalanceAdjustmentRequired:
               response.data.opening_balance_required,
-            OpeningBalanceAdjustmentDate: response.data.opening_balance_date,
+            OpeningBalanceAdjustmentDate: formatDate(response.data.opening_balance_date),
             NumberOfTransactions: response.data.number_of_transaction,
             NumberOfTrialBalanceItems: response.data.number_of_balance_items,
             Turnover: response.data.turnover,
@@ -395,8 +402,8 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
 
 
             //////////////////////////
-            Year_Ending_id_1: response.data.Year_Ending_id_1 ?? null,
-            Day_Date_id_2: response.data.Day_Date_id_2 ?? null,
+            Year_Ending_id_1: formatDate(response.data.Year_Ending_id_1),
+            Day_Date_id_2: formatDate(response.data.Day_Date_id_2),
             Week_Year_id_2: response.data.Week_Year_id_2 ?? null,
             Week_Month_id_2: response.data.Week_Month_id_2 ?? null,
             Week_id_2: response.data.Week_id_2 ?? null,
@@ -408,8 +415,8 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
             Quarter_Year_id_2: response.data.Quarter_Year_id_2 ?? null,
             Quarter_id_2: response.data.Quarter_id_2 ?? null,
             Year_id_2: response.data.Year_id_2 ?? null,
-            Other_FromDate_id_2: response.data.Other_FromDate_id_2 ?? null,
-            Other_ToDate_id_2: response.data.Other_ToDate_id_2 ?? null,
+            Other_FromDate_id_2: formatDate(response.data.Other_FromDate_id_2),
+            Other_ToDate_id_2: formatDate(response.data.Other_ToDate_id_2),
             Payroll_Week_Year_id_3: response.data.Payroll_Week_Year_id_3 ?? null,
             Payroll_Week_Month_id_3: response.data.Payroll_Week_Month_id_3 ?? null,
             Payroll_Week_id_3: response.data.Payroll_Week_id_3 ?? null,
@@ -422,11 +429,11 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
             Payroll_Quarter_id_3: response.data.Payroll_Quarter_id_3 ?? null,
             Payroll_Year_id_3: response.data.Payroll_Year_id_3 ?? null,
             Tax_Year_id_4: response.data.Tax_Year_id_4 ?? null,
-            Management_Accounts_FromDate_id_6: response.data.Management_Accounts_FromDate_id_6 ?? null,
-            Management_Accounts_ToDate_id_6: response.data.Management_Accounts_ToDate_id_6 ?? null,
+            Management_Accounts_FromDate_id_6: formatDate(response.data.Management_Accounts_FromDate_id_6),
+            Management_Accounts_ToDate_id_6: formatDate(response.data.Management_Accounts_ToDate_id_6),
             Year_id_33: response.data.Year_id_33 ?? null,
             Period_id_32: response.data.Period_id_32 ?? null,
-            Day_Date_id_32: response.data.Day_Date_id_32 ?? null,
+            Day_Date_id_32: formatDate(response.data.Day_Date_id_32),
             Week_Year_id_32: response.data.Week_Year_id_32 ?? null,
             Week_Month_id_32: response.data.Week_Month_id_32 ?? null,
             Week_id_32: response.data.Week_id_32 ?? null,
@@ -438,8 +445,8 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
             Quarter_Year_id_32: response.data.Quarter_Year_id_32 ?? null,
             Quarter_id_32: response.data.Quarter_id_32 ?? null,
             Year_id_32: response.data.Year_id_32 ?? null,
-            Other_FromDate_id_32: response.data.Other_FromDate_id_32 ?? null,
-            Other_ToDate_id_32: response.data.Other_ToDate_id_32 ?? null,
+            Other_FromDate_id_32: formatDate(response.data.Other_FromDate_id_32),
+            Other_ToDate_id_32: formatDate(response.data.Other_ToDate_id_32),
             Payroll_Frequency_id_31: response.data.Payroll_Frequency_id_31 ?? null,
             Payroll_Week_Year_id_31: response.data.Payroll_Week_Year_id_31 ?? null,
             Payroll_Week_Month_id_31: response.data.Payroll_Week_Month_id_31 ?? null,
@@ -452,10 +459,10 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
             Payroll_Quarter_Year_id_31: response.data.Payroll_Quarter_Year_id_31 ?? null,
             Payroll_Quarter_id_31: response.data.Payroll_Quarter_id_31 ?? null,
             Payroll_Year_id_31: response.data.Payroll_Year_id_31 ?? null,
-            Audit_Year_Ending_id_27: response.data.Audit_Year_Ending_id_27 ?? null,
+            Audit_Year_Ending_id_27: formatDate(response.data.Audit_Year_Ending_id_27),
             Filing_Frequency_id_8: response.data.Filing_Frequency_id_8 ?? null,
-            Period_Ending_Date_id_8: response.data.Period_Ending_Date_id_8 ?? null,
-            Filing_Date_id_8: response.data.Filing_Date_id_8 ?? null,
+            Period_Ending_Date_id_8: formatDate(response.data.Period_Ending_Date_id_8),
+            Filing_Date_id_8: formatDate(response.data.Filing_Date_id_8),
             Year_id_28: response.data.Year_id_28 ?? null,
             job_priority: response.data.job_priority ?? null,
           }));
