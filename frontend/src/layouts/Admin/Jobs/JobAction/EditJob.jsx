@@ -2822,10 +2822,17 @@ const EditJob = () => {
   // Select options for Job Type
   const jobTypeOptions = [
     { value: "", label: "Select Job Type" },
-    ...(get_Job_Type?.data || []).map((jobtype) => ({
-      value: jobtype.id,
-      label: jobtype.type,
-    })),
+    ...(get_Job_Type?.data || [])
+      .filter((jobtype) => {
+        if (!["", undefined, null].includes(jobData?.timesheet_job_id)) {
+          return Number(jobtype.id) === Number(existJobTypeId);
+        }
+        return true;
+      })
+      .map((jobtype) => ({
+        value: jobtype.id,
+        label: jobtype.type,
+      })),
   ];
 
   // Select options for Reviewer
@@ -3269,6 +3276,15 @@ const EditJob = () => {
                                         };
                                         HandleChange(e);
                                         openJobModal(e);
+                                      }}
+                                      onMenuOpen={() => {
+                                        if (
+                                          !["", undefined, null].includes(
+                                            jobData?.timesheet_job_id,
+                                          )
+                                        ) {
+                                          jobModalSetStatus(true);
+                                        }
                                       }}
                                       isLoading={get_Job_Type.loading}
                                       className={
