@@ -634,8 +634,9 @@ const CreateJob = () => {
     }
 
     if (name === "JobType") {
-      if (!['', 'undefined', undefined, null, 'null'].includes(jobData.JobType) && Number(jobData.JobType) === Number(value) && AddTaskArr.length > 0) {
-
+      const selectedJobType = get_Job_Type.data.find(item => Number(item.id) === Number(value));
+      if (selectedJobType && selectedJobType.task) {
+        setAddTaskArr(selectedJobType.task);
       } else {
         setAddTaskArr([]);
       }
@@ -643,7 +644,8 @@ const CreateJob = () => {
 
     const date = new Date();
     if (name == "Service") {
-       
+      setAddTaskArr([]);
+      setJobData(prev => ({ ...prev, JobType: "" }));
       if ([1, 2, 3, 4, 8].includes(Number(value))) {
 
         if (value == 1) {
