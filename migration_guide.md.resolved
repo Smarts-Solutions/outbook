@@ -76,6 +76,14 @@ If you previously used a separate `customer_users` table, you can migrate those 
 **Date of Implementation:** 2026-04-25
 **Module:** Admin / Customer Details / Customer Users
 
+
+CREATE TABLE `customer_contact_person_role_permissions` (
+  `role_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
 //permission table creation
 
 CREATE TABLE customer_permissions (
