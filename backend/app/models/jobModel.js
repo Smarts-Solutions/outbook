@@ -417,8 +417,6 @@ const getAddJobData = async (job) => {
     const [reviewing_checklist_data] = await pool.execute(queryReviewingType, [customer_id]);
 
 
-    // console.log("processing_checklist_data ",processing_checklist_data)
-    // console.log("reviewing_checklist_data ",reviewing_checklist_data)
 
     let status_history = [];
     if (job_id) {
@@ -1632,7 +1630,6 @@ async function getAllJobsSidebar(
       offset,
     ]);
 
-    //console.log("result 1 -->", result.length)
 
     // 🔹 assign_customer_service logic (UNCHANGED)
     // let isExistAssignCustomer = result.find(
@@ -1650,7 +1647,6 @@ async function getAllJobsSidebar(
     //   result = [...matched, ...matched2];
     // }
 
-    //console.log("result 2 -->", result.length)
 
     return {
       status: true,

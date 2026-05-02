@@ -128,8 +128,7 @@ function sendEmailInWorker(row) {
 
 app.post('/downloadSharepointFile', async (req, res) => {
     const { fileUrl, sharepointToken } = req.body;
-    console.log("Received fileUrl:", fileUrl);
-    console.log("Received sharepointToken:", sharepointToken);
+ 
     try {
       const fetchUrl = encodeURI(fileUrl);
         const sharePointResponse = await fetch(fetchUrl, {

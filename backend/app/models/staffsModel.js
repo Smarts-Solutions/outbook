@@ -96,8 +96,8 @@ const createStaff = async (staff) => {
 };
 
 const getStaff = async (data) => {
-  
- 
+
+
   let { page, limit, search } = data;
 
   page = parseInt(page) || 1;
@@ -228,7 +228,7 @@ const updateStaff = async (staff) => {
   const { id, page, limit, search, ...fields } = staff;
   let email = fields.email;
 
-  
+
 
   // Line Manage Code
   let staff_to = fields.staff_to;
@@ -306,7 +306,7 @@ const updateStaff = async (staff) => {
         ? `edited staff ${staff.first_name} ${staff.last_name}`
         : `changes the staff status ${status_change} ${staff.first_name} ${staff.last_name}`;
 
-        
+
 
     const [rows] = await pool.execute(query, values);
     if (rows.changedRows) {
@@ -457,11 +457,14 @@ const getStaffById = async (id) => {
 
 const isLoginAuthTokenCheckmodel = async (staff) => {
   const { id, login_auth_token } = staff;
-  const [rows] = await pool.query(
-    "SELECT id , login_auth_token FROM staffs WHERE id = ? AND login_auth_token = ?",
+
+  // Check staffs table
+  const [staffRows] = await pool.query(
+    "SELECT id, login_auth_token FROM staffs WHERE id = ? AND login_auth_token = ?",
     [id, login_auth_token]
   );
-  return rows[0];
+
+  return staffRows[0];
 };
 
 const profile = async (staff) => {
@@ -530,7 +533,7 @@ const sharepoint_token = async () => {
   const query = `SELECT access_token, refresh_token ,client_id,client_secret FROM sharepoint_token`;
   try {
     const [[result]] = await pool.execute(query);
-    //console.log("result", result);
+
     if (result != undefined && result != null) {
       if (
         result.access_token != null &&
@@ -644,7 +647,7 @@ const getSharePointToken = async (staff) => {
   const query = `SELECT access_token, refresh_token ,client_id,client_secret FROM sharepoint_token`;
   try {
     const [[result]] = await pool.execute(query);
-    //console.log("result", result);
+
     if (result != undefined && result != null) {
       if (
         result.access_token != null &&
@@ -697,7 +700,7 @@ const GetStaffPortfolio = async (staff) => {
     GROUP BY assigned_jobs_staff_view.customer_id
   `;
 
-  
+
 
     try {
       const [assignedCustomers] = await pool.execute(queryCustomerAssign);

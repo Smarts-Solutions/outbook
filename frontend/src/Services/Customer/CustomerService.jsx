@@ -23,8 +23,296 @@ export async function get_All_Customer_Users(data, token) {
 
 // Customer Users End
 
+export async function get_Customers_Jobs(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomersJobs`, data, {
+      headers: header(token),
+    });
+    return res?.data;
+  } catch (err) {
+    return err;
+  }
+}
 
 
+// Customer Dashboard Start
+export async function CUSTOMER_DASHBOARD(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerDashboardData`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_ACTIVITYLOG(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerDashboardActivityLog`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_LINKDATA(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerCountLinkData`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_MASTER_STATUS(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerMasterStatus`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function UPDATE_CUSTOMER_JOB_STATUS(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}updateCustomerJobStatus`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_LIST(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerList`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_CLIENTS(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerClients`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_JOBS(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerJobs`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_CLIENT_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerClientAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_CLIENT_ADD(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerClientAdd`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_JOB_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerJobAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_JOB_UPDATE(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerJobUpdate`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_DROPDOWN(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerDropdown`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+// Customer Dashboard End
+
+export async function CUSTOMER_JOB_TIMELINE(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerJobTimeline`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_TASK_TIMESHEET_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerTaskTimesheetAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_MISSING_LOG_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerMissingLogAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_QUERY_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerQueryAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_DRAFT_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerDraftAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_DOCUMENT_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerDocumentAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+// New Customer Specific Job Management Services
+export async function CUSTOMER_ADD_JOB_DATA(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}getCustomerAddJobData`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_JOB_ADD(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerJobAdd`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_CHECKLIST_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerChecklistAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_OFFICER_DETAILS(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerGetOfficerDetails`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_JOB_TYPE(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerJobType`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_DOWNLOAD_CHECKLIST(checklistId, token) {
+  try {
+    const res = await axios.get(`${Config.base_url}customerDownloadChecklist/${checklistId}`, {
+      headers: header(token),
+      responseType: 'blob',
+    });
+    return res;
+  } catch (err) {
+    return err;
+  }
+}
 
 
 // get Timesheet Report Data
@@ -132,7 +420,7 @@ export async function ADD_SERVICES(data, token) {
 // Get All Customer Services
 export async function ADD_PEPPER_WORK(data, token) {
   try {
-    
+    0
     // const formData = new FormData();
     // data.fileData.forEach((file, index) => {
     //   formData.append("files[]", file);
@@ -644,3 +932,28 @@ export async function UPLOAD_DOCUMENT_MISSING_LOG_AND_QUERY(data, token) {
   }
 }
 
+// Get Job Type
+export async function JOB_TYPE(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}JobType`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+// Download Checklist
+export async function DOWNLOAD_CHECKLIST(checklistId, token) {
+  try {
+    const res = await axios.get(`${Config.base_url}downloadChecklist/${checklistId}`, {
+      headers: header(token),
+      responseType: 'arraybuffer'
+    });
+    return res;
+  } catch (err) {
+    return err;
+  }
+}

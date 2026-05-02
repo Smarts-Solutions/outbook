@@ -31,5 +31,10 @@ router.post('/customerSubSource',verifyToken, controllers.customerSubSourceContr
 router.post('/internal',verifyToken, controllers.customerInternal.handleInternal);
 router.post('/subinternal',verifyToken, controllers.customerSubInternal.handleSubInternal);
 
+// Customer Contact Person Access
+router.post('/customerContactPersonAccess', verifyToken, controllers.customerContactPersonAccessController.accessRolePermissions);
+
+// Get Customer Access by Customer ID
+router.post('/getCustomerAccessById', verifyToken, controllers.customerContactPersonAccessController.getCustomerAccessByCustomerId);
 
 module.exports = router;

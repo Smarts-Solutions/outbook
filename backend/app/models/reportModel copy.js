@@ -465,7 +465,6 @@ const jobReceivedSentReports = async (Report) => {
             };
         });
 
-        //console.log("result", result);
         return { status: true, message: 'Success.', data: result };
 
     } catch (error) {
@@ -795,7 +794,6 @@ const teamMonthlyReports = async (Report) => {
 
         const [result] = await pool.execute(query);
 
-        // console.log("result -- ", result);
 
         return { status: true, message: 'Success.', data: result };
 
@@ -2698,7 +2696,7 @@ const missingTimesheetReport = async (Report) => {
 
 
     const [result] = await pool.execute(query_last_week_filter);
-    // console.log("result", result);
+    
 
     return {
         status: true,

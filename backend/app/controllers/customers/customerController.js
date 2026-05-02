@@ -152,6 +152,14 @@ const deleteCustomer = async (req, res) => {
     }
 }
 
+const getCustomersJobs = async (req, res) => {
+  try {
+      const result = await customerService.getCustomersJobs(req.body);
+      return res.status(200).json(result);
+    } catch (error) {
+      res.status(500).json({ status:false, message: error.message});
+    }
+}
 
 
 module.exports = {
@@ -164,5 +172,6 @@ module.exports = {
   customerUpdate,
   customerStatusUpdate,
   getcustomerschecklist,
-  deleteCustomer
+  deleteCustomer,
+  getCustomersJobs
 };

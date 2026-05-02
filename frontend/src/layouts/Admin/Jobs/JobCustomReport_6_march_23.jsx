@@ -1653,8 +1653,7 @@ function JobCustomReport() {
               //console.log("Action Meta:", actionMeta);
 
               if (actionMeta.action === "remove-value") {
-                // console.log("Removed value:", actionMeta.removedValue.value);
-                addAndRemoveGroupBy(actionMeta.removedValue.value, "remove");
+               addAndRemoveGroupBy(actionMeta.removedValue.value, "remove");
               }
               if (actionMeta.action === "select-option") {
                 //console.log("Added value:", actionMeta.option.value);

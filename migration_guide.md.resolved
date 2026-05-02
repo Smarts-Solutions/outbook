@@ -1,0 +1,155 @@
+# Database Migration & Implementation Guide (Customer User System)
+
+This document outlines the database changes and new table structures implemented for the **Customer User Management** module. Use these queries to update your live/production database.
+
+---
+
+## 1. Table Alterations
+
+### `customer_access` Table
+We have updated the `customer_access` table to support comma-separated storage for Client and Job IDs. This allows for a clean one-row-per-customer relationship.
+
+**SQL Query:**
+```sql
+-- Add client_id column and update job_id to support larger text strings
+ALTER TABLE customer_access 
+ADD COLUMN client_id TEXT DEFAULT NULL,
+MODIFY COLUMN job_id TEXT DEFAULT NULL;
+```
+
+---
+
+## 2. New Reference Tables
+
+### `customer_contact_person_role`
+This table defines the roles available for customer contact persons (e.g., Owner, Manager, etc.).
+
+**SQL Schema:**
+```sql
+CREATE TABLE IF NOT EXISTS `customer_contact_person_role` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(255) NOT NULL,
+  `status` ENUM('0', '1') DEFAULT '1',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Default Roles (if missing)
+INSERT INTO `customer_contact_person_role` (`name`) VALUES 
+('Primary Contact'),
+('Billing Contact'),
+('Technical Contact');
+```
+
+---
+
+## 3. Staff & Role Configuration
+
+### Customer User Role
+The system uses **Role ID 12** to identify Customer Users. Ensure this role exists in your `roles` table.
+
+**SQL Check/Insert:**
+```sql
+-- Ensure Role ID 12 is assigned to Customer Users
+INSERT INTO `roles` (`id`, `role_name`) 
+VALUES (12, 'CUSTOMER_USER')
+ON DUPLICATE KEY UPDATE role_name = 'CUSTOMER_USER';
+```
+
+---
+
+## 4. Logical Changes Summary
+
+1.  **Staff Migration**: Customer Users are now stored in the main `staffs` table with `role_id = 12`. This allows them to use the standard login system while keeping their data scoped.
+2.  **Grouped Access**:
+    *   **allCustomerAccess**: Stores the `customer_id`.
+    *   **selectedClients**: Stores comma-separated client IDs in the `client_id` column.
+    *   **selectedJobs**: Stores comma-separated job IDs in the `job_id` column.
+3.  **Default Permissions**:
+    *   Assigning a Customer automatically grants access to all its Clients and Jobs by default.
+    *   Admin can manually remove specific Job/Client access via the checkboxes.
+
+---
+
+## 5. Cleaning Up Old Data (Optional)
+If you previously used a separate `customer_users` table, you can migrate those users to `staffs` with `role_id=12` and then retire the old table.
+
+---
+**Date of Implementation:** 2026-04-25
+**Module:** Admin / Customer Details / Customer Users
+
+//permission table creation
+
+SELECT 
+  jobs.id AS job_id,
+  customers.trading_name AS customer_name,
+  clients.trading_name AS client_name,
+
+  CONCAT(
+      SUBSTRING(customers.trading_name, 1, 3), '_',
+      SUBSTRING(clients.trading_name, 1, 3), '_',
+      SUBSTRING(job_types.type, 1, 4), '_',
+      SUBSTRING(jobs.job_id, 1, 15)
+  ) AS job_code_id,
+
+  CONCAT(
+    '[',
+    GROUP_CONCAT(
+      DISTINCT CONCAT(
+        '{"service_id":', services.id,
+        ',"service_name":"', REPLACE(IFNULL(services.name,''), '"', '\\"'), '"}'
+      )
+    ),
+    ']'
+  ) AS services,
+
+  CONCAT(
+    '[',
+    GROUP_CONCAT(
+      DISTINCT CONCAT(
+        '{"job_type_id":', job_types.id,
+        ',"job_type_name":"', REPLACE(IFNULL(job_types.type,''), '"', '\\"'),
+        '","service_id":', job_types.service_id, '}'
+      )
+    ),
+    ']'
+  ) AS jobTypes,
+
+  (
+    SELECT CONCAT(
+      '[',
+      GROUP_CONCAT(
+        DISTINCT CONCAT(
+          '{"task_id":', t.id,
+          ',"task_name":"', REPLACE(IFNULL(t.name,''), '"', '\\"'),
+          '","service_id":', t.service_id,
+          ',"job_type_id":', t.job_type_id,
+          ',"budgeted_hour":', IFNULL(t.budgeted_hour, 0),
+          '}'
+        )
+      ),
+      ']'
+    )
+    FROM task t
+    WHERE t.service_id = services.id
+  ) AS tasks
+
+FROM jobs
+JOIN customers ON jobs.customer_id = customers.id
+JOIN clients ON customers.id = clients.customer_id
+JOIN customer_services ON customer_services.customer_id = customers.id
+JOIN services ON services.id = customer_services.service_id
+JOIN job_types ON job_types.service_id = services.id
+
+
+
+WHERE jobs.service_id = ?
+GROUP BY 
+  jobs.id,
+  customers.trading_name,
+  clients.trading_name,
+  jobs.job_id
+
+ORDER BY jobs.id DESC;
+
+
+//permission table creation

@@ -4968,18 +4968,7 @@ svg {
   /* tweak this value */
 }
 
-.table-equal {
-  table-layout: fixed;
-  width: 100%;
-}
 
-.table-equal th:first-child,
-.table-equal td:first-child {
-  width: 60px;
-  max-width: 60px;
-}
 
-.table-equal th:not(:first-child),
-.table-equal td:not(:first-child) {
-  width: calc((100% - 60px) / 4);
-}
+
+

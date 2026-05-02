@@ -32,9 +32,11 @@ const accessRolePermissions = async (data) => {
   const { role_id, action } = data;
   if (action === 'get') {
     const rowData = await rolePermissionsModel.accessRolePermissions(data);
+
     if (!rowData.length) {
       return [];
     }
+
     const result = rowData.reduce((acc, curr) => {
       const { permission_name, id, type, is_assigned } = curr;
       let permission = acc.find(p => p.permission_name === permission_name);
@@ -47,7 +49,7 @@ const accessRolePermissions = async (data) => {
     }, []);
 
     return result;
-  } else if(action === 'update'){
+  } else if (action === 'update') {
     const rowData = await rolePermissionsModel.accessRolePermissions(data);
     return rowData;
   }

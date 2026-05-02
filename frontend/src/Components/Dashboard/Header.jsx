@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { isLoginAuthCheckToken ,isLogOut} from "../../ReduxStore/Slice/Auth/authSlice";
+import { isLoginAuthCheckToken, isLogOut } from "../../ReduxStore/Slice/Auth/authSlice";
 import { Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+
 
 const Header = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const Header = () => {
     setIsMenuEnlarged((prevState) => !prevState);
   };
 
+  const role = JSON.parse(localStorage.getItem("role"));
 
 
 
@@ -36,6 +38,8 @@ const Header = () => {
       document.body.classList.remove("enlarge-menu");
     };
   }, [isMenuEnlarged]);
+
+
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -69,8 +73,8 @@ const Header = () => {
     localStorage.removeItem("accessData");
     localStorage.removeItem("updatedShowTab");
     sessionStorage.clear();
-    
-    const req = { id: staffDetails.id};
+
+    const req = { id: staffDetails.id };
     await dispatch(isLogOut(req))
       .unwrap()
       .then(async (response) => {
@@ -116,14 +120,14 @@ const Header = () => {
   };
 
 
-  const clearSession = () => { 
-    var decoded = jwtDecode(token); 
+  const clearSession = () => {
+    var decoded = jwtDecode(token);
     if (decoded.exp * 1000 < new Date().getTime()) {
 
-        localStorage.clear(); 
-        window.location.reload();
+      localStorage.clear();
+      window.location.reload();
     }
-};
+  };
 
   return (
     <div>
@@ -167,7 +171,7 @@ const Header = () => {
                   </svg>{" "}
                   Profile
                 </Link>{" "}
-                
+
                 <div className="dropdown-divider mb-0" />
                 <a
                   className="dropdown-item"
@@ -196,7 +200,7 @@ const Header = () => {
           </ul>
           {/*end topbar-nav*/}
           <ul className="list-unstyled topbar-nav mb-0">
-            
+
             <li>
               <button
                 className="nav-link button-menu-mobile"

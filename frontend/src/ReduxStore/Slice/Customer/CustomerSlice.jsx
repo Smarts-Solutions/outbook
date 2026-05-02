@@ -39,17 +39,40 @@ import {
 
   // customer users
   get_All_Customer_Users,
-  
+  get_Customers_Jobs,
+
+  CUSTOMER_DASHBOARD,
+  CUSTOMER_ACTIVITYLOG,
+  CUSTOMER_LINKDATA,
+  CUSTOMER_MASTER_STATUS,
+  UPDATE_CUSTOMER_JOB_STATUS,
+  CUSTOMER_LIST,
+  CUSTOMER_CLIENTS,
+  CUSTOMER_JOBS,
+  CUSTOMER_DROPDOWN,
+  CUSTOMER_CLIENT_ACTION,
+  CUSTOMER_CLIENT_ADD,
+  CUSTOMER_JOB_ACTION,
+  CUSTOMER_JOB_TIMELINE,
+  CUSTOMER_TASK_TIMESHEET_ACTION,
+  CUSTOMER_MISSING_LOG_ACTION,
+  CUSTOMER_QUERY_ACTION,
+  CUSTOMER_DRAFT_ACTION,
+  CUSTOMER_DOCUMENT_ACTION,
+  CUSTOMER_ADD_JOB_DATA,
+  CUSTOMER_JOB_ADD,
+  CUSTOMER_CHECKLIST_ACTION,
+  CUSTOMER_OFFICER_DETAILS,
+  CUSTOMER_JOB_TYPE,
+  CUSTOMER_DOWNLOAD_CHECKLIST,
 } from "../../../Services/Customer/CustomerService";
 import { add } from "date-fns";
 var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
-
-
 // Customer Users Start
 
-export const getAllCustomerUsers = createAsyncThunk( 
+export const getAllCustomerUsers = createAsyncThunk(
   "getAllCustomerUsers",
   async (data) => {
     try {
@@ -67,6 +90,298 @@ export const getAllCustomerUsers = createAsyncThunk(
     }
   }
 );
+
+export const getCustomersJobs = createAsyncThunk(
+  "getCustomersJobs",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      const res = await get_Customers_Jobs(req, authToken);
+      return res;
+    } catch (err) {
+      throw err;
+    }
+  }
+);
+// Customer Dashboard Start
+export const CustomerDashboardData = createAsyncThunk("getCustomerDashboardData", async (data) => {
+  try {
+    const { req, authToken } = data;
+    const res = await CUSTOMER_DASHBOARD(req, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerActivityLog = createAsyncThunk("getCustomerDashboardActivityLog", async (data) => {
+  try {
+    const { req, authToken } = data;
+    const res = await CUSTOMER_ACTIVITYLOG(req, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+
+
+export const CustomerLinkData = createAsyncThunk("getCustomerCountLinkData", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      action: "get",
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_LINKDATA(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+
+
+export const updateCustomerJobStatus = createAsyncThunk("updateCustomerJobStatus", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await UPDATE_CUSTOMER_JOB_STATUS(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerList = createAsyncThunk("getCustomerList", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      action: "get",
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_LIST(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerClientList = createAsyncThunk("getCustomerClients", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      action: "get",
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_CLIENTS(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerJobList = createAsyncThunk("getCustomerJobs", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      action: "get",
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_JOBS(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerClientAction = createAsyncThunk("customerClientAction", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_CLIENT_ACTION(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerClientAdd = createAsyncThunk("customerClientAdd", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_CLIENT_ADD(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerJobAction = createAsyncThunk("customerJobAction", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_JOB_ACTION(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerJobUpdate = createAsyncThunk("customerJobUpdate", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_JOB_UPDATE(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const GetCustomerDropdown = createAsyncThunk("getCustomerDropdown", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      action: "get",
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_DROPDOWN(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerJobTimeline = createAsyncThunk("customerJobTimeline", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
+    const res = await CUSTOMER_JOB_TIMELINE(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerTaskTimesheetAction = createAsyncThunk("customerTaskTimesheetAction", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
+    const res = await CUSTOMER_TASK_TIMESHEET_ACTION(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerMissingLogAction = createAsyncThunk("customerMissingLogAction", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
+    const res = await CUSTOMER_MISSING_LOG_ACTION(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerQueryAction = createAsyncThunk("customerQueryAction", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
+    const res = await CUSTOMER_QUERY_ACTION(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerDraftAction = createAsyncThunk("customerDraftAction", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
+    const res = await CUSTOMER_DRAFT_ACTION(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerDocumentAction = createAsyncThunk("customerDocumentAction", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
+    const res = await CUSTOMER_DOCUMENT_ACTION(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const getCustomerMasterStatus = createAsyncThunk("getCustomerMasterStatus", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      action: "get",
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_MASTER_STATUS(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+// Customer Dashboard End
 
 // Customer Users End
 
@@ -88,7 +403,7 @@ export const getTimesheetReportData = createAsyncThunk("getTimesheetReportData",
 export const getAllTaskByStaff = createAsyncThunk("getAllTaskByStaff", async (data) => {
   try {
 
-    
+
     const updatedReq = {
       StaffUserId: StaffUserId.id,
       data: data.req
@@ -120,7 +435,8 @@ export const GetOfficerDetails = createAsyncThunk("seachCompany", async (data) =
       StaffUserId: StaffUserId.id,
       type: data.type
     };
-    const res = await GETOFFICERDETAILS(updatedReq);
+    const token = JSON.parse(localStorage.getItem("token"));
+    const res = await CUSTOMER_OFFICER_DETAILS(updatedReq, token);
     return await res;
   } catch (err) {
     throw err;
@@ -310,7 +626,7 @@ export const GetAllJabData = createAsyncThunk("getAddJobData", async (data) => {
       ip: IP_Data,
       StaffUserId: StaffUserId.id,
     };
-    const res = await GET_ALL_JOB_DATA(updatedReq, authToken);
+    const res = await CUSTOMER_ADD_JOB_DATA(updatedReq, authToken);
 
     return await res;
   } catch (err) {
@@ -327,7 +643,7 @@ export const AddAllJobType = createAsyncThunk("jobAdd", async (data) => {
       ip: IP_Data,
       StaffUserId: StaffUserId.id,
     };
-    const res = await Add_Job_Type(updatedReq, authToken);
+    const res = await CUSTOMER_JOB_ADD(updatedReq, authToken);
 
     return await res;
   } catch (err) {
@@ -378,13 +694,33 @@ export const GET_ALL_CHECKLIST = createAsyncThunk(
         ip: IP_Data,
         StaffUserId: StaffUserId.id,
       };
-      const res = await GETALLCHECKLIST(updatedReq, authToken);
+      const res = await CUSTOMER_CHECKLIST_ACTION(updatedReq, authToken);
       return await res;
     } catch (err) {
       throw err;
     }
   }
 );
+
+export const JobType = createAsyncThunk("jobType", async (data) => {
+  try {
+    const { req, authToken } = data;
+    const res = await CUSTOMER_JOB_TYPE(req, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const DownloadChecklist = createAsyncThunk("downloadChecklist", async (data) => {
+  try {
+    const { checklistId, token } = data;
+    const res = await CUSTOMER_DOWNLOAD_CHECKLIST(checklistId, token);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
 
 export const getAllTaskTimeSheet = createAsyncThunk(
   "getTaskTimeSheet",

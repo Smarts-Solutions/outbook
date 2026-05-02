@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import { Briefcase, ChevronDown, ChevronRight ,PieChart,Shield,User,Users,File, Clock, Clock1, Clock10Icon, Settings, LayoutGrid} from "lucide-react";
+import { useCustomerAccess } from "../../Utils/CustomerAccessContext";
+import { Briefcase, ChevronDown, ChevronRight, PieChart, Shield, User, Users, File, Clock, Clock1, Clock10Icon, Settings, LayoutGrid, UserCog, FileSliders } from "lucide-react";
 
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const role = JSON.parse(localStorage.getItem("role"));
+  const { hasAccess } = useCustomerAccess();
+
   const updatedShowTab = JSON.parse(localStorage.getItem("updatedShowTab"));
   const [activeLink, setActiveLink] = useState(location.pathname);
   const [menuState, setMenuState] = useState({
@@ -18,6 +21,9 @@ const Sidebar = () => {
       "/admin/job/customreport": false, // For "Custom Job Report" dropdown
     },
   });
+
+
+
 
   useEffect(() => {
     setActiveLink(location.pathname);
@@ -34,7 +40,7 @@ const Sidebar = () => {
       };
 
       if (
-        location.pathname.startsWith("/admin/customer") ||
+        (location.pathname === "/admin/customer" || location.pathname.startsWith("/admin/customer/")) ||
         location.pathname.startsWith("/admin/ClientLists") ||
         location.pathname.startsWith("/admin/client/profiles")
       ) {
@@ -83,7 +89,7 @@ const Sidebar = () => {
       if (reportPaths.some((p) => linkPathname.startsWith(p))) {
         newDropdown["/admin/reports"] = true;
       } else if (
-        linkPathname.startsWith("/admin/customer") ||
+        (linkPathname === "/admin/customer" || linkPathname.startsWith("/admin/customer/")) ||
         linkPathname.startsWith("/admin/client") ||
         linkPathname === "/admin/ClientLists"
       ) {
@@ -137,181 +143,219 @@ const Sidebar = () => {
         <div className="menu-content h-100 mm-active" data-simplebar="init">
           <ul className="metismenu left-sidenav-menu mm-show">
             {/* Dashboard Link */}
-            <li className={activeLink === "/admin/dashboard" ? "active" : ""}>
-              <Link
-                to="/admin/dashboard"
-                onClick={(e) => handleLinkClick(e, "/admin/dashboard")}
-              >
-                <span className="sidebar-icons">
-                 <LayoutGrid/>
-                </span>
-                <span>Dashboard</span>
-              </Link>
-            </li>
-
-            {/* Customer Dropdown */}
-            <li
-              className={
-                activeLink.startsWith("/admin/customer") ||
-                activeLink.startsWith("/admin/ClientLists") ||
-                activeLink.startsWith("/admin/client/profiles")
-                  ? "active"
-                  : ""
-              }
-            >
-              {((updatedShowTab && updatedShowTab.customer) ||
-                (updatedShowTab && updatedShowTab.client) ||
-                (updatedShowTab && updatedShowTab.job) ||
-                (updatedShowTab && updatedShowTab.all_customers) ||
-                (updatedShowTab && updatedShowTab.all_clients) ||
-                (updatedShowTab && updatedShowTab.all_jobs) ||
-                role === "SUPERADMIN") && (
-                <Link
-                  to="/admin/customer"
-                  onClick={(e) => handleMenuClick(e, "/admin/customer")}
-                >
-                  <div>
-                    <span className="sidebar-icons">
-                      <Users />
-                    </span>
-                    <span className="pe-4 pe-lg-4">Customer</span>
-                  </div>
-                  <span className="chevron-icon">
-                  {
-  menuState.dropdownOpen["/admin/customer"] ? (
-    <ChevronDown size={16} />
-  ) : (
-    <ChevronRight size={16} />
-  )
-}
+            {role !== "CUSTOMER" && (
+              <li className={activeLink === "/admin/dashboard" ? "active" : ""}>
+                <Link to="/admin/dashboard">
+                  <span className="sidebar-icons">
+                    <LayoutGrid />
                   </span>
+                  <span>Dashboard</span>
                 </Link>
-              )}
+              </li>
+            )}
 
-              <ul
-                className={`nav-second-level ${
-                  menuState.dropdownOpen["/admin/customer"]
-                    ? "in"
-                    : "mm-collapse"
-                }`}
-                aria-expanded={
-                  menuState.dropdownOpen["/admin/customer"] ? "true" : "false"
-                }
-              >
+            {role === "CUSTOMER" && hasAccess("dashboard") && (
+              <li className={activeLink === "/customer/dashboard" ? "active" : ""}>
+                <Link to="/customer/dashboard">
+                  <span className="sidebar-icons">
+                    <LayoutGrid />
+                  </span>
+                  <span>Dashboard</span>
+                </Link>
+              </li>
+            )}
+
+            {role === "CUSTOMER" && (
+              <>
+
+                {role === "CUSTOMER" && hasAccess("client") && (
+                  <li className={activeLink === "/customer/client" ? "active" : ""}>
+                    <Link to="/customer/client">
+                      <span className="sidebar-icons">
+                        <User />
+                      </span>
+                      <span>Clients</span>
+                    </Link>
+                  </li>
+                )}
+                {role === "CUSTOMER" && hasAccess("job") && (
+                  <li className={activeLink === "/customer/job" ? "active" : ""}>
+                    <Link to="/customer/job">
+                      <span className="sidebar-icons">
+                        <Briefcase />
+                      </span>
+                      <span>Jobs</span>
+                    </Link>
+                  </li>
+                )}
+              </>
+            )}
+            {role !== "CUSTOMER" && (
+              <>
+                {/* Customer Dropdown */}
                 <li
-                  className={activeLink === "/admin/customer" ? "active" : ""}
+                  className={
+                    (activeLink === "/admin/customer" || activeLink.startsWith("/admin/customer/")) ||
+                      activeLink.startsWith("/admin/ClientLists") ||
+                      activeLink.startsWith("/admin/client/profiles")
+                      ? "active"
+                      : ""
+                  }
                 >
                   {((updatedShowTab && updatedShowTab.customer) ||
+                    (updatedShowTab && updatedShowTab.client) ||
+                    (updatedShowTab && updatedShowTab.job) ||
                     (updatedShowTab && updatedShowTab.all_customers) ||
-                    role === "SUPERADMIN") && (
-                    <Link
-                      to="/admin/customer"
-                      onClick={(e) => handleLinkClick(e, "/admin/customer")}
-                    >
-                      {/* <i className="ti-control-record" /> */}
-                      <span className="sidebar-icons">
-                      <Users />
-                    </span>
-                    <span className="pe-4 pe-lg-4">Customer</span>
-                    </Link>
-                  )}
-                </li>
-
-                <li
-                  className={
-                    activeLink === "/admin/ClientLists" ? "active" : ""
-                  }
-                >
-                  {((updatedShowTab && updatedShowTab.client) ||
                     (updatedShowTab && updatedShowTab.all_clients) ||
-                    role === "SUPERADMIN") && (
-                    <Link
-                      to="/admin/ClientLists"
-                      onClick={(e) => handleLinkClick(e, "/admin/ClientLists")}
-                    >
-                    
-                      <span className="sidebar-icons">
-                      <User />
-                    </span>
-                    <span className="pe-4 pe-lg-4">Clients</span>
-                    </Link>
-                  )}
-                </li>
-
-                <li
-                  className={
-                    activeLink === "/admin/client/profiles" ? "active" : ""
-                  }
-                >
-                  {((updatedShowTab && updatedShowTab.job) ||
                     (updatedShowTab && updatedShowTab.all_jobs) ||
                     role === "SUPERADMIN") && (
-                    <Link
-                      to="/admin/client/profiles"
-                      onClick={(e) =>
-                        handleLinkClick(e, "/admin/client/profiles")
+                      <Link
+                        to="/admin/customer"
+                        onClick={(e) => handleMenuClick(e, "/admin/customer")}
+                      >
+                        <div>
+                          <span className="sidebar-icons">
+                            <Users />
+                          </span>
+                          <span className="pe-4 pe-lg-4">Customer</span>
+                        </div>
+                        <span className="chevron-icon">
+                          {
+                            menuState.dropdownOpen["/admin/customer"] ? (
+                              <ChevronDown size={16} />
+                            ) : (
+                              <ChevronRight size={16} />
+                            )
+                          }
+                        </span>
+                      </Link>
+                    )}
+
+                  <ul
+                    className={`nav-second-level ${menuState.dropdownOpen["/admin/customer"]
+                      ? "in"
+                      : "mm-collapse"
+                      }`}
+                    aria-expanded={
+                      menuState.dropdownOpen["/admin/customer"] ? "true" : "false"
+                    }
+                  >
+                    <li
+                      className={activeLink === "/admin/customer" ? "active" : ""}
+                    >
+                      {((updatedShowTab && updatedShowTab.customer) ||
+                        (updatedShowTab && updatedShowTab.all_customers) ||
+                        role === "SUPERADMIN") && (
+                          <Link
+                            to="/admin/customer"
+                            onClick={(e) => handleLinkClick(e, "/admin/customer")}
+                          >
+                            {/* <i className="ti-control-record" /> */}
+                            <span className="sidebar-icons">
+                              <Users />
+                            </span>
+                            <span className="pe-4 pe-lg-4">Customer</span>
+                          </Link>
+                        )}
+                    </li>
+
+                    <li
+                      className={
+                        activeLink === "/admin/ClientLists" ? "active" : ""
                       }
                     >
-                      {/* <i className="ti-control-record" /> */}
-                      <span className="sidebar-icons">
-                      <Briefcase />
-                    </span>
-                    <span className="pe-4 pe-lg-4">Jobs</span>
-                    </Link>
-                    
-                  )}
+                      {((updatedShowTab && updatedShowTab.client) ||
+                        (updatedShowTab && updatedShowTab.all_clients) ||
+                        role === "SUPERADMIN") && (
+                          <Link
+                            to="/admin/ClientLists"
+                            onClick={(e) => handleLinkClick(e, "/admin/ClientLists")}
+                          >
+
+                            <span className="sidebar-icons">
+                              <User />
+                            </span>
+                            <span className="pe-4 pe-lg-4">Clients</span>
+                          </Link>
+                        )}
+                    </li>
+
+                    <li
+                      className={
+                        activeLink === "/admin/client/profiles" ? "active" : ""
+                      }
+                    >
+                      {((updatedShowTab && updatedShowTab.job) ||
+                        (updatedShowTab && updatedShowTab.all_jobs) ||
+                        role === "SUPERADMIN") && (
+                          <Link
+                            to="/admin/client/profiles"
+                            onClick={(e) =>
+                              handleLinkClick(e, "/admin/client/profiles")
+                            }
+                          >
+                            {/* <i className="ti-control-record" /> */}
+                            <span className="sidebar-icons">
+                              <Briefcase />
+                            </span>
+                            <span className="pe-4 pe-lg-4">Jobs</span>
+                          </Link>
+
+                        )}
+                    </li>
+                  </ul>
                 </li>
-              </ul>
-            </li>
 
-            {((updatedShowTab && updatedShowTab.status) ||
-              role === "SUPERADMIN") && (
-              <li className={activeLink === "/admin/status" ? "active" : ""}>
-                <Link
-                  to="/admin/status"
-                  aria-expanded="false"
-                  onClick={(e) => handleLinkClick(e, "/admin/status")}
-                >
-                  <span className="sidebar-icons">
-                   <PieChart/>
-                  </span>
-                  <span>Status</span>
-                </Link>
-              </li>
-            )}
+                {((updatedShowTab && updatedShowTab.status) ||
+                  role === "SUPERADMIN") && (
+                    <li className={activeLink === "/admin/status" ? "active" : ""}>
+                      <Link
+                        to="/admin/status"
+                        aria-expanded="false"
+                        onClick={(e) => handleLinkClick(e, "/admin/status")}
+                      >
+                        <span className="sidebar-icons">
+                          <PieChart />
+                        </span>
+                        <span>Status</span>
+                      </Link>
+                    </li>
+                  )}
 
-            {((updatedShowTab && updatedShowTab.staff) ||
-              role === "SUPERADMIN") && (
-              <li className={activeLink === "/admin/staff" ? "active" : ""}>
-                <Link
-                  to="/admin/staff"
-                  aria-expanded="false"
-                  onClick={(e) => handleLinkClick(e, "/admin/staff")}
-                >
-                  <span className="sidebar-icons">
-                    <Users/>
-                  </span>
-                  <span>Staffs</span>
-                </Link>
-              </li>
-            )}
+                {((updatedShowTab && updatedShowTab.staff) ||
+                  role === "SUPERADMIN") && (
+                    <li className={activeLink === "/admin/staff" ? "active" : ""}>
+                      <Link
+                        to="/admin/staff"
+                        aria-expanded="false"
+                        onClick={(e) => handleLinkClick(e, "/admin/staff")}
+                      >
+                        <span className="sidebar-icons">
+                          <Users />
+                        </span>
+                        <span>Staffs</span>
+                      </Link>
+                    </li>
+                  )}
 
-            {role === "SUPERADMIN" && (
-              <li className={activeLink === "/admin/access" ? "active" : ""}>
-                <Link
-                  to="/admin/access"
-                  aria-expanded="false"
-                  onClick={(e) => handleLinkClick(e, "/admin/access")}
-                >
-                  <span className="sidebar-icons">
-                   <Shield/>
-                  </span>
-                  <span>Access</span>
-                </Link>
-              </li>
-            )}
+                {role === "SUPERADMIN" && (
+                  <li className={activeLink === "/admin/access" ? "active" : ""}>
+                    <Link
+                      to="/admin/access"
+                      aria-expanded="false"
+                      onClick={(e) => handleLinkClick(e, "/admin/access")}
+                    >
+                      <span className="sidebar-icons">
+                        <Shield />
+                      </span>
+                      <span>Access</span>
+                    </Link>
+                  </li>
+                )}
 
-            {/* {((updatedShowTab && updatedShowTab.report) ||
+
+
+                {/* {((updatedShowTab && updatedShowTab.report) ||
               role === "SUPERADMIN") && (
                 <li
                   className={
@@ -354,105 +398,104 @@ const Sidebar = () => {
                 : ""
             } */}
 
-            {/* Customer Dropdown */}
-            <li
-              className={
-                activeLink.startsWith("/admin/reports") ||
-                activeLink.startsWith("/admin/timesheetReports") ||
-                activeLink.startsWith("/admin/job/customreport")
-                  ? "active"
-                  : ""
-              }
-            >
-              {((updatedShowTab && updatedShowTab.report) ||
-                role === "SUPERADMIN") && (
-                <a
-                  href="#"
-                  onClick={(e) => handleMenuClick(e, "/admin/reports")}
-                  className="sidebar-parent"
-                >
-                  <div>
-                    <span className="sidebar-icons">
-                      <Users />
-                    </span>
-                    <span className="pe-4 pe-lg-4">Reports</span>
-                  </div>
-                  <span className="chevron-icon">
-                    {
-  menuState.dropdownOpen["/admin/reports"] ? (
-    <ChevronDown size={16} />
-  ) : (
-    <ChevronRight size={16} />
-  )
-}
-                  </span>
-                </a>
-              )}
-
-              <ul
-                className={`nav-second-level ${
-                  menuState.dropdownOpen["/admin/reports"]
-                    ? "in"
-                    : "mm-collapse"
-                }`}
-                aria-expanded={
-                  menuState.dropdownOpen["/admin/reports"] ? "true" : "false"
-                }
-              >
-                <li className={activeLink === "/admin/reports" ? "active" : ""}>
-                  <Link
-                    to="/admin/reports"
-                    aria-expanded="false"
-                    onClick={(e) => handleLinkClick(e, "/admin/reports")}
-                  >
-                    <span className="sidebar-icons">
-                    <File/>{" "}
-                    </span>
-                    <span>Standard</span>
-                  </Link>
-                </li>
-
+                {/* Customer Dropdown */}
                 <li
                   className={
-                    activeLink === "/admin/timesheetReports" ? "active" : ""
+                    activeLink.startsWith("/admin/reports") ||
+                      activeLink.startsWith("/admin/timesheetReports") ||
+                      activeLink.startsWith("/admin/job/customreport")
+                      ? "active"
+                      : ""
                   }
                 >
-                  <Link
-                    to="/admin/timesheetReports"
-                    aria-expanded="false"
-                    onClick={(e) =>
-                      handleLinkClick(e, "/admin/timesheetReports")
+                  {((updatedShowTab && updatedShowTab.report) ||
+                    role === "SUPERADMIN") && (
+                      <a
+                        href="#"
+                        onClick={(e) => handleMenuClick(e, "/admin/reports")}
+                        className="sidebar-parent"
+                      >
+                        <div>
+                          <span className="sidebar-icons">
+                            <FileSliders />
+                          </span>
+                          <span className="pe-4 pe-lg-4">Reports</span>
+                        </div>
+                        <span className="chevron-icon">
+                          {
+                            menuState.dropdownOpen["/admin/reports"] ? (
+                              <ChevronDown size={16} />
+                            ) : (
+                              <ChevronRight size={16} />
+                            )
+                          }
+                        </span>
+                      </a>
+                    )}
+
+                  <ul
+                    className={`nav-second-level ${menuState.dropdownOpen["/admin/reports"]
+                      ? "in"
+                      : "mm-collapse"
+                      }`}
+                    aria-expanded={
+                      menuState.dropdownOpen["/admin/reports"] ? "true" : "false"
                     }
                   >
-                    <span className="sidebar-icons">
-                     <Clock/>{" "}
-                    </span>
-                    <span>Custom TimeSheet</span>
-                  </Link>
+                    <li className={activeLink === "/admin/reports" ? "active" : ""}>
+                      <Link
+                        to="/admin/reports"
+                        aria-expanded="false"
+                        onClick={(e) => handleLinkClick(e, "/admin/reports")}
+                      >
+                        <span className="sidebar-icons">
+                          <File />{" "}
+                        </span>
+                        <span>Standard</span>
+                      </Link>
+                    </li>
+
+                    <li
+                      className={
+                        activeLink === "/admin/timesheetReports" ? "active" : ""
+                      }
+                    >
+                      <Link
+                        to="/admin/timesheetReports"
+                        aria-expanded="false"
+                        onClick={(e) =>
+                          handleLinkClick(e, "/admin/timesheetReports")
+                        }
+                      >
+                        <span className="sidebar-icons">
+                          <Clock />{" "}
+                        </span>
+                        <span>Custom TimeSheet</span>
+                      </Link>
+                    </li>
+
+                    <li
+                      className={
+                        activeLink === "/admin/job/customreport" ? "active" : ""
+                      }
+                    >
+                      <Link
+                        to="/admin/job/customreport"
+                        aria-expanded="false"
+                        onClick={(e) =>
+                          handleLinkClick(e, "/admin/job/customreport")
+                        }
+                      >
+                        <span className="sidebar-icons">
+                          <Clock1 />{" "}
+                        </span>
+                        <span>Custom Job</span>
+                      </Link>
+                    </li>
+                  </ul>
                 </li>
 
-                <li
-                  className={
-                    activeLink === "/admin/job/customreport" ? "active" : ""
-                  }
-                >
-                  <Link
-                    to="/admin/job/customreport"
-                    aria-expanded="false"
-                    onClick={(e) =>
-                      handleLinkClick(e, "/admin/job/customreport")
-                    }
-                  >
-                    <span className="sidebar-icons">
-                     <Clock1/>{" "}
-                    </span>
-                    <span>Custom Job</span>
-                  </Link>
-                </li>
-              </ul>
-            </li>
-
-            {/* {((updatedShowTab && updatedShowTab.report) || role === "SUPERADMIN") && (
+                {/* {((updatedShowTab && updatedShowTab.report) || role === "SUPERADMIN") && (
               <li className={activeLink.startsWith("/admin/reports") ? "active" : ""}>
                 <Link
                   to="/admin/reports"
@@ -537,64 +580,83 @@ const Sidebar = () => {
               </li>
             )} */}
 
-            {((updatedShowTab && updatedShowTab.timesheet) ||
-              role === "SUPERADMIN") && (
-              <>
-                <li
-                  className={activeLink === "/admin/timesheet" ? "active" : ""}
-                >
-                  <Link
-                    to="/admin/timesheet"
-                    aria-expanded="false"
-                    onClick={(e) => handleLinkClick(e, "/admin/timesheet")}
-                  >
-                    <span className="sidebar-icons">
-                     <Clock10Icon/> {/* Time Sheet icon */}
-                    </span>
-                    <span>Time Sheet</span>
-                  </Link>
-                </li>
+                {((updatedShowTab && updatedShowTab.timesheet) ||
+                  role === "SUPERADMIN") && (
+                    <>
+                      <li
+                        className={activeLink === "/admin/timesheet" ? "active" : ""}
+                      >
+                        <Link
+                          to="/admin/timesheet"
+                          aria-expanded="false"
+                          onClick={(e) => handleLinkClick(e, "/admin/timesheet")}
+                        >
+                          <span className="sidebar-icons">
+                            <Clock10Icon /> {/* Time Sheet icon */}
+                          </span>
+                          <span>Time Sheet</span>
+                        </Link>
+                      </li>
+                    </>
+                  )}
+
+                {((updatedShowTab && updatedShowTab.setting) ||
+                  role === "SUPERADMIN") && (
+                    <li className={activeLink === "/admin/setting" ? "active" : ""}>
+                      <Link
+                        to="/admin/setting"
+                        aria-expanded="false"
+                        onClick={(e) => handleLinkClick(e, "/admin/setting")}
+                      >
+                        <span className="sidebar-icons">
+                          <Settings /> {/* Setting icon */}
+                        </span>
+                        <span>Settings</span>
+                      </Link>
+                    </li>
+                  )}
+
+                {/* Coustomer users*/}
+                {
+                  (
+                    role === "SUPERADMIN") && (
+                    <li
+                      className={
+                        activeLink === "/admin/cust_details" ? "active" : ""
+                      }
+                    >
+                      <Link
+                        to="/admin/cust_details"
+                        aria-expanded="false"
+                        onClick={(e) => handleLinkClick(e, "/admin/cust_details")}
+                      >
+                        <span className="sidebar-icons">
+                          {/* <i className="fas fa-user-cog"></i>  */}
+                          <UserCog />{" "}
+                        </span>
+                        <span>Customer Details</span>
+                      </Link>
+                    </li>
+                  )
+                }
+
+
+                {role === "SUPERADMIN" && (
+                  <li className={activeLink === "/admin/customer-access" ? "active" : ""}>
+                    <Link
+                      to="/admin/customer-access"
+                      aria-expanded="false"
+                      onClick={(e) => handleLinkClick(e, "/admin/customer-access")}
+                    >
+                      <span className="sidebar-icons">
+                        <Shield />
+                      </span>
+                      <span>Customer Access</span>
+                    </Link>
+                  </li>
+                )}
               </>
             )}
-
-            {((updatedShowTab && updatedShowTab.setting) ||
-              role === "SUPERADMIN") && (
-              <li className={activeLink === "/admin/setting" ? "active" : ""}>
-                <Link
-                  to="/admin/setting"
-                  aria-expanded="false"
-                  onClick={(e) => handleLinkClick(e, "/admin/setting")}
-                >
-                  <span className="sidebar-icons">
-                   <Settings/> {/* Setting icon */}
-                  </span>
-                  <span>Settings</span>
-                </Link>
-              </li>
-            )}
-
-            {/* Coustomer users*/}
-            {/* {
-            (
-              role === "SUPERADMIN") && (
-                <li
-                  className={
-                    activeLink === "/admin/cust_details" ? "active" : ""
-                  }
-                >
-                  <Link
-                    to="/admin/cust_details"
-                    aria-expanded="false"
-                    onClick={(e) => handleLinkClick(e, "/admin/cust_details")}
-                  >
-                    <span className="sidebar-icons">
-                      <i className="fas fa-user-cog"></i> 
-                    </span>
-                    <span>Customer Details</span>
-                  </Link>
-                </li>
-              )
-              } */}
           </ul>
         </div>
       </div>
