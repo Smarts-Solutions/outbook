@@ -14,9 +14,9 @@ import Swal from "sweetalert2";
 import sweatalert from "sweetalert2";
 import ReactPaginate from "react-paginate";
 import * as Yup from "yup";
+import { Plus, Download } from "lucide-react";
 
 import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
-import { Plus, Download } from "lucide-react";
 
 const CustomerUsers = () => {
 
@@ -154,11 +154,7 @@ const CustomerUsers = () => {
 
   useEffect(() => {
     GetAllCustomer();
-    //   GetAllCustomer({
-    //   searchValue: "",
-    //   pageNo: 1
-    // });
-
+    FetchCustomersJobs();
     CustomerPersonRoleData();
   }, []);
 
@@ -580,27 +576,6 @@ const CustomerUsers = () => {
       ],
     },
     {
-      type: "multiselect",
-      name: "allCustomerAccess",
-      label: "All Customer Access",
-      label_size: 12,
-      col_size: 6,
-      disable: false,
-      options: customerDataAll?.map((item) => ({
-        value: item.id,
-        label: item.trading_name,
-      }))
-    },
-    //    {
-    //   type: "multiselect-pagination",
-    //   name: "allCustomerAccess",
-    //   label: "All Customer Access",
-    //   label_size: 12,
-    //   col_size: 6,
-    //   disable: false,
-    //   options: customerOptions
-    // },
-    {
       type: "select",
       name: "customer_contact_person_role_id",
       label: "Customer Role",
@@ -864,7 +839,7 @@ const CustomerUsers = () => {
                                                 // Optionally auto-select all jobs when client is checked? 
                                                 // User said "defaultall", so maybe yes.
                                                 jobIds.forEach(id => {
-                                                  if(!newSelectedJobs.includes(id)) newSelectedJobs.push(id);
+                                                  if (!newSelectedJobs.includes(id)) newSelectedJobs.push(id);
                                                 });
                                               } else {
                                                 newSelectedClients = newSelectedClients.filter(id => id !== client.id);
@@ -896,7 +871,7 @@ const CustomerUsers = () => {
                                                   newSelectedJobs.push(id);
                                                 }
                                               });
-                                              if(!newSelectedClients.includes(client.id)) newSelectedClients.push(client.id);
+                                              if (!newSelectedClients.includes(client.id)) newSelectedClients.push(client.id);
                                             } else {
                                               newSelectedJobs = newSelectedJobs.filter((id) => !jobIds.includes(id));
                                               // Should we uncheck client if all jobs are unchecked? 
@@ -927,7 +902,7 @@ const CustomerUsers = () => {
                                                     let newSelectedClients = [...(formik.values.selectedClients || [])];
                                                     if (e.target.checked) {
                                                       newSelectedJobs.push(job.id);
-                                                      if(!newSelectedClients.includes(client.id)) newSelectedClients.push(client.id);
+                                                      if (!newSelectedClients.includes(client.id)) newSelectedClients.push(client.id);
                                                     } else {
                                                       newSelectedJobs = newSelectedJobs.filter((id) => id !== job.id);
                                                     }
@@ -1021,10 +996,12 @@ const CustomerUsers = () => {
                               <option value="0">Inactive</option>
                             </select>
                           </div>
-                          <div className="col-md-2">
-
-                            <button className="btn btn-outline-info fw-bold float-end border-3 " onClick={handleExport}>
-                              <Download size={16} />{" "}
+                          <div className="col-md-6">
+                            <button
+                              className="btn btn-outline-info fw-bold float-end border-3 "
+                              onClick={handleExport}
+                            >
+                              <Download size={16} /> {" "}
                               Export Excel
                             </button>
                           </div>

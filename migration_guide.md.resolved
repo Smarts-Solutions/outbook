@@ -112,3 +112,22 @@ INSERT INTO customer_permissions (id, permission_name, type) VALUES
 
 
 //permission table creation
+
+
+//add these two column in staff table
+
+customer_contact_person_role_id     int default null
+is_first_login   tinyint default as 0
+
+
+
+
+// /
+customer_access ki table delete krna h then isko run krna h 
+CREATE TABLE `customer_access` (
+  `id` int(11) NOT NULL,
+  `staff_id` int(11) DEFAULT NULL,
+  `customer_id` int(11) NOT NULL,
+  `job_id` text DEFAULT NULL,
+  `client_id` text DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
