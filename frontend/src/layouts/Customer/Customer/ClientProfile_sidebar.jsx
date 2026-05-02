@@ -1415,9 +1415,23 @@ const CustomerClientProfile = () => {
           <div className={`tab-pane fade show active`} id={"NoOfJobs"} role="tabpanel">
             <div className="report-data mt-4 ">
               <div className="d-flex justify-content-between align-items-center">
-                <div className="tab-title mb-3">
-                  <h4 className="mt-0">Assigned Jobs</h4>
-                </div>
+                <ul className="nav nav-tabs border-0 mb-3" role="tablist">
+                  <li className="nav-item" role="presentation">
+                    <button
+                      className="nav-link active"
+                      id="assignedjob-tab"
+                      data-bs-toggle="pill"
+                      data-bs-target="#assignedjob"
+                      type="button"
+                      role="tab"
+                      aria-controls="assignedjob"
+                      aria-selected="true"
+                      tabIndex={-1}
+                    >
+                      Assigned Jobs
+                    </button>
+                  </li>
+                </ul>
                 {customerData && customerData.length > 0 && (
                   <div className="col-md-2">
                     <button
@@ -1477,7 +1491,7 @@ const CustomerClientProfile = () => {
               <div className="card-body">
                 <div className="dastyle-profile">
                   <div className="row">
-                    <div className="col-md-4 align-self-center mb-3 mb-lg-0">
+                    <div className="col-md-4 col-sm-12 col-lg-4 align-self-center mb-3 mb-lg-0">
                       <div className="dastyle-profile-main">
                         <div className="dastyle-profile-main-pic">
                           <span className="dastyle-profile_main-pic-change">
