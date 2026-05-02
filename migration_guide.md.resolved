@@ -50,9 +50,8 @@ The system uses **Role ID 12** to identify Customer Users. Ensure this role exis
 **SQL Check/Insert:**
 ```sql
 -- Ensure Role ID 12 is assigned to Customer Users
-INSERT INTO `roles` (`id`, `role_name`) 
-VALUES (12, 'CUSTOMER_USER')
-ON DUPLICATE KEY UPDATE role_name = 'CUSTOMER_USER';
+INSERT INTO `roles` (`id`, `role_name`,`role`) 
+VALUES (12, 'Customer User','CUSTOMERUSER')
 ```
 
 ---
