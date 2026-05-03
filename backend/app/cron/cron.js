@@ -9,10 +9,9 @@ module.exports = (app) => {
   // Schedule tasks to be run on the server.
 
   // Missing Timesheet Report Email to Individual Staff on every Monday at 09:00 AM
-  cron.schedule(
-    "0 9 * * 1",
-    async () => {
+  cron.schedule( "30 9 * * 1",async () => {
       ////////-----------Missing Timesheet Report Email --------------------//////
+       if (process.env.NODE_APP_INSTANCE === "0") {
       const [staffResult] = await pool.execute(`
     SELECT 
     id,
@@ -41,6 +40,7 @@ module.exports = (app) => {
     GROUP BY staffs.id
     `);
       sendEmailInWorkerSubmitTimesheet(staffResultSubmitTimeSheet || []);
+       }
     },
 
     {
