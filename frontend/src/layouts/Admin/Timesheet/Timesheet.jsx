@@ -2090,11 +2090,54 @@ const Timesheet = () => {
       setTimeSheetRows(filteredRows);
 
 
+      // Collect information about all merged records
+      const mergedRecordsList = [];
+      const mergedKeys = new Set();
+
+      timeSheetRows.forEach((row) => {
+        const key =
+          row.customer_id +
+          "_" +
+          row.client_id +
+          "_" +
+          row.job_id +
+          "_" +
+          row.task_id +
+          "_" +
+          row.task_type;
+
+        if (uniqueRowsMap.has(key) && !mergedKeys.has(key)) {
+          const firstRow = uniqueRowsMap.get(key);
+          const cName = firstRow.task_type === "1" ? "Internal" : (firstRow.client_name || firstRow.customer_name || firstRow.clientData?.find(c => String(c.id) === String(firstRow.client_id))?.trading_name || "");
+          const jName = firstRow.task_type === "1" ? (firstRow.internal_name || firstRow.jobData?.find(j => String(j.id) === String(firstRow.job_id))?.name || "") : (firstRow.job_name || firstRow.jobData?.find(j => String(j.id) === String(firstRow.job_id))?.name || "");
+          const tName = firstRow.task_type === "1" ? (firstRow.sub_internal_name || firstRow.taskData?.find(t => String(t.id) === String(firstRow.task_id))?.name || "") : (firstRow.task_name || firstRow.taskData?.find(t => String(t.id) === String(firstRow.task_id))?.name || "");
+          
+          const jobTaskDetail = `${jName}${jName && tName ? " — " : ""}${tName}`;
+          mergedRecordsList.push(jobTaskDetail);
+          mergedKeys.add(key);
+        }
+      });
+
+      const recordsHtml = mergedRecordsList.map(rec => `
+        <div style="background: #fdf7f2; padding: 10px; border-radius: 8px; margin-top: 8px; border: 1px solid #f9ebdf;">
+          <small style="color: #999; text-transform: uppercase; font-size: 9px; font-weight: 700; display: block; margin-bottom: 2px;">Original Record</small>
+          <strong style="color: #333; font-size: 14px;">${rec}</strong>
+        </div>
+      `).join("");
+
       sweatalert
         .fire({
           icon: "warning",
-          title: "Entry already exists",
-          text: "Entry already exists. Redirecting to the original record.",
+          title: "Entries already exist",
+          html: `
+            <div style="text-align: center;">
+              <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Multiple timesheet entries for these customers and tasks have been recorded. To avoid duplicates, we've merged them into the original records.</p>
+              <div style="max-height: 200px; overflow-y: auto; padding-right: 5px;">
+                ${recordsHtml}
+              </div>
+            </div>
+          `,
+          confirmButtonText: "Go to original record",
         })
         .then(() => {
           if (focusDay !== "monday") {
