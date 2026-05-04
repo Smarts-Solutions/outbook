@@ -1080,6 +1080,13 @@ const EditJob = () => {
 
     if (name === "Service") {
       if (!["", undefined, null].includes(jobData?.timesheet_job_id)) {
+        sweatalert.fire({
+          icon: "warning",
+          title: `Service cannot be changed as a timesheet is already filled for this job.`,
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 2000,
+        });
         return;
       }
 
@@ -1133,11 +1140,24 @@ const EditJob = () => {
     }
 
     if (name === "JobType") {
+      if (!["", undefined, null].includes(jobData?.timesheet_job_id)) {
+        sweatalert.fire({
+          icon: "warning",
+          title: `Job type cannot be changed as a timesheet is already filled for this job.`,
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 2000,
+        });
+        return;
+      }
+
       if (
         !["", undefined, null].includes(value) &&
         Number(existJobTypeId) === Number(value)
       ) {
         setAddTaskArr(existAddTaskArr);
+      } else {
+        setAddTaskArr([]);
       }
     }
 
@@ -1603,6 +1623,10 @@ const EditJob = () => {
     : {};
 
   const openJobModal = (e) => {
+    if (!["", undefined, null].includes(jobData?.timesheet_job_id)) {
+      return;
+    }
+
     if (e.target.value != "") {
       jobModalSetStatus(true);
     }
@@ -1628,19 +1652,6 @@ const EditJob = () => {
   };
 
   const RemoveTask = (id) => {
-    if (!["", undefined, null].includes(jobData?.timesheet_job_id)) {
-      const isOriginalTask = existAddTaskArr.some((task) => task.task_id === id);
-      if (isOriginalTask) {
-        sweatalert.fire({
-          icon: "warning",
-          title: `This task cannot be deleted as a timesheet is already filled for this job.`,
-          timerProgressBar: true,
-          showConfirmButton: true,
-          timer: 2000,
-        });
-        return;
-      }
-    }
     setAddTaskArr((prevTasks) =>
       prevTasks.filter((task) => task.task_id !== id),
     );
@@ -2822,17 +2833,10 @@ const EditJob = () => {
   // Select options for Job Type
   const jobTypeOptions = [
     { value: "", label: "Select Job Type" },
-    ...(get_Job_Type?.data || [])
-      .filter((jobtype) => {
-        if (!["", undefined, null].includes(jobData?.timesheet_job_id)) {
-          return Number(jobtype.id) === Number(existJobTypeId);
-        }
-        return true;
-      })
-      .map((jobtype) => ({
-        value: jobtype.id,
-        label: jobtype.type,
-      })),
+    ...(get_Job_Type?.data || []).map((jobtype) => ({
+      value: jobtype.id,
+      label: jobtype.type,
+    })),
   ];
 
   // Select options for Reviewer
@@ -3207,11 +3211,6 @@ const EditJob = () => {
                                         };
                                         HandleChange(e);
                                       }}
-                                      isDisabled={
-                                        !["", undefined, null].includes(
-                                          jobData?.timesheet_job_id,
-                                        )
-                                      }
                                       className={
                                         errors["Service"]
                                           ? "error-field react-select basic-multi-select"
@@ -3276,15 +3275,6 @@ const EditJob = () => {
                                         };
                                         HandleChange(e);
                                         openJobModal(e);
-                                      }}
-                                      onMenuOpen={() => {
-                                        if (
-                                          !["", undefined, null].includes(
-                                            jobData?.timesheet_job_id,
-                                          )
-                                        ) {
-                                          jobModalSetStatus(true);
-                                        }
                                       }}
                                       isLoading={get_Job_Type.loading}
                                       className={
@@ -5176,32 +5166,16 @@ const EditJob = () => {
 
                                                                 <td>
                                                                   <div className="add">
-                                                                    {!["", undefined, null].includes(
-                                                                      jobData?.timesheet_job_id,
-                                                                    ) &&
-                                                                    existAddTaskArr.some(
-                                                                      (task) =>
-                                                                        task.task_id ===
-                                                                        checklist.task_id,
-                                                                    ) ? (
-                                                                      <span
-                                                                        className="text-muted"
-                                                                        title="Cannot delete original task with filled timesheet"
-                                                                      >
-                                                                        <i className="ti-lock"></i>
-                                                                      </span>
-                                                                    ) : (
-                                                                      <button className="delete-icon">
-                                                                        <i
-                                                                          className="ti-trash text-danger"
-                                                                          onClick={() =>
-                                                                            RemoveTask(
-                                                                              checklist.task_id,
-                                                                            )
-                                                                          }
-                                                                        ></i>
-                                                                      </button>
-                                                                    )}
+                                                                    <button className="delete-icon">
+                                                                      <i
+                                                                        className="ti-trash text-danger"
+                                                                        onClick={() =>
+                                                                          RemoveTask(
+                                                                            checklist.task_id,
+                                                                          )
+                                                                        }
+                                                                      ></i>
+                                                                    </button>
                                                                   </div>
                                                                 </td>
                                                               </tr>

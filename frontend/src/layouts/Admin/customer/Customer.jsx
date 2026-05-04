@@ -167,8 +167,8 @@ const Customer = () => {
     },
 {
   name:"Employee Id",
-  selector: (row) => row.account_manager_employee_number,
-  cell: (row) => <div title={row.account_manager_employee_number}>{row.account_manager_employee_number}</div>,
+  selector: (row) => row.employee_number,
+  cell: (row) => <div title={row.employee_number}>{row.employee_number}</div>,
   sortable: true,
 },
     {

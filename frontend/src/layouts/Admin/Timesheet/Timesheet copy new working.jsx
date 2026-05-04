@@ -34,7 +34,6 @@ import {
 import { SAVE_TIMESHEET } from "../../../Services/Timesheet/TimesheetService";
 import sweatalert from "sweetalert2";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
-import * as XLSX from "xlsx";
 
 const Timesheet = () => {
 
@@ -1484,15 +1483,9 @@ const Timesheet = () => {
     return `${day}/${month}/${year}`;
   };
 
-  const exportToExcel = (timeSheetRows) => {
+  const exportToCSV = (timeSheetRows) => {
     if (!timeSheetRows || timeSheetRows.length === 0) {
-      sweatalert.fire({
-        icon: "warning",
-        title: "No data to export!",
-        timerProgressBar: true,
-        showConfirmButton: true,
-        timer: 1500,
-      });
+      alert("No data to export!");
       return;
     }
 
@@ -1504,17 +1497,17 @@ const Timesheet = () => {
       "Job Name",
       "Job Type",
       "Task Name",
-      weekDays.monday ? dayMonthFormatDate(weekDays.monday) : "Monday",
+      weekDays.monday ? dayMonthFormatDate(weekDays.monday) : "",
       "Monday Note",
-      weekDays.tuesday ? dayMonthFormatDate(weekDays.tuesday) : "Tuesday",
+      weekDays.tuesday ? dayMonthFormatDate(weekDays.tuesday) : "",
       "Tuesday Note",
-      weekDays.wednesday ? dayMonthFormatDate(weekDays.wednesday) : "Wednesday",
+      weekDays.wednesday ? dayMonthFormatDate(weekDays.wednesday) : "",
       "Wednesday Note",
-      weekDays.thursday ? dayMonthFormatDate(weekDays.thursday) : "Thursday",
+      weekDays.thursday ? dayMonthFormatDate(weekDays.thursday) : "",
       "Thursday Note",
-      weekDays.friday ? dayMonthFormatDate(weekDays.friday) : "Friday",
+      weekDays.friday ? dayMonthFormatDate(weekDays.friday) : "",
       "Friday Note",
-      weekDays.saturday ? dayMonthFormatDate(weekDays.saturday) : "Saturday",
+      weekDays.saturday ? dayMonthFormatDate(weekDays.saturday) : "",
       "Saturday Note",
       "Remark",
     ];
@@ -1553,43 +1546,20 @@ const Timesheet = () => {
       });
 
     const finalRemarkRow = [
-      `Total Weekly Hours : ${total_hours.toFixed(2)}`,
-      `Final Remark: ${timeSheetRows[0]?.final_remark || ""}`,
-      ...new Array(headers.length - 2).fill(""),
+      `Total Weekly Hours : ${total_hours.toFixed(2) || ""}`,
+      `Final Remark: ${timeSheetRows[0].final_remark || ""}`,
+      ...new Array(headers.length - 1).fill(""),
     ];
 
-    const worksheetData = [headers, ...rows, finalRemarkRow];
-    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    const csvContent = [headers, ...rows, finalRemarkRow]
+      .map((row) => row.join(","))
+      .join("\n");
 
-    // Set column widths for better readability
-    const wscols = [
-      { wch: 8 },  // Index
-      { wch: 15 }, // Task Type
-      { wch: 25 }, // Customer Name
-      { wch: 25 }, // Client Name
-      { wch: 25 }, // Job Name
-      { wch: 15 }, // Job Type
-      { wch: 25 }, // Task Name
-      { wch: 15 }, // Monday Date
-      { wch: 40 }, // Monday Note
-      { wch: 15 }, // Tuesday Date
-      { wch: 40 }, // Tuesday Note
-      { wch: 15 }, // Wednesday Date
-      { wch: 40 }, // Wednesday Note
-      { wch: 15 }, // Thursday Date
-      { wch: 40 }, // Thursday Note
-      { wch: 15 }, // Friday Date
-      { wch: 40 }, // Friday Note
-      { wch: 15 }, // Saturday Date
-      { wch: 40 }, // Saturday Note
-      { wch: 40 }, // Remark
-    ];
-    worksheet["!cols"] = wscols;
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "TimeSheetData");
-
-    XLSX.writeFile(workbook, "TimeSheetData.xlsx");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "TimeSheetData.csv";
+    link.click();
   };
 
   const handleSingleRemark = (e, item, index) => {
@@ -2090,54 +2060,11 @@ const Timesheet = () => {
       setTimeSheetRows(filteredRows);
 
 
-      // Collect information about all merged records
-      const mergedRecordsList = [];
-      const mergedKeys = new Set();
-
-      timeSheetRows.forEach((row) => {
-        const key =
-          row.customer_id +
-          "_" +
-          row.client_id +
-          "_" +
-          row.job_id +
-          "_" +
-          row.task_id +
-          "_" +
-          row.task_type;
-
-        if (uniqueRowsMap.has(key) && !mergedKeys.has(key)) {
-          const firstRow = uniqueRowsMap.get(key);
-          const cName = firstRow.task_type === "1" ? "Internal" : (firstRow.client_name || firstRow.customer_name || firstRow.clientData?.find(c => String(c.id) === String(firstRow.client_id))?.trading_name || "");
-          const jName = firstRow.task_type === "1" ? (firstRow.internal_name || firstRow.jobData?.find(j => String(j.id) === String(firstRow.job_id))?.name || "") : (firstRow.job_name || firstRow.jobData?.find(j => String(j.id) === String(firstRow.job_id))?.name || "");
-          const tName = firstRow.task_type === "1" ? (firstRow.sub_internal_name || firstRow.taskData?.find(t => String(t.id) === String(firstRow.task_id))?.name || "") : (firstRow.task_name || firstRow.taskData?.find(t => String(t.id) === String(firstRow.task_id))?.name || "");
-          
-          const jobTaskDetail = `${jName}${jName && tName ? " — " : ""}${tName}`;
-          mergedRecordsList.push(jobTaskDetail);
-          mergedKeys.add(key);
-        }
-      });
-
-      const recordsHtml = mergedRecordsList.map(rec => `
-        <div style="background: #fdf7f2; padding: 10px; border-radius: 8px; margin-top: 8px; border: 1px solid #f9ebdf;">
-          <small style="color: #999; text-transform: uppercase; font-size: 9px; font-weight: 700; display: block; margin-bottom: 2px;">Original Record</small>
-          <strong style="color: #333; font-size: 14px;">${rec}</strong>
-        </div>
-      `).join("");
-
       sweatalert
         .fire({
           icon: "warning",
-          title: "Entries already exist",
-          html: `
-            <div style="text-align: center;">
-              <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Multiple timesheet entries for these customers and tasks have been recorded. To avoid duplicates, we've merged them into the original records.</p>
-              <div style="max-height: 200px; overflow-y: auto; padding-right: 5px;">
-                ${recordsHtml}
-              </div>
-            </div>
-          `,
-          confirmButtonText: "Go to original record",
+          title: "Entry already exists",
+          text: "Entry already exists. Redirecting to the original record.",
         })
         .then(() => {
           if (focusDay !== "monday") {
@@ -2217,7 +2144,7 @@ const Timesheet = () => {
               <div className="form-group float-md-end">
                 <button
                   className="btn btn-info "
-                  onClick={() => exportToExcel(timeSheetRows)}
+                  onClick={() => exportToCSV(timeSheetRows)}
                 >
                   <Download size={16} />
                   <span> Export Timesheet Data</span>
