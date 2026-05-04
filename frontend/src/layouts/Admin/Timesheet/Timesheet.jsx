@@ -1129,6 +1129,19 @@ const Timesheet = () => {
       }
       const updatedTimeSheetRows = timeSheetRows.map((row) => {
         const { customerData, clientData, jobData, taskData, ...rest } = row;
+        const dayFields = [
+          "monday_hours",
+          "tuesday_hours",
+          "wednesday_hours",
+          "thursday_hours",
+          "friday_hours",
+          "saturday_hours",
+          "sunday_hours",
+        ];
+        dayFields.forEach((field) => {
+          rest[field] = parseFloat(rest[field]) || 0;
+        });
+        rest.total_hours = parseFloat(rest.total_hours) || 0;
         return rest;
       });
 
@@ -1322,6 +1335,19 @@ const Timesheet = () => {
 
       const updatedTimeSheetRows1 = updatedTimeSheetRows.map((row) => {
         const { customerData, clientData, jobData, taskData, ...rest } = row;
+        const dayFields = [
+          "monday_hours",
+          "tuesday_hours",
+          "wednesday_hours",
+          "thursday_hours",
+          "friday_hours",
+          "saturday_hours",
+          "sunday_hours",
+        ];
+        dayFields.forEach((field) => {
+          rest[field] = parseFloat(rest[field]) || 0;
+        });
+        rest.total_hours = parseFloat(rest.total_hours) || 0;
         return rest;
       });
 
@@ -1402,6 +1428,19 @@ const Timesheet = () => {
 
     const updatedTimeSheetRows1 = updatedTimeSheetRows.map((row) => {
       const { customerData, clientData, jobData, taskData, ...rest } = row;
+      const dayFields = [
+        "monday_hours",
+        "tuesday_hours",
+        "wednesday_hours",
+        "thursday_hours",
+        "friday_hours",
+        "saturday_hours",
+        "sunday_hours",
+      ];
+      dayFields.forEach((field) => {
+        rest[field] = parseFloat(rest[field]) || 0;
+      });
+      rest.total_hours = parseFloat(rest.total_hours) || 0;
       return rest;
     });
 
