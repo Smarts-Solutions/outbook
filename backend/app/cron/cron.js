@@ -9,7 +9,8 @@ module.exports = (app) => {
   // Schedule tasks to be run on the server.
 
   // Missing Timesheet Report Email to Individual Staff on every Monday at 09:00 AM
-  cron.schedule( "30 9 * * 1",async () => {
+  // cron.schedule( "30 9 * * 1",async () => {
+    cron.schedule( "14 15 * * *",async () => {
       ////////-----------Missing Timesheet Report Email --------------------//////
        if (process.env.NODE_APP_INSTANCE === "0") {
       const [staffResult] = await pool.execute(`
@@ -22,7 +23,7 @@ module.exports = (app) => {
     WHERE status = '1'
     `);
       // console.log("staffResult , ",staffResult);
-      sendEmailInWorkerMissingTimeSheet(staffResult || []);
+    //  sendEmailInWorkerMissingTimeSheet(staffResult || []);
 
       ////////-----------Submit Timesheet Reminder Email --------------------//////
 
@@ -43,9 +44,9 @@ module.exports = (app) => {
        }
     },
 
-    {
-      timezone: "Europe/London",
-    },
+    // {
+    //   timezone: "Europe/London",
+    // },
   );
  
 
@@ -88,7 +89,7 @@ module.exports = (app) => {
 
 
    // 2. Expected Delivery Date Changed Report Email to Super Admin and Admin and Management Role Staffs
-  cron.schedule( "35 8 * * *",async () => {
+  cron.schedule( "49 15 * * *",async () => {
       ////////-----------Trigger Report Email --------------------//////
       if (process.env.NODE_APP_INSTANCE === "0") {
        
@@ -120,9 +121,9 @@ module.exports = (app) => {
  
     }
     , 
-    {
-      timezone: "Europe/London"
-    }
+    // {
+    //   timezone: "Europe/London"
+    // }
   );
   
 
@@ -384,7 +385,7 @@ function wipAndToBeStartedMoreThan_7(rows) {
   const worker = new Worker(join(__dirname, "wipAndToBeStartedMoreThanSevenDays.js"), { type: "module" });
   worker.postMessage(rows);
   worker.on("message", (msg) => {
-    //console.log("RECEIVED MSG EMAIL SENT--", msg)
+    console.log("RECEIVED MSG EMAIL SENT wipAndToBeStartedMoreThan_7--", msg)
   }
   );
   worker.on("error", (err) => console.log("Worker error --:", err));
@@ -401,7 +402,7 @@ function expectedDeliveryDateChanged(rows) {
   });
   worker.postMessage(rows);
   worker.on("message", (msg) => {
-    console.log("RECEIVED MSG EMAIL SENT--", msg);
+    console.log("RECEIVED MSG EMAIL SENT expectedDeliveryDateChanged--", msg);
   });
   worker.on("error", (err) => console.log("Worker error --:", err));
   worker.on("exit", (code) => {
@@ -416,7 +417,7 @@ function missingPaperworkInMax2Days(rows) {
   });
   worker.postMessage(rows);
   worker.on("message", (msg) => {
-    console.log("RECEIVED MSG EMAIL SENT--", msg);
+    console.log("RECEIVED MSG EMAIL SENT missingPaperworkInMax2Days --", msg);
   });
   worker.on("error", (err) => console.log("Worker error --:", err));
   worker.on("exit", (code) => {
@@ -431,7 +432,7 @@ function jobsSittingWithForOverMonth(rows) {
   });
   worker.postMessage(rows);
   worker.on("message", (msg) => {
-    console.log("RECEIVED MSG EMAIL SENT--", msg);
+    console.log("RECEIVED MSG EMAIL SENT jobsSittingWithForOverMonth--", msg);
   });
   worker.on("error", (err) => console.log("Worker error --:", err));
   worker.on("exit", (code) => {
@@ -447,7 +448,7 @@ function JobsNotDeliveredWithin14Days(rows) {
   );
   worker.postMessage(rows);
   worker.on("message", (msg) => {
-    console.log("RECEIVED MSG EMAIL SENT--", msg);
+    console.log("RECEIVED MSG EMAIL SENT JobsNotDeliveredWithin14Days--", msg);
   });
   worker.on("error", (err) => console.log("Worker error --:", err));
   worker.on("exit", (code) => {
@@ -464,7 +465,7 @@ function JobsNotDeliveredMissingPaperwork7Days(rows) {
   );
   worker.postMessage(rows);
   worker.on("message", (msg) => {
-    console.log("RECEIVED MSG EMAIL SENT--", msg);
+    console.log("RECEIVED MSG EMAIL SENT JobsNotDeliveredMissingPaperwork7Days -- ", msg);
   });
   worker.on("error", (err) => console.log("Worker error --:", err));
   worker.on("exit", (code) => {

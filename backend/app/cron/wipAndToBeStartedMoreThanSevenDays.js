@@ -1,6 +1,7 @@
 const pool = require("../config/database");
 const { parentPort } = require("worker_threads");
 const { commonEmail } = require("../utils/commonEmail");
+const { logEmail } = require("../utils/emailLogger");
 
 /* ---------------- HELPERS ---------------- */
 
@@ -184,6 +185,34 @@ parentPort.on("message", async (rows) => {
         const filename = `Jobs (with status WIP and To Be Started) that haven’t been modified for more than 7 days consecutively -${new Date().toISOString().slice(0, 10)}.csv`;
 
         const sent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+
+         const csvToJson = (csv) => {
+          const lines = csv.trim().split("\n");
+
+          // headers
+          const headers = lines[0].split(",");
+
+          // data rows
+          const result = lines.slice(1).map((line) => {
+            const values = line.split(",");
+
+            let obj = {};
+            headers.forEach((header, index) => {
+              obj[header.trim()] = values[index]?.trim() || "";
+            });
+
+            return obj;
+          });
+
+          return result;
+        };
+        const attachmentJson = csvToJson(dynamic_attachment);
+          logEmail({
+            toEmail: toEmail,
+            filename: filename,
+            attachment: attachmentJson,
+            logFileName: "wipAndToBeStartedMoreThanSevenDays.json",
+          });
 
         parentPort.postMessage(
           sent ? `✅ ${user.staff_email}` : `❌ ${user.staff_email}`

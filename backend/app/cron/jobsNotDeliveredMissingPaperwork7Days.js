@@ -2,6 +2,7 @@
 const pool = require('../config/database');
 const { parentPort } = require("worker_threads");
 const { commonEmail } = require("../utils/commonEmail");
+const { logEmail } = require("../utils/emailLogger");
 const convertDate = (date) => {
   if ([null, undefined, ''].includes(date)) {
     return "-";
@@ -195,6 +196,35 @@ parentPort.on("message", async (rows) => {
           const dynamic_attachment = finalCSV;
 
         const sent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+
+           const csvToJson = (csv) => {
+          const lines = csv.trim().split("\n");
+
+          // headers
+          const headers = lines[0].split(",");
+
+          // data rows
+          const result = lines.slice(1).map((line) => {
+            const values = line.split(",");
+
+            let obj = {};
+            headers.forEach((header, index) => {
+              obj[header.trim()] = values[index]?.trim() || "";
+            });
+
+            return obj;
+          });
+
+          return result;
+        };
+        const attachmentJson = csvToJson(dynamic_attachment);
+          logEmail({
+            toEmail: toEmail,
+            filename: filename,
+            attachment: attachmentJson,
+            logFileName: "jobsNotDeliveredMissingPaperwork7Days.json",
+          });
+
 
         parentPort.postMessage(
           sent ? `✅ ${user.staff_email}` : `❌ ${user.staff_email}`
