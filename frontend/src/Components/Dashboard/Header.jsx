@@ -242,20 +242,54 @@ const Header = () => {
                       className="basic-single"
                       classNamePrefix="select"
                       styles={{
-                        control: (base) => ({
+                        control: (base, state) => ({
                           ...base,
-                          borderRadius: "20px",
-                          height: "38px",
-                          minHeight: "38px",
-                          border: "1px solid #e0e0e0",
-                          boxShadow: "none",
+                          borderRadius: "30px",
+                          height: "42px",
+                          minHeight: "42px",
+                          border: state.isFocused ? "1.5px solid #007bff" : "1px solid #e0e6ed",
+                          boxShadow: state.isFocused ? "0 0 0 4px rgba(0, 123, 255, 0.1)" : "none",
+                          backgroundColor: "#fff",
+                          paddingLeft: "8px",
+                          fontSize: "14px",
+                          fontWeight: "500",
+                          transition: "all 0.2s ease",
                           "&:hover": {
-                            border: "1px solid #007bff",
+                            border: "1.5px solid #007bff",
                           },
                         }),
                         valueContainer: (base) => ({
                           ...base,
                           padding: "0 12px",
+                        }),
+                        menu: (base) => ({
+                          ...base,
+                          borderRadius: "12px",
+                          marginTop: "8px",
+                          boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+                          border: "1px solid #f1f4f8",
+                          overflow: "hidden",
+                          zIndex: 9999,
+                        }),
+                        option: (base, { isFocused, isSelected }) => ({
+                          ...base,
+                          backgroundColor: isSelected ? "#007bff" : isFocused ? "#f8faff" : "#fff",
+                          color: isSelected ? "#fff" : "#495057",
+                          padding: "10px 15px",
+                          fontSize: "14px",
+                          cursor: "pointer",
+                          "&:active": {
+                            backgroundColor: "#007bff",
+                            color: "#fff",
+                          },
+                        }),
+                        placeholder: (base) => ({
+                          ...base,
+                          color: "#adb5bd",
+                        }),
+                        singleValue: (base) => ({
+                          ...base,
+                          color: "#2c3e50",
                         }),
                       }}
                     />
