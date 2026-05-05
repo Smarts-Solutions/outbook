@@ -970,89 +970,143 @@ const CreateJob = () => {
     }
 
 
+    const clientInfo = allClientDetails?.find((client) => Number(client?.client_id) == Number(jobData.client_id || jobData.Client)) || "";
+    const clientTradingName = clientInfo?.client_trading_name || "";
+
+    const managerInfo = AllJobData?.data?.Manager?.[0] || {};
+    const managerName = managerInfo?.manager_name || "";
+    const managerId = managerInfo?.manager_id || "";
+
     const req = {
       ...jobData,
+      // 1. Client & ID (Superadmin uses trading name in 'Client')
+      Client: clientTradingName,
+      Client_id: Number(jobData.client_id || jobData.Client),
+      client_id: Number(jobData.client_id || jobData.Client),
+
+      // 2. Staff / Manager
+      AccountManager: managerName,
+      account_manager_id: Number(managerId),
+      StaffUserId: Number(staffCreatedId),
+      staffCreatedId: Number(staffCreatedId),
       selectedStaffData: selectedStaffData,
-      staffCreatedId: staffCreatedId,
-      StaffUserId: staffCreatedId,
-      ip: ip,
-      account_manager_id: AllJobData?.data?.Manager?.[0]?.manager_id,
-      customer_id: AllJobData?.data?.customer?.customer_id,
-      Client_id: jobData.client_id,
-      client_id:
-        location?.state?.goto == "Customer"
-          ? Number(jobData.Client)
-          : location?.state?.clientName?.id,
-      client_job_code: jobData.ClientJobCode,
-      customer_contact_details_id: Number(jobData.CustomerAccountManager),
-      service_id: Number(jobData.Service),
-      job_type_id: Number(jobData.JobType),
-      budgeted_hours: formatTime(budgetedHours.hours, budgetedHours.minutes),
-      reviewer: Number(jobData.Reviewer),
       allocated_to: Number(jobData.AllocatedTo),
-      allocated_on: jobData.AllocatedOn
-        ? jobData.AllocatedOn
-        : new Date().toISOString().split("T")[0],
-      date_received_on: jobData.DateReceivedOn
-        ? jobData.DateReceivedOn
-        : new Date().toISOString().split("T")[0],
-      year_end: jobData.YearEnd,
-      total_preparation_time: formatTime(
-        PreparationTimne.hours,
-        PreparationTimne.minutes
-      ),
-      review_time: formatTime(reviewTime.hours, reviewTime.minutes),
-      feedback_incorporation_time: formatTime(
-        FeedbackIncorporationTime.hours,
-        FeedbackIncorporationTime.minutes
-      ),
-      total_time: formatTime(Math.floor(totalHours / 60), totalHours % 60),
-      engagement_model: jobData.EngagementModel,
-      expected_delivery_date: jobData.ExpectedDeliveryDate,
-      due_on: jobData.DueOn,
+      AllocatedTo: Number(jobData.AllocatedTo),
+
+      // 3. Service / JobType
+      Service: Number(jobData.Service),
+      service_id: Number(jobData.Service),
+      JobType: Number(jobData.JobType),
+      job_type_id: Number(jobData.JobType),
+
+      // 4. Deadlines & Dates
+      AllocatedOn: jobData.AllocatedOn || new Date().toISOString().split("T")[0],
+      allocated_on: jobData.AllocatedOn || new Date().toISOString().split("T")[0],
+      SubmissionDeadline: jobData.SubmissionDeadline,
       submission_deadline: jobData.SubmissionDeadline,
+      DueOn: jobData.DueOn,
+      due_on: jobData.DueOn,
+      CustomerDeadlineDate: jobData.CustomerDeadlineDate,
       customer_deadline_date: jobData.CustomerDeadlineDate,
-
-
-      // sla_deadline_date: jobData?.SLADeadlineDate
-      //   ? jobData?.SLADeadlineDate
-      //   : new Date().toISOString().split("T")[0],
+      expected_delivery_date: jobData.ExpectedDeliveryDate,
+      ExpectedDeliveryDate: jobData.ExpectedDeliveryDate,
       sla_deadline_date: jobData?.SLADeadlineDate,
+      SLADeadlineDate: jobData?.SLADeadlineDate,
       internal_deadline_date: jobData.InternalDeadlineDate,
+      InternalDeadlineDate: jobData.InternalDeadlineDate,
+      date_received_on: jobData.DateReceivedOn || new Date().toISOString().split("T")[0],
+      DateReceivedOn: jobData.DateReceivedOn || new Date().toISOString().split("T")[0],
 
+      // 5. Types (Superadmin uses strings for these specifically, but number for Turnover_id_0)
+      InvoiceValue: String(jobData.InvoiceValue || "0"),
+      invoice_value: String(jobData.InvoiceValue || "0"),
+      bookkeeping: String(jobData.Bookkeeping || "0"),
+      Bookkeeping: String(jobData.Bookkeeping || "0"),
+      currency: String(jobData.Currency || "0"),
+      Currency: String(jobData.Currency || "0"),
+      invoiced: String(jobData.Invoiced || "0"),
+      Invoiced: String(jobData.Invoiced || "0"),
+      Turnover: jobData.Turnover || "",
+      turnover: Number(jobData.Turnover || 0),
+      Turnover_id_0: Number(jobData.Turnover_id_0 || 0),
+      NoOfEmployees: jobData.NoOfEmployees || "",
+      number_of_employees: Number(jobData.NoOfEmployees || 0),
+      VATReconciliation: jobData.VATReconciliation || "0",
+      vat_reconciliation: jobData.VATReconciliation || "0",
+      ProcessingType: jobData.ProcessingType || "0",
+      processing_type: jobData.ProcessingType || "0",
+      NumberOfTransactions: jobData.NumberOfTransactions || "",
+      number_of_transaction: Number(jobData.NumberOfTransactions || 0),
+      NumberOfTrialBalanceItems: jobData.NumberOfTrialBalanceItems || "",
+      number_of_balance_items: Number(jobData.NumberOfTrialBalanceItems || 0),
+
+      // 6. Null vs Empty String (Aligning with Superadmin)
+      InvoiceDate: jobData.InvoiceDate || null,
+      invoice_date: jobData.InvoiceDate || null,
+      YearEnd: jobData.YearEnd || "",
+      year_end: jobData.YearEnd || "",
+
+      // 7. Dynamic Fields (Ensuring they match jobData values)
+      ClientJobCode: jobData.ClientJobCode,
+      client_job_code: jobData.ClientJobCode,
+      CustomerAccountManager: jobData.CustomerAccountManager,
+      customer_contact_details_id: Number(jobData.CustomerAccountManager),
+      EngagementModel: jobData.EngagementModel,
+      engagement_model: jobData.EngagementModel,
+      Reviewer: Number(jobData.Reviewer),
+      reviewer: Number(jobData.Reviewer),
+
+      // 8. Filing fields
+      FilingWithCompaniesHouseRequired: jobData.FilingWithCompaniesHouseRequired,
       filing_Companies_required: jobData.FilingWithCompaniesHouseRequired,
+      CompaniesHouseFilingDate: jobData.CompaniesHouseFilingDate,
       filing_Companies_date: jobData.CompaniesHouseFilingDate,
+      FilingWithHMRCRequired: jobData.FilingWithHMRCRequired,
       filing_hmrc_required: jobData.FilingWithHMRCRequired,
+      HMRCFilingDate: jobData.HMRCFilingDate,
       filing_hmrc_date: jobData.HMRCFilingDate,
+      OpeningBalanceAdjustmentRequired: jobData.OpeningBalanceAdjustmentRequired,
       opening_balance_required: jobData.OpeningBalanceAdjustmentRequired,
+      OpeningBalanceAdjustmentDate: jobData.OpeningBalanceAdjustmentDate,
       opening_balance_date: jobData.OpeningBalanceAdjustmentDate,
 
-      number_of_transaction: Number(jobData.NumberOfTransactions),
-      number_of_balance_items: Number(jobData.NumberOfTrialBalanceItems),
-      turnover: Number(jobData.Turnover),
-      number_of_employees: Number(jobData.NoOfEmployees),
-      vat_reconciliation: jobData.VATReconciliation,
-      bookkeeping: jobData.Bookkeeping,
-      processing_type: jobData.ProcessingType,
-      invoiced: jobData.Invoiced,
-      currency: jobData.Currency,
-      invoice_value: jobData.InvoiceValue,
-      invoice_date: jobData.InvoiceDate,
+      // 9. Time fields (Superadmin sends empty string for PascalCase fields)
+      budgeted_hours: formatTime(budgetedHours.hours, budgetedHours.minutes),
+      BudgetedHours: "",
       invoice_hours: formatTime(invoiceTime.hours, invoiceTime.minutes),
-      invoice_remark: jobData.InvoiceRemark,
+      InvoiceHours: "",
+      invoice_remark: jobData.InvoiceRemark || "",
+      InvoiceRemark: jobData.InvoiceRemark || "",
       notes: jobData.notes,
+      total_preparation_time: formatTime(PreparationTimne.hours, PreparationTimne.minutes),
+      TotalPreparationTime: "",
+      review_time: formatTime(reviewTime.hours, reviewTime.minutes),
+      ReviewTime: "",
+      feedback_incorporation_time: formatTime(FeedbackIncorporationTime.hours, FeedbackIncorporationTime.minutes),
+      FeedbackIncorporationTime: "",
+      total_time: formatTime(Math.floor(totalHours / 60), totalHours % 60),
+      TotalTime: "",
+
+      // 10. Tasks (Strict key order: task_id, budgeted_hour, task_name)
       tasks: {
-        checklist_id: getChecklistId,
-        task: AddTaskArr,
+        checklist_id: getChecklistId || "",
+        task: AddTaskArr.map(t => ({
+          task_id: t.task_id,
+          budgeted_hour: t.budgeted_hour,
+          task_name: t.task_name
+        })),
       },
 
+      // 11. Checklist status & metadata
       processing_checklist: jobData?.processing_checklist == null ? 0 : jobData?.processing_checklist,
       reviewing_checklist: jobData?.reviewing_checklist == null ? 0 : jobData?.reviewing_checklist,
       processing_checklist_status: processing_checklist_status,
       reviewing_checklist_status: reviewing_checklist_status,
       checklist_modal_data: checklist_modal_data,
-
-
+      CustomerDetails: [],
+      ip: ip,
+      customer_id: AllJobData?.data?.customer?.customer_id,
+      job_priority: jobData.job_priority || "normal",
     };
 
 
