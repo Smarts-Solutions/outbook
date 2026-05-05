@@ -502,7 +502,7 @@ const CustomerDocuments = ({ job_id, getAccessDataJob }) => {
               (getAccessDataJob.delete === 1 ||  role === "SUPERADMIN") && (
                 <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" className="btn btn-secondary  float-sm-end ms-sm-2"> <i className="ti-trash pe-1"></i>  Delete Selected</button>
               )} */}
-              {(hasAccess("job_document", "add") || hasAccess("job_document", "insert") || role === "SUPERADMIN") && (
+              {(hasAccess("job_document", "add") || role === "SUPERADMIN") && (
                 <button
                   type="button"
                   className="btn btn-info text-white float-sm-end ms-2"

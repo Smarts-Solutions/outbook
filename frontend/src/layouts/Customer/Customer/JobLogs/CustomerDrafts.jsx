@@ -449,7 +449,7 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
           )}
 
           {goto !== "report" &&
-            (hasAccess("draft", "insert") || role === "SUPERADMIN") && (
+            (hasAccess("draft", "add") || role === "SUPERADMIN") && (
               <button
                 type="button"
                 className="btn btn-info text-white"

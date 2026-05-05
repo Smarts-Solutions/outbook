@@ -763,7 +763,7 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
 
             {draftStatus == 0 &&
               goto !== "report" &&
-              (hasAccess("missing_logs", "insert") || role === "SUPERADMIN") && (
+              (hasAccess("missing_logs", "add") || role === "SUPERADMIN") && (
                 <button
                   type="button"
                   className="btn btn-info text-white"

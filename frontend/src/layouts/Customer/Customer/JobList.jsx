@@ -171,7 +171,7 @@ const ClientList = () => {
   const [statusDataAll, setStatusDataAll] = useState([]);
   const [selectStatusIs, setStatusId] = useState("");
   const getAccessDataJob = {
-    insert: hasAccess("job", "insert") || role === "SUPERADMIN" ? 1 : 0,
+    add: hasAccess("job", "add") || role === "SUPERADMIN" ? 1 : 0,
     update: hasAccess("job", "update") || role === "SUPERADMIN" ? 1 : 0,
     delete: hasAccess("job", "delete") || role === "SUPERADMIN" ? 1 : 0,
     view: hasAccess("job", "view") || role === "SUPERADMIN" ? 1 : 0,
@@ -179,7 +179,7 @@ const ClientList = () => {
   };
 
   const getAccessDataClient = {
-    insert: hasAccess("client", "insert") || role === "SUPERADMIN" ? 1 : 0,
+    add: hasAccess("client", "add") || role === "SUPERADMIN" ? 1 : 0,
     update: hasAccess("client", "update") || role === "SUPERADMIN" ? 1 : 0,
     delete: hasAccess("client", "delete") || role === "SUPERADMIN" ? 1 : 0,
     view: hasAccess("client", "view") || role === "SUPERADMIN" ? 1 : 0,
@@ -1131,13 +1131,9 @@ const ClientList = () => {
                   {activeTab == "NoOfJobs" && (
                     <>
                       <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
-                        {/* CHANGED: Create Job button sirf tab dikhega jab specific client select ho */}
-                        {(getAccessDataJob.insert == 1 ||
-                          role === "SUPERADMIN") &&
-                          clientDetailSingle.id !== "" &&
-                          clientData.length > 0 && (
+                        {(getAccessDataJob.add == 1 || role === "SUPERADMIN") && (
                             <div
-                              className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
+                              className="btn btn-info text-white blue-btn mt-2 mt-sm-0"
                               onClick={handleCreateJob}
                             >
                               <Plus size={16} /> Create Job

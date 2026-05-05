@@ -233,7 +233,7 @@ const CustomerClientProfile = () => {
   const [selectStatusIs, setStatusId] = useState("");
   const { hasAccess } = useCustomerAccess();
   const [getAccessDataJob, setAccessDataJob] = useState({
-    insert: hasAccess("job", "insert") || role === "SUPERADMIN" ? 1 : 0,
+    add: hasAccess("job", "add") || role === "SUPERADMIN" ? 1 : 0,
     update: hasAccess("job", "update") || role === "SUPERADMIN" ? 1 : 0,
     delete: hasAccess("job", "delete") || role === "SUPERADMIN" ? 1 : 0,
     view: hasAccess("job", "view") || role === "SUPERADMIN" ? 1 : 0,
@@ -241,7 +241,7 @@ const CustomerClientProfile = () => {
   });
 
   const [getAccessDataClient, setAccessDataClient] = useState({
-    insert: hasAccess("client", "insert") || role === "SUPERADMIN" ? 1 : 0,
+    add: hasAccess("client", "add") || role === "SUPERADMIN" ? 1 : 0,
     update: hasAccess("client", "update") || role === "SUPERADMIN" ? 1 : 0,
     delete: hasAccess("client", "delete") || role === "SUPERADMIN" ? 1 : 0,
     view: hasAccess("client", "view") || role === "SUPERADMIN" ? 1 : 0,
@@ -249,7 +249,7 @@ const CustomerClientProfile = () => {
 
   useEffect(() => {
     const updatedAccessJob = {
-      insert: hasAccess("job", "insert") || role === "SUPERADMIN" ? 1 : 0,
+      add: hasAccess("job", "add") || role === "SUPERADMIN" ? 1 : 0,
       update: hasAccess("job", "update") || role === "SUPERADMIN" ? 1 : 0,
       delete: hasAccess("job", "delete") || role === "SUPERADMIN" ? 1 : 0,
       view: hasAccess("job", "view") || role === "SUPERADMIN" ? 1 : 0,
@@ -258,7 +258,7 @@ const CustomerClientProfile = () => {
     setAccessDataJob(updatedAccessJob);
 
     const updatedAccessClient = {
-      insert: hasAccess("client", "insert") || role === "SUPERADMIN" ? 1 : 0,
+      add: hasAccess("client", "add") || role === "SUPERADMIN" ? 1 : 0,
       update: hasAccess("client", "update") || role === "SUPERADMIN" ? 1 : 0,
       delete: hasAccess("client", "delete") || role === "SUPERADMIN" ? 1 : 0,
       view: hasAccess("client", "view") || role === "SUPERADMIN" ? 1 : 0,
@@ -374,7 +374,7 @@ const CustomerClientProfile = () => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
-          {(hasAccess("client_document", "delete") || role === "SUPERADMIN") && (
+          {(hasAccess("client_tab", "delete") || role === "SUPERADMIN") && (
             <button className="delete-icon me-2" onClick={() => removeItem(row, 2)}>
               <i className="ti-trash text-danger" />
             </button>
@@ -537,20 +537,25 @@ const CustomerClientProfile = () => {
   };
 
   const tabs = [
-    { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16} /> },
-    ...((clientDetailSingle.id !== "" || cli_id_sidebar !== "") && getAccessDataClient.view == 1
+    {
+      id: "NoOfJobs",
+      label: "No. Of Jobs",
+      icon: <Briefcase size={16} />,
+      access: hasAccess("no_of_jobs", "view") || role === "SUPERADMIN",
+    },
+    ...((clientDetailSingle.id !== "" || cli_id_sidebar !== "") && (getAccessDataClient.view == 1 || role === "SUPERADMIN")
       ? [
         {
           id: "view client",
           label: "View Client",
           icon: <User size={16} />,
-          access: hasAccess("client", "view") || role === "SUPERADMIN",
+          access: hasAccess("client_overview", "view") || role === "SUPERADMIN",
         },
         {
           id: "documents",
           label: "Documents",
           icon: <FileText size={16} />,
-          access: hasAccess("client_document", "view") || role === "SUPERADMIN",
+          access: hasAccess("client_tab", "view") || role === "SUPERADMIN",
         },
       ]
       : []),

@@ -748,7 +748,7 @@ const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
 
             {draftStatus == 0 &&
               goto !== "report" &&
-              (hasAccess("queries", "insert") || role === "SUPERADMIN") && (
+              (hasAccess("queries", "add") || role === "SUPERADMIN") && (
                 <button
                   type="button"
                   className="btn btn-info text-white"

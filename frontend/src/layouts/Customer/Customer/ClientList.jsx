@@ -544,12 +544,12 @@ const ClientLists = () => {
                   </ul>
                 </div>
                 <div className="col-md-4 d-flex justify-content-end align-items-center">
-                    {activeTab === "client" && customerId && hasAccess("client", "insert") && (
+                    {activeTab === "client" && customerId && hasAccess("client", "add") && (
                         <div className="btn btn-info text-white blue-btn mt-2 mt-sm-0" onClick={() => navigate("/customer/addclient", { state: { id: customerId, activeTab: activeTab } })}>
                              <Plus size={16} /> Add Client
                         </div>
                     )}
-                    {activeTab === "job" && customerId && hasAccess("job", "insert") && (
+                    {activeTab === "job" && customerId && hasAccess("job", "add") && (
                          <div className="btn btn-info text-white blue-btn mt-2 mt-sm-0" onClick={() => navigate("/customer/createjob", { state: { customer_id: customerId, goto: "Customer", activeTab: activeTab } })}>
                              <Plus size={16} /> Create Job
                          </div>

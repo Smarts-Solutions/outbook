@@ -33,7 +33,7 @@ const CustomerJobLogs = () => {
   const [activeSubTab, setActiveSubTab] = useState(initialTab);
 
   const getAccessDataJob = {
-    insert: hasAccess("job", "insert") || role === "SUPERADMIN" ? 1 : 0,
+    add: hasAccess("job", "add") || role === "SUPERADMIN" ? 1 : 0,
     update: hasAccess("job", "update") || role === "SUPERADMIN" ? 1 : 0,
     delete: hasAccess("job", "delete") || role === "SUPERADMIN" ? 1 : 0,
     view: hasAccess("job", "view") || role === "SUPERADMIN" ? 1 : 0,
