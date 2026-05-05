@@ -59,6 +59,30 @@ const CustomerJobLogs = () => {
     sessionStorage.setItem("activeTab2", tabName);
   };
 
+  useEffect(() => {
+    const tabs = [
+      { id: "JobInformation", key: "job_information" },
+      { id: "TaskTimesheet", key: "task_timesheet" },
+      { id: "Timeline", key: "job_timeline" },
+      { id: "MissingLogs", key: "missing_logs" },
+      { id: "Queries", key: "queries" },
+      { id: "Drafts", key: "draft" },
+      { id: "Documents", key: "job_document" },
+    ];
+
+    const isAccessible = (tabId) => {
+      const tab = tabs.find(t => t.id === tabId);
+      return tab ? (hasAccess(tab.key, "view") || role === "SUPERADMIN") : false;
+    };
+
+    if (!isAccessible(activeSubTab)) {
+      const firstAccessibleTab = tabs.find(t => isAccessible(t.id));
+      if (firstAccessibleTab) {
+        setActiveSubTab(firstAccessibleTab.id);
+      }
+    }
+  }, [hasAccess, role, activeSubTab]);
+
   return (
     <div className="container-fluid">
       <div className="row ">
