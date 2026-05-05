@@ -156,7 +156,10 @@ const Header = () => {
                 />
               </a>
               <div className="dropdown-menu dropdown-menu-right">
-                <Link className="dropdown-item" to={"/admin/profile"}>
+                <Link
+                  className="dropdown-item"
+                  to={role?.toString().toUpperCase() === "CUSTOMER" ? "/customer/profile" : "/admin/profile"}
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width={24}
