@@ -229,73 +229,178 @@ const Header = () => {
               </button>
             </li>
             {role?.toString().toUpperCase() === "CUSTOMER" && (
+              // <li className="hide-phone app-search">
+              //   <div className="d-flex align-items-center">
+              //     {/* <label className="mb-0 mr-2 text-dark font-weight-semibold">Customer</label> */}
+              //     <div style={{ width: "250px" }}>
+              //       <Select
+              //         options={assignedCustomers}
+              //         value={selectedCustomer}
+              //         onChange={(selectedOption) => setSelectedCustomer(selectedOption)}
+              //         placeholder="Select Customer"
+              //         isSearchable={true}
+              //         className="basic-single"
+              //         classNamePrefix="select"
+              //         styles={{
+              //           control: (base, state) => ({
+              //             ...base,
+              //             borderRadius: "30px",
+              //             height: "42px",
+              //             minHeight: "42px",
+              //             border: state.isFocused ? "1.5px solid #007bff" : "1px solid #e0e6ed",
+              //             boxShadow: state.isFocused ? "0 0 0 4px rgba(0, 123, 255, 0.1)" : "none",
+              //             backgroundColor: "#fff",
+              //             paddingLeft: "8px",
+              //             fontSize: "14px",
+              //             fontWeight: "500",
+              //             transition: "all 0.2s ease",
+              //             "&:hover": {
+              //               border: "1.5px solid #007bff",
+              //             },
+              //           }),
+              //           valueContainer: (base) => ({
+              //             ...base,
+              //             padding: "0 12px",
+              //           }),
+              //           menu: (base) => ({
+              //             ...base,
+              //             borderRadius: "12px",
+              //             marginTop: "8px",
+              //             boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+              //             border: "1px solid #f1f4f8",
+              //             overflow: "hidden",
+              //             zIndex: 9999,
+              //           }),
+              //           option: (base, { isFocused, isSelected }) => ({
+              //             ...base,
+              //             backgroundColor: isSelected ? "#007bff" : isFocused ? "#f8faff" : "#fff",
+              //             color: isSelected ? "#fff" : "#495057",
+              //             padding: "10px 15px",
+              //             fontSize: "14px",
+              //             cursor: "pointer",
+              //             "&:active": {
+              //               backgroundColor: "#007bff",
+              //               color: "#fff",
+              //             },
+              //           }),
+              //           placeholder: (base) => ({
+              //             ...base,
+              //             color: "#adb5bd",
+              //           }),
+              //           singleValue: (base) => ({
+              //             ...base,
+              //             color: "#2c3e50",
+              //           }),
+              //         }}
+              //       />
+              //     </div>
+              //   </div>
+              // </li>
+              // @dropdown
               <li className="hide-phone app-search">
-                <div className="d-flex align-items-center mt-2">
-                  {/* <label className="mb-0 mr-2 text-dark font-weight-semibold">Customer</label> */}
-                  <div style={{ width: "250px" }}>
+                <div className="d-flex align-items-center">
+                  <div style={{ width: "260px" }}>
                     <Select
                       options={assignedCustomers}
                       value={selectedCustomer}
                       onChange={(selectedOption) => setSelectedCustomer(selectedOption)}
-                      placeholder="Select Customer"
+                      placeholder="🔍 Search Customer..."
                       isSearchable={true}
                       className="basic-single"
                       classNamePrefix="select"
                       styles={{
                         control: (base, state) => ({
                           ...base,
-                          borderRadius: "30px",
-                          height: "42px",
-                          minHeight: "42px",
-                          border: state.isFocused ? "1.5px solid #007bff" : "1px solid #e0e6ed",
-                          boxShadow: state.isFocused ? "0 0 0 4px rgba(0, 123, 255, 0.1)" : "none",
-                          backgroundColor: "#fff",
-                          paddingLeft: "8px",
+                          borderRadius: "12px",
+                          height: "45px",
+                          minHeight: "45px",
+                          border: state.isFocused
+                            ? "1.5px solid #4f46e5"
+                            : "1px solid #4f46e5",
+                          boxShadow: state.isFocused
+                            ? "0 0 0 3px rgba(79, 70, 229, 0.15)"
+                            : "0 4px 12px rgba(0,0,0,0.05)",
+                          background: "linear-gradient(135deg, #ffffff, #f9fafb)",
+                          paddingLeft: "6px",
                           fontSize: "14px",
                           fontWeight: "500",
-                          transition: "all 0.2s ease",
+                          transition: "all 0.25s ease",
+                          cursor: "pointer",
                           "&:hover": {
-                            border: "1.5px solid #007bff",
+                            border: "1.5px solid #6366f1",
                           },
                         }),
+
                         valueContainer: (base) => ({
                           ...base,
-                          padding: "0 12px",
+                          padding: "0 14px",
                         }),
+
                         menu: (base) => ({
                           ...base,
-                          borderRadius: "12px",
-                          marginTop: "8px",
-                          boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-                          border: "1px solid #f1f4f8",
+                          borderRadius: "14px",
+                          marginTop: "10px",
+                          boxShadow: "0 15px 35px rgba(0,0,0,0.12)",
+                          border: "1px solid #eef2f7",
                           overflow: "hidden",
                           zIndex: 9999,
+                          backdropFilter: "blur(10px)",
                         }),
+
+                        // 🔥 THIS PART ADDED
+                        menuList: (base) => ({
+                          ...base,
+                          maxHeight: "220px",
+                          overflowY: "auto",
+                          overflowX: "hidden",
+                        }),
+
                         option: (base, { isFocused, isSelected }) => ({
                           ...base,
-                          backgroundColor: isSelected ? "#007bff" : isFocused ? "#f8faff" : "#fff",
-                          color: isSelected ? "#fff" : "#495057",
-                          padding: "10px 15px",
+                          background: isSelected
+                            ? "linear-gradient(135deg, #4f46e5, #6366f1)"
+                            : isFocused
+                              ? "#eef2ff"
+                              : "#fff",
+                          color: isSelected ? "#fff" : "#374151",
+                          padding: "12px 16px",
                           fontSize: "14px",
+                          borderRadius: "8px",
+                          margin: "4px 8px",
                           cursor: "pointer",
-                          "&:active": {
-                            backgroundColor: "#007bff",
-                            color: "#fff",
-                          },
+                          transition: "all 0.2s ease",
                         }),
+
                         placeholder: (base) => ({
                           ...base,
-                          color: "#adb5bd",
+                          color: "#9ca3af",
+                          fontWeight: "400",
                         }),
+
                         singleValue: (base) => ({
                           ...base,
-                          color: "#2c3e50",
+                          color: "#111827",
+                          fontWeight: "600",
+                        }),
+
+                        dropdownIndicator: (base, state) => ({
+                          ...base,
+                          color: state.isFocused ? "#4f46e5" : "#9ca3af",
+                          transition: "all 0.3s ease",
+                          transform: state.selectProps.menuIsOpen
+                            ? "rotate(180deg)"
+                            : "rotate(0deg)",
+                        }),
+
+                        indicatorSeparator: () => ({
+                          display: "none",
                         }),
                       }}
                     />
                   </div>
                 </div>
               </li>
+              // @dropdown
             )}
           </ul>
         </nav>
