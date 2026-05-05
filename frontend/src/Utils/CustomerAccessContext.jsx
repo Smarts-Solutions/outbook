@@ -21,13 +21,26 @@ export const CustomerAccessProvider = ({ children }) => {
     const [assignedCustomers, setAssignedCustomers] = useState([]);
     
     const [selectedCustomer, setSelectedCustomerState] = useState(() => {
-        const saved = sessionStorage.getItem('selectedCustomer');
-        return saved ? JSON.parse(saved) : { value: "All", label: "All" };
+        const saved = localStorage.getItem('selectedCustomer');
+        try {
+            return saved ? JSON.parse(saved) : { value: "All", label: "All" };
+        } catch (e) {
+            return { value: "All", label: "All" };
+        }
     });
 
     const setSelectedCustomer = (customer) => {
         setSelectedCustomerState(customer);
-        sessionStorage.setItem('selectedCustomer', JSON.stringify(customer));
+        localStorage.setItem('selectedCustomer', JSON.stringify(customer));
+        
+        // Keep legacy sidebar state in sync
+        if (customer.value === "All") {
+            sessionStorage.removeItem('cust_id_sidebar');
+            sessionStorage.removeItem('cust_id_sidebar_name');
+        } else {
+            sessionStorage.setItem('cust_id_sidebar', customer.value);
+            sessionStorage.setItem('cust_id_sidebar_name', customer.label);
+        }
     };
 
     const fetchAccessData = useCallback(async () => {
