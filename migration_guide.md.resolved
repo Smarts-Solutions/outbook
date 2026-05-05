@@ -131,3 +131,83 @@ CREATE TABLE `customer_access` (
   `job_id` text DEFAULT NULL,
   `client_id` text DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+
+
+
+
+new permission table /////////
+
+
+CREATE TABLE IF NOT EXISTS customer_permissions (
+  id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  permission_name VARCHAR(100) NOT NULL,
+  type VARCHAR(50) NOT NULL,
+  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO customer_permissions (permission_name, type) VALUES
+
+-- Dashboard
+('dashboard', 'view'),
+
+-- Customer
+('customer', 'view'),
+('customer', 'insert'),
+('customer', 'update'),
+('customer', 'delete'),
+
+-- Client
+('client', 'view'),
+('client', 'insert'),
+('client', 'update'),
+('client', 'delete'),
+
+-- Client Documents
+('client_document', 'view'),
+('client_document', 'upload'),
+('client_document', 'delete'),
+
+-- Jobs
+('job', 'view'),
+('job', 'insert'),
+('job', 'update'),
+('job', 'delete'),
+('job', 'copy'),
+('job', 'status_update'),
+
+-- Job Information
+('job_information', 'view'),
+
+-- Job Timesheet
+('job_timesheet', 'view'),
+('job_timesheet', 'add'),
+
+-- Task Timesheet
+('task_timesheet', 'view'),
+
+-- Job Timeline
+('job_timeline', 'view'),
+
+-- Missing Logs
+('missing_logs', 'view'),
+('missing_logs', 'add'),
+
+-- Queries
+('queries', 'view'),
+('queries', 'add'),
+
+-- Draft
+('draft', 'view'),
+('draft', 'add'),
+
+-- Job Documents
+('job_document', 'view'),
+('job_document', 'add'),
+
+-- Reports
+('report', 'view'),
+
+-- Export
+('export', 'data');
