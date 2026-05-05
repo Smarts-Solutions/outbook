@@ -181,7 +181,7 @@ INSERT INTO customer_permissions (permission_name, type) VALUES
 ('client_tab', 'view'),
 ('client_tab', 'upload'),
 ('client_tab', 'delete'),
-('noofjobs', 'view'),
+('no_of_jobs', 'view'),
 ('client_overview', 'view'),
 
 
