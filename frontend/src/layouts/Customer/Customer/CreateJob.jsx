@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import {
-  GetAllJabData,
-  AddAllJobType,
-  GET_ALL_CHECKLIST,
-  GetOfficerDetails,
+  getCustomerAddJobData,
+  customerJobAdd,
+  customerChecklistAction,
+  customerGetOfficerDetails,
   JobType
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
@@ -95,7 +95,10 @@ const CreateJob = () => {
     }
 
     try {
-      const response = await axios.get(`${base_url}downloadChecklist/${checklistId}`, {
+      const response = await axios.get(`${base_url}customerDownloadChecklist/${checklistId}`, {
+        headers: {
+          Authorization: token,
+        },
         responseType: 'arraybuffer'
       });
 
@@ -293,7 +296,7 @@ const CreateJob = () => {
       client_id: clientId || ""
     };
     const data = { req: req, authToken: token };
-    await dispatch(GetAllJabData(data))
+    await dispatch(getCustomerAddJobData(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
@@ -369,7 +372,7 @@ const CreateJob = () => {
   const get_information_company_number = async (company_number, service_id) => {
 
     const data = { company_number: company_number, type: 'company_info' };
-    await dispatch(GetOfficerDetails(data))
+    await dispatch(customerGetOfficerDetails(data))
       .unwrap()
       .then((res) => {
         if (res.status) {
@@ -500,7 +503,7 @@ const CreateJob = () => {
 
 
 
-      await dispatch(GET_ALL_CHECKLIST(data))
+      await dispatch(customerChecklistAction(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
@@ -569,7 +572,7 @@ const CreateJob = () => {
 
 
     const data = { req: req, authToken: token };
-    await dispatch(GET_ALL_CHECKLIST(data))
+    await dispatch(customerChecklistAction(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
@@ -1058,7 +1061,7 @@ const CreateJob = () => {
     setIsSubmitted(true);
     const isValid = validateAllFields();
     if (isValid) {
-      await dispatch(AddAllJobType(data))
+      await dispatch(customerJobAdd(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {

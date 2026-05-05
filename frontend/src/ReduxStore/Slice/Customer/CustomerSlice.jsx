@@ -757,6 +757,74 @@ export const getCustomersJobs = createAsyncThunk(
     }
   }
 );
+
+export const getCustomerAddJobData = createAsyncThunk("getCustomerAddJobData", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_ADD_JOB_DATA(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const customerJobAdd = createAsyncThunk("customerJobAdd", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_JOB_ADD(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const customerChecklistAction = createAsyncThunk(
+  "customerChecklistAction",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+      const updatedReq = {
+        ...req,
+        ip: IP_Data,
+        StaffUserId: StaffUserId.id,
+      };
+      const res = await CUSTOMER_CHECKLIST_ACTION(updatedReq, authToken);
+      return await res;
+    } catch (err) {
+      throw err;
+    }
+  }
+);
+
+export const customerGetOfficerDetails = createAsyncThunk("customerGetOfficerDetails", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_OFFICER_DETAILS(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
 // Customer Dashboard Start
 export const CustomerDashboardData = createAsyncThunk("getCustomerDashboardData", async (data) => {
   try {
@@ -1187,6 +1255,17 @@ const CustomerSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
       })
+      .addCase(getCustomerAddJobData.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getCustomerAddJobData.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.getalljobdata = action.payload;
+      })
+      .addCase(getCustomerAddJobData.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
       .addCase(AddAllJobType.pending, (state) => {
         state.isLoading = true;
       })
@@ -1195,6 +1274,17 @@ const CustomerSlice = createSlice({
         state.addjobtype = action.payload;
       })
       .addCase(AddAllJobType.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(customerJobAdd.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(customerJobAdd.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.addjobtype = action.payload;
+      })
+      .addCase(customerJobAdd.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
       })
@@ -1228,6 +1318,17 @@ const CustomerSlice = createSlice({
         state.getallchecklist = action.payload;
       })
       .addCase(GET_ALL_CHECKLIST.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(customerChecklistAction.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(customerChecklistAction.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.getallchecklist = action.payload;
+      })
+      .addCase(customerChecklistAction.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
       })
