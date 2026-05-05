@@ -1,36 +1,36 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import TaskTimesheet from "./CustomerTaskTimesheet";
 import MissingLogs from "./CustomerMissingLogs";
 import Queries from "./CustomerQueries";
 import Drafts from "./CustomerDrafts";
 import Documents from "./CustomerDocuments";
-import JobTimeline from "./CustomerJobTimeline";
+import CustomerJobTimeline from "./CustomerJobTimeline";
 import JobInformation from "./CustomerJobInformation";
 import { useLocation } from "react-router-dom";
 import Hierarchy from "../../../../Components/ExtraComponents/Hierarchy";
 import {
   Info,
   ArrowLeft,
-  Circle,
   Clock,
-  Table,
-  AlertTriangle,
-  HelpCircle,
-  File,
-  Folder,
+  AlertCircle,
+  Pencil,
+  FileText,
+  PlayCircle,
+  CheckCircle2
 } from "lucide-react";
 import { useCustomerAccess } from "../../../../Utils/CustomerAccessContext";
 
 const CustomerJobLogs = () => {
   const location = useLocation();
-  const tab = sessionStorage.getItem("activeTab2") || "job information";
-  const [selectedTab, setSelectedTab] = useState(tab);
   const role = JSON.parse(localStorage.getItem("role"));
   const { hasAccess } = useCustomerAccess();
 
   const [jobId, setJobId] = useState(location?.state?.job_id || sessionStorage.getItem("currentJobId"));
   const [hierarchyData, setHierarchyData] = useState(location?.state?.data || JSON.parse(sessionStorage.getItem("currentHierarchyData") || "{}"));
   const [goto, setGoto] = useState(location?.state?.goto || sessionStorage.getItem("currentGoto"));
+  
+  const initialTab = sessionStorage.getItem("activeTab2") || "JobInformation";
+  const [activeSubTab, setActiveSubTab] = useState(initialTab);
 
   const getAccessDataJob = {
     insert: hasAccess("job", "insert") || role === "SUPERADMIN" ? 1 : 0,
@@ -54,6 +54,10 @@ const CustomerJobLogs = () => {
     }
   }, [location]);
 
+  const handleTabChange = (tabName) => {
+    setActiveSubTab(tabName);
+    sessionStorage.setItem("activeTab2", tabName);
+  };
 
   return (
     <div className="container-fluid">
@@ -62,167 +66,78 @@ const CustomerJobLogs = () => {
           <div className="page-title-box">
             <div className="row align-items-start">
               <div className="col-md-8">
-                <>
-                  <ul className="nav nav-pills rounded-tabs" role="tablist">
+                <ul className="nav nav-pills rounded-tabs" id="pills-tab" role="tablist">
+                  {(hasAccess("job_information", "view") || role === "SUPERADMIN") && (
                     <li className="nav-item" role="presentation">
                       <button
-                        className={`nav-link ${selectedTab === "job information" ? "active" : ""}`}
-                        id="job-information-tab"
-                        data-bs-toggle="pill"
-                        data-bs-target="#job-information"
-                        type="button"
-                        role="tab"
-                        aria-controls="job-information"
-                        aria-selected="true"
-                        onClick={() => {
-                          setSelectedTab("job information");
-                          sessionStorage.setItem(
-                            "activeTab2",
-                            "job information",
-                          );
-                        }}
+                        className={`nav-link ${activeSubTab === "JobInformation" ? "active" : ""}`}
+                        onClick={() => handleTabChange("JobInformation")}
                       >
-                        <Info size={18} className="me-1" />
-                        Job Information
+                        <Info size={16} /> Job Information
                       </button>
                     </li>
+                  )}
+                  {(hasAccess("task_timesheet", "view") || role === "SUPERADMIN") && (
                     <li className="nav-item" role="presentation">
                       <button
-                        className={
-                          "nav-link" +
-                          (selectedTab === "task timesheet" ? " active" : "")
-                        }
-                        id="task-timesheet-tab"
-                        data-bs-toggle="pill"
-                        data-bs-target="#task-timesheet"
-                        type="button"
-                        role="tab"
-                        aria-controls="task-timesheet"
-                        aria-selected="false"
-                        onClick={() => {
-                          setSelectedTab("task timesheet");
-                          sessionStorage.setItem(
-                            "activeTab2",
-                            "task timesheet",
-                          );
-                        }}
+                        className={`nav-link ${activeSubTab === "TaskTimesheet" ? "active" : ""}`}
+                        onClick={() => handleTabChange("TaskTimesheet")}
                       >
-                        <Table size={18} className="me-1" />
-                        Task Timesheet
+                        <Clock size={16} /> Task Timesheet
                       </button>
                     </li>
+                  )}
+                  {(hasAccess("job_timeline", "view") || role === "SUPERADMIN") && (
                     <li className="nav-item" role="presentation">
                       <button
-                        className={
-                          "nav-link" +
-                          (selectedTab === "job timeline" ? " active" : "")
-                        }
-                        id="job-timeline-tab"
-                        data-bs-toggle="pill"
-                        data-bs-target="#job-timeline"
-                        type="button"
-                        role="tab"
-                        aria-controls="job-timeline"
-                        aria-selected="false"
-                        onClick={() => {
-                          setSelectedTab("job timeline");
-                          sessionStorage.setItem("activeTab2", "job timeline");
-                        }}
+                        className={`nav-link ${activeSubTab === "Timeline" ? "active" : ""}`}
+                        onClick={() => handleTabChange("Timeline")}
                       >
-                        <Clock size={18} className="me-1" />
-                        Job Timeline
+                        <PlayCircle size={16} /> Job Timeline
                       </button>
                     </li>
+                  )}
+                  {(hasAccess("missing_logs", "view") || role === "SUPERADMIN") && (
                     <li className="nav-item" role="presentation">
                       <button
-                        className={
-                          "nav-link" +
-                          (selectedTab === "missing logs" ? " active" : "")
-                        }
-                        id="missing-logs-tab"
-                        data-bs-toggle="pill"
-                        data-bs-target="#missing-logs"
-                        type="button"
-                        role="tab"
-                        aria-controls="missing-logs"
-                        aria-selected="false"
-                        onClick={() => {
-                          setSelectedTab("missing logs");
-                          sessionStorage.setItem("activeTab2", "missing logs");
-                        }}
+                        className={`nav-link ${activeSubTab === "MissingLogs" ? "active" : ""}`}
+                        onClick={() => handleTabChange("MissingLogs")}
                       >
-                        <AlertTriangle size={18} className="me-1" />
-                        Missing Logs
+                        <AlertCircle size={16} /> Missing Logs
                       </button>
                     </li>
+                  )}
+                  {(hasAccess("queries", "view") || role === "SUPERADMIN") && (
                     <li className="nav-item" role="presentation">
                       <button
-                        className={
-                          "nav-link" +
-                          (selectedTab === "queries" ? " active" : "")
-                        }
-                        id="queries-tab"
-                        data-bs-toggle="pill"
-                        data-bs-target="#queries"
-                        type="button"
-                        role="tab"
-                        aria-controls="queries"
-                        aria-selected="false"
-                        onClick={() => {
-                          setSelectedTab("queries");
-                          sessionStorage.setItem("activeTab2", "queries");
-                        }}
+                        className={`nav-link ${activeSubTab === "Queries" ? "active" : ""}`}
+                        onClick={() => handleTabChange("Queries")}
                       >
-                        <HelpCircle size={18} className="me-1" />
-                        Queries
+                        <CheckCircle2 size={16} /> Queries
                       </button>
                     </li>
+                  )}
+                  {(hasAccess("draft", "view") || role === "SUPERADMIN") && (
                     <li className="nav-item" role="presentation">
                       <button
-                        className={
-                          "nav-link" +
-                          (selectedTab === "drafts" ? " active" : "")
-                        }
-                        id="drafts-tab"
-                        data-bs-toggle="pill"
-                        data-bs-target="#drafts"
-                        type="button"
-                        role="tab"
-                        aria-controls="drafts"
-                        aria-selected="false"
-                        onClick={() => {
-                          setSelectedTab("drafts");
-                          sessionStorage.setItem("activeTab2", "drafts");
-                        }}
+                        className={`nav-link ${activeSubTab === "Drafts" ? "active" : ""}`}
+                        onClick={() => handleTabChange("Drafts")}
                       >
-                        <File size={18} className="me-1" />
-                        Drafts
+                        <Pencil size={16} /> Drafts
                       </button>
                     </li>
+                  )}
+                  {(hasAccess("job_document", "view") || role === "SUPERADMIN") && (
                     <li className="nav-item" role="presentation">
                       <button
-                        className={
-                          "nav-link" +
-                          (selectedTab === "documents" ? " active" : "")
-                        }
-                        id="documents-tab"
-                        data-bs-toggle="pill"
-                        data-bs-target="#documents"
-                        type="button"
-                        role="tab"
-                        aria-controls="documents"
-                        aria-selected="false"
-                        onClick={() => {
-                          setSelectedTab("documents");
-                          sessionStorage.setItem("activeTab2", "documents");
-                        }}
+                        className={`nav-link ${activeSubTab === "Documents" ? "active" : ""}`}
+                        onClick={() => handleTabChange("Documents")}
                       >
-                        <Folder size={18} className="me-1" />
-                        Documents
+                        <FileText size={16} /> Documents
                       </button>
                     </li>
-                  </ul>
-                </>
+                  )}
+                </ul>
               </div>
               <div className="col-md-4">
                 <div className="page-title-right">
@@ -231,9 +146,7 @@ const CustomerJobLogs = () => {
                     onClick={() => {
                       sessionStorage.setItem(
                         "activeTab",
-                        goto == "report"
-                          ? "client"
-                          : location.state?.activeTab || "client",
+                        goto == "report" ? "client" : location.state?.activeTab || "client"
                       );
                       window.history.back();
                       sessionStorage.removeItem("activeTab2");
@@ -248,125 +161,54 @@ const CustomerJobLogs = () => {
         </div>
       </div>
 
-      {goto == "report" ? (
-        ""
-      ) : (
+      {goto !== "report" && (
         <Hierarchy
           show={
             goto == "Customer"
-              ? ["Customer", "Job", selectedTab]
-              : ["Customer", "Client", "Job", selectedTab]
+              ? ["Customer", "Job", activeSubTab]
+              : ["Customer", "Client", "Job", activeSubTab]
           }
           active={goto == "Customer" ? 2 : 3}
           data={hierarchyData}
         />
       )}
 
-      <div className="tab-content report-data mt-4" id="pills-tabContent">
-        <div
-          className={
-            "tab-pane fade" +
-            (selectedTab === "job information" ? " show active" : "")
-          }
-          id="job-information"
-          role="tabpanel"
-          aria-labelledby="job-information-tab"
-        >
-          <JobInformation
-            job_id={jobId}
-            getAccessDataJob={getAccessDataJob}
-            goto={goto}
-          />
-        </div>
-
-        <div
-          className={
-            "tab-pane fade" +
-            (selectedTab === "job timeline" ? " show active" : "")
-          }
-          id="job-timeline"
-          role="tabpanel"
-          aria-labelledby="job-timeline-tab"
-        >
-          <JobTimeline
-            job_id={jobId}
-            getAccessDataJob={getAccessDataJob}
-            goto={goto}
-          />
-        </div>
-        <div
-          className={
-            "tab-pane fade" +
-            (selectedTab === "task timesheet" ? " show active" : "")
-          }
-          id="task-timesheet"
-          role="tabpanel"
-          aria-labelledby="task-timesheet-tab"
-        >
-          <TaskTimesheet
-            job_id={jobId}
-            getAccessDataJob={getAccessDataJob}
-            goto={goto}
-          />
-        </div>
-        <div
-          className={
-            "tab-pane fade" +
-            (selectedTab === "missing logs" ? " show active" : "")
-          }
-          id="missing-logs"
-          role="tabpanel"
-          aria-labelledby="missing-logs-tab"
-        >
-          <MissingLogs
-            job_id={jobId}
-            getAccessDataJob={getAccessDataJob}
-            goto={goto}
-          />
-        </div>
-        <div
-          className={
-            "tab-pane fade" + (selectedTab === "queries" ? " show active" : "")
-          }
-          id="queries"
-          role="tabpanel"
-          aria-labelledby="queries-tab"
-        >
-          <Queries
-            job_id={jobId}
-            getAccessDataJob={getAccessDataJob}
-            goto={goto}
-          />
-        </div>
-        <div
-          className={
-            "tab-pane fade" + (selectedTab === "drafts" ? " show active" : "")
-          }
-          id="drafts"
-          role="tabpanel"
-          aria-labelledby="drafts-tab"
-        >
-          <Drafts
-            job_id={jobId}
-            getAccessDataJob={getAccessDataJob}
-            goto={goto}
-          />
-        </div>
-        <div
-          className={
-            "tab-pane fade" +
-            (selectedTab === "documents" ? " show active" : "")
-          }
-          id="documents"
-          role="tabpanel"
-          aria-labelledby="documents-tab"
-        >
-          <Documents
-            job_id={jobId}
-            getAccessDataJob={getAccessDataJob}
-            goto={goto}
-          />
-        </div>
+      <div className="tab-content mt-4">
+        {activeSubTab === "JobInformation" && (hasAccess("job_information", "view") || role === "SUPERADMIN") && (
+          <div className="tab-pane fade show active">
+            <JobInformation job_id={jobId} />
+          </div>
+        )}
+        {activeSubTab === "TaskTimesheet" && (hasAccess("task_timesheet", "view") || role === "SUPERADMIN") && (
+          <div className="tab-pane fade show active">
+            <TaskTimesheet job_id={jobId} timesheet_job_id={location.state?.timesheet_job_id} />
+          </div>
+        )}
+        {activeSubTab === "Timeline" && (hasAccess("job_timeline", "view") || role === "SUPERADMIN") && (
+          <div className="tab-pane fade show active">
+            <CustomerJobTimeline job_id={jobId} />
+          </div>
+        )}
+        {activeSubTab === "MissingLogs" && (hasAccess("missing_logs", "view") || role === "SUPERADMIN") && (
+          <div className="tab-pane fade show active">
+            <MissingLogs job_id={jobId} getAccessDataJob={getAccessDataJob} goto={goto} />
+          </div>
+        )}
+        {activeSubTab === "Queries" && (hasAccess("queries", "view") || role === "SUPERADMIN") && (
+          <div className="tab-pane fade show active">
+            <Queries job_id={jobId} getAccessDataJob={getAccessDataJob} goto={goto} />
+          </div>
+        )}
+        {activeSubTab === "Drafts" && (hasAccess("draft", "view") || role === "SUPERADMIN") && (
+          <div className="tab-pane fade show active">
+            <Drafts job_id={jobId} getAccessDataJob={getAccessDataJob} goto={goto} />
+          </div>
+        )}
+        {activeSubTab === "Documents" && (hasAccess("job_document", "view") || role === "SUPERADMIN") && (
+          <div className="tab-pane fade show active">
+            <Documents job_id={jobId} getAccessDataJob={getAccessDataJob} goto={goto} />
+          </div>
+        )}
       </div>
     </div>
   );

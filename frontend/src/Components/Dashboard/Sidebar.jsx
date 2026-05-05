@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useCustomerAccess } from "../../Utils/CustomerAccessContext";
-import { Briefcase, ChevronDown, ChevronRight, PieChart, Shield, User, Users, File, Clock, Clock1, Clock10Icon, Settings, LayoutGrid, UserCog, FileSliders } from "lucide-react";
+import { Briefcase, ChevronDown, ChevronRight, PieChart, Shield, User, Users, File, FileText, Clock, Clock1, Clock10Icon, Settings, LayoutGrid, UserCog, FileSliders } from "lucide-react";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -185,6 +185,16 @@ const Sidebar = () => {
                         <Briefcase />
                       </span>
                       <span>Jobs</span>
+                    </Link>
+                  </li>
+                )}
+                {role === "CUSTOMER" && hasAccess("report") && (
+                  <li className={activeLink === "/customer/reports" ? "active" : ""}>
+                    <Link to="/customer/reports">
+                      <span className="sidebar-icons">
+                        <FileText />
+                      </span>
+                      <span>Reports</span>
                     </Link>
                   </li>
                 )}

@@ -9,8 +9,10 @@ import { useLocation } from "react-router-dom";
 import sweatalert from "sweetalert2";
 import { convertDate, validate } from "../../../../Utils/Comman_function";
 import { Download, Plus, Eye } from "lucide-react";
+import { useCustomerAccess } from "../../../../Utils/CustomerAccessContext";
 
 const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
+  const { hasAccess } = useCustomerAccess();
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
   const location = useLocation();
@@ -309,7 +311,7 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
           {row.was_it_complete == 1 ? (
             ""
           ) : goto != "report" &&
-            (getAccessDataJob.update === 1 || role === "SUPERADMIN") ? (
+            (hasAccess("draft", "update") || role === "SUPERADMIN") ? (
             <button
               className="edit-icon"
               onClick={() => {
@@ -436,7 +438,7 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
 
         {/* RIGHT */}
         <div className="col-md-4 text-end">
-          {DraftListData && DraftListData.length > 0 && (
+          {(hasAccess("export", "data") || role === "SUPERADMIN") && DraftListData && DraftListData.length > 0 && (
             <button
               className="btn btn-outline-info fw-bold border-3 me-2"
               onClick={handleExport}
@@ -447,7 +449,7 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
           )}
 
           {goto !== "report" &&
-            (getAccessDataJob.insert === 1 || role === "SUPERADMIN") && (
+            (hasAccess("draft", "insert") || role === "SUPERADMIN") && (
               <button
                 type="button"
                 className="btn btn-info text-white"

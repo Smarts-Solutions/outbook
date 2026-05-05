@@ -15,6 +15,7 @@ import CreateJob from "../layouts/Customer/Customer/CreateJob";
 import JobEdit from "../layouts/Customer/Customer/EditJob";
 import JobLogs from "../layouts/Customer/Customer/JobLogs/CustomerJobLogs";
 import AddNewClient from "../layouts/Customer/Customer/CreateClient";
+import CustomerReports from "../layouts/Customer/Customer/Reports";
 
 const Customer_Route = () => {
     return (
@@ -36,6 +37,7 @@ const Customer_Route = () => {
                         <Route path="/createjob" element={<CreateJob />} />
                         <Route path="/job/edit" element={<JobEdit />} />
                         <Route path="/job/logs" element={<JobLogs />} />
+                        <Route path="/reports" element={<CustomerReports />} />
 
                     </Routes>
                 </div>

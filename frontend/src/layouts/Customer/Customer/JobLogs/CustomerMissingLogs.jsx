@@ -19,8 +19,10 @@ import {
   deleteFolderFromFolder,
 } from "../../../../Utils/graphAPI";
 import { Download, Plus, FileText, File, Eye } from "lucide-react";
+import { useCustomerAccess } from "../../../../Utils/CustomerAccessContext";
 
 const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
+  const { hasAccess } = useCustomerAccess();
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
  
@@ -620,7 +622,7 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
           {row.status == 1 ? (
             ""
           ) : goto != "report" &&
-            (getAccessDataJob.update === 1 || role === "SUPERADMIN") ? (
+            (hasAccess("missing_logs", "update") || role === "SUPERADMIN") ? (
             <button
               className="edit-icon"
               onClick={() => {
@@ -748,7 +750,7 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
 
           {/* RIGHT */}
           <div className="col-md-6 text-end d-flex justify-content-end align-items-center gap-2">
-            {getMissingLogListData && getMissingLogListData.length > 0 && (
+            {(hasAccess("export", "data") || role === "SUPERADMIN") && getMissingLogListData && getMissingLogListData.length > 0 && (
               <button
                 className="btn btn-info d-inline-flex align-items-center gap-2 rounded-pill px-3 py-2 ms-auto"
                 onClick={handleExport}
@@ -761,7 +763,7 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
 
             {draftStatus == 0 &&
               goto !== "report" &&
-              (getAccessDataJob.insert === 1 || role === "SUPERADMIN") && (
+              (hasAccess("missing_logs", "insert") || role === "SUPERADMIN") && (
                 <button
                   type="button"
                   className="btn btn-info text-white"

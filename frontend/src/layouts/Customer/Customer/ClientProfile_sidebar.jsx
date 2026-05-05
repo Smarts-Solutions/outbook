@@ -374,9 +374,11 @@ const CustomerClientProfile = () => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
-          <button className="delete-icon me-2" onClick={() => removeItem(row, 2)}>
-            <i className="ti-trash text-danger" />
-          </button>
+          {(hasAccess("client_document", "delete") || role === "SUPERADMIN") && (
+            <button className="delete-icon me-2" onClick={() => removeItem(row, 2)}>
+              <i className="ti-trash text-danger" />
+            </button>
+          )}
           <button
             className="download-icon"
             onClick={() =>
@@ -540,11 +542,21 @@ const CustomerClientProfile = () => {
     { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16} /> },
     ...((clientDetailSingle.id !== "" || cli_id_sidebar !== "") && getAccessDataClient.view == 1
       ? [
-        { id: "view client", label: "View Client", icon: <User size={16} /> },
-        { id: "documents", label: "Documents", icon: <File size={16} /> }
+        {
+          id: "view client",
+          label: "View Client",
+          icon: <User size={16} />,
+          access: hasAccess("client", "view") || role === "SUPERADMIN",
+        },
+        {
+          id: "documents",
+          label: "Documents",
+          icon: <FileText size={16} />,
+          access: hasAccess("client_document", "view") || role === "SUPERADMIN",
+        },
       ]
       : []),
-  ];
+  ].filter((tab) => tab.access !== false);
 
   const GetStatus = async () => {
     const data = { req: { action: "get" }, authToken: token };
@@ -720,7 +732,7 @@ const CustomerClientProfile = () => {
             className="form-select form-control"
             value={row.status_type}
             onChange={(e) => handleStatusChange(e, row)}
-            disabled={!(getAccessDataJob.update === 1 || role === "SUPERADMIN")}
+            disabled={!hasAccess("job", "status_update") && role !== "SUPERADMIN"}
           >
             {statusDataAll.map((status) => (
               <option key={status.id} value={status.id}>
@@ -1439,8 +1451,17 @@ const CustomerClientProfile = () => {
                       onClick={handleExport}
                     >
                       <Download size={16} />
-                      <span>Export Excel</span>
+                      <span>Export To Excel</span>
                     </button>
+                    {(hasAccess("client_document", "upload") || role === "SUPERADMIN") && (
+                      <button
+                        className="btn btn-info text-white d-flex align-items-center gap-2"
+                        onClick={() => setAddDocuments(true)}
+                      >
+                        <Plus size={16} />
+                        <span>Upload Documents</span>
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

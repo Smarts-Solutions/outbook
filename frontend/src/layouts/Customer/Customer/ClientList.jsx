@@ -319,7 +319,7 @@ const ClientLists = () => {
           className="form-select form-control"
           value={row.status_type}
           onChange={(e) => handleStatusChange(e, row)}
-          disabled={!hasAccess("job", "update")}
+          disabled={!(hasAccess("job", "status_update") || role === "SUPERADMIN")}
         >
           {statusDataAll.map((status) => (
             <option key={status.id} value={status.id}>
@@ -576,9 +576,11 @@ const ClientLists = () => {
               <div className="tab-title">
                 <h3 className="mt-0">{activeTab === "client" ? "Clients" : "Jobs"}</h3>
               </div>
-              <button className="btn btn-outline-info fw-bold d-inline-flex align-items-center gap-2" onClick={handleExport}>
-                <Download size={16} /> Export Excel
-              </button>
+              {(hasAccess("export", "data") || role === "SUPERADMIN") && (
+                <button className="btn btn-outline-info fw-bold d-inline-flex align-items-center gap-2" onClick={handleExport}>
+                  <Download size={16} /> Export Excel
+                </button>
+              )}
             </div>
 
             <div className="row mb-3 mt-3">

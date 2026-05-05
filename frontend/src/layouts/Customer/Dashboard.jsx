@@ -498,27 +498,29 @@ const Dashboard = () => {
                 </div>
                 <div className="col-md-3">
                   <div className="d-flex justify-content-end">
-                    <button
-                      type="button"
-                      className="btn btn-outline-info fw-bold"
-                      onClick={exportAllActivityLog}
-                      disabled={exporting || !getActiviyLog?.length}
-                    >
-                      {exporting ? (
-                        <>
-                          <span
-                            className="spinner-border spinner-border-sm me-2"
-                            role="status"
-                            aria-hidden="true"
-                          ></span>
-                          Exporting...
-                        </>
-                      ) : (
-                        <>
-                          <Download size={16} /> Export All
-                        </>
-                      )}
-                    </button>
+                    {(hasAccess("export", "data") || role === "SUPERADMIN") && (
+                      <button
+                        type="button"
+                        className="btn btn-outline-info fw-bold"
+                        onClick={exportAllActivityLog}
+                        disabled={exporting || !getActiviyLog?.length}
+                      >
+                        {exporting ? (
+                          <>
+                            <span
+                              className="spinner-border spinner-border-sm me-2"
+                              role="status"
+                              aria-hidden="true"
+                            ></span>
+                            Exporting...
+                          </>
+                        ) : (
+                          <>
+                            <Download size={16} /> Export All
+                          </>
+                        )}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

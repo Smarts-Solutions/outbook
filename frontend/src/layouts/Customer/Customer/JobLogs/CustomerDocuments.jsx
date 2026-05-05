@@ -15,8 +15,10 @@ import {
 } from "../../../../Utils/graphAPI";
 import { allowedTypes } from "../../../../Utils/Comman_function";
 import { FileText, File, Plus, Download, Trash2 } from "lucide-react";
+import { useCustomerAccess } from "../../../../Utils/CustomerAccessContext";
 
 const CustomerDocuments = ({ job_id, getAccessDataJob }) => {
+  const { hasAccess } = useCustomerAccess();
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const location = useLocation();
@@ -123,7 +125,7 @@ const CustomerDocuments = ({ job_id, getAccessDataJob }) => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex justify-content-end gap-2">
-          {(getAccessDataJob?.delete === 1 || role === "SUPERADMIN") && (
+          {(hasAccess("job_document", "delete") || role === "SUPERADMIN") && (
             <div className="d-flex gap-2">
               <button
                 className="delete-icon"
@@ -500,7 +502,7 @@ const CustomerDocuments = ({ job_id, getAccessDataJob }) => {
               (getAccessDataJob.delete === 1 ||  role === "SUPERADMIN") && (
                 <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" className="btn btn-secondary  float-sm-end ms-sm-2"> <i className="ti-trash pe-1"></i>  Delete Selected</button>
               )} */}
-              {(getAccessDataJob.update === 1 || role === "SUPERADMIN") && (
+              {(hasAccess("job_document", "upload") || role === "SUPERADMIN") && (
                 <button
                   type="button"
                   className="btn btn-info text-white float-sm-end ms-2"

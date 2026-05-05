@@ -391,7 +391,7 @@ const ClientList = () => {
             className="form-select form-control"
             value={row.status_type}
             onChange={(e) => handleStatusChange(e, row)}
-            disabled={!(getAccessDataJob.update === 1 || role === "SUPERADMIN")}
+            disabled={!(hasAccess("job", "status_update") || role === "SUPERADMIN")}
           >
             {statusDataAll.map((status) => (
               <option key={status.id} value={status.id}>
@@ -503,9 +503,11 @@ const ClientList = () => {
               </button>
           )}
 
+          {(hasAccess("job", "copy") || role === "SUPERADMIN") && (
               <button className="copy-icon" onClick={() => copyRow(row)}>
                 <i className="ti-files"></i>
               </button>
+          )}
 
           {row.timesheet_job_id == null
             ? (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
@@ -1199,7 +1201,7 @@ const ClientList = () => {
                       </li>
                     </ul>
 
-                    {customerData && customerData.length > 0 && (
+                    {(hasAccess("export", "data") || role === "SUPERADMIN") && (
                       <div className="col-md-2">
                         <button
                           className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"

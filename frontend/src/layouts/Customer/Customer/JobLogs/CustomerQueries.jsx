@@ -17,8 +17,10 @@ import {
   deleteFolderFromFolder,
 } from "../../../../Utils/graphAPI";
 import { Download, Plus, FileText, File, Eye } from "lucide-react";
+import { useCustomerAccess } from "../../../../Utils/CustomerAccessContext";
 
 const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
+  const { hasAccess } = useCustomerAccess();
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
   const dispatch = useDispatch();
@@ -600,7 +602,7 @@ const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
           {row.status == 1 ? (
             ""
           ) : goto != "report" &&
-            (getAccessDataJob.update === 1 || role === "SUPERADMIN") ? (
+            (hasAccess("queries", "update") || role === "SUPERADMIN") ? (
             <button
               className="edit-icon"
               onClick={() => {
@@ -734,7 +736,7 @@ const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
 
           {/* RIGHT */}
           <div className="col-md-4 text-end">
-            {AllQueryList && AllQueryList.length > 0 && (
+            {(hasAccess("export", "data") || role === "SUPERADMIN") && AllQueryList && AllQueryList.length > 0 && (
               <button
                 className="btn btn-outline-info fw-bold border-3 me-2"
                 onClick={handleExport}
@@ -746,7 +748,7 @@ const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
 
             {draftStatus == 0 &&
               goto !== "report" &&
-              (getAccessDataJob.insert === 1 || role === "SUPERADMIN") && (
+              (hasAccess("queries", "insert") || role === "SUPERADMIN") && (
                 <button
                   type="button"
                   className="btn btn-info text-white"
