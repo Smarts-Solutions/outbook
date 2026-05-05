@@ -442,7 +442,7 @@ const CustomerTaskTimesheet = ({ job_id, getAccessDataJob, goto }) => {
                     <Plus size={16} /> Job Timesheet
                   </button>
                 )}
-              {taskTimeData && taskTimeData.length > 0 && (
+              {(hasAccess("export", "data") || role === "SUPERADMIN") && taskTimeData && taskTimeData.length > 0 && (
                 <button
                   className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
                   onClick={handleExport}

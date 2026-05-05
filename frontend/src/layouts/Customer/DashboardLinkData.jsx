@@ -11,11 +11,14 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 import { Download, ArrowLeft } from "lucide-react";
+import { useCustomerAccess } from "../../Utils/CustomerAccessContext";
 
 const DashboardLinkData = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
+  const { hasAccess } = useCustomerAccess();
+  const role = JSON.parse(localStorage.getItem("role"));
 
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
@@ -360,6 +363,7 @@ const DashboardLinkData = () => {
           className="form-select form-control"
           value={row.status_type}
           onChange={(e) => handleStatusChange(e, row)}
+          disabled={!(hasAccess("job", "status_update") || role === "SUPERADMIN")}
         >
           {statusDataAll && statusDataAll.length > 0 ? (
             statusDataAll.map((status) => (
@@ -533,7 +537,7 @@ const DashboardLinkData = () => {
                   <ArrowLeft size={16} className="me-1" /> Back
                 </div>
 
-                {allLinkedData && allLinkedData.length > 0 && (
+                {(hasAccess("export", "data") || role === "SUPERADMIN") && allLinkedData && allLinkedData.length > 0 && (
                   <div className="ms-2">
                     <button
                       className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"

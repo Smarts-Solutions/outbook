@@ -3,8 +3,11 @@ import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { CustomerJobTimeline as CustomerJobTimelineAction } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { Download, Info } from "lucide-react";
+import { useCustomerAccess } from "../../../../Utils/CustomerAccessContext";
 
 const CustomerJobTimeline = ({ job_id }) => {
+  const { hasAccess } = useCustomerAccess();
+  const role = JSON.parse(localStorage.getItem("role"));
   const location = useLocation();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
@@ -112,7 +115,7 @@ const CustomerJobTimeline = ({ job_id }) => {
           <div className="tab-title d-flex align-items-center">
             <h3 className="mb-0">Job Timeline</h3>
 
-            {JobTimelineData && JobTimelineData.length > 0 && (
+            {(hasAccess("export", "data") || role === "SUPERADMIN") && JobTimelineData && JobTimelineData.length > 0 && (
               <button
                 className="btn btn-info d-inline-flex align-items-center gap-2 rounded-pill px-3 py-2 ms-auto"
                 id="btn-export"
