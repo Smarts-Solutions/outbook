@@ -31,7 +31,7 @@ const CreateJob = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
- 
+
   const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] });
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -147,7 +147,7 @@ const CreateJob = () => {
       newData[index] = {
         ...newData[index],
         [attribute]: answer,
-        date: (attribute === "answer" && !answer) ? "" : new Date().toISOString().split('T')[0] 
+        date: (attribute === "answer" && !answer) ? "" : new Date().toISOString().split('T')[0]
       };
       return {
         ...prev,
@@ -284,14 +284,14 @@ const CreateJob = () => {
     // If we have a client selected now but didn't have full data yet, fetch it
     const currentClientId = stateClientId || autoClient;
     if (currentClientId && !AllJobData?.data?.services) {
-        GetJobData(null, currentClientId);
+      GetJobData(null, currentClientId);
     }
   }, [AllJobData]);
 
   const GetJobData = async (cid = null, clid = null) => {
     const custId = cid || location.state?.customer_id || sessionStorage.getItem("cust_id_sidebar") || localStorage.getItem("customer_id");
     const clientId = clid || location.state?.clientName?.id || location.state?.client_id || "";
-    const req = { 
+    const req = {
       customer_id: custId || "",
       client_id: clientId || ""
     };
@@ -483,35 +483,40 @@ const CreateJob = () => {
 
   const getAllChecklist = async () => {
     if (
-      AllJobData?.data?.client?.[0]?.client_id &&
+      (jobData.client_id || jobData.Client || AllJobData?.data?.client?.[0]?.client_id) &&
       jobData?.Service &&
-      AllJobData?.data?.customer?.customer_id &&
+      (AllJobData?.data?.customer?.customer_id || localStorage.getItem("customer_id")) &&
       jobData?.JobType
     ) {
       const req = {
         action: "getByServiceWithJobType",
-        service_id: jobData.Service,
-        customer_id: AllJobData?.data?.customer?.customer_id,
-        job_type_id: jobData.JobType,
-        // clientId: AllJobData?.data?.client[0]?.client_id,
-        clientId:
-          location?.state?.goto == "Customer"
-            ? Number(jobData.Client)
-            : location?.state?.clientName?.id,
+        service_id: Number(jobData.Service),
+        customer_id: Number(AllJobData?.data?.customer?.customer_id || localStorage.getItem("customer_id")),
+        job_type_id: Number(jobData.JobType),
+        clientId: Number(jobData.client_id || jobData.Client || AllJobData?.data?.client?.[0]?.client_id),
+        // Fallback for different backend parameter naming conventions
+        serviceId: Number(jobData.Service),
+        customerId: Number(AllJobData?.data?.customer?.customer_id || localStorage.getItem("customer_id")),
+        jobTypeId: Number(jobData.JobType),
+        client_id: Number(jobData.client_id || jobData.Client || AllJobData?.data?.client?.[0]?.client_id),
       };
       const data = { req: req, authToken: token };
-
-
 
       await dispatch(customerChecklistAction(data))
         .unwrap()
         .then(async (response) => {
-          if (response.status) {
-            if (response.data.length > 0) {
-
+          if (response.status && response.data && response.data.length > 0) {
+            setAllChecklistData({
+              loading: true,
+              data: response.data,
+            });
+          } else {
+            // Fallback: If API returns empty, use tasks from the JobType data if available
+            const selectedJobType = get_Job_Type.data.find(item => Number(item.id) === Number(jobData.JobType));
+            if (selectedJobType && selectedJobType.task && selectedJobType.task.length > 0) {
               setAllChecklistData({
                 loading: true,
-                data: response.data,
+                data: selectedJobType.task,
               });
             } else {
               setAllChecklistData({
@@ -519,11 +524,6 @@ const CreateJob = () => {
                 data: [],
               });
             }
-          } else {
-            setAllChecklistData({
-              loading: true,
-              data: [],
-            });
           }
         })
         .catch((error) => {
@@ -938,11 +938,11 @@ const CreateJob = () => {
 
 
 
-    if (["", null, undefined ,0].includes(jobData?.processing_checklist)) {
+    if (["", null, undefined, 0].includes(jobData?.processing_checklist)) {
       processing_checklist_status = "0"
     }
 
-    if (["", null, undefined ,0].includes(jobData?.reviewing_checklist)) {
+    if (["", null, undefined, 0].includes(jobData?.reviewing_checklist)) {
       reviewing_checklist_status = "0"
     }
 
@@ -1088,7 +1088,7 @@ const CreateJob = () => {
               timerProgressBar: true,
             });
           }
-          
+
           else {
             sweatalert.fire({
               icon: "error",
@@ -2273,7 +2273,7 @@ const CreateJob = () => {
         ...prevState,
         SLADeadlineDate: date.toISOString().split("T")[0],
       }));
-    } 
+    }
     else {
 
       setJobData((prevState) => ({
@@ -2430,7 +2430,7 @@ const CreateJob = () => {
     }))
   ];
 
- 
+
   // let isAssignDetails = jobData?.CustomerDetails.find(
   //   (detail) => detail.assigned_source === "assign_customer_service"
   // );
@@ -3406,10 +3406,10 @@ const CreateJob = () => {
                                           })
                                         }
                                         value={jobData.processing_checklist ?? ""}
-                                        // onChange={HandleChange}
-                                        // value={
-                                        //   jobData.processing_checklist
-                                        // }
+                                      // onChange={HandleChange}
+                                      // value={
+                                      //   jobData.processing_checklist
+                                      // }
                                       >
                                         <option value={""}>-- Select --</option>
 
@@ -3480,10 +3480,10 @@ const CreateJob = () => {
                                           })
                                         }
                                         value={jobData.reviewing_checklist ?? ""}
-                                        // onChange={HandleChange}
-                                        // value={
-                                        //   jobData.reviewing_checklist
-                                        // }
+                                      // onChange={HandleChange}
+                                      // value={
+                                      //   jobData.reviewing_checklist
+                                      // }
                                       >
                                         <option value={""}>-- Select --</option>
                                         <option value={0}>Not Required</option>
