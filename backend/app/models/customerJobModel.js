@@ -245,19 +245,34 @@ const customerJobAdd = async (job) => {
     job_type_id,
     reviewer,
     allocated_to,
-    status_type: initial_status_type,
+    tasks,
+    selectedStaffData,
     StaffUserId,
     ip,
-    // ... other fields (mapping from job object)
+    status_type: initial_status_type,
   } = job;
 
   let status_type = initial_status_type || 1; // Default: To Be Started
 
-  // Status Logic
+  // Status Logic consistency with Admin
   if (allocated_to > 0) {
-    status_type = 3; // In Progress
+    if (Number(job?.processing_checklist_status) === 2) {
+      return {
+        status: false,
+        message: "Please complete the processing checklist first.",
+        data: "W",
+      };
+    }
+    status_type = 3;
   } else if (reviewer > 0) {
-    status_type = 5; // Ready for Review
+    if (Number(job?.reviewing_checklist_status) === 2) {
+      return {
+        status: false,
+        message: "Please complete the reviewing checklist first.",
+        data: "W",
+      };
+    }
+    status_type = 5;
   }
 
   const job_id_code = await generateNextUniqueCode({ table: "jobs", field: "job_id" });
@@ -274,8 +289,46 @@ const customerJobAdd = async (job) => {
         expected_delivery_date, expected_delivery_date_old, due_on, submission_deadline,
         customer_deadline_date, sla_deadline_date, internal_deadline_date,
         filing_Companies_required, filing_Companies_date, filing_hmrc_required, filing_hmrc_date,
-        job_priority, processing_checklist, reviewing_checklist, status_type, notes
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+        opening_balance_required, opening_balance_date, number_of_transaction,
+        number_of_balance_items, turnover, number_of_employees, vat_reconciliation,
+        bookkeeping, processing_type, invoiced, currency, invoice_value,
+        invoice_date, invoice_hours, invoice_remark, status_type, notes,
+        Turnover_Period_id_0, Turnover_Currency_id_0, Turnover_id_0, VAT_Registered_id_0,
+        VAT_Frequency_id_0, Who_Did_The_Bookkeeping_id_1, PAYE_Registered_id_1,
+        Number_of_Trial_Balance_Items_id_1, Bookkeeping_Frequency_id_2,
+        Number_of_Total_Transactions_id_2, Number_of_Bank_Transactions_id_2,
+        Number_of_Purchase_Invoices_id_2, Number_of_Sales_Invoices_id_2,
+        Number_of_Petty_Cash_Transactions_id_2, Number_of_Journal_Entries_id_2,
+        Number_of_Other_Transactions_id_2, Transactions_Posting_id_2,
+        Quality_of_Paperwork_id_2, Number_of_Integration_Software_Platforms_id_2,
+        CIS_id_2, Posting_Payroll_Journals_id_2, Department_Tracking_id_2,
+        Sales_Reconciliation_Required_id_2, Factoring_Account_id_2, Payment_Methods_id_2,
+        Payroll_Frequency_id_3, Type_of_Payslip_id_3, Percentage_of_Variable_Payslips_id_3,
+        Is_CIS_Required_id_3, CIS_Frequency_id_3, Number_of_Sub_contractors_id_3,
+        Whose_Tax_Return_is_it_id_4, Number_of_Income_Sources_id_4,
+        If_Landlord_Number_of_Properties_id_4, If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+        Management_Accounts_Frequency_id_6, Year_Ending_id_1, Day_Date_id_2,
+        Week_Year_id_2, Week_Month_id_2, Week_id_2, Fortnight_Year_id_2,
+        Fortnight_Month_id_2, Fortnight_id_2, Month_Year_id_2, Month_id_2,
+        Quarter_Year_id_2, Quarter_id_2, Year_id_2, Other_FromDate_id_2,
+        Other_ToDate_id_2, Payroll_Week_Year_id_3, Payroll_Week_Month_id_3,
+        Payroll_Week_id_3, Payroll_Fortnight_Year_id_3, Payroll_Fortnight_Month_id_3,
+        Payroll_Fortnight_id_3, Payroll_Month_Year_id_3, Payroll_Month_id_3,
+        Payroll_Quarter_Year_id_3, Payroll_Quarter_id_3, Payroll_Year_id_3,
+        Tax_Year_id_4, Management_Accounts_FromDate_id_6, Management_Accounts_ToDate_id_6,
+        Year_id_33, Period_id_32, Day_Date_id_32, Week_Year_id_32, Week_Month_id_32,
+        Week_id_32, Fortnight_Year_id_32, Fortnight_Month_id_32, Fortnight_id_32,
+        Month_Year_id_32, Month_id_32, Quarter_Year_id_32, Quarter_id_32,
+        Year_id_32, Other_FromDate_id_32, Other_ToDate_id_32, Payroll_Frequency_id_31,
+        Payroll_Week_Year_id_31, Payroll_Week_Month_id_31, Payroll_Week_id_31,
+        Payroll_Fortnight_Year_id_31, Payroll_Fortnight_Month_id_31,
+        Payroll_Fortnight_id_31, Payroll_Month_Year_id_31, Payroll_Month_id_31,
+        Payroll_Quarter_Year_id_31, Payroll_Quarter_id_31, Payroll_Year_id_31,
+        Audit_Year_Ending_id_27, Filing_Frequency_id_8, Period_Ending_Date_id_8,
+        Filing_Date_id_8, Year_id_28, job_priority, processing_checklist,
+        reviewing_checklist, processing_checklist_status, reviewing_checklist_status,
+        checklist_modal_data
+    ) VALUES `;
 
     const values = [
       staffCreatedId, job_id_code, job.account_manager_id, customer_id, client_id, job.client_job_code,
@@ -285,10 +338,48 @@ const customerJobAdd = async (job) => {
       job.expected_delivery_date, job.expected_delivery_date, job.due_on, job.submission_deadline,
       job.customer_deadline_date, job.sla_deadline_date, job.internal_deadline_date,
       job.filing_Companies_required, job.filing_Companies_date, job.filing_hmrc_required, job.filing_hmrc_date,
-      job.job_priority || 'normal', job.processing_checklist, job.reviewing_checklist, status_type, job.notes || ""
+      job.opening_balance_required, job.opening_balance_date, job.number_of_transaction,
+      job.number_of_balance_items, job.turnover, job.number_of_employees, job.vat_reconciliation,
+      job.bookkeeping, job.processing_type, job.invoiced, job.currency, job.invoice_value,
+      job.invoice_date, job.invoice_hours, job.invoice_remark, status_type, job.notes || "",
+      job.Turnover_Period_id_0, job.Turnover_Currency_id_0, job.Turnover_id_0, job.VAT_Registered_id_0,
+      job.VAT_Frequency_id_0, job.Who_Did_The_Bookkeeping_id_1, job.PAYE_Registered_id_1,
+      job.Number_of_Trial_Balance_Items_id_1, job.Bookkeeping_Frequency_id_2,
+      job.Number_of_Total_Transactions_id_2, job.Number_of_Bank_Transactions_id_2,
+      job.Number_of_Purchase_Invoices_id_2, job.Number_of_Sales_Invoices_id_2,
+      job.Number_of_Petty_Cash_Transactions_id_2, job.Number_of_Journal_Entries_id_2,
+      job.Number_of_Other_Transactions_id_2, job.Transactions_Posting_id_2,
+      job.Quality_of_Paperwork_id_2, job.Number_of_Integration_Software_Platforms_id_2,
+      job.CIS_id_2, job.Posting_Payroll_Journals_id_2, job.Department_Tracking_id_2,
+      job.Sales_Reconciliation_Required_id_2, job.Factoring_Account_id_2, job.Payment_Methods_id_2,
+      job.Payroll_Frequency_id_3, job.Type_of_Payslip_id_3, job.Percentage_of_Variable_Payslips_id_3,
+      job.Is_CIS_Required_id_3, job.CIS_Frequency_id_3, job.Number_of_Sub_contractors_id_3,
+      job.Whose_Tax_Return_is_it_id_4, job.Number_of_Income_Sources_id_4,
+      job.If_Landlord_Number_of_Properties_id_4, job.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+      job.Management_Accounts_Frequency_id_6, job.Year_Ending_id_1, job.Day_Date_id_2,
+      job.Week_Year_id_2, job.Week_Month_id_2, job.Week_id_2, job.Fortnight_Year_id_2,
+      job.Fortnight_Month_id_2, job.Fortnight_id_2, job.Month_Year_id_2, job.Month_id_2,
+      job.Quarter_Year_id_2, job.Quarter_id_2, job.Year_id_2, job.Other_FromDate_id_2,
+      job.Other_ToDate_id_2, job.Payroll_Week_Year_id_3, job.Payroll_Week_Month_id_3,
+      job.Payroll_Week_id_3, job.Payroll_Fortnight_Year_id_3, job.Payroll_Fortnight_Month_id_3,
+      job.Payroll_Fortnight_id_3, job.Payroll_Month_Year_id_3, job.Payroll_Month_id_3,
+      job.Payroll_Quarter_Year_id_3, job.Payroll_Quarter_id_3, job.Payroll_Year_id_3,
+      job.Tax_Year_id_4, job.Management_Accounts_FromDate_id_6, job.Management_Accounts_ToDate_id_6,
+      job.Year_id_33, job.Period_id_32, job.Day_Date_id_32, job.Week_Year_id_32, job.Week_Month_id_32,
+      job.Week_id_32, job.Fortnight_Year_id_32, job.Fortnight_Month_id_32, job.Fortnight_id_32,
+      job.Month_Year_id_32, job.Month_id_32, job.Quarter_Year_id_32, job.Quarter_id_32,
+      job.Year_id_32, job.Other_FromDate_id_32, job.Other_ToDate_id_32, job.Payroll_Frequency_id_31,
+      job.Payroll_Week_Year_id_31, job.Payroll_Week_Month_id_31, job.Payroll_Week_id_31,
+      job.Payroll_Fortnight_Year_id_31, job.Payroll_Fortnight_Month_id_31,
+      job.Payroll_Fortnight_id_31, job.Payroll_Month_Year_id_31, job.Payroll_Month_id_31,
+      job.Payroll_Quarter_Year_id_31, job.Payroll_Quarter_id_31, job.Payroll_Year_id_31,
+      job.Audit_Year_Ending_id_27, job.Filing_Frequency_id_8, job.Period_Ending_Date_id_8,
+      job.Filing_Date_id_8, job.Year_id_28, job.job_priority || 'normal',
+      job.processing_checklist, job.reviewing_checklist, job.processing_checklist_status,
+      job.reviewing_checklist_status, job.checklist_modal_data
     ].map(handleUndefined);
 
-    const [result] = await pool.execute(query, values);
+    const [result] = await pool.execute(query + "(" + Array(values.length).fill("?").join(",") + ")", values);
 
     if (result.insertId > 0) {
       const status_update_date = new Date().toLocaleString('sv-SE');
@@ -304,12 +395,50 @@ const customerJobAdd = async (job) => {
         module_id: result.insertId,
       });
 
-      // Handle Allowed Staff
-      if (reviewer > 0) {
-        await pool.execute("INSERT INTO job_allowed_staffs (job_id, staff_id) VALUES (?, ?)", [result.insertId, reviewer]);
+      // Task Insertion Logic (from Admin)
+      if (tasks && tasks.task && tasks.task.length > 0) {
+        for (const tsk of tasks.task) {
+          let task_id = tsk.task_id;
+          let task_name = tsk.task_name;
+          let budgeted_hour = tsk.budgeted_hour;
+
+          if (task_id == "" || task_id == undefined || task_id == null) {
+            const checkQuery = `SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?`;
+            const [existing] = await pool.execute(checkQuery, [task_name, service_id, job_type_id]);
+
+            if (existing.length === 0) {
+              const insertTaskQuery = `INSERT INTO task (name, service_id, job_type_id) VALUES (?, ?, ?)`;
+              const [newTask] = await pool.execute(insertTaskQuery, [task_name, service_id, job_type_id]);
+              if (newTask.insertId > 0) {
+                task_id = newTask.insertId;
+              }
+            } else {
+              task_id = existing[0].id;
+            }
+          }
+
+          if (task_id) {
+            const insertJobTaskQuery = `INSERT INTO client_job_task (job_id, client_id, task_id, time) VALUES (?, ?, ?, ?)`;
+            await pool.execute(insertJobTaskQuery, [result.insertId, client_id, task_id, budgeted_hour]);
+          }
+        }
       }
-      if (allocated_to > 0 && allocated_to !== reviewer) {
-        await pool.execute("INSERT INTO job_allowed_staffs (job_id, staff_id) VALUES (?, ?)", [result.insertId, allocated_to]);
+
+      // Allowed Staff Logic (from Admin)
+      if (selectedStaffData && selectedStaffData.length > 0) {
+        for (const staff of selectedStaffData) {
+          let { value } = staff;
+          const query = `INSERT INTO job_allowed_staffs (job_id, staff_id) VALUES (?, ?)`;
+          await pool.execute(query, [result.insertId, value]);
+        }
+      } else {
+        // Fallback for Customer Portal specific defaults if no selectedStaffData
+        if (reviewer > 0) {
+          await pool.execute("INSERT INTO job_allowed_staffs (job_id, staff_id) VALUES (?, ?)", [result.insertId, reviewer]);
+        }
+        if (allocated_to > 0 && allocated_to !== reviewer) {
+          await pool.execute("INSERT INTO job_allowed_staffs (job_id, staff_id) VALUES (?, ?)", [result.insertId, allocated_to]);
+        }
       }
     }
 
