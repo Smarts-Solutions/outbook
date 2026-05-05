@@ -637,7 +637,11 @@ const CreateJob = () => {
     }
 
     if (name === "JobType") {
-      setAddTaskArr([]);
+      if (!['', 'undefined', undefined, null, 'null'].includes(jobData.JobType) && Number(jobData.JobType) === Number(value) && AddTaskArr.length > 0) {
+
+      } else {
+        setAddTaskArr([]);
+      }
     }
 
     const date = new Date();
@@ -3985,7 +3989,6 @@ const CreateJob = () => {
                         onHide={(e) => {
                           jobModalSetStatus(false);
                           HandleReset1();
-                          setAddTaskArr([]);
                         }}
                         centered
                         size="xl"
@@ -4170,7 +4173,6 @@ const CreateJob = () => {
                             onClick={() => {
                               jobModalSetStatus(false);
                               HandleReset1();
-                              setAddTaskArr([]);
                             }}
                           >
                             <X size={16} /> Close
