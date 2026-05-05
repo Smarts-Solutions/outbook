@@ -637,12 +637,7 @@ const CreateJob = () => {
     }
 
     if (name === "JobType") {
-      const selectedJobType = get_Job_Type.data.find(item => Number(item.id) === Number(value));
-      if (selectedJobType && selectedJobType.task) {
-        setAddTaskArr(selectedJobType.task);
-      } else {
-        setAddTaskArr([]);
-      }
+      setAddTaskArr([]);
     }
 
     const date = new Date();
@@ -4012,12 +4007,10 @@ const CreateJob = () => {
                                   <div className="col-lg-6">
                                     <div className="col-sm-auto">
                                       <button
-                                        className="btn btn-info float-end mb-3"
-                                        // disabled={getChecklistId == ""}
+                                        className="btn btn-outline-info float-end mb-3"
                                         onClick={() => setShowAddJobModal(true)}
                                       >
-                                        <Plus size={16} /> Add
-                                        Task
+                                        <Plus size={16} /> Add Task
                                       </button>
                                     </div>
                                   </div>
@@ -4063,7 +4056,8 @@ const CreateJob = () => {
                                                             ""
                                                           ) : (
                                                             <button
-                                                              className=" btn-info text-white blue-btn"
+                                                              className="btn-info text-white blue-btn"
+                                                              style={{ borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none' }}
                                                               onClick={() =>
                                                                 AddTask(
                                                                   checklist?.task_id
@@ -4172,22 +4166,20 @@ const CreateJob = () => {
                         </Modal.Body>
                         <Modal.Footer>
                           <Button
-                            variant="secondary"
+                            variant="btn btn-outline-danger float-end"
                             onClick={() => {
                               jobModalSetStatus(false);
                               HandleReset1();
                               setAddTaskArr([]);
                             }}
                           >
-                            < X size={16} />
-                            Close
+                            <X size={16} /> Close
                           </Button>
                           <Button
                             variant="btn btn-outline-success float-end "
                             onClick={handleAddCheckList}
                           >
-                            <Save size={16} />
-                            Submit
+                            <Save size={16} /> Submit
                           </Button>
                         </Modal.Footer>
                       </Modal>
