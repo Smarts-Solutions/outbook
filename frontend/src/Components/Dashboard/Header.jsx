@@ -4,6 +4,8 @@ import { useDispatch } from "react-redux";
 import { isLoginAuthCheckToken, isLogOut } from "../../ReduxStore/Slice/Auth/authSlice";
 import { Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import Select from "react-select";
+import { useCustomerAccess } from "../../Utils/CustomerAccessContext";
 
 
 const Header = () => {
@@ -18,6 +20,7 @@ const Header = () => {
   };
 
   const role = JSON.parse(localStorage.getItem("role"));
+  const { assignedCustomers, selectedCustomer, setSelectedCustomer } = useCustomerAccess();
 
 
 
@@ -225,12 +228,41 @@ const Header = () => {
                 </svg>
               </button>
             </li>
-            {/* <li>
-              <p className="mb-0 page-subtitle">{formatTime(currentTime)}</p>
-              <h2 className="header-page-title mt-1 mb-0">
-                {formatDate(currentTime)}
-              </h2>
-            </li> */}
+            {role?.toString().toUpperCase() === "CUSTOMER" && (
+              <li className="hide-phone app-search">
+                <div className="d-flex align-items-center mt-2">
+                  {/* <label className="mb-0 mr-2 text-dark font-weight-semibold">Customer</label> */}
+                  <div style={{ width: "250px" }}>
+                    <Select
+                      options={assignedCustomers}
+                      value={selectedCustomer}
+                      onChange={(selectedOption) => setSelectedCustomer(selectedOption)}
+                      placeholder="Select Customer"
+                      isSearchable={true}
+                      className="basic-single"
+                      classNamePrefix="select"
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          borderRadius: "20px",
+                          height: "38px",
+                          minHeight: "38px",
+                          border: "1px solid #e0e0e0",
+                          boxShadow: "none",
+                          "&:hover": {
+                            border: "1px solid #007bff",
+                          },
+                        }),
+                        valueContainer: (base) => ({
+                          ...base,
+                          padding: "0 12px",
+                        }),
+                      }}
+                    />
+                  </div>
+                </div>
+              </li>
+            )}
           </ul>
         </nav>
         {/* end navbar*/}

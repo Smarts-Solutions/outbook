@@ -18,7 +18,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
   const dispatch = useDispatch();
-  const { hasAccess } = useCustomerAccess();
+  const { hasAccess, selectedCustomer } = useCustomerAccess();
 
   const [dashboard, setDashboard] = useState({
     client: { count: 0, ids: "" },
@@ -64,7 +64,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     GetDashboardData();
-  }, [selectedTab]);
+  }, [selectedTab, selectedCustomer]);
 
   // ✅ FIXED: Custom date range logic
   useEffect(() => {
@@ -88,7 +88,8 @@ const Dashboard = () => {
       setLoading(true);
       setError(null);
 
-      const req = { staff_id: staffDetails.id, date_filter: selectedTab };
+      const customer_id = selectedCustomer.value === "All" ? "" : selectedCustomer.value;
+      const req = { staff_id: staffDetails.id, date_filter: selectedTab, customer_id: customer_id };
       const data = { req: req, authToken: token };
 
       const res = await dispatch(CustomerDashboardData(data)).unwrap();
@@ -110,10 +111,12 @@ const Dashboard = () => {
 
   const ActivityLogData = async (pageNo = 1) => {
     try {
+      const customer_id = selectedCustomer.value === "All" ? "" : selectedCustomer.value;
       const req = {
         staff_id: staffDetails.id,
         filter_type: activityRange,
         page: pageNo,
+        customer_id: customer_id,
       };
 
       if (activityRange === "custom") {

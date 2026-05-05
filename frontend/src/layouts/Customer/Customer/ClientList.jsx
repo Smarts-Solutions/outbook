@@ -24,12 +24,12 @@ const ClientLists = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const role = JSON.parse(localStorage.getItem("role"));
-  const { hasAccess } = useCustomerAccess();
+  const { hasAccess, selectedCustomer } = useCustomerAccess();
 
   const customer_id_sidebar = sessionStorage.getItem("cust_id_sidebar");
   const [CustomerData, setCustomerData] = useState([]);
-  const [customerId, setCustomerId] = useState(customer_id_sidebar || "");
-  const [customerName, setCustomerName] = useState(sessionStorage.getItem("cust_id_sidebar_name") || "");
+  const [customerId, setCustomerId] = useState(selectedCustomer?.value || "");
+  const [customerName, setCustomerName] = useState(selectedCustomer?.label || "");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -95,12 +95,16 @@ const ClientLists = () => {
       GetStatus();
     }
     
+    const id = selectedCustomer.value === "All" ? "" : selectedCustomer.value;
+    setCustomerId(id);
+    setCustomerName(selectedCustomer.label);
+
     if (activeTab === "client") {
-      GetAllClientData(customerId, 1, pageSize, "");
+      GetAllClientData(id, 1, pageSize, "");
     } else if (activeTab === "job") {
-      JobDetails(1, pageSize, "");
+      JobDetails(1, pageSize, "", id);
     }
-  }, [activeTab, customerId]);
+  }, [activeTab, selectedCustomer, pageSize]);
 
   const SetTab = (e) => {
     setActiveTab(e);
@@ -125,9 +129,9 @@ const ClientLists = () => {
       .finally(() => setLoading(false));
   };
 
-  const JobDetails = async (page = 1, limit = 10, search = "") => {
+  const JobDetails = async (page = 1, limit = 10, search = "", id = customerId) => {
     setLoading(true);
-    const req = { action: "getByCustomer", customer_id: customerId, page, limit, search };
+    const req = { action: "getByCustomer", customer_id: id, page, limit, search };
     await dispatch(CustomerJobList({ req, authToken: token }))
       .unwrap()
       .then((response) => {
@@ -495,24 +499,6 @@ const ClientLists = () => {
     navigate("/customer/job/logs", { state: { job_id: row.job_id, activeTab: activeTab, customer_id: customerId, data: updatedData } });
   };
 
-  const selectCustomerId = (id, name) => {
-    sessionStorage.setItem("cust_id_sidebar", id);
-    sessionStorage.setItem("cust_id_sidebar_name", name);
-    setCustomerId(id);
-    setCustomerName(name);
-    setHararchyData({ customer: { id: id, trading_name: name } });
-    setActiveTab("client");
-    setCurrentPage(1);
-    setSearchTerm("");
-  };
-
-  const customerOptions = [
-    { value: "", label: "All" },
-    ...(CustomerData || []).map((val) => ({ value: val.id, label: val.trading_name })),
-  ];
-
-  const selectedOption = customerOptions.find((opt) => Number(opt.value) === Number(customerId)) || { value: "", label: "All" };
-
   const tabs = [];
   if (hasAccess("client", "view")) {
     tabs.push({ id: "client", label: "Client", icon: <User size={16} /> });
@@ -526,7 +512,7 @@ const ClientLists = () => {
       <div className="content-title">
         <div className="row ">
           <div className="col-sm-12">
-            <div className="form-group col-md-4 mb-0">
+            {/* <div className="form-group col-md-4 mb-0">
               <label className="form-label mb-2"> Customer</label>
               <Select
                 options={customerOptions}
@@ -539,7 +525,7 @@ const ClientLists = () => {
                 menuPortalTarget={document.body}
                 styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
               />
-            </div>
+            </div> */}
 
             <div className="page-title-box pt-2">
               <div className="row align-items-start">

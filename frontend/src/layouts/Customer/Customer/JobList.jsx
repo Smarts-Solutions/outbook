@@ -22,6 +22,10 @@ import { Download, Plus, Briefcase, User, Phone, Mail } from "lucide-react";
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 const ClientList = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const { hasAccess, selectedCustomer } = useCustomerAccess();
+
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const cust_id_sidebar = sessionStorage.getItem("cust_id_sidebar");
   const cli_id_sidebar = sessionStorage.getItem("cli_id_sidebar");
@@ -47,35 +51,26 @@ const ClientList = () => {
   useEffect(() => {
     GetAllCustomer();
     GetStatus();
-
-    if (
-      ![undefined, "", null].includes(cust_id_sidebar) &&
-      ![undefined, "", null].includes(cli_id_sidebar)
-    ) {
-      getAllClientData1(
-        cust_id_sidebar,
-        cust_id_sidebar_name,
-        cli_id_sidebar,
-        cli_id_sidebar_name,
-      );
-      setHararchyData({
-        customer: { id: cust_id_sidebar, trading_name: cust_id_sidebar_name },
-        client: { id: cli_id_sidebar, client_name: cli_id_sidebar_name },
-      });
-    } else if (![undefined, "", null].includes(cust_id_sidebar)) {
-      setCustomerDetails({
-        id: cust_id_sidebar,
-        trading_name: cust_id_sidebar_name,
-      });
-      setHararchyData({
-        customer: { id: cust_id_sidebar, trading_name: cust_id_sidebar_name },
-        client: { id: "", client_name: "" },
-      });
-      GetAllClientData(cust_id_sidebar, cust_id_sidebar_name);
-    } else {
-      GetAllJobListByCustomer("");
-    }
   }, []);
+
+  useEffect(() => {
+    const id = selectedCustomer.value === "All" ? "" : selectedCustomer.value;
+    const name = selectedCustomer.label;
+
+    setCustomerDetails({ id: id, trading_name: name });
+    
+    if (id) {
+        GetAllClientData(id, name);
+    } else {
+        GetAllJobListByCustomer("", 1, pageSize, searchTerm);
+        setClientData([]);
+        setClientDetailSingle({ id: "", client_name: "" });
+        setHararchyData({
+            customer: { id: "", trading_name: "" },
+            client: { id: "", client_name: "" },
+        });
+    }
+  }, [selectedCustomer, pageSize]);
 
 
 
@@ -157,9 +152,6 @@ const ClientList = () => {
       });
   };
 
-  const location = useLocation();
-  const dispatch = useDispatch();
-  const { hasAccess } = useCustomerAccess();
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
   const [customerData, setCustomerData] = useState([]);
@@ -790,7 +782,7 @@ const ClientList = () => {
       search,
     };
 
-    const data = { req, authToken: token };
+    const data = { req: req, authToken: token };
 
     await dispatch(CustomerJobList(data))
       .unwrap()
@@ -866,35 +858,6 @@ const ClientList = () => {
     }
   };
 
-  const selectCustomerId = (id, name) => {
-    if (id && id != "") {
-      sessionStorage.setItem("cust_id_sidebar", id);
-      sessionStorage.setItem("cust_id_sidebar_name", name);
-      setCustomerData([]);
-      setCustomerDetails({ id: id, trading_name: name });
-      setHararchyData({
-        customer: { id: id, trading_name: name },
-        client: { id: "", client_name: "" },
-      });
-      setClientDetailSingle({ id: "", client_name: "" });
-      setActiveTab("NoOfJobs");
-      GetAllClientData(id, name);
-    } else {
-      GetAllJobListByCustomer("", 1, pageSize, "");
-      setClientData([]);
-      setCustomerDetails({ id: "", trading_name: "" });
-      setHararchyData({
-        customer: { id: "", trading_name: "" },
-        client: { id: "", client_name: "" },
-      });
-      setClientDetails({ loading: false, data: [] });
-      informationSetData([]);
-      setClientInformationData([]);
-      setCompanyDetails([]);
-    }
-  };
-
-  // CHANGED: "All" option (id="") select karne par customer ki saari jobs dikhao
   const selectClientId = (id, name) => {
     if (id != "") {
       // Specific client selected
@@ -947,7 +910,6 @@ const ClientList = () => {
     Status: item.status,
   }));
 
-  // Prepare customer options for the select dropdown
   const customerOptions = [
     { value: "", label: "All" },
     ...(customerDataAll || [])
@@ -994,7 +956,7 @@ const ClientList = () => {
       search: "",
     };
 
-    const data = { req, authToken: token };
+    const data = { req: req, authToken: token };
     const response = await dispatch(CustomerJobList(data)).unwrap();
     if (!response.status) {
       alert("No data to export!");
@@ -1014,10 +976,6 @@ const ClientList = () => {
       "Job Priority": item.job_priority || "-",
       "Client Trading Name": item.client_trading_name || "-",
       "Job Type Name": item.job_type_name || "-",
-      // "Account Manager":
-      //   item.account_manager_officer_first_name +
-      //   " " +
-      //   item.account_manager_officer_last_name||"-",
       "Client Contact Person":
         item.account_manager_officer_first_name &&
           item.account_manager_officer_last_name
@@ -1075,7 +1033,7 @@ const ClientList = () => {
       )}
       <div className="content-title">
         <div className="row">
-          <div className="form-group col-md-4 mb-0">
+          {/* <div className="form-group col-md-4 mb-0">
             <label className="form-label mb-2">Customer</label>
             <Select
               id="tabSelect"
@@ -1096,7 +1054,7 @@ const ClientList = () => {
               isSearchable
               placeholder="All"
             />
-          </div>
+          </div> */}
 
           {customerDetails.id != "" ? (
             <>
