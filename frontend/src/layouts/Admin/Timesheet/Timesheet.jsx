@@ -2003,10 +2003,10 @@ const Timesheet = () => {
         const rowToMerge = JSON.parse(JSON.stringify(row));
         rowToMerge.merge_date_time = new Date().toLocaleString();
         if (Array.isArray(rowToMerge.duplicate_entry)) {
-          firstRow.duplicate_entry.push(...rowToMerge.duplicate_entry);
+          firstRow?.duplicate_entry.push(...rowToMerge?.duplicate_entry);
           delete rowToMerge.duplicate_entry;
         }
-        firstRow.duplicate_entry.push(rowToMerge);
+        firstRow?.duplicate_entry?.push(rowToMerge);
 
         const days = [
           "monday",
@@ -2074,8 +2074,8 @@ const Timesheet = () => {
             updateRecordSheet(row.id, hKey, row[hKey]);
           });
           updateRecordSheet(row.id, "total_hours", row.total_hours);
-          if (row.duplicate_entry) {
-            updateRecordSheet(row.id, "duplicate_entry", row.duplicate_entry);
+          if (row?.duplicate_entry) {
+            updateRecordSheet(row?.id, "duplicate_entry", row?.duplicate_entry);
           }
         }
       });
