@@ -431,4 +431,62 @@ async function JobStatusUpdate(job_id, status_type, status_update_date) {
   }
 }
 
-module.exports = { SatffLogUpdateOperation, generateNextUniqueCode, generateNextUniqueCodeJobLogTitle, getDateRange, JobTaskNameWithId, getAllCustomerIds, LineManageStaffIdHelperFunction, QueryRoleHelperFunction, JobStatusUpdate };
+const getStaffAccessFilters = async (staff_id) => {
+  const [accessRows] = await pool.execute(
+    `SELECT ca.customer_id, ca.client_id, ca.job_id, s.role_id 
+     FROM customer_access ca
+     JOIN staffs s ON s.id = ca.staff_id
+     WHERE ca.staff_id = ?`,
+    [staff_id]
+  );
+
+  const queryAllAssigned = `
+      SELECT customer_id FROM customer_access WHERE staff_id = ?
+      UNION
+      SELECT customer_id FROM staff_portfolio WHERE staff_id = ?
+      UNION
+      SELECT id as customer_id FROM customers WHERE staff_id = ? OR account_manager_id = ?
+      UNION
+      SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
+  `;
+  const [assignedCustomers] = await pool.execute(queryAllAssigned, [staff_id, staff_id, staff_id, staff_id, staff_id]);
+  const assignedCustomerIds = assignedCustomers.map(c => c.customer_id).filter(id => id);
+
+  if (assignedCustomerIds.length === 0) {
+    return { customerCondition: "1=0", clientCondition: "1=0", jobCondition: "1=0", assignedCustomerIds: [] };
+  }
+
+  let customerCondition = `customer_id IN (${assignedCustomerIds.join(',')})`;
+  let clientCondition = "1=1";
+  let jobCondition = "1=1";
+
+  // If it's a Customer User (Role 12), apply strict filtering from customer_access
+  if (accessRows.length > 0 && accessRows[0].role_id === 12) {
+    let allClientIds = [];
+    let allJobIds = [];
+    accessRows.forEach(row => {
+      if (row.client_id && row.client_id.trim() !== '') {
+        allClientIds.push(...row.client_id.split(',').map(s => s.trim()).filter(s => s));
+      }
+      if (row.job_id && row.job_id.trim() !== '') {
+        allJobIds.push(...row.job_id.split(',').map(s => s.trim()).filter(s => s));
+      }
+    });
+
+    if (allClientIds.length > 0) {
+      clientCondition = `id IN (${allClientIds.join(',')})`;
+    } else {
+      clientCondition = "1=0";
+    }
+
+    if (allJobIds.length > 0) {
+      jobCondition = `id IN (${allJobIds.join(',')})`;
+    } else {
+      jobCondition = "1=0";
+    }
+  }
+
+  return { customerCondition, clientCondition, jobCondition, assignedCustomerIds };
+};
+
+module.exports = { SatffLogUpdateOperation, generateNextUniqueCode, generateNextUniqueCodeJobLogTitle, getDateRange, JobTaskNameWithId, getAllCustomerIds, LineManageStaffIdHelperFunction, QueryRoleHelperFunction, JobStatusUpdate, getStaffAccessFilters };

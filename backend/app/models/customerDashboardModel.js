@@ -1,5 +1,5 @@
 const pool = require('../config/database');
-const { getDateRange, SatffLogUpdateOperation, generateNextUniqueCode, JobStatusUpdate } = require('../utils/helper');
+const { getDateRange, SatffLogUpdateOperation, generateNextUniqueCode, JobStatusUpdate, getStaffAccessFilters } = require('../utils/helper');
 const { CustomerLogUpdateOperation } = require('../utils/customerHelper');
 const { getCompanyOfficerDetailsFun } = require('../controllers/companies/companyController');
 
@@ -9,18 +9,8 @@ const getCustomerDashboardData = async (dashboard) => {
   let { startDate, endDate } = await getDateRange(date_filter);
 
   try {
-    // 1. Get all assigned customer IDs for this staff member
-    const AssignedCustomerQuery = `
-        SELECT customer_id FROM customer_access WHERE staff_id = ?
-        UNION
-        SELECT customer_id FROM staff_portfolio WHERE staff_id = ?
-        UNION
-        SELECT id FROM customers WHERE staff_id = ? OR account_manager_id = ?
-        UNION
-        SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
-    `;
-    const [assignedCustomers] = await pool.execute(AssignedCustomerQuery, [effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId]);
-    const assignedCustomerIds = assignedCustomers.map(c => c.customer_id);
+    const access = await getStaffAccessFilters(effectiveStaffId);
+    const assignedCustomerIds = access.assignedCustomerIds;
 
     if (assignedCustomerIds.length === 0) {
       return {
@@ -38,30 +28,30 @@ const getCustomerDashboardData = async (dashboard) => {
     const idsStr = assignedCustomerIds.join(',');
 
     // 2. Get Clients for these Customers
-    let clientCondition = "";
+    let clientCondition = access.clientCondition;
     if (customer_id) {
-      clientCondition = `AND customer_id = ${pool.escape(customer_id)}`;
+      clientCondition += ` AND customer_id = ${pool.escape(customer_id)}`;
     }
 
     const ClientQuery = `
         SELECT id FROM clients 
         WHERE customer_id IN (${idsStr})
-        ${clientCondition}
+        AND ${clientCondition}
         AND DATE(created_at) BETWEEN ? AND ?
         ORDER BY id DESC
     `;
     const [ClientData] = await pool.execute(ClientQuery, [startDate, endDate]);
 
     // 3. Get Jobs for these Customers
-    let jobCondition = "";
+    let jobCondition = access.jobCondition;
     if (customer_id) {
-      jobCondition = `AND customer_id = ${pool.escape(customer_id)}`;
+      jobCondition += ` AND customer_id = ${pool.escape(customer_id)}`;
     }
 
     const JobQuery = `
         SELECT id, status_type FROM jobs 
         WHERE customer_id IN (${idsStr})
-        ${jobCondition}
+        AND ${jobCondition}
         AND DATE(created_at) BETWEEN ? AND ?
         ORDER BY id DESC
     `;
@@ -464,6 +454,7 @@ const getByCustomerClient = async (dashboard) => {
     const offset = (page - 1) * limit;
     search = search ? search.trim() : "";
 
+    const access = await getStaffAccessFilters(effectiveStaffId);
     let filterCondition = "";
     if (ids) {
       const cleane_ids = ids.replace(/^,+|,+$/g, "");
@@ -471,10 +462,12 @@ const getByCustomerClient = async (dashboard) => {
         filterCondition = `AND clients.id IN (${cleane_ids})`;
       }
     } else if (customer_id) {
-      filterCondition = `AND clients.customer_id = ${customer_id}`;
+      filterCondition = `AND clients.customer_id = ${customer_id} AND clients.${access.clientCondition}`;
+    } else {
+      filterCondition = `AND clients.${access.clientCondition}`;
     }
 
-    if (!filterCondition) return { status: true, message: "No filters provided.", data: [], pagination: { total: 0 } };
+    if (!access.assignedCustomerIds.length) return { status: true, message: "No filters provided.", data: [], pagination: { total: 0 } };
 
     const clientCodeExpr = `
       CONCAT(
@@ -512,19 +505,7 @@ const getByCustomerClient = async (dashboard) => {
       ];
     }
 
-    // Get assigned customer IDs for security check
-    const AssignedCustomerQuery = `
-        SELECT customer_id FROM customer_access WHERE staff_id = ?
-        UNION
-        SELECT customer_id FROM staff_portfolio WHERE staff_id = ?
-        UNION
-        SELECT id FROM customers WHERE staff_id = ? OR account_manager_id = ?
-        UNION
-        SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
-    `;
-    const [assignedCustomers] = await pool.execute(AssignedCustomerQuery, [effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId]);
-    const assignedCustomerIds = assignedCustomers.map(c => c.customer_id);
-    const idsStr = assignedCustomerIds.length > 0 ? assignedCustomerIds.join(',') : '0';
+    const idsStr = access.assignedCustomerIds.length > 0 ? access.assignedCustomerIds.join(',') : '0';
 
     const [countResult] = await pool.execute(
       `
@@ -650,6 +631,7 @@ const getByCustomerJob = async (dashboard) => {
     const offset = (page - 1) * limit;
     search = search ? search.trim() : "";
 
+    const access = await getStaffAccessFilters(effectiveStaffId);
     let filterCondition = "";
     if (ids) {
       const cleane_ids = ids.replace(/^,+|,+$/g, "");
@@ -657,10 +639,12 @@ const getByCustomerJob = async (dashboard) => {
         filterCondition = `AND jobs.id IN (${cleane_ids})`;
       }
     } else if (customer_id) {
-      filterCondition = `AND jobs.customer_id = ${customer_id}`;
+      filterCondition = `AND jobs.customer_id = ${customer_id} AND jobs.${access.jobCondition}`;
+    } else {
+      filterCondition = `AND jobs.${access.jobCondition}`;
     }
 
-    if (!filterCondition) return { status: true, message: "No filters provided.", data: [], pagination: { total: 0 } };
+    if (!access.assignedCustomerIds.length) return { status: true, message: "No filters provided.", data: [], pagination: { total: 0 } };
 
     const jobCodeExpr = `
       CONCAT(
@@ -694,19 +678,7 @@ const getByCustomerJob = async (dashboard) => {
       ];
     }
 
-    // Get assigned customer IDs for security check
-    const AssignedCustomerQuery = `
-        SELECT customer_id FROM customer_access WHERE staff_id = ?
-        UNION
-        SELECT customer_id FROM staff_portfolio WHERE staff_id = ?
-        UNION
-        SELECT id FROM customers WHERE staff_id = ? OR account_manager_id = ?
-        UNION
-        SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
-    `;
-    const [assignedCustomers] = await pool.execute(AssignedCustomerQuery, [effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId]);
-    const assignedCustomerIds = assignedCustomers.map(c => c.customer_id);
-    const idsStr = assignedCustomerIds.length > 0 ? assignedCustomerIds.join(',') : '0';
+    const idsStr = access.assignedCustomerIds.length > 0 ? access.assignedCustomerIds.join(',') : '0';
 
     const [countResult] = await pool.execute(
       `
@@ -854,6 +826,10 @@ const getCustomerDropdown = async (dashboard) => {
     const effectiveStaffId = staff_id || StaffUserId;
 
     if (action === "get") {
+      const access = await getStaffAccessFilters(effectiveStaffId);
+      const assignedIds = access.assignedCustomerIds;
+      if (assignedIds.length === 0) return { status: true, message: "Success..", data: [] };
+      
       const query = `
           SELECT 
             id, 
@@ -862,18 +838,10 @@ const getCustomerDropdown = async (dashboard) => {
             trading_name, 
             CONCAT('cust_', SUBSTRING(trading_name,1,3),'_',SUBSTRING(customer_code,1,15)) AS customer_code
           FROM customers 
-          WHERE id IN (
-            SELECT customer_id FROM customer_access WHERE staff_id = ?
-            UNION
-            SELECT customer_id FROM staff_portfolio WHERE staff_id = ?
-            UNION
-            SELECT id FROM customers WHERE staff_id = ? OR account_manager_id = ?
-            UNION
-            SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
-          ) AND status = '1' AND form_process = '4'
+          WHERE id IN (${assignedIds.join(',')}) AND status = '1' AND form_process = '4'
           ORDER BY trading_name ASC
       `;
-      const [rows] = await pool.execute(query, [effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId]);
+      const [rows] = await pool.execute(query);
 
       return {
         status: true,
@@ -900,17 +868,8 @@ const getCustomerList = async (dashboard) => {
     const offset = (page - 1) * limit;
     search = search ? search.trim() : "";
 
-    const queryAssigned = `
-        SELECT customer_id FROM customer_access WHERE staff_id = ?
-        UNION
-        SELECT customer_id FROM staff_portfolio WHERE staff_id = ?
-        UNION
-        SELECT id FROM customers WHERE staff_id = ? OR account_manager_id = ?
-        UNION
-        SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
-    `;
-    const [assignedCustomers] = await pool.execute(queryAssigned, [effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId]);
-    const assignedIds = assignedCustomers.map(c => c.customer_id);
+    const access = await getStaffAccessFilters(effectiveStaffId);
+    const assignedIds = access.assignedCustomerIds;
 
     if (assignedIds.length === 0) {
       return {
@@ -1045,23 +1004,14 @@ const getCustomerClientList = async (dashboard) => {
     const offset = (page - 1) * limit;
     search = search ? search.trim() : "";
 
-    let assignedCondition = "";
+    const access = await getStaffAccessFilters(effectiveStaffId);
+    const assignedIds = access.assignedCustomerIds;
+    
     if (customer_id && customer_id !== "") {
-      assignedCondition = `AND customers.id = ${customer_id}`;
+      assignedCondition = `AND customers.id = ${customer_id} AND clients.${access.clientCondition}`;
     } else {
-      const queryAssigned = `
-          SELECT customer_id FROM customer_access WHERE staff_id = ?
-          UNION
-          SELECT customer_id FROM staff_portfolio WHERE staff_id = ?
-          UNION
-          SELECT id FROM customers WHERE staff_id = ? OR account_manager_id = ?
-          UNION
-          SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
-      `;
-      const [assignedCustomers] = await pool.execute(queryAssigned, [effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId]);
-      const assignedIds = assignedCustomers.map(c => c.customer_id);
       if (assignedIds.length === 0) return { status: true, message: "No assigned customers.", data: [], pagination: { total: 0 } };
-      assignedCondition = `AND customers.id IN (${assignedIds.join(',')})`;
+      assignedCondition = `AND customers.id IN (${assignedIds.join(',')}) AND clients.${access.clientCondition}`;
     }
 
     let searchCondition = "";
@@ -1148,25 +1098,16 @@ const getCustomerJobList = async (dashboard) => {
       )
     `;
 
-    let assignedCondition = "";
+    const access = await getStaffAccessFilters(effectiveStaffId);
+    const assignedIds = access.assignedCustomerIds;
+
     if (action === "getByClient" && client_id) {
       assignedCondition = `AND jobs.client_id = ${client_id}`;
     } else if (action === "getByCustomer" && customer_id) {
-      assignedCondition = `AND jobs.customer_id = ${customer_id}`;
+      assignedCondition = `AND jobs.customer_id = ${customer_id} AND jobs.${access.jobCondition}`;
     } else {
-      const queryAssigned = `
-          SELECT customer_id FROM customer_access WHERE staff_id = ?
-          UNION
-          SELECT customer_id FROM staff_portfolio WHERE staff_id = ?
-          UNION
-          SELECT id FROM customers WHERE staff_id = ? OR account_manager_id = ?
-          UNION
-          SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
-      `;
-      const [assignedCustomers] = await pool.execute(queryAssigned, [effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId, effectiveStaffId]);
-      const assignedIds = assignedCustomers.map(c => c.customer_id);
       if (assignedIds.length === 0) return { status: true, message: "No assigned jobs.", data: [], pagination: { total: 0 } };
-      assignedCondition = `AND jobs.customer_id IN (${assignedIds.join(',')})`;
+      assignedCondition = `AND jobs.customer_id IN (${assignedIds.join(',')}) AND jobs.${access.jobCondition}`;
     }
 
     let searchCondition = "";

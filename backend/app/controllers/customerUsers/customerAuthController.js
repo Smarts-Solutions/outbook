@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const { commonEmail } = require("../../utils/commonEmail");
 const e = require('cors');
 const jwt = require("jsonwebtoken");
+const { getStaffAccessFilters } = require("../../utils/helper");
 
 exports.customerLogin = async (req, res) => {
   const { email, password } = req.body;
@@ -92,6 +93,13 @@ exports.getAssignedCustomers = async (req, res) => {
   const userId = req.userId;
 
   try {
+    const access = await getStaffAccessFilters(userId);
+    const assignedIds = access.assignedCustomerIds;
+
+    if (assignedIds.length === 0) {
+      return res.json({ status: true, message: "No assigned customers found", data: [] });
+    }
+
     const query = `
       SELECT 
         c.id,
@@ -117,13 +125,12 @@ exports.getAssignedCustomers = async (req, res) => {
             SUBSTRING(c.customer_code, 1, 15)
         ) AS customer_code
       FROM customers c
-      JOIN customer_access ca ON c.id = ca.customer_id
       LEFT JOIN staffs s1 ON c.staff_id = s1.id
       LEFT JOIN staffs s2 ON c.account_manager_id = s2.id
-      WHERE ca.staff_id = ?
+      WHERE c.id IN (${assignedIds.join(',')})
     `;
 
-    const [rows] = await pool.query(query, [userId]);
+    const [rows] = await pool.query(query);
 
     res.json({
       status: true,
@@ -142,6 +149,13 @@ exports.getAssignedClients = async (req, res) => {
   const userId = req.userId;
 
   try {
+    const access = await getStaffAccessFilters(userId);
+    const assignedIds = access.assignedCustomerIds;
+
+    if (assignedIds.length === 0) {
+      return res.json({ status: true, message: "No assigned clients found", data: [] });
+    }
+
     const query = `
       SELECT 
         cl.id,
@@ -159,15 +173,14 @@ exports.getAssignedClients = async (req, res) => {
         ) AS client_code
       FROM clients cl
       JOIN customers c ON cl.customer_id = c.id
-      JOIN customer_access ca ON c.id = ca.customer_id
       LEFT JOIN client_types ct ON cl.client_type = ct.id
       LEFT JOIN staffs s ON cl.staff_created_id = s.id
-      WHERE ca.staff_id = ?
+      WHERE c.id IN (${assignedIds.join(',')}) AND cl.${access.clientCondition}
       GROUP BY cl.id
       ORDER BY cl.trading_name ASC
     `;
 
-    const [rows] = await pool.query(query, [userId]);
+    const [rows] = await pool.query(query);
 
     res.json({
       status: true,
@@ -186,6 +199,13 @@ exports.getAssignedJobs = async (req, res) => {
   const userId = req.userId;
 
   try {
+    const access = await getStaffAccessFilters(userId);
+    const assignedIds = access.assignedCustomerIds;
+
+    if (assignedIds.length === 0) {
+      return res.json({ status: true, message: "No assigned jobs found", data: [] });
+    }
+
     const query = `
       SELECT 
         j.id,
@@ -205,7 +225,6 @@ exports.getAssignedJobs = async (req, res) => {
         j.invoiced
       FROM jobs j
       JOIN customers c ON j.customer_id = c.id
-      JOIN customer_access ca ON c.id = ca.customer_id
       LEFT JOIN clients cl ON j.client_id = cl.id
       LEFT JOIN job_types jt ON j.job_type_id = jt.id
       LEFT JOIN master_status ms ON j.status_type = ms.id
@@ -213,12 +232,12 @@ exports.getAssignedJobs = async (req, res) => {
       LEFT JOIN staffs s_am ON j.account_manager_id = s_am.id
       LEFT JOIN staffs s_at ON j.allocated_to = s_at.id
       LEFT JOIN staffs s_cb ON j.staff_created_id = s_cb.id
-      WHERE ca.staff_id = ?
+      WHERE c.id IN (${assignedIds.join(',')}) AND j.${access.jobCondition}
       GROUP BY j.id
       ORDER BY j.id DESC
     `;
 
-    const [rows] = await pool.query(query, [userId]);
+    const [rows] = await pool.query(query);
 
     res.json({
       status: true,
