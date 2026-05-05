@@ -1752,7 +1752,7 @@ const customerJobAction = async (dashboard) => {
 const customerJobUpdate = async (job) => {
   const {
     job_id, client_id, service_id, job_type_id, status_type,
-    reviewer, allocated_to, allocated_on, date_received_on, YearEnd,
+    reviewer, allocated_to, allocated_on, date_received_on, year_end,
     budgeted_hours, total_preparation_time, review_time, feedback_incorporation_time,
     total_time, engagement_model, expected_delivery_date, due_on,
     submission_deadline, customer_deadline_date, sla_deadline_date, internal_deadline_date,
@@ -1775,7 +1775,6 @@ const customerJobUpdate = async (job) => {
       if (field === "status_type") {
         await JobStatusUpdate(job_id, updateRow[field], new Date().toLocaleString('sv-SE'));
         
-        // Log status change (non-blocking)
         try {
           const [StatusName] = await pool.execute(`SELECT name FROM master_status WHERE id = ?`, [updateRow[field]]);
           CustomerLogUpdateOperation({
@@ -1797,69 +1796,293 @@ const customerJobUpdate = async (job) => {
     }
   }
 
+  // Check Reviewer Checklist Status
+  if (reviewer > 0 && Number(job?.reviewing_checklist_status) === 2) {
+    return { status: false, message: "Please complete the reviewing checklist first.", data: "W" };
+  }
+
+  // Check Processor Checklist Status
+  if (allocated_to > 0 && Number(job?.processing_checklist_status) === 2) {
+    return { status: false, message: "Please complete the processing checklist first.", data: "W" };
+  }
+
+  const ExistJobQuery = `
+    SELECT 
+      account_manager_id, customer_id, client_id, client_job_code, customer_contact_details_id,
+      service_id, job_type_id, budgeted_hours, reviewer, allocated_to,
+      DATE_FORMAT(allocated_on, '%Y-%m-%d') AS allocated_on,
+      DATE_FORMAT(date_received_on, '%Y-%m-%d') AS date_received_on,
+      year_end, total_preparation_time, review_time, feedback_incorporation_time,
+      total_time, engagement_model, status_type,
+      DATE_FORMAT(expected_delivery_date, '%Y-%m-%d') AS expected_delivery_date,
+      DATE_FORMAT(expected_delivery_date_old, '%Y-%m-%d') AS expected_delivery_date_old,
+      DATE_FORMAT(due_on, '%Y-%m-%d') AS due_on,
+      DATE_FORMAT(submission_deadline, '%Y-%m-%d') AS submission_deadline,
+      DATE_FORMAT(customer_deadline_date, '%Y-%m-%d') AS customer_deadline_date,
+      DATE_FORMAT(sla_deadline_date, '%Y-%m-%d') AS sla_deadline_date,
+      DATE_FORMAT(internal_deadline_date, '%Y-%m-%d') AS internal_deadline_date,
+      filing_Companies_required, DATE_FORMAT(filing_Companies_date, '%Y-%m-%d') AS filing_Companies_date,
+      filing_hmrc_required, DATE_FORMAT(filing_hmrc_date, '%Y-%m-%d') AS filing_hmrc_date,
+      opening_balance_required, DATE_FORMAT(opening_balance_date, '%Y-%m-%d') AS opening_balance_date,
+      number_of_transaction, number_of_balance_items, turnover, number_of_employees,
+      vat_reconciliation, bookkeeping, processing_type, invoiced, currency, invoice_value,
+      DATE_FORMAT(invoice_date, '%Y-%m-%d') AS invoice_date, invoice_hours, invoice_remark, notes
+    FROM jobs WHERE id = ?
+  `;
+
   try {
+    const [[ExistJob]] = await pool.execute(ExistJobQuery, [job_id]);
+    if (!ExistJob) return { status: false, message: "Job not found." };
+
+    let expected_delivery_date_old = ExistJob.expected_delivery_date_old;
+    if (expected_delivery_date == null) {
+      expected_delivery_date_old = null;
+    } else if (expected_delivery_date != null && ExistJob.expected_delivery_date_old == null) {
+      expected_delivery_date_old = expected_delivery_date;
+    } else if (expected_delivery_date != null && ExistJob.expected_delivery_date_old != null) {
+      expected_delivery_date_old = ExistJob.expected_delivery_date;
+    }
+
+    let status_type_update = status_type;
+    if (status_type == null || status_type == 0 || status_type == 1) {
+      if (allocated_to > 0) status_type_update = 3;
+    } else {
+      if (allocated_to > 0 && ExistJob.allocated_to == 0) status_type_update = 3;
+    }
+
     const query = `
       UPDATE jobs SET 
-        client_id = ?, service_id = ?, job_type_id = ?, status_type = ?, 
-        reviewer = ?, allocated_to = ?, allocated_on = ?, date_received_on = ?, year_end = ?,
-        budgeted_hours = ?, total_preparation_time = ?, review_time = ?, feedback_incorporation_time = ?,
-        total_time = ?, engagement_model = ?, expected_delivery_date = ?, due_on = ?,
-        submission_deadline = ?, customer_deadline_date = ?, sla_deadline_date = ?, internal_deadline_date = ?,
-        filing_Companies_required = ?, filing_Companies_date = ?, filing_hmrc_required = ?, filing_hmrc_date = ?,
-        opening_balance_required = ?, opening_balance_date = ?, number_of_transaction = ?, number_of_balance_items = ?,
-        turnover = ?, number_of_employees = ?, vat_reconciliation = ?, bookkeeping = ?, processing_type = ?,
-        invoiced = ?, currency = ?, invoice_value = ?, invoice_date = ?, invoice_hours = ?, invoice_remark = ?,
-        notes = ?, client_job_code = ?, processing_checklist = ?, reviewing_checklist = ?, 
-        processing_checklist_status = ?, reviewing_checklist_status = ?, checklist_modal_data = ?, job_priority = ?
+        account_manager_id = ?, customer_id = ?, client_id = ?, client_job_code = ?, customer_contact_details_id = ?, 
+        service_id = ?, job_type_id = ?, budgeted_hours = ?, reviewer = ?, allocated_to = ?, allocated_on = ?, 
+        date_received_on = ?, year_end = ?, total_preparation_time = ?, review_time = ?, 
+        feedback_incorporation_time = ?, total_time = ?, engagement_model = ?, expected_delivery_date = ?, expected_delivery_date_old = ?, due_on = ?, 
+        submission_deadline = ?, customer_deadline_date = ?, sla_deadline_date = ?, internal_deadline_date = ?, 
+        filing_Companies_required = ?, filing_Companies_date = ?, filing_hmrc_required = ?, filing_hmrc_date = ?, 
+        opening_balance_required = ?, opening_balance_date = ?, number_of_transaction = ?, number_of_balance_items = ?, 
+        turnover = ?, number_of_employees = ?, vat_reconciliation = ?, bookkeeping = ?, processing_type = ?, 
+        invoiced = ?, currency = ?, invoice_value = ?, invoice_date = ?, invoice_hours = ?, invoice_remark = ?, status_type = ?, notes = ?,
+        Turnover_Period_id_0 = ?, Turnover_Currency_id_0 = ?, Turnover_id_0 = ?, VAT_Registered_id_0 = ?, VAT_Frequency_id_0 = ?,
+        Who_Did_The_Bookkeeping_id_1 = ?, PAYE_Registered_id_1 = ?, Number_of_Trial_Balance_Items_id_1 = ?, Bookkeeping_Frequency_id_2 = ?,
+        Number_of_Total_Transactions_id_2 = ?, Number_of_Bank_Transactions_id_2 = ?, Number_of_Purchase_Invoices_id_2 = ?, Number_of_Sales_Invoices_id_2 = ?,
+        Number_of_Petty_Cash_Transactions_id_2 = ?, Number_of_Journal_Entries_id_2 = ?, Number_of_Other_Transactions_id_2 = ?, Transactions_Posting_id_2 = ?,
+        Quality_of_Paperwork_id_2 = ?, Number_of_Integration_Software_Platforms_id_2 = ?, CIS_id_2 = ?, Posting_Payroll_Journals_id_2 = ?,
+        Department_Tracking_id_2 = ?, Sales_Reconciliation_Required_id_2 = ?, Factoring_Account_id_2 = ?, Payment_Methods_id_2 = ?,
+        Payroll_Frequency_id_3 = ?, Type_of_Payslip_id_3 = ?, Percentage_of_Variable_Payslips_id_3 = ?, Is_CIS_Required_id_3 = ?,
+        CIS_Frequency_id_3 = ?, Number_of_Sub_contractors_id_3 = ?, Whose_Tax_Return_is_it_id_4 = ?, Number_of_Income_Sources_id_4 = ?,
+        If_Landlord_Number_of_Properties_id_4 = ?, If_Sole_Trader_Who_is_doing_Bookkeeping_id_4 = ?, Management_Accounts_Frequency_id_6 = ?,
+        Year_Ending_id_1 = ?, Day_Date_id_2 = ?, Week_Year_id_2 = ?, Week_Month_id_2 = ?, Week_id_2 = ?, Fortnight_Year_id_2 = ?,
+        Fortnight_Month_id_2 = ?, Fortnight_id_2 = ?, Month_Year_id_2 = ?, Month_id_2 = ?, Quarter_Year_id_2 = ?, Quarter_id_2 = ?,
+        Year_id_2 = ?, Other_FromDate_id_2 = ?, Other_ToDate_id_2 = ?, Payroll_Week_Year_id_3 = ?, Payroll_Week_Month_id_3 = ?,
+        Payroll_Week_id_3 = ?, Payroll_Fortnight_Year_id_3 = ?, Payroll_Fortnight_Month_id_3 = ?, Payroll_Fortnight_id_3 = ?,
+        Payroll_Month_Year_id_3 = ?, Payroll_Month_id_3 = ?, Payroll_Quarter_Year_id_3 = ?, Payroll_Quarter_id_3 = ?,
+        Payroll_Year_id_3 = ?, Tax_Year_id_4 = ?, Management_Accounts_FromDate_id_6 = ?, Management_Accounts_ToDate_id_6 = ?,
+        Year_id_33 = ?, Period_id_32 = ?, Day_Date_id_32 = ?, Week_Year_id_32 = ?, Week_Month_id_32 = ?, Week_id_32 = ?,
+        Fortnight_Year_id_32 = ?, Fortnight_Month_id_32 = ?, Fortnight_id_32 = ?, Month_Year_id_32 = ?, Month_id_32 = ?,
+        Quarter_Year_id_32 = ?, Quarter_id_32 = ?, Year_id_32 = ?, Other_FromDate_id_32 = ?, Other_ToDate_id_32 = ?,
+        Payroll_Frequency_id_31 = ?, Payroll_Week_Year_id_31 = ?, Payroll_Week_Month_id_31 = ?, Payroll_Week_id_31 = ?,
+        Payroll_Fortnight_Year_id_31 = ?, Payroll_Fortnight_Month_id_31 = ?, Payroll_Fortnight_id_31 = ?, Payroll_Month_Year_id_31 = ?,
+        Payroll_Month_id_31 = ?, Payroll_Quarter_Year_id_31 = ?, Payroll_Quarter_id_31 = ?, Payroll_Year_id_31 = ?,
+        Audit_Year_Ending_id_27 = ?, Filing_Frequency_id_8 = ?, Period_Ending_Date_id_8 = ?, Filing_Date_id_8 = ?,
+        Year_id_28 = ?, job_priority = ?, processing_checklist = ?, reviewing_checklist = ?, 
+        processing_checklist_status = ?, reviewing_checklist_status = ?, checklist_modal_data = ?
       WHERE id = ?
     `;
 
-    const values = [
-      client_id, service_id, job_type_id, status_type,
-      reviewer, allocated_to, allocated_on, date_received_on, YearEnd,
-      budgeted_hours, total_preparation_time, review_time, feedback_incorporation_time,
-      total_time, engagement_model, expected_delivery_date, due_on,
+    const handleUndefined = (v) => (v === undefined ? null : v);
+    const params = [
+      account_manager_id, customer_id, client_id, client_job_code, customer_contact_details_id,
+      service_id, job_type_id, budgeted_hours, reviewer, allocated_to, allocated_on,
+      date_received_on, year_end, total_preparation_time, review_time,
+      feedback_incorporation_time, total_time, engagement_model, expected_delivery_date, expected_delivery_date_old, due_on,
       submission_deadline, customer_deadline_date, sla_deadline_date, internal_deadline_date,
       filing_Companies_required, filing_Companies_date, filing_hmrc_required, filing_hmrc_date,
       opening_balance_required, opening_balance_date, number_of_transaction, number_of_balance_items,
       turnover, number_of_employees, vat_reconciliation, bookkeeping, processing_type,
-      invoiced, currency, invoice_value, invoice_date, invoice_hours, invoice_remark,
-      notes, client_job_code, processing_checklist, reviewing_checklist,
-      processing_checklist_status, reviewing_checklist_status, JSON.stringify(checklist_modal_data), job_priority,
+      invoiced, currency, invoice_value, invoice_date, invoice_hours, invoice_remark, status_type_update, notes,
+      job.Turnover_Period_id_0, job.Turnover_Currency_id_0, job.Turnover_id_0, job.VAT_Registered_id_0, job.VAT_Frequency_id_0,
+      job.Who_Did_The_Bookkeeping_id_1, job.PAYE_Registered_id_1, job.Number_of_Trial_Balance_Items_id_1, job.Bookkeeping_Frequency_id_2,
+      job.Number_of_Total_Transactions_id_2, job.Number_of_Bank_Transactions_id_2, job.Number_of_Purchase_Invoices_id_2, job.Number_of_Sales_Invoices_id_2,
+      job.Number_of_Petty_Cash_Transactions_id_2, job.Number_of_Journal_Entries_id_2, job.Number_of_Other_Transactions_id_2, job.Transactions_Posting_id_2,
+      job.Quality_of_Paperwork_id_2, job.Number_of_Integration_Software_Platforms_id_2, job.CIS_id_2, job.Posting_Payroll_Journals_id_2,
+      job.Department_Tracking_id_2, job.Sales_Reconciliation_Required_id_2, job.Factoring_Account_id_2, job.Payment_Methods_id_2,
+      job.Payroll_Frequency_id_3, job.Type_of_Payslip_id_3, job.Percentage_of_Variable_Payslips_id_3, job.Is_CIS_Required_id_3,
+      job.CIS_Frequency_id_3, job.Number_of_Sub_contractors_id_3, job.Whose_Tax_Return_is_it_id_4, job.Number_of_Income_Sources_id_4,
+      job.If_Landlord_Number_of_Properties_id_4, job.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4, job.Management_Accounts_Frequency_id_6,
+      job.Year_Ending_id_1, job.Day_Date_id_2, job.Week_Year_id_2, job.Week_Month_id_2, job.Week_id_2, job.Fortnight_Year_id_2,
+      job.Fortnight_Month_id_2, job.Fortnight_id_2, job.Month_Year_id_2, job.Month_id_2, job.Quarter_Year_id_2, job.Quarter_id_2,
+      job.Year_id_2, job.Other_FromDate_id_2, job.Other_ToDate_id_2, job.Payroll_Week_Year_id_3, job.Payroll_Week_Month_id_3,
+      job.Payroll_Week_id_3, job.Payroll_Fortnight_Year_id_3, job.Payroll_Fortnight_Month_id_3, job.Payroll_Fortnight_id_3,
+      job.Payroll_Month_Year_id_3, job.Payroll_Month_id_3, job.Payroll_Quarter_Year_id_3, job.Payroll_Quarter_id_3,
+      job.Payroll_Year_id_3, job.Tax_Year_id_4, job.Management_Accounts_FromDate_id_6, job.Management_Accounts_ToDate_id_6,
+      job.Year_id_33, job.Period_id_32, job.Day_Date_id_32, job.Week_Year_id_32, job.Week_Month_id_32, job.Week_id_32,
+      job.Fortnight_Year_id_32, job.Fortnight_Month_id_32, job.Fortnight_id_32, job.Month_Year_id_32, job.Month_id_32,
+      job.Quarter_Year_id_32, job.Quarter_id_32, job.Year_id_32, job.Other_FromDate_id_32, job.Other_ToDate_id_32,
+      job.Payroll_Frequency_id_31, job.Payroll_Week_Year_id_31, job.Payroll_Week_Month_id_31, job.Payroll_Week_id_31,
+      job.Payroll_Fortnight_Year_id_31, job.Payroll_Fortnight_Month_id_31, job.Payroll_Fortnight_id_31, job.Payroll_Month_Year_id_31,
+      job.Payroll_Month_id_31, job.Payroll_Quarter_Year_id_31, job.Payroll_Quarter_id_31, job.Payroll_Year_id_31,
+      job.Audit_Year_Ending_id_27, job.Filing_Frequency_id_8, job.Period_Ending_Date_id_8, job.Filing_Date_id_8,
+      job.Year_id_28, job_priority, processing_checklist, reviewing_checklist,
+      processing_checklist_status, reviewing_checklist_status, JSON.stringify(checklist_modal_data),
       job_id
-    ];
+    ].map(handleUndefined);
 
-    await pool.execute(query, values);
-
-    // Update tasks
-    if (tasks && tasks.length > 0) {
-      await pool.execute("DELETE FROM client_job_task WHERE job_id = ?", [job_id]);
-      for (const t of tasks) {
-        await pool.execute(
-          "INSERT INTO client_job_task (job_id, client_id, task_id, time) VALUES (?, ?, ?, ?)",
-          [job_id, client_id, t.task_id, t.time]
-        );
-      }
+    if (Number(ExistJob.status_type) != Number(status_type_update)) {
+      await pool.execute(`UPDATE jobs SET status_updation_date = NOW() WHERE id = ?`, [job_id]);
     }
 
-    // Update staff
+    const status_update_date = new Date().toLocaleString('sv-SE');
+    await JobStatusUpdate(job_id, status_type_update, status_update_date);
+
+    const [result] = await pool.execute(query, params);
+
+    // Staff Assignments
     if (selectedStaffData) {
       await pool.execute("DELETE FROM job_allowed_staffs WHERE job_id = ?", [job_id]);
-      for (const sId of selectedStaffData) {
-        await pool.execute("INSERT INTO job_allowed_staffs (job_id, staff_id) VALUES (?, ?)", [job_id, sId]);
+      for (const staff of selectedStaffData) {
+        const sId = (typeof staff === 'object') ? staff.value : staff;
+        if (sId) await pool.execute("INSERT INTO job_allowed_staffs (job_id, staff_id) VALUES (?, ?)", [job_id, sId]);
       }
     }
 
-    // Log full job update (non-blocking)
-    CustomerLogUpdateOperation({
-      staff_id: StaffUserId,
-      ip: ip,
-      date: new Date().toISOString().split("T")[0],
-      module_name: "job",
-      log_message: `updated job details. job code:`,
-      permission_type: "updated",
-      module_id: job_id,
-    }).catch(err => console.error("Logging error:", err));
+    // Task Reconciliation (from Admin)
+    if (tasks && tasks.task && tasks.task.length > 0) {
+      if (Number(ExistJob?.job_type_id) != Number(job_type_id)) {
+        await pool.execute("DELETE FROM client_job_task WHERE job_id = ? AND client_id = ?", [job_id, client_id]);
+      }
+
+      const providedTaskIds = tasks.task.filter(t => t.task_id).map(t => t.task_id);
+      const [existingTasks] = await pool.execute("SELECT task_id FROM client_job_task WHERE job_id = ?", [job_id]);
+      const existingTaskIds = existingTasks.map(t => t.task_id);
+      const tasksToDelete = existingTaskIds.filter(id => !providedTaskIds.includes(id));
+
+      if (tasksToDelete.length > 0) {
+        await pool.execute(`DELETE FROM client_job_task WHERE job_id = ? AND client_id = ? AND task_id IN (${tasksToDelete.map(() => "?").join(",")})`, [job_id, client_id, ...tasksToDelete]);
+      }
+
+      for (const tsk of tasks.task) {
+        let { task_id, task_name, budgeted_hour } = tsk;
+        if (!task_id) {
+          const [existing] = await pool.execute("SELECT id FROM task WHERE name = ?", [task_name]);
+          if (existing.length === 0) {
+            const [newTask] = await pool.execute("INSERT INTO task (name, service_id, job_type_id) VALUES (?, ?, ?)", [task_name, service_id, job_type_id]);
+            task_id = newTask.insertId;
+          } else {
+            task_id = existing[0].id;
+          }
+        }
+
+        const [isExisting] = await pool.execute("SELECT id FROM client_job_task WHERE job_id = ? AND client_id = ? AND task_id = ?", [job_id, client_id, task_id]);
+        if (isExisting.length === 0) {
+          await pool.execute("INSERT INTO client_job_task (job_id, client_id, task_id, time) VALUES (?, ?, ?, ?)", [job_id, client_id, task_id, budgeted_hour]);
+        } else {
+          await pool.execute("UPDATE client_job_task SET time = ? WHERE job_id = ? AND client_id = ? AND task_id = ?", [budgeted_hour, job_id, client_id, task_id]);
+        }
+      }
+    }
+
+    // Granular Logging (from Admin)
+    if (result.changedRows > 0) {
+      let logMsgs = [];
+      const userId = StaffUserId || job.staffCreatedId || 0;
+      const userIp = ip || "";
+
+      if (
+        ExistJob.account_manager_id != account_manager_id ||
+        ExistJob.customer_id != customer_id ||
+        ExistJob.client_id != client_id ||
+        ExistJob.client_job_code != client_job_code ||
+        ExistJob.customer_contact_details_id != customer_contact_details_id ||
+        ExistJob.service_id != service_id ||
+        Number(ExistJob.job_type_id) != Number(job_type_id) ||
+        ExistJob.budgeted_hours.split(":").slice(0, 2).join(":") != budgeted_hours ||
+        ExistJob.engagement_model != engagement_model
+      ) {
+        logMsgs.push("edited the job information");
+      }
+
+      if (
+        ExistJob.expected_delivery_date != expected_delivery_date ||
+        ExistJob.due_on != due_on ||
+        ExistJob.submission_deadline != submission_deadline ||
+        ExistJob.customer_deadline_date != customer_deadline_date ||
+        ExistJob.sla_deadline_date != sla_deadline_date ||
+        ExistJob.internal_deadline_date != internal_deadline_date
+      ) {
+        logMsgs.push("edited the job deadline");
+      }
+
+      if (
+        ExistJob.filing_Companies_required != filing_Companies_required ||
+        ExistJob.filing_Companies_date != filing_Companies_date ||
+        ExistJob.filing_hmrc_required != filing_hmrc_required ||
+        ExistJob.filing_hmrc_date != filing_hmrc_date ||
+        ExistJob.opening_balance_required != opening_balance_required ||
+        ExistJob.opening_balance_date != opening_balance_date
+      ) {
+        logMsgs.push("edited the job other tasks");
+      }
+
+      if (
+        Number(ExistJob.number_of_transaction) != number_of_transaction ||
+        ExistJob.number_of_balance_items != number_of_balance_items ||
+        Number(ExistJob.turnover) != turnover ||
+        ExistJob.number_of_employees != number_of_employees ||
+        ExistJob.vat_reconciliation != vat_reconciliation ||
+        ExistJob.bookkeeping != bookkeeping ||
+        ExistJob.processing_type != processing_type
+      ) {
+        logMsgs.push("edited the job other data");
+      }
+
+      if (
+        ExistJob.invoiced != invoiced ||
+        ExistJob.currency != currency ||
+        ExistJob.invoice_value != invoice_value ||
+        ExistJob.invoice_date != invoice_date ||
+        ExistJob.invoice_hours.split(":").slice(0, 2).join(":") != invoice_hours ||
+        ExistJob.invoice_remark != invoice_remark
+      ) {
+        logMsgs.push("edited the job invoice data");
+      }
+
+      // Reviewer/Processor Assignment logs
+      if (parseInt(ExistJob.reviewer) == 0) {
+        if (reviewer > 0) {
+          const [[getStaff]] = await pool.execute('SELECT CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ?', [reviewer]);
+          logMsgs.push("has assigned the job to the reviewer, " + (getStaff?.name || "Unknown"));
+        }
+      } else {
+        if (reviewer == 0) {
+          logMsgs.push("has removed the reviewer from the job");
+        } else if (reviewer != ExistJob.reviewer) {
+          const [[getStaff]] = await pool.execute('SELECT CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ?', [reviewer]);
+          logMsgs.push("changed the job to the reviewer, " + (getStaff?.name || "Unknown"));
+        }
+      }
+
+      if (parseInt(ExistJob.allocated_to) == 0) {
+        if (allocated_to > 0) {
+          const [[getStaff]] = await pool.execute('SELECT CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ?', [allocated_to]);
+          logMsgs.push("has assigned the job to the processor, " + (getStaff?.name || "Unknown"));
+        }
+      } else {
+        if (allocated_to == 0) {
+          logMsgs.push("has removed the processor from the job");
+        } else if (allocated_to != ExistJob.allocated_to) {
+          const [[getStaff]] = await pool.execute('SELECT CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ?', [allocated_to]);
+          logMsgs.push("changed the job to the processor, " + (getStaff?.name || "Unknown"));
+        }
+      }
+
+      if (logMsgs.length > 0) {
+        const finalMsg = logMsgs.length > 1 ? logMsgs.slice(0, -1).join(", ") + " and " + logMsgs.slice(-1) : logMsgs[0];
+        CustomerLogUpdateOperation({
+          staff_id: userId, ip: userIp, date: new Date().toISOString().split("T")[0],
+          module_name: "job", log_message: `${finalMsg} job code:`,
+          permission_type: "updated", module_id: job_id
+        }).catch(e => console.error("Log Error", e));
+      }
+    }
 
     return { status: true, message: "Job updated successfully." };
   } catch (err) {
@@ -1867,6 +2090,7 @@ const customerJobUpdate = async (job) => {
     return { status: false, message: err.message };
   }
 };
+
 
 // ─── CUSTOMER JOB LOGS SUB-TAB APIs ────────────────────────────────────────
 
