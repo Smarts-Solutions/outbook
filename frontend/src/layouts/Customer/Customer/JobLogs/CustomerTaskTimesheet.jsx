@@ -10,8 +10,10 @@ import {
 import { getCustomerMasterStatus } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import { Download, Plus, Eye } from "lucide-react";
+import { useCustomerAccess } from "../../../../Utils/CustomerAccessContext";
 
 const CustomerTaskTimesheet = ({ job_id, getAccessDataJob, goto }) => {
+  const { hasAccess } = useCustomerAccess();
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
   const location = useLocation();
@@ -205,7 +207,7 @@ const CustomerTaskTimesheet = ({ job_id, getAccessDataJob, goto }) => {
       cell: (row) => (
         <div>
           {goto != "report" &&
-            (getAccessDataJob.update === 1 || role === "SUPERADMIN") && (
+            (hasAccess("task_timesheet", "update") || role === "SUPERADMIN") && (
               <button
                 className="view-icon"
                 onClick={() => {
@@ -224,7 +226,7 @@ const CustomerTaskTimesheet = ({ job_id, getAccessDataJob, goto }) => {
       button: true,
       reorder: false,
     },
-  ], [goto, getAccessDataJob.update, role, location.state?.job_id]);
+  ], [goto, hasAccess, role, location.state?.job_id]);
 
 
   const handleChange = (e) => {
@@ -428,7 +430,7 @@ const CustomerTaskTimesheet = ({ job_id, getAccessDataJob, goto }) => {
           <div className="col-md-4">
             <div>
               {goto != "report" &&
-                (getAccessDataJob.insert === 1 || role === "SUPERADMIN") && (
+                (hasAccess("task_timesheet", "insert") || role === "SUPERADMIN") && (
                   <button
                     type="button"
                     onClick={() => {

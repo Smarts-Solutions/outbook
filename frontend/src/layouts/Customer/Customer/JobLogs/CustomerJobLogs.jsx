@@ -181,12 +181,12 @@ const CustomerJobLogs = () => {
         )}
         {activeSubTab === "TaskTimesheet" && (hasAccess("task_timesheet", "view") || role === "SUPERADMIN") && (
           <div className="tab-pane fade show active">
-            <TaskTimesheet job_id={jobId} timesheet_job_id={location.state?.timesheet_job_id} />
+            <TaskTimesheet job_id={jobId} getAccessDataJob={getAccessDataJob} goto={goto} timesheet_job_id={location.state?.timesheet_job_id} />
           </div>
         )}
         {activeSubTab === "Timeline" && (hasAccess("job_timeline", "view") || role === "SUPERADMIN") && (
           <div className="tab-pane fade show active">
-            <CustomerJobTimeline job_id={jobId} />
+            <CustomerJobTimeline job_id={jobId} getAccessDataJob={getAccessDataJob} goto={goto} />
           </div>
         )}
         {activeSubTab === "MissingLogs" && (hasAccess("missing_logs", "view") || role === "SUPERADMIN") && (
