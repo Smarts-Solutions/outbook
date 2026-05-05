@@ -138,7 +138,6 @@ CREATE TABLE `customer_access` (
 
 new permission table /////////
 
-
 CREATE TABLE IF NOT EXISTS customer_permissions (
   id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   permission_name VARCHAR(100) NOT NULL,
@@ -154,38 +153,45 @@ INSERT INTO customer_permissions (permission_name, type) VALUES
 
 -- Customer
 ('customer', 'view'),
-('customer', 'insert'),
+('customer', 'add'),
 ('customer', 'update'),
 ('customer', 'delete'),
 
 -- Client
 ('client', 'view'),
-('client', 'insert'),
+('client', 'add'),
 ('client', 'update'),
 ('client', 'delete'),
 
--- Client Documents
-('client_document', 'view'),
-('client_document', 'upload'),
-('client_document', 'delete'),
-
 -- Jobs
 ('job', 'view'),
-('job', 'insert'),
+('job', 'add'),
 ('job', 'update'),
 ('job', 'delete'),
 ('job', 'copy'),
 ('job', 'status_update'),
 
+-- Reports
+('report', 'view'),
+
+-- Export
+('export', 'data'),
+
+-- Client Tab (moved from client_document)
+('client_tab', 'view'),
+('client_tab', 'upload'),
+('client_tab', 'delete'),
+('noofjobs', 'view'),
+('client_overview', 'view'),
+
+
+
 -- Job Information
 ('job_information', 'view'),
 
--- Job Timesheet
-('job_timesheet', 'view'),
-('job_timesheet', 'add'),
-
--- Task Timesheet
+-- Task Timesheet (added add permission)
 ('task_timesheet', 'view'),
+('task_timesheet', 'add'),
 
 -- Job Timeline
 ('job_timeline', 'view'),
@@ -206,8 +212,7 @@ INSERT INTO customer_permissions (permission_name, type) VALUES
 ('job_document', 'view'),
 ('job_document', 'add'),
 
--- Reports
-('report', 'view'),
 
--- Export
-('export', 'data');
+
+
+
