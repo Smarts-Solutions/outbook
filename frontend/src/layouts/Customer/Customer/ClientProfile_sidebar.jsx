@@ -394,8 +394,6 @@ const CustomerClientProfile = () => {
         </div>
       ),
       ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
     },
   ];
 
@@ -1444,26 +1442,7 @@ const CustomerClientProfile = () => {
                     </button>
                   </li>
                 </ul>
-                {customerData && customerData.length > 0 && (
-                  <div className="col-md-2">
-                    <button
-                      className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
-                      onClick={handleExport}
-                    >
-                      <Download size={16} />
-                      <span>Export To Excel</span>
-                    </button>
-                    {(hasAccess("client_document", "upload") || role === "SUPERADMIN") && (
-                      <button
-                        className="btn btn-info text-white d-flex align-items-center gap-2"
-                        onClick={() => setAddDocuments(true)}
-                      >
-                        <Plus size={16} />
-                        <span>Upload Documents</span>
-                      </button>
-                    )}
-                  </div>
-                )}
+               
               </div>
               <div className="tab-content">
                 <div className="tab-pane fade active show">

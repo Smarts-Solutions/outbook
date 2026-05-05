@@ -176,7 +176,7 @@ const CustomerJobLogs = () => {
       <div className="tab-content mt-4">
         {activeSubTab === "JobInformation" && (hasAccess("job_information", "view") || role === "SUPERADMIN") && (
           <div className="tab-pane fade show active">
-            <JobInformation job_id={jobId} />
+            <JobInformation job_id={jobId} getAccessDataJob={getAccessDataJob} goto={goto} />
           </div>
         )}
         {activeSubTab === "TaskTimesheet" && (hasAccess("task_timesheet", "view") || role === "SUPERADMIN") && (

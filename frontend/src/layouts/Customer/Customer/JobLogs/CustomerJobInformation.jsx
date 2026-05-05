@@ -13,12 +13,14 @@ import sweatalert from "sweetalert2";
 import { getCustomerMasterStatus } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Select from 'react-select';
 import { Save, Plus, ArrowLeft, Pencil, X, ExternalLink, RotateCcw, Clock, AlertCircle, Info, CheckCircle2, PlayCircle, FileText, File, Mail, Phone } from "lucide-react";
+import { useCustomerAccess } from "../../../../Utils/CustomerAccessContext";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import { base_url } from "../../../../Utils/Config";
 import { Modal, Button, Table, Form } from "react-bootstrap";
 
 const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
+  const { hasAccess } = useCustomerAccess();
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
@@ -1608,7 +1610,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
           <div className="d-flex w-100 justify-content-end">
             {goto !== "report" && (
               <>
-                {(getAccessDataJob.update === 1 ||
+                {(hasAccess("job", "update") ||
 
                   role === "SUPERADMIN") && (
                     <div className="w-auto">
@@ -1635,7 +1637,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                   </span>
                 )}
 
-                {(getAccessDataJob.update === 1 ||
+                {(hasAccess("job", "update") ||
 
                   role === "SUPERADMIN") && (
                     <button className="edit-icon" onClick={handleJobEdit}>
