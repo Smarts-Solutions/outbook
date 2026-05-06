@@ -14,7 +14,8 @@ import Swal from "sweetalert2";
 import sweatalert from "sweetalert2";
 import ReactPaginate from "react-paginate";
 import * as Yup from "yup";
-import { Plus, Download } from "lucide-react";
+import { Plus, Download, Trash2, AlertCircle, ArrowRightLeft, User, Clock } from "lucide-react";
+import Select from "react-select";
 
 import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
 
@@ -175,6 +176,57 @@ const CustomerUsers = () => {
       font-size: 0.85rem;
       margin-bottom: 6px;
     }
+
+    /* Transfer Modal Specific Styles */
+    .transfer-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.5rem;
+      background: #ffffff;
+      margin-bottom: 1.5rem;
+    }
+    .transfer-icon-wrapper {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #fef2f2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .transfer-alert {
+      background: #fffbeb;
+      border: 1px solid #fef3c7;
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+    }
+    .transfer-alert i {
+      color: #d97706;
+      margin-right: 0.75rem;
+      margin-top: 0.25rem;
+    }
+    .user-info-box {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      border: 1px solid #f1f5f9;
+    }
+    .assignment-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-right: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .badge-jobs { background: #eff6ff; color: #1d4ed8; }
+    .badge-clients { background: #f0fdf4; color: #15803d; }
   `;
 
 
@@ -224,6 +276,14 @@ const CustomerUsers = () => {
   const [allClients, setAllClients] = useState([]);
   const [allJobs, setAllJobs] = useState([]);
   const [selectedJobs, setSelectedJobs] = useState([]);
+
+  // Transfer Logic States
+  const [showTransferModal, setShowTransferModal] = useState(false);
+  const [selectedUserForDeletion, setSelectedUserForDeletion] = useState(null);
+  const [transferUserId, setTransferUserId] = useState("");
+  const [allOtherUsers, setAllOtherUsers] = useState([]);
+  const [isTransferring, setIsTransferring] = useState(false);
+
 
 
 
@@ -484,54 +544,137 @@ const CustomerUsers = () => {
   ];
 
   const handleDelete = (row) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Do you want to delete this customer?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, delete it!",
-      cancelButtonText: "No, cancel",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const req = { customer_user_id: row.id, action: 'deleteCustomerUsers' };
-          const res = await dispatch(getAllCustomerUsers({ req, authToken: token })).unwrap();
+    // Check if the user has assignments
+    const clientCount = row.selectedClients ? row.selectedClients.split(",").filter(x => x).length : 0;
+    const jobCount = row.selectedJobs ? row.selectedJobs.split(",").filter(x => x).length : 0;
+    const customerCount = row.allCustomerAccess ? row.allCustomerAccess.split(",").filter(x => x).length : 0;
 
-          if (res.status) {
-            Swal.fire({
-              title: "Success",
-              text: res.message,
-              icon: "success",
-              timer: 1000,
-              showConfirmButton: false,
-            });
-            GetAllCustomerData(1, pageSize, '');
-          } else {
-            Swal.fire({
-              title: "Error",
-              text: res.message,
-              icon: "error",
-              confirmButtonText: "Ok",
-            });
-          }
-        } catch (error) {
-          Swal.fire({
-            title: "Error",
-            text: "An error occurred while deleting the customer.",
-            icon: "error",
-            confirmButtonText: "Ok",
-          });
+    if (clientCount > 0 || jobCount > 0 || customerCount > 0) {
+      setSelectedUserForDeletion({
+        ...row,
+        clientCount,
+        jobCount,
+        customerCount
+      });
+      fetchAllOtherUsers(row.id);
+      setShowTransferModal(true);
+    } else {
+      Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to delete this customer user?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "No, cancel",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          performDelete(row.id);
         }
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
+      });
+    }
+  };
+
+  const fetchAllOtherUsers = async (excludeId) => {
+    // Fetch all users for transfer dropdown
+    const req = { action: 'getCustomerUsers', staff_id: staffDetails.id, page: 1, limit: 1000 };
+    const data = { req, authToken: token };
+    try {
+      const response = await dispatch(getAllCustomerUsers(data)).unwrap();
+      if (response.status) {
+        const others = response.data.data
+          .filter(u => u.id !== excludeId)
+          .map(u => ({
+            value: u.id,
+            label: `${u.first_name} ${u.last_name} (${u.email})`
+          }));
+        setAllOtherUsers(others);
+      }
+    } catch (error) {
+      console.error('Error fetching other users:', error);
+    }
+  };
+
+  const handleTransferAndDelete = async () => {
+    if (!transferUserId) {
+      Swal.fire({
+        title: "Error",
+        text: "Please select a user to transfer jobs and clients to.",
+        icon: "error",
+        confirmButtonText: "Ok",
+      });
+      return;
+    }
+
+    setIsTransferring(true);
+    try {
+      const req = { 
+        customer_user_id: selectedUserForDeletion.id, 
+        replace_id: transferUserId,
+        action: 'deleteCustomerUsers' 
+      };
+      const res = await dispatch(getAllCustomerUsers({ req, authToken: token })).unwrap();
+
+      if (res.status) {
         Swal.fire({
-          title: "Cancelled",
-          text: "Customer was not deleted",
+          title: "Success",
+          text: res.message || "Assignments transferred and user deleted successfully.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+        setShowTransferModal(false);
+        setTransferUserId("");
+        GetAllCustomerData(currentPage, pageSize, searchTerm);
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: res.message,
           icon: "error",
           confirmButtonText: "Ok",
         });
       }
-    });
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: "An error occurred during transfer and deletion.",
+        icon: "error",
+        confirmButtonText: "Ok",
+      });
+    } finally {
+      setIsTransferring(false);
+    }
+  };
 
+  const performDelete = async (userId) => {
+    try {
+      const req = { customer_user_id: userId, action: 'deleteCustomerUsers' };
+      const res = await dispatch(getAllCustomerUsers({ req, authToken: token })).unwrap();
+
+      if (res.status) {
+        Swal.fire({
+          title: "Success",
+          text: res.message,
+          icon: "success",
+          timer: 1000,
+          showConfirmButton: false,
+        });
+        GetAllCustomerData(currentPage, pageSize, searchTerm);
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: res.message,
+          icon: "error",
+          confirmButtonText: "Ok",
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: "An error occurred while deleting the user.",
+        icon: "error",
+        confirmButtonText: "Ok",
+      });
+    }
   };
 
 
@@ -1098,6 +1241,96 @@ const CustomerUsers = () => {
             )
           }
         />
+      </CommanModal>
+
+      <CommanModal
+        isOpen={showTransferModal}
+        backdrop="static"
+        size="md"
+        title="Transfer Assignments & Delete"
+        className="premium-modal"
+        hideBtn={true}
+        handleClose={() => {
+          setShowTransferModal(false);
+          setTransferUserId("");
+          setSelectedUserForDeletion(null);
+        }}
+      >
+        <div className="p-2">
+          <div className="transfer-alert">
+            <AlertCircle size={20} className="me-2 text-warning" />
+            <div>
+              <p className="mb-1 fw-bold text-dark" style={{ fontSize: '0.95rem' }}>Important Action Required</p>
+              <p className="mb-0 text-muted small">
+                This user has active Customer, Job, and Client assignments. You must transfer these to another customer user before deletion.
+              </p>
+            </div>
+          </div>
+
+          <div className="transfer-card shadow-sm border-0 bg-light">
+            <div className="d-flex align-items-center mb-3">
+              <div className="transfer-icon-wrapper me-3">
+                <Trash2 size={22} className="text-danger" />
+              </div>
+              <div>
+                <h6 className="mb-0 fw-bold">User for Deletion</h6>
+                <p className="text-muted small mb-0">{selectedUserForDeletion?.first_name} {selectedUserForDeletion?.last_name}</p>
+              </div>
+            </div>
+
+            <div className="user-info-box mb-2">
+              <div className="d-flex flex-wrap">
+                <span className="assignment-badge bg-info text-white">
+                  <User size={12} className="me-1" /> {selectedUserForDeletion?.customerCount || 0} Customers
+                </span>
+                <span className="assignment-badge badge-clients">
+                  <User size={12} className="me-1" /> {selectedUserForDeletion?.clientCount || 0} Clients
+                </span>
+                <span className="assignment-badge badge-jobs">
+                  <Clock size={12} className="me-1" /> {selectedUserForDeletion?.jobCount || 0} Jobs
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <label className="form-label d-flex align-items-center mb-2">
+              <ArrowRightLeft size={16} className="me-2 text-primary" />
+              Transfer all assignments to:
+            </label>
+            <Select
+              options={allOtherUsers}
+              value={allOtherUsers.find(opt => opt.value === transferUserId)}
+              onChange={(selected) => setTransferUserId(selected?.value)}
+              placeholder="Select replacement customer user..."
+              className="premium-select"
+              isSearchable
+            />
+          </div>
+
+          <div className="d-flex gap-3 mt-4 pt-3 border-top">
+            <button 
+              className="btn btn-danger w-100 py-2 fw-bold"
+              onClick={handleTransferAndDelete}
+              disabled={isTransferring || !transferUserId}
+            >
+              {isTransferring ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Processing...
+                </>
+              ) : (
+                "Transfer & Delete"
+              )}
+            </button>
+            <button 
+              className="btn btn-outline-secondary w-100 py-2 fw-bold"
+              onClick={() => setShowTransferModal(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       </CommanModal>
 
       <div className="container-fluid">

@@ -258,7 +258,46 @@ const getAllCustomerUsers = async (req, res) => {
     }
     else if (action === 'deleteCustomerUsers') {
       const customer_user_id = customerUsers.customer_user_id;
-      // delete customer user customer_access
+      const replace_id = customerUsers.replace_id;
+
+      if (replace_id) {
+        // Transfer logic
+        const [accessRecords] = await pool.execute(`SELECT * FROM customer_access WHERE staff_id = ?`, [customer_user_id]);
+
+        for (const record of accessRecords) {
+          const { customer_id, client_id, job_id } = record;
+
+          // Check if replacement user already has access to this customer
+          const [existingAccess] = await pool.execute(
+            `SELECT id, client_id, job_id FROM customer_access WHERE staff_id = ? AND customer_id = ?`,
+            [replace_id, customer_id]
+          );
+
+          if (existingAccess.length > 0) {
+            // Merge assignments
+            let mergedClients = Array.from(new Set([
+              ...(existingAccess[0].client_id ? existingAccess[0].client_id.split(',') : []),
+              ...(client_id ? client_id.split(',') : [])
+            ])).filter(x => x).join(',');
+
+            let mergedJobs = Array.from(new Set([
+              ...(existingAccess[0].job_id ? existingAccess[0].job_id.split(',') : []),
+              ...(job_id ? job_id.split(',') : [])
+            ])).filter(x => x).join(',');
+
+            await pool.execute(
+              `UPDATE customer_access SET client_id = ?, job_id = ? WHERE id = ?`,
+              [mergedClients, mergedJobs, existingAccess[0].id]
+            );
+          } else {
+            // Simply transfer the record
+            await pool.execute(
+              `UPDATE customer_access SET staff_id = ? WHERE id = ?`,
+              [replace_id, record.id]
+            );
+          }
+        }
+      }
 
       const deleteQueryCustomerAccess = `DELETE FROM customer_access WHERE staff_id = ?`;
       await pool.execute(deleteQueryCustomerAccess, [customer_user_id]);
@@ -276,7 +315,7 @@ const getAllCustomerUsers = async (req, res) => {
         module_id: customer_user_id,
       });
 
-      return res.status(200).json({ status: true, message: "Customer User deleted successfully." });
+      return res.status(200).json({ status: true, message: "Customer User deleted and assignments transferred successfully." });
     }
     else if (action === 'updateCustomerUsers') {
       const customer_user_id = customerUsers.customer_user_id;
