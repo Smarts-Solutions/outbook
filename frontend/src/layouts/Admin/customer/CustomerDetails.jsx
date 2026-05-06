@@ -19,6 +19,163 @@ import { Plus, Download } from "lucide-react";
 import CommanModal from '../../../Components/ExtraComponents/Modals/CommanModal';
 
 const CustomerUsers = () => {
+  const customStyles = `
+    .premium-modal .modal-content {
+      border-radius: 16px;
+      border: none;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+    }
+    .premium-modal .modal-header {
+      border-bottom: 1px solid #f0f4f8;
+      padding: 1.25rem 1.5rem;
+      background: #ffffff;
+    }
+    .premium-modal .modal-title {
+      font-weight: 700;
+      color: #1a202c;
+      font-size: 1.2rem;
+      letter-spacing: -0.01em;
+    }
+    .job-assignment-wrapper {
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      margin-top: 20px;
+      overflow: hidden;
+    }
+    .job-assignment-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      background: #ffffff;
+    }
+    .job-assignment-scroll-area {
+      max-height: 450px;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    /* Custom Premium Scrollbar */
+    .job-assignment-scroll-area::-webkit-scrollbar {
+      width: 6px;
+    }
+    .job-assignment-scroll-area::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 10px;
+    }
+    .job-assignment-scroll-area::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+    .job-assignment-scroll-area::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 0;
+      display: flex;
+      align-items: center;
+    }
+    .section-title i {
+      margin-right: 10px;
+      color: #3b82f6;
+      font-size: 1.1rem;
+    }
+
+    .custom-accordion .accordion-item {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px !important;
+      margin-bottom: 12px;
+      background: #ffffff;
+      overflow: hidden;
+    }
+    .custom-accordion .accordion-button {
+      padding: 12px 18px;
+      font-weight: 600;
+      color: #475569;
+      background: #ffffff;
+      box-shadow: none;
+      font-size: 0.9rem;
+    }
+    .custom-accordion .accordion-button:not(.collapsed) {
+      background: #f1f5f9;
+      color: #2563eb;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .client-card {
+      border: 1px solid #f1f5f9;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      background: #ffffff;
+    }
+    .client-header {
+      padding: 8px 12px;
+      background: #f8fafc;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .client-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #334155;
+    }
+    .job-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 8px;
+      padding: 12px;
+    }
+    .job-item {
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      transition: all 0.2s;
+    }
+    .job-item:hover {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+    .job-item label {
+      font-size: 0.8rem;
+      margin-left: 8px;
+      margin-bottom: 0;
+      color: #64748b;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .select-all-link {
+      font-size: 0.75rem;
+      color: #3b82f6;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .select-all-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Form Styles */
+    .premium-modal .form-control, .premium-modal .form-select {
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.875rem;
+    }
+    .premium-modal label {
+      font-weight: 600;
+      color: #475569;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+    }
+  `;
 
 
 
@@ -759,11 +916,13 @@ const CustomerUsers = () => {
 
   return (
     <div>
+      <style>{customStyles}</style>
       <CommanModal
         isOpen={showAddCustomerModal}
         backdrop="static"
         size="xl"
         title={type === "edit" ? "Update Customer User" : "Add Customer User"}
+        className="premium-modal"
         hideBtn={true}
         handleClose={() => {
           setShowAddCustomerModal(false);
@@ -785,45 +944,49 @@ const CustomerUsers = () => {
           }}
           additional_field={
             formik.values.allCustomerAccess && formik.values.allCustomerAccess.length > 0 && (
-              <div className="mt-4 border-top pt-3">
-                <h5 className="mb-3 text-primary">Assign Jobs for Selected Customers</h5>
-                <div className="accordion" id="customerAccordion">
-                  {formik.values.allCustomerAccess.map((customerId) => {
-                    const customer = allCustomers.find((c) => c.id === customerId);
-                    if (!customer) return null;
+              <div className="job-assignment-wrapper">
+                <div className="job-assignment-header">
+                  <h5 className="section-title">
+                    <i className="ti-briefcase"></i> Assign Jobs for Selected Customers
+                  </h5>
+                </div>
+                <div className="job-assignment-scroll-area">
+                  <div className="accordion custom-accordion" id="customerAccordion">
+                    {formik.values.allCustomerAccess.map((customerId) => {
+                      const customer = allCustomers.find((c) => c.id === customerId);
+                      if (!customer) return null;
 
-                    const customerClients = allClients.filter((c) => c.customer_id === customerId);
+                      const customerClients = allClients.filter((c) => c.customer_id === customerId);
 
-                    return (
-                      <div key={customerId} className="accordion-item mb-3 border">
-                        <h2 className="accordion-header" id={`heading-${customerId}`}>
-                          <button
-                            className="accordion-button bg-light fw-bold"
-                            type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target={`#collapse-${customerId}`}
-                            aria-expanded="true"
-                            aria-controls={`collapse-${customerId}`}
+                      return (
+                        <div key={customerId} className="accordion-item">
+                          <h2 className="accordion-header" id={`heading-${customerId}`}>
+                            <button
+                              className="accordion-button"
+                              type="button"
+                              data-bs-toggle="collapse"
+                              data-bs-target={`#collapse-${customerId}`}
+                              aria-expanded="true"
+                              aria-controls={`collapse-${customerId}`}
+                            >
+                              Customer: {customer.trading_name}
+                            </button>
+                          </h2>
+                          <div
+                            id={`collapse-${customerId}`}
+                            className="accordion-collapse collapse show"
+                            aria-labelledby={`heading-${customerId}`}
                           >
-                            Customer: {customer.trading_name}
-                          </button>
-                        </h2>
-                        <div
-                          id={`collapse-${customerId}`}
-                          className="accordion-collapse collapse show"
-                          aria-labelledby={`heading-${customerId}`}
-                        >
-                          <div className="accordion-body">
-                            {customerClients.length > 0 ? (
-                              customerClients.map((client) => {
-                                const clientJobs = allJobs.filter((j) => j.client_id === client.id);
-                                const isAllSelected = clientJobs.length > 0 && clientJobs.every((j) => formik.values.selectedJobs?.includes(j.id));
+                            <div className="accordion-body p-2">
+                              {customerClients.length > 0 ? (
+                                customerClients.map((client) => {
+                                  const clientJobs = allJobs.filter((j) => j.client_id === client.id);
+                                  const isAllSelected = clientJobs.length > 0 && clientJobs.every((j) => formik.values.selectedJobs?.includes(j.id));
 
-                                return (
-                                  <div key={client.id} className="card shadow-none border mb-2">
-                                    <div className="card-header bg-white d-flex justify-content-between align-items-center py-2">
-                                      <div className="d-flex align-items-center">
-                                        <div className="form-check me-3">
+                                  return (
+                                    <div key={client.id} className="client-card">
+                                      <div className="client-header">
+                                        <div className="form-check m-0">
                                           <input
                                             type="checkbox"
                                             className="form-check-input"
@@ -836,8 +999,6 @@ const CustomerUsers = () => {
 
                                               if (e.target.checked) {
                                                 newSelectedClients.push(client.id);
-                                                // Optionally auto-select all jobs when client is checked? 
-                                                // User said "defaultall", so maybe yes.
                                                 jobIds.forEach(id => {
                                                   if (!newSelectedJobs.includes(id)) newSelectedJobs.push(id);
                                                 });
@@ -849,89 +1010,75 @@ const CustomerUsers = () => {
                                               formik.setFieldValue("selectedJobs", newSelectedJobs);
                                             }}
                                           />
-                                          <label className="form-check-label fw-semibold text-secondary" htmlFor={`client-${client.id}`}>
-                                            Client: {client.trading_name}
+                                          <label className="client-title ms-1 mb-0" htmlFor={`client-${client.id}`}>
+                                            {client.trading_name}
                                           </label>
                                         </div>
-                                      </div>
-                                      <div className="form-check">
-                                        <input
-                                          type="checkbox"
-                                          className="form-check-input"
-                                          id={`all-jobs-${client.id}`}
-                                          checked={isAllSelected}
-                                          onChange={(e) => {
+                                        <span 
+                                          className="select-all-link"
+                                          onClick={() => {
                                             const jobIds = clientJobs.map((j) => j.id);
                                             let newSelectedJobs = [...(formik.values.selectedJobs || [])];
                                             let newSelectedClients = [...(formik.values.selectedClients || [])];
-
-                                            if (e.target.checked) {
+                                            
+                                            if (!isAllSelected) {
                                               jobIds.forEach((id) => {
-                                                if (!newSelectedJobs.includes(id)) {
-                                                  newSelectedJobs.push(id);
-                                                }
+                                                if (!newSelectedJobs.includes(id)) newSelectedJobs.push(id);
                                               });
                                               if (!newSelectedClients.includes(client.id)) newSelectedClients.push(client.id);
                                             } else {
                                               newSelectedJobs = newSelectedJobs.filter((id) => !jobIds.includes(id));
-                                              // Should we uncheck client if all jobs are unchecked? 
-                                              // Maybe not, they might want the client access but no specific jobs.
                                             }
                                             formik.setFieldValue("selectedJobs", newSelectedJobs);
                                             formik.setFieldValue("selectedClients", newSelectedClients);
                                           }}
-                                        />
-                                        <label className="form-check-label small" htmlFor={`all-jobs-${client.id}`}>
-                                          Select All Client Jobs
-                                        </label>
+                                        >
+                                          {isAllSelected ? 'Deselect All' : 'Select All Jobs'}
+                                        </span>
                                       </div>
-                                    </div>
-                                    <div className="card-body py-2">
-                                      <div className="row">
+                                      <div className="job-grid">
                                         {clientJobs.length > 0 ? (
                                           clientJobs.map((job) => (
-                                            <div key={job.id} className="col-md-4 mb-1">
-                                              <div className="form-check">
-                                                <input
-                                                  type="checkbox"
-                                                  className="form-check-input"
-                                                  id={`job-${job.id}`}
-                                                  checked={formik.values.selectedJobs && formik.values.selectedJobs.includes(job.id)}
-                                                  onChange={(e) => {
-                                                    let newSelectedJobs = [...(formik.values.selectedJobs || [])];
-                                                    let newSelectedClients = [...(formik.values.selectedClients || [])];
-                                                    if (e.target.checked) {
-                                                      newSelectedJobs.push(job.id);
-                                                      if (!newSelectedClients.includes(client.id)) newSelectedClients.push(client.id);
-                                                    } else {
-                                                      newSelectedJobs = newSelectedJobs.filter((id) => id !== job.id);
-                                                    }
-                                                    formik.setFieldValue("selectedJobs", newSelectedJobs);
-                                                    formik.setFieldValue("selectedClients", newSelectedClients);
-                                                  }}
-                                                />
-                                                <label className="form-check-label small" htmlFor={`job-${job.id}`}>
-                                                  {job.job_id}
-                                                </label>
-                                              </div>
+                                            <div key={job.id} className="job-item">
+                                              <input
+                                                type="checkbox"
+                                                className="form-check-input"
+                                                id={`job-${job.id}`}
+                                                checked={formik.values.selectedJobs && formik.values.selectedJobs.includes(job.id)}
+                                                onChange={(e) => {
+                                                  let newSelectedJobs = [...(formik.values.selectedJobs || [])];
+                                                  let newSelectedClients = [...(formik.values.selectedClients || [])];
+                                                  if (e.target.checked) {
+                                                    newSelectedJobs.push(job.id);
+                                                    if (!newSelectedClients.includes(client.id)) newSelectedClients.push(client.id);
+                                                  } else {
+                                                    newSelectedJobs = newSelectedJobs.filter((id) => id !== job.id);
+                                                  }
+                                                  formik.setFieldValue("selectedJobs", newSelectedJobs);
+                                                  formik.setFieldValue("selectedClients", newSelectedClients);
+                                                }}
+                                              />
+                                              <label htmlFor={`job-${job.id}`} title={job.job_id}>
+                                                {job.job_id}
+                                              </label>
                                             </div>
                                           ))
                                         ) : (
-                                          <div className="col-12 small text-muted">No jobs found for this client</div>
+                                          <div className="p-2 small text-muted">No jobs found</div>
                                         )}
                                       </div>
                                     </div>
-                                  </div>
-                                );
-                              })
-                            ) : (
-                              <div className="text-muted small">No clients found for this customer</div>
-                            )}
+                                  );
+                                })
+                              ) : (
+                                <div className="text-muted small p-2">No clients found</div>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             )

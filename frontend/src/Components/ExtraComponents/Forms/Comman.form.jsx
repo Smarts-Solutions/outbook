@@ -254,6 +254,7 @@ const ReusableForm = ({
                         htmlFor={field.name}
                       >
                         {field.label}
+                        <span className="text-danger">*</span>
                       </label>
                       <div
                         className={`col-lg-${title === "addgroup" ? 12 : 12}`}
@@ -343,6 +344,7 @@ const ReusableForm = ({
                       htmlFor={field.name}
                     >
                       {field.label}
+                      <span className="text-danger">*</span>
                     </label>
 
                     <div className="col-lg-12">
@@ -982,6 +984,7 @@ const ReusableForm = ({
                         htmlFor={field.name}
                       >
                         {field.label}
+                        <span className="text-danger">*</span>
                       </label>
                       <div>
                         <input
