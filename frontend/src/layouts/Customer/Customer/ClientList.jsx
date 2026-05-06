@@ -94,7 +94,7 @@ const ClientLists = () => {
     if (activeTab === "job") {
       GetStatus();
     }
-    
+
     const id = selectedCustomer.value === "All" ? "" : selectedCustomer.value;
     setCustomerId(id);
     setCustomerName(selectedCustomer.label);
@@ -262,23 +262,23 @@ const ClientLists = () => {
       sortable: true,
     },
     ...((hasAccess("client", "update") || hasAccess("client", "delete")) ? [
-        {
+      {
         name: "Actions",
         cell: (row) => (
-            <div className="d-flex">
+          <div className="d-flex">
             {hasAccess("client", "update") && (
-                <button className="edit-icon" onClick={() => navigate("/customer/client/edit", { state: { row, id: customerId, activeTab: activeTab } })}>
+              <button className="edit-icon" onClick={() => navigate("/customer/client/edit", { state: { row, id: customerId, activeTab: activeTab } })}>
                 <i className="ti-pencil" />
-                </button>
+              </button>
             )}
             {hasAccess("client", "delete") && row.Delete_Status == null && (
-                <button className="delete-icon" onClick={() => handleDelete(row, "client")}>
+              <button className="delete-icon" onClick={() => handleDelete(row, "client")}>
                 <i className="ti-trash text-danger" />
-                </button>
+              </button>
             )}
-            </div>
+          </div>
         ),
-        }
+      }
     ] : []),
   ];
 
@@ -387,23 +387,23 @@ const ClientLists = () => {
       sortable: true,
     },
     ...((hasAccess("job", "update") || hasAccess("job", "delete")) ? [
-        {
+      {
         name: "Actions",
         cell: (row) => (
-            <div className="d-flex">
+          <div className="d-flex">
             {hasAccess("job", "update") && (
-                <button className="edit-icon" onClick={() => navigate("/customer/job/edit", { state: { job_id: row.job_id, goto: "Customer", activeTab: activeTab } })}>
+              <button className="edit-icon" onClick={() => navigate("/customer/job/edit", { state: { job_id: row.job_id, goto: "Customer", activeTab: activeTab } })}>
                 <i className="ti-pencil" />
-                </button>
+              </button>
             )}
             {hasAccess("job", "delete") && row.timesheet_job_id == null && (
-                <button className="delete-icon" onClick={() => handleDelete(row, "job")}>
+              <button className="delete-icon" onClick={() => handleDelete(row, "job")}>
                 <i className="ti-trash text-danger" />
-                </button>
+              </button>
             )}
-            </div>
+          </div>
         ),
-        }
+      }
     ] : []),
   ];
 
@@ -544,16 +544,16 @@ const ClientLists = () => {
                   </ul>
                 </div>
                 <div className="col-md-4 d-flex justify-content-end align-items-center">
-                    {activeTab === "client" && customerId && hasAccess("client", "add") && (
-                        <div className="btn btn-info text-white blue-btn mt-2 mt-sm-0" onClick={() => navigate("/customer/addclient", { state: { id: customerId, activeTab: activeTab } })}>
-                             <Plus size={16} /> Add Client
-                        </div>
-                    )}
-                    {activeTab === "job" && customerId && hasAccess("job", "add") && (
-                         <div className="btn btn-info text-white blue-btn mt-2 mt-sm-0" onClick={() => navigate("/customer/createjob", { state: { customer_id: customerId, goto: "Customer", activeTab: activeTab } })}>
-                             <Plus size={16} /> Create Job
-                         </div>
-                    )}
+                  {activeTab === "client" && customerId && hasAccess("client", "add") && (
+                    <div className="btn btn-info text-white blue-btn mt-2 mt-sm-0" onClick={() => navigate("/customer/addclient", { state: { id: customerId, activeTab: activeTab } })}>
+                      <Plus size={16} /> Add Client
+                    </div>
+                  )}
+                  {activeTab === "job" && customerId && hasAccess("job", "add") && (
+                    <div className="btn btn-info text-white blue-btn mt-2 mt-sm-0" onClick={() => navigate("/customer/createjob", { state: { customer_id: customerId, goto: "Customer", activeTab: activeTab } })}>
+                      <Plus size={16} /> Create Job
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -570,12 +570,26 @@ const ClientLists = () => {
         />
       )}
 
-        <div className="tab-content mt-4">
-          <div className="report-data">
-            <div className="d-flex justify-content-between align-items-center">
-              <div className="tab-title">
-                <h3 className="mt-0">{activeTab === "client" ? "Clients" : "Jobs"}</h3>
-              </div>
+      <div className="tab-content mt-4">
+        <div className="report-data">
+          <div className="d-flex justify-content-between align-items-center">
+            <div className="tab-title">
+              <h3 className="mt-0">{activeTab === "client" ? "Clients" : "Jobs"}</h3>
+            </div>
+
+          </div>
+
+          <div className="row mb-3 mt-3 d-flex justify-content-between align-items-center">
+            <div className="col-md-4 ">
+              <input
+                type="text"
+                placeholder={`Search ${activeTab}...`}
+                className="form-control"
+                value={searchTerm}
+                onChange={(e) => handleSearchChange(e.target.value)}
+              />
+            </div>
+            <div className="col-md-4 d-flex justify-content-end">
               {(hasAccess("export", "data") || role === "SUPERADMIN") && (
                 <button className="btn btn-outline-info fw-bold d-inline-flex align-items-center gap-2" onClick={handleExport}>
                   <Download size={16} /> Export Excel
@@ -583,53 +597,43 @@ const ClientLists = () => {
               )}
             </div>
 
-            <div className="row mb-3 mt-3">
-              <div className="col-md-4">
-                <input
-                  type="text"
-                  placeholder={`Search ${activeTab}...`}
-                  className="form-control"
-                  value={searchTerm}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                />
-              </div>
-            </div>
+          </div>
 
-            <div className="datatable-wrapper">
-              {loading && <div className="overlay"><div className="loader"></div></div>}
-              <Datatable
-                columns={activeTab === "client" ? ClientListColumns : JobColumns}
-                data={activeTab === "client" ? ClientData : getJobDetails}
-                filter={false}
-                pagination={false}
+          <div className="datatable-wrapper">
+            {loading && <div className="overlay"><div className="loader"></div></div>}
+            <Datatable
+              columns={activeTab === "client" ? ClientListColumns : JobColumns}
+              data={activeTab === "client" ? ClientData : getJobDetails}
+              filter={false}
+              pagination={false}
+            />
+
+            <div className="d-flex justify-content-between align-items-center mt-3">
+              <ReactPaginate
+                previousLabel={"Previous"}
+                nextLabel={"Next"}
+                breakLabel={"..."}
+                pageCount={Math.ceil(totalRecords / pageSize)}
+                marginPagesDisplayed={2}
+                pageRangeDisplayed={5}
+                onPageChange={handlePageChange}
+                containerClassName={"pagination"}
+                activeClassName={"active"}
+                forcePage={currentPage - 1}
               />
-
-              <div className="d-flex justify-content-between align-items-center mt-3">
-                <ReactPaginate
-                  previousLabel={"Previous"}
-                  nextLabel={"Next"}
-                  breakLabel={"..."}
-                  pageCount={Math.ceil(totalRecords / pageSize)}
-                  marginPagesDisplayed={2}
-                  pageRangeDisplayed={5}
-                  onPageChange={handlePageChange}
-                  containerClassName={"pagination"}
-                  activeClassName={"active"}
-                  forcePage={currentPage - 1}
-                />
-                <select className="perpage-select" value={pageSize} onChange={handlePageSizeChange}>
-                  <option value={5}>5</option>
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                </select>
-              </div>
+              <select className="perpage-select" value={pageSize} onChange={handlePageSizeChange}>
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default ClientLists;

@@ -58,17 +58,17 @@ const ClientList = () => {
     const name = selectedCustomer.label;
 
     setCustomerDetails({ id: id, trading_name: name });
-    
+
     if (id) {
-        GetAllClientData(id, name);
+      GetAllClientData(id, name);
     } else {
-        GetAllJobListByCustomer("", 1, pageSize, searchTerm);
-        setClientData([]);
-        setClientDetailSingle({ id: "", client_name: "" });
-        setHararchyData({
-            customer: { id: "", trading_name: "" },
-            client: { id: "", client_name: "" },
-        });
+      GetAllJobListByCustomer("", 1, pageSize, searchTerm);
+      setClientData([]);
+      setClientDetailSingle({ id: "", client_name: "" });
+      setHararchyData({
+        customer: { id: "", trading_name: "" },
+        client: { id: "", client_name: "" },
+      });
     }
   }, [selectedCustomer, pageSize]);
 
@@ -498,15 +498,15 @@ const ClientList = () => {
       cell: (row) => (
         <div className="d-flex">
           {(getAccessDataJob.update == 1 || role === "SUPERADMIN") && (
-              <button className="edit-icon" onClick={() => handleEdit(row)}>
-                <i className="ti-pencil" />
-              </button>
+            <button className="edit-icon" onClick={() => handleEdit(row)}>
+              <i className="ti-pencil" />
+            </button>
           )}
 
           {(hasAccess("job", "copy") || role === "SUPERADMIN") && (
-              <button className="copy-icon" onClick={() => copyRow(row)}>
-                <i className="ti-files"></i>
-              </button>
+            <button className="copy-icon" onClick={() => copyRow(row)}>
+              <i className="ti-files"></i>
+            </button>
           )}
 
           {row.timesheet_job_id == null
@@ -1096,7 +1096,7 @@ const ClientList = () => {
                 )}
               </div>
 
-              <div className="page-title-box pt-2">
+              <div className="page-title-box pt-2 ps-3">
                 <div className="row align-items-start flex-md-row flex-column-reverse justify-content-between">
                   <div className=" col-md-6 col-lg-8">
                     <ul
@@ -1132,13 +1132,13 @@ const ClientList = () => {
                     <>
                       <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
                         {(getAccessDataJob.add == 1 || role === "SUPERADMIN") && (
-                            <div
-                              className="btn btn-info text-white blue-btn mt-2 mt-sm-0"
-                              onClick={handleCreateJob}
-                            >
-                              <Plus size={16} /> Create Job
-                            </div>
-                          )}
+                          <div
+                            className="btn btn-info text-white blue-btn mt-2 mt-sm-0"
+                            onClick={handleCreateJob}
+                          >
+                            <Plus size={16} /> Create Job
+                          </div>
+                        )}
                       </div>
                     </>
                   )}
@@ -1195,18 +1195,7 @@ const ClientList = () => {
                       </li>
                     </ul>
 
-                    {(hasAccess("export", "data") || role === "SUPERADMIN") && (
-                      <div className="col-md-2">
-                        <button
-                          className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
-                          onClick={handleExport}
-                        >
-                          <Download size={16} />
 
-                          <span>Export Excel</span>
-                        </button>
-                      </div>
-                    )}
                   </div>
                   <div className="tab-content" id="pills-tabContent">
                     <div
@@ -1215,14 +1204,35 @@ const ClientList = () => {
                       role="tabpanel"
                       aria-labelledby="assignedjob-tab"
                     >
-                      <div className="col-md-3 mb-2">
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Search jobs..."
-                          value={searchTerm}
-                          onChange={(e) => handleSearchChange(e.target.value)}
-                        />
+                      <div className="row d-flex justify-content-between align-items-center">
+                        <div className="col-md-3 mb-2">
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Search jobs..."
+                            value={searchTerm}
+                            onChange={(e) => handleSearchChange(e.target.value)}
+                          />
+                        </div>
+                        <div className="col-md-6 d-flex justify-content-end">
+
+                          {(hasAccess("export", "data") || role === "SUPERADMIN") && (
+                            <div className="col-md-4">
+                              <button
+                                className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
+                                onClick={handleExport}
+                              >
+                                <Download size={16} />
+
+                                <span>Export Excel</span>
+                              </button>
+                            </div>
+                          )}
+
+
+                        </div>
+
+
                       </div>
 
                       <div className="datatable-wrapper ">

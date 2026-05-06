@@ -93,7 +93,7 @@ const Dashboard = () => {
       const data = { req: req, authToken: token };
 
       const res = await dispatch(CustomerDashboardData(data)).unwrap();
-     
+
       if (res.status) {
         setDashboard(res.data);
       } else {
@@ -596,12 +596,12 @@ const Dashboard = () => {
                   ) : (
                     <div className="row justify-content-center">
                       <div
-                        className="col-md-12 col-xl-4 col-lg-6"
+                        className="col-md-12 col-lg-6"
                         style={{
                           cursor:
                             (hasAccess("client", "view") ||
                               role === "SUPERADMIN") &&
-                            parseInt(dashboard.client.count) > 0
+                              parseInt(dashboard.client.count) > 0
                               ? "pointer"
                               : "default",
                         }}
@@ -640,12 +640,12 @@ const Dashboard = () => {
                         </div>
                       </div>
                       <div
-                        className="col-md-12 col-xl-4 col-lg-6"
+                        className="col-md-12  col-lg-6"
                         style={{
                           cursor:
                             (hasAccess("job", "view") ||
                               role === "SUPERADMIN") &&
-                            parseInt(dashboard.job.count) > 0
+                              parseInt(dashboard.job.count) > 0
                               ? "pointer"
                               : "default",
                         }}
@@ -678,12 +678,12 @@ const Dashboard = () => {
                         </div>
                       </div>
                       <div
-                        className="col-md-12 col-xl-4 col-lg-6"
+                        className="col-md-12  col-lg-6"
                         style={{
                           cursor:
                             (hasAccess("job", "view") ||
                               role === "SUPERADMIN") &&
-                            parseInt(dashboard.pending_job.count) > 0
+                              parseInt(dashboard.pending_job.count) > 0
                               ? "pointer"
                               : "default",
                         }}
@@ -723,12 +723,12 @@ const Dashboard = () => {
                         </div>
                       </div>
                       <div
-                        className="col-md-12 col-xl-4 col-lg-6"
+                        className="col-md-12  col-lg-6"
                         style={{
                           cursor:
                             (hasAccess("job", "view") ||
                               role === "SUPERADMIN") &&
-                            parseInt(dashboard.completed_job.count) > 0
+                              parseInt(dashboard.completed_job.count) > 0
                               ? "pointer"
                               : "default",
                         }}

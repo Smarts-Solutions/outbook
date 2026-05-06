@@ -1447,30 +1447,36 @@ const CustomerClientProfile = () => {
                     </button>
                   </li>
                 </ul>
-                <div className="d-flex align-items-center gap-2 mb-3">
-                  {(hasAccess("export", "data") || role === "SUPERADMIN") && customerData && customerData.length > 0 && (
-                    <button
-                      className="btn btn-outline-info fw-bold border-3 d-inline-flex align-items-center gap-2 lh-1"
-                      onClick={handleExport}
-                    >
-                      <Download size={16} />
-                      <span>Export To Excel</span>
-                    </button>
-                  )}
-                
-                </div>
+
               </div>
               <div className="tab-content">
                 <div className="tab-pane fade active show">
-                  <div className="col-md-3 mb-2">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Search jobs..."
-                      value={searchTerm}
-                      onChange={(e) => handleSearchChange(e.target.value)}
-                    />
+                  <div className="row d-flex justify-content-between align-items-center">
+                    <div className="col-md-3 mb-2">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search jobs..."
+                        value={searchTerm}
+                        onChange={(e) => handleSearchChange(e.target.value)}
+                      />
+                    </div>
+                    <div className="col-md-6 d-flex align-items-center justify-content-end gap-2 mb-3">
+                      {(hasAccess("export", "data") || role === "SUPERADMIN") && customerData && customerData.length > 0 && (
+                        <button
+                          className="btn btn-outline-info fw-bold border-3 d-inline-flex align-items-center gap-2 lh-1"
+                          onClick={handleExport}
+                        >
+                          <Download size={16} />
+                          <span>Export To Excel</span>
+                        </button>
+                      )}
+
+                    </div>
+
                   </div>
+
+
                   <div className="datatable-wrapper ">
                     {jobLoading && (
                       <div className="overlay"><div className="loader"></div></div>

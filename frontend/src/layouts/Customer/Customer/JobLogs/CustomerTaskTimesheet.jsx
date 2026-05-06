@@ -430,14 +430,14 @@ const CustomerTaskTimesheet = ({ job_id, getAccessDataJob, goto }) => {
           <div className="col-md-4">
             <div>
               {goto != "report" &&
-                (hasAccess("task_timesheet", "add") || role === "SUPERADMIN") && (
+                (hasAccess("job_timesheet", "add") || role === "SUPERADMIN") && (
                   <button
                     type="button"
                     onClick={() => {
                       handleTimeSheetView(location.state.job_id);
                       setAddjobtimesheet(true);
                     }}
-                    className="btn btn-info text-white float-end ms-2"
+                    className="btn btn-info text-white float-start me-3 "
                   >
                     <Plus size={16} /> Job Timesheet
                   </button>
