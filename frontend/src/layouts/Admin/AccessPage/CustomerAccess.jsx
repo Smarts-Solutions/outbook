@@ -108,22 +108,21 @@ const CustomerAccess = () => {
     return (
       <div>
         <h4
-          className="card-title fs-16  mb-3 flex-grow-1"
+          className="card-title fs-16 mb-3 flex-grow-1"
           style={{ marginBottom: "20px !important", textTransform: 'capitalize' }}
         >
           {section.permission_name}
         </h4>
 
-        <div className="row ">
+        <div className="row">
           {section.items.map((item) => (
-            <div key={item.id} className="col-auto">
-                <CheckboxItem
-                id={item.id}
-                label={item.type}
-                permission_name={section.permission_name}
-                role_id={role_id}
-                />
-            </div>
+            <CheckboxItem
+              key={item.id}
+              id={item.id}
+              label={item.type}
+              permission_name={section.permission_name}
+              role_id={role_id}
+            />
           ))}
         </div>
       </div>
@@ -132,9 +131,6 @@ const CustomerAccess = () => {
 
   const handleSaveChanges = async () => {
     try {
-        // Filter only the permissions related to the currently open role if needed, 
-        // but existing Access.jsx sends all in checkboxState.
-        // We'll follow the same pattern.
       const response = await dispatch(
         CustomerContactPersonAccess({
           req: {
@@ -154,7 +150,7 @@ const CustomerAccess = () => {
           timer: 1000,
         }).then(() => {
           setTimeout(() => {
-             //window.location.reload();
+             window.location.reload();
           }, 1000);
         });
       } else {
@@ -202,7 +198,7 @@ const CustomerAccess = () => {
                     onClick={(e) => OpenAccourdian(val)}
                   >
                     <button
-                      className=" accordion-button collapsed"
+                      className="accordion-button collapsed"
                       type="button"
                       data-bs-toggle="collapse"
                       data-bs-target={`#collapse${index}`}
@@ -222,7 +218,7 @@ const CustomerAccess = () => {
                       <div className="row">
                         {accessData &&
                           accessData.data.map((section, idx) => (
-                            <div key={idx} className="col-lg-3 col-md-6 mb-4">
+                            <div key={idx} className="col-lg-2 col-md-6">
                               <AccordionItem
                                 section={section}
                                 role_id={val.id}
@@ -242,7 +238,7 @@ const CustomerAccess = () => {
             className="btn btn-outline-success mt-3"
             onClick={handleSaveChanges}
           >
-            <Save size={16} className="me-2" /> Save changes
+            <Save size={16} /> Save changes
           </button>
         </div>
       </div>
