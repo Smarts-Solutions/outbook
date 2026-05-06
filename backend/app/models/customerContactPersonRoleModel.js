@@ -28,6 +28,24 @@ const createCustomerContactPersonRole = async (CustomerContactPersonRole) => {
                 module_id:result.insertId
             }
         );
+
+        // Auto-assign 'dashboard view' permission to the new role on creation
+        try {
+            const [[dashboardPerm]] = await pool.execute(
+                `SELECT id FROM customer_permissions WHERE permission_name = 'dashboard' AND type = 'view' LIMIT 1`
+            );
+            if (dashboardPerm) {
+                await pool.execute(
+                    `INSERT INTO customer_contact_person_role_permissions (role_id, permission_id)
+                     VALUES (?, ?)
+                     ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP`,
+                    [result.insertId, dashboardPerm.id]
+                );
+            }
+        } catch (permErr) {
+            console.error('Warning: Could not auto-assign dashboard view permission to new role:', permErr);
+        }
+
         return {status: true, message: 'Customer Contact Person Role created successfully.' , data : result.insertId};
     } catch (err) {
         console.error('Error inserting data:', err);
