@@ -62,7 +62,7 @@ const CustomerAccess = () => {
             onChange={(e) => handleChange(e)}
           />
           <label className="form-check-label new_checkbox mb-0" htmlFor={`perm-${id}-${role_id}`}>
-            {label}
+            {label && label.replace(/_/g, " ")}
           </label>
         </div>
       </div>
@@ -111,7 +111,7 @@ const CustomerAccess = () => {
           className="card-title fs-16 mb-3 flex-grow-1"
           style={{ marginBottom: "20px !important", textTransform: 'capitalize' }}
         >
-          {section.permission_name}
+          {section.permission_name && section.permission_name.replace(/_/g, " ")}
         </h4>
 
         <div className="row">
