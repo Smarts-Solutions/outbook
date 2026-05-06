@@ -736,7 +736,7 @@ const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
 
           {/* RIGHT */}
           <div className="col-md-4 text-end">
-            {(hasAccess("export", "data") || role === "SUPERADMIN") && AllQueryList && AllQueryList.length > 0 && (
+            {(hasAccess("queries", "download") || role === "SUPERADMIN") && AllQueryList && AllQueryList.length > 0 && (
               <button
                 className="btn btn-outline-info fw-bold border-3 me-2"
                 onClick={handleExport}

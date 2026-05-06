@@ -17,12 +17,20 @@ import { ScrollToViewFirstError } from "../../../Utils/Comman_function";
 import { CreateJobErrorMessage } from "../../../Utils/Common_Message";
 import Select from 'react-select';
 import { Save, Plus, ArrowLeft, X, ExternalLink, RotateCcw } from "lucide-react";
+import { useCustomerAccess } from "../../../Utils/CustomerAccessContext";
 
 const CreateJob = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { hasAccess } = useCustomerAccess();
   const role = JSON.parse(localStorage.getItem("role"));
+
+  useEffect(() => {
+    if (!hasAccess("job", "add") && role !== "SUPERADMIN") {
+      navigate("/customer/dashboard");
+    }
+  }, [hasAccess, role, navigate]);
 
 
 

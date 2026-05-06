@@ -20,12 +20,20 @@ import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import { base_url } from "../../../Utils/Config";
+import { useCustomerAccess } from "../../../Utils/CustomerAccessContext";
 
 const EditJob = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
+  const { hasAccess } = useCustomerAccess();
   const role = JSON.parse(localStorage.getItem("role"));
+
+  useEffect(() => {
+    if (!hasAccess("job", "update") && role !== "SUPERADMIN") {
+      navigate("/customer/dashboard");
+    }
+  }, [hasAccess, role, navigate]);
   const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
   const dispatch = useDispatch();
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });

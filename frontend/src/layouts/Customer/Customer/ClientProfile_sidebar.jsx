@@ -374,7 +374,7 @@ const CustomerClientProfile = () => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
-          {(hasAccess("client_tab", "delete") || role === "SUPERADMIN") && (
+          {(hasAccess("client_document", "delete") || role === "SUPERADMIN") && (
             <button className="delete-icon me-2" onClick={() => removeItem(row, 2)}>
               <i className="ti-trash text-danger" />
             </button>
@@ -555,7 +555,7 @@ const CustomerClientProfile = () => {
           id: "documents",
           label: "Documents",
           icon: <FileText size={16} />,
-          access: hasAccess("client_tab", "view") || role === "SUPERADMIN",
+          access: hasAccess("client_document", "view") || role === "SUPERADMIN",
         },
       ]
       : []),
@@ -735,7 +735,7 @@ const CustomerClientProfile = () => {
             className="form-select form-control"
             value={row.status_type}
             onChange={(e) => handleStatusChange(e, row)}
-            disabled={!hasAccess("job", "status_update") && role !== "SUPERADMIN"}
+            disabled={!(hasAccess("job", "status_update") || role === "SUPERADMIN")}
           >
             {statusDataAll.map((status) => (
               <option key={status.id} value={status.id}>
@@ -1462,7 +1462,7 @@ const CustomerClientProfile = () => {
                       />
                     </div>
                     <div className="col-md-6 d-flex align-items-center justify-content-end gap-2 mb-3">
-                      {(hasAccess("export", "data") || role === "SUPERADMIN") && customerData && customerData.length > 0 && (
+                      {(hasAccess("job", "export") || role === "SUPERADMIN") && customerData && customerData.length > 0 && (
                         <button
                           className="btn btn-outline-info fw-bold border-3 d-inline-flex align-items-center gap-2 lh-1"
                           onClick={handleExport}
@@ -1588,7 +1588,7 @@ const CustomerClientProfile = () => {
                       </ul>
                     </div>
                   </div>
-                  {/* {getAccessDataClient.update == 1 && (
+                  {(hasAccess("client", "update") || role === "SUPERADMIN") && (
                     <div className="text-end mt-3">
                       <button
                         className="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1"
@@ -1603,7 +1603,7 @@ const CustomerClientProfile = () => {
                         <Pencil size={14} /> Edit
                       </button>
                     </div>
-                  )} */}
+                  )}
                 </div>
               </div>
             </div>
@@ -1708,76 +1708,80 @@ const CustomerClientProfile = () => {
                 <Formik initialValues={{ files: [] }} onSubmit={handleDocumentSubmit}>
                   {({ setFieldValue }) => (
                     <Form>
-                      <div className="row">
-                        <div className="col-md-6">
-                          <div className="form-group">
-                            <label className="form-label">Upload Documents</label>
-                            <div className="input-group">
-                              <input
-                                type="file"
-                                className="form-control"
-                                multiple
-                                ref={fileInputRef}
-                                onChange={(e) => handleFileChange(e)}
-                              />
+                      {(hasAccess("client_document", "upload") || role === "SUPERADMIN") && (
+                        <>
+                          <div className="row">
+                            <div className="col-md-6">
+                              <div className="form-group">
+                                <label className="form-label">Upload Documents</label>
+                                <div className="input-group">
+                                  <input
+                                    type="file"
+                                    className="form-control"
+                                    multiple
+                                    ref={fileInputRef}
+                                    onChange={(e) => handleFileChange(e)}
+                                  />
+                                </div>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                      {newFiles.length > 0 && (
-                        <div className="table-responsive mt-3">
-                          <table className="table table-bordered mb-0">
-                            <thead>
-                              <tr>
-                                <th>Preview</th>
-                                <th>File Name</th>
-                                <th>Type</th>
-                                <th>Size</th>
-                                <th>Action</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {newFiles.map((file, index) => (
-                                <tr key={index}>
-                                  <td>
-                                    {file.type.startsWith("image/") ? (
-                                      <img src={previews[index]} alt="preview" style={{ width: "40px", height: "40px" }} />
-                                    ) : file.type === "application/pdf" ? (
-                                      <FileText size={24} color="#FF0000" />
-                                    ) : (
-                                      <File size={24} color="#000" />
-                                    )}
-                                  </td>
-                                  <td>{file.name}</td>
-                                  <td>{file.type}</td>
-                                  <td>
-                                    {file.size < 1024 * 1024
-                                      ? `${(file.size / 1024).toFixed(2)} KB`
-                                      : `${(file.size / (1024 * 1024)).toFixed(2)} MB`}
-                                  </td>
-                                  <td>
-                                    <button
-                                      type="button"
-                                      className="btn btn-sm btn-outline-danger"
-                                      onClick={() => {
-                                        const updatedFiles = newFiles.filter((_, idx) => idx !== index);
-                                        setNewFiles(updatedFiles);
-                                        setPreviews(previews.filter((_, idx) => idx !== index));
-                                      }}
-                                    >
-                                      <X size={14} />
-                                    </button>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                          <div className="mt-3">
-                            <Button type="primary" onClick={handleDocumentSubmit} className="btn btn-primary d-inline-flex align-items-center gap-2">
-                              Save <ArrowRight size={16} />
-                            </Button>
-                          </div>
-                        </div>
+                          {newFiles.length > 0 && (
+                            <div className="table-responsive mt-3">
+                              <table className="table table-bordered mb-0">
+                                <thead>
+                                  <tr>
+                                    <th>Preview</th>
+                                    <th>File Name</th>
+                                    <th>Type</th>
+                                    <th>Size</th>
+                                    <th>Action</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {newFiles.map((file, index) => (
+                                    <tr key={index}>
+                                      <td>
+                                        {file.type.startsWith("image/") ? (
+                                          <img src={previews[index]} alt="preview" style={{ width: "40px", height: "40px" }} />
+                                        ) : file.type === "application/pdf" ? (
+                                          <FileText size={24} color="#FF0000" />
+                                        ) : (
+                                          <File size={24} color="#000" />
+                                        )}
+                                      </td>
+                                      <td>{file.name}</td>
+                                      <td>{file.type}</td>
+                                      <td>
+                                        {file.size < 1024 * 1024
+                                          ? `${(file.size / 1024).toFixed(2)} KB`
+                                          : `${(file.size / (1024 * 1024)).toFixed(2)} MB`}
+                                      </td>
+                                      <td>
+                                        <button
+                                          type="button"
+                                          className="btn btn-sm btn-outline-danger"
+                                          onClick={() => {
+                                            const updatedFiles = newFiles.filter((_, idx) => idx !== index);
+                                            setNewFiles(updatedFiles);
+                                            setPreviews(previews.filter((_, idx) => idx !== index));
+                                          }}
+                                        >
+                                          <X size={14} />
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                              <div className="mt-3">
+                                <button type="button" onClick={handleDocumentSubmit} className="btn btn-primary d-inline-flex align-items-center gap-2">
+                                  Save <ArrowRight size={16} />
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </>
                       )}
                     </Form>
                   )}

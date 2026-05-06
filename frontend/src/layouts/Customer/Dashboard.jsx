@@ -498,7 +498,7 @@ const Dashboard = () => {
                 </div>
                 <div className="col-md-3">
                   <div className="d-flex justify-content-end">
-                    {(hasAccess("export", "data") || role === "SUPERADMIN") && (
+                    {(hasAccess("dashboard", "export") || role === "SUPERADMIN") && (
                       <button
                         type="button"
                         className="btn btn-outline-info fw-bold"
@@ -599,7 +599,7 @@ const Dashboard = () => {
                         className="col-md-12 col-lg-6"
                         style={{
                           cursor:
-                            (hasAccess("client", "view") ||
+                            (hasAccess("client_overview", "view") ||
                               role === "SUPERADMIN") &&
                               parseInt(dashboard.client.count) > 0
                               ? "pointer"
@@ -643,7 +643,7 @@ const Dashboard = () => {
                         className="col-md-12  col-lg-6"
                         style={{
                           cursor:
-                            (hasAccess("job", "view") ||
+                            (hasAccess("no_of_jobs", "view") ||
                               role === "SUPERADMIN") &&
                               parseInt(dashboard.job.count) > 0
                               ? "pointer"
@@ -681,7 +681,7 @@ const Dashboard = () => {
                         className="col-md-12  col-lg-6"
                         style={{
                           cursor:
-                            (hasAccess("job", "view") ||
+                            (hasAccess("no_of_jobs", "view") ||
                               role === "SUPERADMIN") &&
                               parseInt(dashboard.pending_job.count) > 0
                               ? "pointer"
@@ -726,7 +726,7 @@ const Dashboard = () => {
                         className="col-md-12  col-lg-6"
                         style={{
                           cursor:
-                            (hasAccess("job", "view") ||
+                            (hasAccess("no_of_jobs", "view") ||
                               role === "SUPERADMIN") &&
                               parseInt(dashboard.completed_job.count) > 0
                               ? "pointer"

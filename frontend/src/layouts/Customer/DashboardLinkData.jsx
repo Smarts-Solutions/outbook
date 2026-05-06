@@ -537,7 +537,7 @@ const DashboardLinkData = () => {
                   <ArrowLeft size={16} className="me-1" /> Back
                 </div>
 
-                {(hasAccess("export", "data") || role === "SUPERADMIN") && allLinkedData && allLinkedData.length > 0 && (
+                {((location?.state?.req?.key === "client" ? hasAccess("client", "export") : hasAccess("job", "export")) || role === "SUPERADMIN") && allLinkedData && allLinkedData.length > 0 && (
                   <div className="ms-2">
                     <button
                       className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"

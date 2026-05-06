@@ -1216,7 +1216,7 @@ const ClientList = () => {
                         </div>
                         <div className="col-md-6 d-flex justify-content-end">
 
-                          {(hasAccess("export", "data") || role === "SUPERADMIN") && (
+                          {(hasAccess("job", "export") || role === "SUPERADMIN") && (
                             <div className="col-md-4">
                               <button
                                 className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"

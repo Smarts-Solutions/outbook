@@ -750,7 +750,7 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
 
           {/* RIGHT */}
           <div className="col-md-6 text-end d-flex justify-content-end align-items-center gap-2">
-            {(hasAccess("export", "data") || role === "SUPERADMIN") && getMissingLogListData && getMissingLogListData.length > 0 && (
+            {(hasAccess("missing_logs", "download") || role === "SUPERADMIN") && getMissingLogListData && getMissingLogListData.length > 0 && (
               <button
                 className="btn btn-info d-inline-flex align-items-center gap-2 rounded-pill px-3 py-2 ms-auto"
                 onClick={handleExport}

@@ -590,7 +590,7 @@ const ClientLists = () => {
               />
             </div>
             <div className="col-md-4 d-flex justify-content-end">
-              {(hasAccess("export", "data") || role === "SUPERADMIN") && (
+              {((activeTab === "client" ? hasAccess("client", "export") : hasAccess("job", "export")) || role === "SUPERADMIN") && (
                 <button className="btn btn-outline-info fw-bold d-inline-flex align-items-center gap-2" onClick={handleExport}>
                   <Download size={16} /> Export Excel
                 </button>

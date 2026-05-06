@@ -430,7 +430,7 @@ const CustomerTaskTimesheet = ({ job_id, getAccessDataJob, goto }) => {
           <div className="col-md-4">
             <div>
               {goto != "report" &&
-                (hasAccess("job_timesheet", "add") || role === "SUPERADMIN") && (
+                (hasAccess("task_timesheet", "add") || role === "SUPERADMIN") && (
                   <button
                     type="button"
                     onClick={() => {
@@ -442,7 +442,7 @@ const CustomerTaskTimesheet = ({ job_id, getAccessDataJob, goto }) => {
                     <Plus size={16} /> Job Timesheet
                   </button>
                 )}
-              {(hasAccess("export", "data") || role === "SUPERADMIN") && taskTimeData && taskTimeData.length > 0 && (
+              {(hasAccess("task_timesheet", "download") || role === "SUPERADMIN") && taskTimeData && taskTimeData.length > 0 && (
                 <button
                   className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
                   onClick={handleExport}

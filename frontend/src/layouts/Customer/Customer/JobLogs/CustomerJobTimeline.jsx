@@ -115,7 +115,7 @@ const CustomerJobTimeline = ({ job_id }) => {
           <div className="tab-title d-flex align-items-center">
             <h3 className="mb-0">Job Timeline</h3>
 
-            {(hasAccess("export", "data") || role === "SUPERADMIN") && JobTimelineData && JobTimelineData.length > 0 && (
+            {(hasAccess("job", "export") || role === "SUPERADMIN") && JobTimelineData && JobTimelineData.length > 0 && (
               <button
                 className="btn btn-info d-inline-flex align-items-center gap-2 rounded-pill px-3 py-2 ms-auto"
                 id="btn-export"

@@ -8,12 +8,21 @@ import Swal from "sweetalert2";
 import { PersonRole, Country, IncorporationApi } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import { ScrollToViewFirstError, ScrollToViewFirstErrorContactForm, convertDate } from '../../../Utils/Comman_function'
 import { Plus ,ArrowLeft} from "lucide-react";
+import { useCustomerAccess } from "../../../Utils/CustomerAccessContext";
 
 const CreateClient = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
+  const { hasAccess } = useCustomerAccess();
+  const role = JSON.parse(localStorage.getItem("role"));
+
+  useEffect(() => {
+    if (!hasAccess("client", "add") && role !== "SUPERADMIN") {
+      navigate("/customer/dashboard");
+    }
+  }, [hasAccess, role, navigate]);
   const [clientIndustry, setClientIndustry] = useState([]);
   const [getAllSearchCompany, setGetAllSearchCompany] = useState([]);
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);

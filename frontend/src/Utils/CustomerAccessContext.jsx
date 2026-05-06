@@ -92,6 +92,9 @@ export const CustomerAccessProvider = ({ children }) => {
     }, [location.pathname, fetchAccessData, fetchAssignedCustomers]);
 
     const hasAccess = (permission, type = "view") => {
+        const role = JSON.parse(localStorage.getItem("role"));
+        if (role?.toString().toUpperCase() === "SUPERADMIN") return true;
+        
         if (!accessData) return false;
         const module = accessData.find(item => item.permission_name === permission);
         if (!module) return false;
