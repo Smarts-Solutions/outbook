@@ -232,39 +232,7 @@ const CustomerClientProfile = () => {
   const [statusDataAll, setStatusDataAll] = useState([]);
   const [selectStatusIs, setStatusId] = useState("");
   const { hasAccess } = useCustomerAccess();
-  const [getAccessDataJob, setAccessDataJob] = useState({
-    add: hasAccess("job", "add") || role === "SUPERADMIN" ? 1 : 0,
-    update: hasAccess("job", "update") || role === "SUPERADMIN" ? 1 : 0,
-    delete: hasAccess("job", "delete") || role === "SUPERADMIN" ? 1 : 0,
-    view: hasAccess("job", "view") || role === "SUPERADMIN" ? 1 : 0,
-    all_jobs: hasAccess("all_jobs", "view") || role === "SUPERADMIN" ? 1 : 0,
-  });
 
-  const [getAccessDataClient, setAccessDataClient] = useState({
-    add: hasAccess("client", "add") || role === "SUPERADMIN" ? 1 : 0,
-    update: hasAccess("client", "update") || role === "SUPERADMIN" ? 1 : 0,
-    delete: hasAccess("client", "delete") || role === "SUPERADMIN" ? 1 : 0,
-    view: hasAccess("client", "view") || role === "SUPERADMIN" ? 1 : 0,
-  });
-
-  useEffect(() => {
-    const updatedAccessJob = {
-      add: hasAccess("job", "add") || role === "SUPERADMIN" ? 1 : 0,
-      update: hasAccess("job", "update") || role === "SUPERADMIN" ? 1 : 0,
-      delete: hasAccess("job", "delete") || role === "SUPERADMIN" ? 1 : 0,
-      view: hasAccess("job", "view") || role === "SUPERADMIN" ? 1 : 0,
-      all_jobs: hasAccess("all_jobs", "view") || role === "SUPERADMIN" ? 1 : 0,
-    };
-    setAccessDataJob(updatedAccessJob);
-
-    const updatedAccessClient = {
-      add: hasAccess("client", "add") || role === "SUPERADMIN" ? 1 : 0,
-      update: hasAccess("client", "update") || role === "SUPERADMIN" ? 1 : 0,
-      delete: hasAccess("client", "delete") || role === "SUPERADMIN" ? 1 : 0,
-      view: hasAccess("client", "view") || role === "SUPERADMIN" ? 1 : 0,
-    };
-    setAccessDataClient(updatedAccessClient);
-  }, [role, hasAccess]);
 
   const handleCreateJob = () => {
     navigate("/customer/createjob", {
@@ -543,7 +511,7 @@ const CustomerClientProfile = () => {
       icon: <Briefcase size={16} />,
       access: hasAccess("no_of_jobs", "view") || role === "SUPERADMIN",
     },
-    ...((clientDetailSingle.id !== "" || cli_id_sidebar !== "") && (getAccessDataClient.view == 1 || role === "SUPERADMIN")
+    ...((clientDetailSingle.id !== "" || cli_id_sidebar !== "") && (hasAccess("client", "view") || role === "SUPERADMIN")
       ? [
         {
           id: "view client",
@@ -669,8 +637,7 @@ const CustomerClientProfile = () => {
       name: "Job ID",
       cell: (row) => (
         <div title={row.job_code_id}>
-          {getAccessDataJob.view == 1 ||
-            getAccessDataJob.all_jobs == 1 ||
+          {hasAccess("job", "view") ||
             role === "SUPERADMIN" ? (
             <a
               onClick={() => HandleJob(row)}
@@ -841,7 +808,7 @@ const CustomerClientProfile = () => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
-          {(getAccessDataJob.update == 1 || role === "SUPERADMIN") && (
+          {(hasAccess("job", "update") || role === "SUPERADMIN") && (
             <button className="edit-icon" onClick={() => handleEdit(row)}>
               <i className="ti-pencil" />
             </button>
@@ -852,7 +819,7 @@ const CustomerClientProfile = () => {
           </button>
 
           {row.timesheet_job_id == null
-            ? (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
+            ? (hasAccess("job", "delete") || role === "SUPERADMIN") && (
               <button
                 className="delete-icon"
                 onClick={() => handleDelete(row, "job")}
@@ -1342,7 +1309,7 @@ const CustomerClientProfile = () => {
               </ul>
             </div>
             <div className="col-md-6 col-lg-4 d-flex justify-content-end align-items-center gap-2 mt-2 mt-sm-0 ps-lg-0">
-              {getAccessDataJob.insert == 1 && (
+              {(hasAccess("job", "add") || role === "SUPERADMIN") && (
                 <button
                   type="button"
                   className="btn btn-info text-white blue-btn"

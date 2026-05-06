@@ -1,7 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FileText } from 'lucide-react';
+import { useCustomerAccess } from '../../../Utils/CustomerAccessContext';
+import { useNavigate } from 'react-router-dom';
 
 const CustomerReports = () => {
+    const { hasAccess } = useCustomerAccess();
+    const navigate = useNavigate();
+    const role = JSON.parse(localStorage.getItem("role"));
+
+    useEffect(() => {
+        if (!hasAccess("report", "view") && role !== "SUPERADMIN") {
+            navigate("/customer/dashboard");
+        }
+    }, [hasAccess, role, navigate]);
+
     return (
         <div className="container-fluid">
             <div className="row">

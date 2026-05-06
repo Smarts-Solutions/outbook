@@ -125,8 +125,8 @@ const CustomerDocuments = ({ job_id, getAccessDataJob }) => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex justify-content-end gap-2">
-          {(hasAccess("job_document", "delete") || role === "SUPERADMIN") && (
-            <div className="d-flex gap-2">
+          <div className="d-flex gap-2">
+            {(hasAccess("job_document", "delete") || role === "SUPERADMIN") && (
               <button
                 className="delete-icon"
                 onClick={() => removeItem(row, 2)}
@@ -134,21 +134,21 @@ const CustomerDocuments = ({ job_id, getAccessDataJob }) => {
               >
                 <i className="ti-trash fs-5 text-danger" />
               </button>
-              <button
-                className="download-icon"
-                onClick={() =>
-                  downloadFileFromSharePoint(
-                    row.web_url,
-                    sharepoint_token,
-                    row.original_name,
-                  )
-                }
-                title="Download Document"
-              >
-                <Download size={18} />
-              </button>
-            </div>
-          )}
+            )}
+            <button
+              className="download-icon"
+              onClick={() =>
+                downloadFileFromSharePoint(
+                  row.web_url,
+                  sharepoint_token,
+                  row.original_name,
+                )
+              }
+              title="Download Document"
+            >
+              <Download size={18} />
+            </button>
+          </div>
         </div>
       ),
       ignoreRowClick: true,

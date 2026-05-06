@@ -106,6 +106,12 @@ const ClientLists = () => {
     }
   }, [activeTab, selectedCustomer, pageSize]);
 
+  useEffect(() => {
+    if (!hasAccess("client", "view") && !hasAccess("job", "view") && role !== "SUPERADMIN") {
+      navigate("/customer/dashboard");
+    }
+  }, [hasAccess, role, navigate]);
+
   const SetTab = (e) => {
     setActiveTab(e);
     setCurrentPage(1);

@@ -49,6 +49,12 @@ const ClientList = () => {
   const debounceRef = useRef(null);
 
   useEffect(() => {
+    if (!hasAccess("job", "view") && role !== "SUPERADMIN") {
+      navigate("/customer/dashboard");
+    }
+  }, [hasAccess, role, navigate]);
+
+  useEffect(() => {
     GetAllCustomer();
     GetStatus();
   }, []);
@@ -170,20 +176,7 @@ const ClientList = () => {
   });
   const [statusDataAll, setStatusDataAll] = useState([]);
   const [selectStatusIs, setStatusId] = useState("");
-  const getAccessDataJob = {
-    add: hasAccess("job", "add") || role === "SUPERADMIN" ? 1 : 0,
-    update: hasAccess("job", "update") || role === "SUPERADMIN" ? 1 : 0,
-    delete: hasAccess("job", "delete") || role === "SUPERADMIN" ? 1 : 0,
-    view: hasAccess("job", "view") || role === "SUPERADMIN" ? 1 : 0,
-    all_jobs: hasAccess("all_jobs", "view") || role === "SUPERADMIN" ? 1 : 0,
-  };
 
-  const getAccessDataClient = {
-    add: hasAccess("client", "add") || role === "SUPERADMIN" ? 1 : 0,
-    update: hasAccess("client", "update") || role === "SUPERADMIN" ? 1 : 0,
-    delete: hasAccess("client", "delete") || role === "SUPERADMIN" ? 1 : 0,
-    view: hasAccess("client", "view") || role === "SUPERADMIN" ? 1 : 0,
-  };
 
   const GetClientDetails = async (client_id) => {
     const req = { action: "getByid", client_id: client_id, staff_id: staffDetails.id };
@@ -213,7 +206,7 @@ const ClientList = () => {
 
   const tabs = [
     { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16} /> },
-    ...(clientDetailSingle.id !== "" && getAccessDataClient.view == 1
+    ...(clientDetailSingle.id !== "" && (hasAccess("client", "view") || role === "SUPERADMIN")
       ? [{ id: "view client", label: "View Client", icon: <User size={16} /> }]
       : []),
   ];
@@ -497,7 +490,7 @@ const ClientList = () => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
-          {(getAccessDataJob.update == 1 || role === "SUPERADMIN") && (
+          {(hasAccess("job", "update") || role === "SUPERADMIN") && (
             <button className="edit-icon" onClick={() => handleEdit(row)}>
               <i className="ti-pencil" />
             </button>
@@ -510,7 +503,7 @@ const ClientList = () => {
           )}
 
           {row.timesheet_job_id == null
-            ? (getAccessDataJob.delete == 1 || role === "SUPERADMIN") && (
+            ? (hasAccess("job", "delete") || role === "SUPERADMIN") && (
               <button
                 className="delete-icon"
                 onClick={() => handleDelete(row, "job")}
@@ -1131,7 +1124,7 @@ const ClientList = () => {
                   {activeTab == "NoOfJobs" && (
                     <>
                       <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
-                        {(getAccessDataJob.add == 1 || role === "SUPERADMIN") && (
+                        {(hasAccess("job", "add") || role === "SUPERADMIN") && (
                           <div
                             className="btn btn-info text-white blue-btn mt-2 mt-sm-0"
                             onClick={handleCreateJob}
