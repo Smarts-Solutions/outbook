@@ -138,12 +138,13 @@ CREATE TABLE `customer_access` (
 
 new permission table /////////
 
-CREATE TABLE IF NOT EXISTS customer_permissions (
+CREATE TABLE customer_permissions (
   id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   permission_name VARCHAR(100) NOT NULL,
   type VARCHAR(50) NOT NULL,
   created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY unique_permission (permission_name, type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO customer_permissions (permission_name, type) VALUES
@@ -162,36 +163,40 @@ INSERT INTO customer_permissions (permission_name, type) VALUES
 ('client', 'add'),
 ('client', 'update'),
 ('client', 'delete'),
+('client', 'export'),
 
--- Jobs
+-- Job
 ('job', 'view'),
 ('job', 'add'),
 ('job', 'update'),
 ('job', 'delete'),
 ('job', 'copy'),
 ('job', 'status_update'),
+('job', 'export'),
 
--- Reports
+-- Report
 ('report', 'view'),
 
--- Export
-('export', 'data'),
+-- Client Document
+('client_document', 'view'),
+('client_document', 'add'),
+('client_document', 'upload'),
+('client_document', 'delete'),
+('client_document', 'download'),
 
--- Client Tab (moved from client_document)
-('client_tab', 'view'),
-('client_tab', 'upload'),
-('client_tab', 'delete'),
+-- Client Extra
 ('no_of_jobs', 'view'),
 ('client_overview', 'view'),
 
-
-
--- Job Information
+-- Job Info
 ('job_information', 'view'),
 
--- Task Timesheet (added add permission)
+-- Task Timesheet
 ('task_timesheet', 'view'),
 ('task_timesheet', 'add'),
+('task_timesheet', 'update'),
+('task_timesheet', 'delete'),
+('task_timesheet', 'download'),
 
 -- Job Timeline
 ('job_timeline', 'view'),
@@ -199,18 +204,30 @@ INSERT INTO customer_permissions (permission_name, type) VALUES
 -- Missing Logs
 ('missing_logs', 'view'),
 ('missing_logs', 'add'),
+('missing_logs', 'update'),
+('missing_logs', 'delete'),
+('missing_logs', 'download'),
 
 -- Queries
 ('queries', 'view'),
 ('queries', 'add'),
+('queries', 'update'),
+('queries', 'delete'),
+('queries', 'download'),
 
 -- Draft
 ('draft', 'view'),
 ('draft', 'add'),
+('draft', 'update'),
+('draft', 'delete'),
+('draft', 'download'),
 
--- Job Documents
+-- Job Document
 ('job_document', 'view'),
 ('job_document', 'add'),
+('job_document', 'update'),
+('job_document', 'delete'),
+('job_document', 'download');
 
 
 
