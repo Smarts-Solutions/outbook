@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, Fragment } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Datatable from "../../../Components/ExtraComponents/Datatable_1";
@@ -710,6 +710,7 @@ const CustomerUsers = () => {
       col_size: 6,
       disable: false,
       placeholder: "Enter Phone Number",
+      maxLength: 10,
     },
     {
       type: "email",
@@ -765,13 +766,13 @@ const CustomerUsers = () => {
   const formik = useFormik({
     initialValues: {
       first_name: updatedata?.first_name || "",
-      last_name: updatedata?.first_name || "",
+      last_name: updatedata?.last_name || "",
       email: updatedata?.email || "",
       phone: updatedata?.phone || "",
       phone_code: updatedata?.phone_code || "+44",
       role: "1",
       status: updatedata?.status || "1",
-      customer_contact_person_role_id: updatedata?.customer_contact_person_role_id || null,
+      customer_contact_person_role_id: updatedata?.customer_contact_person_role_id || "",
       allCustomerAccess: updatedata?.allCustomerAccess
         ? updatedata.allCustomerAccess.split(",").map(Number)
         : [] || [],
@@ -792,7 +793,8 @@ const CustomerUsers = () => {
         .required("Last name is required"),
       phone: Yup.string()
         .trim()
-        .required("phone is required"),
+        .matches(/^[0-9]{10}$/, "Phone number must be exactly 10 digits")
+        .required("Phone number is required"),
       email: Yup.string()
         .trim()
         .email("Invalid email address")
@@ -864,54 +866,59 @@ const CustomerUsers = () => {
     },
   });
 
+  const isFirstRender = useRef(true);
   const prevCustomerAccess = useRef(formik.values.allCustomerAccess);
 
   useEffect(() => {
-    // Skip if it's the initial load for edit mode
-    if (showAddCustomerModal) {
-      const added = (formik.values.allCustomerAccess || []).filter(id => !(prevCustomerAccess.current || []).includes(id));
-      const removed = (prevCustomerAccess.current || []).filter(id => !(formik.values.allCustomerAccess || []).includes(id));
+    // Reset initial load flag when modal closes
+    if (!showAddCustomerModal) {
+      isFirstRender.current = true;
+      return;
+    }
 
-      let newSelectedClients = [...(formik.values.selectedClients || [])];
-      let newSelectedJobs = [...(formik.values.selectedJobs || [])];
+    // Skip the auto-selection logic on the first render of the modal to preserve existing assignments
+    if (isFirstRender.current) {
+      prevCustomerAccess.current = formik.values.allCustomerAccess;
+      isFirstRender.current = false;
+      return;
+    }
 
-      if (added.length > 0) {
-        added.forEach(customerId => {
-          const clients = allClients.filter(c => c.customer_id === customerId);
-          clients.forEach(client => {
-            if (!newSelectedClients.includes(client.id)) newSelectedClients.push(client.id);
-            const jobs = allJobs.filter(j => j.client_id === client.id);
-            jobs.forEach(job => {
-              if (!newSelectedJobs.includes(job.id)) newSelectedJobs.push(job.id);
-            });
+    const added = (formik.values.allCustomerAccess || []).filter(id => !(prevCustomerAccess.current || []).includes(id));
+    const removed = (prevCustomerAccess.current || []).filter(id => !(formik.values.allCustomerAccess || []).includes(id));
+
+    let newSelectedClients = [...(formik.values.selectedClients || [])];
+    let newSelectedJobs = [...(formik.values.selectedJobs || [])];
+
+    if (added.length > 0) {
+      added.forEach(customerId => {
+        const clients = allClients.filter(c => c.customer_id === customerId);
+        clients.forEach(client => {
+          if (!newSelectedClients.includes(client.id)) newSelectedClients.push(client.id);
+          const jobs = allJobs.filter(j => j.client_id === client.id);
+          jobs.forEach(job => {
+            if (!newSelectedJobs.includes(job.id)) newSelectedJobs.push(job.id);
           });
         });
-        formik.setFieldValue("selectedClients", newSelectedClients);
-        formik.setFieldValue("selectedJobs", newSelectedJobs);
-      }
-
-      if (removed.length > 0) {
-        removed.forEach(customerId => {
-          const clients = allClients.filter(c => c.customer_id === customerId);
-          const clientIds = clients.map(c => c.id);
-          newSelectedClients = newSelectedClients.filter(id => !clientIds.includes(id));
-
-          const jobs = allJobs.filter(j => j.customer_id === customerId);
-          const jobIds = jobs.map(j => j.id);
-          newSelectedJobs = newSelectedJobs.filter(id => !jobIds.includes(id));
-        });
-        formik.setFieldValue("selectedClients", newSelectedClients);
-        formik.setFieldValue("selectedJobs", newSelectedJobs);
-      }
-      prevCustomerAccess.current = formik.values.allCustomerAccess;
+      });
+      formik.setFieldValue("selectedClients", newSelectedClients);
+      formik.setFieldValue("selectedJobs", newSelectedJobs);
     }
+
+    if (removed.length > 0) {
+      removed.forEach(customerId => {
+        const clients = allClients.filter(c => c.customer_id === customerId);
+        const clientIds = clients.map(c => c.id);
+        newSelectedClients = newSelectedClients.filter(id => !clientIds.includes(id));
+
+        const jobs = allJobs.filter(j => j.customer_id === customerId);
+        const jobIds = jobs.map(j => j.id);
+        newSelectedJobs = newSelectedJobs.filter(id => !jobIds.includes(id));
+      });
+      formik.setFieldValue("selectedClients", newSelectedClients);
+      formik.setFieldValue("selectedJobs", newSelectedJobs);
+    }
+    prevCustomerAccess.current = formik.values.allCustomerAccess;
   }, [formik.values.allCustomerAccess, allClients, allJobs, showAddCustomerModal]);
-
-  useEffect(() => {
-    if (showAddCustomerModal) {
-      prevCustomerAccess.current = formik.values.allCustomerAccess;
-    }
-  }, [showAddCustomerModal]);
 
 
   return (
