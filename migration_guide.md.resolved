@@ -157,6 +157,7 @@ INSERT INTO customer_permissions (permission_name, type) VALUES
 ('customer', 'add'),
 ('customer', 'update'),
 ('customer', 'delete'),
+('customer', 'export'),
 
 -- Client
 ('client', 'view'),
@@ -177,7 +178,7 @@ INSERT INTO customer_permissions (permission_name, type) VALUES
 -- Report
 ('report', 'view'),
 
--- Client Document
+-- Client Document (UNCHANGED)
 ('client_document', 'view'),
 ('client_document', 'add'),
 ('client_document', 'upload'),
@@ -196,7 +197,7 @@ INSERT INTO customer_permissions (permission_name, type) VALUES
 ('task_timesheet', 'add'),
 ('task_timesheet', 'update'),
 ('task_timesheet', 'delete'),
-('task_timesheet', 'download'),
+('task_timesheet', 'export'),
 
 -- Job Timeline
 ('job_timeline', 'view'),
@@ -206,23 +207,23 @@ INSERT INTO customer_permissions (permission_name, type) VALUES
 ('missing_logs', 'add'),
 ('missing_logs', 'update'),
 ('missing_logs', 'delete'),
-('missing_logs', 'download'),
+('missing_logs', 'export'),
 
 -- Queries
 ('queries', 'view'),
 ('queries', 'add'),
 ('queries', 'update'),
 ('queries', 'delete'),
-('queries', 'download'),
+('queries', 'export'),
 
 -- Draft
 ('draft', 'view'),
 ('draft', 'add'),
 ('draft', 'update'),
 ('draft', 'delete'),
-('draft', 'download'),
+('draft', 'export'),
 
--- Job Document
+-- Job Document (UNCHANGED)
 ('job_document', 'view'),
 ('job_document', 'add'),
 ('job_document', 'update'),
