@@ -105,14 +105,60 @@ const CustomerAccess = () => {
   };
 
   const AccordionItem = ({ section, role_id }) => {
+    const sectionPermissions = section.items.map(item => item.id);
+    const selectedSectionPermissions = checkboxState.filter(
+      (item) => item.role_id === role_id && sectionPermissions.includes(item.permission_id) && item.is_assigned
+    );
+
+    const isAllSelected = sectionPermissions.length > 0 && selectedSectionPermissions.length === sectionPermissions.length;
+
+    const handleSelectAll = (event) => {
+      const checked = event.target.checked;
+      setCheckboxState((prevState) => {
+        let updatedState = prevState.filter(
+          (item) => !(item.role_id === role_id && sectionPermissions.includes(item.permission_id))
+        );
+
+        if (checked) {
+          section.items.forEach((item) => {
+            updatedState.push({
+              permission_id: item.id,
+              role_id: role_id,
+              is_assigned: true,
+              permission_name: section.permission_name,
+            });
+          });
+        }
+        return updatedState;
+      });
+    };
+
     return (
       <div>
         <h4
-          className="card-title fs-16 mb-3 flex-grow-1"
-          style={{ marginBottom: "20px !important", textTransform: 'capitalize' }}
+          className="card-title fs-16 mb-2 flex-grow-1"
+          style={{ textTransform: 'capitalize' }}
         >
           {section.permission_name && section.permission_name.replace(/_/g, " ")}
         </h4>
+        <div className="mb-3 border-bottom pb-2">
+          <div className="form-check form-check-outline form-check-dark">
+            <input
+              className="form-check-input new-checkbox me-2"
+              type="checkbox"
+              id={`select-all-${section.permission_name}-${role_id}`}
+              checked={isAllSelected}
+              onChange={handleSelectAll}
+            />
+            <label 
+              className="form-check-label new_checkbox mb-0" 
+              htmlFor={`select-all-${section.permission_name}-${role_id}`}
+              style={{ fontSize: '12px', fontWeight: 'bold', color: '#007bff' }}
+            >
+              Select All
+            </label>
+          </div>
+        </div>
 
         <div className="row">
           {section.items.map((item) => (
@@ -215,6 +261,48 @@ const CustomerAccess = () => {
                     data-bs-parent="#customer-access-accordion"
                   >
                     <div className="accordion-body">
+                      <div className="d-flex justify-content-end mb-3 border-bottom pb-2">
+                        <div className="form-check form-check-outline form-check-dark">
+                          <input
+                            className="form-check-input new-checkbox"
+                            type="checkbox"
+                            id={`global-select-all-${val.id}`}
+                            checked={
+                                accessData.data.length > 0 && 
+                                accessData.data.every(section => 
+                                    section.items.every(item => 
+                                        checkboxState.some(p => p.role_id === val.id && p.permission_id === item.id && p.is_assigned)
+                                    )
+                                )
+                            }
+                            onChange={(e) => {
+                                const checked = e.target.checked;
+                                setCheckboxState(prevState => {
+                                    let updatedState = prevState.filter(item => item.role_id !== val.id);
+                                    if (checked) {
+                                        accessData.data.forEach(section => {
+                                            section.items.forEach(item => {
+                                                updatedState.push({
+                                                    permission_id: item.id,
+                                                    role_id: val.id,
+                                                    is_assigned: true,
+                                                    permission_name: section.permission_name,
+                                                });
+                                            });
+                                        });
+                                    }
+                                    return updatedState;
+                                });
+                            }}
+                          />
+                          <label 
+                            className="form-check-label new_checkbox mb-0 ms-2 fw-bold text-primary" 
+                            htmlFor={`global-select-all-${val.id}`}
+                          >
+                            Select All Permissions for {val.name}
+                          </label>
+                        </div>
+                      </div>
                       <div className="row">
                         {accessData &&
                           accessData.data.map((section, idx) => (
