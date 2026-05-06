@@ -134,22 +134,7 @@ const getAllCustomerUsers = async (req, res) => {
         }
       }
 
-      // Auto-assign 'dashboard view' permission to the user's role on creation
-      try {
-        const [[dashboardPerm]] = await pool.execute(
-          `SELECT id FROM customer_permissions WHERE permission_name = 'dashboard' AND type = 'view' LIMIT 1`
-        );
-        if (dashboardPerm) {
-          await pool.execute(
-            `INSERT INTO customer_contact_person_role_permissions (role_id, permission_id)
-             VALUES (?, ?)
-             ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP`,
-            [customer_contact_person_role_id, dashboardPerm.id]
-          );
-        }
-      } catch (permErr) {
-        console.error('Warning: Could not auto-assign dashboard view permission:', permErr);
-      }
+
 
 
       const token = jwt.sign({ uid: newCustomerUserId }, "ABC-D", { expiresIn: "7d" });
