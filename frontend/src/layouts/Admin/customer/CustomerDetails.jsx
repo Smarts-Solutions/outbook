@@ -774,13 +774,13 @@ const CustomerUsers = () => {
       status: updatedata?.status || "1",
       customer_contact_person_role_id: updatedata?.customer_contact_person_role_id || "",
       allCustomerAccess: updatedata?.allCustomerAccess
-        ? updatedata.allCustomerAccess.split(",").map(Number)
-        : [] || [],
+        ? updatedata.allCustomerAccess.split(",").filter(x => x).map(Number)
+        : [],
       selectedClients: updatedata?.selectedClients
-        ? updatedata.selectedClients.split(",").map(Number)
+        ? updatedata.selectedClients.split(",").filter(x => x).map(Number)
         : [],
       selectedJobs: updatedata?.selectedJobs
-        ? updatedata.selectedJobs.split(",").map(Number)
+        ? updatedata.selectedJobs.split(",").filter(x => x).map(Number)
         : [],
     },
     enableReinitialize: true,
@@ -876,15 +876,22 @@ const CustomerUsers = () => {
       return;
     }
 
-    // Skip the auto-selection logic on the first render of the modal to preserve existing assignments
+    // Initialize baseline on first open
     if (isFirstRender.current) {
       prevCustomerAccess.current = formik.values.allCustomerAccess;
       isFirstRender.current = false;
       return;
     }
 
-    const added = (formik.values.allCustomerAccess || []).filter(id => !(prevCustomerAccess.current || []).includes(id));
-    const removed = (prevCustomerAccess.current || []).filter(id => !(formik.values.allCustomerAccess || []).includes(id));
+    // Only auto-select for customers that were NOT in the initial list (genuinely newly added by user)
+    const added = (formik.values.allCustomerAccess || []).filter(id => 
+      !(prevCustomerAccess.current || []).includes(id) && 
+      !(formik.initialValues.allCustomerAccess || []).includes(id)
+    );
+    
+    const removed = (prevCustomerAccess.current || []).filter(id => 
+      !(formik.values.allCustomerAccess || []).includes(id)
+    );
 
     let newSelectedClients = [...(formik.values.selectedClients || [])];
     let newSelectedJobs = [...(formik.values.selectedJobs || [])];
