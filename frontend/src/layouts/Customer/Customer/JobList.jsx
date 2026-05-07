@@ -1152,7 +1152,7 @@ const ClientList = () => {
                   {activeTab == "NoOfJobs" && (
                     <>
                       <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
-                        {(hasAccess("job", "add") || role === "SUPERADMIN") && (
+                        {(hasAccess("job", "add") || role === "SUPERADMIN") && clientDetailSingle.id != "" && (
                           <div
                             className="btn btn-info text-white blue-btn mt-2 mt-sm-0"
                             onClick={handleCreateJob}
