@@ -529,6 +529,12 @@ const CustomerClientProfile = () => {
       : []),
   ].filter((tab) => tab.access !== false);
 
+  useEffect(() => {
+    if (tabs.length > 0 && !tabs.find((t) => t.id === activeTab)) {
+      setActiveTab(tabs[0].id);
+    }
+  }, [tabs, activeTab]);
+
   const GetStatus = async () => {
     const data = { req: { action: "get" }, authToken: token };
     await dispatch(getCustomerMasterStatus(data))
@@ -1395,7 +1401,7 @@ const CustomerClientProfile = () => {
       )}
 
       <div className="mt-2">
-        {activeTab == "NoOfJobs" && (
+        {activeTab == "NoOfJobs" && (hasAccess("no_of_jobs", "view") || role === "SUPERADMIN") && (
           <div className={`tab-pane fade show active`} id={"NoOfJobs"} role="tabpanel">
             <div className="report-data mt-4 ">
               <div className="d-flex justify-content-between align-items-center">
