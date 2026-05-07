@@ -814,9 +814,11 @@ const CustomerClientProfile = () => {
             </button>
           )}
 
-          <button className="copy-icon" onClick={() => copyRow(row)}>
-            <i className="ti-files"></i>
-          </button>
+          {(hasAccess("job", "copy") || role === "SUPERADMIN") && (
+            <button className="copy-icon" onClick={() => copyRow(row)}>
+              <i className="ti-files"></i>
+            </button>
+          )}
 
           {row.timesheet_job_id == null
             ? (hasAccess("job", "delete") || role === "SUPERADMIN") && (
