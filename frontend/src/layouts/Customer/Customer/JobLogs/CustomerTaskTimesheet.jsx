@@ -207,18 +207,18 @@ const CustomerTaskTimesheet = ({ job_id, getAccessDataJob, goto }) => {
       cell: (row) => (
         <div>
           {goto != "report" &&
-            (hasAccess("task_timesheet", "update") || role === "SUPERADMIN") && (
-              <button
-                className="view-icon"
-                onClick={() => {
-                  handleTimeSheetView(location.state?.job_id);
-                  setRowData(row);
-                  setViewtimesheet(true);
+
+            <button
+              className="view-icon"
+              onClick={() => {
+                handleTimeSheetView(location.state?.job_id);
+                setRowData(row);
+                setViewtimesheet(true);
                 }}
               >
                 <Eye size={16} className="text-warning" />
               </button>
-            )}
+          }
         </div>
       ),
       ignoreRowClick: true,
@@ -750,7 +750,7 @@ const CustomerTaskTimesheet = ({ job_id, getAccessDataJob, goto }) => {
         title="Time Sheet"
         cancel_btn="true"
         btn_name="Save"
-        hideBtn={false}
+        hideBtn={!(hasAccess("task_timesheet", "update") || role === "SUPERADMIN")}
         handleClose={() => {
           setViewtimesheet(false);
           setRowData({});
