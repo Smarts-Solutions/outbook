@@ -39,6 +39,27 @@ const ClientLists = () => {
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef(null);
 
+  const customerOptions = [
+    { label: "All", value: "" },
+    ...CustomerData.map((customer) => ({
+      label: customer.trading_name,
+      value: customer.id,
+    })),
+  ];
+
+  const selectedOption = customerOptions.find((option) => option.value == customerId) || { label: "All", value: "" };
+
+  const selectCustomerId = (id, name) => {
+    setCustomerId(id);
+    setCustomerName(name || "");
+    setCurrentPage(1);
+    if (activeTab === "client") {
+      GetAllClientData(id, 1, pageSize, searchTerm);
+    } else {
+      JobDetails(1, pageSize, searchTerm, id);
+    }
+  };
+
   const [ClientData, setClientData] = useState([]);
   const [getJobDetails, setGetJobDetails] = useState([]);
   const [statusDataAll, setStatusDataAll] = useState([]);
@@ -522,20 +543,26 @@ const ClientLists = () => {
       <div className="content-title">
         <div className="row ">
           <div className="col-sm-12">
-            {/* <div className="form-group col-md-4 mb-0">
-              <label className="form-label mb-2"> Customer</label>
-              <Select
-                options={customerOptions}
-                value={selectedOption}
-                onChange={(selected) => {
-                  const selectedCustomer = CustomerData.find(c => c.id == selected.value);
-                  selectCustomerId(selected.value, selectedCustomer?.trading_name);
-                }}
-                placeholder="All"
-                menuPortalTarget={document.body}
-                styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-              />
-            </div> */}
+            {(selectedCustomer?.value === "All" && (hasAccess("customer", "view") || role === "SUPERADMIN")) && (
+              <div className="form-group col-md-4 mb-0">
+                <label className="form-label mb-2"> Customer</label>
+                <Select
+                  options={customerOptions}
+                  value={selectedOption}
+                  onChange={(selected) => {
+                    if (selected.value === "") {
+                      selectCustomerId("", "");
+                    } else {
+                      const selectedCustomer = CustomerData.find(c => c.id == selected.value);
+                      selectCustomerId(selected.value, selectedCustomer?.trading_name);
+                    }
+                  }}
+                  placeholder="All"
+                  menuPortalTarget={document.body}
+                  styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                />
+              </div>
+            )}
 
             <div className="page-title-box pt-2">
               <div className="row align-items-start">
