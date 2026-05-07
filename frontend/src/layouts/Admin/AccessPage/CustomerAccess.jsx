@@ -9,7 +9,7 @@ const CustomerAccess = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const [checkboxState, setCheckboxState] = useState([]);
   const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
-  const [accessData, setAccessData] = useState({ loading: true, data: [] });
+  const [accessData, setAccessData] = useState({ loading: true, data: [], role_id: null });
 
   const roleData = async () => {
     try {
@@ -32,7 +32,7 @@ const CustomerAccess = () => {
 
       setCheckboxState((prevState) => {
         let updatedState = prevState.filter(
-          (item) => !(item.permission_id === id && item.role_id === role_id),
+          (item) => !(item.permission_id == id && item.role_id == role_id),
         );
         updatedState.push({
           permission_id: id,
@@ -46,8 +46,8 @@ const CustomerAccess = () => {
 
     const isChecked = checkboxState.some(
       (item) =>
-        item.permission_id === id &&
-        item.role_id === role_id &&
+        item.permission_id == id &&
+        item.role_id == role_id &&
         item.is_assigned,
     );
 
@@ -95,19 +95,19 @@ const CustomerAccess = () => {
             return updatedState;
         });
 
-        setAccessData({ loading: false, data: response.data });
+        setAccessData({ loading: false, data: response.data, role_id: val.id });
       } else {
-        setAccessData({ loading: false, data: [] });
+        setAccessData({ loading: false, data: [], role_id: val.id });
       }
     } catch (error) {
-      setAccessData({ loading: false, data: [] });
+      setAccessData({ loading: false, data: [], role_id: val.id });
     }
   };
 
   const AccordionItem = ({ section, role_id }) => {
     const sectionPermissions = section.items.map(item => item.id);
     const selectedSectionPermissions = checkboxState.filter(
-      (item) => item.role_id === role_id && sectionPermissions.includes(item.permission_id) && item.is_assigned
+      (item) => item.role_id == role_id && sectionPermissions.some(pid => pid == item.permission_id) && item.is_assigned
     );
 
     const isAllSelected = sectionPermissions.length > 0 && selectedSectionPermissions.length === sectionPermissions.length;
@@ -116,19 +116,18 @@ const CustomerAccess = () => {
       const checked = event.target.checked;
       setCheckboxState((prevState) => {
         let updatedState = prevState.filter(
-          (item) => !(item.role_id === role_id && sectionPermissions.includes(item.permission_id))
+          (item) => !(item.role_id == role_id && sectionPermissions.some(pid => pid == item.permission_id))
         );
 
-        if (checked) {
-          section.items.forEach((item) => {
-            updatedState.push({
-              permission_id: item.id,
-              role_id: role_id,
-              is_assigned: true,
-              permission_name: section.permission_name,
-            });
+        // Always push records for all items in the section with the current toggle status
+        section.items.forEach((item) => {
+          updatedState.push({
+            permission_id: item.id,
+            role_id: role_id,
+            is_assigned: checked,
+            permission_name: section.permission_name,
           });
-        }
+        });
         return updatedState;
       });
     };
@@ -268,29 +267,33 @@ const CustomerAccess = () => {
                             type="checkbox"
                             id={`global-select-all-${val.id}`}
                             checked={
+                                accessData.role_id == val.id &&
                                 accessData.data.length > 0 && 
                                 accessData.data.every(section => 
                                     section.items.every(item => 
-                                        checkboxState.some(p => p.role_id === val.id && p.permission_id === item.id && p.is_assigned)
+                                        checkboxState.some(p => p.role_id == val.id && p.permission_id == item.id && p.is_assigned)
                                     )
                                 )
                             }
                             onChange={(e) => {
                                 const checked = e.target.checked;
+                                if (accessData.role_id != val.id) return;
+
                                 setCheckboxState(prevState => {
-                                    let updatedState = prevState.filter(item => item.role_id !== val.id);
-                                    if (checked) {
-                                        accessData.data.forEach(section => {
-                                            section.items.forEach(item => {
-                                                updatedState.push({
-                                                    permission_id: item.id,
-                                                    role_id: val.id,
-                                                    is_assigned: true,
-                                                    permission_name: section.permission_name,
-                                                });
+                                    // Clear existing records for this role
+                                    let updatedState = prevState.filter(item => item.role_id != val.id);
+                                    
+                                    // Push all permissions for this role with the toggle status
+                                    accessData.data.forEach(section => {
+                                        section.items.forEach(item => {
+                                            updatedState.push({
+                                                permission_id: item.id,
+                                                role_id: val.id,
+                                                is_assigned: checked,
+                                                permission_name: section.permission_name,
                                             });
                                         });
-                                    }
+                                    });
                                     return updatedState;
                                 });
                             }}
