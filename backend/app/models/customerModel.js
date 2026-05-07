@@ -745,7 +745,9 @@ const getCustomer = async (customer) => {
           OR staff2.last_name LIKE ?
           OR CONCAT(staffs.first_name,' ',staffs.last_name) LIKE ?
           OR CONCAT('cust_', SUBSTRING(customers.trading_name,1,3),'_',SUBSTRING(customers.customer_code,1,15)) LIKE ?
+           GROUP BY customers.id
         ORDER BY customers.id DESC
+       
         LIMIT ? OFFSET ?
       `;
 
@@ -918,6 +920,7 @@ const getCustomer = async (customer) => {
     }
 
     query += `
+     GROUP BY c.id
       ORDER BY c.id DESC
       LIMIT ? OFFSET ?
     `;
