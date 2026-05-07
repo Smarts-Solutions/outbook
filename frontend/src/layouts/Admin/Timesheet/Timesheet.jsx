@@ -2147,12 +2147,13 @@ const Timesheet = () => {
 
         if (uniqueRowsMap.has(key) && !mergedKeys.has(key)) {
           const firstRow = uniqueRowsMap.get(key);
-          const cName = firstRow.task_type === "1" ? "Internal" : (firstRow.client_name || firstRow.customer_name || firstRow.clientData?.find(c => String(c.id) === String(firstRow.client_id))?.trading_name || "");
-          const jName = firstRow.task_type === "1" ? (firstRow.internal_name || firstRow.jobData?.find(j => String(j.id) === String(firstRow.job_id))?.name || "") : (firstRow.job_name || firstRow.jobData?.find(j => String(j.id) === String(firstRow.job_id))?.name || "");
-          const tName = firstRow.task_type === "1" ? (firstRow.sub_internal_name || firstRow.taskData?.find(t => String(t.id) === String(firstRow.task_id))?.name || "") : (firstRow.task_name || firstRow.taskData?.find(t => String(t.id) === String(firstRow.task_id))?.name || "");
-          
-          const jobTaskDetail = `${jName}${jName && tName ? " — " : ""}${tName}`;
-          mergedRecordsList.push(jobTaskDetail);
+          if (firstRow.duplicate_entry && firstRow.duplicate_entry.length > 0) {
+            const jName = firstRow.task_type === "1" ? (firstRow.internal_name || firstRow.jobData?.find(j => String(j.id) === String(firstRow.job_id))?.name || "") : (firstRow.job_name || firstRow.jobData?.find(j => String(j.id) === String(firstRow.job_id))?.name || "");
+            const tName = firstRow.task_type === "1" ? (firstRow.sub_internal_name || firstRow.taskData?.find(t => String(t.id) === String(firstRow.task_id))?.name || "") : (firstRow.task_name || firstRow.taskData?.find(t => String(t.id) === String(firstRow.task_id))?.name || "");
+
+            const jobTaskDetail = `${jName}${jName && tName ? " — " : ""}${tName} (${firstRow.duplicate_entry.length + 1} Rows Merged)`;
+            mergedRecordsList.push(jobTaskDetail);
+          }
           mergedKeys.add(key);
         }
       });
