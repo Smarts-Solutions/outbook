@@ -226,9 +226,13 @@ const ClientLists = () => {
     {
       name: "Client Name",
       cell: (row) => (
-        <a onClick={() => HandleClientView(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
-          {row.client_name}
-        </a>
+        (hasAccess("job", "view") || role === "SUPERADMIN") ? (
+          <a onClick={() => HandleClientView(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
+            {row.client_name}
+          </a>
+        ) : (
+          <span>{row.client_name}</span>
+        )
       ),
       selector: (row) => row.client_name,
       sortable: true,
