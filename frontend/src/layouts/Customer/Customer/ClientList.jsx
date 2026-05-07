@@ -28,7 +28,7 @@ const ClientLists = () => {
 
   const customer_id_sidebar = sessionStorage.getItem("cust_id_sidebar");
   const [CustomerData, setCustomerData] = useState([]);
-  const [customerId, setCustomerId] = useState(selectedCustomer?.value || "");
+  const [customerId, setCustomerId] = useState(selectedCustomer?.value === "All" ? "" : (selectedCustomer?.value || ""));
   const [customerName, setCustomerName] = useState(selectedCustomer?.label || "");
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -112,20 +112,22 @@ const ClientLists = () => {
   }, []);
 
   useEffect(() => {
+    const id = selectedCustomer.value === "All" ? "" : selectedCustomer.value;
+    setCustomerId(id);
+    setCustomerName(selectedCustomer.label);
+  }, [selectedCustomer]);
+
+  useEffect(() => {
     if (activeTab === "job") {
       GetStatus();
     }
 
-    const id = selectedCustomer.value === "All" ? "" : selectedCustomer.value;
-    setCustomerId(id);
-    setCustomerName(selectedCustomer.label);
-
     if (activeTab === "client") {
-      GetAllClientData(id, 1, pageSize, "");
+      GetAllClientData(customerId, 1, pageSize, searchTerm);
     } else if (activeTab === "job") {
-      JobDetails(1, pageSize, "", id);
+      JobDetails(1, pageSize, searchTerm, customerId);
     }
-  }, [activeTab, selectedCustomer, pageSize]);
+  }, [activeTab, customerId, pageSize]);
 
   useEffect(() => {
     if (!hasAccess("client", "view") && !hasAccess("job", "view") && role !== "SUPERADMIN") {
