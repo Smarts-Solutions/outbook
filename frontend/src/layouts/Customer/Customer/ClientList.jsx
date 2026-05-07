@@ -52,6 +52,7 @@ const ClientLists = () => {
   const selectCustomerId = (id, name) => {
     setCustomerId(id);
     setCustomerName(name || "");
+    setHararchyData({ customer: { id: id, trading_name: name || "" } });
     setCurrentPage(1);
     if (activeTab === "client") {
       GetAllClientData(id, 1, pageSize, searchTerm);
@@ -113,8 +114,10 @@ const ClientLists = () => {
 
   useEffect(() => {
     const id = selectedCustomer.value === "All" ? "" : selectedCustomer.value;
+    const name = selectedCustomer.label === "All" ? "" : selectedCustomer.label;
     setCustomerId(id);
     setCustomerName(selectedCustomer.label);
+    setHararchyData({ customer: { id: id, trading_name: name } });
   }, [selectedCustomer]);
 
   useEffect(() => {
@@ -519,17 +522,34 @@ const ClientLists = () => {
   };
 
   const HandleClientView = (row) => {
-    const updatedData = { ...hararchyData, client: row };
+    const updatedData = { 
+      ...hararchyData, 
+      customer: { 
+        id: customerId || row.customer_id, 
+        trading_name: (customerName && customerName !== "All") ? customerName : row.customer_name 
+      },
+      client: row 
+    };
     setHararchyData(updatedData);
     sessionStorage.setItem("cli_id_sidebar", row.id);
     sessionStorage.setItem("cli_id_sidebar_name", row.client_name);
-    navigate("/customer/client/profile", { state: { Client_id: row.id, activeTab: activeTab, customer_id: customerId, data: updatedData } });
+    navigate("/customer/client/profile", { state: { Client_id: row.id, activeTab: activeTab, customer_id: customerId || row.customer_id, data: updatedData } });
   };
 
   const HandleJobView = (row) => {
-    const updatedData = { customer: { id: customerId, trading_name: customerName }, job: row };
+    const updatedData = { 
+      customer: { 
+        id: customerId || row.customer_id, 
+        trading_name: (customerName && customerName !== "All") ? customerName : (row.customer_name || row.customer_trading_name) 
+      }, 
+      client: {
+        id: row.client_id,
+        client_name: row.client_trading_name || row.client_name
+      },
+      job: row 
+    };
     setHararchyData(updatedData);
-    navigate("/customer/job/logs", { state: { job_id: row.job_id, activeTab: activeTab, customer_id: customerId, data: updatedData } });
+    navigate("/customer/job/logs", { state: { job_id: row.job_id, activeTab: activeTab, customer_id: customerId || row.customer_id, data: updatedData } });
   };
 
   const tabs = [];
@@ -584,12 +604,12 @@ const ClientLists = () => {
                 </div>
                 <div className="col-md-4 d-flex justify-content-end align-items-center">
                   {activeTab === "client" && customerId && hasAccess("client", "add") && (
-                    <div className="btn btn-info text-white blue-btn mt-2 mt-sm-0" onClick={() => navigate("/customer/addclient", { state: { id: customerId, activeTab: activeTab } })}>
+                    <div className="btn btn-info text-white blue-btn mt-2 mt-sm-0" onClick={() => navigate("/customer/addclient", { state: { id: customerId, activeTab: activeTab, data: hararchyData } })}>
                       <Plus size={16} /> Add Client
                     </div>
                   )}
                   {activeTab === "job" && customerId && hasAccess("job", "add") && (
-                    <div className="btn btn-info text-white blue-btn mt-2 mt-sm-0" onClick={() => navigate("/customer/createjob", { state: { customer_id: customerId, goto: "Customer", activeTab: activeTab } })}>
+                    <div className="btn btn-info text-white blue-btn mt-2 mt-sm-0" onClick={() => navigate("/customer/createjob", { state: { customer_id: customerId, goto: "Customer", activeTab: activeTab, data: hararchyData } })}>
                       <Plus size={16} /> Create Job
                     </div>
                   )}

@@ -247,7 +247,17 @@ const Dashboard = () => {
       ids: data.ids,
       heading: heading,
     };
-    navigate("/customer/dashboard/data", { state: { req: req } });
+    navigate("/customer/dashboard/data", { 
+      state: { 
+        req: req, 
+        data: { 
+          customer: { 
+            id: selectedCustomer.value === "All" ? "" : selectedCustomer.value, 
+            trading_name: selectedCustomer.label === "All" ? "" : selectedCustomer.label 
+          } 
+        } 
+      } 
+    });
   };
 
   // Start Process SharePoint Refresh Process Start //

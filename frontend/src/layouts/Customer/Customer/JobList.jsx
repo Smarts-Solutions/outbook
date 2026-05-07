@@ -63,18 +63,18 @@ const ClientList = () => {
 
   useEffect(() => {
     const id = selectedCustomer.value === "All" ? "" : selectedCustomer.value;
-    const name = selectedCustomer.label;
+    const name = selectedCustomer.label === "All" ? "" : selectedCustomer.label;
 
-    setCustomerDetails({ id: id, trading_name: name });
+    setCustomerDetails({ id: id, trading_name: selectedCustomer.label });
 
     if (id) {
-      GetAllClientData(id, name);
+      GetAllClientData(id, selectedCustomer.label);
     } else {
       GetAllJobListByCustomer("", 1, pageSize, searchTerm);
       setClientData([]);
       setClientDetailSingle({ id: "", client_name: "" });
       setHararchyData({
-        customer: { id: "", trading_name: "" },
+        customer: { id: id, trading_name: name },
         client: { id: "", client_name: "" },
       });
     }
@@ -523,6 +523,14 @@ const ClientList = () => {
     setHararchyData((prevState) => {
       const updatedData = {
         ...prevState,
+        customer: {
+          id: prevState?.customer?.id || row.customer_id,
+          trading_name: prevState?.customer?.trading_name || row.customer_name || row.customer_trading_name
+        },
+        client: {
+          id: prevState?.client?.id || row.client_id,
+          client_name: prevState?.client?.client_name || row.client_trading_name || row.client_name
+        },
         job: row,
       };
       navigate("/customer/job/logs", {

@@ -179,6 +179,14 @@ const DashboardLinkData = () => {
     setHararchyData((prevState) => {
       const updatedData = {
         ...prevState,
+        customer: {
+          id: prevState?.customer?.id || row.customer_id,
+          trading_name: prevState?.customer?.trading_name || row.customer_name || row.customer_trading_name
+        },
+        client: {
+          id: prevState?.client?.id || row.client_id,
+          client_name: prevState?.client?.client_name || row.client_trading_name || row.client_name
+        },
         job: row,
       };
       navigate("/customer/job/logs", {
@@ -198,6 +206,10 @@ const DashboardLinkData = () => {
     setHararchyData((prevState) => {
       const updatedData = {
         ...prevState,
+        customer: {
+          id: prevState?.customer?.id || row.customer_id,
+          trading_name: prevState?.customer?.trading_name || row.customer_name || row.customer_trading_name
+        },
         client: row,
       };
       navigate("/customer/client/profile", {
