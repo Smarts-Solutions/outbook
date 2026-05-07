@@ -1,16 +1,17 @@
 // submitTimesheetReminderEmail.js
-const pool = require('../config/database');
+const pool = require("../config/database");
 const { parentPort } = require("worker_threads");
 const { commonEmail } = require("../utils/commonEmail");
-
-
+const { logEmail } = require("../utils/emailLogger");
 
 // Submit Timesheet Report Email Worker
 parentPort.on("message", async (rows) => {
   for (const row of rows) {
     try {
-      const [[getStaffNameSubmitReport]] = await pool.execute(`CALL GetLastWeekSubmitTimesheetReport(${row.id})`);
-      //console.log("getStaffNameSubmitReport , ",getStaffNameSubmitReport); 
+      const [[getStaffNameSubmitReport]] = await pool.execute(
+        `CALL GetLastWeekSubmitTimesheetReport(${row.id})`,
+      );
+      //console.log("getStaffNameSubmitReport , ",getStaffNameSubmitReport);
       if (getStaffNameSubmitReport && getStaffNameSubmitReport.length > 0) {
         let csvContent = "Staff Name,Staff Email\n";
         // getStaffNameSubmitReport?.forEach(val => {
@@ -18,7 +19,7 @@ parentPort.on("message", async (rows) => {
         // });
 
         let processedStaff = new Set();
-        getStaffNameSubmitReport?.forEach(val => {
+        getStaffNameSubmitReport?.forEach((val) => {
           if (processedStaff.has(val?.staff_id)) {
             return;
           }
@@ -27,29 +28,63 @@ parentPort.on("message", async (rows) => {
           csvContent += `${val?.staff_fullname},${val?.staff_email}\n`;
         });
 
-
-
         let toEmail = row.staff_email;
-        let subjectEmail = "Submit Timesheet Reminder Report"
-        let htmlEmail = "<h3>Please find the attached Submit Timesheet Report.</h3>"
+        let subjectEmail = "Submit Timesheet Reminder Report";
+        let htmlEmail =
+          "<h3>Please find the attached Submit Timesheet Report.</h3>";
         const dynamic_attachment = csvContent;
         const filename = "SubmitTimesheetReport.csv";
 
         //parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
 
-        const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+        const emailSent = await commonEmail(
+          toEmail,
+          subjectEmail,
+          htmlEmail,
+          "",
+          "",
+          dynamic_attachment,
+          filename,
+        );
+        //console.log("toEmail",toEmail)
+        const csvToJson = (csv) => {
+          const lines = csv.trim().split("\n");
+
+          // header 
+          const headers = lines[0].split(",");
+
+          // data rows 
+          const result = lines.slice(1).map((line) => {
+            const values = line.split(",");
+
+            return {
+              staff_name: values[0],
+              staff_email: values[1],
+            };
+          });
+
+          return result;
+        };
+        const attachmentJson = csvToJson(dynamic_attachment);
+        logEmail({
+          toEmail: toEmail,
+          filename: filename,
+          attachment: attachmentJson,
+          logFileName: "submitTimesheetReminderEmail.json",
+        });
+
         if (emailSent) {
           parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
         } else {
-          parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
+          parentPort.postMessage(
+            `❌ Failed to send email to: ${row.staff_email}`,
+          );
         }
-
       } else {
-        parentPort.postMessage(`ℹ️ No submit timesheet report for ${row.staff_email}`);
+        parentPort.postMessage(
+          `ℹ️ No submit timesheet report for ${row.staff_email}`,
+        );
       }
-
-
-
     } catch (err) {
       parentPort.postMessage(`❌ Failed for ${row.id}: ${err.message}`);
     }

@@ -1,8 +1,7 @@
-// Jobs Sitting With Staff For Over Month Report Email Worker
+// Jobs Missing Paperwork and Due in the Next 2 Days Report Email Worker
 const pool = require('../config/database');
 const { parentPort } = require("worker_threads");
 const { commonEmail } = require("../utils/commonEmail");
-const { logEmail } = require("../utils/emailLogger");
 const convertDate = (date) => {
   if ([null, undefined, ''].includes(date)) {
     return "-";
@@ -17,7 +16,6 @@ const convertDate = (date) => {
   return "-";
 }
 
-
 const formatCSV = (value) => {
   if (!value) return ' - ';
   value = value.toString();
@@ -30,39 +28,10 @@ const formatCSV = (value) => {
   return value;
 };
 
-/* 🔥 LIMIT PARALLEL EXECUTION */
-async function processWithLimit(items, limit, handler) {
-  let index = 0;
-
-  async function worker() {
-    while (index < items.length) {
-      const currentIndex = index++;
-      await handler(items[currentIndex]);
-    }
-  }
-
-  const workers = Array(limit).fill(null).map(worker);
-  await Promise.all(workers);
-}
-
-/* ---------------- MAIN WORKER ---------------- */
-
+// Missing Timesheet Report Email Worker
 parentPort.on("message", async (rows) => {
-  try {
-    /* ✅ STEP 1: REMOVE DUPLICATES */
-    const uniqueUsers = [];
-    const seen = new Set();
 
-    for (const r of rows) {
-      if (!seen.has(r.staff_email)) {
-        seen.add(r.staff_email);
-        uniqueUsers.push(r);
-      }
-    }
-
-    parentPort.postMessage(`Total unique users: ${uniqueUsers.length}`);
-
-    const query = `
+  const query = `
         SELECT 
         jobs.id AS id,
           CONCAT(
@@ -123,28 +92,24 @@ parentPort.on("message", async (rows) => {
         queries ON queries.job_id = jobs.id
         LEFT JOIN
         drafts ON drafts.job_id = jobs.id
+        LEFT JOIN 
+        missing_logs ON jobs.id = missing_logs.job_id
         WHERE 
-        jobs.date_received_on <= NOW() - INTERVAL 1 MONTH
-        AND jobs.status_type NOT IN (6,7,17,18,19,20)
+        DATE(jobs.date_received_on) < CURDATE() - INTERVAL 2 DAY
+        AND jobs.status_type = 2
+        AND missing_logs.job_id IS NULL
         GROUP BY jobs.id
         ORDER BY 
           jobs.id DESC;
         `;
   const [result] = await pool.execute(query);
-
-   if (!result.length) {
-      parentPort.postMessage("No jobs found");
-      return;
-    }
-
-  let csv = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
+  let csvContent = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
 
   if (result && result.length > 0) {
-
     result?.forEach(val => {
 
       let job_received_on = convertDate(val.job_received_on);
-      customer_trading_name = formatCSV(val.customer_trading_name) || ' - ';
+      let customer_trading_name = formatCSV(val.customer_trading_name) || ' - ';
       let account_manager_name = formatCSV(val.account_manager_name) || ' - ';
       let client_trading_name = formatCSV(val.client_trading_name) || ' - ';
       let service_name = formatCSV(val.service_name) || ' - ';
@@ -163,86 +128,81 @@ parentPort.on("message", async (rows) => {
 
 
 
-      csv += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
+      csvContent += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
     });
   }
 
-    /* ✅ STEP 4: SEND EMAILS WITH LIMIT */
-    await processWithLimit(uniqueUsers, 5, async (user) => {
-      try {
+  for (const row of rows) {
+    try {
 
-        
-        let finalCSV = csv;
+      if (result && result.length > 0) {
 
-        /* 👉 NON ADMIN USER */
-        if (![1, 2, 8].includes(user.role_id)) {
-          const res = await otherUserDataGet(user);
-          if (!res.status) return;
-          finalCSV = res.csvContent;
+        if ([1, 2, 8].includes(row.role_id)) {
+          let toEmail = row.staff_email;
+          let subjectEmail = "Alert: Jobs with Missing Paperwork Due in the Next 2 Days";
+          let htmlEmail = `
+          <h3>Alert: Jobs with Missing Paperwork Due in the Next 2 Days</h3>
+          <p>Hello,</p>
+          <p>This is to inform you that some jobs are missing required paperwork and are due within the next 2 days.</p>
+          <p>Please review the attached report to take necessary actions.</p>
+          <br>
+          <p>Regards,<br>Your Automation System</p>
+        `;
+          const dynamic_attachment = csvContent;
+         const filename = `Jobs that haven’t been updated within 2 days of receiving. We should sent out missing paperwork in max 2 days -${new Date().toISOString().slice(0, 10)}.csv`;
+
+
+          //parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
+
+          const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+          if (emailSent) {
+            parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
+          } else {
+            parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
+          }
+
+        } else {
+          await otherUserDataGet(row).then(async (res) => {
+            if (res.status) {
+              let toEmail = row.staff_email;
+              let subjectEmail = "Alert: Jobs with Missing Paperwork Due in the Next 2 Days";
+              let htmlEmail = `
+              <h3>Alert: Jobs with Missing Paperwork Due in the Next 2 Days</h3>
+              <p>Hello,</p>
+              <p>This is to inform you that some jobs are missing required paperwork and are due within the next 2 days.</p>
+              <p>Please review the attached report to take necessary actions.</p>
+              <br>
+              <p>Regards,<br>Your Automation System</p>
+            `;
+              const dynamic_attachment = res.csvContent;
+              const filename = `Jobs that haven’t been updated within 2 days of receiving. We should sent out missing paperwork in max 2 days -${new Date().toISOString().slice(0, 10)}.csv`;
+              const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+              if (emailSent) {
+                parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
+              } else {
+                parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
+              }
+            }
+          });
+
         }
 
-        let toEmail = user.staff_email;
-          let subjectEmail = "Alert: Jobs That Have Been Sitting With Us for Over a Month";
-          let htmlEmail = `
-          <h3>Alert: Jobs That Have Been Sitting With Us for Over a Month</h3>
-          <p>Hello,</p>
-          <p>This is to inform you that some jobs have been sitting with us for over a month without any progress or updates.</p>
-          <p>Please review the attached report and take the necessary actions to move these jobs forward.</p>
-          <br>
-          <p>Regards,<br>Team Outbooks</p>
-        `;
-          const dynamic_attachment = finalCSV;
-           const filename = `Jobs that have been sitting with us for over a month - ${new Date().toISOString().slice(0, 10)}.csv`;
-
-        const sent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
-
-        const csvToJson = (csv) => {
-          const lines = csv.trim().split("\n");
-
-          // headers
-          const headers = lines[0].split(",");
-
-          // data rows
-          const result = lines.slice(1).map((line) => {
-            const values = line.split(",");
-
-            let obj = {};
-            headers.forEach((header, index) => {
-              obj[header.trim()] = values[index]?.trim() || "";
-            });
-
-            return obj;
-          });
-
-          return result;
-        };
-        const attachmentJson = csvToJson(dynamic_attachment);
-          logEmail({
-            toEmail: toEmail,
-            filename: filename,
-            attachment: attachmentJson,
-            logFileName: "jobsSittingWithForOverMonth.json",
-          });
-
-        parentPort.postMessage(
-          sent ? `✅ ${user.staff_email}` : `❌ ${user.staff_email}`
-        );
-
-      } catch (err) {
-        parentPort.postMessage(`❌ ${user.staff_email}: ${err.message}`);
+      } else {
+        parentPort.postMessage(`ℹ️ No missing timesheet report for ${row.staff_email}`);
       }
-    });
 
-   
-    parentPort.postMessage("All emails processed ✅");
-  } catch (err) {
-    parentPort.postMessage("Worker failed: " + err.message);
+
+    } catch (err) {
+      parentPort.postMessage(`❌ Failed for ${row.id}: ${err.message}`);
+    }
   }
 });
 
 
-async function otherUserDataGet(row) {
 
+
+async function otherUserDataGet(row) {
+  
   const query = `
         SELECT 
         jobs.id AS id,
@@ -309,16 +269,17 @@ async function otherUserDataGet(row) {
         queries ON queries.job_id = jobs.id
         LEFT JOIN
         drafts ON drafts.job_id = jobs.id
+        LEFT JOIN 
+        missing_logs ON jobs.id = missing_logs.job_id
         WHERE 
         (
-        jobs.date_received_on <= NOW() - INTERVAL 1 MONTH
-        AND jobs.status_type NOT IN (6,7,17,18,19,20)
-        )
+        DATE(jobs.date_received_on) < CURDATE() - INTERVAL 2 DAY
+        AND jobs.status_type = 2
+        AND missing_logs.job_id IS NULL
         AND assigned_jobs_staff_view.staff_id = ${row?.id}  AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
-            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
-          )
-        
+        assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+        OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+      )
         GROUP BY jobs.id
         ORDER BY 
           jobs.id DESC;
@@ -329,11 +290,10 @@ async function otherUserDataGet(row) {
   let csvContent = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
 
   if (result && result.length > 0) {
-
     result?.forEach(val => {
 
       let job_received_on = convertDate(val.job_received_on);
-      customer_trading_name = formatCSV(val.customer_trading_name) || ' - ';
+      let customer_trading_name = formatCSV(val.customer_trading_name) || ' - ';
       let account_manager_name = formatCSV(val.account_manager_name) || ' - ';
       let client_trading_name = formatCSV(val.client_trading_name) || ' - ';
       let service_name = formatCSV(val.service_name) || ' - ';
@@ -354,7 +314,6 @@ async function otherUserDataGet(row) {
 
       csvContent += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
     });
-
     return { status: true, csvContent: csvContent };
   }
 
@@ -364,6 +323,7 @@ async function otherUserDataGet(row) {
 
 
 }
+
 
 
 

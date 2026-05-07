@@ -1,8 +1,7 @@
-// Jobs Sitting With Staff For Over Month Report Email Worker
+// missingTimesheetReportEmail.js
 const pool = require('../config/database');
 const { parentPort } = require("worker_threads");
 const { commonEmail } = require("../utils/commonEmail");
-const { logEmail } = require("../utils/emailLogger");
 const convertDate = (date) => {
   if ([null, undefined, ''].includes(date)) {
     return "-";
@@ -17,7 +16,6 @@ const convertDate = (date) => {
   return "-";
 }
 
-
 const formatCSV = (value) => {
   if (!value) return ' - ';
   value = value.toString();
@@ -30,218 +28,8 @@ const formatCSV = (value) => {
   return value;
 };
 
-/* 🔥 LIMIT PARALLEL EXECUTION */
-async function processWithLimit(items, limit, handler) {
-  let index = 0;
-
-  async function worker() {
-    while (index < items.length) {
-      const currentIndex = index++;
-      await handler(items[currentIndex]);
-    }
-  }
-
-  const workers = Array(limit).fill(null).map(worker);
-  await Promise.all(workers);
-}
-
-/* ---------------- MAIN WORKER ---------------- */
 
 parentPort.on("message", async (rows) => {
-  try {
-    /* ✅ STEP 1: REMOVE DUPLICATES */
-    const uniqueUsers = [];
-    const seen = new Set();
-
-    for (const r of rows) {
-      if (!seen.has(r.staff_email)) {
-        seen.add(r.staff_email);
-        uniqueUsers.push(r);
-      }
-    }
-
-    parentPort.postMessage(`Total unique users: ${uniqueUsers.length}`);
-
-    const query = `
-        SELECT 
-        jobs.id AS id,
-          CONCAT(
-                SUBSTRING(customers.trading_name, 1, 3), '_',
-                SUBSTRING(clients.trading_name, 1, 3), '_',
-                SUBSTRING(job_types.type, 1, 4), '_',
-                SUBSTRING(jobs.job_id, 1, 15)
-                ) AS job_code_id,
-        customers.id AS customer_id,
-        customers.trading_name AS customer_trading_name,
-        clients.id AS client_id,
-        clients.trading_name AS client_trading_name,
-        staffs3.id AS account_manager_id,
-        CONCAT(
-          staffs3.first_name, ' ', staffs3.last_name) AS account_manager_name,
-          services.id AS service_id,
-          services.name AS service_name,
-          job_types.id AS job_type_id,
-          job_types.type AS job_type_name,
-          master_status.name AS status,
-          staffs2.id AS reviewer_id,
-          CONCAT(staffs2.first_name, ' ', staffs2.last_name) AS reviewer_name,
-          staffs.id AS allocated_id,
-          CONCAT(staffs.first_name, ' ', staffs.last_name) AS allocated_name,    
-          DATE_FORMAT(jobs.filing_Companies_date, '%Y-%m-%d') AS filing_Companies_date,
-          DATE_FORMAT(jobs.internal_deadline_date, '%Y-%m-%d') AS internal_deadline_date,
-          DATE_FORMAT(jobs.customer_deadline_date, '%Y-%m-%d') AS customer_deadline_date,  
-          DATE_FORMAT(queries.query_sent_date, '%Y-%m-%d') AS query_sent_date,
-          DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
-          DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
-          DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
-          DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS job_received_on,
-        GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR '| ') AS multiple_staff_names
-        FROM 
-        jobs
-        LEFT JOIN 
-        job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
-        LEFT JOIN staffs AS staffs4 ON job_allowed_staffs.staff_id = staffs4.id
-        LEFT JOIN 
-        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-        LEFT JOIN 
-        clients ON jobs.client_id = clients.id
-        LEFT JOIN 
-        customers ON jobs.customer_id = customers.id
-        LEFT JOIN 
-        job_types ON jobs.job_type_id = job_types.id
-        LEFT JOIN 
-        services ON jobs.service_id = services.id
-        LEFT JOIN 
-        staffs ON jobs.allocated_to = staffs.id
-        LEFT JOIN 
-        staffs AS staffs2 ON jobs.reviewer = staffs2.id
-        LEFT JOIN 
-        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-        LEFT JOIN 
-        master_status ON master_status.id = jobs.status_type
-        LEFT JOIN
-        queries ON queries.job_id = jobs.id
-        LEFT JOIN
-        drafts ON drafts.job_id = jobs.id
-        WHERE 
-        jobs.date_received_on <= NOW() - INTERVAL 1 MONTH
-        AND jobs.status_type NOT IN (6,7,17,18,19,20)
-        GROUP BY jobs.id
-        ORDER BY 
-          jobs.id DESC;
-        `;
-  const [result] = await pool.execute(query);
-
-   if (!result.length) {
-      parentPort.postMessage("No jobs found");
-      return;
-    }
-
-  let csv = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
-
-  if (result && result.length > 0) {
-
-    result?.forEach(val => {
-
-      let job_received_on = convertDate(val.job_received_on);
-      customer_trading_name = formatCSV(val.customer_trading_name) || ' - ';
-      let account_manager_name = formatCSV(val.account_manager_name) || ' - ';
-      let client_trading_name = formatCSV(val.client_trading_name) || ' - ';
-      let service_name = formatCSV(val.service_name) || ' - ';
-      let job_type_name = formatCSV(val.job_type_name) || ' - ';
-      let status = formatCSV(val.status) || ' - ';
-      let allocated_name = formatCSV(val.allocated_name) || ' - ';
-      let multiple_staff_names = formatCSV(val.multiple_staff_names) || ' - ';
-      let reviewer_name = formatCSV(val.reviewer_name) || ' - ';
-      let filing_Companies_date = convertDate(val.filing_Companies_date) || ' - ';
-      let internal_deadline_date = convertDate(val.internal_deadline_date) || ' - ';
-      let customer_deadline_date = convertDate(val.customer_deadline_date) || ' - ';
-      let query_sent_date = convertDate(val.query_sent_date) || ' - ';
-      let final_query_response_received_date = convertDate(val.final_query_response_received_date) || ' - ';
-      let draft_sent_on = convertDate(val.draft_sent_on) || ' - ';
-      let final_draft_sent_on = convertDate(val.final_draft_sent_on) || ' - ';
-
-
-
-      csv += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
-    });
-  }
-
-    /* ✅ STEP 4: SEND EMAILS WITH LIMIT */
-    await processWithLimit(uniqueUsers, 5, async (user) => {
-      try {
-
-        
-        let finalCSV = csv;
-
-        /* 👉 NON ADMIN USER */
-        if (![1, 2, 8].includes(user.role_id)) {
-          const res = await otherUserDataGet(user);
-          if (!res.status) return;
-          finalCSV = res.csvContent;
-        }
-
-        let toEmail = user.staff_email;
-          let subjectEmail = "Alert: Jobs That Have Been Sitting With Us for Over a Month";
-          let htmlEmail = `
-          <h3>Alert: Jobs That Have Been Sitting With Us for Over a Month</h3>
-          <p>Hello,</p>
-          <p>This is to inform you that some jobs have been sitting with us for over a month without any progress or updates.</p>
-          <p>Please review the attached report and take the necessary actions to move these jobs forward.</p>
-          <br>
-          <p>Regards,<br>Team Outbooks</p>
-        `;
-          const dynamic_attachment = finalCSV;
-           const filename = `Jobs that have been sitting with us for over a month - ${new Date().toISOString().slice(0, 10)}.csv`;
-
-        const sent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
-
-        const csvToJson = (csv) => {
-          const lines = csv.trim().split("\n");
-
-          // headers
-          const headers = lines[0].split(",");
-
-          // data rows
-          const result = lines.slice(1).map((line) => {
-            const values = line.split(",");
-
-            let obj = {};
-            headers.forEach((header, index) => {
-              obj[header.trim()] = values[index]?.trim() || "";
-            });
-
-            return obj;
-          });
-
-          return result;
-        };
-        const attachmentJson = csvToJson(dynamic_attachment);
-          logEmail({
-            toEmail: toEmail,
-            filename: filename,
-            attachment: attachmentJson,
-            logFileName: "jobsSittingWithForOverMonth.json",
-          });
-
-        parentPort.postMessage(
-          sent ? `✅ ${user.staff_email}` : `❌ ${user.staff_email}`
-        );
-
-      } catch (err) {
-        parentPort.postMessage(`❌ ${user.staff_email}: ${err.message}`);
-      }
-    });
-
-   
-    parentPort.postMessage("All emails processed ✅");
-  } catch (err) {
-    parentPort.postMessage("Worker failed: " + err.message);
-  }
-});
-
-
-async function otherUserDataGet(row) {
 
   const query = `
         SELECT 
@@ -275,12 +63,193 @@ async function otherUserDataGet(row) {
           DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
           DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
           DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
-          DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS job_received_on,
+          DATE_FORMAT(jobs.created_at, '%Y-%m-%d') AS job_received_on,
+          DATE_FORMAT(jobs.expected_delivery_date, '%d/%m/%Y') AS expected_delivery_date,
+          DATE_FORMAT(jobs.expected_delivery_date_old, '%d/%m/%Y') AS expected_delivery_date_old,
+        GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR '| ') AS multiple_staff_names
+        FROM 
+        jobs
+        LEFT JOIN 
+        job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
+        LEFT JOIN staffs AS staffs4 ON job_allowed_staffs.staff_id = staffs4.id
+        LEFT JOIN 
+        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN 
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN 
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN 
+        services ON jobs.service_id = services.id
+        LEFT JOIN 
+        staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN 
+        staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN 
+        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type
+        LEFT JOIN
+        queries ON queries.job_id = jobs.id
+        LEFT JOIN
+        drafts ON drafts.job_id = jobs.id
+        WHERE jobs.expected_delivery_date <> jobs.expected_delivery_date_old
+        GROUP BY jobs.id
+        ORDER BY 
+          jobs.id DESC;
+        `;
+  const [result] = await pool.execute(query);
+  let csvContent = "Job Id,Expected Delivery Date ,Expected Delivery Date Old,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
+
+  if (result && result.length > 0) {
+
+    result?.forEach(val => {
+
+      let expected_delivery_date = val.expected_delivery_date || ' - ';
+      let expected_delivery_date_old = val.expected_delivery_date_old || ' - ';
+
+      let job_received_on = convertDate(val.job_received_on);
+      let customer_trading_name = formatCSV(val.customer_trading_name) || ' - ';
+      let account_manager_name = formatCSV(val.account_manager_name) || ' - ';
+      let client_trading_name = formatCSV(val.client_trading_name) || ' - ';
+      let service_name = formatCSV(val.service_name) || ' - ';
+      let job_type_name = formatCSV(val.job_type_name) || ' - ';
+      let status = formatCSV(val.status) || ' - ';
+      let allocated_name = formatCSV(val.allocated_name) || ' - ';
+      let multiple_staff_names = formatCSV(val.multiple_staff_names) || ' - ';
+      let reviewer_name = formatCSV(val.reviewer_name) || ' - ';
+      let filing_Companies_date = convertDate(val.filing_Companies_date) || ' - ';
+      let internal_deadline_date = convertDate(val.internal_deadline_date) || ' - ';
+      let customer_deadline_date = convertDate(val.customer_deadline_date) || ' - ';
+      let query_sent_date = convertDate(val.query_sent_date) || ' - ';
+      let final_query_response_received_date = convertDate(val.final_query_response_received_date) || ' - ';
+      let draft_sent_on = convertDate(val.draft_sent_on) || ' - ';
+      let final_draft_sent_on = convertDate(val.final_draft_sent_on) || ' - ';
+
+
+
+      csvContent += `${val.job_code_id},${expected_delivery_date},${expected_delivery_date_old},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
+    });
+
+  }
+
+  for (const row of rows) {
+    try {
+
+      if (result && result.length > 0) {
+       
+         if([1,2,8].includes(row.role_id)){
+
+        let toEmail = row.staff_email;
+        let subjectEmail = "Alert: Jobs with Changed Expected Delivery Dates";
+        let htmlEmail = `
+                <h3>Alert: Jobs with Changed Expected Delivery Dates</h3>
+                <p>Hello,</p>
+                <p>This is to inform you that some job records have had their expected delivery dates changed.</p>
+                <p>Please review the attached report for more details.</p>
+                <br>
+                <p>Regards,<br>Your Automation System</p>
+              `;
+        const dynamic_attachment = csvContent;
+        const filename = `Jobs where Expected delivery date has changed. This field had some data before and now has been changed - ${new Date().toISOString().slice(0, 10)}.csv`;
+
+        const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+        if (emailSent) {
+         
+          parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
+        } else {
+          
+          parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
+        }
+
+      }else{
+        await otherUserDataGet(row).then(async (res)=>{
+          if(res.status){
+
+            let toEmail = row.staff_email;
+            let subjectEmail = "Alert: Jobs with Changed Expected Delivery Dates";
+            let htmlEmail = `
+                    <h3>Alert: Jobs with Changed Expected Delivery Dates</h3>
+                    <p>Hello,</p>
+                    <p>This is to inform you that some job records have had their expected delivery dates changed.</p>
+                    <p>Please review the attached report for more details.</p>
+                    <br>
+                    <p>Regards,<br>Your Automation System</p>
+                  `;
+            const dynamic_attachment = res.csvContent;
+            const filename = `Jobs where Expected delivery date has changed. This field had some data before and now has been changed - ${new Date().toISOString().slice(0, 10)}.csv`;
+            const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+            if (emailSent) {
+             
+              parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
+            } else {
+              
+              parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
+            }
+          } else {
+            parentPort.postMessage(`ℹ️ No missing timesheet report for ${row.staff_email}`);
+          }
+        });
+      }
+
+
+      } 
+      
+      
+      else {
+        parentPort.postMessage(`ℹ️ No missing timesheet report for ${row.staff_email}`);
+      }
+
+
+    } catch (err) {
+      parentPort.postMessage(`❌ Failed for ${row.id}: ${err.message}`);
+    }
+  }
+});
+
+
+async function otherUserDataGet(row) {
+ const query = `
+        SELECT 
+        jobs.id AS id,
+          CONCAT(
+                SUBSTRING(customers.trading_name, 1, 3), '_',
+                SUBSTRING(clients.trading_name, 1, 3), '_',
+                SUBSTRING(job_types.type, 1, 4), '_',
+                SUBSTRING(jobs.job_id, 1, 15)
+                ) AS job_code_id,
+        customers.id AS customer_id,
+        customers.trading_name AS customer_trading_name,
+        clients.id AS client_id,
+        clients.trading_name AS client_trading_name,
+        staffs3.id AS account_manager_id,
+        CONCAT(
+          staffs3.first_name, ' ', staffs3.last_name) AS account_manager_name,
+          services.id AS service_id,
+          services.name AS service_name,
+          job_types.id AS job_type_id,
+          job_types.type AS job_type_name,
+          master_status.name AS status,
+          staffs2.id AS reviewer_id,
+          CONCAT(staffs2.first_name, ' ', staffs2.last_name) AS reviewer_name,
+          staffs.id AS allocated_id,
+          CONCAT(staffs.first_name, ' ', staffs.last_name) AS allocated_name,    
+          DATE_FORMAT(jobs.filing_Companies_date, '%Y-%m-%d') AS filing_Companies_date,
+          DATE_FORMAT(jobs.internal_deadline_date, '%Y-%m-%d') AS internal_deadline_date,
+          DATE_FORMAT(jobs.customer_deadline_date, '%Y-%m-%d') AS customer_deadline_date,  
+          DATE_FORMAT(queries.query_sent_date, '%Y-%m-%d') AS query_sent_date,
+          DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
+          DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
+          DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
+          DATE_FORMAT(jobs.created_at, '%Y-%m-%d') AS job_received_on,
+          DATE_FORMAT(jobs.expected_delivery_date, '%d/%m/%Y') AS expected_delivery_date,
+          DATE_FORMAT(jobs.expected_delivery_date_old, '%d/%m/%Y') AS expected_delivery_date_old,
         GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR '| ') AS multiple_staff_names,
         assigned_jobs_staff_view.source AS assigned_source,
         assigned_jobs_staff_view.service_id_assign AS service_id_assign,
         jobs.service_id AS job_service_id,
-        assigned_jobs_staff_view.staff_id AS assigned_jobs_staff_view_staff_id
+        assigned_jobs_staff_view.staff_id AS assigned_jobs_staff_view_staff_id 
         FROM 
         jobs
         LEFT JOIN 
@@ -309,31 +278,28 @@ async function otherUserDataGet(row) {
         queries ON queries.job_id = jobs.id
         LEFT JOIN
         drafts ON drafts.job_id = jobs.id
-        WHERE 
-        (
-        jobs.date_received_on <= NOW() - INTERVAL 1 MONTH
-        AND jobs.status_type NOT IN (6,7,17,18,19,20)
-        )
+        WHERE (jobs.expected_delivery_date <> jobs.expected_delivery_date_old)
         AND assigned_jobs_staff_view.staff_id = ${row?.id}  AND (
             assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           )
-        
         GROUP BY jobs.id
         ORDER BY 
           jobs.id DESC;
         `;
 
   const [result] = await pool.execute(query);
- 
-  let csvContent = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
+  let csvContent = "Job Id,Expected Delivery Date ,Expected Delivery Date Old,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
 
   if (result && result.length > 0) {
 
     result?.forEach(val => {
 
+      let expected_delivery_date = val.expected_delivery_date || ' - ';
+      let expected_delivery_date_old = val.expected_delivery_date_old || ' - ';
+
       let job_received_on = convertDate(val.job_received_on);
-      customer_trading_name = formatCSV(val.customer_trading_name) || ' - ';
+      let customer_trading_name = formatCSV(val.customer_trading_name) || ' - ';
       let account_manager_name = formatCSV(val.account_manager_name) || ' - ';
       let client_trading_name = formatCSV(val.client_trading_name) || ' - ';
       let service_name = formatCSV(val.service_name) || ' - ';
@@ -352,18 +318,24 @@ async function otherUserDataGet(row) {
 
 
 
-      csvContent += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
+      csvContent += `${val.job_code_id},${expected_delivery_date},${expected_delivery_date_old},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
     });
 
-    return { status: true, csvContent: csvContent };
+    return {status:true, csvContent:csvContent};
+
+  }
+  
+  else{
+   return {status:false};
   }
 
-  else {
-    return { status: false };
-  }
-
-
+  
 }
+
+
+
+
+
 
 
 

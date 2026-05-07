@@ -3,7 +3,6 @@ const pool = require('../config/database');
 const { parentPort } = require("worker_threads");
 const { missingTimesheetReport } = require("../models/reportModel");
 const { commonEmail } = require("../utils/commonEmail");
-const { logEmail } = require("../utils/emailLogger");
 
 // Missing Timesheet Report Email Worker
 parentPort.on("message", async (rows) => {
@@ -35,34 +34,6 @@ parentPort.on("message", async (rows) => {
         // parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
 
         const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
-
-       const csvToJson = (csv) => {
-          const lines = csv.trim().split("\n");
-
-          // header 
-          const headers = lines[0].split(",");
-
-          // data rows 
-          const result = lines.slice(1).map((line) => {
-            const values = line.split(",");
-
-            return {
-              staff_name: values[0],
-              staff_email: values[1],
-            };
-          });
-
-          return result;
-        };
-        const attachmentJson = csvToJson(dynamic_attachment);
-          logEmail({
-            toEmail: toEmail,
-            filename: filename,
-            attachment: attachmentJson,
-            logFileName: "missingTimesheetReportEmail.json",
-          });
-
-
         if (emailSent) {
           parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
         } else {

@@ -2,7 +2,6 @@
 const pool = require('../config/database');
 const { parentPort } = require("worker_threads");
 const { commonEmail } = require("../utils/commonEmail");
-const { logEmail } = require("../utils/emailLogger");
 const convertDate = (date) => {
   if ([null, undefined, ''].includes(date)) {
     return "-";
@@ -30,39 +29,10 @@ const formatCSV = (value) => {
   return value;
 };
 
-/* 🔥 LIMIT PARALLEL EXECUTION */
-async function processWithLimit(items, limit, handler) {
-  let index = 0;
-
-  async function worker() {
-    while (index < items.length) {
-      const currentIndex = index++;
-      await handler(items[currentIndex]);
-    }
-  }
-
-  const workers = Array(limit).fill(null).map(worker);
-  await Promise.all(workers);
-}
-
-/* ---------------- MAIN WORKER ---------------- */
-
+// Missing Timesheet Report Email Worker
 parentPort.on("message", async (rows) => {
-  try {
-    /* ✅ STEP 1: REMOVE DUPLICATES */
-    const uniqueUsers = [];
-    const seen = new Set();
 
-    for (const r of rows) {
-      if (!seen.has(r.staff_email)) {
-        seen.add(r.staff_email);
-        uniqueUsers.push(r);
-      }
-    }
-
-    parentPort.postMessage(`Total unique users: ${uniqueUsers.length}`);
-
-    const query = `
+  const query = `
         SELECT 
         jobs.id AS id,
           CONCAT(
@@ -131,13 +101,7 @@ parentPort.on("message", async (rows) => {
           jobs.id DESC;
         `;
   const [result] = await pool.execute(query);
-
-   if (!result.length) {
-      parentPort.postMessage("No jobs found");
-      return;
-    }
-
-  let csv = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
+  let csvContent = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
 
   if (result && result.length > 0) {
 
@@ -163,25 +127,18 @@ parentPort.on("message", async (rows) => {
 
 
 
-      csv += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
+      csvContent += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
     });
   }
 
-    /* ✅ STEP 4: SEND EMAILS WITH LIMIT */
-    await processWithLimit(uniqueUsers, 5, async (user) => {
-      try {
 
-        
-        let finalCSV = csv;
+  for (const row of rows) {
+    try {
 
-        /* 👉 NON ADMIN USER */
-        if (![1, 2, 8].includes(user.role_id)) {
-          const res = await otherUserDataGet(user);
-          if (!res.status) return;
-          finalCSV = res.csvContent;
-        }
-
-        let toEmail = user.staff_email;
+      if (result && result.length > 0) {
+        if ([1, 2, 8].includes(row.role_id)) {
+         
+          let toEmail = row.staff_email;
           let subjectEmail = "Alert: Jobs That Have Been Sitting With Us for Over a Month";
           let htmlEmail = `
           <h3>Alert: Jobs That Have Been Sitting With Us for Over a Month</h3>
@@ -189,54 +146,61 @@ parentPort.on("message", async (rows) => {
           <p>This is to inform you that some jobs have been sitting with us for over a month without any progress or updates.</p>
           <p>Please review the attached report and take the necessary actions to move these jobs forward.</p>
           <br>
-          <p>Regards,<br>Team Outbooks</p>
+          <p>Regards,<br>Your Automation System</p>
         `;
-          const dynamic_attachment = finalCSV;
+          const dynamic_attachment = csvContent;
            const filename = `Jobs that have been sitting with us for over a month - ${new Date().toISOString().slice(0, 10)}.csv`;
 
-        const sent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
 
-        const csvToJson = (csv) => {
-          const lines = csv.trim().split("\n");
 
-          // headers
-          const headers = lines[0].split(",");
+          //parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
 
-          // data rows
-          const result = lines.slice(1).map((line) => {
-            const values = line.split(",");
+          const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+          if (emailSent) {
+            parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
+          } else {
+            parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
+          }
 
-            let obj = {};
-            headers.forEach((header, index) => {
-              obj[header.trim()] = values[index]?.trim() || "";
-            });
+        } else {
+          await otherUserDataGet(row).then(async (res)=>{
+            if(res.status){
+             
+              let toEmail = row.staff_email;
+              let subjectEmail = "Alert: Jobs That Have Been Sitting With Us for Over a Month";
 
-            return obj;
+              let htmlEmail = `
+              <h3>Alert: Jobs That Have Been Sitting With Us for Over a Month</h3>
+              <p>Hello,</p>
+              <p>This is to inform you that some jobs have been sitting with us for over a month without any progress or updates.</p>
+              <p>Please review the attached report and take the necessary actions to move these jobs forward.</p>
+              <br>
+              <p>Regards,<br>Your Automation System</p>
+            `;
+              const dynamic_attachment = res.csvContent;
+               const filename = `Jobs that have been sitting with us for over a month - ${new Date().toISOString().slice(0, 10)}.csv`;
+              const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+              if (emailSent) {
+                parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
+              } else {
+                parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
+              }
+            }
           });
 
-          return result;
-        };
-        const attachmentJson = csvToJson(dynamic_attachment);
-          logEmail({
-            toEmail: toEmail,
-            filename: filename,
-            attachment: attachmentJson,
-            logFileName: "jobsSittingWithForOverMonth.json",
-          });
 
-        parentPort.postMessage(
-          sent ? `✅ ${user.staff_email}` : `❌ ${user.staff_email}`
-        );
 
-      } catch (err) {
-        parentPort.postMessage(`❌ ${user.staff_email}: ${err.message}`);
+        }
+
+
+      } else {
+        parentPort.postMessage(`ℹ️ No missing timesheet report for ${row.staff_email}`);
       }
-    });
 
-   
-    parentPort.postMessage("All emails processed ✅");
-  } catch (err) {
-    parentPort.postMessage("Worker failed: " + err.message);
+
+    } catch (err) {
+      parentPort.postMessage(`❌ Failed for ${row.id}: ${err.message}`);
+    }
   }
 });
 
