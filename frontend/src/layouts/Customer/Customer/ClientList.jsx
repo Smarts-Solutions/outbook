@@ -608,11 +608,6 @@ const ClientLists = () => {
                       <Plus size={16} /> Add Client
                     </div>
                   )}
-                  {activeTab === "job" && customerId && hasAccess("job", "add") && (
-                    <div className="btn btn-info text-white blue-btn mt-2 mt-sm-0" onClick={() => navigate("/customer/createjob", { state: { customer_id: customerId, goto: "Customer", activeTab: activeTab, data: hararchyData } })}>
-                      <Plus size={16} /> Create Job
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
