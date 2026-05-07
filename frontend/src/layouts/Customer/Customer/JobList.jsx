@@ -27,6 +27,8 @@ const ClientList = () => {
   const { hasAccess, selectedCustomer } = useCustomerAccess();
 
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+  const token = JSON.parse(localStorage.getItem("token"));
+  const role = JSON.parse(localStorage.getItem("role"));
   const cust_id_sidebar = sessionStorage.getItem("cust_id_sidebar");
   const cli_id_sidebar = sessionStorage.getItem("cli_id_sidebar");
 
@@ -158,8 +160,7 @@ const ClientList = () => {
       });
   };
 
-  const token = JSON.parse(localStorage.getItem("token"));
-  const role = JSON.parse(localStorage.getItem("role"));
+
   const [customerData, setCustomerData] = useState([]);
   const [activeTab, setActiveTab] = useState("NoOfJobs");
   const [getClientDetails, setClientDetails] = useState({
@@ -318,8 +319,7 @@ const ClientList = () => {
       name: "Job ID",
       cell: (row) => (
         <div title={row.job_code_id}>
-          {getAccessDataJob.view == 1 ||
-            getAccessDataJob.all_jobs == 1 ||
+          {hasAccess("job", "view") ||
             role === "SUPERADMIN" ? (
             <a
               onClick={() => HandleJob(row)}
