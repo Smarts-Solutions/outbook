@@ -44,6 +44,16 @@ const DashboardLinkData = () => {
   }, [location.state]);
 
   useEffect(() => {
+    const key = location?.state?.req?.key;
+    if (key) {
+      const module = key === "client" ? "client" : (key === "customer" ? "customer" : "job");
+      if (!hasAccess(module, "view") && role !== "SUPERADMIN") {
+        navigate("/customer/dashboard");
+      }
+    }
+  }, [location, hasAccess, role, navigate]);
+
+  useEffect(() => {
     GetLinkedData();
     GetStatus();
   }, []);

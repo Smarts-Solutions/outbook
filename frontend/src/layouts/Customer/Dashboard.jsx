@@ -236,7 +236,7 @@ const Dashboard = () => {
         return;
       }
     } else if (type === "customer") {
-      if (!hasAccess("dashboard", "view") && role !== "SUPERADMIN") {
+      if (!hasAccess("customer", "view") && role !== "SUPERADMIN") {
         return;
       }
     }
@@ -604,7 +604,7 @@ const Dashboard = () => {
                         className="col-md-12 col-lg-6"
                         style={{
                           cursor:
-                            (hasAccess("dashboard", "view") ||
+                            (hasAccess("customer", "view") ||
                               role === "SUPERADMIN") &&
                               parseInt(dashboard.customer.count) > 0
                               ? "pointer"
