@@ -1119,11 +1119,11 @@ const CustomerUsers = () => {
                         <div key={customerId} className="accordion-item">
                           <h2 className="accordion-header" id={`heading-${customerId}`}>
                             <button
-                              className="accordion-button"
+                              className="accordion-button collapsed"
                               type="button"
                               data-bs-toggle="collapse"
                               data-bs-target={`#collapse-${customerId}`}
-                              aria-expanded="true"
+                              aria-expanded="false"
                               aria-controls={`collapse-${customerId}`}
                             >
                               Customer: {customer.trading_name}
@@ -1131,7 +1131,7 @@ const CustomerUsers = () => {
                           </h2>
                           <div
                             id={`collapse-${customerId}`}
-                            className="accordion-collapse collapse show"
+                            className="accordion-collapse collapse"
                             aria-labelledby={`heading-${customerId}`}
                           >
                             <div className="accordion-body p-2">
