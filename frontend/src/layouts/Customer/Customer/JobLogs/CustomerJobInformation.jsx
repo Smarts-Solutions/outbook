@@ -1610,23 +1610,20 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
           <div className="d-flex w-100 justify-content-end">
             {goto !== "report" && (
               <>
-                {(hasAccess("job", "update") ||
-
-                  role === "SUPERADMIN") && (
-                    <div className="w-auto">
-                      <select
-                        className="form-select form-control"
-                        onChange={handleStatusChange}
-                        value={selectStatusIs}
-                      >
-                        {statusDataAll.map((status) => (
-                          <option value={status.id} key={status.id}>
-                            {status.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
+                <div className="w-auto">
+                  <select
+                    className="form-select form-control"
+                    onChange={handleStatusChange}
+                    value={selectStatusIs}
+                    disabled={!(hasAccess("job", "status_update") || role === "SUPERADMIN")}
+                  >
+                    {statusDataAll.map((status) => (
+                      <option value={status.id} key={status.id}>
+                        {status.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
                 {selectStatusIs && (
                   <span className="text-muted fs-12 d-flex align-items-center px-3 py-1 rounded-pill border bg-light ms-2" style={{ minWidth: 'fit-content', height: '38px' }}>

@@ -37,6 +37,7 @@ const CustomerJobLogs = () => {
     update: hasAccess("job", "update") || role === "SUPERADMIN" ? 1 : 0,
     delete: hasAccess("job", "delete") || role === "SUPERADMIN" ? 1 : 0,
     view: hasAccess("job", "view") || role === "SUPERADMIN" ? 1 : 0,
+    status_update: hasAccess("job", "status_update") || role === "SUPERADMIN" ? 1 : 0,
   };
 
   useEffect(() => {
