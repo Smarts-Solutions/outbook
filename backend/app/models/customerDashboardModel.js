@@ -17,6 +17,7 @@ const getCustomerDashboardData = async (dashboard) => {
         status: true,
         message: "No assigned customers found.",
         data: {
+          customer: { count: 0, ids: "" },
           client: { count: 0, ids: "" },
           job: { count: 0, ids: "" },
           pending_job: { count: 0, ids: "" },
@@ -58,6 +59,10 @@ const getCustomerDashboardData = async (dashboard) => {
     const [JobData] = await pool.execute(JobQuery, [startDate, endDate]);
 
     const result = {
+      customer: {
+        count: assignedCustomerIds.length,
+        ids: assignedCustomerIds.join(","),
+      },
       client: {
         count: ClientData.length,
         ids: ClientData.map((row) => row.id).join(","),
@@ -815,6 +820,22 @@ const getCustomerCountLinkData = async (dashboard) => {
     return getByCustomerClient(dashboard);
   } else if (key === "job" || key === "pending_job" || key === "completed_job") {
     return getByCustomerJob(dashboard);
+  } else if (key === "customer") {
+    const res = await getCustomerList(dashboard);
+    if (res.status) {
+      return {
+        status: true,
+        message: res.message,
+        data: res.data.data,
+        pagination: {
+          total: res.data.pagination.totalItems,
+          page: res.data.pagination.currentPage,
+          limit: res.data.pagination.limit,
+          totalPages: res.data.pagination.totalPages
+        }
+      };
+    }
+    return res;
   } else {
     return { status: false, message: "Error getting customer dashboard data." };
   }
@@ -889,9 +910,9 @@ const getCustomerList = async (dashboard) => {
       searchCondition = `
         AND (
           customers.trading_name LIKE ?
-          OR customers.customer_code LIKE ?
-          OR staffs.first_name LIKE ?
-          OR staffs.last_name LIKE ?
+          OR CONCAT(staff2.first_name, ' ', staff2.last_name) LIKE ?
+          OR staffs.employee_number LIKE ?
+          OR CONCAT(staffs.first_name, ' ', staffs.last_name) LIKE ?
         )
       `;
       const likeSearch = `%${search}%`;
@@ -901,7 +922,8 @@ const getCustomerList = async (dashboard) => {
     const [countResult] = await pool.execute(
       `SELECT COUNT(DISTINCT customers.id) AS total 
        FROM customers 
-       LEFT JOIN staffs ON customers.account_manager_id = staffs.id
+       LEFT JOIN staffs ON customers.staff_id = staffs.id
+       LEFT JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
        WHERE customers.id IN (${idsStr}) ${searchCondition}`,
       [...searchParams]
     );
@@ -923,7 +945,7 @@ const getCustomerList = async (dashboard) => {
         DATE_FORMAT(customers.created_at, '%d/%m/%Y') AS created_at,
         staff2.first_name AS account_manager_firstname,
         staff2.last_name AS account_manager_lastname,
-        staff2.employee_number AS account_manager_employee_number,
+        staffs.employee_number AS creator_employee_number,
         CONCAT('cust_', SUBSTRING(customers.trading_name,1,3),'_',SUBSTRING(customers.customer_code,1,15)) AS customer_code
       FROM customers
       LEFT JOIN staffs ON customers.staff_id = staffs.id

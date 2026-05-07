@@ -253,6 +253,17 @@ const DashboardLinkData = () => {
             "Created By": item.client_created_by,
             "Created At": item.created_at,
           }));
+        } else if (key === "customer") {
+          exportData = res.data.map(item => ({
+            "Trading Name": item.trading_name,
+            "Customer Code": item.customer_code,
+            "Type": item.customer_type === '1' ? "Sole Trader" : item.customer_type === '2' ? "Company" : item.customer_type === '3' ? "Partnership" : "-",
+            "Account Manager": item.account_manager_firstname + " " + item.account_manager_lastname,
+            "Emloyee ID": item.creator_employee_number,
+            "Created by": item.customer_created_by,
+            "Created At": item.created_at,
+            "Status": item.status == 1 ? "Active" : "Inactive",
+          }));
         } else {
           exportData = res.data.map(item => ({
             "Job ID": item.job_code_id,
@@ -518,6 +529,88 @@ const DashboardLinkData = () => {
       sortable: true,
     },
   ];
+  const CustomerListColumns = [
+    {
+      name: "Trading Name",
+      selector: (row) => row.trading_name,
+      sortable: true,
+      cell: (row) => <div title={row.trading_name}>{row.trading_name}</div>,
+    },
+    {
+      name: "Customer Code",
+      selector: (row) => row.customer_code,
+      sortable: true,
+      cell: (row) => <div title={row.customer_code}>{row.customer_code}</div>,
+    },
+    {
+      name: "Type",
+      selector: (row) =>
+        row.customer_type === "1"
+          ? "Sole Trader"
+          : row.customer_type === "2"
+          ? "Company"
+          : row.customer_type === "3"
+          ? "Partnership"
+          : "-",
+      sortable: true,
+      cell: (row) => {
+        const type =
+          row.customer_type === "1"
+            ? "Sole Trader"
+            : row.customer_type === "2"
+            ? "Company"
+            : row.customer_type === "3"
+            ? "Partnership"
+            : "-";
+        return <div title={type}>{type}</div>;
+      },
+    },
+    {
+      name: "Account Manager",
+      selector: (row) =>
+        row.account_manager_firstname + " " + row.account_manager_lastname,
+      sortable: true,
+      cell: (row) => {
+        const name =
+          row.account_manager_firstname + " " + row.account_manager_lastname;
+        return <div title={name}>{name}</div>;
+      },
+    },
+    {
+      name: "Emloyee ID",
+      selector: (row) => row.creator_employee_number,
+      sortable: true,
+      cell: (row) => (
+        <div title={row.creator_employee_number}>{row.creator_employee_number}</div>
+      ),
+    },
+    {
+      name: "Created by",
+      selector: (row) => row.customer_created_by,
+      sortable: true,
+      cell: (row) => (
+        <div title={row.customer_created_by}>{row.customer_created_by}</div>
+      ),
+    },
+    {
+      name: "Created At",
+      selector: (row) => row.created_at,
+      sortable: true,
+      cell: (row) => <div title={row.created_at}>{row.created_at}</div>,
+    },
+    {
+      name: "Status",
+      cell: (row) => (
+        <span
+          className={row.status == 1 ? "text-success" : "text-danger"}
+          title={row.status == 1 ? "Active" : "Inactive"}
+        >
+          {row.status == 1 ? "Active" : "Inactive"}
+        </span>
+      ),
+      sortable: true,
+    },
+  ];
 
   return (
     <div>
@@ -575,7 +668,13 @@ const DashboardLinkData = () => {
           <Datatable
             filter={false}
             pagination={false}
-            columns={location?.state?.req?.key === "client" ? ClientListColumns : JobColumns}
+            columns={
+              location?.state?.req?.key === "client"
+                ? ClientListColumns
+                : location?.state?.req?.key === "customer"
+                  ? CustomerListColumns
+                  : JobColumns
+            }
             data={allLinkedData || []}
           />
 

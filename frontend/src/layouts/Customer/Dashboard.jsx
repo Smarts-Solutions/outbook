@@ -21,6 +21,7 @@ const Dashboard = () => {
   const { hasAccess, selectedCustomer } = useCustomerAccess();
 
   const [dashboard, setDashboard] = useState({
+    customer: { count: 0, ids: "" },
     client: { count: 0, ids: "" },
     job: { count: 0, ids: "" },
     pending_job: { count: 0, ids: "" },
@@ -232,6 +233,10 @@ const Dashboard = () => {
       }
     } else if (["job", "pending_job", "completed_job"].includes(type)) {
       if (!hasAccess("job", "view") && role !== "SUPERADMIN") {
+        return;
+      }
+    } else if (type === "customer") {
+      if (!hasAccess("dashboard", "view") && role !== "SUPERADMIN") {
         return;
       }
     }
@@ -595,6 +600,50 @@ const Dashboard = () => {
                     </div>
                   ) : (
                     <div className="row justify-content-center">
+                      <div
+                        className="col-md-12 col-lg-6"
+                        style={{
+                          cursor:
+                            (hasAccess("dashboard", "view") ||
+                              role === "SUPERADMIN") &&
+                              parseInt(dashboard.customer.count) > 0
+                              ? "pointer"
+                              : "default",
+                        }}
+                      >
+                        <div className="card report-card dashboard-card">
+                          <div className="card-body">
+                            <div className="row d-flex justify-content-center">
+                              <div className="col-12">
+                                <p className="text-dark mb-1 font-weight-semibold">
+                                  NO OF CUSTOMERS
+                                </p>
+                              </div>
+                              <div
+                                className="col-12 d-flex align-items-center justify-content-between"
+                                onClick={() =>
+                                  handleClick(
+                                    "customer",
+                                    dashboard.customer,
+                                    "Customers",
+                                  )
+                                }
+                              >
+                                <h3 className="my-4">
+                                  {formatNumberSafe(
+                                    dashboard.customer && dashboard.customer.count,
+                                  )}
+                                </h3>
+                                <img
+                                  className="dashboad-img"
+                                  src="/assets/images/dashboards/users.png"
+                                  alt="customers"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                       <div
                         className="col-md-12 col-lg-6"
                         style={{
