@@ -1047,7 +1047,12 @@ const StaffPage = () => {
         .unwrap()
         .then((res) => {
           if (res.status) {
-            setChangedRoleStaffData(res.data);
+  //  setChangedRoleStaffData(res.data);
+
+            const sortedData = [...res.data].sort((a, b) =>
+              (a.staff_fullname || "").localeCompare(b.staff_fullname || ""),
+            );
+            setChangedRoleStaffData(sortedData);
           } else {
             setChangedRoleStaffData([]);
           }
@@ -1746,7 +1751,7 @@ const StaffPage = () => {
               <user size={16} /> Staff to Replace
             </label>
 
-            <div className="dropdown w-100">
+             {/* <div className="dropdown w-100">
               <button
                 className="btn btn-outline-info rounded-pill dropdown-toggle w-100 text-start"
                 type="button"
@@ -1783,7 +1788,37 @@ const StaffPage = () => {
                   )}
                 </ul>
               )}
-            </div>
+            </div> */}
+
+            <Select
+              isSearchable
+              className="shadow-sm select-staff"
+              classNamePrefix="select"
+              placeholder="Choose Staff"
+              options={changedRoleStaffData?.map((staff) => ({
+                value: staff.id,
+                label: staff.staff_fullname,
+                staffData: staff,
+              }))}
+              value={
+                selectedStaff
+                  ? {
+                      value: selectedStaff.id,
+                      label: selectedStaff.staff_fullname,
+                    }
+                  : null
+              }
+              onChange={(selectedOption) => {
+                setSelectedStaff(selectedOption?.staffData || null);
+              }}
+              menuPortalTarget={document.body}
+              styles={{
+                menuPortal: (base) => ({
+                  ...base,
+                  zIndex: 9999,
+                }),
+              }}
+            />
           </div>
 
           <div className="d-flex justify-content-end gap-2">
