@@ -1035,8 +1035,9 @@ const ClientList = () => {
   const handleExport = async () => {
     setLoading(true);
     const req = {
-      action: "getByCustomer",
+      action: clientDetailSingle.id ? "getByClient" : "getByCustomer",
       customer_id: customerDetails.id || "",
+      client_id: clientDetailSingle.id,
       page: 1,
       limit: 100000,
       search: "",
