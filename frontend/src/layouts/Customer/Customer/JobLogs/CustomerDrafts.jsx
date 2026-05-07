@@ -438,7 +438,7 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
 
         {/* RIGHT */}
         <div className="col-md-4 text-end">
-          {(hasAccess("draft", "download") || role === "SUPERADMIN") && DraftListData && DraftListData.length > 0 && (
+          {(hasAccess("draft", "export") || role === "SUPERADMIN") && DraftListData && DraftListData.length > 0 && (
             <button
               className="btn btn-outline-info fw-bold border-3 me-2"
               onClick={handleExport}
