@@ -1051,43 +1051,45 @@ const ClientList = () => {
 
           {customerDetails.id != "" ? (
             <>
-              <div className="form-group col-md-4 mb-0">
-                <label className="form-label mb-2">Client</label>
-                {clientData.length == 0 ? (
-                  <input
-                    type="text"
-                    className="form-select"
-                    disabled
-                    value={"The customer's client is not available."}
-                  />
-                ) : (
-                  // CHANGED: "All" option add kiya, aur value="" ho to "All" show karo
-                  <Select
-                    id="tabSelect"
-                    name="staff_id"
-                    className="basic-multi-select"
-                    classNamePrefix="react-select"
-                    isSearchable
-                    options={clientOptions}
-                    value={selectedOptionClient}
-                    onChange={(selected) => {
-                      if (selected.value === "") {
-                        // "All" selected
-                        selectClientId("", "");
-                      } else {
-                        const selectedClient = clientData.find(
-                          (client) => client.id == selected.value,
-                        );
-                        selectClientId(
-                          selected.value,
-                          selectedClient?.client_name,
-                        );
-                      }
-                    }}
-                    placeholder="Select Client"
-                  />
-                )}
-              </div>
+              {(hasAccess("client", "view") || role === "SUPERADMIN") && (
+                <div className="form-group col-md-4 mb-0">
+                  <label className="form-label mb-2">Client</label>
+                  {clientData.length == 0 ? (
+                    <input
+                      type="text"
+                      className="form-select"
+                      disabled
+                      value={"The customer's client is not available."}
+                    />
+                  ) : (
+                    // CHANGED: "All" option add kiya, aur value="" ho to "All" show karo
+                    <Select
+                      id="tabSelect"
+                      name="staff_id"
+                      className="basic-multi-select"
+                      classNamePrefix="react-select"
+                      isSearchable
+                      options={clientOptions}
+                      value={selectedOptionClient}
+                      onChange={(selected) => {
+                        if (selected.value === "") {
+                          // "All" selected
+                          selectClientId("", "");
+                        } else {
+                          const selectedClient = clientData.find(
+                            (client) => client.id == selected.value,
+                          );
+                          selectClientId(
+                            selected.value,
+                            selectedClient?.client_name,
+                          );
+                        }
+                      }}
+                      placeholder="Select Client"
+                    />
+                  )}
+                </div>
+              )}
 
               <div className="page-title-box pt-2 ps-3">
                 <div className="row align-items-start flex-md-row flex-column-reverse justify-content-between">
