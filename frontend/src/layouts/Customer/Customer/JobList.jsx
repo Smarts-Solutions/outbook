@@ -859,6 +859,22 @@ const ClientList = () => {
     }
   };
 
+  const selectCustomerId = (id, name) => {
+    setCustomerDetails({ id: id, trading_name: name || "" });
+    setHararchyData({
+      customer: { id: id, trading_name: name || "" },
+      client: { id: "", client_name: "" },
+    });
+    setCurrentPage(1);
+    if (id) {
+      GetAllClientData(id, name);
+    } else {
+      GetAllJobListByCustomer("", 1, pageSize, searchTerm);
+      setClientData([]);
+      setClientDetailSingle({ id: "", client_name: "" });
+    }
+  };
+
   const selectClientId = (id, name) => {
     if (id != "") {
       // Specific client selected
@@ -1034,30 +1050,32 @@ const ClientList = () => {
       )}
       <div className="content-title">
         <div className="row">
-          {/* <div className="form-group col-md-4 mb-0">
-            <label className="form-label mb-2">Customer</label>
-            <Select
-              id="tabSelect"
-              name="staff_id"
-              className="basic-multi-select"
-              options={customerOptions}
-              value={selectedOption}
-              onChange={(selected) => {
-                const selectedCustomer = customerDataAll.find(
-                  (customer) => customer.id == selected.value,
-                );
-                selectCustomerId(
-                  selected.value,
-                  selectedCustomer?.trading_name,
-                );
-              }}
-              classNamePrefix="react-select"
-              isSearchable
-              placeholder="All"
-            />
-          </div> */}
+          {selectedCustomer.value === "All" && (hasAccess("customer", "view") || role === "SUPERADMIN") && (
+            <div className="form-group col-md-4 mb-0">
+              <label className="form-label mb-2">Customer</label>
+              <Select
+                id="tabSelect"
+                name="staff_id"
+                className="basic-multi-select"
+                options={customerOptions}
+                value={selectedOption}
+                onChange={(selected) => {
+                  const selectedCustomerRow = customerDataAll.find(
+                    (customer) => customer.id == selected.value,
+                  );
+                  selectCustomerId(
+                    selected.value,
+                    selectedCustomerRow?.trading_name,
+                  );
+                }}
+                classNamePrefix="react-select"
+                isSearchable
+                placeholder="All"
+              />
+            </div>
+          )}
 
-          {customerDetails.id != "" ? (
+          {(customerDetails.id != "" || selectedCustomer.value !== "All") && (
             <>
               {(hasAccess("client", "view") || role === "SUPERADMIN") && (
                 <div className="form-group col-md-4 mb-0">
@@ -1163,8 +1181,6 @@ const ClientList = () => {
                 NumberOfActive={activeTab == "NoOfJobs" ? totalRecords : ""}
               />
             </>
-          ) : (
-            ""
           )}
         </div>
 
