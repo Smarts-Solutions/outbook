@@ -28,6 +28,20 @@ const getCustomerDashboardData = async (dashboard) => {
 
     const idsStr = assignedCustomerIds.join(',');
 
+    // 1. Get Customers within date range
+    let customerFilter = "";
+    if (customer_id) {
+      customerFilter = ` AND id = ${pool.escape(customer_id)}`;
+    }
+    const CustomerQuery = `
+        SELECT id FROM customers 
+        WHERE id IN (${idsStr})
+        ${customerFilter}
+        AND DATE(created_at) BETWEEN ? AND ?
+        ORDER BY id DESC
+    `;
+    const [CustomerData] = await pool.execute(CustomerQuery, [startDate, endDate]);
+
     // 2. Get Clients for these Customers
     let clientCondition = access.clientCondition;
     if (customer_id) {
@@ -60,8 +74,8 @@ const getCustomerDashboardData = async (dashboard) => {
 
     const result = {
       customer: {
-        count: assignedCustomerIds.length,
-        ids: assignedCustomerIds.join(","),
+        count: CustomerData.length,
+        ids: CustomerData.map((row) => row.id).join(","),
       },
       client: {
         count: ClientData.length,
@@ -879,7 +893,7 @@ const getCustomerDropdown = async (dashboard) => {
 
 const getCustomerList = async (dashboard) => {
   try {
-    let { staff_id, StaffUserId, page, limit, search, action } = dashboard;
+    let { staff_id, StaffUserId, page, limit, search, action, customer_id, date_filter, ids } = dashboard;
 
     // Support both staff_id and StaffUserId
     const effectiveStaffId = staff_id || StaffUserId;
@@ -891,6 +905,24 @@ const getCustomerList = async (dashboard) => {
 
     const access = await getStaffAccessFilters(effectiveStaffId);
     const assignedIds = access.assignedCustomerIds;
+
+    let filterCondition = "";
+
+    if (ids) {
+      const clean_ids = ids.replace(/^,+|,+$/g, "");
+      if (clean_ids) {
+        filterCondition = `AND customers.id IN (${clean_ids})`;
+      }
+    } else if (customer_id) {
+      filterCondition = `AND customers.id = ${pool.escape(customer_id)}`;
+      if (date_filter) {
+        let { startDate, endDate } = await getDateRange(date_filter);
+        filterCondition += ` AND DATE(customers.created_at) BETWEEN ${pool.escape(startDate)} AND ${pool.escape(endDate)}`;
+      }
+    } else if (date_filter) {
+      let { startDate, endDate } = await getDateRange(date_filter);
+      filterCondition = `AND DATE(customers.created_at) BETWEEN ${pool.escape(startDate)} AND ${pool.escape(endDate)}`;
+    }
 
     if (assignedIds.length === 0) {
       return {
@@ -924,7 +956,7 @@ const getCustomerList = async (dashboard) => {
        FROM customers 
        LEFT JOIN staffs ON customers.staff_id = staffs.id
        LEFT JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
-       WHERE customers.id IN (${idsStr}) ${searchCondition}`,
+       WHERE customers.id IN (${idsStr}) ${filterCondition} ${searchCondition}`,
       [...searchParams]
     );
     const total = countResult[0].total;
@@ -950,7 +982,7 @@ const getCustomerList = async (dashboard) => {
       FROM customers
       LEFT JOIN staffs ON customers.staff_id = staffs.id
       LEFT JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
-      WHERE customers.id IN (${idsStr}) ${searchCondition}
+      WHERE customers.id IN (${idsStr}) ${filterCondition} ${searchCondition}
       ORDER BY customers.id DESC
       LIMIT ? OFFSET ?
     `;
