@@ -607,10 +607,10 @@ const CustomerUsers = () => {
 
     setIsTransferring(true);
     try {
-      const req = { 
-        customer_user_id: selectedUserForDeletion.id, 
+      const req = {
+        customer_user_id: selectedUserForDeletion.id,
         replace_id: transferUserId,
-        action: 'deleteCustomerUsers' 
+        action: 'deleteCustomerUsers'
       };
       const res = await dispatch(getAllCustomerUsers({ req, authToken: token })).unwrap();
 
@@ -895,6 +895,13 @@ const CustomerUsers = () => {
       label_size: 12,
       col_size: 6,
       disable: false,
+      styles: {
+        menuPortal: (base) => ({
+          ...base,
+          zIndex: 999,
+        }),
+      },
+      menuPortalTarget: document.body,
       options: customerDataAll?.map((item) => ({
         value: item.id,
         label: item.trading_name,
@@ -1027,12 +1034,12 @@ const CustomerUsers = () => {
     }
 
     // Only auto-select for customers that were NOT in the initial list (genuinely newly added by user)
-    const added = (formik.values.allCustomerAccess || []).filter(id => 
-      !(prevCustomerAccess.current || []).includes(id) && 
+    const added = (formik.values.allCustomerAccess || []).filter(id =>
+      !(prevCustomerAccess.current || []).includes(id) &&
       !(formik.initialValues.allCustomerAccess || []).includes(id)
     );
-    
-    const removed = (prevCustomerAccess.current || []).filter(id => 
+
+    const removed = (prevCustomerAccess.current || []).filter(id =>
       !(formik.values.allCustomerAccess || []).includes(id)
     );
 
@@ -1171,13 +1178,13 @@ const CustomerUsers = () => {
                                             {client.trading_name}
                                           </label>
                                         </div>
-                                        <span 
+                                        <span
                                           className="select-all-link"
                                           onClick={() => {
                                             const jobIds = clientJobs.map((j) => j.id);
                                             let newSelectedJobs = [...(formik.values.selectedJobs || [])];
                                             let newSelectedClients = [...(formik.values.selectedClients || [])];
-                                            
+
                                             if (!isAllSelected) {
                                               jobIds.forEach((id) => {
                                                 if (!newSelectedJobs.includes(id)) newSelectedJobs.push(id);
@@ -1309,7 +1316,7 @@ const CustomerUsers = () => {
           </div>
 
           <div className="d-flex gap-3 mt-4 pt-3 border-top">
-            <button 
+            <button
               className="btn btn-danger w-100 py-2 fw-bold"
               onClick={handleTransferAndDelete}
               disabled={isTransferring || !transferUserId}
@@ -1323,7 +1330,7 @@ const CustomerUsers = () => {
                 "Transfer & Delete"
               )}
             </button>
-            <button 
+            <button
               className="btn btn-outline-secondary w-100 py-2 fw-bold"
               onClick={() => setShowTransferModal(false)}
             >
