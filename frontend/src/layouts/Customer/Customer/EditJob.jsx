@@ -26,14 +26,14 @@ const EditJob = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
-  const { hasAccess } = useCustomerAccess();
+  const { hasAccess, loading: accessLoading } = useCustomerAccess();
   const role = JSON.parse(localStorage.getItem("role"));
 
   useEffect(() => {
-    if (!hasAccess("job", "update") && role !== "SUPERADMIN") {
+    if (!accessLoading && !hasAccess("job", "update") && role !== "SUPERADMIN") {
       navigate("/customer/dashboard");
     }
-  }, [hasAccess, role, navigate]);
+  }, [hasAccess, role, navigate, accessLoading]);
   const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
   const dispatch = useDispatch();
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });

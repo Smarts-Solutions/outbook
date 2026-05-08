@@ -4,15 +4,15 @@ import { useCustomerAccess } from '../../../Utils/CustomerAccessContext';
 import { useNavigate } from 'react-router-dom';
 
 const CustomerReports = () => {
-    const { hasAccess } = useCustomerAccess();
+    const { hasAccess, loading: accessLoading } = useCustomerAccess();
     const navigate = useNavigate();
     const role = JSON.parse(localStorage.getItem("role"));
 
     useEffect(() => {
-        if (!hasAccess("report", "view") && role !== "SUPERADMIN") {
+        if (!accessLoading && !hasAccess("report", "view") && role !== "SUPERADMIN") {
             navigate("/customer/dashboard");
         }
-    }, [hasAccess, role, navigate]);
+    }, [hasAccess, role, navigate, accessLoading]);
 
     return (
         <div className="container-fluid">
