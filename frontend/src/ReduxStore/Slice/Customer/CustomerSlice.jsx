@@ -78,7 +78,7 @@ const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
 export const getAllCustomerUsers = createAsyncThunk(
   "getAllCustomerUsers",
-  async (data) => {
+  async (data, { rejectWithValue }) => {
     try {
       const { req, authToken } = data;
       var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -90,7 +90,7 @@ export const getAllCustomerUsers = createAsyncThunk(
       const res = await get_All_Customer_Users(updatedReq, authToken);
       return await res;
     } catch (err) {
-      throw err;
+      return rejectWithValue(err.response?.data || err.message);
     }
   }
 );

@@ -15,8 +15,7 @@ export async function get_All_Customer_Users(data, token) {
     });
     return await res?.data;
   } catch (err) {
-    return await
-      err;
+    throw err;
   }
 }
 

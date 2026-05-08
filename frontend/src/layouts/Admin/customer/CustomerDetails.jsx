@@ -438,7 +438,7 @@ const CustomerUsers = () => {
       cell: (row) => <div title={row.email}>{row.email}</div>,
       selector: (row) => row.email,
       sortable: true,
-      idth: "300px",
+      width: "300px",
       reorder: false,
     },
     {
@@ -1003,14 +1003,14 @@ const CustomerUsers = () => {
           sweatalert.fire({
             icon: "error",
             title: "Error",
-            text: response.response.data.message || "Failed to add customer user",
+            text: response.message || "Failed to add customer user",
           });
         }
       } catch (error) {
         sweatalert.fire({
           icon: "error",
           title: "Error",
-          text: error.message || "An error occurred while adding customer user",
+          text: error.message || error || "An error occurred while adding customer user",
         });
       }
     },
