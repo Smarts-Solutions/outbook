@@ -1734,6 +1734,39 @@ const customerJobAction = async (dashboard) => {
         await pool.execute(`INSERT INTO job_allowed_staffs SET job_id = ?, staff_id = ?`, [insertId, staff.staff_id]);
       }
 
+      // --- ADD DESCRIPTIVE LOGGING START ---
+      try {
+        const queryJobCode = `
+          SELECT 
+          CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id
+          FROM jobs
+          JOIN clients ON jobs.client_id = clients.id
+          JOIN customers ON clients.customer_id = customers.id
+          JOIN job_types ON jobs.job_type_id = job_types.id
+          WHERE jobs.id = ?;
+        `;
+        const [[oldJob]] = await pool.execute(queryJobCode, [id]);
+        const [[newJob]] = await pool.execute(queryJobCode, [insertId]);
+
+        await CustomerLogUpdateOperation({
+          staff_id: StaffUserId,
+          ip: ip,
+          date: new Date().toISOString().split("T")[0],
+          module_name: "job",
+          log_message: `Copied Job Code: From ${oldJob?.job_code_id || 'Unknown'} To `,
+          permission_type: "copied",
+          module_id: insertId,
+        });
+      } catch (logErr) {
+        console.error("Log error in copy_job:", logErr);
+      }
+      // --- ADD DESCRIPTIVE LOGGING END ---
+
       return { status: true, message: "Job copied successfully.", data: insertId };
     } catch (err) {
       console.error("copy_job error:", err);
@@ -2096,26 +2129,10 @@ const customerJobTimeline = async (dashboard) => {
     staff_logs.staff_id AS staff_id,
     DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
     staff_logs.created_at AS created_at,
-    CONCAT(
-      roles.role_name, ' ',
-      staffs.first_name, ' ',
-      staffs.last_name, ' ',
-      staff_logs.log_message, ' ',
-      CASE
-         WHEN staff_logs.module_name = 'job' THEN (
-          SELECT CONCAT(SUBSTRING(customers.trading_name, 1, 3),'_', SUBSTRING(clients.trading_name, 1, 3),'_',jobs.job_id)
-          FROM jobs
-          JOIN clients ON jobs.client_id = clients.id
-          JOIN customers ON clients.customer_id = customers.id
-          WHERE jobs.id = staff_logs.module_id
-        )
-        ELSE ''
-      END
-    ) AS log_message
+    IFNULL(staff_logs.log_message_all, staff_logs.log_message) AS log_message
   FROM staff_logs
   JOIN staffs ON staffs.id = staff_logs.staff_id
   JOIN roles ON roles.id = staffs.role_id
-  LEFT JOIN jobs ON staff_logs.module_name = 'job' AND staff_logs.module_id = jobs.id
   WHERE staff_logs.module_name = 'job' AND staff_logs.module_id = ?
   ORDER BY staff_logs.id DESC`;
   const [result] = await pool.execute(query, [job_id]);

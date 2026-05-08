@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { SIGN_IN_STAFF , SIGN_IN_AZURE_SSO,LOGIN_AUTH_TOKEN , IS_LOGIN_AUTH_TOKEN_CHECK ,IS_LOGOUT , STATUS ,GET_SHAREPOINT_TOKEN,GET_STAFF_BY_ROLE} from "../../../Services/Auth/authService";
+import { SIGN_OUT_CUSTOMER } from "../../../Services/CustomerUser/customerUserService";
 const token = localStorage.getItem("token");
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
@@ -50,6 +51,15 @@ export const isLogOut = createAsyncThunk("isLogOut", async (data) => {
     var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
     const updatedReq = { ...data, ip: IP_Data };
     const res = await IS_LOGOUT(updatedReq);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
+
+export const signOutCustomer = createAsyncThunk("signOutCustomer", async (token) => {
+  try {
+    const res = await SIGN_OUT_CUSTOMER(token);
     return await res;
   } catch (err) {
     return err;

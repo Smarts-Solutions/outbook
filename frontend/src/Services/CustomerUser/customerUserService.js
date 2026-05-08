@@ -21,5 +21,14 @@ export async function UPDATE_CUSTOMER_PASSWORD(data) {
     return await err;
   }
 }
-
+export async function SIGN_OUT_CUSTOMER(token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customer/logout`, {}, {
+      headers: { Authorization: token }
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
 

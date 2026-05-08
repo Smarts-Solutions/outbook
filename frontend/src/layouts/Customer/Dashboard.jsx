@@ -921,7 +921,7 @@ const Dashboard = () => {
                               </div>
                               <div className="activity-info-text">
                                 <small>{formatDate(item?.created_at)}</small>
-                                <p>{item?.log_message}</p>
+                                <p>{item?.log_message_all || item?.log_message}</p>
                               </div>
                             </div>
                           ))

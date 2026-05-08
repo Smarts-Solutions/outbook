@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { isLoginAuthCheckToken, isLogOut } from "../../ReduxStore/Slice/Auth/authSlice";
+import { isLoginAuthCheckToken, isLogOut, signOutCustomer } from "../../ReduxStore/Slice/Auth/authSlice";
 import { Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import Select from "react-select";
@@ -78,14 +78,25 @@ const Header = () => {
     sessionStorage.clear();
 
     const req = { id: staffDetails.id };
-    await dispatch(isLogOut(req))
-      .unwrap()
-      .then(async (response) => {
-        navigate("/login");
-      })
-      .catch((error) => {
-        navigate("/login");
-      });
+    if (role?.toString().toUpperCase() === "CUSTOMER") {
+      await dispatch(signOutCustomer(token))
+        .unwrap()
+        .then(async (response) => {
+          navigate("/customer-login");
+        })
+        .catch((error) => {
+          navigate("/customer-login");
+        });
+    } else {
+      await dispatch(isLogOut(req))
+        .unwrap()
+        .then(async (response) => {
+          navigate("/login");
+        })
+        .catch((error) => {
+          navigate("/login");
+        });
+    }
 
     navigate("/login");
   };
