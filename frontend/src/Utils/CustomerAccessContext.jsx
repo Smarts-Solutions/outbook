@@ -19,6 +19,7 @@ export const CustomerAccessProvider = ({ children }) => {
     const location = useLocation();
     const [accessData, setAccessData] = useState([]);
     const [assignedCustomers, setAssignedCustomers] = useState([]);
+    const [loading, setLoading] = useState(true);
     
     const [selectedCustomer, setSelectedCustomerState] = useState(() => {
         const saved = localStorage.getItem('selectedCustomer');
@@ -49,6 +50,7 @@ export const CustomerAccessProvider = ({ children }) => {
         const role = JSON.parse(localStorage.getItem('role'));
 
         if (staffDetails?.id && role?.toString().toUpperCase() === "CUSTOMER") {
+            setLoading(true);
             const req = { customer_id: staffDetails.id };
             const data = { req, authToken: token };
             try {
@@ -58,7 +60,11 @@ export const CustomerAccessProvider = ({ children }) => {
                 }
             } catch (error) {
                 console.error("Error fetching customer access:", error);
+            } finally {
+                setLoading(false);
             }
+        } else {
+            setLoading(false);
         }
     }, [dispatch]);
 
@@ -109,7 +115,8 @@ export const CustomerAccessProvider = ({ children }) => {
             hasAccess, 
             assignedCustomers, 
             selectedCustomer, 
-            setSelectedCustomer 
+            setSelectedCustomer,
+            loading 
         }}>
             {children}
         </CustomerAccessContext.Provider>

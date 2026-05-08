@@ -15,14 +15,14 @@ const CreateClient = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
-  const { hasAccess } = useCustomerAccess();
+  const { hasAccess, loading: accessLoading } = useCustomerAccess();
   const role = JSON.parse(localStorage.getItem("role"));
 
   useEffect(() => {
-    if (!hasAccess("client", "add") && role !== "SUPERADMIN") {
+    if (!accessLoading && !hasAccess("client", "add") && role !== "SUPERADMIN") {
       navigate("/customer/dashboard");
     }
-  }, [hasAccess, role, navigate]);
+  }, [hasAccess, role, navigate, accessLoading]);
   const [clientIndustry, setClientIndustry] = useState([]);
   const [getAllSearchCompany, setGetAllSearchCompany] = useState([]);
   const [incorporationDataAll, setIncorporationDataAll] = useState([]);

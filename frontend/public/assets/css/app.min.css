@@ -4969,6 +4969,7 @@ svg {
 }
 
 
-
-
-
+.css-1nmdiq5-menu,
+.css-26l3qy-menu {
+  z-index: 9999 !important;
+}

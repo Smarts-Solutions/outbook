@@ -422,7 +422,7 @@ const CustomerLogin = () => {
                                 onClick={() => handleSubmitLogin()}
                                 onKeyPress={handleKeyPress}
                               >
-                                Sign In <ArrowRight size={16} />
+                                Sign In <ArrowRight size={16} className="ms-1" />
                               </button>
                             </div>
 
@@ -503,7 +503,7 @@ const CustomerLogin = () => {
                                 onClick={() => handleUpdatePassword()}
                                 onKeyPress={handleKeyPress1}
                               >
-                                Update Password <i className="fas fa-sign-in-alt ml-1" />
+                                Update Password <ArrowRight size={16} className="ms-1" />
                               </button>
                             </div>
 

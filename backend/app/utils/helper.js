@@ -489,4 +489,46 @@ const getStaffAccessFilters = async (staff_id) => {
   return { customerCondition, clientCondition, jobCondition, assignedCustomerIds };
 };
 
-module.exports = { SatffLogUpdateOperation, generateNextUniqueCode, generateNextUniqueCodeJobLogTitle, getDateRange, JobTaskNameWithId, getAllCustomerIds, LineManageStaffIdHelperFunction, QueryRoleHelperFunction, JobStatusUpdate, getStaffAccessFilters };
+
+const grantStaffAccess = async (staff_id, customer_id, entity_type, entity_id) => {
+  try {
+    const [rows] = await pool.execute(
+      `SELECT id, client_id, job_id FROM customer_access WHERE staff_id = ? AND customer_id = ?`,
+      [staff_id, customer_id]
+    );
+
+    if (rows.length === 0) {
+      const client_id_str = entity_type === 'client' ? entity_id.toString() : '';
+      const job_id_str = entity_type === 'job' ? entity_id.toString() : '';
+      await pool.execute(
+        `INSERT INTO customer_access (staff_id, customer_id, client_id, job_id) VALUES (?, ?, ?, ?)`,
+        [staff_id, customer_id, client_id_str, job_id_str]
+      );
+    } else {
+      let client_ids = rows[0].client_id ? rows[0].client_id.split(',').map(s => s.trim()).filter(s => s) : [];
+      let job_ids = rows[0].job_id ? rows[0].job_id.split(',').map(s => s.trim()).filter(s => s) : [];
+
+      if (entity_type === 'client') {
+        if (!client_ids.includes(entity_id.toString())) {
+          client_ids.push(entity_id.toString());
+          await pool.execute(
+            `UPDATE customer_access SET client_id = ? WHERE id = ?`,
+            [client_ids.join(','), rows[0].id]
+          );
+        }
+      } else if (entity_type === 'job') {
+        if (!job_ids.includes(entity_id.toString())) {
+          job_ids.push(entity_id.toString());
+          await pool.execute(
+            `UPDATE customer_access SET job_id = ? WHERE id = ?`,
+            [job_ids.join(','), rows[0].id]
+          );
+        }
+      }
+    }
+  } catch (error) {
+    console.error('grantStaffAccess error', error);
+  }
+};
+
+module.exports = { SatffLogUpdateOperation, generateNextUniqueCode, generateNextUniqueCodeJobLogTitle, getDateRange, JobTaskNameWithId, getAllCustomerIds, LineManageStaffIdHelperFunction, QueryRoleHelperFunction, JobStatusUpdate, getStaffAccessFilters, grantStaffAccess };

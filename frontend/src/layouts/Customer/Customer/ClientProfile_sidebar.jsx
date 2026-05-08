@@ -1563,22 +1563,6 @@ const CustomerClientProfile = () => {
                       </ul>
                     </div>
                   </div>
-                  {(hasAccess("client", "update") || role === "SUPERADMIN") && (
-                    <div className="text-end mt-3">
-                      <button
-                        className="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1"
-                        onClick={() => navigate("/customer/client/edit", {
-                          state: {
-                            row: informationData,
-                            id: customerDetails.id,
-                            activeTab: activeTab
-                          }
-                        })}
-                      >
-                        <Pencil size={14} /> Edit
-                      </button>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>

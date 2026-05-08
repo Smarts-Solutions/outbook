@@ -278,12 +278,15 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
           });
 
 
-          let checklisModalData = response?.data?.checklist_modal_data ? JSON.parse(response.data.checklist_modal_data) : {
-            show: false,
-            data: [],
-            title: "",
-            loading: false,
-            type: ""
+          let checklisModalData = response?.data?.checklist_modal_data ? JSON.parse(response.data.checklist_modal_data) : null;
+          if (!checklisModalData) {
+            checklisModalData = {
+              show: false,
+              data: [],
+              title: "",
+              loading: false,
+              type: ""
+            };
           }
           setChecklistModal(checklisModalData);
           setJobInformationData((prevState) => ({
@@ -2527,7 +2530,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                             ExpectedDeliveryDate: e.target.value,
                           })
                         }
-                        value={JobInformationData.ExpectedDeliveryDate}
+                        value={JobInformationData.ExpectedDeliveryDate || ""}
                       />
                     </div>
                     <div className="col-lg-4 mb-3">
@@ -2545,7 +2548,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                             DueOn: e.target.value,
                           })
                         }
-                        value={JobInformationData.DueOn}
+                        value={JobInformationData.DueOn || ""}
                       />
                     </div>
                     <div className="col-lg-4 mb-3">
@@ -2563,7 +2566,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                             SubmissionDeadline: e.target.value,
                           })
                         }
-                        value={JobInformationData.SubmissionDeadline}
+                        value={JobInformationData.SubmissionDeadline || ""}
                       />
                     </div>
                     <div className="col-lg-4 mb-3">
@@ -2583,7 +2586,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                             CustomerDeadlineDate: e.target.value,
                           })
                         }
-                        value={JobInformationData.CustomerDeadlineDate}
+                        value={JobInformationData.CustomerDeadlineDate || ""}
                       />
                     </div>
                     <div className="col-lg-4 mb-3">
@@ -2601,7 +2604,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                             SLADeadlineDate: e.target.value,
                           })
                         }
-                        value={JobInformationData.SLADeadlineDate}
+                        value={JobInformationData.SLADeadlineDate || ""}
                       />
                     </div>
                     <div className="col-lg-4">
@@ -2621,7 +2624,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                             InternalDeadlineDate: e.target.value,
                           })
                         }
-                        value={JobInformationData.InternalDeadlineDate}
+                        value={JobInformationData.InternalDeadlineDate || ""}
                       />
                     </div>
                   </div>

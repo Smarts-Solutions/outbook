@@ -61,6 +61,7 @@ import {
   CUSTOMER_DOCUMENT_ACTION,
   CUSTOMER_ADD_JOB_DATA,
   CUSTOMER_JOB_ADD,
+  CUSTOMER_JOB_UPDATE,
   CUSTOMER_CHECKLIST_ACTION,
   CUSTOMER_OFFICER_DETAILS,
   CUSTOMER_JOB_TYPE,
@@ -77,7 +78,7 @@ const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
 export const getAllCustomerUsers = createAsyncThunk(
   "getAllCustomerUsers",
-  async (data) => {
+  async (data, { rejectWithValue }) => {
     try {
       const { req, authToken } = data;
       var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
@@ -89,7 +90,7 @@ export const getAllCustomerUsers = createAsyncThunk(
       const res = await get_All_Customer_Users(updatedReq, authToken);
       return await res;
     } catch (err) {
-      throw err;
+      return rejectWithValue(err.response?.data || err.message);
     }
   }
 );
@@ -1484,6 +1485,17 @@ const CustomerSlice = createSlice({
         state.customerchcklist = action.payload;
       })
       .addCase(getcustomerschecklistApi.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(CustomerJobUpdate.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(CustomerJobUpdate.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.updatejob = action.payload;
+      })
+      .addCase(CustomerJobUpdate.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
       });

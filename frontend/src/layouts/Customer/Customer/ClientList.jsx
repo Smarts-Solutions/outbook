@@ -24,7 +24,7 @@ const ClientLists = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const role = JSON.parse(localStorage.getItem("role"));
-  const { hasAccess, selectedCustomer } = useCustomerAccess();
+  const { hasAccess, selectedCustomer, loading: accessLoading } = useCustomerAccess();
 
   const customer_id_sidebar = sessionStorage.getItem("cust_id_sidebar");
   const [CustomerData, setCustomerData] = useState([]);
@@ -133,10 +133,10 @@ const ClientLists = () => {
   }, [activeTab, customerId, pageSize]);
 
   useEffect(() => {
-    if (!hasAccess("client", "view") && !hasAccess("job", "view") && role !== "SUPERADMIN") {
+    if (!accessLoading && !hasAccess("client", "view") && !hasAccess("job", "view") && role !== "SUPERADMIN") {
       navigate("/customer/dashboard");
     }
-  }, [hasAccess, role, navigate]);
+  }, [hasAccess, role, navigate, accessLoading]);
 
   const SetTab = (e) => {
     setActiveTab(e);

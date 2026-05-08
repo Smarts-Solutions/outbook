@@ -24,7 +24,7 @@ const ClientList = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  const { hasAccess, selectedCustomer } = useCustomerAccess();
+  const { hasAccess, selectedCustomer, loading: accessLoading } = useCustomerAccess();
 
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const token = JSON.parse(localStorage.getItem("token"));
@@ -51,10 +51,10 @@ const ClientList = () => {
   const debounceRef = useRef(null);
 
   useEffect(() => {
-    if (!hasAccess("job", "view") && role !== "SUPERADMIN") {
+    if (!accessLoading && !hasAccess("job", "view") && role !== "SUPERADMIN") {
       navigate("/customer/dashboard");
     }
-  }, [hasAccess, role, navigate]);
+  }, [hasAccess, role, navigate, accessLoading]);
 
   useEffect(() => {
     GetAllCustomer();

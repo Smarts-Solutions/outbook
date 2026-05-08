@@ -154,7 +154,7 @@ const Sidebar = () => {
               </li>
             )}
 
-            {role === "CUSTOMER" && hasAccess("dashboard") && (
+            {role === "CUSTOMER" && (
               <li className={activeLink === "/customer/dashboard" ? "active" : ""}>
                 <Link to="/customer/dashboard">
                   <span className="sidebar-icons">
