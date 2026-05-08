@@ -445,11 +445,17 @@ const EditJob = () => {
         if (response.status) {
           if (Object.keys(response.data).length > 0) {
             setSelectedStaffData(response.data.selectedStaffData || []);
+            const taskList = response.data.tasks?.task ?? [];
+            const normalizedTasks = taskList.map((task) => ({
+              ...task,
+              budgeted_hour: task.budgeted_hour ?? task.time ?? "0:0",
+            }));
+
             setChecklistId(response.data.tasks?.checklist_id ?? 0);
             setTempChecklistId(response.data.tasks?.checklist_id ?? 0);
-            setTempTaskArr(response.data.tasks?.task ?? []);
-            setAddTaskArr(response.data.tasks?.task ?? []);
-            setExistAddTaskArr(response.data.tasks?.task ?? []);
+            setTempTaskArr(normalizedTasks);
+            setAddTaskArr(normalizedTasks);
+            setExistAddTaskArr(normalizedTasks);
             setExistJobTypeId(response.data.job_type_id ?? []);
             setBudgetedHours({
               hours: response.data.budgeted_hours?.split(":")[0] ?? "",
@@ -533,8 +539,8 @@ const EditJob = () => {
                 response.data.account_manager_officer_id ?? "",
               Service: response.data.service_id ?? "",
               JobType: response.data.job_type_id ?? "",
-              Reviewer: response.data.reviewer_id ?? "",
-              AllocatedTo: response.data.allocated_id ?? "",
+              Reviewer: response.data.reviewer_id ?? response.data.reviewer ?? "",
+              AllocatedTo: response.data.allocated_id ?? response.data.allocated_to ?? "",
               AllocatedOn: response.data.allocated_on?.split("T")[0] ?? null,
               DateReceivedOn:
                 response.data.date_received_on?.split("T")[0] ?? null,
@@ -572,7 +578,7 @@ const EditJob = () => {
               Bookkeeping: response.data.bookkeeping ?? "",
               ProcessingType: response.data.processing_type ?? "",
               Invoiced: response.data.invoiced ?? false,
-              Currency: response.data.currency_id ?? "0",
+              Currency: response.data.currency_id ?? response.data.currency ?? "0",
               InvoiceValue: response.data.invoice_value ?? 0,
               InvoiceDate: response.data.invoice_date?.split("T")[0] ?? null,
               InvoiceHours: response.data.invoice_hours ?? "",
@@ -646,7 +652,7 @@ const EditJob = () => {
 
               //////////////////////////
 
-              Year_Ending_id_1: response.data.Year_Ending_id_1 ?? null,
+              Year_Ending_id_1: response.data.Year_Ending_id_1?.split("T")[0] ?? null,
               Day_Date_id_2: response.data.Day_Date_id_2 ?? null,
               Week_Year_id_2: response.data.Week_Year_id_2 ?? null,
               Week_Month_id_2: response.data.Week_Month_id_2 ?? null,
@@ -944,7 +950,23 @@ const EditJob = () => {
 
           setCustomerDetails(response.data.customerDetails || []);
 
-          setAllStaffData(response?.data?.allStaff || []);
+          const staffList = response?.data?.allStaff || [];
+          setAllStaffData(staffList);
+
+          // Normalize selectedStaffData if it contains only IDs (Customer User case)
+          setSelectedStaffData((prev) => {
+            if (prev && prev.length > 0 && typeof prev[0] !== "object") {
+              return prev
+                .map((id) => {
+                  const match = staffList.find((s) => Number(s.id) === Number(id));
+                  return match
+                    ? { label: match.full_name, value: match.id }
+                    : null;
+                })
+                .filter(Boolean);
+            }
+            return prev;
+          });
           setAllClientDetails(response?.data?.client || []);
         } else {
           setAllJobData({
@@ -1083,6 +1105,23 @@ const EditJob = () => {
   //   }));
   //   validate(name, value);
   // };
+  // Backfill task names and staff labels when checklist or staff data is loaded
+  useEffect(() => {
+    if (AllChecklistData.data?.length > 0 && AddTaskArr.length > 0) {
+      setAddTaskArr((prev) =>
+        prev.map((task) => {
+          if (!task.task_name) {
+            const match = AllChecklistData.data.find(
+              (c) => Number(c.task_id) === Number(task.task_id)
+            );
+            if (match) return { ...task, task_name: match.task_name };
+          }
+          return task;
+        })
+      );
+    }
+  }, [AllChecklistData.data, AddTaskArr.length]);
+
 
   const HandleChange = async (e) => {
     const { name, value } = e.target;
@@ -1484,7 +1523,9 @@ const EditJob = () => {
       selectedStaffData: selectedStaffData,
       staffCreatedId: staffCreatedId,
       account_manager_id:
-        getJobDetails.data && getJobDetails.data.outbooks_acount_manager_id,
+        getJobDetails.data &&
+        (getJobDetails.data.outbooks_acount_manager_id ??
+          getJobDetails.data.account_manager_id),
       customer_id: getJobDetails.data && getJobDetails.data.customer_id,
       client_id: getJobDetails.data && getJobDetails.data.client_id,
       client_job_code: jobData.ClientJobCode,
