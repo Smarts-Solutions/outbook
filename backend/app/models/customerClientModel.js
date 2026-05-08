@@ -2,6 +2,8 @@ const pool = require("../config/database");
 const {
   SatffLogUpdateOperation,
   generateNextUniqueCode,
+  grantStaffAccess,
+  QueryRoleHelperFunction,
 } = require("../../app/utils/helper");
 const { CustomerLogUpdateOperation } = require("../../app/utils/customerHelper");
 
@@ -575,6 +577,11 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       console.error("Error inserting data:", err);
       throw err;
     }
+  }
+
+  const roleData = await QueryRoleHelperFunction(StaffUserId);
+  if (roleData.length > 0 && roleData[0].role_id === 12) {
+    await grantStaffAccess(StaffUserId, customer_id, "client", client_id);
   }
 
   return { status: true, message: "Client Added Successfully.", data: client_id };

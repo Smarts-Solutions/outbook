@@ -204,21 +204,18 @@ const updateJobStatus = async (data) => {
   const { job_id, status_type, StaffUserId, ip } = data;
 
   try {
-    // 1. Security Check: Does the staff have access to this job?
+    const access = await getStaffAccessFilters(StaffUserId);
+    if (!access.assignedCustomerIds.length) {
+      return { status: false, message: "No assigned customers found." };
+    }
+
     const checkQuery = `
       SELECT j.id, j.status_type, j.customer_id 
       FROM jobs j
-      WHERE j.id = ? AND j.customer_id IN (
-        SELECT customer_id FROM customer_access WHERE staff_id = ?
-        UNION
-        SELECT customer_id FROM staff_portfolio WHERE staff_id = ?
-        UNION
-        SELECT id FROM customers WHERE staff_id = ? OR account_manager_id = ?
-        UNION
-        SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
-      )
+      WHERE j.id = ? AND j.customer_id IN (${access.assignedCustomerIds.join(',')})
+      AND j.${access.jobCondition}
     `;
-    const [jobRows] = await pool.execute(checkQuery, [job_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId]);
+    const [jobRows] = await pool.execute(checkQuery, [job_id]);
 
     if (jobRows.length === 0) {
       return { status: false, message: "Job not found or access denied." };
@@ -478,7 +475,7 @@ const getByCustomerClient = async (dashboard) => {
     if (ids) {
       const cleane_ids = ids.replace(/^,+|,+$/g, "");
       if (cleane_ids) {
-        filterCondition = `AND clients.id IN (${cleane_ids})`;
+        filterCondition = `AND clients.id IN (${cleane_ids}) AND clients.${access.clientCondition}`;
       }
     } else if (customer_id) {
       filterCondition = `AND clients.customer_id = ${customer_id} AND clients.${access.clientCondition}`;
@@ -655,7 +652,7 @@ const getByCustomerJob = async (dashboard) => {
     if (ids) {
       const cleane_ids = ids.replace(/^,+|,+$/g, "");
       if (cleane_ids) {
-        filterCondition = `AND jobs.id IN (${cleane_ids})`;
+        filterCondition = `AND jobs.id IN (${cleane_ids}) AND jobs.${access.jobCondition}`;
       }
     } else if (customer_id) {
       filterCondition = `AND jobs.customer_id = ${customer_id} AND jobs.${access.jobCondition}`;
@@ -1156,7 +1153,7 @@ const getCustomerJobList = async (dashboard) => {
     const assignedIds = access.assignedCustomerIds;
 
     if (action === "getByClient" && client_id) {
-      assignedCondition = `AND jobs.client_id = ${client_id}`;
+      assignedCondition = `AND jobs.client_id = ${client_id} AND jobs.${access.jobCondition}`;
     } else if (action === "getByCustomer" && customer_id) {
       assignedCondition = `AND jobs.customer_id = ${customer_id} AND jobs.${access.jobCondition}`;
     } else {
