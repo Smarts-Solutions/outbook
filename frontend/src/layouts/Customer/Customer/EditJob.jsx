@@ -2914,7 +2914,7 @@ const EditJob = () => {
   ];
 
   const isReviewerDisabled = !(
-    ["ADMIN", "SUPERADMIN"].includes(role) ||
+    ["ADMIN", "SUPERADMIN", "CUSTOMER"].includes(role) ||
     (getJobDetails.data?.staff_created_id !== undefined &&
       (getJobDetails.data.staff_created_id === staffCreatedId ||
         getJobDetails.data.customer_staff_id === staffCreatedId ||
@@ -2932,7 +2932,7 @@ const EditJob = () => {
   ];
 
   const isAllocatedToDisabled = !(
-    ["ADMIN", "SUPERADMIN"].includes(role) ||
+    ["ADMIN", "SUPERADMIN", "CUSTOMER"].includes(role) ||
     (getJobDetails.data?.staff_created_id !== undefined &&
       (getJobDetails.data.staff_created_id === staffCreatedId ||
         getJobDetails.data.customer_staff_id === staffCreatedId ||
