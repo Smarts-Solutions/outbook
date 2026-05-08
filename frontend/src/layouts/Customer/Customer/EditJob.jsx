@@ -2929,7 +2929,7 @@ const EditJob = () => {
   return (
     <div>
       <div className="container-fluid">
-        {location?.state?.goto == "report" ? (
+        {location?.state?.goto == "report" || role === "CUSTOMER" ? (
           ""
         ) : (
           <Hierarchy
