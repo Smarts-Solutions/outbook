@@ -1620,7 +1620,14 @@ const customerJobAction = async (dashboard) => {
         const jobData = rows[0];
 
         // Get tasks
-        const [tasks] = await pool.execute("SELECT * FROM client_job_task WHERE job_id = ?", [job_id]);
+        const [tasks] = await pool.execute(`
+          SELECT 
+            client_job_task.*,
+            task.name AS task_name
+          FROM client_job_task
+          LEFT JOIN task ON client_job_task.task_id = task.id
+          WHERE client_job_task.job_id = ?
+        `, [job_id]);
 
         // Get allowed staff
         const [staff] = await pool.execute("SELECT staff_id FROM job_allowed_staffs WHERE job_id = ?", [job_id]);
