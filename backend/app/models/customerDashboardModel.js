@@ -1776,7 +1776,8 @@ const customerJobAction = async (dashboard) => {
 
 const customerJobUpdate = async (job) => {
   const {
-    job_id, client_id, service_id, job_type_id, status_type,
+    job_id, account_manager_id, customer_id, client_id, client_job_code, customer_contact_details_id,
+    service_id, job_type_id, status_type,
     reviewer, allocated_to, allocated_on, date_received_on, year_end,
     budgeted_hours, total_preparation_time, review_time, feedback_incorporation_time,
     total_time, engagement_model, expected_delivery_date, due_on,
@@ -1785,7 +1786,7 @@ const customerJobUpdate = async (job) => {
     opening_balance_required, opening_balance_date, number_of_transaction, number_of_balance_items,
     turnover, number_of_employees, vat_reconciliation, bookkeeping, processing_type,
     invoiced, currency, invoice_value, invoice_date, invoice_hours, invoice_remark,
-    notes, tasks, selectedStaffData, StaffUserId, ip, client_job_code,
+    notes, tasks, selectedStaffData, StaffUserId, ip,
     processing_checklist, reviewing_checklist, processing_checklist_status, reviewing_checklist_status,
     checklist_modal_data, job_priority,
     field, row: updateRow

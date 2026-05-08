@@ -1608,7 +1608,10 @@ const EditJob = () => {
     };
 
     const data = { req: req, authToken: token };
-    if (validate()) {
+    const isValid = validate(null, null, true);
+    console.log("Submission Request:", req);
+    console.log("Validation Result:", isValid);
+    if (isValid) {
       await dispatch(CustomerJobUpdate(data))
         .unwrap()
         .then(async (response) => {
@@ -1646,6 +1649,14 @@ const EditJob = () => {
           }
         })
         .catch((error) => {
+          console.error("Update Job Error:", error);
+          sweatalert.fire({
+            icon: "error",
+            title: "Update Failed",
+            text: error?.message || "An unexpected error occurred during update.",
+            timerProgressBar: true,
+            showConfirmButton: true,
+          });
           return;
         });
     } else {

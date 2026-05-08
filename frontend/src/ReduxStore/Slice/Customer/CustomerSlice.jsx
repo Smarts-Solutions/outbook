@@ -61,6 +61,7 @@ import {
   CUSTOMER_DOCUMENT_ACTION,
   CUSTOMER_ADD_JOB_DATA,
   CUSTOMER_JOB_ADD,
+  CUSTOMER_JOB_UPDATE,
   CUSTOMER_CHECKLIST_ACTION,
   CUSTOMER_OFFICER_DETAILS,
   CUSTOMER_JOB_TYPE,
@@ -1484,6 +1485,17 @@ const CustomerSlice = createSlice({
         state.customerchcklist = action.payload;
       })
       .addCase(getcustomerschecklistApi.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(CustomerJobUpdate.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(CustomerJobUpdate.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.updatejob = action.payload;
+      })
+      .addCase(CustomerJobUpdate.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
       });
