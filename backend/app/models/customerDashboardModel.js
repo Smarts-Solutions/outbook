@@ -1948,7 +1948,8 @@ const customerJobUpdate = async (job) => {
       job.Payroll_Month_id_31, job.Payroll_Quarter_Year_id_31, job.Payroll_Quarter_id_31, job.Payroll_Year_id_31,
       job.Audit_Year_Ending_id_27, job.Filing_Frequency_id_8, job.Period_Ending_Date_id_8, job.Filing_Date_id_8,
       job.Year_id_28, job_priority, processing_checklist, reviewing_checklist,
-      processing_checklist_status, reviewing_checklist_status, JSON.stringify(checklist_modal_data),
+      processing_checklist_status, reviewing_checklist_status, 
+      (checklist_modal_data && typeof checklist_modal_data === 'object') ? JSON.stringify(checklist_modal_data) : null,
       job_id
     ].map(handleUndefined);
 

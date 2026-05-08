@@ -507,12 +507,15 @@ const EditJob = () => {
             }
 
 
-            let checklisModalData = response?.data?.checklist_modal_data ? JSON.parse(response.data.checklist_modal_data) : {
-              show: false,
-              data: [],
-              title: "",
-              loading: false,
-              type: ""
+            let checklisModalData = response?.data?.checklist_modal_data ? JSON.parse(response.data.checklist_modal_data) : null;
+            if (!checklisModalData) {
+              checklisModalData = {
+                show: false,
+                data: [],
+                title: "",
+                loading: false,
+                type: ""
+              };
             }
             setChecklistModal(checklisModalData);
 
@@ -5024,8 +5027,8 @@ const EditJob = () => {
                                                     <tbody className="list form-check-all">
                                                       {AllChecklistData.data &&
                                                         AllChecklistData.data.map(
-                                                          (checklist) => (
-                                                            <tr className="">
+                                                          (checklist, index) => (
+                                                            <tr className="" key={index}>
                                                               <td>
                                                                 {
                                                                   checklist.task_name
