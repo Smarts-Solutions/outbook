@@ -36,8 +36,7 @@ const CustomerJobSummary = () => {
   }
 
   const handleOnClick = (row) => {
-    if (!row?.job_ids) return;
-    navigate('/customer/report/jobs', { state: { job_ids: row.job_ids } });
+    navigate('/customer/report/jobs', { state: { job_ids: row?.job_ids } });
   }
 
   const columns = [
@@ -66,7 +65,7 @@ const CustomerJobSummary = () => {
     <div>
       <div className='report-data'>
         <div className='row'>
-          <div className='col-md-7 mb-2'>
+          <div className='col-md-7 mb-5'>
             <div className='tab-title'>
               <h3>Job Summary Report</h3>
             </div>
@@ -77,16 +76,13 @@ const CustomerJobSummary = () => {
             <div className="loader"></div>
           </div>
         )}
-        {!loading && (
-          <div className='datatable-wrapper mt-minus'>
-            <Datatable
-              columns={columns}
-              data={jobSummaryReportData}
-              filter={false}
-              pagination={false}
-            />
-          </div>
-        )}
+        <div className='datatable-wrapper mt-minus'>
+          <Datatable
+            filter={true}
+            columns={columns}
+            data={jobSummaryReportData && jobSummaryReportData}
+          />
+        </div>
       </div>
     </div>
   )
