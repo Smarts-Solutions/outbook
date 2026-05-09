@@ -48,14 +48,18 @@ const CustomerTeamMonthlyReport = () => {
       sortable: true,
     },
     {
-      name: "Jobs Completed (Current Month)",
+      name: "No.Of Jobs Completed",
       cell: (row) => (
-        <div
-          style={{ color: "rgb(38, 189, 240)", cursor: "pointer" }}
-          onClick={() => handleOnClick(row.job_ids)}
-        >
-          {row.number_of_job_completed}
-        </div>
+        row.number_of_job_completed > 0 ? (
+          <div
+            style={{ color: "rgb(38, 189, 240)", cursor: "pointer" }}
+            onClick={() => handleOnClick(row.job_ids)}
+          >
+            {row.number_of_job_completed}
+          </div>
+        ) : (
+          <div>{row.number_of_job_completed}</div>
+        )
       ),
       selector: (row) => row.number_of_job_completed,
       sortable: true,
@@ -65,9 +69,9 @@ const CustomerTeamMonthlyReport = () => {
   const handleExport = () => {
     const exportData = teamData.map((row) => ({
       "Staff Name": row.staff_name,
-      "Jobs Completed": row.number_of_job_completed,
+      "No.Of Jobs Completed": row.number_of_job_completed,
     }));
-    downloadCSV(exportData, "Customer_Team_Monthly_Report.csv");
+    downloadCSV(exportData, "Team_Performance_Report.csv");
   };
 
   const downloadCSV = (data, filename) => {
@@ -92,16 +96,13 @@ const CustomerTeamMonthlyReport = () => {
     <div>
       <div className="report-data">
         <div className="row">
-          <div className="col-md-7 mb-2">
+          <div className="col-md-7 mb-5">
             <div className="tab-title">
-              <h3>Team Performance Report (Monthly)</h3>
+              <h3>Team Performance Report by Month</h3>
             </div>
           </div>
-        </div>
-        <div className="datatable-wrapper mt-minus">
-          <div className="d-flex justify-content-end mb-3">
+          <div className="col-md-5 d-flex justify-content-end align-items-center mb-5">
             {teamData && teamData.length > 0 && (
-              <div className="col-md-8 d-flex justify-content-end">
                 <button
                   className="btn btn-outline-info fw-bold border-3 d-inline-flex align-items-center gap-2 lh-1"
                   onClick={handleExport}
@@ -109,10 +110,10 @@ const CustomerTeamMonthlyReport = () => {
                   <Download size={16} />
                   <span>Export Excel</span>
                 </button>
-              </div>
             )}
           </div>
-
+        </div>
+        <div className="datatable-wrapper mt-minus">
           {loading && (
             <div className="overlay">
               <div className="loader"></div>
@@ -120,10 +121,9 @@ const CustomerTeamMonthlyReport = () => {
           )}
 
           <Datatable
+            filter={true}
             columns={columns}
             data={teamData && teamData}
-            filter={false}
-            pagination={false}
           />
         </div>
       </div>

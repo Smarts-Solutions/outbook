@@ -36,12 +36,22 @@ const CustomerJobPending = () => {
   }
 
   const handleOnClick = (row) => {
-    if (!row?.job_ids) return;
-    navigate('/customer/report/jobs', { state: { job_ids: row.job_ids } });
+    navigate('/customer/report/jobs', { state: { job_ids: row?.job_ids } });
   }
 
   const columns = [
-    { name: 'Status', selector: row => row.job_status, sortable: true, width: '50%' },
+    {
+      name: 'Job Status',
+      selector: row => row.job_status,
+      sortable: true,
+      reorder: false,
+    },
+    {
+      name: 'Job Type Name',
+      selector: row => row.job_type_name,
+      sortable: true,
+      reorder: false,
+    },
     {
       name: 'No Of Jobs',
       cell: (row) => (
@@ -58,7 +68,7 @@ const CustomerJobPending = () => {
       ),
       selector: row => row.number_of_job,
       sortable: true,
-      width: '50%'
+      reorder: false,
     }
   ]
 
@@ -66,7 +76,7 @@ const CustomerJobPending = () => {
     <div>
       <div className='report-data'>
         <div className='row'>
-          <div className='col-md-7 mb-2'>
+          <div className='col-md-7 mb-5'>
             <div className='tab-title'>
               <h3>Job Pending Report</h3>
             </div>
@@ -77,16 +87,13 @@ const CustomerJobPending = () => {
             <div className="loader"></div>
           </div>
         )}
-        {!loading && (
-          <div className='datatable-wrapper mt-minus'>
-            <Datatable
-              columns={columns}
-              data={jobPendingReportData}
-              filter={false}
-              pagination={false}
-            />
-          </div>
-        )}
+        <div className='datatable-wrapper mt-minus'>
+          <Datatable
+            filter={true}
+            columns={columns}
+            data={jobPendingReportData && jobPendingReportData}
+          />
+        </div>
       </div>
     </div>
   )

@@ -68,7 +68,7 @@ const CustomerJobStatus = () => {
   const dynamicManagerColumns = Array.from({ length: maxManagers }).flatMap(
     (_, index) => [
       {
-        name: `Individual Account Manager ${index + 1}`,
+        name: `Individual Account Manager`,
         cell: (row) => {
           const manager = row.account_managers?.[index];
           return <div title={manager?.full_name || "-"}>{manager?.full_name || "-"}</div>;
@@ -77,7 +77,7 @@ const CustomerJobStatus = () => {
         sortable: true,
       },
       {
-        name: `Employee ID ${index + 1}`,
+        name: `Employee ID`,
         cell: (row) => {
           const manager = row.account_managers?.[index];
           return <div title={manager?.employee_number || "-"}>{manager?.employee_number || "-"}</div>;
@@ -90,8 +90,6 @@ const CustomerJobStatus = () => {
 
   const HandleJob = (row) => {
     const updatedData = {
-        customer: { id: row.customer_id, trading_name: row.customer_trading_name },
-        client: { id: row.client_id, client_name: row.client_trading_name },
         job: row,
     };
     navigate("/customer/job/logs", {
@@ -124,13 +122,30 @@ const CustomerJobStatus = () => {
       name: "Job Priority",
       cell: (row) => {
         const v = row.job_priority || "-";
-        return <div title={v}>{v.charAt(0).toUpperCase() + v.slice(1).toLowerCase()}</div>;
+        const cap = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
+        return <div title={cap}>{cap}</div>;
       },
       selector: (row) => row.job_priority,
       sortable: true,
     },
     {
-      name: "Client Name",
+      name: "Customer Name",
+      selector: (row) => row.customer_trading_name,
+      sortable: true,
+    },
+    {
+      name: "Account Manager",
+      selector: (row) => row.account_manager_name,
+      sortable: true,
+    },
+    {
+      name: "Employee ID",
+      selector: (row) => row.account_manager_employee_number,
+      sortable: true,
+    },
+    ...dynamicManagerColumns,
+    {
+      name: "Clients",
       selector: (row) => row.client_trading_name,
       sortable: true,
     },
@@ -145,14 +160,106 @@ const CustomerJobStatus = () => {
       sortable: true,
     },
     {
-        name: "Account Manager",
-        selector: (row) => row.account_manager_name,
+      name: "Year Ending",
+      cell: (row) => (row.service_name === "Accounts Production" ? <div>{row.Year_Ending_id_1 ? convertDate(row.Year_Ending_id_1) : "-"}</div> : "-"),
+      selector: (row) => row.Year_Ending_id_1,
+      sortable: true,
+    },
+    {
+      name: "Tax Year",
+      cell: (row) => (row.service_name === "Personal Tax Return" ? <div>{row.Tax_Year_id_4 || "-"}</div> : "-"),
+      selector: (row) => row.Tax_Year_id_4,
+      sortable: true,
+    },
+    {
+      name: "Payroll Frequency",
+      cell: (row) => (row.service_name === "Payroll" ? <div>{row.Payroll_Frequency_id_3 || "-"}</div> : "-"),
+      selector: (row) => row.Payroll_Frequency_id_3,
+      sortable: true,
+    },
+    {
+      name: "Payroll Year",
+      cell: (row) => (
+        row.service_name === "Payroll" ? (
+          row.Payroll_Frequency_id_3 === "Weekly" ? (row.Payroll_Week_Year_id_3 || "-") :
+          row.Payroll_Frequency_id_3 === "Monthly" ? (row.Payroll_Month_Year_id_3 || "-") :
+          row.Payroll_Frequency_id_3 === "Fortnightly" ? (row.Payroll_Fortnight_Year_id_3 || "-") :
+          row.Payroll_Frequency_id_3 === "Quarterly" ? (row.Payroll_Quarter_Year_id_3 || "-") :
+          row.Payroll_Frequency_id_3 === "Yearly" ? (row.Payroll_Year_id_3 || "-") : "-"
+        ) : "-"
+      ),
+      selector: (row) => row.Payroll_Week_Year_id_3,
+      sortable: true,
+    },
+    {
+      name: "Payroll Month",
+      cell: (row) => (
+        row.service_name === "Payroll" ? (
+          row.Payroll_Frequency_id_3 === "Weekly" ? (row.Payroll_Week_Month_id_3 || "-") :
+          row.Payroll_Frequency_id_3 === "Monthly" ? (row.Payroll_Month_id_3 || "-") :
+          row.Payroll_Frequency_id_3 === "Fortnightly" ? (row.Payroll_Fortnight_Month_id_3 || "-") : "-"
+        ) : "-"
+      ),
+      selector: (row) => row.Payroll_Week_Month_id_3,
+      sortable: true,
+    },
+    {
+      name: "Payroll Week",
+      cell: (row) => (row.service_name === "Payroll" ? (row.Payroll_Week_id_3 || "-") : "-"),
+      selector: (row) => row.Payroll_Week_id_3,
+      sortable: true,
+    },
+    {
+      name: "Bookkeeping Frequency",
+      cell: (row) => (row.service_name === "Bookkeeping" ? (row.Bookkeeping_Frequency_id_2 || "-") : "-"),
+      selector: (row) => row.Bookkeeping_Frequency_id_2,
+      sortable: true,
+    },
+    {
+      name: "Date",
+      cell: (row) => (row.service_name === "Bookkeeping" ? (row.Day_Date_id_2 ? convertDate(row.Day_Date_id_2) : "-") : "-"),
+      selector: (row) => row.Day_Date_id_2,
+      sortable: true,
+    },
+    {
+      name: "Year",
+      cell: (row) => (
+        row.service_name === "Bookkeeping" ? (
+          row.Bookkeeping_Frequency_id_2 === "Weekly" ? (row.Week_Year_id_2 || "-") :
+          row.Bookkeeping_Frequency_id_2 === "Fortnightly" ? (row.Fortnight_Year_id_2 || "-") :
+          row.Bookkeeping_Frequency_id_2 === "Monthly" ? (row.Month_Year_id_2 || "-") :
+          row.Bookkeeping_Frequency_id_2 === "Quarterly" ? (row.Quarter_Year_id_2 || "-") :
+          row.Bookkeeping_Frequency_id_2 === "Yearly" ? (row.Year_id_2 || "-") : "-"
+        ) : "-"
+      ),
+      selector: (row) => row.Week_Year_id_2,
+      sortable: true,
+    },
+    {
+      name: "Month",
+      cell: (row) => (
+        row.service_name === "Bookkeeping" ? (
+          row.Bookkeeping_Frequency_id_2 === "Weekly" ? (row.Week_Month_id_2 || "-") :
+          row.Bookkeeping_Frequency_id_2 === "Fortnightly" ? (row.Fortnight_Month_id_2 || "-") :
+          row.Bookkeeping_Frequency_id_2 === "Monthly" ? (row.Month_id_2 || "-") : "-"
+        ) : "-"
+      ),
+      selector: (row) => row.Week_Month_id_2,
+      sortable: true,
+    },
+    {
+        name: "Status",
+        selector: (row) => row.status,
         sortable: true,
     },
-    ...dynamicManagerColumns,
     {
-      name: "Status",
-      selector: (row) => row.status,
+      name: "Allocated To",
+      selector: (row) => row.allocated_name,
+      sortable: true,
+    },
+    {
+      name: "Reviewer Name",
+      selector: (row) => row.reviewer_name,
       sortable: true,
     },
     {
@@ -167,21 +274,24 @@ const CustomerJobStatus = () => {
     }
   ];
 
-  const handleExport = () => {
-    if (!JobStatusData || JobStatusData.length === 0) {
+  const handleExport = async () => {
+    const data = { req: { page: 1, limit: 1000000, search: "" }, authToken: token };
+    const response = await dispatch(CustomerJobStatusReport(data)).unwrap();
+
+    if (!response.status || !response?.data?.rows || response?.data?.rows?.length === 0) {
       alert("No data to export!");
       return;
     }
 
-    const exportData = JobStatusData.map((item) => {
+    const rows = response.data.rows;
+    const exportData = rows.map((item) => {
       const rowData = {};
       rowData["Job ID"] = item.job_code_id || "-";
       rowData["Job Received On"] = item.job_received_on ? convertDate(item.job_received_on) : "-";
       rowData["Job Priority"] = item.job_priority || "-";
-      rowData["Client Name"] = item.client_trading_name || "-";
-      rowData["Service Type"] = item.service_name || "-";
-      rowData["Job Type"] = item.job_type_name || "-";
+      rowData["Customer Name"] = item.customer_trading_name || "-";
       rowData["Account Manager"] = item.account_manager_name || "-";
+      rowData["Employee ID"] = item.account_manager_employee_number || "-";
 
       for (let i = 0; i < maxManagers; i++) {
         const manager = item.account_managers?.[i];
@@ -189,14 +299,19 @@ const CustomerJobStatus = () => {
         rowData[`Employee ID ${i + 1}`] = manager?.employee_number || "-";
       }
 
+      rowData["Clients"] = item.client_trading_name || "-";
+      rowData["Service Type"] = item.service_name || "-";
+      rowData["Job Type"] = item.job_type_name || "-";
       rowData["Status"] = item.status || "-";
+      rowData["Allocated To"] = item.allocated_name || "-";
+      rowData["Reviewer Name"] = item.reviewer_name || "-";
       rowData["Internal Deadline"] = convertDate(item.internal_deadline_date) || "-";
       rowData["Customer Deadline"] = convertDate(item.customer_deadline_date) || "-";
 
       return rowData;
     });
 
-    downloadCSV(exportData, "Customer_Job_Status_Report.csv");
+    downloadCSV(exportData, "Job_Status_Report.csv");
   };
 
   const downloadCSV = (data, filename) => {
@@ -224,7 +339,7 @@ const CustomerJobStatus = () => {
     <div>
       <div className="report-data">
         <div className="row">
-          <div className="col-md-7 mb-2">
+          <div className="col-md-7 mb-5">
             <div className="tab-title">
               <h3>Job Status Report</h3>
             </div>
@@ -267,33 +382,47 @@ const CustomerJobStatus = () => {
           <Datatable
             columns={columns}
             data={JobStatusData && JobStatusData}
-            filter={false}
-            pagination={false}
+            filter={true}
           />
 
-          <ReactPaginate
-            previousLabel={"Previous"}
-            nextLabel={"Next"}
-            breakLabel={"..."}
-            pageCount={Math.ceil(totalRecords / pageSize)}
-            marginPagesDisplayed={2}
-            pageRangeDisplayed={5}
-            onPageChange={handlePageChange}
-            containerClassName={"pagination"}
-            activeClassName={"active"}
-            forcePage={currentPage - 1}
-          />
-
-          <select
-            className="perpage-select"
-            value={pageSize}
-            onChange={handlePageSizeChange}
-          >
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
+          <div className="d-flex justify-content-between align-items-center mt-3">
+            <div className="d-flex align-items-center">
+                <span className="me-2">Show</span>
+                <select
+                    className="perpage-select form-select form-select-sm"
+                    style={{ width: 'auto' }}
+                    value={pageSize}
+                    onChange={handlePageSizeChange}
+                >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                </select>
+                <span className="ms-2">entries</span>
+            </div>
+            
+            <ReactPaginate
+                previousLabel={"Previous"}
+                nextLabel={"Next"}
+                breakLabel={"..."}
+                pageCount={Math.ceil(totalRecords / pageSize)}
+                marginPagesDisplayed={2}
+                pageRangeDisplayed={5}
+                onPageChange={handlePageChange}
+                containerClassName={"pagination mb-0"}
+                activeClassName={"active"}
+                pageClassName={"page-item"}
+                pageLinkClassName={"page-link"}
+                previousClassName={"page-item"}
+                previousLinkClassName={"page-link"}
+                nextClassName={"page-item"}
+                nextLinkClassName={"page-link"}
+                breakClassName={"page-item"}
+                breakLinkClassName={"page-link"}
+                forcePage={currentPage - 1}
+            />
+          </div>
         </div>
       </div>
     </div>

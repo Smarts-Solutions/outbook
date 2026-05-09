@@ -1,31 +1,29 @@
-import React, { useState, useEffect } from "react";
-import Datatable from "../../../Components/ExtraComponents/Datatable";
-import { CustomerAverageTatReport as fetchAverageTatReport } from "../../../ReduxStore/Slice/Report/CustomerReportSlice";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import Datatable from '../../../Components/ExtraComponents/Datatable';
+import { CustomerAverageTatReport as fetchAverageTatReport } from '../../../ReduxStore/Slice/Report/CustomerReportSlice';
+import { useDispatch } from 'react-redux';
 import { Download } from "lucide-react";
 
 const CustomerAverageTatReport = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
-  const [tatData, setTatData] = useState([]);
+  const [reportData, setReportData] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    getTatReport();
+    AvgTatReport();
   }, []);
 
-  const getTatReport = async () => {
+  const AvgTatReport = async () => {
     setLoading(true);
     const data = { authToken: token };
     await dispatch(fetchAverageTatReport(data))
       .unwrap()
       .then((res) => {
         if (res.status) {
-          setTatData(res.data);
+          setReportData(res.data);
         } else {
-          setTatData([]);
+          setReportData([]);
         }
       })
       .catch((err) => {
@@ -36,38 +34,27 @@ const CustomerAverageTatReport = () => {
       });
   };
 
-  const handleOnClick = (ids) => {
-    if (!ids) return;
-    navigate("/customer/report/jobs", { state: { job_ids: ids } });
-  };
-
   const columns = [
     {
-      name: "Month",
-      selector: (row) => row.month,
+      name: 'Month',
+      selector: row => row.month,
       sortable: true,
+      reorder: false,
     },
     {
-      name: "Average TAT (Days)",
-      cell: (row) => (
-        <div
-          style={{ color: "rgb(38, 189, 240)", cursor: "pointer" }}
-          onClick={() => handleOnClick(row.job_ids)}
-        >
-          {parseFloat(row.average_tat_per_day || 0).toFixed(2)}
-        </div>
-      ),
-      selector: (row) => row.average_tat_per_day,
+      name: 'Average TAT Per Day',
+      selector: row => (row.average_tat_per_day ? parseFloat(row.average_tat_per_day).toFixed(2) : '0.00'),
       sortable: true,
+      reorder: false,
     },
   ];
 
   const handleExport = () => {
-    const exportData = tatData.map((row) => ({
-      Month: row.month,
-      "Average TAT (Days)": parseFloat(row.average_tat_per_day || 0).toFixed(2),
+    const exportData = reportData.map((row) => ({
+      "Month": row.month,
+      "Average TAT Per Day": row.average_tat_per_day ? parseFloat(row.average_tat_per_day).toFixed(2) : '0.00',
     }));
-    downloadCSV(exportData, "Customer_Average_TAT_Report.csv");
+    downloadCSV(exportData, "Average_TAT_Report.csv");
   };
 
   const downloadCSV = (data, filename) => {
@@ -90,18 +77,15 @@ const CustomerAverageTatReport = () => {
 
   return (
     <div>
-      <div className="report-data">
-        <div className="row">
-          <div className="col-md-7 mb-2">
-            <div className="tab-title">
+      <div className='report-data'>
+        <div className='row'>
+          <div className='col-md-7 mb-5'>
+            <div className='tab-title'>
               <h3>Average TAT Report</h3>
             </div>
           </div>
-        </div>
-        <div className="datatable-wrapper mt-minus">
-          <div className="d-flex justify-content-end mb-3">
-            {tatData && tatData.length > 0 && (
-              <div className="col-md-8 d-flex justify-content-end">
+          <div className="col-md-5 d-flex justify-content-end align-items-center mb-5">
+            {reportData && reportData.length > 0 && (
                 <button
                   className="btn btn-outline-info fw-bold border-3 d-inline-flex align-items-center gap-2 lh-1"
                   onClick={handleExport}
@@ -109,21 +93,19 @@ const CustomerAverageTatReport = () => {
                   <Download size={16} />
                   <span>Export Excel</span>
                 </button>
-              </div>
             )}
           </div>
-
+        </div>
+        <div className='datatable-wrapper mt-minus'>
           {loading && (
             <div className="overlay">
               <div className="loader"></div>
             </div>
           )}
-
           <Datatable
+            filter={true}
             columns={columns}
-            data={tatData && tatData}
-            filter={false}
-            pagination={false}
+            data={reportData && reportData}
           />
         </div>
       </div>

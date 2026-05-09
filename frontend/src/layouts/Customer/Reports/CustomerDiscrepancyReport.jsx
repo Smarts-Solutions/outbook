@@ -34,47 +34,52 @@ const CustomerDiscrepancyReport = () => {
       });
   };
 
+  const convertTimeFormat = (value) => {
+    let final_value = value;
+    if (!value) return final_value;
+    let [intPart, decimalPart] = value.toString().split(".");
+    if (decimalPart) {
+      let multiplied = Math.floor(parseInt(decimalPart) * 0.6);
+      const multipliedStr = multiplied.toString().padStart(2, '0');
+      final_value = `${intPart}:${multipliedStr}`;
+    }
+    return final_value;
+  };
+
+  function convertTimeFormatString(timeStr) {
+    if (!timeStr) return "";
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    let result = "";
+    if (hours > 0) result += `${hours} Hour${hours > 1 ? "s" : ""}`;
+    if (minutes > 0) result += (result ? " " : "") + `${minutes} Minute${minutes > 1 ? "s" : ""}`;
+    return result || "0 minutes";
+  }
+
   const columns = [
     {
-      name: "Job ID",
-      selector: (row) => row.job_code_id,
-      sortable: true,
+      name: 'Job Name',
+      selector: row => row.job_code_id, 
+      sortable: true
     },
     {
-      name: "Total Quoted Time",
-      selector: (row) => row.job_total_time || "00:00:00",
-      sortable: true,
+      name: 'Timesheet Total Hours',
+      selector: row => (convertTimeFormatString(convertTimeFormat(row.total_spent_hours))),
+      sortable: true
     },
     {
-      name: "Total Spent Time",
-      selector: (row) => row.total_spent_hours || 0,
-      sortable: true,
-    },
-    {
-      name: "Discrepancy",
-      cell: (row) => {
-          const quoted = parseFloat((row.job_total_time || "0:0").replace(":", ".")) || 0;
-          const spent = parseFloat(row.total_spent_hours) || 0;
-          const diff = quoted - spent;
-          return <span style={{ color: diff < 0 ? 'red' : 'green' }}>{diff.toFixed(2)}</span>;
-      },
-      sortable: true,
+      name: 'Job Total Hours',
+      selector: row => convertTimeFormatString(row.job_total_time),
+      sortable: true
     },
   ];
 
   const handleExport = () => {
-    const exportData = reportData.map((row) => {
-        const quoted = parseFloat((row.job_total_time || "0:0").replace(":", ".")) || 0;
-        const spent = parseFloat(row.total_spent_hours) || 0;
-        const diff = quoted - spent;
-        return {
-            "Job ID": row.job_code_id,
-            "Total Quoted Time": row.job_total_time || "00:00:00",
-            "Total Spent Time": row.total_spent_hours || 0,
-            "Discrepancy": diff.toFixed(2),
-        };
-    });
-    downloadCSV(exportData, "Customer_Discrepancy_Report.csv");
+    const exportData = reportData.map(row => ({
+        "Job Name": row.job_code_id,
+        "Timesheet Total Hours": convertTimeFormatString(convertTimeFormat(row.total_spent_hours)),
+        "Job Total Hours": convertTimeFormatString(row.job_total_time)
+    }));
+    downloadCSV(exportData, "Discrepancy_Report.csv");
   };
 
   const downloadCSV = (data, filename) => {
@@ -99,16 +104,13 @@ const CustomerDiscrepancyReport = () => {
     <div>
       <div className="report-data">
         <div className="row">
-          <div className="col-md-7 mb-2">
+          <div className="col-md-7 mb-5">
             <div className="tab-title">
               <h3>Discrepancy Report</h3>
             </div>
           </div>
-        </div>
-        <div className="datatable-wrapper mt-minus">
-          <div className="d-flex justify-content-end mb-3">
+          <div className="col-md-5 d-flex justify-content-end align-items-center mb-5">
             {reportData && reportData.length > 0 && (
-              <div className="col-md-8 d-flex justify-content-end">
                 <button
                   className="btn btn-outline-info fw-bold border-3 d-inline-flex align-items-center gap-2 lh-1"
                   onClick={handleExport}
@@ -116,10 +118,10 @@ const CustomerDiscrepancyReport = () => {
                   <Download size={16} />
                   <span>Export Excel</span>
                 </button>
-              </div>
             )}
           </div>
-
+        </div>
+        <div className="datatable-wrapper mt-minus">
           {loading && (
             <div className="overlay">
               <div className="loader"></div>
@@ -127,10 +129,9 @@ const CustomerDiscrepancyReport = () => {
           )}
 
           <Datatable
+            filter={true}
             columns={columns}
             data={reportData && reportData}
-            filter={false}
-            pagination={false}
           />
         </div>
       </div>
