@@ -357,16 +357,26 @@ const jobSummaryReports = async (Report) => {
 
         master_status.name AS job_status,
         jobs.id AS job_id
-        FROM
+        FROM 
             jobs
-         JOIN
+        LEFT JOIN 
           assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
-         JOIN
-        clients ON jobs.client_id = clients.id
-         JOIN
+        LEFT JOIN 
+          customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+          clients ON jobs.client_id = clients.id
+        LEFT JOIN 
             master_status ON master_status.id = jobs.status_type
-        WHERE 
-            assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})
+        WHERE (
+            (
+             (assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}))
+             AND (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci OR jobs.service_id = assigned_jobs_staff_view.service_id_assign)
+            )
+            OR customers.staff_id IN (${LineManageStaffId})
+            OR customers.account_manager_id IN (${LineManageStaffId})
+            OR customers.id IN (SELECT customer_id FROM customer_access WHERE staff_id IN (${LineManageStaffId}))
+            OR customers.id IN (SELECT customer_id FROM staff_portfolio WHERE staff_id IN (${LineManageStaffId}))
+        )
         GROUP BY jobs.id;
          `;
 
@@ -454,16 +464,26 @@ const jobPendingReports = async (Report) => {
 
         master_status.name AS job_status,
         jobs.id AS job_id
-        FROM
+        FROM 
             jobs
-         JOIN
+        LEFT JOIN 
           assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
-         JOIN
-        clients ON jobs.client_id = clients.id
-         JOIN
+        LEFT JOIN 
+          customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+          clients ON jobs.client_id = clients.id
+        LEFT JOIN 
             master_status ON master_status.id = jobs.status_type
-        WHERE 
-        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) 
+        WHERE (
+            (
+             (assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}))
+             AND (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci OR jobs.service_id = assigned_jobs_staff_view.service_id_assign)
+            )
+            OR customers.staff_id IN (${LineManageStaffId})
+            OR customers.account_manager_id IN (${LineManageStaffId})
+            OR customers.id IN (SELECT customer_id FROM customer_access WHERE staff_id IN (${LineManageStaffId}))
+            OR customers.id IN (SELECT customer_id FROM staff_portfolio WHERE staff_id IN (${LineManageStaffId}))
+        )
         AND jobs.status_type != 6
         GROUP BY jobs.id;
          `;
@@ -569,12 +589,22 @@ const jobReceivedSentReports = async (Report) => {
         LEFT JOIN 
           assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
         LEFT JOIN 
-        clients ON jobs.client_id = clients.id      
+          customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+          clients ON jobs.client_id = clients.id      
         LEFT JOIN 
             drafts ON drafts.job_id = jobs.id    
-        WHERE
-            (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}))
-            AND YEAR(jobs.created_at) = YEAR(CURDATE())
+        WHERE (
+            (
+             (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}))
+             AND (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci OR jobs.service_id = assigned_jobs_staff_view.service_id_assign)
+            )
+            OR customers.staff_id IN (${LineManageStaffId})
+            OR customers.account_manager_id IN (${LineManageStaffId})
+            OR customers.id IN (SELECT customer_id FROM customer_access WHERE staff_id IN (${LineManageStaffId}))
+            OR customers.id IN (SELECT customer_id FROM staff_portfolio WHERE staff_id IN (${LineManageStaffId}))
+        )
+        AND YEAR(jobs.created_at) = YEAR(CURDATE())
         GROUP BY 
             month_name, DAY(jobs.created_at)
         ORDER BY 
