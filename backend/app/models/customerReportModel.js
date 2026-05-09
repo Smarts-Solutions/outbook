@@ -1015,6 +1015,108 @@ const taxWeeklyStatusReport = async (Report) => {
   }
 };
 
+const taxWeeklyStatusReportFilterKey = async (Report) => {
+  const { StaffUserId } = Report;
+  try {
+    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+    const rows = await QueryRoleHelperFunction(StaffUserId);
+
+    const [RoleAccess] = await pool.execute(
+      "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+      [rows[0].role_id, 33],
+    );
+
+    let customer = [];
+    let custumerData = [];
+
+    if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
+      const queryCustomer = `
+        SELECT customers.id AS customer_id, customers.trading_name AS customer_name
+        FROM customers   
+        ORDER BY customers.trading_name ASC;
+       `;
+      const [data] = await pool.execute(queryCustomer);
+      custumerData = data;
+    } else {
+      const queryCustomer = `
+        SELECT customers.id AS customer_id, customers.trading_name AS customer_name
+        FROM customers
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+        WHERE customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})           
+        ORDER BY customers.trading_name ASC;
+       `;
+      const [data] = await pool.execute(queryCustomer);
+      custumerData = data;
+    }
+
+    if (custumerData.length > 0) {
+      customer = custumerData.map((row) => ({
+        customer_id: row.customer_id,
+        customer_name: row.customer_name,
+      }));
+    }
+
+    const queryReviewer = `
+         SELECT staffs.id AS reviewer_id, staffs.first_name AS reviewer_first_name, staffs.last_name AS reviewer_last_name
+        FROM staffs
+        JOIN roles ON staffs.role_id = roles.id
+        WHERE (staffs.role_id = 6 || staffs.role_id = 4) AND staffs.status = '1'  
+        ORDER BY staffs.first_name ASC;
+       `;
+    const [rows1] = await pool.execute(queryReviewer);
+    let reviewer = [];
+    if (rows1.length > 0) {
+      reviewer = rows1.map((row) => ({
+        reviewer_id: row.reviewer_id,
+        reviewer_name: row.reviewer_first_name + " " + row.reviewer_last_name,
+      }));
+    }
+
+    const queryProcessor = `
+         SELECT staffs.id AS staff_id, staffs.first_name AS staff_first_name, staffs.last_name AS staff_last_name
+        FROM staffs
+        JOIN roles ON staffs.role_id = roles.id
+        WHERE (staffs.role_id = 3 || staffs.role_id = 4) AND staffs.status = '1'   
+        ORDER BY staffs.first_name ASC;
+       `;
+    const [rows2] = await pool.execute(queryProcessor);
+    let processor = [];
+    if (rows2.length > 0) {
+      processor = rows2.map((row) => ({
+        processor_id: row.staff_id,
+        processor_name: row.staff_first_name + " " + row.staff_last_name,
+      }));
+    }
+
+    const queryJobStatusType = `
+       SELECT master_status.id AS job_status_type_id, master_status.name AS job_status_type_name
+      FROM master_status
+      ORDER BY master_status.name ASC;
+     `;
+    const [rows3] = await pool.execute(queryJobStatusType);
+    let job_status_type = [];
+    if (rows3.length > 0) {
+      job_status_type = rows3.map((row) => ({
+        job_status_type_id: row.job_status_type_id,
+        job_status_type_name: row.job_status_type_name,
+      }));
+    }
+
+    return {
+      status: true,
+      message: "success.",
+      data: {
+        customer: customer,
+        reviewer: reviewer,
+        processor: processor,
+        job_status_type: job_status_type,
+      },
+    };
+  } catch (err) {
+    return { status: false, message: "Err Customer Get" };
+  }
+};
+
 const averageTatReport = async (Report) => {
   const { StaffUserId } = Report;
   // Line Manager
@@ -1532,6 +1634,7 @@ module.exports = {
   dueByReport,
   teamMonthlyReports,
   taxWeeklyStatusReport,
+  taxWeeklyStatusReportFilterKey,
   averageTatReport,
   reportCountJob,
   missingTimesheetReport,

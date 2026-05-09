@@ -72,6 +72,17 @@ export async function CUSTOMER_TAX_WEEKLY_REPORT(data, token) {
     }
 }
 
+export async function CUSTOMER_TAX_WEEKLY_REPORT_FILTER(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}customer/taxWeeklyStatusReportFilterKey`, data, {
+            headers: header(token),
+        });
+        return res.data;
+    } catch (err) {
+        return err;
+    }
+}
+
 export async function CUSTOMER_AVERAGE_TAT_REPORT(data, token) {
     try {
         const res = await axios.post(`${Config.base_url}customer/averageTatReport`, data, {

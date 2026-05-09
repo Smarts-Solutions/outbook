@@ -72,6 +72,17 @@ exports.taxWeeklyStatusReport = async (req, res) => {
   }
 };
 
+exports.taxWeeklyStatusReportFilterKey = async (req, res) => {
+  try {
+    const result = await customerReportModel.taxWeeklyStatusReportFilterKey({ 
+      StaffUserId: req.userId 
+    });
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
 exports.averageTatReport = async (req, res) => {
   try {
     const result = await customerReportModel.averageTatReport({ StaffUserId: req.userId });

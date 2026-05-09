@@ -7,6 +7,7 @@ import {
   CUSTOMER_DUE_BY_REPORT,
   CUSTOMER_TEAM_MONTHLY_REPORT,
   CUSTOMER_TAX_WEEKLY_REPORT,
+  CUSTOMER_TAX_WEEKLY_REPORT_FILTER,
   CUSTOMER_AVERAGE_TAT_REPORT,
   CUSTOMER_REPORT_COUNT_JOB,
   CUSTOMER_MISSING_TIMESHEET_REPORT,
@@ -122,6 +123,19 @@ export const CustomerTaxWeeklyReport = createAsyncThunk(
     try {
       const { req, authToken } = data;
       const res = await CUSTOMER_TAX_WEEKLY_REPORT(req, authToken);
+      return res;
+    } catch (err) {
+      return err;
+    }
+  }
+);
+
+export const CustomerTaxWeeklyReportFilter = createAsyncThunk(
+  "CustomerTaxWeeklyReportFilter",
+  async (data) => {
+    try {
+      const { authToken } = data;
+      const res = await CUSTOMER_TAX_WEEKLY_REPORT_FILTER({}, authToken);
       return res;
     } catch (err) {
       return err;

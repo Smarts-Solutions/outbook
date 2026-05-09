@@ -3,6 +3,7 @@ import Datatable from '../../../Components/ExtraComponents/Datatable';
 import { customerJobPendingReports } from '../../../ReduxStore/Slice/Report/CustomerReportSlice'
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { Download } from "lucide-react";
 
 const CustomerJobPending = () => {
   const navigate = useNavigate();
@@ -70,7 +71,34 @@ const CustomerJobPending = () => {
       sortable: true,
       reorder: false,
     }
-  ]
+  ];
+
+  const handleExport = () => {
+    const exportData = jobPendingReportData.map(row => ({
+      "Job Status": row.job_status,
+      "Job Type Name": row.job_type_name,
+      "No Of Jobs": row.number_of_job
+    }));
+    downloadCSV(exportData, "Job_Pending_Report.csv");
+  };
+
+  const downloadCSV = (data, filename) => {
+    if (!data || data.length === 0) return;
+    const csvRows = [];
+    const headers = Object.keys(data[0]);
+    csvRows.push(headers.join(","));
+    data.forEach((row) => {
+      const values = headers.map((h) => `"${row[h] || 0}"`);
+      csvRows.push(values.join(","));
+    });
+    const csvString = csvRows.join("\n");
+    const blob = new Blob([csvString], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.setAttribute("href", url);
+    a.setAttribute("download", filename);
+    a.click();
+  };
 
   return (
     <div>
@@ -80,6 +108,17 @@ const CustomerJobPending = () => {
             <div className='tab-title'>
               <h3>Job Pending Report</h3>
             </div>
+          </div>
+          <div className="col-md-5 d-flex justify-content-end align-items-center mb-5">
+            {jobPendingReportData && jobPendingReportData.length > 0 && (
+                <button
+                  className="btn btn-outline-info fw-bold border-3 d-inline-flex align-items-center gap-2 lh-1"
+                  onClick={handleExport}
+                >
+                  <Download size={16} />
+                  <span>Export Excel</span>
+                </button>
+            )}
           </div>
         </div>
         {loading && (
