@@ -31,7 +31,7 @@ export async function CUSTOMER_JOB_SUMMARY_REPORTS(data, token) {
 export async function CUSTOMER_JOB_PENDING_REPORT(data, token) {
     try {
         const res = await axios.post(`${Config.base_url}customer/jobPendingReports`, data, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: header(token),
         });
         return res.data;
     } catch (err) {
@@ -42,7 +42,7 @@ export async function CUSTOMER_JOB_PENDING_REPORT(data, token) {
 export async function CUSTOMER_DUE_BY_REPORT(data, token) {
     try {
         const res = await axios.post(`${Config.base_url}customer/dueByReport`, data, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: header(token),
         });
         return res.data;
     } catch (err) {
@@ -53,7 +53,7 @@ export async function CUSTOMER_DUE_BY_REPORT(data, token) {
 export async function CUSTOMER_TEAM_MONTHLY_REPORT(data, token) {
     try {
         const res = await axios.post(`${Config.base_url}customer/teamMonthlyReports`, data, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: header(token),
         });
         return res.data;
     } catch (err) {
@@ -64,7 +64,7 @@ export async function CUSTOMER_TEAM_MONTHLY_REPORT(data, token) {
 export async function CUSTOMER_TAX_WEEKLY_REPORT(data, token) {
     try {
         const res = await axios.post(`${Config.base_url}customer/taxWeeklyStatusReport`, data, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: header(token),
         });
         return res.data;
     } catch (err) {
@@ -75,7 +75,7 @@ export async function CUSTOMER_TAX_WEEKLY_REPORT(data, token) {
 export async function CUSTOMER_AVERAGE_TAT_REPORT(data, token) {
     try {
         const res = await axios.post(`${Config.base_url}customer/averageTatReport`, data, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: header(token),
         });
         return res.data;
     } catch (err) {
@@ -86,7 +86,7 @@ export async function CUSTOMER_AVERAGE_TAT_REPORT(data, token) {
 export async function CUSTOMER_REPORT_COUNT_JOB(data, token) {
     try {
         const res = await axios.post(`${Config.base_url}customer/reportCountJob`, data, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: header(token),
         });
         return res.data;
     } catch (err) {
@@ -97,7 +97,7 @@ export async function CUSTOMER_REPORT_COUNT_JOB(data, token) {
 export async function CUSTOMER_MISSING_TIMESHEET_REPORT(data, token) {
     try {
         const res = await axios.post(`${Config.base_url}customer/missingTimesheetReport`, data, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: header(token),
         });
         return res.data;
     } catch (err) {
@@ -108,7 +108,7 @@ export async function CUSTOMER_MISSING_TIMESHEET_REPORT(data, token) {
 export async function CUSTOMER_DISCREPANCY_REPORT(data, token) {
     try {
         const res = await axios.post(`${Config.base_url}customer/discrepancyReport`, data, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: header(token),
         });
         return res.data;
     } catch (err) {

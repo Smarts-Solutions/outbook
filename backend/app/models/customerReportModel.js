@@ -1241,8 +1241,9 @@ const reportCountJob = async (Report) => {
 
       const [[{ total }]] = await pool.execute(countQuery, searchValues);
 
+      let finalRowsData = rowsData;
       if (rowsData && rowsData.length > 0) {
-        rowsData = await Promise.all(
+        finalRowsData = await Promise.all(
           rowsData.map(async (element) => {
             const Get_account_manger_id = `
               SELECT s.id,
@@ -1279,7 +1280,7 @@ const reportCountJob = async (Report) => {
         status: true,
         message: "Success.",
         data: {
-          data: rowsData,
+          data: finalRowsData,
           pagination: {
             totalItems: total,
             totalPages: Math.ceil(total / limit),
