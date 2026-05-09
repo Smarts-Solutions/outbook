@@ -4,12 +4,10 @@ import { CustomerTaxWeeklyReport as fetchTaxWeeklyReport, CustomerTaxWeeklyRepor
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
-import { Download } from "lucide-react";
 
 const CustomerTaxWeeklyReport = () => {
   const navigate = useNavigate();
   const noDataImage = '/assets/images/No-data-amico.png';
-  const StaffUserId = JSON.parse(localStorage.getItem('staffDetails'))?.id;
   const token = JSON.parse(localStorage.getItem('token'));
   const dispatch = useDispatch();
   
@@ -30,8 +28,9 @@ const CustomerTaxWeeklyReport = () => {
 
   useEffect(() => {
     var CurrentWeek = getCurrentWeekNumber();
-    setCurrentIndex(CurrentWeek);
-    setVisibleColumns(generateColumns(53).slice(CurrentWeek - 1, CurrentWeek + 9));
+    const startIndex = Math.max(0, CurrentWeek - 1);
+    setCurrentIndex(startIndex);
+    setVisibleColumns(columns.slice(startIndex, startIndex + 10));
     getFilterData();
   }, []);
 
@@ -88,21 +87,18 @@ const CustomerTaxWeeklyReport = () => {
   }
 
   const slideNext = () => {
-    if (currentIndex + 10 < columns.length) {
-      const newIndex = currentIndex + 10;
+    if (currentIndex + 1 < columns.length) {
+      const newIndex = currentIndex + 1;
       setVisibleColumns(columns.slice(newIndex, newIndex + 10));
       setCurrentIndex(newIndex);
     }
   };
 
   const slidePrev = () => {
-    if (currentIndex - 10 >= 0) {
-      const newIndex = currentIndex - 10;
+    if (currentIndex - 1 >= 0) {
+      const newIndex = currentIndex - 1;
       setVisibleColumns(columns.slice(newIndex, newIndex + 10));
       setCurrentIndex(newIndex);
-    } else if (currentIndex > 0 && currentIndex < 10) {
-      setVisibleColumns(columns.slice(0, 10));
-      setCurrentIndex(0);
     }
   };
 
@@ -128,8 +124,7 @@ const CustomerTaxWeeklyReport = () => {
   };
 
   const headers = [
-    { label: 'Customer Name', key: 'customer_name' },
-    { label: 'Job Status', key: 'job_status' },
+    { label: 'Name', key: 'customer_name' },
     ...Array.from({ length: 53 }, (_, i) => ({ label: `Week ${i + 1}`, key: `week_${i + 1}` })),
     { label: 'Grand Total', key: 'grand_total' }
   ];
@@ -144,187 +139,223 @@ const CustomerTaxWeeklyReport = () => {
     }
     return {
       customer_name: row.customer_name,
-      job_status: row.job_status,
       ...weekData,
       grand_total: row.Grand_Total?.count || 0
     };
   });
 
+  const selectStyles = {
+    control: (base) => ({
+      ...base,
+      borderRadius: '25px',
+      padding: '2px 10px',
+      borderColor: '#ddd',
+      boxShadow: 'none',
+      fontSize: '14px',
+      minHeight: '38px',
+      '&:hover': {
+        borderColor: '#26bdf0'
+      }
+    })
+  };
+
   return (
-    <div className='container-fluid mt-2'>
-      <div className='report-data'>
-        <div className="row mb-5">
-            <div className="col-md-7">
-                <div className="tab-title">
-                    <h3>Tax Weekly Status Report</h3>
+    <div className='container-fluid px-0 mt-3'>
+      <div className='card border-0 shadow-sm rounded-4 overflow-hidden'>
+        <div className='card-body p-4'>
+            <div className='mb-4'>
+                <div className="row g-2 align-items-center">
+                    <div className='col-md-2 pe-1'>
+                        <Select
+                            styles={selectStyles}
+                            options={[
+                                { value: "", label: "---Select---" },
+                                ...(filterData?.customer ? filterData.customer.map(d => ({ value: d.customer_id, label: d.customer_name })) : [])
+                            ]}
+                            value={multipleFilter.customer_id === "" ? { value: "", label: "---Select---" } : (filterData?.customer?.map(d => ({ value: d.customer_id, label: d.customer_name })).find(o => o.value === multipleFilter.customer_id))}
+                            onChange={(selected) => setMultipleFilter({ ...multipleFilter, customer_id: selected ? selected.value : "" })}
+                            placeholder="---Select---"
+                        />
+                    </div>
+                    <div className='col-md-2 pe-1'>
+                        <Select
+                            styles={selectStyles}
+                            options={[
+                                { value: "", label: "--- Select ----" },
+                                ...(filterData?.job_status_type ? filterData.job_status_type.map(d => ({ value: d.job_status_type_id, label: d.job_status_type_name })) : [])
+                            ]}
+                            value={multipleFilter.job_status_type_id === "" ? { value: "", label: "--- Select ----" } : (filterData?.job_status_type?.map(d => ({ value: d.job_status_type_id, label: d.job_status_type_name })).find(o => o.value === multipleFilter.job_status_type_id))}
+                            onChange={(selected) => setMultipleFilter({ ...multipleFilter, job_status_type_id: selected ? selected.value : "" })}
+                            placeholder="--- Select ----"
+                        />
+                    </div>
+                    <div className='col-md-2 pe-1'>
+                        <Select
+                            styles={selectStyles}
+                            options={[
+                                { value: "", label: "--- Select ---" },
+                                ...(filterData?.processor ? filterData.processor.map(d => ({ value: d.processor_id, label: d.processor_name })) : [])
+                            ]}
+                            value={multipleFilter.processor_id === "" ? { value: "", label: "--- Select ---" } : (filterData?.processor?.map(d => ({ value: d.processor_id, label: d.processor_name })).find(o => o.value === multipleFilter.processor_id))}
+                            onChange={(selected) => setMultipleFilter({ ...multipleFilter, processor_id: selected ? selected.value : "" })}
+                            placeholder="--- Select ---"
+                        />
+                    </div>
+                    <div className='col-md-2 pe-1'>
+                        <Select
+                            styles={selectStyles}
+                            options={[
+                                { value: "", label: "--- Select ---" },
+                                ...(filterData?.reviewer ? filterData.reviewer.map(d => ({ value: d.reviewer_id, label: d.reviewer_name })) : [])
+                            ]}
+                            value={multipleFilter.reviewer_id === "" ? { value: "", label: "--- Select ---" } : (filterData?.reviewer?.map(d => ({ value: d.reviewer_id, label: d.reviewer_name })).find(o => o.value === multipleFilter.reviewer_id))}
+                            onChange={(selected) => setMultipleFilter({ ...multipleFilter, reviewer_id: selected ? selected.value : "" })}
+                            placeholder="--- Select ---"
+                        />
+                    </div>
+                    <div className='col-md-auto pe-1'>
+                        <button 
+                            className="btn btn-outline-info rounded-pill px-4 fw-bold" 
+                            onClick={clearFilter}
+                            style={{ borderWidth: '2px', fontSize: '14px', whiteSpace: 'nowrap' }}
+                        >
+                            Reset
+                        </button>
+                    </div>
+                    <div className='col-md-auto ms-auto'>
+                        <ExportToExcel 
+                            apiData={exportData} 
+                            fileName={'Weekly_Report'} 
+                            headers={headers}
+                            className="btn btn-outline-info rounded-pill px-4 fw-bold d-inline-flex align-items-center gap-2"
+                            style={{ borderWidth: '2px', fontSize: '14px', whiteSpace: 'nowrap' }}
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div className='mb-4'>
-          <div className="row g-2">
-            <div className='col-md-2 pe-0'>
-              <Select
-                id="customerSelect"
-                className="basic-multi-select"
-                classNamePrefix="react-select"
-                isSearchable
-                options={[
-                  { value: "", label: "--- Select Customer ---" },
-                  ...(filterData?.customer ? filterData.customer.map(d => ({ value: d.customer_id, label: d.customer_name })) : [])
-                ]}
-                value={multipleFilter.customer_id === "" ? { value: "", label: "--- Select Customer ---" } : (filterData?.customer?.map(d => ({ value: d.customer_id, label: d.customer_name })).find(o => o.value === multipleFilter.customer_id))}
-                onChange={(selected) => setMultipleFilter({ ...multipleFilter, customer_id: selected ? selected.value : "" })}
-                placeholder="Customer"
-              />
-            </div>
-
-            <div className='col-md-2 pe-0'>
-              <Select
-                id="statusSelect"
-                className="basic-multi-select"
-                classNamePrefix="react-select"
-                isSearchable
-                options={[
-                  { value: "", label: "--- Select Status ---" },
-                  ...(filterData?.job_status_type ? filterData.job_status_type.map(d => ({ value: d.job_status_type_id, label: d.job_status_type_name })) : [])
-                ]}
-                value={multipleFilter.job_status_type_id === "" ? { value: "", label: "--- Select Status ---" } : (filterData?.job_status_type?.map(d => ({ value: d.job_status_type_id, label: d.job_status_type_name })).find(o => o.value === multipleFilter.job_status_type_id))}
-                onChange={(selected) => setMultipleFilter({ ...multipleFilter, job_status_type_id: selected ? selected.value : "" })}
-                placeholder="Job Status"
-              />
+            <div className='row mb-4'>
+                <div className='col-12 d-flex gap-2'>
+                    <button 
+                        className="btn btn-outline-info rounded-pill px-4 fw-bold" 
+                        onClick={slidePrev} 
+                        disabled={currentIndex === 0}
+                        style={{ borderWidth: '2px', minWidth: '100px' }}
+                    >
+                        Prev
+                    </button>
+                    <button 
+                        className="btn btn-outline-info rounded-pill px-4 fw-bold" 
+                        onClick={slideNext} 
+                        disabled={currentIndex + 10 >= columns.length}
+                        style={{ borderWidth: '2px', minWidth: '100px' }}
+                    >
+                        Next
+                    </button>
+                </div>
             </div>
 
-            <div className='col-md-2 pe-0'>
-              <Select
-                id="processorSelect"
-                className="basic-multi-select"
-                classNamePrefix="react-select"
-                isSearchable
-                options={[
-                  { value: "", label: "--- Select Processor ---" },
-                  ...(filterData?.processor ? filterData.processor.map(d => ({ value: d.processor_id, label: d.processor_name })) : [])
-                ]}
-                value={multipleFilter.processor_id === "" ? { value: "", label: "--- Select Processor ---" } : (filterData?.processor?.map(d => ({ value: d.processor_id, label: d.processor_name })).find(o => o.value === multipleFilter.processor_id))}
-                onChange={(selected) => setMultipleFilter({ ...multipleFilter, processor_id: selected ? selected.value : "" })}
-                placeholder="Processor"
-              />
-            </div>
-
-            <div className='col-md-2 pe-0'>
-              <Select
-                id="reviewerSelect"
-                className="basic-multi-select"
-                classNamePrefix="react-select"
-                isSearchable
-                options={[
-                  { value: "", label: "--- Select Reviewer ---" },
-                  ...(filterData?.reviewer ? filterData.reviewer.map(d => ({ value: d.reviewer_id, label: d.reviewer_name })) : [])
-                ]}
-                value={multipleFilter.reviewer_id === "" ? { value: "", label: "--- Select Reviewer ---" } : (filterData?.reviewer?.map(d => ({ value: d.reviewer_id, label: d.reviewer_name })).find(o => o.value === multipleFilter.reviewer_id))}
-                onChange={(selected) => setMultipleFilter({ ...multipleFilter, reviewer_id: selected ? selected.value : "" })}
-                placeholder="Reviewer"
-              />
-            </div>
-
-            <div className='col-md-1 pe-0'>
-              <button className="btn btn-outline-secondary w-100 fw-bold" onClick={clearFilter}>
-                Reset
-              </button>
-            </div>
-            
-            <div className='col-md-3 text-end'>
-              <ExportToExcel apiData={exportData} fileName={'Customer_Tax_Weekly_Report'} headers={headers} />
-            </div>
-          </div>
-        </div>
-
-        <div className='row mb-3 align-items-center'>
-            <div className='col-md-6 d-flex gap-2'>
-                <button className="btn btn-sm btn-info px-4 fw-bold" onClick={slidePrev} disabled={currentIndex <= 0}>
-                Prev
-                </button>
-                <button className="btn btn-sm btn-info px-4 fw-bold" onClick={slideNext} disabled={currentIndex + 10 >= columns.length}>
-                Next
-                </button>
-            </div>
-            <div className="col-md-6 text-end text-muted small">
-                Showing Weeks {visibleColumns[0]} to {visibleColumns[visibleColumns.length - 1]}
-            </div>
-        </div>
-
-        <div className="datatable-wrapper mt-minus position-relative">
-          {loading && (
-            <div className="overlay">
-              <div className="loader"></div>
-            </div>
-          )}
-
-          <div className="table-responsive">
-            <table className="table table-bordered table-hover align-middle">
-              <thead className='table-light'>
-                <tr>
-                  <th className="bg-light sticky-left" style={{ minWidth: '200px' }}>Customer Name</th>
-                  <th style={{ minWidth: '150px' }}>Job Status</th>
-                  {visibleColumns.map((col) => (
-                    <th key={col} className="text-center" style={{ minWidth: '80px' }}>Week {col}</th>
-                  ))}
-                  <th className="text-center bg-light sticky-right" style={{ minWidth: '100px' }}>Grand Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {weeklyReportData.length === 0 ? (
-                  <tr>
-                    <td colSpan={visibleColumns.length + 3} className="text-center py-5">
-                      <img src={noDataImage} alt="No Data" style={{ width: '150px' }} />
-                      <p className="mt-3 text-muted">No records found</p>
-                    </td>
-                  </tr>
-                ) : (
-                  weeklyReportData.map((data, index) => (
-                    <tr key={index}>
-                      <td className="bg-white sticky-left fw-medium">{data?.customer_name}</td>
-                      <td><span className="badge bg-soft-info text-info">{data?.job_status}</span></td>
-                      {visibleColumns.map((colNum) => {
-                        const weekKey = `WE_${colNum}_${currentYear}`;
-                        const weekData = data.weeks?.[0]?.[weekKey];
-                        return (
-                          <td key={colNum} className="text-center">
-                            {weekData?.count > 0 ? (
-                              <span 
-                                className="text-primary fw-bold cursor-pointer hover-underline"
-                                onClick={() => handleOnClick(weekData)}
-                              >
-                                {weekData.count}
-                              </span>
-                            ) : (
-                              <span className="text-muted opacity-50">-</span>
-                            )}
-                          </td>
-                        );
-                      })}
-                      <td className="text-center bg-white sticky-right fw-bold text-dark">
-                         <span 
-                            className="cursor-pointer text-primary"
-                            onClick={() => handleOnClick(data.Grand_Total)}
-                         >
-                            {data.Grand_Total?.count || 0}
-                         </span>
-                      </td>
-                    </tr>
-                  ))
+            <div className="table-responsive position-relative">
+                {loading && (
+                    <div className="overlay rounded-3">
+                        <div className="loader"></div>
+                    </div>
                 )}
-              </tbody>
-            </table>
-          </div>
+                <table className="table table-hover align-middle custom-weekly-table">
+                    <thead>
+                        <tr>
+                            <th className="bg-white sticky-left py-3" style={{ minWidth: '200px' }}>Name</th>
+                            {visibleColumns.map((col) => (
+                                <th key={col} className="text-center py-3" style={{ minWidth: '100px' }}>Week {col}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {weeklyReportData.length === 0 ? (
+                            <tr>
+                                <td colSpan={visibleColumns.length + 1} className="text-center py-5 border-0">
+                                    <div className="d-flex flex-column align-items-center">
+                                        <img src={noDataImage} alt="No Data" style={{ width: '150px' }} />
+                                        <p className="mt-3 text-muted fw-bold">No data available</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : (
+                            weeklyReportData.map((data, index) => (
+                                <tr key={index}>
+                                    <td className="bg-white sticky-left py-3 fw-bold" style={{ color: '#333' }}>
+                                        {data?.customer_name}
+                                    </td>
+                                    {visibleColumns.map((colNum) => {
+                                        const weekKey = `WE_${colNum}_${currentYear}`;
+                                        const weekData = data.weeks?.[0]?.[weekKey];
+                                        return (
+                                            <td key={colNum} className="text-center py-3">
+                                                {weekData?.count > 0 ? (
+                                                    <span 
+                                                        className="text-info fw-bold cursor-pointer"
+                                                        onClick={() => handleOnClick(weekData)}
+                                                    >
+                                                        {weekData.count}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-muted opacity-25">-</span>
+                                                )}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
         </div>
       </div>
       <style>{`
-        .sticky-left { position: sticky; left: 0; z-index: 1; border-right: 2px solid #eee !important; }
-        .sticky-right { position: sticky; right: 0; z-index: 1; border-left: 2px solid #eee !important; }
-        .cursor-pointer { cursor: pointer; }
-        .hover-underline:hover { text-decoration: underline; }
-        .bg-soft-info { background-color: rgba(38, 189, 240, 0.1); }
+        .custom-weekly-table thead th {
+            border-top: none;
+            border-bottom: 2px solid #000 !important;
+            color: #000;
+            font-weight: 700;
+            font-size: 15px;
+        }
+        .custom-weekly-table tbody td {
+            border-color: #eee;
+            font-size: 14px;
+        }
+        .sticky-left { 
+            position: sticky; 
+            left: 0; 
+            z-index: 2; 
+        }
+        .cursor-pointer:hover {
+            text-decoration: underline;
+        }
+        .btn-outline-info {
+            color: #26bdf0;
+            border-color: #26bdf0;
+        }
+        .btn-outline-info:hover {
+            background-color: #26bdf0 !important;
+            color: #fff !important;
+        }
+        .btn-outline-info:disabled {
+            color: #ccc;
+            border-color: #eee;
+        }
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
       `}</style>
     </div>
   );

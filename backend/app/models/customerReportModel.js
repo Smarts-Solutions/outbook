@@ -2,6 +2,7 @@ const pool = require("../config/database");
 const {
   LineManageStaffIdHelperFunction,
   QueryRoleHelperFunction,
+  getStaffAccessFilters,
 } = require("../utils/helper");
 
 const jobStatusReports = async (Report) => {
@@ -877,6 +878,7 @@ const taxWeeklyStatusReport = async (Report) => {
     const LineManageStaffId =
       await LineManageStaffIdHelperFunction(StaffUserId);
     const rows = await QueryRoleHelperFunction(StaffUserId);
+    const { customerCondition, clientCondition, jobCondition } = await getStaffAccessFilters(StaffUserId);
 
     const currentYear = new Date().getFullYear();
 
@@ -885,7 +887,6 @@ const taxWeeklyStatusReport = async (Report) => {
       [rows[0].role_id, 33],
     );
 
-    // ✅ Lightweight optimized query
     let query = `
       SELECT
         master_status.name AS job_status,
@@ -895,12 +896,19 @@ const taxWeeklyStatusReport = async (Report) => {
         GROUP_CONCAT(jobs.id) AS job_ids
       FROM jobs
       INNER JOIN customers ON jobs.customer_id = customers.id
+      LEFT JOIN clients ON jobs.client_id = clients.id
       LEFT JOIN master_status ON master_status.id = jobs.status_type
-      LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
       WHERE YEAR(jobs.created_at) = ?
     `;
 
     const params = [currentYear];
+
+    // ✅ Apply access filters for non-admins
+    if (!(rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
+        query += ` AND ${customerCondition.replace(/customer_id/g, "customers.id")} `;
+        query += ` AND ${clientCondition.replace(/id/g, "clients.id")} `;
+        query += ` AND ${jobCondition.replace(/id/g, "jobs.id")} `;
+    }
 
     // 🔍 Dynamic filters
     if (customer_id) {
@@ -920,10 +928,6 @@ const taxWeeklyStatusReport = async (Report) => {
     if (reviewer_id) {
       query += ` AND jobs.reviewer = ?`;
       params.push(reviewer_id);
-    }
-
-    if (!(rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
-      query += ` AND (customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))`;
     }
 
     query += `
@@ -1029,6 +1033,8 @@ const taxWeeklyStatusReportFilterKey = async (Report) => {
     let customer = [];
     let custumerData = [];
 
+    const { assignedCustomerIds } = await getStaffAccessFilters(StaffUserId);
+
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
       const queryCustomer = `
         SELECT customers.id AS customer_id, customers.trading_name AS customer_name
@@ -1038,15 +1044,18 @@ const taxWeeklyStatusReportFilterKey = async (Report) => {
       const [data] = await pool.execute(queryCustomer);
       custumerData = data;
     } else {
-      const queryCustomer = `
-        SELECT customers.id AS customer_id, customers.trading_name AS customer_name
-        FROM customers
-        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
-        WHERE customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})           
-        ORDER BY customers.trading_name ASC;
-       `;
-      const [data] = await pool.execute(queryCustomer);
-      custumerData = data;
+        if (assignedCustomerIds.length > 0) {
+            const queryCustomer = `
+                SELECT id AS customer_id, trading_name AS customer_name
+                FROM customers
+                WHERE id IN (${assignedCustomerIds.join(',')})
+                ORDER BY trading_name ASC;
+            `;
+            const [data] = await pool.execute(queryCustomer);
+            custumerData = data;
+        } else {
+            custumerData = [];
+        }
     }
 
     if (custumerData.length > 0) {
