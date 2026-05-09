@@ -457,8 +457,9 @@ const getStaffAccessFilters = async (staff_id) => {
   }
 
   let customerCondition = `customer_id IN (${assignedCustomerIds.join(',')})`;
-  let clientCondition = "1=1";
-  let jobCondition = "1=1";
+  let clientCondition = "id IS NOT NULL";
+  let jobClientCondition = "client_id IS NOT NULL";
+  let jobCondition = "id IS NOT NULL";
 
   // If it's a Customer User (Role 12), apply strict filtering from customer_access
   if (accessRows.length > 0 && accessRows[0].role_id === 12) {
@@ -475,18 +476,20 @@ const getStaffAccessFilters = async (staff_id) => {
 
     if (allClientIds.length > 0) {
       clientCondition = `id IN (${allClientIds.join(',')})`;
+      jobClientCondition = `client_id IN (${allClientIds.join(',')})`;
     } else {
-      clientCondition = "1=0";
+      clientCondition = "id IS NULL";
+      jobClientCondition = "client_id IS NULL";
     }
 
     if (allJobIds.length > 0) {
       jobCondition = `id IN (${allJobIds.join(',')})`;
     } else {
-      jobCondition = "1=0";
+      jobCondition = "id IS NULL";
     }
   }
 
-  return { customerCondition, clientCondition, jobCondition, assignedCustomerIds };
+  return { customerCondition, clientCondition, jobClientCondition, jobCondition, assignedCustomerIds };
 };
 
 
