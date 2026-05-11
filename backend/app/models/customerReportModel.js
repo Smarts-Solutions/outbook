@@ -2028,6 +2028,8 @@ const getJobCustomReport = async (Report) => {
           CONCAT(am.first_name, ' ', am.last_name) AS account_manager_name,
           CONCAT(at.first_name, ' ', at.last_name) AS allocated_to_name,
           CONCAT(rv.first_name, ' ', rv.last_name) AS reviewer_name,
+          CONCAT(ato.first_name, ' ', ato.last_name) AS allocated_to_other_name,
+          CONCAT(ccd.first_name, ' ', ccd.last_name) AS customer_account_manager_officer,
           sv.name AS service_name, jt.type AS job_type_name, st.name AS status_type_name, sf.employee_number AS employee_number
       FROM (${subquerySQL}) AS raw
       LEFT JOIN customer_contact_details AS ccd ON raw.customer_contact_details_id = ccd.id
@@ -2037,9 +2039,12 @@ const getJobCustomReport = async (Report) => {
       LEFT JOIN staffs AS am ON raw.account_manager_id = am.id
       LEFT JOIN staffs AS at ON raw.allocated_to_id = at.id
       LEFT JOIN staffs AS rv ON raw.reviewer_id = rv.id
+      LEFT JOIN staffs AS sv_staff ON raw.staff_created_id = sv_staff.id
       LEFT JOIN services AS sv ON raw.service_id = sv.id
       LEFT JOIN master_status AS st ON raw.status_type_id = st.id
       LEFT JOIN staffs AS sf ON raw.staff_created_id = sf.id
+      LEFT JOIN job_allowed_staffs AS jas ON jas.job_id = raw.job_id
+      LEFT JOIN staffs AS ato ON jas.staff_id = ato.id
       LEFT JOIN staffs AS jobcreatestaff ON raw.staff_created_id = jobcreatestaff.id
       LEFT JOIN roles AS staffrole ON jobcreatestaff.role_id = staffrole.id
       LEFT JOIN line_managers AS lm ON lm.staff_by = jobcreatestaff.id
@@ -2053,8 +2058,62 @@ const getJobCustomReport = async (Report) => {
     const [rows] = await pool.execute(dataSQL, [fromDate, toDate]);
 
     const idToNameMap = {
-      job_id: "job_name", customer_id: "customer_name", client_id: "client_name", account_manager_id: "account_manager_name", allocated_to_id: "allocated_to_name", reviewer_id: "reviewer_name", service_id: "service_name", job_type_id: "job_type_name", status_type_id: "status_type_name", employee_number: "employee_number",
-      date_received_on: "date_received_on", allocated_on: "allocated_on", job_priority: "job_priority", engagement_model: "engagement_model", status_updation_date: "status_updation_date", submission_deadline: "submission_deadline", budgeted_hours: "budgeted_hours", total_time: "total_time", due_on: "due_on", staff_full_name: "staff_full_name", role: "role", staff_email: "staff_email", line_manager: "line_manager", staff_status: "staff_status",
+      id: "job_id",
+      job_id: "job_name",
+      customer_id: "customer_name",
+      client_id: "client_name",
+      account_manager_id: "account_manager_name",
+      allocated_to_id: "allocated_to_name",
+      reviewer_id: "reviewer_name",
+      allocated_to_other_id: "allocated_to_other_name",
+      service_id: "service_name",
+      job_type_id: "job_type_name",
+      status_type_id: "status_type_name",
+      employee_number: "employee_number",
+
+      date_received_on: "date_received_on",
+      allocated_on: "allocated_on",
+      job_priority: "job_priority",
+      engagement_model: "engagement_model",
+      customer_account_manager_officer: "customer_account_manager_officer",
+      status_updation_date: "status_updation_date",
+      Transactions_Posting_id_2: "Transactions_Posting_id_2",
+      Number_of_Bank_Transactions_id_2: "Number_of_Bank_Transactions_id_2",
+      Number_of_Journal_Entries_id_2: "Number_of_Journal_Entries_id_2",
+      Number_of_Other_Transactions_id_2: "Number_of_Other_Transactions_id_2",
+      Number_of_Petty_Cash_Transactions_id_2: "Number_of_Petty_Cash_Transactions_id_2",
+      Number_of_Purchase_Invoices_id_2: "Number_of_Purchase_Invoices_id_2",
+      Number_of_Sales_Invoices_id_2: "Number_of_Sales_Invoices_id_2",
+      Number_of_Total_Transactions_id_2: "Number_of_Total_Transactions_id_2",
+      submission_deadline: "submission_deadline",
+      Tax_Year_id_4: "Tax_Year_id_4",
+      If_Sole_Trader_Who_is_doing_Bookkeeping_id_4: "If_Sole_Trader_Who_is_doing_Bookkeeping_id_4",
+      Whose_Tax_Return_is_it_id_4: "Whose_Tax_Return_is_it_id_4",
+      Type_of_Payslip_id_3: "Type_of_Payslip_id_3",
+      Year_Ending_id_1: "Year_Ending_id_1",
+      Bookkeeping_Frequency_id_2: "Bookkeeping_Frequency_id_2",
+      CIS_Frequency_id_3: "CIS_Frequency_id_3",
+      Filing_Frequency_id_8: "Filing_Frequency_id_8",
+      Management_Accounts_Frequency_id_6: "Management_Accounts_Frequency_id_6",
+      Payroll_Frequency_id_3: "Payroll_Frequency_id_3",
+      budgeted_hours: "budgeted_hours",
+      feedback_incorporation_time: "feedback_incorporation_time",
+      review_time: "review_time",
+      total_preparation_time: "total_preparation_time",
+      total_time: "total_time",
+      due_on: "due_on",
+      customer_deadline_date: "customer_deadline_date",
+      expected_delivery_date: "expected_delivery_date",
+      internal_deadline_date: "internal_deadline_date",
+      sla_deadline_date: "sla_deadline_date",
+      Management_Accounts_FromDate_id_6: "Management_Accounts_FromDate_id_6",
+      Management_Accounts_ToDate_id_6: "Management_Accounts_ToDate_id_6",
+
+      staff_full_name: "staff_full_name",
+      role: "role",
+      staff_email: "staff_email",
+      line_manager: "line_manager",
+      staff_status: "staff_status",
     };
 
     const groups = {};
@@ -2069,7 +2128,12 @@ const getJobCustomReport = async (Report) => {
       periodSet.add(periodKey);
 
       if (!groups[gid]) {
-        groups[gid] = { ...r, periodSeconds: {} };
+        groups[gid] = { 
+          ...r, 
+          allocated_to_other_name: r.allocated_to_other_name,
+          customer_account_manager_officer: r.customer_account_manager_officer,
+          periodSeconds: {} 
+        };
       }
       groups[gid].periodSeconds[periodKey] = (groups[gid].periodSeconds[periodKey] || 0) + 1;
     }
@@ -2077,7 +2141,69 @@ const getJobCustomReport = async (Report) => {
     const periods = Array.from(periodSet).sort((a, b) => a.localeCompare(b));
     const outRows = Object.keys(groups).map(gid => {
       const g = groups[gid];
-      const row = { ...g };
+      const row = {};
+
+      row["id"] = g.job_id;
+      row["job_id"] = g.job_name;
+      row["customer_id"] = g.customer_name;
+      row["client_id"] = g.client_name;
+      row["account_manager_id"] = g.account_manager_name;
+      row["allocated_to_id"] = g.allocated_to_name;
+      row["reviewer_id"] = g.reviewer_name;
+      row["allocated_to_other_id"] = g.allocated_to_other_name;
+      row["service_id"] = g.service_name;
+      row["job_type_id"] = g.job_type_name;
+      row["status_type_id"] = g.status_type_name;
+      row["employee_number"] = g.employee_number;
+
+      row["date_received_on"] = g.date_received_on;
+      row["allocated_on"] = g.allocated_on;
+      row["job_priority"] = g.job_priority;
+      row["engagement_model"] = g?.engagement_model
+        ?.replace(/_/g, " ")
+        ?.replace(/\b\w/g, (c) => c?.toUpperCase());
+      row["customer_account_manager_officer"] = g.customer_account_manager_officer;
+      row["status_updation_date"] = g.status_updation_date;
+      row["Transactions_Posting_id_2"] = g.Transactions_Posting_id_2;
+      row["Number_of_Bank_Transactions_id_2"] = g.Number_of_Bank_Transactions_id_2;
+      row["Number_of_Journal_Entries_id_2"] = g.Number_of_Journal_Entries_id_2;
+      row["Number_of_Other_Transactions_id_2"] = g.Number_of_Other_Transactions_id_2;
+      row["Number_of_Petty_Cash_Transactions_id_2"] = g.Number_of_Petty_Cash_Transactions_id_2;
+      row["Number_of_Purchase_Invoices_id_2"] = g.Number_of_Purchase_Invoices_id_2;
+      row["Number_of_Sales_Invoices_id_2"] = g.Number_of_Sales_Invoices_id_2;
+      row["Number_of_Total_Transactions_id_2"] = g.Number_of_Total_Transactions_id_2;
+      row["submission_deadline"] = g.submission_deadline;
+      row["Tax_Year_id_4"] = g.Tax_Year_id_4;
+      row["If_Sole_Trader_Who_is_doing_Bookkeeping_id_4"] = g.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4;
+      row["Whose_Tax_Return_is_it_id_4"] = g.Whose_Tax_Return_is_it_id_4;
+      row["Type_of_Payslip_id_3"] = g.Type_of_Payslip_id_3;
+      row["Year_Ending_id_1"] = g.Year_Ending_id_1;
+      row["Bookkeeping_Frequency_id_2"] = g.Bookkeeping_Frequency_id_2;
+      row["CIS_Frequency_id_3"] = g.CIS_Frequency_id_3;
+      row["Filing_Frequency_id_8"] = g.Filing_Frequency_id_8;
+      row["Management_Accounts_Frequency_id_6"] = g.Management_Accounts_Frequency_id_6;
+      row["Payroll_Frequency_id_3"] = g.Payroll_Frequency_id_3;
+      row["budgeted_hours"] = g.budgeted_hours;
+      row["feedback_incorporation_time"] = g.feedback_incorporation_time;
+      row["review_time"] = g.review_time;
+      row["total_preparation_time"] = g.total_preparation_time;
+      row["total_time"] = g.total_time;
+      row["due_on"] = g.due_on;
+      row["customer_deadline_date"] = g.customer_deadline_date;
+      row["expected_delivery_date"] = g.expected_delivery_date;
+      row["internal_deadline_date"] = g.internal_deadline_date;
+      row["sla_deadline_date"] = g.sla_deadline_date;
+      row["Management_Accounts_FromDate_id_6"] = g.Management_Accounts_FromDate_id_6;
+      row["Management_Accounts_ToDate_id_6"] = g.Management_Accounts_ToDate_id_6;
+
+      row["staff_full_name"] = g.staff_full_name;
+      row["staff_email"] = g.staff_email;
+      row["role"] = g.role;
+      row["staff_status"] = g.staff_status === "1" ? "Active" : "Inactive";
+      row["line_manager"] = g.line_manager;
+      row["work_date"] = g.work_date;
+      row["periodSeconds"] = g.periodSeconds;
+
       if (!["", null, undefined].includes(displayBy)) {
         let total = 0;
         for (const p of periods) {
