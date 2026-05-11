@@ -1538,8 +1538,34 @@ const missingTimesheetReport = async (Report) => {
   if (rows.length > 0 && rows[0].role_name == "SUPERADMIN") {
     where.push(`ts.submit_status = '0' OR ts.submit_status IS NULL`);
   } else {
+    let staffIds = [...LineManageStaffId];
+    const { assignedCustomerIds } = await getStaffAccessFilters(StaffUserId);
+    if (assignedCustomerIds && assignedCustomerIds.length > 0) {
+      const customerIdsStr = assignedCustomerIds.join(",");
+      const [allStaff] = await pool.execute(
+        `SELECT DISTINCT staff_id FROM (
+            SELECT staff_id FROM assigned_jobs_staff_view WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT staff_id FROM staff_portfolio WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT allocated_to as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT reviewer as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT account_manager_id as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT staff_created_id as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT staff_created_id as staff_id FROM clients WHERE customer_id IN (${customerIdsStr})
+        ) as t WHERE staff_id IS NOT NULL`,
+      );
+      allStaff.forEach((s) => staffIds.push(s.staff_id));
+    }
+
+    const uniqueStaffIds = [...new Set(staffIds)].filter((id) => id);
+
     where.push(
-      `(ts.submit_status = '0' OR ts.submit_status IS NULL) AND st.id IN (${LineManageStaffId})`,
+      `(ts.submit_status = '0' OR ts.submit_status IS NULL) AND st.id IN (${uniqueStaffIds.length > 0 ? uniqueStaffIds.join(",") : StaffUserId})`,
     );
   }
 
@@ -1621,7 +1647,33 @@ const discrepancyReport = async (Report) => {
   if (rows.length > 0 && rows[0].role_name == "SUPERADMIN") {
     // Allow access to all data
   } else {
-    query += ` WHERE timesheet.staff_id IN (${LineManageStaffId})`;
+    let staffIds = [...LineManageStaffId];
+    const { assignedCustomerIds } = await getStaffAccessFilters(StaffUserId);
+    if (assignedCustomerIds && assignedCustomerIds.length > 0) {
+      const customerIdsStr = assignedCustomerIds.join(",");
+      const [allStaff] = await pool.execute(
+        `SELECT DISTINCT staff_id FROM (
+            SELECT staff_id FROM assigned_jobs_staff_view WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT staff_id FROM staff_portfolio WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT allocated_to as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT reviewer as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT account_manager_id as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT staff_created_id as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT staff_created_id as staff_id FROM clients WHERE customer_id IN (${customerIdsStr})
+        ) as t WHERE staff_id IS NOT NULL`,
+      );
+      allStaff.forEach((s) => staffIds.push(s.staff_id));
+    }
+
+    const uniqueStaffIds = [...new Set(staffIds)].filter((id) => id);
+
+    query += ` WHERE timesheet.staff_id IN (${uniqueStaffIds.length > 0 ? uniqueStaffIds.join(",") : StaffUserId})`;
   }
 
   query += ` GROUP BY jobs.id, job_code_id, jobs.total_time`;
