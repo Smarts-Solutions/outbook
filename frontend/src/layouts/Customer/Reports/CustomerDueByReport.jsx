@@ -61,7 +61,7 @@ const CustomerDueByReport = () => {
             {data.count}
           </div>
         ) : (
-          <div>{data?.count || 0}</div>
+          <div></div>
         );
       },
       selector: (row) => row[`due_within_${i + 1}_months`]?.count || 0,
@@ -79,7 +79,7 @@ const CustomerDueByReport = () => {
             {row.due_passed.count}
           </div>
         ) : (
-          <div>{row.due_passed?.count || 0}</div>
+          <div></div>
         ),
       selector: (row) => row.due_passed?.count || 0,
       sortable: true,
