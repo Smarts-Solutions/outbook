@@ -505,7 +505,9 @@ const getDashboardActivityLog = async (dashboard) => {
     `;
     const [rows] = await pool.execute(QueryRole, [staff_id]);
 
-    const isSuperAdmin = rows.length > 0 && rows[0].role_name === "SUPERADMIN";
+    const hasFullLogAccess =
+      rows.length > 0 &&
+      ["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(rows[0].role_name);
 
     const getDateRangeByFilter = () => {
       const today = new Date();
@@ -617,8 +619,8 @@ const getDashboardActivityLog = async (dashboard) => {
     let whereConditions = [];
     let queryParams = [];
 
-    // Add staff filter for non-superadmin
-    if (!isSuperAdmin) {
+    // Add staff filter for non-privileged users
+    if (!hasFullLogAccess) {
       whereConditions.push("staff_logs.staff_id = ?");
       queryParams.push(staff_id);
     }
