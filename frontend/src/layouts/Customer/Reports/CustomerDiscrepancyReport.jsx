@@ -74,7 +74,7 @@ const CustomerDiscrepancyReport = () => {
   ];
 
   const handleExport = () => {
-    const exportData = reportData.map(row => ({
+    const exportData = (reportData || []).map(row => ({
       "Job Name": row.job_code_id,
       "Timesheet Total Hours": convertTimeFormatString(convertTimeFormat(row.total_spent_hours)),
       "Job Total Hours": convertTimeFormatString(row.job_total_time)

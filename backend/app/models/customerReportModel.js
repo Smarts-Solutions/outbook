@@ -1734,6 +1734,7 @@ const discrepancyReportProcessor = async (Report) => {
         JOIN customers ON customers.id = jobs.customer_id
         JOIN clients ON clients.id = jobs.client_id
         JOIN job_types ON jobs.job_type_id = job_types.id
+        WHERE staffs.role_id = 3 -- Only Processors
     `;
 
   if (rows.length > 0 && rows[0].role_name == "SUPERADMIN") {
@@ -1765,7 +1766,7 @@ const discrepancyReportProcessor = async (Report) => {
 
     const uniqueStaffIds = [...new Set(staffIds)].filter((id) => id);
 
-    query += ` WHERE timesheet.staff_id IN (${uniqueStaffIds.length > 0 ? uniqueStaffIds.join(",") : StaffUserId})`;
+    query += ` AND timesheet.staff_id IN (${uniqueStaffIds.length > 0 ? uniqueStaffIds.join(",") : StaffUserId})`;
   }
 
   query += ` GROUP BY jobs.id, job_code_id, jobs.total_time`;

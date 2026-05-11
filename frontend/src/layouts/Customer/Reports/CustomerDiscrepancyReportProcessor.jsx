@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Datatable from '../../../Components/ExtraComponents/Datatable';
 import { useDispatch } from 'react-redux';
-import { getAllTaskByStaff } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { CustomerGetAllTaskByStaff } from "../../../ReduxStore/Slice/Report/CustomerReportSlice";
 import { Modal } from "react-bootstrap";
 import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
 
@@ -22,7 +22,7 @@ const CustomerDiscrepancyReportProcessor = () => {
   const Discrepancy = async () => {
     const req = { action: "discrepancyReportProcessor" };
     const data = { req: req, authToken: token };
-    await dispatch(getAllTaskByStaff(data))
+    await dispatch(CustomerGetAllTaskByStaff(data))
       .unwrap()
       .then((res) => {
         if (res.status) {
@@ -84,7 +84,7 @@ const CustomerDiscrepancyReportProcessor = () => {
     { label: 'Job Total Hours', key: 'job_total_time_processor' }
   ];
 
-  const exportData = discrepancyReportData.map(row => ({
+  const exportData = (discrepancyReportData || []).map(row => ({
     job_code_id: row.job_code_id,
     timesheet_total_hours: convertTimeFormatString(convertTimeFormat(row.total_spent_hours)),
     job_total_time_processor: convertTimeFormatString(row.job_total_time_processor)
