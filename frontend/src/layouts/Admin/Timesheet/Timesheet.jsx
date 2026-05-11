@@ -1069,7 +1069,7 @@ const Timesheet = () => {
   };
 
   const saveData = async (e) => {
-   
+
     if (timeSheetRows.length === 0) {
       sweatalert.fire({
         icon: "warning",
@@ -1167,6 +1167,10 @@ const Timesheet = () => {
       //   saveTimesheetData({ req, authToken: token })
       // ).unwrap();
 
+      setLoading(true);
+      setIsDisabled(true);
+
+      
       const res = await SAVE_TIMESHEET({ req, authToken: token });
       if (res.status) {
         setActiveIndex(null);
@@ -1186,6 +1190,20 @@ const Timesheet = () => {
         // note States reset
         setIsModalOpen(false);
         setModalText("");
+        setLoading(false);
+        setIsDisabled(false);
+        return;
+      } else {
+        sweatalert.fire({
+          icon: "error",
+          title: res.message,
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 1500,
+        });
+        setLoading(false);
+        setIsDisabled(false);
+        return;
       }
     }
   };
@@ -1245,8 +1263,7 @@ const Timesheet = () => {
   }
 
   const saveTimeSheetRemark = async (e) => {
-    setLoading(true);
-    setIsDisabled(true);
+
     if (submitStatus == 1) {
       const updatedTimeSheetRows = timeSheetRows.map((item) => {
         return {
@@ -1324,20 +1341,21 @@ const Timesheet = () => {
             showConfirmButton: true,
             timer: 3000,
           });
-          setLoading(false);
-          setIsDisabled(false);
+
           return;
         }
       }
 
-       
-      
+      setLoading(true);
+      setIsDisabled(true);
+
+
 
       // const res = await dispatch(
       //   saveTimesheetData({ req, authToken: token })
       // ).unwrap();
 
-     const res = await SAVE_TIMESHEET({ req, authToken: token });
+      const res = await SAVE_TIMESHEET({ req, authToken: token });
       if (res.status) {
         setActiveIndex(null);
         setActiveField(null);
@@ -1355,12 +1373,26 @@ const Timesheet = () => {
         setSubmitStatus(0);
         setSubmitStatusAllKey(0);
         GetTimeSheet(weekOffSetValue.current);
-        
 
+        setLoading(false);
+        setIsDisabled(false);
+        return;
+      } else {
+        setLoading(false);
+        setIsDisabled(false);
+
+        sweatalert.fire({
+          icon: "error",
+          title: "Timesheet data submit failed.",
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 1500,
+        });
+        return;
       }
-      setLoading(false);
-      setIsDisabled(false);
+
       return;
+
     }
 
     const updatedTimeSheetRows = timeSheetRows.map((item) => {
@@ -1438,8 +1470,7 @@ const Timesheet = () => {
           showConfirmButton: true,
           timer: 3000,
         });
-        setLoading(false);
-        setIsDisabled(false);
+
         return;
       }
     }
@@ -1448,7 +1479,12 @@ const Timesheet = () => {
     //   saveTimesheetData({ req, authToken: token })
     // ).unwrap();
 
-   const res = await SAVE_TIMESHEET({ req, authToken: token });
+    setLoading(true);
+    setIsDisabled(true);
+
+
+
+    const res = await SAVE_TIMESHEET({ req, authToken: token });
 
     if (res.status) {
       setRemarkText(null);
@@ -1470,9 +1506,22 @@ const Timesheet = () => {
       setModalText("");
       setActiveIndex(null);
       setActiveField(null);
+      setLoading(false);
+      setIsDisabled(false);
+      return;
+    } else {
+      sweatalert.fire({
+        icon: "error",
+        title: res.message,
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500,
+      });
+      setLoading(false);
+      setIsDisabled(false);
+      return;
     }
-    setLoading(false);
-    setIsDisabled(false);
+
   };
 
   // const dayMonthFormatDate = (dateString) => {
@@ -1492,15 +1541,15 @@ const Timesheet = () => {
 
   const dayMonthFormatDate = (dateString) => {
 
-  const parts = dateString.split(", ");
-  const dateParts = parts[1].split("/");
+    const parts = dateString.split(", ");
+    const dateParts = parts[1].split("/");
 
-  const day = String(dateParts[0]).padStart(2, "0");
-  const month = String(dateParts[1]).padStart(2, "0");
-  const year = String(dateParts[2]).slice(-2); // last 2 digit
+    const day = String(dateParts[0]).padStart(2, "0");
+    const month = String(dateParts[1]).padStart(2, "0");
+    const year = String(dateParts[2]).slice(-2); // last 2 digit
 
-  return `${day}/${month}/${year}`;
-};
+    return `${day}/${month}/${year}`;
+  };
 
 
   const exportToCSV = (timeSheetRows) => {
@@ -1838,7 +1887,13 @@ const Timesheet = () => {
   console.log("timeSheetRows", timeSheetRows);
 
   return (
+
     <div className="container-fluid">
+      {loading && (
+        <div className="overlay">
+          <div className="loader"></div>
+        </div>
+      )}
       <div className="content-title">
         <div className="row">
           <div className="col-md-8">
@@ -1879,8 +1934,8 @@ const Timesheet = () => {
                   className="btn btn-info "
                   onClick={() => exportToCSV(timeSheetRows)}
                 >
-                <Download size={16} />
-               <span> Export Timesheet Data</span>
+                  <Download size={16} />
+                  <span> Export Timesheet Data</span>
                 </button>
               </div>
             ) : (
@@ -1921,7 +1976,7 @@ const Timesheet = () => {
             )}
 
             {staffDataWeekDataAll.data &&
-            staffDataWeekDataAll.data.length > 0 ? (
+              staffDataWeekDataAll.data.length > 0 ? (
               <div className="form-group col-md-4   pe-0">
                 <label className="form-label mb-2">Select Date</label>
                 <Select
@@ -1950,8 +2005,8 @@ const Timesheet = () => {
             )}
 
             {isExistStaffDataWeekDataAll?.data &&
-            isExistStaffDataWeekDataAll?.data.length > 0 &&
-            staffDataWeekDataAll?.data.length === 0 ? (
+              isExistStaffDataWeekDataAll?.data.length > 0 &&
+              staffDataWeekDataAll?.data.length === 0 ? (
               <div className="form-group col-md-4 pe-0">
                 <label className="form-label mb-2">Select Date</label>
                 <Select
@@ -2010,8 +2065,8 @@ const Timesheet = () => {
             )}
 
             {selectedLineManager != "" &&
-            staffDataWeekDataAll.data &&
-            staffDataWeekDataAll.data.length > 0 ? (
+              staffDataWeekDataAll.data &&
+              staffDataWeekDataAll.data.length > 0 ? (
               <div className="form-group col-md-4  pe-0">
                 <label className="form-label mb-2">
                   Line Manager Select Week
@@ -2078,10 +2133,9 @@ const Timesheet = () => {
                             </th>
 
                             <th
-                              className={`pe-0 week-data ${
-                                isExpanded ? "expanded" : ""
-                              }`}
-                              // style={{ width: isExpanded ? "50%" : "100px" }}
+                              className={`pe-0 week-data ${isExpanded ? "expanded" : ""
+                                }`}
+                            // style={{ width: isExpanded ? "50%" : "100px" }}
                             >
                               <div className="d-flex align-items-center">
                                 <ChevronLeft
@@ -2128,7 +2182,7 @@ const Timesheet = () => {
                                     }`}
                                     aria-hidden="true"
                                   ></i> */}
-                                   {isExpanded ? (
+                                  {isExpanded ? (
                                     <Minus size={16} />
                                   ) : (
                                     <Plus size={16} />
@@ -2237,7 +2291,7 @@ const Timesheet = () => {
                                 {/* Customer Selection */}
                                 <td>
                                   {item.newRow === 1 &&
-                                  item.task_type === "2" ? (
+                                    item.task_type === "2" ? (
                                     // <select
                                     //   className="form-select"
                                     //   style={{ width: "100px" }}
@@ -2303,7 +2357,7 @@ const Timesheet = () => {
                                 {/* Client Selection */}
                                 <td>
                                   {item.newRow === 1 &&
-                                  item.task_type === "2" ? (
+                                    item.task_type === "2" ? (
                                     // <select
                                     //   className="form-select"
                                     //   style={{ width: "90px" }}
@@ -2345,7 +2399,7 @@ const Timesheet = () => {
                                       }
                                       placeholder={
                                         !item.clientData ||
-                                        item.clientData.length === 0
+                                          item.clientData.length === 0
                                           ? "No Client"
                                           : "Client"
                                       }
@@ -2416,7 +2470,7 @@ const Timesheet = () => {
                                       }
                                       placeholder={
                                         !item.jobData ||
-                                        item.jobData.length === 0
+                                          item.jobData.length === 0
                                           ? "No Job"
                                           : "Job"
                                       }
@@ -2456,7 +2510,7 @@ const Timesheet = () => {
                                       );
                                       return matchedJob &&
                                         matchedJob.job_type_name !==
-                                          undefined ? (
+                                        undefined ? (
                                         <div style={{ width: "100px" }}>
                                           {matchedJob.job_type_name}
                                         </div>
@@ -2490,8 +2544,8 @@ const Timesheet = () => {
                                     // </select>
                                     <Select
                                       className="basic-multi-select"
-                                            menuPortalTarget={document.body}
-                                         menuPosition="fixed"
+                                      menuPortalTarget={document.body}
+                                      menuPosition="fixed"
                                       classNamePrefix="react-select"
                                       styles={{
                                         container: (base) => ({
@@ -2512,7 +2566,7 @@ const Timesheet = () => {
                                       }
                                       placeholder={
                                         !item.taskData ||
-                                        item.taskData.length === 0
+                                          item.taskData.length === 0
                                           ? "No Task"
                                           : "Task"
                                       }
@@ -2570,20 +2624,20 @@ const Timesheet = () => {
                                             // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false :false}
                                             disabled={
                                               staffDetails.id !=
-                                              multipleFilter.staff_id
+                                                multipleFilter.staff_id
                                                 ? true
                                                 : item.submit_status === "1"
-                                                ? true
-                                                : false
+                                                  ? true
+                                                  : false
                                             }
                                             onFocus={() => {
                                               setActiveIndex(index);
                                               setActiveField("monday");
                                             }}
-                                            // onBlur={() => {
-                                            //   setActiveIndex(null);
-                                            //   setActiveField(null);
-                                            // }}
+                                          // onBlur={() => {
+                                          //   setActiveIndex(null);
+                                          //   setActiveField(null);
+                                          // }}
                                           />
                                         </span>
 
@@ -2625,20 +2679,20 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false : true : false : currentDay !== 'tuesday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
                                             setActiveField("tuesday");
                                           }}
-                                          // onBlur={() => {
-                                          //   setActiveIndex(null);
-                                          //   setActiveField(null);
-                                          // }}
+                                        // onBlur={() => {
+                                        //   setActiveIndex(null);
+                                        //   setActiveField(null);
+                                        // }}
                                         />
                                         {activeIndex === index &&
                                           activeField === "tuesday" && (
@@ -2678,20 +2732,20 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false : true : false : currentDay !== 'wednesday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
                                             setActiveField("wednesday");
                                           }}
-                                          // onBlur={() => {
-                                          //   setActiveIndex(null);
-                                          //   setActiveField(null);
-                                          // }}
+                                        // onBlur={() => {
+                                        //   setActiveIndex(null);
+                                        //   setActiveField(null);
+                                        // }}
                                         />
                                         {activeIndex === index &&
                                           activeField === "wednesday" && (
@@ -2731,20 +2785,20 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ? currentDay === 'thursday' ? false : true : false : currentDay !== 'thursday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
                                             setActiveField("thursday");
                                           }}
-                                          // onBlur={() => {
-                                          //   setActiveIndex(null);
-                                          //   setActiveField(null);
-                                          // }}
+                                        // onBlur={() => {
+                                        //   setActiveIndex(null);
+                                        //   setActiveField(null);
+                                        // }}
                                         />
                                         {activeIndex === index &&
                                           activeField === "thursday" && (
@@ -2784,20 +2838,20 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? currentDay === 'friday' ? false : true : false : currentDay !== 'friday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
                                             setActiveField("friday");
                                           }}
-                                          // onBlur={() => {
-                                          //   setActiveIndex(null);
-                                          //   setActiveField(null);
-                                          // }}
+                                        // onBlur={() => {
+                                        //   setActiveIndex(null);
+                                        //   setActiveField(null);
+                                        // }}
                                         />
                                         {activeIndex === index &&
                                           activeField === "friday" && (
@@ -2837,20 +2891,20 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
                                             setActiveField("saturday");
                                           }}
-                                          // onBlur={() => {
-                                          //   setActiveIndex(null);
-                                          //   setActiveField(null);
-                                          // }}
+                                        // onBlur={() => {
+                                        //   setActiveIndex(null);
+                                        //   setActiveField(null);
+                                        // }}
                                         />
                                         {activeIndex === index &&
                                           activeField === "saturday" && (
@@ -2892,11 +2946,11 @@ const Timesheet = () => {
                                           // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false : currentDay !== 'monday'}
                                           disabled={
                                             staffDetails.id !=
-                                            multipleFilter.staff_id
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
-                                              ? true
-                                              : false
+                                                ? true
+                                                : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
@@ -3187,7 +3241,7 @@ const Timesheet = () => {
                                   className="edit-icon"
                                   onClick={() => setRemarkModel(true)}
                                 >
-                                 <Eye size={16} />
+                                  <Eye size={16} />
                                 </button>
                               </span>
                             </div>
@@ -3234,7 +3288,7 @@ const Timesheet = () => {
                       saveData(e);
                     }}
                   >
-                     <Check size={16} /> Save
+                    <Check size={16} /> Save
                   </button>
 
                   <button
@@ -3243,7 +3297,7 @@ const Timesheet = () => {
                       submitData(e);
                     }}
                   >
-                     <Save size={16} /> Submit
+                    <Save size={16} /> Submit
                   </button>
                 </>
               ) : (
@@ -3328,14 +3382,14 @@ const Timesheet = () => {
                     <p>
                       {remarkSingleIndex != null && timeSheetRows.length > 0
                         ? ["", null, undefined].includes(
-                            timeSheetRows[remarkSingleIndex]
-                          )
+                          timeSheetRows[remarkSingleIndex]
+                        )
                           ? "No Remark Found"
                           : !["", null, undefined].includes(
-                              timeSheetRows[remarkSingleIndex].remark
-                            )
-                          ? timeSheetRows[remarkSingleIndex].remark
-                          : "No Remark Found"
+                            timeSheetRows[remarkSingleIndex].remark
+                          )
+                            ? timeSheetRows[remarkSingleIndex].remark
+                            : "No Remark Found"
                         : "No Remark Found"}
                     </p>
                   ) : (
@@ -3357,8 +3411,8 @@ const Timesheet = () => {
                         value={
                           remarkSingleIndex != null && timeSheetRows.length > 0
                             ? ["", null, undefined].includes(
-                                timeSheetRows[remarkSingleIndex]
-                              )
+                              timeSheetRows[remarkSingleIndex]
+                            )
                               ? ""
                               : timeSheetRows[remarkSingleIndex].remark
                             : ""
