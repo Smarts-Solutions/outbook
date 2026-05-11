@@ -17,8 +17,9 @@ const Sidebar = () => {
       "/admin/client/profiles": false, // For "Job" dropdown
       "/admin/ClientLists": false, // For "Client" dropdown
       "/admin/reports": false, // For "Reports" dropdown
-      "admin/timesheetReports": false, // For "Time Sheet Reports" dropdown
+      "/admin/timesheetReports": false, // For "Time Sheet Reports" dropdown
       "/admin/job/customreport": false, // For "Custom Job Report" dropdown
+      "customerReports": false, // For Customer Reports dropdown
     },
   });
 
@@ -48,10 +49,17 @@ const Sidebar = () => {
       } else if (
         location.pathname.startsWith("/admin/reports") ||
         location.pathname.startsWith("/admin/timesheetReports") ||
-        location.pathname.startsWith("/admin/job/customreport")
+        location.pathname.startsWith("/admin/job/customreport") ||
+        location.pathname.startsWith("/customer/reports") ||
+        location.pathname.startsWith("/customer/timesheetReports") ||
+        location.pathname.startsWith("/customer/job/customreport")
       ) {
         // any report-related path -> open the Reports parent
-        allKeys["/admin/reports"] = true;
+        if (role === "CUSTOMER") {
+          allKeys["customerReports"] = true;
+        } else {
+          allKeys["/admin/reports"] = true;
+        }
       }
 
       return {
@@ -70,6 +78,9 @@ const Sidebar = () => {
       "/admin/reports",
       "/admin/timesheetReports",
       "/admin/job/customreport",
+      "/customer/reports",
+      "/customer/timesheetReports",
+      "/customer/job/customreport",
     ];
     const customerPaths = [
       "/admin/customer",
@@ -87,7 +98,11 @@ const Sidebar = () => {
       );
 
       if (reportPaths.some((p) => linkPathname.startsWith(p))) {
-        newDropdown["/admin/reports"] = true;
+        if (role === "CUSTOMER") {
+          newDropdown["customerReports"] = true;
+        } else {
+          newDropdown["/admin/reports"] = true;
+        }
       } else if (
         (linkPathname === "/admin/customer" || linkPathname.startsWith("/admin/customer/")) ||
         linkPathname.startsWith("/admin/client") ||
@@ -189,13 +204,80 @@ const Sidebar = () => {
                   </li>
                 )}
                 {role === "CUSTOMER" && hasAccess("report") && (
-                  <li className={activeLink === "/customer/reports" ? "active" : ""}>
-                    <Link to="/customer/reports">
-                      <span className="sidebar-icons">
-                        <FileText />
+                  <li
+                    className={
+                      activeLink.startsWith("/customer/reports") ||
+                        activeLink.startsWith("/customer/timesheetReports") ||
+                        activeLink.startsWith("/customer/job/customreport")
+                        ? "active"
+                        : ""
+                    }
+                  >
+                    <a
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleMenuClick(e, "customerReports");
+                      }}
+                      className="sidebar-parent"
+                    >
+                      <div>
+                        <span className="sidebar-icons">
+                          <FileText />
+                        </span>
+                        <span className="pe-4 pe-lg-4">Reports</span>
+                      </div>
+                      <span className="chevron-icon">
+                        {menuState.dropdownOpen["customerReports"] ? (
+                          <ChevronDown size={16} />
+                        ) : (
+                          <ChevronRight size={16} />
+                        )}
                       </span>
-                      <span>Reports</span>
-                    </Link>
+                    </a>
+                    <ul
+                      className={`nav-second-level ${menuState.dropdownOpen["customerReports"]
+                        ? "in"
+                        : "mm-collapse"
+                        }`}
+                      aria-expanded={
+                        menuState.dropdownOpen["customerReports"] ? "true" : "false"
+                      }
+                    >
+                      <li className={activeLink === "/customer/reports" ? "active" : ""}>
+                        <Link
+                          to="/customer/reports"
+                          onClick={(e) => handleLinkClick(e, "/customer/reports")}
+                        >
+                          <span className="sidebar-icons">
+                            <File />
+                          </span>
+                          <span>Standard</span>
+                        </Link>
+                      </li>
+                      <li className={activeLink === "/customer/timesheetReports" ? "active" : ""}>
+                        <Link
+                          to="/customer/timesheetReports"
+                          onClick={(e) => handleLinkClick(e, "/customer/timesheetReports")}
+                        >
+                          <span className="sidebar-icons">
+                            <Clock />
+                          </span>
+                          <span>Time Sheet</span>
+                        </Link>
+                      </li>
+                      <li className={activeLink === "/customer/job/customreport" ? "active" : ""}>
+                        <Link
+                          to="/customer/job/customreport"
+                          onClick={(e) => handleLinkClick(e, "/customer/job/customreport")}
+                        >
+                          <span className="sidebar-icons">
+                            <Clock1 />
+                          </span>
+                          <span>Custom Job</span>
+                        </Link>
+                      </li>
+                    </ul>
                   </li>
                 )}
               </>

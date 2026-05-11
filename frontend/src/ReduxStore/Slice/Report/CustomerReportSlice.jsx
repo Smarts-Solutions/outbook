@@ -12,6 +12,8 @@ import {
   CUSTOMER_REPORT_COUNT_JOB,
   CUSTOMER_MISSING_TIMESHEET_REPORT,
   CUSTOMER_DISCREPANCY_REPORT,
+  CUSTOMER_TIMESHEET_REPORTS,
+  CUSTOMER_GET_ALL_TASK_BY_STAFF,
 } from "../../../Services/Report/customerReportService";
 
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
@@ -195,6 +197,33 @@ export const CustomerDiscrepancyReport = createAsyncThunk(
   }
 );
 
+export const CustomerTimesheetReports = createAsyncThunk(
+  "CustomerTimesheetReports",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      const res = await CUSTOMER_TIMESHEET_REPORTS(req, authToken);
+      return res;
+    } catch (err) {
+      return err;
+    }
+  }
+);
+
+export const CustomerGetAllTaskByStaff = createAsyncThunk(
+  "CustomerGetAllTaskByStaff",
+  async (data, { rejectWithValue }) => {
+    try {
+      const { req, authToken } = data;
+      const res = await CUSTOMER_GET_ALL_TASK_BY_STAFF(req, authToken);
+      return res;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+
 const CustomerReportSlice = createSlice({
   name: "CustomerReportSlice",
   initialState: {
@@ -249,6 +278,17 @@ const CustomerReportSlice = createSlice({
         state.receivedsentreport = action.payload;
       })
       .addCase(CustomerReceivedSentReport.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(CustomerTimesheetReports.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(CustomerTimesheetReports.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.timesheetReports = action.payload;
+      })
+      .addCase(CustomerTimesheetReports.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
       });

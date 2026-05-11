@@ -62,9 +62,9 @@ exports.teamMonthlyReports = async (req, res) => {
 
 exports.taxWeeklyStatusReport = async (req, res) => {
   try {
-    const result = await customerReportModel.taxWeeklyStatusReport({ 
+    const result = await customerReportModel.taxWeeklyStatusReport({
       StaffUserId: req.userId,
-      ...req.body 
+      ...req.body
     });
     res.status(200).json(result);
   } catch (error) {
@@ -74,8 +74,8 @@ exports.taxWeeklyStatusReport = async (req, res) => {
 
 exports.taxWeeklyStatusReportFilterKey = async (req, res) => {
   try {
-    const result = await customerReportModel.taxWeeklyStatusReportFilterKey({ 
-      StaffUserId: req.userId 
+    const result = await customerReportModel.taxWeeklyStatusReportFilterKey({
+      StaffUserId: req.userId
     });
     res.status(200).json(result);
   } catch (error) {
@@ -125,3 +125,28 @@ exports.discrepancyReport = async (req, res) => {
     res.status(500).json({ status: false, message: error.message });
   }
 };
+
+exports.getTimesheetReportData = async (req, res) => {
+  try {
+    const result = await customerReportModel.getTimesheetReportData({
+      StaffUserId: req.userId,
+      data: req.body,
+    });
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
+exports.getAllTaskByStaff = async (req, res) => {
+  try {
+    const result = await customerReportModel.getAllTaskByStaff({
+      StaffUserId: req.userId,
+      data: req.body,
+    });
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
