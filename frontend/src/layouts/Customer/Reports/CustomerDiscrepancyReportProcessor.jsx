@@ -101,7 +101,7 @@ const CustomerDiscrepancyReportProcessor = () => {
             </div>
           </div>
           <div className='col-md-5 text-end'>
-             <ExportToExcel apiData={exportData} fileName={'Discrepancy_Report_Processor'} headers={headers} />
+            <ExportToExcel apiData={exportData} fileName={'Discrepancy_Report_Processor'} headers={headers} />
           </div>
         </div>
 

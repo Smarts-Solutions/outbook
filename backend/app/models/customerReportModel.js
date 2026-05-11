@@ -235,11 +235,11 @@ const jobStatusReports = async (Report) => {
       LIMIT ? OFFSET ?
     `;
 
-        let [rowsData] = await pool.execute(dataQuery, [
-            ...searchValues,
-            Number(limit),
-            Number(offset),
-        ]);
+    let [rowsData] = await pool.execute(dataQuery, [
+      ...searchValues,
+      Number(limit),
+      Number(offset),
+    ]);
 
     const countQuery = `
       SELECT COUNT(DISTINCT jobs.id) AS total
@@ -266,13 +266,13 @@ const jobStatusReports = async (Report) => {
 
     const [[{ total }]] = await pool.execute(countQuery, searchValues);
 
-        if (rowsData && rowsData.length > 0) {
+    if (rowsData && rowsData.length > 0) {
 
-            rowsData = await Promise.all(
-                rowsData.map(async (element, index) => {
+      rowsData = await Promise.all(
+        rowsData.map(async (element, index) => {
 
 
-                    const Get_account_manger_id = `
+          const Get_account_manger_id = `
       SELECT s.id,
              CONCAT(s.first_name, ' ', s.last_name) AS full_name,
              s.employee_number
@@ -286,33 +286,33 @@ const jobStatusReports = async (Report) => {
       AND s.id != ?
     `;
 
-                    const [rowsAccountManager] = await pool.execute(
-                        Get_account_manger_id,
-                        [element.customer_id, element.service_id, element.account_manager_id]
-                    );
+          const [rowsAccountManager] = await pool.execute(
+            Get_account_manger_id,
+            [element.customer_id, element.service_id, element.account_manager_id]
+          );
 
-                    return {
-                        ...element,
-                        account_managers: rowsAccountManager
-                    };
+          return {
+            ...element,
+            account_managers: rowsAccountManager
+          };
 
-                })
-            );
+        })
+      );
 
-        }
-
-
-        return {
-            status: true,
-            message: "Success.",
-            data: { rows: rowsData, total },
-        };
-
-
-    } catch (error) {
-        console.log("error ", error);
-        return { status: false, message: "Error getting job status report." };
     }
+
+
+    return {
+      status: true,
+      message: "Success.",
+      data: { rows: rowsData, total },
+    };
+
+
+  } catch (error) {
+    console.log("error ", error);
+    return { status: false, message: "Error getting job status report." };
+  }
 };
 
 const jobSummaryReports = async (Report) => {
@@ -905,9 +905,9 @@ const taxWeeklyStatusReport = async (Report) => {
 
     // âœ… Apply access filters for non-admins
     if (!(rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
-        query += ` AND ${customerCondition.replace(/customer_id/g, "customers.id")} `;
-        query += ` AND ${clientCondition.replace(/id/g, "clients.id")} `;
-        query += ` AND ${jobCondition.replace(/id/g, "jobs.id")} `;
+      query += ` AND ${customerCondition.replace(/customer_id/g, "customers.id")} `;
+      query += ` AND ${clientCondition.replace(/id/g, "clients.id")} `;
+      query += ` AND ${jobCondition.replace(/id/g, "jobs.id")} `;
     }
 
     // ðŸ” Dynamic filters
@@ -967,16 +967,16 @@ const taxWeeklyStatusReport = async (Report) => {
         grouped[key].weeks[0][`WE_${weekNum}_${currentYear}`];
       const existingIds = existingWeek.job_ids
         ? existingWeek.job_ids
-            .split(",")
-            .map((id) => id.trim())
-            .filter((id) => id)
+          .split(",")
+          .map((id) => id.trim())
+          .filter((id) => id)
         : [];
 
       const newIds = row.job_ids
         ? row.job_ids
-            .split(",")
-            .map((id) => id.trim())
-            .filter((id) => id)
+          .split(",")
+          .map((id) => id.trim())
+          .filter((id) => id)
         : [];
 
       // Combine and keep unique job IDs
@@ -991,9 +991,9 @@ const taxWeeklyStatusReport = async (Report) => {
       // --- Update Grand Total (unique across all weeks) ---
       const existingTotalIds = grouped[key].Grand_Total.job_ids
         ? grouped[key].Grand_Total.job_ids
-            .split(",")
-            .map((id) => id.trim())
-            .filter((id) => id)
+          .split(",")
+          .map((id) => id.trim())
+          .filter((id) => id)
         : [];
 
       const totalUniqueIds = [...new Set([...existingTotalIds, ...newIds])];
@@ -1044,18 +1044,18 @@ const taxWeeklyStatusReportFilterKey = async (Report) => {
       const [data] = await pool.execute(queryCustomer);
       custumerData = data;
     } else {
-        if (assignedCustomerIds.length > 0) {
-            const queryCustomer = `
+      if (assignedCustomerIds.length > 0) {
+        const queryCustomer = `
                 SELECT id AS customer_id, trading_name AS customer_name
                 FROM customers
                 WHERE id IN (${assignedCustomerIds.join(',')})
                 ORDER BY trading_name ASC;
             `;
-            const [data] = await pool.execute(queryCustomer);
-            custumerData = data;
-        } else {
-            custumerData = [];
-        }
+        const [data] = await pool.execute(queryCustomer);
+        custumerData = data;
+      } else {
+        custumerData = [];
+      }
     }
 
     if (custumerData.length > 0) {
@@ -2297,9 +2297,9 @@ const getJobCustomReport = async (Report) => {
       periodSet.add(periodKey);
 
       if (!groups[gid]) {
-        groups[gid] = { 
-          ...r, 
-          periodSeconds: {} 
+        groups[gid] = {
+          ...r,
+          periodSeconds: {}
         };
       }
       groups[gid].periodSeconds[periodKey] = (groups[gid].periodSeconds[periodKey] || 0) + 1;
@@ -2347,7 +2347,7 @@ const getJobCustomReport = async (Report) => {
     const total_count_header = !["", null, undefined].includes(displayBy) ? ["total_count"] : [];
     const weeks = !["", null, undefined].includes(displayBy) ? getWeekEndings(new Date(fromDate), new Date(toDate), displayBy) : [];
     const columnsWeeks = [...groupBy, ...weeks, ...total_count_header];
-    
+
     const finalRows = normalizeRows(columnsWeeks, outRows);
     const fixed = [...groupBy];
     const dynamic = columnsWeeks.filter(col => !fixed.includes(col));
@@ -2422,7 +2422,7 @@ const getAllTaskByStaff = async (Report) => {
 async function getAllTaskByStaffData(Report) {
   const { StaffUserId } = Report;
   const filters = await getStaffAccessFilters(StaffUserId);
-  
+
   const [jobs] = await pool.execute(`SELECT id FROM jobs WHERE 1=1 AND ${filters.jobCondition}`);
   const jobIds = jobs.length > 0 ? jobs.map(j => j.id).join(",") : "0";
 
@@ -2453,7 +2453,7 @@ async function getStaffWithRole(Report) {
   const { role_id } = data;
   let query = "SELECT id, CONCAT(first_name, ' ', last_name) as name, employee_number FROM staffs WHERE status = 1";
   let params = [];
-  
+
   if (role_id === "employee_number") {
     query += " AND employee_number IS NOT NULL AND employee_number != ''";
   } else if (role_id === "other") {
@@ -2462,7 +2462,7 @@ async function getStaffWithRole(Report) {
     query += " AND role_id = ?";
     params.push(role_id);
   }
-  
+
   const [result] = await pool.execute(query, params);
   return { status: true, message: "Success.", data: result };
 }
@@ -2608,7 +2608,7 @@ async function getTimesheetReportDataInternal(Report) {
 
     // Apply customer-scoped filters
     if (accessFilters.customer_ids && accessFilters.customer_ids.length > 0) {
-        where.push(`raw.customer_id IN (${accessFilters.customer_ids.join(",")})`);
+      where.push(`raw.customer_id IN (${accessFilters.customer_ids.join(",")})`);
     }
 
     where = where.length ? `WHERE ${where.join(" AND ")}` : "";
@@ -2616,24 +2616,24 @@ async function getTimesheetReportDataInternal(Report) {
     const groupValueSQL = `CONCAT_WS('::', ${groupBy.map((f) => (f === "employee_number" ? "s.employee_number" : `${f}`)).join(", ")}) AS group_value`;
 
     const groupLabelSQL = groupBy.map((f) => {
-        if (f === "staff_id") return "CONCAT(s.first_name,' ',s.last_name)";
-        if (f === "customer_id") return "c.id";
-        if (f === "client_id") return "cl.id";
-        if (f === "job_id") {
-          return `CASE 
+      if (f === "staff_id") return "CONCAT(s.first_name,' ',s.last_name)";
+      if (f === "customer_id") return "c.id";
+      if (f === "client_id") return "cl.id";
+      if (f === "job_id") {
+        return `CASE 
                     WHEN raw.task_type = '1' THEN internal.name
                     WHEN raw.task_type = '2' THEN j.job_id
                 END`;
-        }
-        if (f === "task_id") {
-          return `CASE 
+      }
+      if (f === "task_id") {
+        return `CASE 
                     WHEN raw.task_type = '1' THEN sub_internal.name
                     WHEN raw.task_type = '2' THEN t.name
                 END`;
-        }
-        if (f === "employee_number") return "s.employee_number";
-        return f;
-      }).join(", ' - ', ");
+      }
+      if (f === "employee_number") return "s.employee_number";
+      return f;
+    }).join(", ' - ', ");
 
     const groupLabelFinal = `CONCAT(${groupLabelSQL}) AS group_label`;
     const staffName = `CONCAT(s.first_name,' ',s.last_name) AS staff_name`;
@@ -2788,7 +2788,7 @@ async function getCustomersFilter(Report) {
   const userRole = userRoleRows.length > 0 ? userRoleRows[0].role_name : "";
   const isAdmin = ["SUPERADMIN", "ADMIN"].includes(userRole);
   const filters = isAdmin ? null : await getStaffAccessFilters(StaffUserId);
-  
+
   let where = [];
   if (filters) {
     const customerCondition = filters.customerCondition.replace(/\bcustomer_id\b/g, "id");
@@ -2808,7 +2808,7 @@ async function getCustomersFilter(Report) {
     WHERE ${where.join(" AND ")}
     ORDER BY trading_name ASC
   `;
-  
+
   const [rows] = await pool.execute(query, params.length > 0 ? params : undefined);
   return { status: true, data: rows };
 }
@@ -2821,7 +2821,7 @@ async function getClientsFilter(Report) {
   const userRole = userRoleRows.length > 0 ? userRoleRows[0].role_name : "";
   const isAdmin = ["SUPERADMIN", "ADMIN"].includes(userRole);
   const filters = isAdmin ? null : await getStaffAccessFilters(StaffUserId);
-  
+
   let where = [];
   if (filters) {
     const customerCondition = filters.customerCondition.replace(/\bcustomer_id\b/g, "cl.customer_id");
@@ -2842,7 +2842,7 @@ async function getClientsFilter(Report) {
     WHERE ${where.join(" AND ")}
     ORDER BY cl.trading_name ASC
   `;
-  
+
   const [rows] = await pool.execute(query, params.length > 0 ? params : undefined);
   const mapped = rows.map(r => ({ id: r.id, name: `${r.trading_name} (${r.client_code})` }));
   return { status: true, data: mapped };
@@ -2856,7 +2856,7 @@ async function getJobsFilter(Report) {
   const userRole = userRoleRows.length > 0 ? userRoleRows[0].role_name : "";
   const isAdmin = ["SUPERADMIN", "ADMIN"].includes(userRole);
   const filters = isAdmin ? null : await getStaffAccessFilters(StaffUserId);
-  
+
   let where = [];
   if (filters) {
     const customerCondition = filters.customerCondition.replace(/\bcustomer_id\b/g, "j.customer_id");
@@ -2878,7 +2878,7 @@ async function getJobsFilter(Report) {
     WHERE ${where.join(" AND ")}
     ORDER BY j.job_id ASC
   `;
-  
+
   const [rows] = await pool.execute(query, params.length > 0 ? params : undefined);
   return { status: true, data: rows };
 }
@@ -2912,7 +2912,7 @@ async function getDateRange(timePeriod, fromDateParam, toDateParam) {
   switch ((timePeriod || "").toLowerCase()) {
     case "this_week": {
       const cur = copy(today);
-      const day = (cur.getDay() + 6) % 7; 
+      const day = (cur.getDay() + 6) % 7;
       start = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() - day);
       end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
       break;
