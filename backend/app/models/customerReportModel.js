@@ -1781,8 +1781,33 @@ const discrepancyReportProcessor = async (Report) => {
 };
 
 const capacityReport = async (Report) => {
-  return { status: true, message: "Capacity Report is under development.", data: [] };
+  const { StaffUserId } = Report;
+  try {
+    const { customerCondition, jobCondition } = await getStaffAccessFilters(StaffUserId);
+
+    const query = `
+      SELECT 
+          CONCAT(s.first_name, ' ', s.last_name) AS staff_fullname,
+          r.role AS role_name,
+          COUNT(j.id) AS active_jobs,
+          COALESCE(SEC_TO_TIME(SUM(TIME_TO_SEC(NULLIF(j.total_time, '')))), '00:00:00') AS total_budgeted_time
+      FROM staffs s
+      JOIN roles r ON s.role_id = r.id
+      JOIN jobs j ON (j.allocated_to = s.id OR j.reviewer = s.id OR j.account_manager_id = s.id)
+      WHERE j.status_type NOT IN (6) AND j.${customerCondition} AND j.${jobCondition}
+      GROUP BY s.id, r.role
+      ORDER BY s.first_name ASC
+    `;
+
+
+    const [result] = await pool.execute(query);
+    return { status: true, message: "Success.", data: result };
+  } catch (error) {
+    console.error("capacityReport error", error);
+    return { status: false, message: "Error fetching capacity report." };
+  }
 };
+
 async function getDateRange(timePeriod, fromDateParam, toDateParam) {
   const today = new Date();
   const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
