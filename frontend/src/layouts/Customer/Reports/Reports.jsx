@@ -68,21 +68,21 @@ function CustomerReports() {
                 <h5 className="mb-4" style={{ fontWeight: 600 }}>Customer Reports</h5>
               </div>
               <div className="col-lg-4 col-md-6 ">
-                  <select className="form-select" id="tabSelect"
-                    value={activeTab}
-                    onChange={(e) => handleTabClick(e.target.value)}
-                  >
-                    <option value="jobStatusReport">Job Status Report</option>
-                    <option value="jobsReceivedSentReports">Jobs Received Sent Reports</option>
-                    <option value="jobSummaryReport">Job Summary Report</option>
-                    <option value="jobsPendingReport">Jobs Pending Report</option>
-                    <option value="dueByReport">Due By Report</option>
-                    <option value="teamMonthlyReports">Team Monthly Reports</option>
-                    <option value="taxWeeklyStatusReport">Tax Weekly Status Report</option>
-                    <option value="averageTatReport">Average TAT Report</option>
-                    <option value="missingTimesheetReport">Missing Timesheet Report</option>
-                    <option value="discrepancyReport">Discrepancy Report</option>
-                  </select>
+                <select className="form-select" id="tabSelect"
+                  value={activeTab}
+                  onChange={(e) => handleTabClick(e.target.value)}
+                >
+                  <option value="jobStatusReport">Job Status Report</option>
+                  <option value="jobsReceivedSentReports">Jobs Received Sent Reports</option>
+                  <option value="jobSummaryReport">Job Summary Report</option>
+                  <option value="jobsPendingReport">Jobs Pending Report</option>
+                  <option value="dueByReport">Due By Report</option>
+                  <option value="teamMonthlyReports">Team Performance Report by Month</option>
+                  <option value="taxWeeklyStatusReport">Tax Weekly Status Report</option>
+                  <option value="averageTatReport">Average TAT Report</option>
+                  <option value="missingTimesheetReport">Missing Timesheet Report</option>
+                  <option value="discrepancyReport">Discrepancy Report</option>
+                </select>
               </div>
             </div>
           </div>
