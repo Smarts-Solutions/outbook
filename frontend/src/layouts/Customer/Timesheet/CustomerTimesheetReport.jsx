@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
+  CustomerTimesheetReports,
+  CustomerGetAllTaskByStaff,
+} from "../../../ReduxStore/Slice/Report/CustomerReportSlice";
+import {
   getAllCustomerDropDown,
   JobAction,
-  getAllTaskByStaff,
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
-import { CustomerTimesheetReports } from "../../../ReduxStore/Slice/Report/CustomerReportSlice";
 import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useDispatch } from "react-redux";
 import Select from "react-select";
@@ -103,7 +105,7 @@ function CustomerTimesheetReport() {
   const employeeData = async () => {
     var req = { action: "getStaffWithRole", role_id: "employee_number" };
     var data = { req: req, authToken: token };
-    await dispatch(getAllTaskByStaff(data))
+    await dispatch(CustomerGetAllTaskByStaff(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
@@ -118,7 +120,7 @@ function CustomerTimesheetReport() {
   const getAllFilters = async () => {
     var req = { action: "getAllFilters", type: "timesheet_report" };
     var data = { req: req, authToken: token };
-    await dispatch(getAllTaskByStaff(data))
+    await dispatch(CustomerGetAllTaskByStaff(data))
       .unwrap()
       .then((response) => {
         if (response.status) {
@@ -126,13 +128,13 @@ function CustomerTimesheetReport() {
             value: item.id,
             label: `
             Group By : [${JSON.parse(item?.groupBy)?.map((it) => it.replace(/_id$/i, ""))}]<br/>
-            ${item.staff_fullname ? `⮞ Staff : ${item.staff_fullname}<br/>` : ""}
-            ${item.customer_name ? `⮞ Customer : ${item.customer_name}<br/>` : ""}
-            ${item.client_name ? `⮞ Client : ${item.client_name}<br/>` : ""}
-            ${item.job_name ? `⮞ Job : ${item.job_name}<br/>` : ""}
-            ${item.task_name ? `⮞ Task : ${item.task_name}<br/>` : ""}
-            ${item.internal_job_name ? `⮞ Internal Job : ${item.internal_job_name}<br/>` : ""}
-            ${item.internal_task_name ? `⮞ Internal Task : ${item.internal_task_name}<br/>` : ""}
+            ${item.staff_fullname ? `â®ž Staff : ${item.staff_fullname}<br/>` : ""}
+            ${item.customer_name ? `â®ž Customer : ${item.customer_name}<br/>` : ""}
+            ${item.client_name ? `â®ž Client : ${item.client_name}<br/>` : ""}
+            ${item.job_name ? `â®ž Job : ${item.job_name}<br/>` : ""}
+            ${item.task_name ? `â®ž Task : ${item.task_name}<br/>` : ""}
+            ${item.internal_job_name ? `â®ž Internal Job : ${item.internal_job_name}<br/>` : ""}
+            ${item.internal_task_name ? `â®ž Internal Task : ${item.internal_task_name}<br/>` : ""}
           `,
             filters: item.filter_record,
           }));
@@ -282,7 +284,7 @@ function CustomerTimesheetReport() {
     if (internal_external === "0" || internal_external === "1") {
       var req = { action: "getInternalJobs" };
       var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
+      await dispatch(CustomerGetAllTaskByStaff(data))
         .unwrap()
         .then((response) => {
           if (response.status) {
@@ -297,7 +299,7 @@ function CustomerTimesheetReport() {
     if (internal_external === "0" || internal_external === "1") {
       var reqInt = { action: "getInternalTasks" };
       var dataInt = { req: reqInt, authToken: token };
-      await dispatch(getAllTaskByStaff(dataInt))
+      await dispatch(CustomerGetAllTaskByStaff(dataInt))
         .unwrap()
         .then((response) => {
           if (response.status) {
@@ -309,7 +311,7 @@ function CustomerTimesheetReport() {
     if (internal_external === "0" || internal_external === "2") {
       var reqExt = { action: "get" };
       var dataExt = { req: reqExt, authToken: token };
-      await dispatch(getAllTaskByStaff(dataExt))
+      await dispatch(CustomerGetAllTaskByStaff(dataExt))
         .unwrap()
         .then((response) => {
           if (response.status) {
@@ -420,7 +422,7 @@ function CustomerTimesheetReport() {
     }
     const req = { action: "saveFilters", filters: filters, id: filterId, type: "timesheet_report" };
     const data = { req: req, authToken: token };
-    await dispatch(getAllTaskByStaff(data)).unwrap().then((response) => {
+    await dispatch(CustomerGetAllTaskByStaff(data)).unwrap().then((response) => {
       if (response.status) {
         sweatalert.fire({ title: "Success", text: response.message, icon: "success" });
         getAllFilters();
@@ -442,7 +444,7 @@ function CustomerTimesheetReport() {
     if (result.isConfirmed) {
       const req = { action: "deleteFilterId", filterId: filterId, type: "timesheet_report" };
       const data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data)).unwrap().then((response) => {
+      await dispatch(CustomerGetAllTaskByStaff(data)).unwrap().then((response) => {
         if (response.status) {
           sweatalert.fire({ title: "Success", text: response.message, icon: "success" });
           getAllFilters();
@@ -463,7 +465,13 @@ function CustomerTimesheetReport() {
                 <label className="form-label fw-medium mt-2 mb-1">Saved Filters</label>
                 <div className="d-flex align-items-center gap-2">
                   <Select
-                    options={[{ value: "", label: "Select..." }, ...getAllFilterData.map((opt) => ({ value: opt.value, label: <span dangerouslySetInnerHTML={{ __html: opt.label }} /> }))]}
+                    options={[
+                      { value: "", label: "Select..." },
+                      ...(getAllFilterData || []).map((opt) => ({
+                        value: opt.value,
+                        label: <span dangerouslySetInnerHTML={{ __html: opt.label }} />,
+                      })),
+                    ]}
                     value={getAllFilterData.find((opt) => Number(opt.value) === Number(filterId)) || null}
                     onChange={handleFilterSelect}
                     isSearchable

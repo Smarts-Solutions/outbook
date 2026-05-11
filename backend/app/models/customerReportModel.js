@@ -903,14 +903,14 @@ const taxWeeklyStatusReport = async (Report) => {
 
     const params = [currentYear];
 
-    // ✅ Apply access filters for non-admins
+    // âœ… Apply access filters for non-admins
     if (!(rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
         query += ` AND ${customerCondition.replace(/customer_id/g, "customers.id")} `;
         query += ` AND ${clientCondition.replace(/id/g, "clients.id")} `;
         query += ` AND ${jobCondition.replace(/id/g, "jobs.id")} `;
     }
 
-    // 🔍 Dynamic filters
+    // ðŸ” Dynamic filters
     if (customer_id) {
       query += ` AND customers.id = ?`;
       params.push(customer_id);
@@ -937,7 +937,7 @@ const taxWeeklyStatusReport = async (Report) => {
 
     const [rowsData] = await pool.execute(query, params);
 
-    // 🧾 Format Result (same as old structure)
+    // ðŸ§¾ Format Result (same as old structure)
     const formattedResult = [];
     const grouped = {};
 
@@ -984,7 +984,7 @@ const taxWeeklyStatusReport = async (Report) => {
 
       // Update week data
       grouped[key].weeks[0][`WE_${weekNum}_${currentYear}`] = {
-        count: uniqueIds.length, // ✅ count based on unique IDs
+        count: uniqueIds.length, // âœ… count based on unique IDs
         job_ids: uniqueIds.join(","),
       };
 
@@ -1836,8 +1836,442 @@ function getWeekEndings(fromDate, toDate, displayBy = "daily") {
   return [...new Set(result)];
 }
 
-const getTimesheetReportData = async (Report) => {
+const getJobCustomReport = async (Report) => {
   const { StaffUserId, data } = Report;
+  var {
+    groupBy = ["job_id"],
+    additionalField = [],
+    job_id,
+    customer_id,
+    client_id,
+    account_manager_id,
+    allocated_to_id,
+    reviewer_id,
+    allocated_to_other_id,
+    service_id,
+    job_type_id,
+    status_type_id,
+    employee_number,
+    date_received_on,
+    allocated_on,
+    job_priority,
+    engagement_model,
+    customer_account_manager_officer,
+    status_updation_date,
+    Transactions_Posting_id_2,
+    Number_of_Bank_Transactions_id_2,
+    Number_of_Journal_Entries_id_2,
+    Number_of_Other_Transactions_id_2,
+    Number_of_Petty_Cash_Transactions_id_2,
+    Number_of_Purchase_Invoices_id_2,
+    Number_of_Sales_Invoices_id_2,
+    Number_of_Total_Transactions_id_2,
+    submission_deadline,
+    Tax_Year_id_4,
+    If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+    Whose_Tax_Return_is_it_id_4,
+    Type_of_Payslip_id_3,
+    Year_Ending_id_1,
+    Bookkeeping_Frequency_id_2,
+    CIS_Frequency_id_3,
+    Filing_Frequency_id_8,
+    Management_Accounts_Frequency_id_6,
+    Payroll_Frequency_id_3,
+    budgeted_hours,
+    feedback_incorporation_time,
+    review_time,
+    total_preparation_time,
+    total_time,
+    due_on,
+    customer_deadline_date,
+    expected_delivery_date,
+    internal_deadline_date,
+    sla_deadline_date,
+    Management_Accounts_FromDate_id_6,
+    Management_Accounts_ToDate_id_6,
+    staff_full_name,
+    role,
+    staff_email,
+    line_manager,
+    staff_status,
+    line_manager_id,
+    timePeriod,
+    displayBy,
+    fromDate,
+    toDate,
+  } = data.filters;
+
+  const accessFilters = await getStaffAccessFilters(StaffUserId);
+  let { page = 1, limit = 10, search = "" } = data;
+  const offset = (page - 1) * limit;
+
+  if (groupBy.length == 0 || ["", null, undefined].includes(timePeriod)) {
+    return { status: false, message: `empty groupBy field`, data: [] };
+  }
+  let GROUPBY = "";
+
+  const ALLOWED_GROUP_FIELDS = [
+    "job_id", "customer_id", "client_id", "account_manager_id", "allocated_to_id", "reviewer_id", "allocated_to_other_id", "service_id", "job_type_id", "status_type_id", "employee_number",
+    "date_received_on", "allocated_on", "job_priority", "engagement_model", "customer_account_manager_officer", "status_updation_date", "Transactions_Posting_id_2", "Number_of_Bank_Transactions_id_2", "Number_of_Journal_Entries_id_2", "Number_of_Other_Transactions_id_2", "Number_of_Petty_Cash_Transactions_id_2", "Number_of_Purchase_Invoices_id_2", "Number_of_Sales_Invoices_id_2", "Number_of_Total_Transactions_id_2", "submission_deadline", "Tax_Year_id_4", "If_Sole_Trader_Who_is_doing_Bookkeeping_id_4", "Whose_Tax_Return_is_it_id_4", "Type_of_Payslip_id_3", "Year_Ending_id_1", "Bookkeeping_Frequency_id_2", "CIS_Frequency_id_3", "Filing_Frequency_id_8", "Management_Accounts_Frequency_id_6", "Payroll_Frequency_id_3", "budgeted_hours", "feedback_incorporation_time", "review_time", "total_preparation_time", "total_time", "due_on", "customer_deadline_date", "expected_delivery_date", "internal_deadline_date", "sla_deadline_date", "Management_Accounts_FromDate_id_6", "Management_Accounts_ToDate_id_6",
+    "staff_full_name", "role", "staff_email", "line_manager", "staff_status",
+  ];
+
+  if (!Array.isArray(groupBy)) groupBy = [groupBy];
+  for (const g of groupBy) {
+    if (!ALLOWED_GROUP_FIELDS.includes(g)) {
+      return { status: false, message: `Invalid groupBy field: ${g}`, data: [] };
+    } else {
+      if (g === "employee_number") {
+        GROUPBY = GROUPBY != "" ? (GROUPBY += " , sf.employee_number") : `GROUP BY sf.employee_number`;
+      } else if (g === "customer_account_manager_officer") {
+        GROUPBY = GROUPBY != "" ? (GROUPBY += " , ccd.id") : `GROUP BY ccd.id`;
+      } else {
+        GROUPBY = GROUPBY != "" ? (GROUPBY += ` , raw.${g}`) : `GROUP BY raw.${g}`;
+      }
+    }
+  }
+
+  try {
+    let range;
+    try {
+      range = await getDateRange(timePeriod, fromDate, toDate);
+    } catch (err) {
+      return { status: false, message: err.message || "Invalid date range", data: [] };
+    }
+    var { fromDate, toDate } = range;
+
+    let where = [`work_date BETWEEN ? AND ?`];
+    let orWhere = [];
+
+    if (!["", null, undefined].includes(job_id) && !(Array.isArray(job_id) && job_id.length === 0)) {
+      orWhere.push(`raw.job_id IN (${Array.isArray(job_id) ? job_id.join(",") : job_id})`);
+    }
+    if (!["", null, undefined].includes(customer_id) && !(Array.isArray(customer_id) && customer_id.length === 0)) {
+      orWhere.push(`raw.customer_id IN (${Array.isArray(customer_id) ? customer_id.join(",") : customer_id})`);
+    }
+    if (!["", null, undefined].includes(client_id) && !(Array.isArray(client_id) && client_id.length === 0)) {
+      orWhere.push(`raw.client_id IN (${Array.isArray(client_id) ? client_id.join(",") : client_id})`);
+    }
+
+    if (orWhere.length) {
+      where.push(`(${orWhere.join(" OR ")})`);
+    }
+
+    // Security Scoping - Map aliases correctly
+    if (accessFilters.customerCondition) {
+        // customerCondition is "customer_id IN (...)"
+        where.push(`raw.${accessFilters.customerCondition}`);
+    }
+    if (accessFilters.clientCondition && accessFilters.clientCondition !== "id IS NOT NULL") {
+        // clientCondition is "id IN (...)" -> needs to be "client_id IN (...)"
+        where.push(`raw.${accessFilters.clientCondition.replace(/\bid\b/g, "client_id")}`);
+    }
+    if (accessFilters.jobCondition && accessFilters.jobCondition !== "id IS NOT NULL") {
+        // jobCondition is "id IN (...)" -> needs to be "job_id IN (...)"
+        where.push(`raw.${accessFilters.jobCondition.replace(/\bid\b/g, "job_id")}`);
+    }
+
+    where = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+    const subquerySQL = `
+      SELECT 
+          j.id AS job_id,
+          j.job_id AS job_code_id,
+          j.date_received_on, j.allocated_on, j.job_priority, j.engagement_model, j.customer_contact_details_id, j.status_updation_date,
+          j.Transactions_Posting_id_2, j.Number_of_Bank_Transactions_id_2, j.Number_of_Journal_Entries_id_2, j.Number_of_Other_Transactions_id_2, j.Number_of_Petty_Cash_Transactions_id_2, j.Number_of_Purchase_Invoices_id_2, j.Number_of_Sales_Invoices_id_2, j.Number_of_Total_Transactions_id_2,
+          j.submission_deadline, j.Tax_Year_id_4, j.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4, j.Whose_Tax_Return_is_it_id_4, j.Type_of_Payslip_id_3, j.Year_Ending_id_1, j.Bookkeeping_Frequency_id_2, j.CIS_Frequency_id_3, j.Filing_Frequency_id_8, j.Management_Accounts_Frequency_id_6, j.Payroll_Frequency_id_3,
+          j.budgeted_hours, j.feedback_incorporation_time, j.review_time, j.total_preparation_time, j.total_time, j.due_on, j.customer_deadline_date, j.expected_delivery_date, j.internal_deadline_date, j.sla_deadline_date, j.Management_Accounts_FromDate_id_6, j.Management_Accounts_ToDate_id_6,
+          j.customer_id, j.client_id, j.job_type_id, j.account_manager_id, j.allocated_to AS allocated_to_id, j.reviewer AS reviewer_id, j.service_id, j.status_type AS status_type_id, j.staff_created_id, j.created_at AS work_date
+      FROM jobs AS j
+    `;
+
+    const countSQL = `
+      SELECT COUNT(*) AS total_count FROM (
+        SELECT raw.job_id
+        FROM (${subquerySQL}) AS raw
+        LEFT JOIN customer_contact_details AS ccd ON raw.customer_contact_details_id = ccd.id
+        LEFT JOIN staffs AS sf ON raw.staff_created_id = sf.id
+        ${where}
+        ${GROUPBY}
+      ) AS count_table
+    `;
+
+    const [countResult] = await pool.execute(countSQL, [fromDate, toDate]);
+    const totalCount = countResult[0]?.total_count || 0;
+
+    const dataSQL = `
+      SELECT
+          raw.job_id,
+          DATE_FORMAT(raw.date_received_on, '%d/%m/%Y') AS date_received_on,
+          DATE_FORMAT(raw.allocated_on, '%d/%m/%Y') AS allocated_on,
+          DATE_FORMAT(raw.status_updation_date, '%d/%m/%Y') AS status_updation_date,
+          raw.job_priority, raw.engagement_model, raw.Transactions_Posting_id_2, raw.Number_of_Bank_Transactions_id_2, raw.Number_of_Journal_Entries_id_2, raw.Number_of_Other_Transactions_id_2, raw.Number_of_Petty_Cash_Transactions_id_2, raw.Number_of_Purchase_Invoices_id_2, raw.Number_of_Sales_Invoices_id_2, raw.Number_of_Total_Transactions_id_2,
+          DATE_FORMAT(raw.submission_deadline, '%d/%m/%Y') AS submission_deadline,
+          raw.Tax_Year_id_4, raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4, raw.Whose_Tax_Return_is_it_id_4, raw.Type_of_Payslip_id_3,
+          DATE_FORMAT(raw.Year_Ending_id_1, '%d/%m/%Y') AS Year_Ending_id_1,
+          raw.Bookkeeping_Frequency_id_2, raw.CIS_Frequency_id_3, raw.Filing_Frequency_id_8, raw.Management_Accounts_Frequency_id_6, raw.Payroll_Frequency_id_3,
+          raw.budgeted_hours, raw.feedback_incorporation_time, raw.review_time, raw.total_preparation_time, raw.total_time,
+          DATE_FORMAT(raw.due_on, '%d/%m/%Y') AS due_on,
+          DATE_FORMAT(raw.customer_deadline_date, '%d/%m/%Y') AS customer_deadline_date,
+          DATE_FORMAT(raw.expected_delivery_date, '%d/%m/%Y') AS expected_delivery_date,
+          DATE_FORMAT(raw.internal_deadline_date, '%d/%m/%Y') AS internal_deadline_date,
+          DATE_FORMAT(raw.sla_deadline_date, '%d/%m/%Y') AS sla_deadline_date,
+          DATE_FORMAT(raw.Management_Accounts_FromDate_id_6, '%d/%m/%Y') AS Management_Accounts_FromDate_id_6,
+          DATE_FORMAT(raw.Management_Accounts_ToDate_id_6, '%d/%m/%Y') AS Management_Accounts_ToDate_id_6,
+          CONCAT(jobcreatestaff.first_name, ' ', jobcreatestaff.last_name) AS staff_full_name,
+          jobcreatestaff.email AS staff_email, staffrole.role AS role, jobcreatestaff.status AS staff_status,
+          CONCAT(managerstaff.first_name, ' ', managerstaff.last_name) AS line_manager,
+          raw.work_date,
+          CONCAT(SUBSTRING(c.trading_name, 1, 3), '_', SUBSTRING(cl.trading_name, 1, 3), '_', SUBSTRING(jt.type, 1, 4), '_', SUBSTRING(raw.job_code_id, 1, 15)) AS job_name,
+          c.trading_name AS customer_name,
+          CONCAT('cli_', SUBSTRING(c.trading_name, 1, 3), '_', SUBSTRING(cl.trading_name, 1, 3), '_', SUBSTRING(cl.client_code, 1, 15)) AS client_name,
+          CONCAT(am.first_name, ' ', am.last_name) AS account_manager_name,
+          CONCAT(at.first_name, ' ', at.last_name) AS allocated_to_name,
+          CONCAT(rv.first_name, ' ', rv.last_name) AS reviewer_name,
+          sv.name AS service_name, jt.type AS job_type_name, st.name AS status_type_name, sf.employee_number AS employee_number
+      FROM (${subquerySQL}) AS raw
+      LEFT JOIN customer_contact_details AS ccd ON raw.customer_contact_details_id = ccd.id
+      LEFT JOIN customers AS c ON raw.customer_id = c.id
+      LEFT JOIN clients AS cl ON raw.client_id = cl.id
+      LEFT JOIN job_types AS jt ON raw.job_type_id = jt.id
+      LEFT JOIN staffs AS am ON raw.account_manager_id = am.id
+      LEFT JOIN staffs AS at ON raw.allocated_to_id = at.id
+      LEFT JOIN staffs AS rv ON raw.reviewer_id = rv.id
+      LEFT JOIN services AS sv ON raw.service_id = sv.id
+      LEFT JOIN master_status AS st ON raw.status_type_id = st.id
+      LEFT JOIN staffs AS sf ON raw.staff_created_id = sf.id
+      LEFT JOIN staffs AS jobcreatestaff ON raw.staff_created_id = jobcreatestaff.id
+      LEFT JOIN roles AS staffrole ON jobcreatestaff.role_id = staffrole.id
+      LEFT JOIN line_managers AS lm ON lm.staff_by = jobcreatestaff.id
+      LEFT JOIN staffs AS managerstaff ON lm.staff_to = managerstaff.id
+      ${where}
+      ${GROUPBY}
+      ORDER BY raw.job_id
+      LIMIT ${limit} OFFSET ${offset}
+    `;
+
+    const [rows] = await pool.execute(dataSQL, [fromDate, toDate]);
+
+    const idToNameMap = {
+      job_id: "job_name", customer_id: "customer_name", client_id: "client_name", account_manager_id: "account_manager_name", allocated_to_id: "allocated_to_name", reviewer_id: "reviewer_name", service_id: "service_name", job_type_id: "job_type_name", status_type_id: "status_type_name", employee_number: "employee_number",
+      date_received_on: "date_received_on", allocated_on: "allocated_on", job_priority: "job_priority", engagement_model: "engagement_model", status_updation_date: "status_updation_date", submission_deadline: "submission_deadline", budgeted_hours: "budgeted_hours", total_time: "total_time", due_on: "due_on", staff_full_name: "staff_full_name", role: "role", staff_email: "staff_email", line_manager: "line_manager", staff_status: "staff_status",
+    };
+
+    const groups = {};
+    const periodSet = new Set();
+
+    for (const r of rows) {
+      let workDateStr = r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0, 10);
+      const groupKeyParts = groupBy.map(idKey => r[idToNameMap[idKey]] || "NULL");
+      const gid = groupKeyParts.join("|");
+      const periodKey = getPeriodKey(displayBy, workDateStr);
+      if (!periodKey) continue;
+      periodSet.add(periodKey);
+
+      if (!groups[gid]) {
+        groups[gid] = { ...r, periodSeconds: {} };
+      }
+      groups[gid].periodSeconds[periodKey] = (groups[gid].periodSeconds[periodKey] || 0) + 1;
+    }
+
+    const periods = Array.from(periodSet).sort((a, b) => a.localeCompare(b));
+    const outRows = Object.keys(groups).map(gid => {
+      const g = groups[gid];
+      const row = { ...g };
+      if (!["", null, undefined].includes(displayBy)) {
+        let total = 0;
+        for (const p of periods) {
+          const count = g.periodSeconds[p] || 0;
+          row[p] = count;
+          total += count;
+        }
+        row["total_count"] = total;
+      }
+      return row;
+    });
+
+    let total_count_header = displayBy ? ["total_count"] : [];
+    let weeks = displayBy ? getWeekEndings(new Date(fromDate), new Date(toDate), displayBy) : [];
+    const columnsWeeks = [...groupBy, ...weeks, ...total_count_header];
+    const finalRows = normalizeRows(columnsWeeks, outRows);
+    const fixed = [...groupBy];
+    const dynamic = columnsWeeks.filter(col => !fixed.includes(col));
+    const columnsWeeksDecOrder = [...fixed, ...dynamic.reverse()];
+
+    return {
+      status: true,
+      message: "Success.",
+      data: {
+        meta: { fromDate, toDate, groupBy, displayBy, timePeriod },
+        columns: columnsWeeksDecOrder,
+        rows: finalRows,
+        pagination: { total: totalCount, page, limit, totalPages: Math.ceil(totalCount / limit) },
+      },
+    };
+  } catch (err) {
+    return { status: false, message: err.message || "server error", data: [] };
+  }
+};
+
+const getTimesheetReportData = async (Report) => {
+  const { data } = Report;
+  if (data.action == "get") {
+    return await getTimesheetReportDataInternal(Report);
+  } else if (data.action === "getJobCustomReport") {
+    return await getJobCustomReport(Report);
+  } else {
+    return { status: false, message: "Invalid action" };
+  }
+};
+
+const getAllTaskByStaff = async (Report) => {
+  const { data } = Report;
+  const action = data.action;
+
+  switch (action) {
+    case "get":
+      return await getAllTaskByStaffData(Report);
+    case "getInternalJobs":
+      return await getInternalJobs(Report);
+    case "getInternalTasks":
+      return await getInternalTasks(Report);
+    case "getStaffWithRole":
+      return await getStaffWithRole(Report);
+    case "getAllService":
+      return await getAllService(Report);
+    case "getAllJobType":
+      return await getAllJobType(Report);
+    case "getAllStatus":
+      return await getAllStatus(Report);
+    case "getAllFilters":
+      return await getAllFilters(Report);
+    case "saveFilters":
+      return await saveFilters(Report);
+    case "deleteFilterId":
+      return await deleteFilterId(Report);
+    case "get_customers_filter":
+      return await getCustomersFilter(Report);
+    case "get_clients_filter":
+      return await getClientsFilter(Report);
+    case "get_jobs_filter":
+      return await getJobsFilter(Report);
+    default:
+      return { status: false, message: "Invalid action in getAllTaskByStaff" };
+  }
+};
+
+async function getAllTaskByStaffData(Report) {
+  const { StaffUserId } = Report;
+  const filters = await getStaffAccessFilters(StaffUserId);
+  
+  const [jobs] = await pool.execute(`SELECT id FROM jobs WHERE 1=1 AND ${filters.jobCondition}`);
+  const jobIds = jobs.length > 0 ? jobs.map(j => j.id).join(",") : "0";
+
+  const query = `
+    SELECT task.id AS task_id, task.name AS task_name
+    FROM client_job_task 
+    JOIN task ON task.id = client_job_task.task_id
+    WHERE job_id IN (${jobIds})
+    GROUP BY task.id
+    ORDER BY task.name ASC;
+  `;
+  const [result] = await pool.execute(query);
+  return { status: true, message: "Success.", data: result };
+}
+
+async function getInternalJobs(Report) {
+  const [result] = await pool.execute("SELECT id, name FROM internal ORDER BY name ASC");
+  return { status: true, message: "Success.", data: result };
+}
+
+async function getInternalTasks(Report) {
+  const [result] = await pool.execute("SELECT id, name FROM sub_internal ORDER BY name ASC");
+  return { status: true, message: "Success.", data: result };
+}
+
+async function getStaffWithRole(Report) {
+  const { data } = Report;
+  const { role_id } = data;
+  let query = "SELECT id, CONCAT(first_name, ' ', last_name) as name, employee_number FROM staffs WHERE status = 1";
+  let params = [];
+  
+  if (role_id === "employee_number") {
+    query += " AND employee_number IS NOT NULL AND employee_number != ''";
+  } else if (role_id === "other") {
+    // Other staff logic if needed
+  } else if (role_id) {
+    query += " AND role_id = ?";
+    params.push(role_id);
+  }
+  
+  const [result] = await pool.execute(query, params);
+  return { status: true, message: "Success.", data: result };
+}
+
+async function getAllService(Report) {
+  const [result] = await pool.execute("SELECT id, name FROM services ORDER BY name ASC");
+  return { status: true, message: "Success.", data: result };
+}
+
+async function getAllJobType(Report) {
+  const [result] = await pool.execute("SELECT id, type FROM job_types ORDER BY type ASC");
+  return { status: true, message: "Success.", data: result };
+}
+
+async function getAllStatus(Report) {
+  const [result] = await pool.execute("SELECT id, name FROM master_status ORDER BY name ASC");
+  return { status: true, message: "Success.", data: result };
+}
+
+async function saveFilters(Report) {
+  const { data, StaffUserId } = Report;
+  const { id, type, filters } = data;
+  if (id) {
+    const query = "UPDATE timesheet_filter SET type = ?, staff_id = ?, filter_record = ? WHERE id = ?";
+    await pool.execute(query, [type, StaffUserId, JSON.stringify(filters), id]);
+    return { status: true, message: "Record updated successfully." };
+  } else {
+    const query = "INSERT INTO timesheet_filter (type, staff_id, filter_record) VALUES (?, ?, ?)";
+    await pool.execute(query, [type, StaffUserId, JSON.stringify(filters)]);
+    return { status: true, message: "Record added successfully" };
+  }
+}
+
+async function deleteFilterId(Report) {
+  const { data } = Report;
+  const { filterId } = data;
+  await pool.execute("DELETE FROM timesheet_filter WHERE id = ?", [filterId]);
+  return { status: true, message: "Filter deleted successfully" };
+}
+
+async function getAllFilters(Report) {
+  const { data, StaffUserId } = Report;
+  const { type } = data;
+  const query = `
+    SELECT tf.*, 
+    CONCAT(s.first_name, ' ', s.last_name) as staff_fullname,
+    c.trading_name as customer_name,
+    cl.trading_name as client_name,
+    j.job_id as job_name
+    FROM timesheet_filter tf
+    LEFT JOIN staffs s ON s.id = JSON_UNQUOTE(JSON_EXTRACT(tf.filter_record, '$.staff_id'))
+    LEFT JOIN customers c ON c.id = JSON_UNQUOTE(JSON_EXTRACT(tf.filter_record, '$.customer_id'))
+    LEFT JOIN clients cl ON cl.id = JSON_UNQUOTE(JSON_EXTRACT(tf.filter_record, '$.client_id'))
+    LEFT JOIN jobs j ON j.id = JSON_UNQUOTE(JSON_EXTRACT(tf.filter_record, '$.job_id'))
+    WHERE tf.staff_id = ? AND tf.type = ?
+    ORDER BY tf.id DESC
+  `;
+  const [result] = await pool.execute(query, [StaffUserId, type]);
+  return { status: true, message: "Success.", data: result };
+}
+
+async function getTimesheetReportDataInternal(Report) {
+  const { data } = Report;
+  if (data.action === "getJobCustomReport") {
+    return await getJobCustomReport(Report);
+  }
+
+  const { StaffUserId } = Report;
   var {
     groupBy = ["staff_id"],
     internal_external,
@@ -2087,6 +2521,87 @@ const getTimesheetReportData = async (Report) => {
 
 /////////////------  END Timesheet Report END-------//////////////////////
 
+async function getCustomersFilter(Report) {
+  const { StaffUserId, data } = Report;
+  const { pagination } = data;
+  const search = pagination?.search || "";
+  const filters = await getStaffAccessFilters(StaffUserId);
+  
+  const customerCondition = filters.customerCondition.replace(/\bcustomer_id\b/g, "id");
+  let where = [`(${customerCondition})`];
+  let params = [];
+  if (search) {
+    where.push(`(trading_name LIKE ? OR id LIKE ?)`);
+    params.push(`%${search}%`, `%${search}%`);
+  }
+
+  let query = `
+    SELECT id, trading_name 
+    FROM customers 
+    WHERE ${where.join(" AND ")}
+    ORDER BY trading_name ASC
+  `;
+  
+  const [rows] = await pool.execute(query, params.length > 0 ? params : undefined);
+  return { status: true, data: rows };
+}
+
+async function getClientsFilter(Report) {
+  const { StaffUserId, data } = Report;
+  const { pagination } = data;
+  const search = pagination?.search || "";
+  const filters = await getStaffAccessFilters(StaffUserId);
+  
+  const customerCondition = filters.customerCondition.replace(/\bcustomer_id\b/g, "cl.customer_id");
+  const clientCondition = filters.clientCondition.replace(/\bid\b/g, "cl.id");
+
+  let where = [`(${customerCondition})`, `(${clientCondition})`];
+  let params = [];
+  if (search) {
+    where.push(`(cl.trading_name LIKE ? OR cl.client_code LIKE ?)`);
+    params.push(`%${search}%`, `%${search}%`);
+  }
+
+  let query = `
+    SELECT cl.id, cl.trading_name, cl.client_code 
+    FROM clients cl
+    WHERE ${where.join(" AND ")}
+    ORDER BY cl.trading_name ASC
+  `;
+  
+  const [rows] = await pool.execute(query, params.length > 0 ? params : undefined);
+  const mapped = rows.map(r => ({ id: r.id, name: `${r.trading_name} (${r.client_code})` }));
+  return { status: true, data: mapped };
+}
+
+async function getJobsFilter(Report) {
+  const { StaffUserId, data } = Report;
+  const { pagination } = data;
+  const search = pagination?.search || "";
+  const filters = await getStaffAccessFilters(StaffUserId);
+  
+  const customerCondition = filters.customerCondition.replace(/\bcustomer_id\b/g, "j.customer_id");
+  const clientCondition = filters.clientCondition.replace(/\bid\b/g, "j.client_id");
+  const jobCondition = filters.jobCondition.replace(/\bid\b/g, "j.id");
+
+  let where = [`(${customerCondition})`, `(${clientCondition})`, `(${jobCondition})`];
+  let params = [];
+  if (search) {
+    where.push(`j.job_id LIKE ?`);
+    params.push(`%${search}%`);
+  }
+
+  let query = `
+    SELECT j.id, j.job_id as name
+    FROM jobs j
+    WHERE ${where.join(" AND ")}
+    ORDER BY j.job_id ASC
+  `;
+  
+  const [rows] = await pool.execute(query, params.length > 0 ? params : undefined);
+  return { status: true, data: rows };
+}
+
 module.exports = {
   jobStatusReports,
   jobSummaryReports,
@@ -2100,5 +2615,202 @@ module.exports = {
   reportCountJob,
   missingTimesheetReport,
   discrepancyReport,
-  getTimesheetReportData
+  getTimesheetReportData,
+  getAllTaskByStaff,
+  getJobCustomReport
 };
+
+async function getDateRange(timePeriod, fromDateParam, toDateParam) {
+  const today = new Date();
+  const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const copy = (d) => new Date(d.getTime());
+  let start, end;
+
+  switch ((timePeriod || "").toLowerCase()) {
+    case "this_week": {
+      const cur = copy(today);
+      const day = (cur.getDay() + 6) % 7; 
+      start = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() - day);
+      end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
+      break;
+    }
+    case "last_week": {
+      const cur = copy(today);
+      const day = (cur.getDay() + 6) % 7;
+      const startThisWeek = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() - day);
+      start = new Date(startThisWeek.getFullYear(), startThisWeek.getMonth(), startThisWeek.getDate() - 7);
+      end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
+      break;
+    }
+    case "this_month": {
+      start = new Date(today.getFullYear(), today.getMonth(), 1);
+      end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      break;
+    }
+    case "last_month": {
+      start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      end = new Date(today.getFullYear(), today.getMonth(), 0);
+      break;
+    }
+    case "this_year": {
+      start = new Date(today.getFullYear(), 0, 1);
+      end = new Date(today.getFullYear(), 11, 31);
+      break;
+    }
+    case "last_year": {
+      start = new Date(today.getFullYear() - 1, 0, 1);
+      end = new Date(today.getFullYear() - 1, 11, 31);
+      break;
+    }
+    case "custom": {
+      if (!fromDateParam || !toDateParam) throw new Error("custom requires fromDate and toDate");
+      return { fromDate: fromDateParam, toDate: toDateParam };
+    }
+    case "all":
+    case "":
+    case undefined:
+      end = startOfDay(today);
+      start = new Date(end.getFullYear(), end.getMonth(), end.getDate() - 29);
+      break;
+    default:
+      end = startOfDay(today);
+      start = new Date(end.getFullYear(), end.getMonth(), end.getDate() - 29);
+  }
+  return { fromDate: toYMD(start), toDate: toYMD(end) };
+}
+
+function toYMD(date) {
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return null;
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function getPeriodKey(displayBy, dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr + "T00:00:00");
+  if (Number.isNaN(d.getTime())) return null;
+  const y = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+
+  switch ((displayBy || "daily").toLowerCase()) {
+    case "daily": {
+      const weekday = d.toLocaleString("default", { weekday: "short" });
+      const day = String(d.getDate()).padStart(2, "0");
+      const monthName = d.toLocaleString("default", { month: "short" });
+      const yearShort = String(d.getFullYear()).slice(-2);
+      return `${weekday} ${day} ${monthName} ${yearShort}`;
+    }
+    case "monthly": {
+      const monthName = d.toLocaleString("default", { month: "short" });
+      return `${monthName} ${y}`;
+    }
+    case "quarterly": {
+      const quarter = Math.floor(d.getMonth() / 3) + 1;
+      return `${y}-Q${quarter}`;
+    }
+    case "yearly":
+      return `${y}`;
+    case "weekly": {
+      const jsDay = d.getDay();
+      const sunday = new Date(d.getFullYear(), d.getMonth(), d.getDate() + ((7 - jsDay) % 7));
+      const day = sunday.getDate();
+      const month = sunday.toLocaleString("default", { month: "short" });
+      const year = sunday.getFullYear();
+      return `week ending ${day} ${month.toLowerCase()} ${year}`;
+    }
+    case "fortnightly": {
+      const day = d.getDate();
+      const monthName = d.toLocaleString("default", { month: "short" });
+      const year = d.getFullYear();
+      const half = day <= 15 ? "H1" : "H2";
+      return `${monthName} ${year} ${half}`;
+    }
+    default:
+      return `${y}-${mm}-${dd}`;
+  }
+}
+
+function normalizeRows(columns, outRows) {
+  return outRows.map((row) => {
+    const newRow = { ...row };
+    for (const col of columns) {
+      if (!(col in newRow) && col !== "staff_id" && col !== "total_hours") {
+        newRow[col] = 0;
+      }
+    }
+    return newRow;
+  });
+}
+
+function getWeekEndings(fromDate, toDate, displayBy = "daily") {
+  const result = [];
+  let current = new Date(fromDate);
+  while (current <= toDate) {
+    const d = new Date(current);
+    const y = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+
+    switch ((displayBy || "daily").toLowerCase()) {
+      case "daily": {
+        const weekday = d.toLocaleString("default", { weekday: "short" });
+        const day = String(d.getDate()).padStart(2, "0");
+        const monthName = d.toLocaleString("default", { month: "short" });
+        const yearShort = String(d.getFullYear()).slice(-2);
+        result.push(`${weekday} ${day} ${monthName} ${yearShort}`);
+        current.setDate(current.getDate() + 1);
+        break;
+      }
+      case "monthly": {
+        const monthName = d.toLocaleString("default", { month: "short" });
+        result.push(`${monthName} ${y}`);
+        current.setMonth(current.getMonth() + 1);
+        break;
+      }
+      case "quarterly": {
+        const quarter = Math.floor(d.getMonth() / 3) + 1;
+        result.push(`${y}-Q${quarter}`);
+        current.setMonth(current.getMonth() + 3);
+        break;
+      }
+      case "yearly": {
+        result.push(`${y}`);
+        current.setFullYear(current.getFullYear() + 1);
+        break;
+      }
+      case "weekly": {
+        const jsDay = d.getDay();
+        const sunday = new Date(d);
+        sunday.setDate(sunday.getDate() + ((7 - jsDay) % 7));
+        const day = sunday.getDate();
+        const month = sunday.toLocaleString("default", { month: "short" }).toLowerCase();
+        const year = sunday.getFullYear();
+        result.push(`week ending ${day} ${month} ${year}`);
+        current.setDate(current.getDate() + 7);
+        break;
+      }
+      case "fortnightly": {
+        const day = d.getDate();
+        const monthName = d.toLocaleString("default", { month: "short" });
+        const year = d.getFullYear();
+        const half = day <= 15 ? "H1" : "H2";
+        result.push(`${monthName} ${year} ${half}`);
+        if (day <= 15) {
+          current.setDate(16);
+        } else {
+          current.setMonth(current.getMonth() + 1, 1);
+        }
+        break;
+      }
+      default: {
+        result.push(`${y}-${mm}-${dd}`);
+        current.setDate(current.getDate() + 1);
+      }
+    }
+  }
+  return [...new Set(result)];
+}

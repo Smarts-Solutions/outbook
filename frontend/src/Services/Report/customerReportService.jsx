@@ -11,7 +11,7 @@ export async function CUSTOMER_JOB_STATUS_REPORT(data, token) {
         return await res?.data;
     }
     catch (err) {
-        return await err;
+        throw err;
     }
 }
 
@@ -24,7 +24,7 @@ export async function CUSTOMER_JOB_SUMMARY_REPORTS(data, token) {
         return await res?.data;
     }
     catch (err) {
-        return await err;
+        throw err;
     }
 }
 
@@ -35,7 +35,7 @@ export async function CUSTOMER_JOB_PENDING_REPORT(data, token) {
         });
         return res.data;
     } catch (err) {
-        return err;
+        throw err;
     }
 }
 
@@ -46,7 +46,7 @@ export async function CUSTOMER_DUE_BY_REPORT(data, token) {
         });
         return res.data;
     } catch (err) {
-        return err;
+        throw err;
     }
 }
 
@@ -57,7 +57,7 @@ export async function CUSTOMER_TEAM_MONTHLY_REPORT(data, token) {
         });
         return res.data;
     } catch (err) {
-        return err;
+        throw err;
     }
 }
 
@@ -68,7 +68,7 @@ export async function CUSTOMER_TAX_WEEKLY_REPORT(data, token) {
         });
         return res.data;
     } catch (err) {
-        return err;
+        throw err;
     }
 }
 
@@ -79,7 +79,7 @@ export async function CUSTOMER_TAX_WEEKLY_REPORT_FILTER(data, token) {
         });
         return res.data;
     } catch (err) {
-        return err;
+        throw err;
     }
 }
 
@@ -90,7 +90,7 @@ export async function CUSTOMER_AVERAGE_TAT_REPORT(data, token) {
         });
         return res.data;
     } catch (err) {
-        return err;
+        throw err;
     }
 }
 
@@ -101,7 +101,7 @@ export async function CUSTOMER_REPORT_COUNT_JOB(data, token) {
         });
         return res.data;
     } catch (err) {
-        return err;
+        throw err;
     }
 }
 
@@ -112,7 +112,18 @@ export async function CUSTOMER_MISSING_TIMESHEET_REPORT(data, token) {
         });
         return res.data;
     } catch (err) {
-        return err;
+        throw err;
+    }
+}
+
+export async function CUSTOMER_MISSING_TIMESHEET_REPORT_FILTER(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}customer/missingTimesheetReportFilter`, data, {
+            headers: header(token),
+        });
+        return res.data;
+    } catch (err) {
+        throw err;
     }
 }
 
@@ -123,7 +134,7 @@ export async function CUSTOMER_DISCREPANCY_REPORT(data, token) {
         });
         return res.data;
     } catch (err) {
-        return err;
+        throw err;
     }
 }
 
@@ -136,7 +147,7 @@ export async function CUSTOMER_JOB_RECEIVED_SEND_REPORT(data, token) {
         return await res?.data;
     }
     catch (err) {
-        return await err;
+        throw err;
     }
 }
 
@@ -148,7 +159,19 @@ export async function CUSTOMER_TIMESHEET_REPORTS(data, token) {
         return await res?.data;
     }
     catch (err) {
-        return await err;
+        throw err;
+    }
+}
+
+export async function CUSTOMER_GET_ALL_TASK_BY_STAFF(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}customer/getAllTaskByStaff`, data, {
+            headers: header(token),
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        throw err;
     }
 }
 

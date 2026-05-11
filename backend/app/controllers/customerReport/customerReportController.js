@@ -138,3 +138,15 @@ exports.getTimesheetReportData = async (req, res) => {
   }
 };
 
+exports.getAllTaskByStaff = async (req, res) => {
+  try {
+    const result = await customerReportModel.getAllTaskByStaff({
+      StaffUserId: req.userId,
+      data: req.body,
+    });
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+

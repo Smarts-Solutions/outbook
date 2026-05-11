@@ -13,6 +13,7 @@ import {
   CUSTOMER_MISSING_TIMESHEET_REPORT,
   CUSTOMER_DISCREPANCY_REPORT,
   CUSTOMER_TIMESHEET_REPORTS,
+  CUSTOMER_GET_ALL_TASK_BY_STAFF,
 } from "../../../Services/Report/customerReportService";
 
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
@@ -205,6 +206,19 @@ export const CustomerTimesheetReports = createAsyncThunk(
       return res;
     } catch (err) {
       return err;
+    }
+  }
+);
+
+export const CustomerGetAllTaskByStaff = createAsyncThunk(
+  "CustomerGetAllTaskByStaff",
+  async (data, { rejectWithValue }) => {
+    try {
+      const { req, authToken } = data;
+      const res = await CUSTOMER_GET_ALL_TASK_BY_STAFF(req, authToken);
+      return res;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
     }
   }
 );

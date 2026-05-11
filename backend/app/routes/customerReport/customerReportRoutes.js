@@ -17,5 +17,6 @@ router.post('/customer/reportCountJob', verifyToken, customerReportController.re
 router.post('/customer/missingTimesheetReport', verifyToken, customerReportController.missingTimesheetReport);
 router.post('/customer/discrepancyReport', verifyToken, customerReportController.discrepancyReport);
 router.post('/customer/getTimesheetReportData', verifyToken, customerReportController.getTimesheetReportData);
+router.post('/customer/getAllTaskByStaff', verifyToken, customerReportController.getAllTaskByStaff);
 
 module.exports = router;

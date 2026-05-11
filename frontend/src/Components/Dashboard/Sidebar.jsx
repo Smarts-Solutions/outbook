@@ -17,8 +17,9 @@ const Sidebar = () => {
       "/admin/client/profiles": false, // For "Job" dropdown
       "/admin/ClientLists": false, // For "Client" dropdown
       "/admin/reports": false, // For "Reports" dropdown
-      "admin/timesheetReports": false, // For "Time Sheet Reports" dropdown
+      "/admin/timesheetReports": false, // For "Time Sheet Reports" dropdown
       "/admin/job/customreport": false, // For "Custom Job Report" dropdown
+      "customerReports": false, // For Customer Reports dropdown
     },
   });
 
@@ -48,10 +49,17 @@ const Sidebar = () => {
       } else if (
         location.pathname.startsWith("/admin/reports") ||
         location.pathname.startsWith("/admin/timesheetReports") ||
-        location.pathname.startsWith("/admin/job/customreport")
+        location.pathname.startsWith("/admin/job/customreport") ||
+        location.pathname.startsWith("/customer/reports") ||
+        location.pathname.startsWith("/customer/timesheetReports") ||
+        location.pathname.startsWith("/customer/job/customreport")
       ) {
         // any report-related path -> open the Reports parent
-        allKeys["/admin/reports"] = true;
+        if (role === "CUSTOMER") {
+          allKeys["customerReports"] = true;
+        } else {
+          allKeys["/admin/reports"] = true;
+        }
       }
 
       return {
@@ -72,6 +80,7 @@ const Sidebar = () => {
       "/admin/job/customreport",
       "/customer/reports",
       "/customer/timesheetReports",
+      "/customer/job/customreport",
     ];
     const customerPaths = [
       "/admin/customer",
@@ -89,7 +98,11 @@ const Sidebar = () => {
       );
 
       if (reportPaths.some((p) => linkPathname.startsWith(p))) {
-        newDropdown["/admin/reports"] = true;
+        if (role === "CUSTOMER") {
+          newDropdown["customerReports"] = true;
+        } else {
+          newDropdown["/admin/reports"] = true;
+        }
       } else if (
         (linkPathname === "/admin/customer" || linkPathname.startsWith("/admin/customer/")) ||
         linkPathname.startsWith("/admin/client") ||
@@ -203,7 +216,7 @@ const Sidebar = () => {
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
-                        toggleDropdown("customerReports");
+                        handleMenuClick(e, "customerReports");
                       }}
                       className="sidebar-parent"
                     >
@@ -237,6 +250,14 @@ const Sidebar = () => {
                               <Clock size={16} />
                             </span>
                             <span>Time Sheet</span>
+                          </Link>
+                        </li>
+                        <li className={activeLink === "/customer/job/customreport" ? "active" : ""}>
+                          <Link to="/customer/job/customreport">
+                            <span className="sidebar-icons">
+                              <Clock1 size={16} />
+                            </span>
+                            <span>Custom Job</span>
                           </Link>
                         </li>
                       </ul>
