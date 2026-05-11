@@ -369,6 +369,8 @@ const Timesheet = () => {
   const [timeSheetRows, setTimeSheetRows] = useState([]);
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
+  const [loading, setLoading] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
 
   // console.log(`timeSheetRows`, timeSheetRows);
 
@@ -1243,6 +1245,8 @@ const Timesheet = () => {
   }
 
   const saveTimeSheetRemark = async (e) => {
+    setLoading(true);
+    setIsDisabled(true);
     if (submitStatus == 1) {
       const updatedTimeSheetRows = timeSheetRows.map((item) => {
         return {
@@ -1320,6 +1324,8 @@ const Timesheet = () => {
             showConfirmButton: true,
             timer: 3000,
           });
+          setLoading(false);
+          setIsDisabled(false);
           return;
         }
       }
@@ -1352,6 +1358,8 @@ const Timesheet = () => {
         
 
       }
+      setLoading(false);
+      setIsDisabled(false);
       return;
     }
 
@@ -1430,6 +1438,8 @@ const Timesheet = () => {
           showConfirmButton: true,
           timer: 3000,
         });
+        setLoading(false);
+        setIsDisabled(false);
         return;
       }
     }
@@ -1461,6 +1471,8 @@ const Timesheet = () => {
       setActiveIndex(null);
       setActiveField(null);
     }
+    setLoading(false);
+    setIsDisabled(false);
   };
 
   // const dayMonthFormatDate = (dateString) => {
@@ -3248,7 +3260,8 @@ const Timesheet = () => {
             size="lg"
             cancel_btn={false}
             btn_2="true"
-            btn_name={submitStatus === 1 ? "Submit" : "Save11"}
+            disabled_submit={isDisabled}
+            btn_name={loading ? "Submitting..." : (submitStatus === 1 ? "Submit" : "Save11")}
             title="Final Remark"
             hideBtn={submitStatusAllKey === 1 ? true : false}
             handleClose={() => {
