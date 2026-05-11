@@ -65,7 +65,7 @@ function CustomerReports() {
           <div className="page-title-box">
             <div className="row">
               <div>
-                <h5 className="mb-4" style={{ fontWeight: 600 }}>Customer Reports</h5>
+                <h5 className="mb-4" style={{ fontWeight: 600 }}>Reports</h5>
               </div>
               <div className="col-lg-4 col-md-6 ">
                 <select className="form-select" id="tabSelect"
