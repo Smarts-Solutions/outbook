@@ -382,47 +382,34 @@ const CustomerJobStatus = () => {
           <Datatable
             columns={columns}
             data={JobStatusData && JobStatusData}
-            // filter={true}
+            filter={false}
+            pagination={false}
           />
 
-          <div className="d-flex justify-content-between align-items-center mt-3">
-            <div className="d-flex align-items-center">
-                <span className="me-2">Show</span>
-                <select
-                    className="perpage-select form-select form-select-sm"
-                    style={{ width: 'auto' }}
-                    value={pageSize}
-                    onChange={handlePageSizeChange}
-                >
-                    <option value={10}>10</option>
-                    <option value={25}>25</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                </select>
-                <span className="ms-2">entries</span>
-            </div>
-            
-            <ReactPaginate
-                previousLabel={"Previous"}
-                nextLabel={"Next"}
-                breakLabel={"..."}
-                pageCount={Math.ceil(totalRecords / pageSize)}
-                marginPagesDisplayed={2}
-                pageRangeDisplayed={5}
-                onPageChange={handlePageChange}
-                containerClassName={"pagination mb-0"}
-                activeClassName={"active"}
-                pageClassName={"page-item"}
-                pageLinkClassName={"page-link"}
-                previousClassName={"page-item"}
-                previousLinkClassName={"page-link"}
-                nextClassName={"page-item"}
-                nextLinkClassName={"page-link"}
-                breakClassName={"page-item"}
-                breakLinkClassName={"page-link"}
-                forcePage={currentPage - 1}
-            />
-          </div>
+          <ReactPaginate
+            previousLabel={"Previous"}
+            nextLabel={"Next"}
+            breakLabel={"..."}
+            pageCount={Math.ceil(totalRecords / pageSize)}
+            marginPagesDisplayed={2}
+            pageRangeDisplayed={5}
+            onPageChange={handlePageChange}
+            containerClassName={"pagination"}
+            activeClassName={"active"}
+            forcePage={currentPage - 1}
+          />
+          <select
+            className="perpage-select"
+            value={pageSize}
+            onChange={handlePageSizeChange}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value={500}>500</option>
+          </select>
         </div>
       </div>
     </div>
