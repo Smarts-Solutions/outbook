@@ -23,7 +23,12 @@ const CustomerJobPending = () => {
       .unwrap()
       .then((res) => {
         if (res.status) {
-          setJobPendingReportData(res.data);
+          const sortedData = [...res.data].sort((a, b) => {
+            const statusCompare = (a.job_status || "").localeCompare(b.job_status || "");
+            if (statusCompare !== 0) return statusCompare;
+            return (a.job_type_name || "").localeCompare(b.job_type_name || "");
+          });
+          setJobPendingReportData(sortedData);
         } else {
           setJobPendingReportData([]);
         }
@@ -108,17 +113,6 @@ const CustomerJobPending = () => {
             <div className='tab-title'>
               <h3>Job Pending Report</h3>
             </div>
-          </div>
-          <div className="col-md-5 d-flex justify-content-end align-items-center mb-5">
-            {jobPendingReportData && jobPendingReportData.length > 0 && (
-                <button
-                  className="btn btn-outline-info fw-bold border-3 d-inline-flex align-items-center gap-2 lh-1"
-                  onClick={handleExport}
-                >
-                  <Download size={16} />
-                  <span>Export Excel</span>
-                </button>
-            )}
           </div>
         </div>
         {loading && (
