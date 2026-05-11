@@ -160,203 +160,151 @@ const CustomerTaxWeeklyReport = () => {
   };
 
   return (
-    <div className='container-fluid px-0 mt-3'>
-      <div className='card border-0 shadow-sm rounded-4 overflow-hidden'>
-        <div className='card-body p-4'>
-            <div className='mb-4'>
-                <div className="row g-2 align-items-center">
-                    <div className='col-md-2 pe-1'>
-                        <Select
-                            styles={selectStyles}
-                            options={[
-                                { value: "", label: "---Select---" },
-                                ...(filterData?.customer ? filterData.customer.map(d => ({ value: d.customer_id, label: d.customer_name })) : [])
-                            ]}
-                            value={multipleFilter.customer_id === "" ? { value: "", label: "---Select---" } : (filterData?.customer?.map(d => ({ value: d.customer_id, label: d.customer_name })).find(o => o.value === multipleFilter.customer_id))}
-                            onChange={(selected) => setMultipleFilter({ ...multipleFilter, customer_id: selected ? selected.value : "" })}
-                            placeholder="---Select---"
-                        />
-                    </div>
-                    <div className='col-md-2 pe-1'>
-                        <Select
-                            styles={selectStyles}
-                            options={[
-                                { value: "", label: "--- Select ----" },
-                                ...(filterData?.job_status_type ? filterData.job_status_type.map(d => ({ value: d.job_status_type_id, label: d.job_status_type_name })) : [])
-                            ]}
-                            value={multipleFilter.job_status_type_id === "" ? { value: "", label: "--- Select ----" } : (filterData?.job_status_type?.map(d => ({ value: d.job_status_type_id, label: d.job_status_type_name })).find(o => o.value === multipleFilter.job_status_type_id))}
-                            onChange={(selected) => setMultipleFilter({ ...multipleFilter, job_status_type_id: selected ? selected.value : "" })}
-                            placeholder="--- Select ----"
-                        />
-                    </div>
-                    <div className='col-md-2 pe-1'>
-                        <Select
-                            styles={selectStyles}
-                            options={[
-                                { value: "", label: "--- Select ---" },
-                                ...(filterData?.processor ? filterData.processor.map(d => ({ value: d.processor_id, label: d.processor_name })) : [])
-                            ]}
-                            value={multipleFilter.processor_id === "" ? { value: "", label: "--- Select ---" } : (filterData?.processor?.map(d => ({ value: d.processor_id, label: d.processor_name })).find(o => o.value === multipleFilter.processor_id))}
-                            onChange={(selected) => setMultipleFilter({ ...multipleFilter, processor_id: selected ? selected.value : "" })}
-                            placeholder="--- Select ---"
-                        />
-                    </div>
-                    <div className='col-md-2 pe-1'>
-                        <Select
-                            styles={selectStyles}
-                            options={[
-                                { value: "", label: "--- Select ---" },
-                                ...(filterData?.reviewer ? filterData.reviewer.map(d => ({ value: d.reviewer_id, label: d.reviewer_name })) : [])
-                            ]}
-                            value={multipleFilter.reviewer_id === "" ? { value: "", label: "--- Select ---" } : (filterData?.reviewer?.map(d => ({ value: d.reviewer_id, label: d.reviewer_name })).find(o => o.value === multipleFilter.reviewer_id))}
-                            onChange={(selected) => setMultipleFilter({ ...multipleFilter, reviewer_id: selected ? selected.value : "" })}
-                            placeholder="--- Select ---"
-                        />
-                    </div>
-                    <div className='col-md-auto pe-1'>
-                        <button 
-                            className="btn btn-outline-info rounded-pill px-4 fw-bold" 
-                            onClick={clearFilter}
-                            style={{ borderWidth: '2px', fontSize: '14px', whiteSpace: 'nowrap' }}
-                        >
-                            Reset
-                        </button>
-                    </div>
-                    <div className='col-md-auto ms-auto'>
-                        <ExportToExcel 
-                            apiData={exportData} 
-                            fileName={'Weekly_Report'} 
-                            headers={headers}
-                            className="btn btn-outline-info rounded-pill px-4 fw-bold d-inline-flex align-items-center gap-2"
-                            style={{ borderWidth: '2px', fontSize: '14px', whiteSpace: 'nowrap' }}
-                        />
-                    </div>
-                </div>
+    <div className='containr-fluid mt-5'>
+      <div className='report-data'>
+        <div className='mb-2'>
+          <div className="row">
+            <div className='col-md-2 pe-0'>
+              <Select
+                id="tabSelect"
+                className="basic-multi-select"
+                classNamePrefix="react-select"
+                isSearchable
+                options={[
+                  { value: "", label: "---Select---" },
+                  ...(filterData?.customer ? filterData.customer.map(d => ({ value: d.customer_id, label: d.customer_name })) : [])
+                ]}
+                value={multipleFilter.customer_id === "" ? { value: "", label: "---Select---" } : (filterData?.customer?.map(d => ({ value: d.customer_id, label: d.customer_name })).find(o => o.value === multipleFilter.customer_id))}
+                onChange={(selected) => setMultipleFilter({ ...multipleFilter, customer_id: selected ? selected.value : "" })}
+                placeholder="---Select---"
+              />
             </div>
 
-            <div className='row mb-4'>
-                <div className='col-12 d-flex gap-2'>
-                    <button 
-                        className="btn btn-outline-info rounded-pill px-4 fw-bold" 
-                        onClick={slidePrev} 
-                        disabled={currentIndex === 0}
-                        style={{ borderWidth: '2px', minWidth: '100px' }}
-                    >
-                        Prev
-                    </button>
-                    <button 
-                        className="btn btn-outline-info rounded-pill px-4 fw-bold" 
-                        onClick={slideNext} 
-                        disabled={currentIndex + 10 >= columns.length}
-                        style={{ borderWidth: '2px', minWidth: '100px' }}
-                    >
-                        Next
-                    </button>
-                </div>
+            <div className='col-md-2 pe-0'>
+              <Select
+                id="tabSelect"
+                className="basic-multi-select"
+                classNamePrefix="react-select"
+                isSearchable
+                options={[
+                  { value: "", label: "--- Select ----" },
+                  ...(filterData?.job_status_type ? filterData.job_status_type.map(d => ({ value: d.job_status_type_id, label: d.job_status_type_name })) : [])
+                ]}
+                value={multipleFilter.job_status_type_id === "" ? { value: "", label: "--- Select ----" } : (filterData?.job_status_type?.map(d => ({ value: d.job_status_type_id, label: d.job_status_type_name })).find(o => o.value === multipleFilter.job_status_type_id))}
+                onChange={(selected) => setMultipleFilter({ ...multipleFilter, job_status_type_id: selected ? selected.value : "" })}
+                placeholder="--- Select ----"
+              />
             </div>
 
-            <div className="table-responsive position-relative">
-                {loading && (
-                    <div className="overlay rounded-3">
-                        <div className="loader"></div>
-                    </div>
-                )}
-                <table className="table table-hover align-middle custom-weekly-table">
-                    <thead>
-                        <tr>
-                            <th className="bg-white sticky-left py-3" style={{ minWidth: '200px' }}>Name</th>
-                            {visibleColumns.map((col) => (
-                                <th key={col} className="text-center py-3" style={{ minWidth: '100px' }}>Week {col}</th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {weeklyReportData.length === 0 ? (
-                            <tr>
-                                <td colSpan={visibleColumns.length + 1} className="text-center py-5 border-0">
-                                    <div className="d-flex flex-column align-items-center">
-                                        <img src={noDataImage} alt="No Data" style={{ width: '150px' }} />
-                                        <p className="mt-3 text-muted fw-bold">No data available</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        ) : (
-                            weeklyReportData.map((data, index) => (
-                                <tr key={index}>
-                                    <td className="bg-white sticky-left py-3 fw-bold" style={{ color: '#333' }}>
-                                        {data?.customer_name}
-                                    </td>
-                                    {visibleColumns.map((colNum) => {
-                                        const weekKey = `WE_${colNum}_${currentYear}`;
-                                        const weekData = data.weeks?.[0]?.[weekKey];
-                                        return (
-                                            <td key={colNum} className="text-center py-3">
-                                                {weekData?.count > 0 ? (
-                                                    <span 
-                                                        className="text-info fw-bold cursor-pointer"
-                                                        onClick={() => handleOnClick(weekData)}
-                                                    >
-                                                        {weekData.count}
-                                                    </span>
-                                                ) : (
-                                                    <span className="text-muted opacity-25">-</span>
-                                                )}
-                                            </td>
-                                        );
-                                    })}
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+            <div className='col-md-2 pe-0'>
+              <Select
+                id="tabSelect"
+                className="basic-multi-select"
+                classNamePrefix="react-select"
+                isSearchable
+                options={[
+                  { value: "", label: "--- Select ---" },
+                  ...(filterData?.processor ? filterData.processor.map(d => ({ value: d.processor_id, label: d.processor_name })) : [])
+                ]}
+                value={multipleFilter.processor_id === "" ? { value: "", label: "--- Select ---" } : (filterData?.processor?.map(d => ({ value: d.processor_id, label: d.processor_name })).find(o => o.value === multipleFilter.processor_id))}
+                onChange={(selected) => setMultipleFilter({ ...multipleFilter, processor_id: selected ? selected.value : "" })}
+                placeholder="--- Select ---"
+              />
             </div>
+
+            <div className='col-md-2 pe-0'>
+              <Select
+                id="tabSelect"
+                className="basic-multi-select"
+                classNamePrefix="react-select"
+                isSearchable
+                options={[
+                  { value: "", label: "--- Select ---" },
+                  ...(filterData?.reviewer ? filterData.reviewer.map(d => ({ value: d.reviewer_id, label: d.reviewer_name })) : [])
+                ]}
+                value={multipleFilter.reviewer_id === "" ? { value: "", label: "--- Select ---" } : (filterData?.reviewer?.map(d => ({ value: d.reviewer_id, label: d.reviewer_name })).find(o => o.value === multipleFilter.reviewer_id))}
+                onChange={(selected) => setMultipleFilter({ ...multipleFilter, reviewer_id: selected ? selected.value : "" })}
+                placeholder="--- Select ---"
+              />
+            </div>
+
+            <div className='col-md-1 pe-0'>
+              <button className="btn btn-info " onClick={clearFilter} disabled={currentIndex === 0}>
+                Reset
+              </button>
+            </div>
+            <div className='col-md-3'>
+              <ExportToExcel apiData={exportData} fileName={'Weekly_Report'} headers={headers} />
+            </div>
+          </div>
+        </div>
+        <div className='row'>
+          <div>
+            <button className="btn btn-info " onClick={slidePrev} disabled={currentIndex === 0}>
+              Prev
+            </button>
+            <button className="btn btn-info ms-2" onClick={slideNext} disabled={currentIndex + 10 >= columns.length}>
+              Next
+            </button>
+          </div>
+        </div>
+        <div className="table-wrapper mt-3">
+          {loading && (
+            <div className="overlay">
+              <div className="loader"></div>
+            </div>
+          )}
+          <table className="table">
+            <thead className='table-light table-head-blue'>
+              <tr>
+                <th className="fixed-column">Name</th>
+                {visibleColumns && visibleColumns.map((col, index) => (
+                  <th key={index}>Week {col}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {weeklyReportData.length === 0 ? (
+                <tr>
+                  <td colSpan={visibleColumns.length + 1} className="text-center">
+                    <img src={noDataImage} alt="No Data" style={{ width: '150px', height: '150px' }} />
+                    <p>No data available</p>
+                  </td>
+                </tr>
+              ) : (
+                weeklyReportData && weeklyReportData?.map((data, index) => (
+                  <tr key={index}>
+                    <td className="fixed-column">{data?.customer_name}</td>
+                    {visibleColumns.map((colNum) => {
+                      const weekKey = `WE_${colNum}_${currentYear}`;
+                      const weekData = data.weeks?.[0]?.[weekKey];
+                      return (
+                        <td key={colNum} className="text-center">
+                          {weekData?.count > 0 ? (
+                            <div
+                              style={{
+                                color: 'rgb(38, 189, 240)',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                height: '100%',
+                              }}
+                              onClick={() => handleOnClick(weekData)}
+                            >
+                              {weekData.count}
+                            </div>
+                          ) : "-"}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
-      <style>{`
-        .custom-weekly-table thead th {
-            border-top: none;
-            border-bottom: 2px solid #000 !important;
-            color: #000;
-            font-weight: 700;
-            font-size: 15px;
-        }
-        .custom-weekly-table tbody td {
-            border-color: #eee;
-            font-size: 14px;
-        }
-        .sticky-left { 
-            position: sticky; 
-            left: 0; 
-            z-index: 2; 
-        }
-        .cursor-pointer:hover {
-            text-decoration: underline;
-        }
-        .btn-outline-info {
-            color: #26bdf0;
-            border-color: #26bdf0;
-        }
-        .btn-outline-info:hover {
-            background-color: #26bdf0 !important;
-            color: #fff !important;
-        }
-        .btn-outline-info:disabled {
-            color: #ccc;
-            border-color: #eee;
-        }
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255,255,255,0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
-        }
-      `}</style>
     </div>
   );
 };

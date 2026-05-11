@@ -339,7 +339,7 @@ const CustomerJobStatus = () => {
     <div>
       <div className="report-data">
         <div className="row">
-          <div className="col-md-7 mb-5">
+          <div className="col-md-7 mb-2">
             <div className="tab-title">
               <h3>Job Status Report</h3>
             </div>
@@ -382,7 +382,7 @@ const CustomerJobStatus = () => {
           <Datatable
             columns={columns}
             data={JobStatusData && JobStatusData}
-            filter={true}
+            // filter={true}
           />
 
           <div className="d-flex justify-content-between align-items-center mt-3">

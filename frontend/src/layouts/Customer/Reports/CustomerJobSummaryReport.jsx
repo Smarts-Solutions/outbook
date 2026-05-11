@@ -97,17 +97,6 @@ const CustomerJobSummary = () => {
               <h3>Job Summary Report</h3>
             </div>
           </div>
-          <div className="col-md-5 d-flex justify-content-end align-items-center mb-5">
-            {jobSummaryReportData && jobSummaryReportData.length > 0 && (
-                <button
-                  className="btn btn-outline-info fw-bold border-3 d-inline-flex align-items-center gap-2 lh-1"
-                  onClick={handleExport}
-                >
-                  <Download size={16} />
-                  <span>Export Excel</span>
-                </button>
-            )}
-          </div>
         </div>
         {loading && (
           <div className="overlay">

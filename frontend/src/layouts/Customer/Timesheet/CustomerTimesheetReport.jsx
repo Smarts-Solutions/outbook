@@ -481,10 +481,14 @@ function CustomerTimesheetReport() {
                 </div>
               </div>
             </div>
-            {showData?.rows?.length > 0 && (
+            {showData && showData?.rows && showData?.rows?.length > 0 && (
               <div className="col-12 col-sm-5">
                 <div className="d-flex justify-content-sm-end align-items-center mt-3 mt-sm-0">
-                  <button className="btn btn-info d-inline-flex align-items-center gap-2 lh-1" onClick={() => exportToCSV(showData)}>
+                  <button
+                    className="btn btn-outline-info fw-bold border-3 d-inline-flex align-items-center gap-2 lh-1"
+                    id="btn-export"
+                    onClick={() => exportToCSV(showData)}
+                  >
                     <Download size={16} />
                     <span>Export Data</span>
                   </button>
@@ -513,7 +517,16 @@ function CustomerTimesheetReport() {
 
         <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">Internal / External</label>
-          <select className="form-select shadow-sm" value={filters.internal_external} onChange={(e) => handleFilterChange({ target: { key: "internal_external", value: e.target.value } })}>
+          <select
+            className="form-select shadow-sm"
+            id="internal_external"
+            value={filters.internal_external}
+            onChange={(e) =>
+              handleFilterChange({
+                target: { key: "internal_external", value: e.target.value },
+              })
+            }
+          >
             <option value="0">Both</option>
             <option value="1">Internal</option>
             <option value="2">External</option>
@@ -634,7 +647,16 @@ function CustomerTimesheetReport() {
 
         <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">Time Period</label>
-          <select className="form-select shadow-sm" value={filters.timePeriod} onChange={(e) => handleFilterChange({ target: { key: "timePeriod", value: e.target.value } })}>
+          <select
+            className="form-select shadow-sm"
+            id="timePeriod"
+            value={filters.timePeriod}
+            onChange={(e) =>
+              handleFilterChange({
+                target: { key: "timePeriod", value: e.target.value },
+              })
+            }
+          >
             <option value="">--Select--</option>
             <option value="this_week">This week</option>
             <option value="last_week">Last Week</option>
@@ -652,18 +674,49 @@ function CustomerTimesheetReport() {
           <>
             <div className="col-lg-4 col-md-6">
               <label className="form-label fw-medium">From Date</label>
-              <input type="date" className="form-control shadow-sm" value={filters.fromDate || ""} onChange={(e) => handleFilterChange({ target: { key: "fromDate", value: e.target.value } })} />
+              <input
+                type="date"
+                className="form-control shadow-sm"
+                id="fromDate"
+                value={filters.fromDate || ""}
+                onChange={(e) =>
+                  handleFilterChange({
+                    target: { key: "fromDate", value: e.target.value },
+                  })
+                }
+              />
             </div>
             <div className="col-lg-4 col-md-6">
               <label className="form-label fw-medium">To Date</label>
-              <input type="date" className="form-control shadow-sm" value={filters.toDate || ""} min={filters.fromDate || ""} onChange={(e) => handleFilterChange({ target: { key: "toDate", value: e.target.value } })} disabled={!filters.fromDate} />
+              <input
+                type="date"
+                className="form-control shadow-sm"
+                id="toDate"
+                value={filters.toDate || ""}
+                min={filters.fromDate || ""}
+                onChange={(e) =>
+                  handleFilterChange({
+                    target: { key: "toDate", value: e.target.value },
+                  })
+                }
+                disabled={!filters.fromDate}
+              />
             </div>
           </>
         )}
 
         <div className="col-lg-4 col-md-6">
           <label className="form-label fw-medium">Display By</label>
-          <select className="form-select shadow-sm" value={filters.displayBy} onChange={(e) => handleFilterChange({ target: { key: "displayBy", value: e.target.value } })}>
+          <select
+            className="form-select shadow-sm"
+            id="displayBy"
+            value={filters.displayBy}
+            onChange={(e) =>
+              handleFilterChange({
+                target: { key: "displayBy", value: e.target.value },
+              })
+            }
+          >
             <option value="">--Select--</option>
             <option value="Daily">Daily</option>
             <option value="Weekly">Weekly</option>
@@ -675,8 +728,20 @@ function CustomerTimesheetReport() {
         </div>
 
         <div className="col-lg-4 col-md-6">
-          <button className="btn btn-outline-secondary shadow-sm rounded-pill border-3 fw-bold" onClick={resetFunction}>Clear Filter</button>
-          <button className="btn btn-info shadow-sm rounded-pill ms-3" onClick={saveFilterFunction}>Save Filters</button>
+          <button
+            className="btn btn-outline-secondary shadow-sm rounded-pill border-3 fw-bold"
+            id="btn-reset"
+            onClick={resetFunction}
+          >
+            Clear Filter
+          </button>
+          <button
+            className="btn btn-info shadow-sm rounded-pill ms-3"
+            id="btn-reset"
+            onClick={saveFilterFunction}
+          >
+            Save Filters
+          </button>
         </div>
       </div>
 
