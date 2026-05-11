@@ -9,6 +9,8 @@ import CustomerTaxWeeklyReport from './CustomerTaxWeeklyReport';
 import CustomerAverageTatReport from './CustomerAverageTatReport';
 import CustomerMissingTimesheetReport from './CustomerMissingTimesheetReport';
 import CustomerDiscrepancyReport from './CustomerDiscrepancyReport';
+import CustomerDiscrepancyReportProcessor from './CustomerDiscrepancyReportProcessor';
+import CustomerCapacityReport from './CustomerCapacityReport';
 import { useCustomerAccess } from '../../../Utils/CustomerAccessContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -53,6 +55,10 @@ function CustomerReports() {
         return <CustomerMissingTimesheetReport />;
       case 'discrepancyReport':
         return <CustomerDiscrepancyReport />;
+      case 'discrepancyReportProcessor':
+        return <CustomerDiscrepancyReportProcessor />;
+      case 'capacityReport':
+        return <CustomerCapacityReport />;
       default:
         return <div className="p-4 text-center"><h5>Coming Soon...</h5></div>;
     }
@@ -81,7 +87,9 @@ function CustomerReports() {
                   <option value="taxWeeklyStatusReport">Tax Weekly Status Report</option>
                   <option value="averageTatReport">Average TAT Report</option>
                   <option value="missingTimesheetReport">Missing Timesheet Report</option>
-                  <option value="discrepancyReport">Discrepancy Report</option>
+                  <option value="discrepancyReport">Discrepancy Report Job</option>
+                  <option value="discrepancyReportProcessor">Discrepancy Report Processor</option>
+                  <option value="capacityReport">Capacity Report</option>
                 </select>
               </div>
             </div>

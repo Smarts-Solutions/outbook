@@ -1694,6 +1694,98 @@ async function getDateRange(timePeriod, fromDateParam, toDateParam) {
   const today = new Date();
   const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
   const copy = (d) => new Date(d.getTime());
+};
+
+const discrepancyReportProcessor = async (Report) => {
+  let { StaffUserId } = Report;
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  const rows = await QueryRoleHelperFunction(StaffUserId);
+
+  let query = `
+        SELECT 
+            jobs.id AS job_id,
+            CONCAT(
+                SUBSTRING(customers.trading_name, 1, 3), '_',
+                SUBSTRING(clients.trading_name, 1, 3), '_',
+                SUBSTRING(job_types.type, 1, 4), '_',
+                SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id,
+
+            jobs.total_preparation_time AS total_preparation_time,
+            jobs.feedback_incorporation_time AS feedback_incorporation_time,
+
+            SEC_TO_TIME(
+                COALESCE(TIME_TO_SEC(jobs.total_preparation_time), 0) + 
+                COALESCE(TIME_TO_SEC(jobs.feedback_incorporation_time), 0)
+            ) AS job_total_time_processor,
+
+            SUM(
+                COALESCE(CAST(REPLACE(timesheet.monday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+                COALESCE(CAST(REPLACE(timesheet.tuesday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+                COALESCE(CAST(REPLACE(timesheet.wednesday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+                COALESCE(CAST(REPLACE(timesheet.thursday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+                COALESCE(CAST(REPLACE(timesheet.friday_hours, ':', '.') AS DECIMAL(10,2)), 0)
+            ) AS total_spent_hours
+
+        FROM timesheet
+        JOIN jobs ON (timesheet.task_type = '2' AND timesheet.job_id = jobs.id)
+        JOIN staffs ON staffs.id = timesheet.staff_id
+        JOIN roles ON roles.id = staffs.role_id
+        JOIN customers ON customers.id = jobs.customer_id
+        JOIN clients ON clients.id = jobs.client_id
+        JOIN job_types ON jobs.job_type_id = job_types.id
+    `;
+
+  if (rows.length > 0 && rows[0].role_name == "SUPERADMIN") {
+    // Allow access to all data
+  } else {
+    let staffIds = [...LineManageStaffId];
+    const { assignedCustomerIds } = await getStaffAccessFilters(StaffUserId);
+    if (assignedCustomerIds && assignedCustomerIds.length > 0) {
+      const customerIdsStr = assignedCustomerIds.join(",");
+      const [allStaff] = await pool.execute(
+        `SELECT DISTINCT staff_id FROM (
+            SELECT staff_id FROM assigned_jobs_staff_view WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT staff_id FROM staff_portfolio WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT allocated_to as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT reviewer as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT account_manager_id as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT staff_created_id as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT staff_created_id as staff_id FROM clients WHERE customer_id IN (${customerIdsStr})
+        ) as t WHERE staff_id IS NOT NULL`,
+      );
+      allStaff.forEach((s) => staffIds.push(s.staff_id));
+    }
+
+    const uniqueStaffIds = [...new Set(staffIds)].filter((id) => id);
+
+    query += ` WHERE timesheet.staff_id IN (${uniqueStaffIds.length > 0 ? uniqueStaffIds.join(",") : StaffUserId})`;
+  }
+
+  query += ` GROUP BY jobs.id, job_code_id, jobs.total_time`;
+
+  try {
+    const [result] = await pool.execute(query);
+    return { status: true, message: "Success.", data: result };
+  } catch (error) {
+    console.log("error ", error);
+    return { status: false, message: "Error getting discrepancy report processor." };
+  }
+};
+
+const capacityReport = async (Report) => {
+  return { status: true, message: "Capacity Report is under development.", data: [] };
+};
+async function getDateRange(timePeriod, fromDateParam, toDateParam) {
+  const today = new Date();
+  const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const copy = (d) => new Date(d.getTime());
 
   let start, end;
 
@@ -2312,6 +2404,10 @@ const getAllTaskByStaff = async (Report) => {
       return await saveFilters(Report);
     case "deleteFilterId":
       return await deleteFilterId(Report);
+    case "discrepancyReportProcessor":
+      return await discrepancyReportProcessor(Report);
+    case "capacityReport":
+      return await capacityReport(Report);
     case "get_customers_filter":
       return await getCustomersFilter(Report);
     case "get_clients_filter":
@@ -2800,6 +2896,8 @@ module.exports = {
   reportCountJob,
   missingTimesheetReport,
   discrepancyReport,
+  discrepancyReportProcessor,
+  capacityReport,
   getTimesheetReportData,
   getAllTaskByStaff,
   getJobCustomReport
