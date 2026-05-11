@@ -23,7 +23,10 @@ const CustomerJobSummary = () => {
       .unwrap()
       .then((res) => {
         if (res.status) {
-          setJobSummaryReportData(res.data);
+          const sortedData = [...res.data].sort((a, b) => 
+            (a.job_status || "").localeCompare(b.job_status || "")
+          );
+          setJobSummaryReportData(sortedData);
         } else {
           setJobSummaryReportData([]);
         }
