@@ -70,6 +70,8 @@ const Sidebar = () => {
       "/admin/reports",
       "/admin/timesheetReports",
       "/admin/job/customreport",
+      "/customer/reports",
+      "/customer/timesheetReports",
     ];
     const customerPaths = [
       "/admin/customer",
@@ -189,13 +191,56 @@ const Sidebar = () => {
                   </li>
                 )}
                 {role === "CUSTOMER" && hasAccess("report") && (
-                  <li className={activeLink === "/customer/reports" ? "active" : ""}>
-                    <Link to="/customer/reports">
-                      <span className="sidebar-icons">
-                        <FileText />
+                  <li
+                    className={
+                      activeLink.startsWith("/customer/reports") ||
+                        activeLink.startsWith("/customer/timesheetReports")
+                        ? "active"
+                        : ""
+                    }
+                  >
+                    <a
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        toggleDropdown("customerReports");
+                      }}
+                      className="sidebar-parent"
+                    >
+                      <div>
+                        <span className="sidebar-icons">
+                          <FileText />
+                        </span>
+                        <span className="pe-4 pe-lg-4">Reports</span>
+                      </div>
+                      <span className="chevron-icon">
+                        {menuState.dropdownOpen["customerReports"] ? (
+                          <ChevronDown size={16} />
+                        ) : (
+                          <ChevronRight size={16} />
+                        )}
                       </span>
-                      <span>Reports</span>
-                    </Link>
+                    </a>
+                    {menuState.dropdownOpen["customerReports"] && (
+                      <ul className="sidebar-submenu">
+                        <li className={activeLink === "/customer/reports" ? "active" : ""}>
+                          <Link to="/customer/reports">
+                            <span className="sidebar-icons">
+                              <File size={16} />
+                            </span>
+                            <span>Standard</span>
+                          </Link>
+                        </li>
+                        <li className={activeLink === "/customer/timesheetReports" ? "active" : ""}>
+                          <Link to="/customer/timesheetReports">
+                            <span className="sidebar-icons">
+                              <Clock size={16} />
+                            </span>
+                            <span>Time Sheet</span>
+                          </Link>
+                        </li>
+                      </ul>
+                    )}
                   </li>
                 )}
               </>

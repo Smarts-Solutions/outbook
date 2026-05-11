@@ -125,3 +125,16 @@ exports.discrepancyReport = async (req, res) => {
     res.status(500).json({ status: false, message: error.message });
   }
 };
+
+exports.getTimesheetReportData = async (req, res) => {
+  try {
+    const result = await customerReportModel.getTimesheetReportData({
+      StaffUserId: req.userId,
+      data: req.body,
+    });
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+

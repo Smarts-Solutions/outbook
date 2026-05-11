@@ -139,3 +139,16 @@ export async function CUSTOMER_JOB_RECEIVED_SEND_REPORT(data, token) {
         return await err;
     }
 }
+
+export async function CUSTOMER_TIMESHEET_REPORTS(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}customer/getTimesheetReportData`, data, {
+            headers: header(token),
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+

@@ -18,6 +18,7 @@ import AddNewClient from "../layouts/Customer/Customer/CreateClient";
 import CustomerReports from "../layouts/Customer/Reports/Reports";
 import CustomerReportJobs from "../layouts/Customer/Reports/CustomerReportJobs";
 import CustomerProfile from "../layouts/Customer/CustomerProfile";
+import CustomerTimesheetReport from "../layouts/Customer/Timesheet/CustomerTimesheetReport";
 
 const Customer_Route = () => {
     return (
@@ -41,6 +42,7 @@ const Customer_Route = () => {
                         <Route path="/job/logs" element={<JobLogs />} />
                         <Route path="/reports" element={<CustomerReports />} />
                         <Route path="/report/jobs" element={<CustomerReportJobs />} />
+                        <Route path="/timesheetReports" element={<CustomerTimesheetReport />} />
                         <Route path="/profile" element={<CustomerProfile />} />
 
                     </Routes>

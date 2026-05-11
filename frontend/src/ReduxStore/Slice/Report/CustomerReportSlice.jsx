@@ -12,6 +12,7 @@ import {
   CUSTOMER_REPORT_COUNT_JOB,
   CUSTOMER_MISSING_TIMESHEET_REPORT,
   CUSTOMER_DISCREPANCY_REPORT,
+  CUSTOMER_TIMESHEET_REPORTS,
 } from "../../../Services/Report/customerReportService";
 
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
@@ -195,6 +196,20 @@ export const CustomerDiscrepancyReport = createAsyncThunk(
   }
 );
 
+export const CustomerTimesheetReports = createAsyncThunk(
+  "CustomerTimesheetReports",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      const res = await CUSTOMER_TIMESHEET_REPORTS(req, authToken);
+      return res;
+    } catch (err) {
+      return err;
+    }
+  }
+);
+
+
 const CustomerReportSlice = createSlice({
   name: "CustomerReportSlice",
   initialState: {
@@ -249,6 +264,17 @@ const CustomerReportSlice = createSlice({
         state.receivedsentreport = action.payload;
       })
       .addCase(CustomerReceivedSentReport.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(CustomerTimesheetReports.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(CustomerTimesheetReports.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.timesheetReports = action.payload;
+      })
+      .addCase(CustomerTimesheetReports.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
       });
