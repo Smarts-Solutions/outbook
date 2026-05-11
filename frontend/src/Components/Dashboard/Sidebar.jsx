@@ -207,7 +207,8 @@ const Sidebar = () => {
                   <li
                     className={
                       activeLink.startsWith("/customer/reports") ||
-                        activeLink.startsWith("/customer/timesheetReports")
+                        activeLink.startsWith("/customer/timesheetReports") ||
+                        activeLink.startsWith("/customer/job/customreport")
                         ? "active"
                         : ""
                     }
@@ -234,34 +235,49 @@ const Sidebar = () => {
                         )}
                       </span>
                     </a>
-                    {menuState.dropdownOpen["customerReports"] && (
-                      <ul className="sidebar-submenu">
-                        <li className={activeLink === "/customer/reports" ? "active" : ""}>
-                          <Link to="/customer/reports">
-                            <span className="sidebar-icons">
-                              <File size={16} />
-                            </span>
-                            <span>Standard</span>
-                          </Link>
-                        </li>
-                        <li className={activeLink === "/customer/timesheetReports" ? "active" : ""}>
-                          <Link to="/customer/timesheetReports">
-                            <span className="sidebar-icons">
-                              <Clock size={16} />
-                            </span>
-                            <span>Time Sheet</span>
-                          </Link>
-                        </li>
-                        <li className={activeLink === "/customer/job/customreport" ? "active" : ""}>
-                          <Link to="/customer/job/customreport">
-                            <span className="sidebar-icons">
-                              <Clock1 size={16} />
-                            </span>
-                            <span>Custom Job</span>
-                          </Link>
-                        </li>
-                      </ul>
-                    )}
+                    <ul
+                      className={`nav-second-level ${menuState.dropdownOpen["customerReports"]
+                        ? "in"
+                        : "mm-collapse"
+                        }`}
+                      aria-expanded={
+                        menuState.dropdownOpen["customerReports"] ? "true" : "false"
+                      }
+                    >
+                      <li className={activeLink === "/customer/reports" ? "active" : ""}>
+                        <Link
+                          to="/customer/reports"
+                          onClick={(e) => handleLinkClick(e, "/customer/reports")}
+                        >
+                          <span className="sidebar-icons">
+                            <File />
+                          </span>
+                          <span>Standard</span>
+                        </Link>
+                      </li>
+                      <li className={activeLink === "/customer/timesheetReports" ? "active" : ""}>
+                        <Link
+                          to="/customer/timesheetReports"
+                          onClick={(e) => handleLinkClick(e, "/customer/timesheetReports")}
+                        >
+                          <span className="sidebar-icons">
+                            <Clock />
+                          </span>
+                          <span>Time Sheet</span>
+                        </Link>
+                      </li>
+                      <li className={activeLink === "/customer/job/customreport" ? "active" : ""}>
+                        <Link
+                          to="/customer/job/customreport"
+                          onClick={(e) => handleLinkClick(e, "/customer/job/customreport")}
+                        >
+                          <span className="sidebar-icons">
+                            <Clock1 />
+                          </span>
+                          <span>Custom Job</span>
+                        </Link>
+                      </li>
+                    </ul>
                   </li>
                 )}
               </>
