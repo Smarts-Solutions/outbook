@@ -1901,7 +1901,13 @@ const getJobCustomReport = async (Report) => {
     toDate,
   } = data.filters;
 
-  const accessFilters = await getStaffAccessFilters(StaffUserId);
+  const userRoleRows = await QueryRoleHelperFunction(StaffUserId);
+  const userRole = userRoleRows.length > 0 ? userRoleRows[0].role_name : "";
+  const isAdmin = ["SUPERADMIN", "ADMIN"].includes(userRole);
+  const accessFilters = isAdmin ? null : await getStaffAccessFilters(StaffUserId);
+  const LineManageStaffIdArr = await LineManageStaffIdHelperFunction(StaffUserId);
+  const LineManageStaffId = LineManageStaffIdArr.join(",");
+
   let { page = 1, limit = 10, search = "" } = data;
   const offset = (page - 1) * limit;
 
@@ -1925,6 +1931,8 @@ const getJobCustomReport = async (Report) => {
         GROUPBY = GROUPBY != "" ? (GROUPBY += " , sf.employee_number") : `GROUP BY sf.employee_number`;
       } else if (g === "customer_account_manager_officer") {
         GROUPBY = GROUPBY != "" ? (GROUPBY += " , ccd.id") : `GROUP BY ccd.id`;
+      } else if (g === "allocated_to_other_id") {
+        GROUPBY = GROUPBY != "" ? (GROUPBY += " , ato.id") : `GROUP BY ato.id`;
       } else {
         GROUPBY = GROUPBY != "" ? (GROUPBY += ` , raw.${g}`) : `GROUP BY raw.${g}`;
       }
@@ -1943,6 +1951,7 @@ const getJobCustomReport = async (Report) => {
     let where = [`work_date BETWEEN ? AND ?`];
     let orWhere = [];
 
+    // Filter Mappings
     if (!["", null, undefined].includes(job_id) && !(Array.isArray(job_id) && job_id.length === 0)) {
       orWhere.push(`raw.job_id IN (${Array.isArray(job_id) ? job_id.join(",") : job_id})`);
     }
@@ -1952,31 +1961,65 @@ const getJobCustomReport = async (Report) => {
     if (!["", null, undefined].includes(client_id) && !(Array.isArray(client_id) && client_id.length === 0)) {
       orWhere.push(`raw.client_id IN (${Array.isArray(client_id) ? client_id.join(",") : client_id})`);
     }
+    if (!["", null, undefined].includes(account_manager_id) && !(Array.isArray(account_manager_id) && account_manager_id.length === 0)) {
+      orWhere.push(`raw.account_manager_id IN (${Array.isArray(account_manager_id) ? account_manager_id.join(",") : account_manager_id})`);
+    }
+    if (!["", null, undefined].includes(allocated_to_id) && !(Array.isArray(allocated_to_id) && allocated_to_id.length === 0)) {
+      orWhere.push(`raw.allocated_to_id IN (${Array.isArray(allocated_to_id) ? allocated_to_id.join(",") : allocated_to_id})`);
+    }
+    if (!["", null, undefined].includes(reviewer_id) && !(Array.isArray(reviewer_id) && reviewer_id.length === 0)) {
+      orWhere.push(`raw.reviewer_id IN (${Array.isArray(reviewer_id) ? reviewer_id.join(",") : reviewer_id})`);
+    }
+    if (!["", null, undefined].includes(allocated_to_other_id) && !(Array.isArray(allocated_to_other_id) && allocated_to_other_id.length === 0)) {
+      orWhere.push(`ato.id IN (${Array.isArray(allocated_to_other_id) ? allocated_to_other_id.join(",") : allocated_to_other_id})`);
+    }
+    if (!["", null, undefined].includes(service_id) && !(Array.isArray(service_id) && service_id.length === 0)) {
+      orWhere.push(`raw.service_id IN (${Array.isArray(service_id) ? service_id.join(",") : service_id})`);
+    }
+    if (!["", null, undefined].includes(job_type_id) && !(Array.isArray(job_type_id) && job_type_id.length === 0)) {
+      orWhere.push(`raw.job_type_id IN (${Array.isArray(job_type_id) ? job_type_id.join(",") : job_type_id})`);
+    }
+    if (!["", null, undefined].includes(status_type_id) && !(Array.isArray(status_type_id) && status_type_id.length === 0)) {
+      orWhere.push(`raw.status_type_id IN (${Array.isArray(status_type_id) ? status_type_id.join(",") : status_type_id})`);
+    }
+    if (!["", null, undefined].includes(employee_number) && !(Array.isArray(employee_number) && employee_number.length === 0)) {
+      orWhere.push(`sf.employee_number IN (${Array.isArray(employee_number) ? employee_number.join(",") : employee_number})`);
+    }
 
     if (orWhere.length) {
       where.push(`(${orWhere.join(" OR ")})`);
     }
 
-    // Security Scoping - Map aliases correctly
-    if (accessFilters.customerCondition) {
-        // customerCondition is "customer_id IN (...)"
-        where.push(`raw.${accessFilters.customerCondition}`);
-    }
-    if (accessFilters.clientCondition && accessFilters.clientCondition !== "id IS NOT NULL") {
-        // clientCondition is "id IN (...)" -> needs to be "client_id IN (...)"
+    // Security Scoping
+    if (isAdmin) {
+      // Full access
+    } else if (accessFilters) {
+      if (accessFilters.customerCondition) where.push(`raw.${accessFilters.customerCondition}`);
+      if (accessFilters.clientCondition && accessFilters.clientCondition !== "id IS NOT NULL") {
         where.push(`raw.${accessFilters.clientCondition.replace(/\bid\b/g, "client_id")}`);
-    }
-    if (accessFilters.jobCondition && accessFilters.jobCondition !== "id IS NOT NULL") {
-        // jobCondition is "id IN (...)" -> needs to be "job_id IN (...)"
+      }
+      if (accessFilters.jobCondition && accessFilters.jobCondition !== "id IS NOT NULL") {
         where.push(`raw.${accessFilters.jobCondition.replace(/\bid\b/g, "job_id")}`);
+      }
+    } else if (StaffUserId) {
+      where.push(`(
+          assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+          OR raw.staff_created_id IN (${LineManageStaffId})
+          OR cl.staff_created_id IN (${LineManageStaffId})
+      )`);
     }
+
+    // Service alignment logic from Admin
+    where.push(`(
+        assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+        OR raw.service_id = assigned_jobs_staff_view.service_id_assign
+    )`);
 
     where = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
     const subquerySQL = `
       SELECT 
-          j.id AS job_id,
-          j.job_id AS job_code_id,
+          j.id AS job_id, j.job_id AS job_code_id,
           j.date_received_on, j.allocated_on, j.job_priority, j.engagement_model, j.customer_contact_details_id, j.status_updation_date,
           j.Transactions_Posting_id_2, j.Number_of_Bank_Transactions_id_2, j.Number_of_Journal_Entries_id_2, j.Number_of_Other_Transactions_id_2, j.Number_of_Petty_Cash_Transactions_id_2, j.Number_of_Purchase_Invoices_id_2, j.Number_of_Sales_Invoices_id_2, j.Number_of_Total_Transactions_id_2,
           j.submission_deadline, j.Tax_Year_id_4, j.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4, j.Whose_Tax_Return_is_it_id_4, j.Type_of_Payslip_id_3, j.Year_Ending_id_1, j.Bookkeeping_Frequency_id_2, j.CIS_Frequency_id_3, j.Filing_Frequency_id_8, j.Management_Accounts_Frequency_id_6, j.Payroll_Frequency_id_3,
@@ -1985,12 +2028,31 @@ const getJobCustomReport = async (Report) => {
       FROM jobs AS j
     `;
 
+    const baseJoinSQL = `
+      FROM (${subquerySQL}) AS raw
+      LEFT JOIN customer_contact_details AS ccd ON raw.customer_contact_details_id = ccd.id
+      LEFT JOIN customers AS c ON raw.customer_id = c.id
+      LEFT JOIN clients AS cl ON raw.client_id = cl.id
+      LEFT JOIN job_types AS jt ON raw.job_type_id = jt.id
+      LEFT JOIN staffs AS am ON raw.account_manager_id = am.id
+      LEFT JOIN staffs AS at ON raw.allocated_to_id = at.id
+      LEFT JOIN staffs AS rv ON raw.reviewer_id = rv.id
+      LEFT JOIN services AS sv ON raw.service_id = sv.id
+      LEFT JOIN master_status AS st ON raw.status_type_id = st.id
+      LEFT JOIN staffs AS sf ON raw.staff_created_id = sf.id
+      LEFT JOIN job_allowed_staffs AS jas ON jas.job_id = raw.job_id
+      LEFT JOIN staffs AS ato ON jas.staff_id = ato.id
+      LEFT JOIN staffs AS jobcreatestaff ON raw.staff_created_id = jobcreatestaff.id
+      LEFT JOIN roles AS staffrole ON jobcreatestaff.role_id = staffrole.id
+      LEFT JOIN line_managers AS lm ON lm.staff_by = jobcreatestaff.id
+      LEFT JOIN staffs AS managerstaff ON lm.staff_to = managerstaff.id
+      LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = raw.job_id
+    `;
+
     const countSQL = `
       SELECT COUNT(*) AS total_count FROM (
         SELECT raw.job_id
-        FROM (${subquerySQL}) AS raw
-        LEFT JOIN customer_contact_details AS ccd ON raw.customer_contact_details_id = ccd.id
-        LEFT JOIN staffs AS sf ON raw.staff_created_id = sf.id
+        ${baseJoinSQL}
         ${where}
         ${GROUPBY}
       ) AS count_table
@@ -2001,54 +2063,20 @@ const getJobCustomReport = async (Report) => {
 
     const dataSQL = `
       SELECT
-          raw.job_id,
-          DATE_FORMAT(raw.date_received_on, '%d/%m/%Y') AS date_received_on,
-          DATE_FORMAT(raw.allocated_on, '%d/%m/%Y') AS allocated_on,
-          DATE_FORMAT(raw.status_updation_date, '%d/%m/%Y') AS status_updation_date,
-          raw.job_priority, raw.engagement_model, raw.Transactions_Posting_id_2, raw.Number_of_Bank_Transactions_id_2, raw.Number_of_Journal_Entries_id_2, raw.Number_of_Other_Transactions_id_2, raw.Number_of_Petty_Cash_Transactions_id_2, raw.Number_of_Purchase_Invoices_id_2, raw.Number_of_Sales_Invoices_id_2, raw.Number_of_Total_Transactions_id_2,
-          DATE_FORMAT(raw.submission_deadline, '%d/%m/%Y') AS submission_deadline,
-          raw.Tax_Year_id_4, raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4, raw.Whose_Tax_Return_is_it_id_4, raw.Type_of_Payslip_id_3,
-          DATE_FORMAT(raw.Year_Ending_id_1, '%d/%m/%Y') AS Year_Ending_id_1,
-          raw.Bookkeeping_Frequency_id_2, raw.CIS_Frequency_id_3, raw.Filing_Frequency_id_8, raw.Management_Accounts_Frequency_id_6, raw.Payroll_Frequency_id_3,
-          raw.budgeted_hours, raw.feedback_incorporation_time, raw.review_time, raw.total_preparation_time, raw.total_time,
-          DATE_FORMAT(raw.due_on, '%d/%m/%Y') AS due_on,
-          DATE_FORMAT(raw.customer_deadline_date, '%d/%m/%Y') AS customer_deadline_date,
-          DATE_FORMAT(raw.expected_delivery_date, '%d/%m/%Y') AS expected_delivery_date,
-          DATE_FORMAT(raw.internal_deadline_date, '%d/%m/%Y') AS internal_deadline_date,
-          DATE_FORMAT(raw.sla_deadline_date, '%d/%m/%Y') AS sla_deadline_date,
-          DATE_FORMAT(raw.Management_Accounts_FromDate_id_6, '%d/%m/%Y') AS Management_Accounts_FromDate_id_6,
-          DATE_FORMAT(raw.Management_Accounts_ToDate_id_6, '%d/%m/%Y') AS Management_Accounts_ToDate_id_6,
+          raw.*,
           CONCAT(jobcreatestaff.first_name, ' ', jobcreatestaff.last_name) AS staff_full_name,
           jobcreatestaff.email AS staff_email, staffrole.role AS role, jobcreatestaff.status AS staff_status,
           CONCAT(managerstaff.first_name, ' ', managerstaff.last_name) AS line_manager,
-          raw.work_date,
-          CONCAT(SUBSTRING(c.trading_name, 1, 3), '_', SUBSTRING(cl.trading_name, 1, 3), '_', SUBSTRING(jt.type, 1, 4), '_', SUBSTRING(raw.job_code_id, 1, 15)) AS job_name,
+          CONCAT(c.trading_name, ' ', cl.trading_name) AS job_name,
           c.trading_name AS customer_name,
-          CONCAT('cli_', SUBSTRING(c.trading_name, 1, 3), '_', SUBSTRING(cl.trading_name, 1, 3), '_', SUBSTRING(cl.client_code, 1, 15)) AS client_name,
+          cl.trading_name AS client_name,
           CONCAT(am.first_name, ' ', am.last_name) AS account_manager_name,
           CONCAT(at.first_name, ' ', at.last_name) AS allocated_to_name,
           CONCAT(rv.first_name, ' ', rv.last_name) AS reviewer_name,
           CONCAT(ato.first_name, ' ', ato.last_name) AS allocated_to_other_name,
           CONCAT(ccd.first_name, ' ', ccd.last_name) AS customer_account_manager_officer,
           sv.name AS service_name, jt.type AS job_type_name, st.name AS status_type_name, sf.employee_number AS employee_number
-      FROM (${subquerySQL}) AS raw
-      LEFT JOIN customer_contact_details AS ccd ON raw.customer_contact_details_id = ccd.id
-      LEFT JOIN customers AS c ON raw.customer_id = c.id
-      LEFT JOIN clients AS cl ON raw.client_id = cl.id
-      LEFT JOIN job_types AS jt ON raw.job_type_id = jt.id
-      LEFT JOIN staffs AS am ON raw.account_manager_id = am.id
-      LEFT JOIN staffs AS at ON raw.allocated_to_id = at.id
-      LEFT JOIN staffs AS rv ON raw.reviewer_id = rv.id
-      LEFT JOIN staffs AS sv_staff ON raw.staff_created_id = sv_staff.id
-      LEFT JOIN services AS sv ON raw.service_id = sv.id
-      LEFT JOIN master_status AS st ON raw.status_type_id = st.id
-      LEFT JOIN staffs AS sf ON raw.staff_created_id = sf.id
-      LEFT JOIN job_allowed_staffs AS jas ON jas.job_id = raw.job_id
-      LEFT JOIN staffs AS ato ON jas.staff_id = ato.id
-      LEFT JOIN staffs AS jobcreatestaff ON raw.staff_created_id = jobcreatestaff.id
-      LEFT JOIN roles AS staffrole ON jobcreatestaff.role_id = staffrole.id
-      LEFT JOIN line_managers AS lm ON lm.staff_by = jobcreatestaff.id
-      LEFT JOIN staffs AS managerstaff ON lm.staff_to = managerstaff.id
+      ${baseJoinSQL}
       ${where}
       ${GROUPBY}
       ORDER BY raw.job_id
@@ -2058,7 +2086,6 @@ const getJobCustomReport = async (Report) => {
     const [rows] = await pool.execute(dataSQL, [fromDate, toDate]);
 
     const idToNameMap = {
-      id: "job_id",
       job_id: "job_name",
       customer_id: "customer_name",
       client_id: "client_name",
@@ -2070,7 +2097,6 @@ const getJobCustomReport = async (Report) => {
       job_type_id: "job_type_name",
       status_type_id: "status_type_name",
       employee_number: "employee_number",
-
       date_received_on: "date_received_on",
       allocated_on: "allocated_on",
       job_priority: "job_priority",
@@ -2108,7 +2134,6 @@ const getJobCustomReport = async (Report) => {
       sla_deadline_date: "sla_deadline_date",
       Management_Accounts_FromDate_id_6: "Management_Accounts_FromDate_id_6",
       Management_Accounts_ToDate_id_6: "Management_Accounts_ToDate_id_6",
-
       staff_full_name: "staff_full_name",
       role: "role",
       staff_email: "staff_email",
@@ -2121,7 +2146,7 @@ const getJobCustomReport = async (Report) => {
 
     for (const r of rows) {
       let workDateStr = r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0, 10);
-      const groupKeyParts = groupBy.map(idKey => r[idToNameMap[idKey]] || "NULL");
+      const groupKeyParts = groupBy.map(idKey => r[idToNameMap[idKey] || idKey] || "NULL");
       const gid = groupKeyParts.join("|");
       const periodKey = getPeriodKey(displayBy, workDateStr);
       if (!periodKey) continue;
@@ -2130,8 +2155,6 @@ const getJobCustomReport = async (Report) => {
       if (!groups[gid]) {
         groups[gid] = { 
           ...r, 
-          allocated_to_other_name: r.allocated_to_other_name,
-          customer_account_manager_officer: r.customer_account_manager_officer,
           periodSeconds: {} 
         };
       }
@@ -2141,8 +2164,10 @@ const getJobCustomReport = async (Report) => {
     const periods = Array.from(periodSet).sort((a, b) => a.localeCompare(b));
     const outRows = Object.keys(groups).map(gid => {
       const g = groups[gid];
-      const row = {};
+      const row = { ...g };
+      delete row.periodSeconds;
 
+      // Group/Metadata Fields Mapping
       row["id"] = g.job_id;
       row["job_id"] = g.job_name;
       row["customer_id"] = g.customer_name;
@@ -2156,53 +2181,9 @@ const getJobCustomReport = async (Report) => {
       row["status_type_id"] = g.status_type_name;
       row["employee_number"] = g.employee_number;
 
-      row["date_received_on"] = g.date_received_on;
-      row["allocated_on"] = g.allocated_on;
-      row["job_priority"] = g.job_priority;
-      row["engagement_model"] = g?.engagement_model
-        ?.replace(/_/g, " ")
-        ?.replace(/\b\w/g, (c) => c?.toUpperCase());
-      row["customer_account_manager_officer"] = g.customer_account_manager_officer;
-      row["status_updation_date"] = g.status_updation_date;
-      row["Transactions_Posting_id_2"] = g.Transactions_Posting_id_2;
-      row["Number_of_Bank_Transactions_id_2"] = g.Number_of_Bank_Transactions_id_2;
-      row["Number_of_Journal_Entries_id_2"] = g.Number_of_Journal_Entries_id_2;
-      row["Number_of_Other_Transactions_id_2"] = g.Number_of_Other_Transactions_id_2;
-      row["Number_of_Petty_Cash_Transactions_id_2"] = g.Number_of_Petty_Cash_Transactions_id_2;
-      row["Number_of_Purchase_Invoices_id_2"] = g.Number_of_Purchase_Invoices_id_2;
-      row["Number_of_Sales_Invoices_id_2"] = g.Number_of_Sales_Invoices_id_2;
-      row["Number_of_Total_Transactions_id_2"] = g.Number_of_Total_Transactions_id_2;
-      row["submission_deadline"] = g.submission_deadline;
-      row["Tax_Year_id_4"] = g.Tax_Year_id_4;
-      row["If_Sole_Trader_Who_is_doing_Bookkeeping_id_4"] = g.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4;
-      row["Whose_Tax_Return_is_it_id_4"] = g.Whose_Tax_Return_is_it_id_4;
-      row["Type_of_Payslip_id_3"] = g.Type_of_Payslip_id_3;
-      row["Year_Ending_id_1"] = g.Year_Ending_id_1;
-      row["Bookkeeping_Frequency_id_2"] = g.Bookkeeping_Frequency_id_2;
-      row["CIS_Frequency_id_3"] = g.CIS_Frequency_id_3;
-      row["Filing_Frequency_id_8"] = g.Filing_Frequency_id_8;
-      row["Management_Accounts_Frequency_id_6"] = g.Management_Accounts_Frequency_id_6;
-      row["Payroll_Frequency_id_3"] = g.Payroll_Frequency_id_3;
-      row["budgeted_hours"] = g.budgeted_hours;
-      row["feedback_incorporation_time"] = g.feedback_incorporation_time;
-      row["review_time"] = g.review_time;
-      row["total_preparation_time"] = g.total_preparation_time;
-      row["total_time"] = g.total_time;
-      row["due_on"] = g.due_on;
-      row["customer_deadline_date"] = g.customer_deadline_date;
-      row["expected_delivery_date"] = g.expected_delivery_date;
-      row["internal_deadline_date"] = g.internal_deadline_date;
-      row["sla_deadline_date"] = g.sla_deadline_date;
-      row["Management_Accounts_FromDate_id_6"] = g.Management_Accounts_FromDate_id_6;
-      row["Management_Accounts_ToDate_id_6"] = g.Management_Accounts_ToDate_id_6;
-
-      row["staff_full_name"] = g.staff_full_name;
-      row["staff_email"] = g.staff_email;
-      row["role"] = g.role;
-      row["staff_status"] = g.staff_status === "1" ? "Active" : "Inactive";
-      row["line_manager"] = g.line_manager;
-      row["work_date"] = g.work_date;
-      row["periodSeconds"] = g.periodSeconds;
+      // Formatting
+      row["engagement_model"] = g?.engagement_model?.replace(/_/g, " ")?.replace(/\b\w/g, (c) => c?.toUpperCase());
+      row["staff_status"] = g.staff_status == "1" ? "Active" : "Inactive";
 
       if (!["", null, undefined].includes(displayBy)) {
         let total = 0;
@@ -2212,13 +2193,17 @@ const getJobCustomReport = async (Report) => {
           total += count;
         }
         row["total_count"] = total;
+      } else {
+        for (const p of periods) row[p] = g.periodSeconds[p] || 0;
+        row.total_hours = Object.values(g.periodSeconds).reduce((a, b) => a + b, 0);
       }
       return row;
     });
 
-    let total_count_header = displayBy ? ["total_count"] : [];
-    let weeks = displayBy ? getWeekEndings(new Date(fromDate), new Date(toDate), displayBy) : [];
+    const total_count_header = !["", null, undefined].includes(displayBy) ? ["total_count"] : [];
+    const weeks = !["", null, undefined].includes(displayBy) ? getWeekEndings(new Date(fromDate), new Date(toDate), displayBy) : [];
     const columnsWeeks = [...groupBy, ...weeks, ...total_count_header];
+    
     const finalRows = normalizeRows(columnsWeeks, outRows);
     const fixed = [...groupBy];
     const dynamic = columnsWeeks.filter(col => !fixed.includes(col));
@@ -2651,10 +2636,18 @@ async function getCustomersFilter(Report) {
   const { StaffUserId, data } = Report;
   const { pagination } = data;
   const search = pagination?.search || "";
-  const filters = await getStaffAccessFilters(StaffUserId);
+  const userRoleRows = await QueryRoleHelperFunction(StaffUserId);
+  const userRole = userRoleRows.length > 0 ? userRoleRows[0].role_name : "";
+  const isAdmin = ["SUPERADMIN", "ADMIN"].includes(userRole);
+  const filters = isAdmin ? null : await getStaffAccessFilters(StaffUserId);
   
-  const customerCondition = filters.customerCondition.replace(/\bcustomer_id\b/g, "id");
-  let where = [`(${customerCondition})`];
+  let where = [];
+  if (filters) {
+    const customerCondition = filters.customerCondition.replace(/\bcustomer_id\b/g, "id");
+    where.push(`(${customerCondition})`);
+  } else {
+    where.push("1=1");
+  }
   let params = [];
   if (search) {
     where.push(`(trading_name LIKE ? OR id LIKE ?)`);
@@ -2676,12 +2669,19 @@ async function getClientsFilter(Report) {
   const { StaffUserId, data } = Report;
   const { pagination } = data;
   const search = pagination?.search || "";
-  const filters = await getStaffAccessFilters(StaffUserId);
+  const userRoleRows = await QueryRoleHelperFunction(StaffUserId);
+  const userRole = userRoleRows.length > 0 ? userRoleRows[0].role_name : "";
+  const isAdmin = ["SUPERADMIN", "ADMIN"].includes(userRole);
+  const filters = isAdmin ? null : await getStaffAccessFilters(StaffUserId);
   
-  const customerCondition = filters.customerCondition.replace(/\bcustomer_id\b/g, "cl.customer_id");
-  const clientCondition = filters.clientCondition.replace(/\bid\b/g, "cl.id");
-
-  let where = [`(${customerCondition})`, `(${clientCondition})`];
+  let where = [];
+  if (filters) {
+    const customerCondition = filters.customerCondition.replace(/\bcustomer_id\b/g, "cl.customer_id");
+    const clientCondition = filters.clientCondition.replace(/\bid\b/g, "cl.id");
+    where.push(`(${customerCondition})`, `(${clientCondition})`);
+  } else {
+    where.push("1=1");
+  }
   let params = [];
   if (search) {
     where.push(`(cl.trading_name LIKE ? OR cl.client_code LIKE ?)`);
@@ -2704,13 +2704,20 @@ async function getJobsFilter(Report) {
   const { StaffUserId, data } = Report;
   const { pagination } = data;
   const search = pagination?.search || "";
-  const filters = await getStaffAccessFilters(StaffUserId);
+  const userRoleRows = await QueryRoleHelperFunction(StaffUserId);
+  const userRole = userRoleRows.length > 0 ? userRoleRows[0].role_name : "";
+  const isAdmin = ["SUPERADMIN", "ADMIN"].includes(userRole);
+  const filters = isAdmin ? null : await getStaffAccessFilters(StaffUserId);
   
-  const customerCondition = filters.customerCondition.replace(/\bcustomer_id\b/g, "j.customer_id");
-  const clientCondition = filters.clientCondition.replace(/\bid\b/g, "j.client_id");
-  const jobCondition = filters.jobCondition.replace(/\bid\b/g, "j.id");
-
-  let where = [`(${customerCondition})`, `(${clientCondition})`, `(${jobCondition})`];
+  let where = [];
+  if (filters) {
+    const customerCondition = filters.customerCondition.replace(/\bcustomer_id\b/g, "j.customer_id");
+    const clientCondition = filters.clientCondition.replace(/\bid\b/g, "j.client_id");
+    const jobCondition = filters.jobCondition.replace(/\bid\b/g, "j.id");
+    where.push(`(${customerCondition})`, `(${clientCondition})`, `(${jobCondition})`);
+  } else {
+    where.push("1=1");
+  }
   let params = [];
   if (search) {
     where.push(`j.job_id LIKE ?`);
