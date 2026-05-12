@@ -12,6 +12,8 @@ export async function GET_TIMESHEET(data) {
       headers: header(token),
       data: {},
     });
+
+    console.log("res===>", res);
     return await res?.data;
   } catch (err) {
     return await err;

@@ -70,6 +70,9 @@ const Timesheet = () => {
   };
 
   const [weekOffset, setWeekOffset] = useState(0); // 0 for current week
+
+ console.log("weekOffset==>",weekOffset);
+
   const [hasValidWeekOffsetZero, setHasValidWeekOffsetZero] = useState(false);
   const [weekDays, setWeekDays] = useState({
     monday: "",
@@ -201,8 +204,8 @@ const Timesheet = () => {
       });
 
       const hasValidWeekOffsetZeroValue =
-        res.filterDataWeek.length > 0 &&
-        res.filterDataWeek.some(
+        res.filterDataWeek?.length > 0 &&
+        res.filterDataWeek?.some(
           (item) => parseInt(item.valid_weekOffsets) === 0
         );
       if (hasValidWeekOffsetZeroValue) {
@@ -211,12 +214,12 @@ const Timesheet = () => {
         setHasValidWeekOffsetZero(false);
       }
 
-      if (res.data.length > 0 && res.data[0].submit_status === "1") {
+      if (res?.data?.length > 0 && res?.data[0]?.submit_status === "1") {
         setSubmitStatusAllKey(1);
       }
       setTimeSheetRows(res.data);
       setTimeSheetRows((prevRows) =>
-        prevRows.map((row) => {
+        prevRows?.map((row) => {
           const sum =
             (parseFloat(row.monday_hours) || 0) +
             (parseFloat(row.tuesday_hours) || 0) +
@@ -324,6 +327,7 @@ const Timesheet = () => {
   }, []);
 
   useEffect(() => {
+    
     GetTimeSheet(0);
     const days = [
       "sunday",
@@ -355,6 +359,7 @@ const Timesheet = () => {
 
   // Function to handle week change
   const changeWeek = (offset) => {
+    alert(offset);
     setWeekOffset(parseInt(weekOffset) + offset);
     weekOffSetValue.current = parseInt(weekOffset) + offset;
     GetTimeSheet(parseInt(weekOffset) + offset);
@@ -1787,8 +1792,8 @@ const Timesheet = () => {
     }
   };
 
-  console.log("weekOptionsWithPlaceholder ", weekOptionsWithPlaceholder);
-  console.log("weekOptions ", weekOptions);
+  // console.log("weekOptionsWithPlaceholder ", weekOptionsWithPlaceholder);
+  // console.log("weekOptions ", weekOptions);
 
   const convertDateFormatForCopy = (dateString) => {
     const datePart = dateString.split(",")[1].trim(); // "07/10/2024"
@@ -1894,7 +1899,7 @@ const Timesheet = () => {
     { value: "2", label: "External" },
   ];
 
-  console.log("timeSheetRows", timeSheetRows);
+  // console.log("timeSheetRows", timeSheetRows);
 
   return (
 
