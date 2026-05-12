@@ -152,7 +152,17 @@ const getCustomerDashboardActivityLog = async (dashboard) => {
 
     const query = `
       SELECT 
-        staff_logs.*,
+        staff_logs.id,
+        staff_logs.staff_id,
+        staff_logs.date,
+        staff_logs.module_name,
+        staff_logs.module_id,
+        staff_logs.log_message,
+        REPLACE(staff_logs.log_message_all, 'CUSTOMERUSER ', '') AS log_message_all,
+        staff_logs.permission_type,
+        staff_logs.ip,
+        staff_logs.created_at,
+        staff_logs.updated_at,
         CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name
       FROM 
         staff_logs
@@ -2135,7 +2145,7 @@ const customerJobTimeline = async (dashboard) => {
     staff_logs.staff_id AS staff_id,
     DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
     staff_logs.created_at AS created_at,
-    IFNULL(staff_logs.log_message_all, staff_logs.log_message) AS log_message
+    REPLACE(IFNULL(staff_logs.log_message_all, staff_logs.log_message), 'CUSTOMERUSER ', '') AS log_message
   FROM staff_logs
   JOIN staffs ON staffs.id = staff_logs.staff_id
   JOIN roles ON roles.id = staffs.role_id
