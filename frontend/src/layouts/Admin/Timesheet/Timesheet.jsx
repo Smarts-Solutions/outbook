@@ -1173,6 +1173,11 @@ const Timesheet = () => {
       
       const res = await SAVE_TIMESHEET({ req, authToken: token });
       if (res.status) {
+
+        setLoading(false);
+        setIsDisabled(false);
+
+
         setActiveIndex(null);
         setActiveField(null);
         sweatalert.fire({
@@ -1190,8 +1195,7 @@ const Timesheet = () => {
         // note States reset
         setIsModalOpen(false);
         setModalText("");
-        setLoading(false);
-        setIsDisabled(false);
+       
         return;
       } else {
         sweatalert.fire({
@@ -1355,6 +1359,10 @@ const Timesheet = () => {
 
       const res = await SAVE_TIMESHEET({ req, authToken: token });
       if (res.status) {
+
+        setLoading(false);
+        setIsDisabled(false);
+
         setActiveIndex(null);
         setActiveField(null);
 
@@ -1372,8 +1380,7 @@ const Timesheet = () => {
         setSubmitStatusAllKey(0);
         GetTimeSheet(weekOffSetValue.current);
 
-        setLoading(false);
-        setIsDisabled(false);
+        
         return;
       } else {
         setLoading(false);
@@ -1485,6 +1492,10 @@ const Timesheet = () => {
     const res = await SAVE_TIMESHEET({ req, authToken: token });
 
     if (res.status) {
+
+       setLoading(false);
+       setIsDisabled(false);
+
       setRemarkText(null);
       setUpdateTimeSheetRows([]);
       setRemarkModel(false);
@@ -1504,9 +1515,8 @@ const Timesheet = () => {
       setModalText("");
       setActiveIndex(null);
       setActiveField(null);
-      setLoading(false);
-      setIsDisabled(false);
       return;
+      
     } else {
       sweatalert.fire({
         icon: "error",
@@ -1517,7 +1527,9 @@ const Timesheet = () => {
       });
       setLoading(false);
       setIsDisabled(false);
+
       return;
+      
     }
 
   };
