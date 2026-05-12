@@ -50,11 +50,12 @@ const ClientList = () => {
   const [jobLoading, setJobLoading] = useState(false);
   const debounceRef = useRef(null);
 
-  useEffect(() => {
-    if (!accessLoading && !hasAccess("job", "view") && role !== "SUPERADMIN") {
-      navigate("/customer/dashboard");
-    }
-  }, [hasAccess, role, navigate, accessLoading]);
+  // Removed permission-based redirect as requested
+  // useEffect(() => {
+  //   if (!accessLoading && !hasAccess("job", "view") && role !== "SUPERADMIN") {
+  //     navigate("/customer/dashboard");
+  //   }
+  // }, [hasAccess, role, navigate, accessLoading]);
 
   useEffect(() => {
     GetAllCustomer();
@@ -207,7 +208,7 @@ const ClientList = () => {
 
   const tabs = [
     { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16} /> },
-    ...(clientDetailSingle.id !== "" && (hasAccess("client", "view") || role === "SUPERADMIN")
+    ...(clientDetailSingle.id !== ""
       ? [{ id: "view client", label: "View Client", icon: <User size={16} /> }]
       : []),
   ];
@@ -319,17 +320,12 @@ const ClientList = () => {
       name: "Job ID",
       cell: (row) => (
         <div title={row.job_code_id}>
-          {hasAccess("job", "view") ||
-            role === "SUPERADMIN" ? (
-            <a
-              onClick={() => HandleJob(row)}
-              style={{ cursor: "pointer", color: "#26bdf0" }}
-            >
-              {row.job_code_id}
-            </a>
-          ) : (
-            <a>{row.job_code_id}</a>
-          )}
+          <a
+            onClick={() => HandleJob(row)}
+            style={{ cursor: "pointer", color: "#26bdf0" }}
+          >
+            {row.job_code_id}
+          </a>
         </div>
       ),
       selector: (row) => row.job_code_id,
