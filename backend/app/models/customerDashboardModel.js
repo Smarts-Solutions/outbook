@@ -1,5 +1,5 @@
 const pool = require('../config/database');
-const { getDateRange, SatffLogUpdateOperation, generateNextUniqueCode, JobStatusUpdate, getStaffAccessFilters } = require('../utils/helper');
+const { getDateRange, SatffLogUpdateOperation, generateNextUniqueCode, JobStatusUpdate, getStaffAccessFilters, grantStaffAccess, QueryRoleHelperFunction } = require('../utils/helper');
 const { CustomerLogUpdateOperation } = require('../utils/customerHelper');
 const { getCompanyOfficerDetailsFun } = require('../controllers/companies/companyController');
 
@@ -1780,6 +1780,13 @@ const customerJobAction = async (dashboard) => {
         console.error("Log error in copy_job:", logErr);
       }
       // --- ADD DESCRIPTIVE LOGGING END ---
+      
+      // --- GRANT ACCESS TO CREATOR START ---
+      const roleData = await QueryRoleHelperFunction(StaffUserId);
+      if (roleData.length > 0 && roleData[0].role_id === 12) {
+        await grantStaffAccess(StaffUserId, data.customer_id, "job", insertId);
+      }
+      // --- GRANT ACCESS TO CREATOR END ---
 
       return { status: true, message: "Job copied successfully.", data: insertId };
     } catch (err) {
