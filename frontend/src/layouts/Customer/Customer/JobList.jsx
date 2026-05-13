@@ -318,29 +318,16 @@ const ClientList = () => {
   const columns = [
     {
       name: "Job ID",
-      cell: (row) => {
-        const canViewLogs = role === "SUPERADMIN" ||
-          hasAccess("job_information", "view") ||
-          hasAccess("task_timesheet", "view") ||
-          hasAccess("job_timeline", "view") ||
-          hasAccess("missing_logs", "view") ||
-          hasAccess("queries", "view") ||
-          hasAccess("draft", "view") ||
-          hasAccess("job_document", "view");
-
-        return canViewLogs ? (
-          <div title={row.job_code_id}>
-            <a
-              onClick={() => HandleJob(row)}
-              style={{ cursor: "pointer", color: "#26bdf0" }}
-            >
-              {row.job_code_id}
-            </a>
-          </div>
-        ) : (
-          <div title={row.job_code_id}>{row.job_code_id}</div>
-        );
-      },
+      cell: (row) => (
+        <div title={row.job_code_id}>
+          <a
+            onClick={() => HandleJob(row)}
+            style={{ cursor: "pointer", color: "#26bdf0" }}
+          >
+            {row.job_code_id}
+          </a>
+        </div>
+      ),
       selector: (row) => row.job_code_id,
       sortable: true,
     },
