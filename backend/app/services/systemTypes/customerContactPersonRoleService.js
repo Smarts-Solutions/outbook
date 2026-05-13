@@ -22,10 +22,20 @@ const modifyCustomerContactPersonRole = async (CustomerContactPersonRole) => {
 };
 
 
+const checkCustomerContactPersonRoleAssignment = async (id) => {
+  return customerContactPersonRoleModel.checkCustomerContactPersonRoleAssignment(id);
+};
+
+const reassignAndDeleteCustomerContactPersonRole = async (data) => {
+  return customerContactPersonRoleModel.reassignAndDeleteCustomerContactPersonRole(data);
+};
+
 module.exports = {
   addCustomerContactPersonRole,
   getCustomerContactPersonRole,
   removeCustomerContactPersonRole,
   modifyCustomerContactPersonRole,
-  getCustomerContactPersonRoleAll
-};
+  getCustomerContactPersonRoleAll,
+  checkCustomerContactPersonRoleAssignment,
+  reassignAndDeleteCustomerContactPersonRole
+};

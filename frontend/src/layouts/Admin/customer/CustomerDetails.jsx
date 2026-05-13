@@ -1115,7 +1115,7 @@ const CustomerUsers = () => {
                   </h5>
                 </div>
                 <div className="job-assignment-scroll-area">
-                  <div className="accordion custom-accordion" id="customerAccordion">
+                  <div className="accordion " id="customerAccordion">
                     {formik.values.allCustomerAccess.map((customerId) => {
                       const customer = allCustomers.find((c) => c.id === customerId);
                       if (!customer) return null;

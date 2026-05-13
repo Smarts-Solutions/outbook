@@ -43,7 +43,7 @@ exports.customerLogin = async (req, res) => {
     staff_id: customer.id,
     date: currentDate.toISOString().split("T")[0],
     module_name: "-",
-    log_message: `Logged in to the customer portal.`,
+    log_message: `Logged in.`,
     permission_type: "-",
     ip: req.ip,
   });
@@ -73,7 +73,7 @@ exports.customerLogout = async (req, res) => {
         staff_id: userId,
         date: currentDate.toISOString().split("T")[0],
         module_name: "-",
-        log_message: `Logged out from the customer portal.`,
+        log_message: `Logged out.`,
         permission_type: "-",
         ip: req.ip,
       });

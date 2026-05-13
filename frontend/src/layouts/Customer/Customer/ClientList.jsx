@@ -132,11 +132,12 @@ const ClientLists = () => {
     }
   }, [activeTab, customerId, pageSize]);
 
-  useEffect(() => {
-    if (!accessLoading && !hasAccess("client", "view") && !hasAccess("job", "view") && role !== "SUPERADMIN") {
-      navigate("/customer/dashboard");
-    }
-  }, [hasAccess, role, navigate, accessLoading]);
+  // Removed permission-based redirect as requested
+  // useEffect(() => {
+  //   if (!accessLoading && !hasAccess("client", "view") && !hasAccess("job", "view") && role !== "SUPERADMIN") {
+  //     navigate("/customer/dashboard");
+  //   }
+  // }, [hasAccess, role, navigate, accessLoading]);
 
   const SetTab = (e) => {
     setActiveTab(e);
@@ -252,13 +253,9 @@ const ClientLists = () => {
     {
       name: "Client Name",
       cell: (row) => (
-        (hasAccess("job", "view") || role === "SUPERADMIN") ? (
-          <a onClick={() => HandleClientView(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
-            {row.client_name}
-          </a>
-        ) : (
-          <span>{row.client_name}</span>
-        )
+        <a onClick={() => HandleClientView(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
+          {row.client_name}
+        </a>
       ),
       selector: (row) => row.client_name,
       sortable: true,
@@ -321,11 +318,24 @@ const ClientLists = () => {
   const JobColumns = [
     {
       name: "Job ID",
-      cell: (row) => (
-        <a onClick={() => HandleJobView(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
-          {row.job_code_id}
-        </a>
-      ),
+      cell: (row) => {
+        const canViewLogs = role === "SUPERADMIN" ||
+          hasAccess("job_information", "view") ||
+          hasAccess("task_timesheet", "view") ||
+          hasAccess("job_timeline", "view") ||
+          hasAccess("missing_logs", "view") ||
+          hasAccess("queries", "view") ||
+          hasAccess("draft", "view") ||
+          hasAccess("job_document", "view");
+
+        return canViewLogs ? (
+          <a onClick={() => HandleJobView(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
+            {row.job_code_id}
+          </a>
+        ) : (
+          <div title={row.job_code_id}>{row.job_code_id}</div>
+        );
+      },
       selector: (row) => row.job_code_id,
       sortable: true,
     },
@@ -552,11 +562,10 @@ const ClientLists = () => {
     navigate("/customer/job/logs", { state: { job_id: row.job_id, activeTab: activeTab, customer_id: customerId || row.customer_id, data: updatedData } });
   };
 
-  const tabs = [];
-  if (hasAccess("client", "view")) {
-    tabs.push({ id: "client", label: "Client", icon: <User size={16} /> });
-  }
-  if (customerId && hasAccess("job", "view")) {
+  const tabs = [
+    { id: "client", label: "Client", icon: <User size={16} /> }
+  ];
+  if (customerId) {
     tabs.push({ id: "job", label: "Job", icon: <Briefcase size={16} /> });
   }
 
