@@ -24,7 +24,7 @@ const ClientList = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  const { hasAccess, selectedCustomer, loading: accessLoading } = useCustomerAccess();
+  const { hasAccess, hasAnyJobAccess, selectedCustomer, loading: accessLoading } = useCustomerAccess();
 
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const token = JSON.parse(localStorage.getItem("token"));
@@ -318,16 +318,20 @@ const ClientList = () => {
   const columns = [
     {
       name: "Job ID",
-      cell: (row) => (
-        <div title={row.job_code_id}>
-          <a
-            onClick={() => HandleJob(row)}
-            style={{ cursor: "pointer", color: "#26bdf0" }}
-          >
-            {row.job_code_id}
-          </a>
-        </div>
-      ),
+      cell: (row) => {
+        return hasAnyJobAccess() ? (
+          <div title={row.job_code_id}>
+            <a
+              onClick={() => HandleJob(row)}
+              style={{ cursor: "pointer", color: "#26bdf0" }}
+            >
+              {row.job_code_id}
+            </a>
+          </div>
+        ) : (
+          <div title={row.job_code_id}>{row.job_code_id}</div>
+        );
+      },
       selector: (row) => row.job_code_id,
       sortable: true,
     },

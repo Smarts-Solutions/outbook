@@ -17,7 +17,7 @@ const DashboardLinkData = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
-  const { hasAccess } = useCustomerAccess();
+  const { hasAccess, hasAnyJobAccess } = useCustomerAccess();
   const role = JSON.parse(localStorage.getItem("role"));
 
   const token = JSON.parse(localStorage.getItem("token"));
@@ -343,16 +343,7 @@ const DashboardLinkData = () => {
     {
       name: "Job ID",
       cell: (row) => {
-        const canViewLogs = role === "SUPERADMIN" ||
-          hasAccess("job_information", "view") ||
-          hasAccess("task_timesheet", "view") ||
-          hasAccess("job_timeline", "view") ||
-          hasAccess("missing_logs", "view") ||
-          hasAccess("queries", "view") ||
-          hasAccess("draft", "view") ||
-          hasAccess("job_document", "view");
-
-        return canViewLogs ? (
+        return hasAnyJobAccess() ? (
           <div
             onClick={() => HandleJob(row)}
             style={{ cursor: "pointer", color: "#26bdf0" }}

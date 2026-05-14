@@ -108,11 +108,24 @@ export const CustomerAccessProvider = ({ children }) => {
         return access?.is_assigned === 1;
     };
 
+    const hasAnyJobAccess = () => {
+        return (
+            hasAccess("job_information", "view") ||
+            hasAccess("task_timesheet", "view") ||
+            hasAccess("job_timeline", "view") ||
+            hasAccess("missing_logs", "view") ||
+            hasAccess("queries", "view") ||
+            hasAccess("draft", "view") ||
+            hasAccess("job_document", "view")
+        );
+    };
+
     return (
         <CustomerAccessContext.Provider value={{ 
             accessData, 
             fetchAccessData, 
             hasAccess, 
+            hasAnyJobAccess,
             assignedCustomers, 
             selectedCustomer, 
             setSelectedCustomer,
