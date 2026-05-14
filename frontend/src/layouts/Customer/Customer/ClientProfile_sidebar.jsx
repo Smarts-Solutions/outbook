@@ -808,39 +808,41 @@ const CustomerClientProfile = () => {
       selector: (row) => row.created_at || "-",
       sortable: true,
     },
-    {
-      name: "Actions",
-      cell: (row) => (
-        <div className="d-flex">
-          {(hasAccess("job", "update") || role === "SUPERADMIN") && (
-            <button className="edit-icon" onClick={() => handleEdit(row)}>
-              <i className="ti-pencil" />
-            </button>
-          )}
-
-          {(hasAccess("job", "copy") || role === "SUPERADMIN") && (
-            <button className="copy-icon" onClick={() => copyRow(row)}>
-              <i className="ti-files"></i>
-            </button>
-          )}
-
-          {row.timesheet_job_id == null
-            ? (hasAccess("job", "delete") || role === "SUPERADMIN") && (
-              <button
-                className="delete-icon"
-                onClick={() => handleDelete(row, "job")}
-              >
-                <i className="ti-trash text-danger" />
+    ...((hasAccess("job", "update") || hasAccess("job", "copy") || hasAccess("job", "delete") || role === "SUPERADMIN") ? [
+      {
+        name: "Actions",
+        cell: (row) => (
+          <div className="d-flex">
+            {(hasAccess("job", "update") || role === "SUPERADMIN") && (
+              <button className="edit-icon" onClick={() => handleEdit(row)}>
+                <i className="ti-pencil" />
               </button>
-            )
-            : ""}
-        </div>
-      ),
-      width: "180px",
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-    },
+            )}
+
+            {(hasAccess("job", "copy") || role === "SUPERADMIN") && (
+              <button className="copy-icon" onClick={() => copyRow(row)}>
+                <i className="ti-files"></i>
+              </button>
+            )}
+
+            {row.timesheet_job_id == null
+              ? (hasAccess("job", "delete") || role === "SUPERADMIN") && (
+                <button
+                  className="delete-icon"
+                  onClick={() => handleDelete(row, "job")}
+                >
+                  <i className="ti-trash text-danger" />
+                </button>
+              )
+              : ""}
+          </div>
+        ),
+        width: "180px",
+        ignoreRowClick: true,
+        allowOverflow: true,
+        button: true,
+      }
+    ] : []),
   ];
 
   const HandleJob = (row) => {
