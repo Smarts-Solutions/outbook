@@ -120,12 +120,21 @@ export const CustomerAccessProvider = ({ children }) => {
         );
     };
 
+    const hasAnyClientAccess = () => {
+        return (
+            hasAccess("no_of_jobs", "view") ||
+            hasAccess("client_overview", "view") ||
+            hasAccess("client_document", "view")
+        );
+    };
+
     return (
         <CustomerAccessContext.Provider value={{ 
             accessData, 
             fetchAccessData, 
             hasAccess, 
             hasAnyJobAccess,
+            hasAnyClientAccess,
             assignedCustomers, 
             selectedCustomer, 
             setSelectedCustomer,

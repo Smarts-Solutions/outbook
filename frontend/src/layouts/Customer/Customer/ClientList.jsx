@@ -24,7 +24,7 @@ const ClientLists = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const role = JSON.parse(localStorage.getItem("role"));
-  const { hasAccess, selectedCustomer, loading: accessLoading } = useCustomerAccess();
+  const { hasAccess, hasAnyJobAccess, hasAnyClientAccess, selectedCustomer, loading: accessLoading } = useCustomerAccess();
 
   const customer_id_sidebar = sessionStorage.getItem("cust_id_sidebar");
   const [CustomerData, setCustomerData] = useState([]);
@@ -252,11 +252,15 @@ const ClientLists = () => {
   const ClientListColumns = [
     {
       name: "Client Name",
-      cell: (row) => (
-        <a onClick={() => HandleClientView(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
-          {row.client_name}
-        </a>
-      ),
+      cell: (row) => {
+        return hasAnyClientAccess() ? (
+          <a onClick={() => HandleClientView(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
+            {row.client_name}
+          </a>
+        ) : (
+          <div title={row.client_name}>{row.client_name}</div>
+        );
+      },
       selector: (row) => row.client_name,
       sortable: true,
     },
@@ -319,16 +323,7 @@ const ClientLists = () => {
     {
       name: "Job ID",
       cell: (row) => {
-        const canViewLogs = role === "SUPERADMIN" ||
-          hasAccess("job_information", "view") ||
-          hasAccess("task_timesheet", "view") ||
-          hasAccess("job_timeline", "view") ||
-          hasAccess("missing_logs", "view") ||
-          hasAccess("queries", "view") ||
-          hasAccess("draft", "view") ||
-          hasAccess("job_document", "view");
-
-        return canViewLogs ? (
+        return hasAnyJobAccess() ? (
           <a onClick={() => HandleJobView(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
             {row.job_code_id}
           </a>

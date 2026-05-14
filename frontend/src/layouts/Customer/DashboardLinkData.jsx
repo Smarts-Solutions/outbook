@@ -17,7 +17,7 @@ const DashboardLinkData = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
-  const { hasAccess, hasAnyJobAccess } = useCustomerAccess();
+  const { hasAccess, hasAnyJobAccess, hasAnyClientAccess } = useCustomerAccess();
   const role = JSON.parse(localStorage.getItem("role"));
 
   const token = JSON.parse(localStorage.getItem("token"));
@@ -502,15 +502,19 @@ const DashboardLinkData = () => {
   const ClientListColumns = [
     {
       name: "Client Name",
-      cell: (row) => (
-        <div
-          onClick={() => HandleClientView(row)}
-          style={{ cursor: "pointer", color: "#26bdf0" }}
-          title={row.client_name}
-        >
-          {row.client_name}
-        </div>
-      ),
+      cell: (row) => {
+        return hasAnyClientAccess() ? (
+          <div
+            onClick={() => HandleClientView(row)}
+            style={{ cursor: "pointer", color: "#26bdf0" }}
+            title={row.client_name}
+          >
+            {row.client_name}
+          </div>
+        ) : (
+          <div title={row.client_name}>{row.client_name}</div>
+        );
+      },
       selector: (row) => row.client_name,
       sortable: true,
     },
