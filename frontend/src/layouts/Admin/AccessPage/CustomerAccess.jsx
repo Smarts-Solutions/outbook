@@ -314,7 +314,7 @@ const CustomerAccess = () => {
                                 className="form-check-label new_checkbox mb-0 ms-2 fw-bold text-primary" 
                                 htmlFor={`global-select-all-${val.id}`}
                               >
-                                Select All Permissions for {val.name}
+                                Select All Permissions
                               </label>
                             </div>
                           </div>
