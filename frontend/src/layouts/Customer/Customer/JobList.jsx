@@ -24,7 +24,7 @@ const ClientList = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  const { hasAccess, selectedCustomer, loading: accessLoading } = useCustomerAccess();
+  const { hasAccess, hasAnyJobAccess, selectedCustomer, loading: accessLoading } = useCustomerAccess();
 
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const token = JSON.parse(localStorage.getItem("token"));
@@ -208,7 +208,7 @@ const ClientList = () => {
 
   const tabs = [
     { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16} /> },
-    ...(clientDetailSingle.id !== ""
+    ...(clientDetailSingle.id !== "" && hasAccess("client_overview", "view")
       ? [{ id: "view client", label: "View Client", icon: <User size={16} /> }]
       : []),
   ];
@@ -318,16 +318,20 @@ const ClientList = () => {
   const columns = [
     {
       name: "Job ID",
-      cell: (row) => (
-        <div title={row.job_code_id}>
-          <a
-            onClick={() => HandleJob(row)}
-            style={{ cursor: "pointer", color: "#26bdf0" }}
-          >
-            {row.job_code_id}
-          </a>
-        </div>
-      ),
+      cell: (row) => {
+        return hasAnyJobAccess() ? (
+          <div title={row.job_code_id}>
+            <a
+              onClick={() => HandleJob(row)}
+              style={{ cursor: "pointer", color: "#26bdf0" }}
+            >
+              {row.job_code_id}
+            </a>
+          </div>
+        ) : (
+          <div title={row.job_code_id}>{row.job_code_id}</div>
+        );
+      },
       selector: (row) => row.job_code_id,
       sortable: true,
     },
@@ -482,37 +486,39 @@ const ClientList = () => {
       selector: (row) => row.created_at || "-",
       sortable: true,
     },
-    {
-      name: "Actions",
-      cell: (row) => (
-        <div className="d-flex">
-          {(hasAccess("job", "update") || role === "SUPERADMIN") && (
-            <button className="edit-icon" onClick={() => handleEdit(row)}>
-              <i className="ti-pencil" />
-            </button>
-          )}
-
-          {(hasAccess("job", "copy") || role === "SUPERADMIN") && (
-            <button className="copy-icon" onClick={() => copyRow(row)}>
-              <i className="ti-files"></i>
-            </button>
-          )}
-
-          {row.timesheet_job_id == null
-            ? (hasAccess("job", "delete") || role === "SUPERADMIN") && (
-              <button
-                className="delete-icon"
-                onClick={() => handleDelete(row, "job")}
-              >
-                <i className="ti-trash text-danger" />
+    ...((hasAccess("job", "update") || hasAccess("job", "copy") || hasAccess("job", "delete") || role === "SUPERADMIN") ? [
+      {
+        name: "Actions",
+        cell: (row) => (
+          <div className="d-flex">
+            {(hasAccess("job", "update") || role === "SUPERADMIN") && (
+              <button className="edit-icon" onClick={() => handleEdit(row)}>
+                <i className="ti-pencil" />
               </button>
-            )
-            : ""}
-        </div>
-      ),
-      width: "180px",
-      ignoreRowClick: true,
-    },
+            )}
+
+            {(hasAccess("job", "copy") || role === "SUPERADMIN") && (
+              <button className="copy-icon" onClick={() => copyRow(row)}>
+                <i className="ti-files"></i>
+              </button>
+            )}
+
+            {row.timesheet_job_id == null
+              ? (hasAccess("job", "delete") || role === "SUPERADMIN") && (
+                <button
+                  className="delete-icon"
+                  onClick={() => handleDelete(row, "job")}
+                >
+                  <i className="ti-trash text-danger" />
+                </button>
+              )
+              : ""}
+          </div>
+        ),
+        width: "180px",
+        ignoreRowClick: true,
+      }
+    ] : []),
   ];
 
   const HandleJob = (row) => {

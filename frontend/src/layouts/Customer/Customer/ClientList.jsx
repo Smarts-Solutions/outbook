@@ -24,7 +24,7 @@ const ClientLists = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const role = JSON.parse(localStorage.getItem("role"));
-  const { hasAccess, selectedCustomer, loading: accessLoading } = useCustomerAccess();
+  const { hasAccess, hasAnyJobAccess, hasAnyClientAccess, selectedCustomer, loading: accessLoading } = useCustomerAccess();
 
   const customer_id_sidebar = sessionStorage.getItem("cust_id_sidebar");
   const [CustomerData, setCustomerData] = useState([]);
@@ -252,11 +252,15 @@ const ClientLists = () => {
   const ClientListColumns = [
     {
       name: "Client Name",
-      cell: (row) => (
-        <a onClick={() => HandleClientView(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
-          {row.client_name}
-        </a>
-      ),
+      cell: (row) => {
+        return hasAnyClientAccess() ? (
+          <a onClick={() => HandleClientView(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
+            {row.client_name}
+          </a>
+        ) : (
+          <div title={row.client_name}>{row.client_name}</div>
+        );
+      },
       selector: (row) => row.client_name,
       sortable: true,
     },
@@ -319,16 +323,7 @@ const ClientLists = () => {
     {
       name: "Job ID",
       cell: (row) => {
-        const canViewLogs = role === "SUPERADMIN" ||
-          hasAccess("job_information", "view") ||
-          hasAccess("task_timesheet", "view") ||
-          hasAccess("job_timeline", "view") ||
-          hasAccess("missing_logs", "view") ||
-          hasAccess("queries", "view") ||
-          hasAccess("draft", "view") ||
-          hasAccess("job_document", "view");
-
-        return canViewLogs ? (
+        return hasAnyJobAccess() ? (
           <a onClick={() => HandleJobView(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
             {row.job_code_id}
           </a>
@@ -532,13 +527,13 @@ const ClientLists = () => {
   };
 
   const HandleClientView = (row) => {
-    const updatedData = { 
-      ...hararchyData, 
-      customer: { 
-        id: customerId || row.customer_id, 
-        trading_name: (customerName && customerName !== "All") ? customerName : row.customer_name 
+    const updatedData = {
+      ...hararchyData,
+      customer: {
+        id: customerId || row.customer_id,
+        trading_name: (customerName && customerName !== "All") ? customerName : row.customer_name
       },
-      client: row 
+      client: row
     };
     setHararchyData(updatedData);
     sessionStorage.setItem("cli_id_sidebar", row.id);
@@ -547,16 +542,16 @@ const ClientLists = () => {
   };
 
   const HandleJobView = (row) => {
-    const updatedData = { 
-      customer: { 
-        id: customerId || row.customer_id, 
-        trading_name: (customerName && customerName !== "All") ? customerName : (row.customer_name || row.customer_trading_name) 
-      }, 
+    const updatedData = {
+      customer: {
+        id: customerId || row.customer_id,
+        trading_name: (customerName && customerName !== "All") ? customerName : (row.customer_name || row.customer_trading_name)
+      },
       client: {
         id: row.client_id,
         client_name: row.client_trading_name || row.client_name
       },
-      job: row 
+      job: row
     };
     setHararchyData(updatedData);
     navigate("/customer/job/logs", { state: { job_id: row.job_id, activeTab: activeTab, customer_id: customerId || row.customer_id, data: updatedData } });
@@ -565,7 +560,7 @@ const ClientLists = () => {
   const tabs = [
     { id: "client", label: "Client", icon: <User size={16} /> }
   ];
-  if (customerId) {
+  if (customerId && (hasAccess("job", "view") || role === "SUPERADMIN")) {
     tabs.push({ id: "job", label: "Job", icon: <Briefcase size={16} /> });
   }
 

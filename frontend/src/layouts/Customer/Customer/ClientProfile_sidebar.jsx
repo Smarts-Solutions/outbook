@@ -231,8 +231,7 @@ const CustomerClientProfile = () => {
   });
   const [statusDataAll, setStatusDataAll] = useState([]);
   const [selectStatusIs, setStatusId] = useState("");
-  const { hasAccess } = useCustomerAccess();
-
+  const { hasAccess, hasAnyJobAccess } = useCustomerAccess();
 
   const handleCreateJob = () => {
     navigate("/customer/createjob", {
@@ -643,8 +642,7 @@ const CustomerClientProfile = () => {
       name: "Job ID",
       cell: (row) => (
         <div title={row.job_code_id}>
-          {hasAccess("job", "view") ||
-            role === "SUPERADMIN" ? (
+          {hasAnyJobAccess() ? (
             <a
               onClick={() => HandleJob(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -652,7 +650,7 @@ const CustomerClientProfile = () => {
               {row.job_code_id}
             </a>
           ) : (
-            <a>{row.job_code_id}</a>
+            <div>{row.job_code_id}</div>
           )}
         </div>
       ),
@@ -810,39 +808,41 @@ const CustomerClientProfile = () => {
       selector: (row) => row.created_at || "-",
       sortable: true,
     },
-    {
-      name: "Actions",
-      cell: (row) => (
-        <div className="d-flex">
-          {(hasAccess("job", "update") || role === "SUPERADMIN") && (
-            <button className="edit-icon" onClick={() => handleEdit(row)}>
-              <i className="ti-pencil" />
-            </button>
-          )}
-
-          {(hasAccess("job", "copy") || role === "SUPERADMIN") && (
-            <button className="copy-icon" onClick={() => copyRow(row)}>
-              <i className="ti-files"></i>
-            </button>
-          )}
-
-          {row.timesheet_job_id == null
-            ? (hasAccess("job", "delete") || role === "SUPERADMIN") && (
-              <button
-                className="delete-icon"
-                onClick={() => handleDelete(row, "job")}
-              >
-                <i className="ti-trash text-danger" />
+    ...((hasAccess("job", "update") || hasAccess("job", "copy") || hasAccess("job", "delete") || role === "SUPERADMIN") ? [
+      {
+        name: "Actions",
+        cell: (row) => (
+          <div className="d-flex">
+            {(hasAccess("job", "update") || role === "SUPERADMIN") && (
+              <button className="edit-icon" onClick={() => handleEdit(row)}>
+                <i className="ti-pencil" />
               </button>
-            )
-            : ""}
-        </div>
-      ),
-      width: "180px",
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-    },
+            )}
+
+            {(hasAccess("job", "copy") || role === "SUPERADMIN") && (
+              <button className="copy-icon" onClick={() => copyRow(row)}>
+                <i className="ti-files"></i>
+              </button>
+            )}
+
+            {row.timesheet_job_id == null
+              ? (hasAccess("job", "delete") || role === "SUPERADMIN") && (
+                <button
+                  className="delete-icon"
+                  onClick={() => handleDelete(row, "job")}
+                >
+                  <i className="ti-trash text-danger" />
+                </button>
+              )
+              : ""}
+          </div>
+        ),
+        width: "180px",
+        ignoreRowClick: true,
+        allowOverflow: true,
+        button: true,
+      }
+    ] : []),
   ];
 
   const HandleJob = (row) => {

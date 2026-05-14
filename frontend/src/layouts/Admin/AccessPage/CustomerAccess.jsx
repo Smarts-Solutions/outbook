@@ -314,12 +314,14 @@ const CustomerAccess = () => {
                                 className="form-check-label new_checkbox mb-0 ms-2 fw-bold text-primary" 
                                 htmlFor={`global-select-all-${val.id}`}
                               >
-                                Select All Permissions for {val.name}
+                                Select All Permissions
                               </label>
                             </div>
                           </div>
                           <div className="row">
-                            {roleStructures[val.id].map((section, idx) => (
+                            {roleStructures[val.id]
+                              ?.filter((section) => section.permission_name !== "report")
+                              ?.map((section, idx) => (
                                 <div key={idx} className="col-lg-2 col-md-6">
                                   <AccordionItem
                                     section={section}
