@@ -504,15 +504,15 @@ const Setting = () => {
       }))
     };
 
-   //console.log("Payload", payload)
+    //console.log("Payload", payload)
 
-   // setLoading(true);
+    // setLoading(true);
     const req = { action: "deletExistingJob", data: payload };
     await dispatch(Service({ req: req, authToken: token }))
       .unwrap()
       .then(async (response) => {
         setLoading(false);
-       
+
         if (response.status) {
           setDeleteServiceModal(false);
           sweatalert.fire({
@@ -3465,7 +3465,7 @@ const Setting = () => {
           <div className="">
             {/* Heading */}
             <div className="text-start mb-4 border-bottom pb-2">
-              <h6 className=" fw-bold d-flex align-items-center  alert alert-warning">
+              <h6 className=" fw-bold d-flex align-items-center ">
                 <i className="bi bi-trash3 me-2"></i>
                 Delete Role:{" "}
                 <span className=" ms-2">{deleteStatus?.role_name}</span>
@@ -3572,7 +3572,7 @@ const Setting = () => {
         >
           <div className="">
             <div className="text-start mb-4 border-bottom pb-2">
-              <h6 className=" fw-bold d-flex align-items-center  alert alert-warning">
+              <h6 className=" fw-bold d-flex align-items-center">
                 <i className="bi bi-trash3 me-2"></i>
                 Delete Contact  Person Role:{" "}
                 <span className=" ms-2">{deletePersonRoleStatus?.name}</span>
@@ -3608,11 +3608,29 @@ const Setting = () => {
                   <label className=" form-label fw-semibold d-flex align-items-center">
                     <User2 size={16} className="me-1" /> Customer Users Assigned
                   </label>
-                  <ul className="list-group mt-2">
+                  {/* <ul className="list-group mt-2 gap-2">
                     {assignedPersonUsers.map((user, index) => (
                       <li
                         key={index}
                         className="list-group-item d-flex justify-content-between align-items-center rounded-pill"
+                      >
+                        <span className="text-dark">
+                          {`${user?.first_name} ${user.last_name}`}
+                        </span>
+                      </li>
+                    ))}
+                  </ul> */}
+                  <ul
+                    className="list-group mt-2 gap-2"
+                    style={{
+                      maxHeight: "220px",
+                      overflowY: "auto",
+                    }}
+                  >
+                    {assignedPersonUsers.map((user, index) => (
+                      <li
+                        key={index}
+                        className="list-group-item d-flex justify-content-between align-items-center"
                       >
                         <span className="text-dark">
                           {`${user?.first_name} ${user.last_name}`}
@@ -3626,13 +3644,13 @@ const Setting = () => {
                   <button
                     disabled={!replacePersonRole}
                     onClick={handlePersonRoleReassignDelete}
-                    className="btn btn-secondary w-100 rounded-pill"
+                    className="swal2-confirm swal2-styled w-100"
                   >
                     Delete & Reassign
                   </button>
                   <button
                     onClick={() => setDeletePersonRoleStatus(null)}
-                    className="btn btn-outline-dark w-100 rounded-pill"
+                    className="swal2-cancel swal2-styled w-100"
                   >
                     Cancel
                   </button>
@@ -3705,7 +3723,7 @@ const Setting = () => {
                                       value={hours}
                                       onChange={(e) => handleBudgetTime(e, index, "hour")}
                                       style={{ minWidth: "35px", width: "55px", fontSize: "14px" }}
-                                    
+
                                     />
                                     <span className="text-muted small ms-1" style={{ fontSize: "12px" }}>h</span>
                                   </div>
@@ -3717,7 +3735,7 @@ const Setting = () => {
                                       value={minutes}
                                       onChange={(e) => handleBudgetTime(e, index, "minute")}
                                       style={{ width: "32px", fontSize: "14px" }}
-                                     
+
                                     />
                                     <span className="text-muted small ms-1" style={{ fontSize: "12px" }}>m</span>
                                   </div>
@@ -3920,7 +3938,7 @@ const Setting = () => {
                                             value={hours}
                                             onChange={(e) => handleBudgetTimeDeleteService(e, index, taskIndex, "hour")}
                                             style={{ minWidth: "32px", width: "50px", fontSize: "13px" }}
-                                           
+
                                           />
                                           <span className="text-muted" style={{ fontSize: "11px" }}>h</span>
                                           <div className="text-muted mx-0" style={{ fontSize: "11px" }}>:</div>
@@ -3930,7 +3948,7 @@ const Setting = () => {
                                             value={minutes}
                                             onChange={(e) => handleBudgetTimeDeleteService(e, index, taskIndex, "minute")}
                                             style={{ width: "26px", fontSize: "13px" }}
-                                           
+
                                           />
                                           <span className="text-muted" style={{ fontSize: "11px" }}>m</span>
                                         </div>
