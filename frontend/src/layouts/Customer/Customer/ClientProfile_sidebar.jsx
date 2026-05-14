@@ -231,8 +231,7 @@ const CustomerClientProfile = () => {
   });
   const [statusDataAll, setStatusDataAll] = useState([]);
   const [selectStatusIs, setStatusId] = useState("");
-  const { hasAccess } = useCustomerAccess();
-
+  const { hasAccess, hasAnyJobAccess } = useCustomerAccess();
 
   const handleCreateJob = () => {
     navigate("/customer/createjob", {
@@ -643,8 +642,7 @@ const CustomerClientProfile = () => {
       name: "Job ID",
       cell: (row) => (
         <div title={row.job_code_id}>
-          {hasAccess("job", "view") ||
-            role === "SUPERADMIN" ? (
+          {hasAnyJobAccess() ? (
             <a
               onClick={() => HandleJob(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -652,7 +650,7 @@ const CustomerClientProfile = () => {
               {row.job_code_id}
             </a>
           ) : (
-            <a>{row.job_code_id}</a>
+            <div>{row.job_code_id}</div>
           )}
         </div>
       ),
