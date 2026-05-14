@@ -527,13 +527,13 @@ const ClientLists = () => {
   };
 
   const HandleClientView = (row) => {
-    const updatedData = { 
-      ...hararchyData, 
-      customer: { 
-        id: customerId || row.customer_id, 
-        trading_name: (customerName && customerName !== "All") ? customerName : row.customer_name 
+    const updatedData = {
+      ...hararchyData,
+      customer: {
+        id: customerId || row.customer_id,
+        trading_name: (customerName && customerName !== "All") ? customerName : row.customer_name
       },
-      client: row 
+      client: row
     };
     setHararchyData(updatedData);
     sessionStorage.setItem("cli_id_sidebar", row.id);
@@ -542,16 +542,16 @@ const ClientLists = () => {
   };
 
   const HandleJobView = (row) => {
-    const updatedData = { 
-      customer: { 
-        id: customerId || row.customer_id, 
-        trading_name: (customerName && customerName !== "All") ? customerName : (row.customer_name || row.customer_trading_name) 
-      }, 
+    const updatedData = {
+      customer: {
+        id: customerId || row.customer_id,
+        trading_name: (customerName && customerName !== "All") ? customerName : (row.customer_name || row.customer_trading_name)
+      },
       client: {
         id: row.client_id,
         client_name: row.client_trading_name || row.client_name
       },
-      job: row 
+      job: row
     };
     setHararchyData(updatedData);
     navigate("/customer/job/logs", { state: { job_id: row.job_id, activeTab: activeTab, customer_id: customerId || row.customer_id, data: updatedData } });
@@ -560,7 +560,7 @@ const ClientLists = () => {
   const tabs = [
     { id: "client", label: "Client", icon: <User size={16} /> }
   ];
-  if (customerId) {
+  if (customerId && (hasAccess("job", "view") || role === "SUPERADMIN")) {
     tabs.push({ id: "job", label: "Job", icon: <Briefcase size={16} /> });
   }
 

@@ -208,7 +208,7 @@ const ClientList = () => {
 
   const tabs = [
     { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16} /> },
-    ...(clientDetailSingle.id !== ""
+    ...(clientDetailSingle.id !== "" && hasAccess("client_overview", "view")
       ? [{ id: "view client", label: "View Client", icon: <User size={16} /> }]
       : []),
   ];
