@@ -185,46 +185,54 @@ const CustomerAccess = () => {
   };
 
   const handleSaveChanges = async () => {
-    try {
-      const response = await dispatch(
-        CustomerContactPersonAccess({
-          req: {
-            action: "update",
-            permissions: checkboxState,
-          },
-          authToken: token,
-        }),
-      ).unwrap();
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to save these permission changes?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, save it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await dispatch(
+            CustomerContactPersonAccess({
+              req: {
+                action: "update",
+                permissions: checkboxState,
+              },
+              authToken: token,
+            }),
+          ).unwrap();
 
-      if (response.status) {
-        Swal.fire({
-          title: "Success!",
-          text: "Permissions updated successfully.",
-          icon: "success",
-          confirmButtonText: "OK",
-          timer: 1000,
-        }).then(() => {
-          setTimeout(() => {
-             window.location.reload();
-          }, 1000);
-        });
-      } else {
-        Swal.fire({
-          title: "Error!",
-          text: "Failed to update permissions. Please try again.",
-          icon: "error",
-          confirmButtonText: "OK",
-          timer: 1000,
-        });
+          if (response.status) {
+            Swal.fire({
+              title: "Success!",
+              text: "Permissions updated successfully.",
+              icon: "success",
+              confirmButtonText: "OK",
+            }).then(() => {
+              // No reload needed
+            });
+          } else {
+            Swal.fire({
+              title: "Error!",
+              text: "Failed to update permissions. Please try again.",
+              icon: "error",
+              confirmButtonText: "OK",
+            });
+          }
+        } catch (error) {
+          Swal.fire({
+            title: "Error!",
+            text: "An error occurred while updating permissions. Please try again later.",
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+        }
       }
-    } catch (error) {
-      Swal.fire({
-        title: "Error!",
-        text: "An error occurred while updating permissions. Please try again later.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-    }
+    });
   };
 
   useEffect(() => {
