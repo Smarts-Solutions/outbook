@@ -158,7 +158,7 @@ const getCustomerDashboardActivityLog = async (dashboard) => {
         staff_logs.module_name,
         staff_logs.module_id,
         staff_logs.log_message,
-        REPLACE(staff_logs.log_message_all, 'CUSTOMERUSER ', '') AS log_message_all,
+        REPLACE(REPLACE(staff_logs.log_message_all, 'CUSTOMERUSER ', ''), 'Customer User ', '') AS log_message_all,
         staff_logs.permission_type,
         staff_logs.ip,
         staff_logs.created_at,
