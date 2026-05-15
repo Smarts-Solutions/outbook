@@ -1756,7 +1756,7 @@ async function getAllJobsSidebar(
       pool.execute(dataQuery,  [...commonParams, limit, offset]),
     ]);
     
-    const total  = countRows[0]?.total || 0;
+    total  = countRows[0]?.total || 0; 
     const result = dataRows;
 
     return {
