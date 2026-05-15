@@ -4,6 +4,8 @@ import Datatable from "../../../../Components/ExtraComponents/Datatable";
 import CommonModal from "../../../../Components/ExtraComponents/Modals/CommanModal";
 import {
   CustomerDraftAction,
+  CustomerAddDraft,
+  CustomerEditDraft,
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useLocation } from "react-router-dom";
 import sweatalert from "sweetalert2";
@@ -141,10 +143,11 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
       updated_amendment: AllDraftInputdata.updated_amendments,
       feedback: AllDraftInputdata.enter_feedback,
       was_it_complete: AllDraftInputdata.was_it_complete,
+      action: "add",
     };
     const data = { req: req, authToken: token };
 
-    await dispatch(CustomerDraftAction({req: req, authToken: token}))
+    await dispatch(CustomerAddDraft({req: req, authToken: token}))
       .unwrap()
       .then((response) => {
         if (response.status) {
@@ -158,9 +161,6 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
             showConfirmButton: true,
             timer: 3000,
           });
-          setTimeout(() => {
-            // window.location.reload();
-          }, 3000);
         } else {
           response.data == "W"
             ? sweatalert.fire({
@@ -180,7 +180,11 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
         }
       })
       .catch((error) => {
-        return;
+        sweatalert.fire({
+          icon: "error",
+          title: "An error occurred",
+          text: error.message || "Failed to add draft",
+        });
       });
   };
 
@@ -206,9 +210,10 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
       updated_amendment: AllDraftInputdata.updated_amendments,
       feedback: AllDraftInputdata.enter_feedback,
       was_it_complete: AllDraftInputdata.was_it_complete,
+      action: "edit",
     };
     const data = { req: req, authToken: token };
-    await dispatch(CustomerDraftAction({req: req, authToken: token}))
+    await dispatch(CustomerEditDraft({req: req, authToken: token}))
       .unwrap()
       .then((response) => {
         if (response.status) {
@@ -223,9 +228,6 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
             showConfirmButton: true,
             timer: 3000,
           });
-          setTimeout(() => {
-            window.location.reload();
-          }, 3000);
         } else {
           response.data == "W"
             ? sweatalert.fire({
@@ -245,7 +247,11 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
         }
       })
       .catch((error) => {
-        return;
+        sweatalert.fire({
+          icon: "error",
+          title: "An error occurred",
+          text: error.message || "Failed to update draft",
+        });
       });
   };
 

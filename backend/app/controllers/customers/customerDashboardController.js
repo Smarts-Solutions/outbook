@@ -159,7 +159,7 @@ const customerJobTimeline = async (req, res) => {
 
 const customerTaskTimesheetAction = async (req, res) => {
   try {
-    const result = await customerDashboardService.customerTaskTimesheetAction(req.body);
+    const result = await customerDashboardService.customerTaskTimesheetAction(req);
 
     return res.status(200).send(result);
   } catch (error) {
@@ -188,7 +188,7 @@ const customerQueryAction = async (req, res) => {
 
 const customerDraftAction = async (req, res) => {
   try {
-    const result = await customerDashboardService.customerDraftAction(req.body);
+    const result = await customerDashboardService.customerDraftAction(req);
 
     return res.status(200).send(result);
   } catch (error) {

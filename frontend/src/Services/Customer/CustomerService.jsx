@@ -1017,6 +1017,28 @@ export async function CUSTOMER_DRAFT_ACTION(data, token) {
   }
 }
 
+export async function CUSTOMER_ADD_DRAFT(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerDraftAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_EDIT_DRAFT(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerDraftAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
 export async function CUSTOMER_DOCUMENT_ACTION(data, token) {
   try {
     const res = await axios.post(`${Config.base_url}customerDocumentAction`, data, {
