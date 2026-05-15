@@ -169,7 +169,7 @@ const customerTaskTimesheetAction = async (req, res) => {
 
 const customerMissingLogAction = async (req, res) => {
   try {
-    const result = await customerDashboardService.customerMissingLogAction(req.body);
+    const result = await customerDashboardService.customerMissingLogAction(req);
     return res.status(200).send(result);
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -178,7 +178,7 @@ const customerMissingLogAction = async (req, res) => {
 
 const customerQueryAction = async (req, res) => {
   try {
-    const result = await customerDashboardService.customerQueryAction(req.body);
+    const result = await customerDashboardService.customerQueryAction(req);
 
     return res.status(200).send(result);
   } catch (error) {

@@ -56,7 +56,11 @@ import {
   CUSTOMER_JOB_TIMELINE,
   CUSTOMER_TASK_TIMESHEET_ACTION,
   CUSTOMER_MISSING_LOG_ACTION,
+  CUSTOMER_ADD_MISSING_LOG,
+  CUSTOMER_EDIT_MISSING_LOG,
   CUSTOMER_QUERY_ACTION,
+  CUSTOMER_ADD_QUERY,
+  CUSTOMER_EDIT_QUERY,
   CUSTOMER_DRAFT_ACTION,
   CUSTOMER_DOCUMENT_ACTION,
   CUSTOMER_ADD_JOB_DATA,
@@ -1105,6 +1109,70 @@ export const getCustomerMasterStatus = createAsyncThunk("getCustomerMasterStatus
   }
 });
 
+export const CustomerAddMissingLog = createAsyncThunk("customerAddMissingLog", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_ADD_MISSING_LOG(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerEditMissingLog = createAsyncThunk("customerEditMissingLog", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_EDIT_MISSING_LOG(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerAddQuery = createAsyncThunk("customerAddQuerie", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_ADD_QUERY(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerEditQuery = createAsyncThunk("customerEditQuerie", async (data) => {
+  try {
+    const { req, authToken } = data;
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await CUSTOMER_EDIT_QUERY(updatedReq, authToken);
+    return await res;
+  } catch (err) {
+    throw err;
+  }
+});
+
 const CustomerSlice = createSlice({
   name: "CustomerSlice",
   initialState: {
@@ -1496,6 +1564,50 @@ const CustomerSlice = createSlice({
         state.updatejob = action.payload;
       })
       .addCase(CustomerJobUpdate.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(CustomerAddMissingLog.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(CustomerAddMissingLog.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.addmissinglog = action.payload;
+      })
+      .addCase(CustomerAddMissingLog.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(CustomerEditMissingLog.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(CustomerEditMissingLog.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.editmissinglog = action.payload;
+      })
+      .addCase(CustomerEditMissingLog.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(CustomerAddQuery.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(CustomerAddQuery.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.addquery = action.payload;
+      })
+      .addCase(CustomerAddQuery.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(CustomerEditQuery.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(CustomerEditQuery.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.editquery = action.payload;
+      })
+      .addCase(CustomerEditQuery.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
       });
