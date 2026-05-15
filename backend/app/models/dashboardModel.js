@@ -107,17 +107,25 @@ JOIN staffs ON staffs.id = job_allowed_staffs.staff_id;
 
 */
 
-const getDashboardData = async (dashboard) => {
+const getDashboardData1 = async (dashboard) => {
   const { staff_id, date_filter } = dashboard;
 
   //time check 
+
+  console.log("dashboard Time - 1 -", new Date());
   
   let { startDate, endDate } = await getDateRange(date_filter);
 
+  console.log("dashboard Time - 2 -", new Date());
+
   // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id);
+
+  console.log("dashboard Time - 3 -", new Date());
   // Get Role
   const rowRoles = await QueryRoleHelperFunction(staff_id);
+
+  console.log("dashboard Time - 4 -", new Date());
 
   try {
     const [RoleAccessCustomer] = await pool.execute(
@@ -159,6 +167,7 @@ const getDashboardData = async (dashboard) => {
         endDate,
       ]);
       CustomerResult = CustomerData;
+       console.log("dashboard Time - ADMIN CUSTOMER -", new Date());
     } else {
       const CustomerQuery = `
         SELECT  
@@ -186,6 +195,7 @@ const getDashboardData = async (dashboard) => {
         endDate,
       ]);
       CustomerResult = CustomerData;
+       console.log("dashboard Time - USER CUSTOMER -", new Date());
     }
 
     // For Client Data
@@ -223,6 +233,7 @@ const getDashboardData = async (dashboard) => {
         endDate,
       ]);
       ClientResult = ClientData;
+      console.log("dashboard Time - ADMIN CLIENT -", new Date());
     } else {
       const ClientQuery = `
     SELECT  
@@ -259,6 +270,7 @@ const getDashboardData = async (dashboard) => {
         endDate,
       ]);
       ClientResult = ClientData;
+       console.log("dashboard Time - USER CLIENT -", new Date());
     }
 
     // For Staff Data
@@ -326,6 +338,7 @@ const getDashboardData = async (dashboard) => {
         `;
       const [JobData] = await pool.execute(JobQuery, [startDate, endDate]);
       JobResult = JobData;
+       console.log("dashboard Time - ADMIN JOB -", new Date());
     } else {
       // const JobQuery = `
       //   SELECT
@@ -433,10 +446,13 @@ const getDashboardData = async (dashboard) => {
         );
         const resultAssignCustomer = [...matched, ...matched2];
         JobResult = resultAssignCustomer;
+
+         console.log("dashboard Time - USER ACCOUNT MANAGER JOB -", new Date());
       }
       //////-----END Assign Customer Service Data END----////////
       else {
         JobResult = JobData;
+         console.log("dashboard Time -  USER JOB -", new Date());
       }
     }
 
@@ -478,6 +494,212 @@ const getDashboardData = async (dashboard) => {
       message: "Err Dashboard Data View Get",
       error: err.message,
     };
+  }
+};
+
+
+const getDashboardData = async (dashboard) => {
+  const { staff_id, date_filter } = dashboard;
+
+  console.log("dashboard Time - START -", new Date());
+
+  // ✅ FIX 1: Parallel mein chalao — ye 3 independent hain
+  const [{ startDate, endDate }, LineManageStaffId, rowRoles] = await Promise.all([
+    getDateRange(date_filter),
+    LineManageStaffIdHelperFunction(staff_id),
+    QueryRoleHelperFunction(staff_id),
+  ]);
+
+  console.log("dashboard Time - after parallel init -", new Date());
+
+  if (!rowRoles.length) {
+    return { status: false, message: "Role not found." };
+  }
+
+  const role_id = rowRoles[0].role_id;
+  const isSuperAdmin = rowRoles[0].role_name === "SUPERADMIN";
+
+  try {
+    // ✅ FIX 2: 3 queries ki jagah ek mein role permissions fetch karo
+    const [rolePermissions] = await pool.execute(
+      `SELECT permission_id FROM role_permissions 
+       WHERE role_id = ? AND permission_id IN (33, 34, 35)`,
+      [role_id]
+    );
+
+    const permissionSet = new Set(rolePermissions.map((r) => r.permission_id));
+    const RoleAccessCustomer = isSuperAdmin || permissionSet.has(33);
+    const RoleAccessClient   = isSuperAdmin || permissionSet.has(34);
+    const RoleAccessJob      = isSuperAdmin || permissionSet.has(35);
+
+    // ─── Query Definitions ───────────────────────────────────────────
+
+    // CUSTOMER
+    const customerQuery = RoleAccessCustomer
+      ? {
+          sql: `SELECT id FROM customers 
+                WHERE created_at BETWEEN ? AND ? 
+                ORDER BY id DESC`,
+          params: [startDate, endDate],
+        }
+      : {
+          sql: `SELECT customers.id
+                FROM customers
+                LEFT JOIN assigned_jobs_staff_view ajsv 
+                  ON ajsv.customer_id = customers.id 
+                  AND ajsv.staff_id IN (${staff_id}, ${LineManageStaffId})
+                WHERE 
+                  (customers.staff_id IN (${staff_id}, ${LineManageStaffId})
+                   OR ajsv.staff_id IS NOT NULL)
+                  AND customers.created_at BETWEEN ? AND ?
+                GROUP BY customers.id
+                ORDER BY customers.id DESC`,
+          params: [startDate, endDate],
+        };
+
+    // CLIENT
+    const clientQuery = RoleAccessClient
+      ? {
+          sql: `SELECT id FROM clients 
+                WHERE created_at BETWEEN ? AND ? 
+                ORDER BY id DESC`,
+          params: [startDate, endDate],
+        }
+      : {
+          sql: `SELECT clients.id
+                FROM clients
+                LEFT JOIN assigned_jobs_staff_view ajsv 
+                  ON ajsv.client_id = clients.id
+                  AND ajsv.staff_id IN (${staff_id}, ${LineManageStaffId})
+                WHERE 
+                  (clients.staff_created_id IN (${staff_id}, ${LineManageStaffId})
+                   OR ajsv.staff_id IS NOT NULL)
+                  AND clients.created_at BETWEEN ? AND ?
+                GROUP BY clients.id
+                ORDER BY clients.id DESC`,
+          params: [startDate, endDate],
+        };
+
+    // STAFF
+    const staffQuery = isSuperAdmin
+      ? {
+          sql: `SELECT id FROM staffs 
+                WHERE created_at BETWEEN ? AND ? 
+                ORDER BY id DESC`,
+          params: [startDate, endDate],
+        }
+      : {
+          sql: `SELECT id FROM staffs 
+                WHERE created_by = ? 
+                  AND created_at BETWEEN ? AND ? 
+                ORDER BY id DESC`,
+          params: [staff_id, startDate, endDate],
+        };
+
+    // JOB
+    const jobStartDate = RoleAccessJob ? startDate : startDate + " 00:00:00";
+    const jobEndDate   = RoleAccessJob ? endDate   : endDate   + " 00:00:00";
+
+    const jobQuery = RoleAccessJob
+      ? {
+          sql: `SELECT jobs.id, jobs.status_type
+                FROM jobs
+                WHERE jobs.created_at BETWEEN ? AND ?
+                GROUP BY jobs.id
+                ORDER BY jobs.id DESC`,
+          params: [jobStartDate, jobEndDate],
+        }
+      : {
+          sql: `SELECT 
+                  jobs.id,
+                  jobs.status_type,
+                  ajsv.source        AS assigned_source,
+                  ajsv.service_id_assign,
+                  jobs.service_id    AS job_service_id
+                FROM jobs
+                JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+                LEFT JOIN assigned_jobs_staff_view ajsv ON ajsv.job_id = jobs.id
+                LEFT JOIN clients  ON jobs.client_id   = clients.id
+                LEFT JOIN customers ON jobs.customer_id = customers.id
+                LEFT JOIN master_status ON master_status.id = jobs.status_type
+                WHERE
+                  (ajsv.staff_id IN (${LineManageStaffId})
+                   OR jobs.staff_created_id IN (${LineManageStaffId})
+                   OR clients.staff_created_id IN (${LineManageStaffId}))
+                  AND DATE(jobs.created_at) BETWEEN ? AND ?
+                  AND (
+                    ajsv.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+                    OR jobs.service_id = ajsv.service_id_assign
+                  )
+                  AND customers.status = '1'
+                GROUP BY jobs.id
+                ORDER BY jobs.id DESC`,
+          params: [jobStartDate, jobEndDate],
+        };
+
+    // ✅ FIX 3: Charo queries ek saath parallel mein
+    console.log("dashboard Time - before parallel queries -", new Date());
+
+    const [
+      [CustomerResult],
+      [ClientResult],
+      [StaffResult],
+      [JobRaw],
+    ] = await Promise.all([
+      pool.execute(customerQuery.sql, customerQuery.params),
+      pool.execute(clientQuery.sql,   clientQuery.params),
+      pool.execute(staffQuery.sql,    staffQuery.params),
+      pool.execute(jobQuery.sql,      jobQuery.params),
+    ]);
+
+    console.log("dashboard Time - after parallel queries -", new Date());
+
+    // ─── Job filtering (non-admin assign_customer_service logic) ─────
+    let JobResult = JobRaw;
+    if (!RoleAccessJob) {
+      const hasAssignCustomer = JobRaw.some(
+        (item) => item.assigned_source === "assign_customer_service"
+      );
+      if (hasAssignCustomer) {
+        const matched  = JobRaw.filter(
+          (item) =>
+            item.assigned_source === "assign_customer_service" &&
+            Number(item.service_id_assign) === Number(item.job_service_id)
+        );
+        const matched2 = JobRaw.filter(
+          (item) => item.assigned_source !== "assign_customer_service"
+        );
+        JobResult = [...matched, ...matched2];
+      }
+    }
+
+    // ─── Result Assembly ─────────────────────────────────────────────
+    const toIds = (arr) => arr.map((r) => r.id).join(",");
+
+    const result = {
+      customer: { count: CustomerResult.length, ids: toIds(CustomerResult) },
+      client:   { count: ClientResult.length,   ids: toIds(ClientResult)   },
+      staff:    { count: StaffResult.length,     ids: toIds(StaffResult)    },
+      job: {
+        count: JobResult.length,
+        ids: toIds(JobResult),
+      },
+      pending_job: {
+        count: JobResult.filter((r) => Number(r.status_type) !== 6).length,
+        ids:   toIds(JobResult.filter((r) => Number(r.status_type) !== 6)),
+      },
+      completed_job: {
+        count: JobResult.filter((r) => Number(r.status_type) === 6).length,
+        ids:   toIds(JobResult.filter((r) => Number(r.status_type) === 6)),
+      },
+    };
+
+    console.log("dashboard Time - END -", new Date());
+    return { status: true, message: "success.", data: result };
+
+  } catch (err) {
+    console.error("Dashboard error:", err);
+    return { status: false, message: "Err Dashboard Data View Get", error: err.message };
   }
 };
 
