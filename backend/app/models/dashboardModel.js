@@ -111,7 +111,7 @@ const getDashboardData = async (dashboard) => {
   const { staff_id, date_filter } = dashboard;
 
   //time check 
-  console.log("dashboard", date_filter);
+  
   let { startDate, endDate } = await getDateRange(date_filter);
 
   // Line Manager
