@@ -113,7 +113,7 @@ const getDashboardData1 = async (dashboard) => {
   //time check 
 
   console.log("dashboard Time - 1 -", new Date());
-  
+
   let { startDate, endDate } = await getDateRange(date_filter);
 
   console.log("dashboard Time - 2 -", new Date());
@@ -167,7 +167,7 @@ const getDashboardData1 = async (dashboard) => {
         endDate,
       ]);
       CustomerResult = CustomerData;
-       console.log("dashboard Time - ADMIN CUSTOMER -", new Date());
+      console.log("dashboard Time - ADMIN CUSTOMER -", new Date());
     } else {
       const CustomerQuery = `
         SELECT  
@@ -195,7 +195,7 @@ const getDashboardData1 = async (dashboard) => {
         endDate,
       ]);
       CustomerResult = CustomerData;
-       console.log("dashboard Time - USER CUSTOMER -", new Date());
+      console.log("dashboard Time - USER CUSTOMER -", new Date());
     }
 
     // For Client Data
@@ -270,7 +270,7 @@ const getDashboardData1 = async (dashboard) => {
         endDate,
       ]);
       ClientResult = ClientData;
-       console.log("dashboard Time - USER CLIENT -", new Date());
+      console.log("dashboard Time - USER CLIENT -", new Date());
     }
 
     // For Staff Data
@@ -338,7 +338,7 @@ const getDashboardData1 = async (dashboard) => {
         `;
       const [JobData] = await pool.execute(JobQuery, [startDate, endDate]);
       JobResult = JobData;
-       console.log("dashboard Time - ADMIN JOB -", new Date());
+      console.log("dashboard Time - ADMIN JOB -", new Date());
     } else {
       // const JobQuery = `
       //   SELECT
@@ -447,12 +447,12 @@ const getDashboardData1 = async (dashboard) => {
         const resultAssignCustomer = [...matched, ...matched2];
         JobResult = resultAssignCustomer;
 
-         console.log("dashboard Time - USER ACCOUNT MANAGER JOB -", new Date());
+        console.log("dashboard Time - USER ACCOUNT MANAGER JOB -", new Date());
       }
       //////-----END Assign Customer Service Data END----////////
       else {
         JobResult = JobData;
-         console.log("dashboard Time -  USER JOB -", new Date());
+        console.log("dashboard Time -  USER JOB -", new Date());
       }
     }
 
@@ -529,21 +529,21 @@ const getDashboardData = async (dashboard) => {
 
     const permissionSet = new Set(rolePermissions.map((r) => r.permission_id));
     const RoleAccessCustomer = isSuperAdmin || permissionSet.has(33);
-    const RoleAccessClient   = isSuperAdmin || permissionSet.has(34);
-    const RoleAccessJob      = isSuperAdmin || permissionSet.has(35);
+    const RoleAccessClient = isSuperAdmin || permissionSet.has(34);
+    const RoleAccessJob = isSuperAdmin || permissionSet.has(35);
 
     // ─── Query Definitions ───────────────────────────────────────────
 
     // CUSTOMER
     const customerQuery = RoleAccessCustomer
       ? {
-          sql: `SELECT id FROM customers 
+        sql: `SELECT id FROM customers 
                 WHERE created_at BETWEEN ? AND ? 
                 ORDER BY id DESC`,
-          params: [startDate, endDate],
-        }
+        params: [startDate, endDate],
+      }
       : {
-          sql: `SELECT customers.id
+        sql: `SELECT customers.id
                 FROM customers
                 LEFT JOIN assigned_jobs_staff_view ajsv 
                   ON ajsv.customer_id = customers.id 
@@ -554,19 +554,19 @@ const getDashboardData = async (dashboard) => {
                   AND customers.created_at BETWEEN ? AND ?
                 GROUP BY customers.id
                 ORDER BY customers.id DESC`,
-          params: [startDate, endDate],
-        };
+        params: [startDate, endDate],
+      };
 
     // CLIENT
     const clientQuery = RoleAccessClient
       ? {
-          sql: `SELECT id FROM clients 
+        sql: `SELECT id FROM clients 
                 WHERE created_at BETWEEN ? AND ? 
                 ORDER BY id DESC`,
-          params: [startDate, endDate],
-        }
+        params: [startDate, endDate],
+      }
       : {
-          sql: `SELECT clients.id
+        sql: `SELECT clients.id
                 FROM clients
                 LEFT JOIN assigned_jobs_staff_view ajsv 
                   ON ajsv.client_id = clients.id
@@ -577,40 +577,40 @@ const getDashboardData = async (dashboard) => {
                   AND clients.created_at BETWEEN ? AND ?
                 GROUP BY clients.id
                 ORDER BY clients.id DESC`,
-          params: [startDate, endDate],
-        };
+        params: [startDate, endDate],
+      };
 
     // STAFF
     const staffQuery = isSuperAdmin
       ? {
-          sql: `SELECT id FROM staffs 
+        sql: `SELECT id FROM staffs 
                 WHERE created_at BETWEEN ? AND ? 
                 ORDER BY id DESC`,
-          params: [startDate, endDate],
-        }
+        params: [startDate, endDate],
+      }
       : {
-          sql: `SELECT id FROM staffs 
+        sql: `SELECT id FROM staffs 
                 WHERE created_by = ? 
                   AND created_at BETWEEN ? AND ? 
                 ORDER BY id DESC`,
-          params: [staff_id, startDate, endDate],
-        };
+        params: [staff_id, startDate, endDate],
+      };
 
     // JOB
     const jobStartDate = RoleAccessJob ? startDate : startDate + " 00:00:00";
-    const jobEndDate   = RoleAccessJob ? endDate   : endDate   + " 00:00:00";
+    const jobEndDate = RoleAccessJob ? endDate : endDate + " 00:00:00";
 
     const jobQuery = RoleAccessJob
       ? {
-          sql: `SELECT jobs.id, jobs.status_type
+        sql: `SELECT jobs.id, jobs.status_type
                 FROM jobs
                 WHERE jobs.created_at BETWEEN ? AND ?
                 GROUP BY jobs.id
                 ORDER BY jobs.id DESC`,
-          params: [jobStartDate, jobEndDate],
-        }
+        params: [jobStartDate, jobEndDate],
+      }
       : {
-          sql: `SELECT 
+        sql: `SELECT 
                   jobs.id,
                   jobs.status_type,
                   ajsv.source        AS assigned_source,
@@ -628,14 +628,15 @@ const getDashboardData = async (dashboard) => {
                    OR clients.staff_created_id IN (${LineManageStaffId}))
                   AND DATE(jobs.created_at) BETWEEN ? AND ?
                   AND (
-                    ajsv.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
-                    OR jobs.service_id = ajsv.service_id_assign
-                  )
+                  ajsv.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+                  OR jobs.service_id = ajsv.service_id_assign
+                 )  
                   AND customers.status = '1'
                 GROUP BY jobs.id
                 ORDER BY jobs.id DESC`,
-          params: [jobStartDate, jobEndDate],
-        };
+        params: [jobStartDate, jobEndDate],
+      };
+
 
     // ✅ FIX 3: Charo queries ek saath parallel mein
     console.log("dashboard Time - before parallel queries -", new Date());
@@ -644,53 +645,37 @@ const getDashboardData = async (dashboard) => {
       [CustomerResult],
       [ClientResult],
       [StaffResult],
-      [JobRaw],
+      [JobResult],
     ] = await Promise.all([
       pool.execute(customerQuery.sql, customerQuery.params),
-      pool.execute(clientQuery.sql,   clientQuery.params),
-      pool.execute(staffQuery.sql,    staffQuery.params),
-      pool.execute(jobQuery.sql,      jobQuery.params),
+      pool.execute(clientQuery.sql, clientQuery.params),
+      pool.execute(staffQuery.sql, staffQuery.params),
+      pool.execute(jobQuery.sql, jobQuery.params),
     ]);
 
     console.log("dashboard Time - after parallel queries -", new Date());
 
     // ─── Job filtering (non-admin assign_customer_service logic) ─────
-    let JobResult = JobRaw;
-    if (!RoleAccessJob) {
-      const hasAssignCustomer = JobRaw.some(
-        (item) => item.assigned_source === "assign_customer_service"
-      );
-      if (hasAssignCustomer) {
-        const matched  = JobRaw.filter(
-          (item) =>
-            item.assigned_source === "assign_customer_service" &&
-            Number(item.service_id_assign) === Number(item.job_service_id)
-        );
-        const matched2 = JobRaw.filter(
-          (item) => item.assigned_source !== "assign_customer_service"
-        );
-        JobResult = [...matched, ...matched2];
-      }
-    }
-
+   
+    
     // ─── Result Assembly ─────────────────────────────────────────────
     const toIds = (arr) => arr.map((r) => r.id).join(",");
 
     const result = {
       customer: { count: CustomerResult.length, ids: toIds(CustomerResult) },
-      client:   { count: ClientResult.length,   ids: toIds(ClientResult)   },
-      staff:    { count: StaffResult.length,     ids: toIds(StaffResult)    },
+      client: { count: ClientResult.length, ids: toIds(ClientResult) },
+      staff: { count: StaffResult.length, ids: toIds(StaffResult) },
       job: {
         count: JobResult.length,
         ids: toIds(JobResult),
       },
       pending_job: {
         count: JobResult.filter((r) => Number(r.status_type) !== 6).length,
-        ids:   toIds(JobResult.filter((r) => Number(r.status_type) !== 6)),
+        ids: toIds(JobResult.filter((r) => Number(r.status_type) !== 6)),
       },
       completed_job: {
         count: JobResult.filter((r) => Number(r.status_type) === 6).length,
-        ids:   toIds(JobResult.filter((r) => Number(r.status_type) === 6)),
+        ids: toIds(JobResult.filter((r) => Number(r.status_type) === 6)),
       },
     };
 
@@ -1034,7 +1019,7 @@ const getByAllClient = async (dashboard) => {
       offset,
     ]);
 
-    
+
     let finalResult = result;
     if (result.length > 0) {
       finalResult = await Promise.all(
@@ -1201,7 +1186,7 @@ const getByAllCustomer = async (dashboard) => {
       offset,
     ]);
 
-    
+
     let finalResult = result;
     if (result.length > 0) {
       finalResult = await Promise.all(
@@ -1378,7 +1363,7 @@ const getByAllJob = async (dashboard) => {
       offset,
     ]);
 
-    
+
     let finalResult = result;
     if (result.length > 0) {
       finalResult = await Promise.all(
@@ -1555,7 +1540,7 @@ const getByAllCompletedJob = async (dashboard) => {
       offset,
     ]);
 
-    
+
     let finalResult = result;
     if (result.length > 0) {
       finalResult = await Promise.all(
@@ -1732,7 +1717,7 @@ const getByAllPendingJob = async (dashboard) => {
       offset,
     ]);
 
-    
+
     let finalResult = result;
     if (result.length > 0) {
       finalResult = await Promise.all(
