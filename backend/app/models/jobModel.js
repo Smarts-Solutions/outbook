@@ -1645,7 +1645,7 @@ async function getAllJobsSidebar(
     // // }
 
     //console.log("result 2 -->", result.length)
-    
+
 
     // ================= OPTIMIZED WITH Promise.all =================
 
@@ -1663,8 +1663,7 @@ async function getAllJobsSidebar(
       LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
       LEFT JOIN master_status ON master_status.id = jobs.status_type
       LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
-    `;
-    
+    `;  
     const placeholders = makePlaceholders(LineManageStaffId);
     
     const WHERE_CLAUSE = `
