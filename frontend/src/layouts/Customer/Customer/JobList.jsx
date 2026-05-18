@@ -396,28 +396,6 @@ const ClientList = () => {
       ),
       width: "325px",
     },
-
-    {
-      name: "Client Contact Person",
-      cell: (row) => (
-        <div
-          title={
-            row.account_manager_officer_first_name +
-            " " +
-            row.account_manager_officer_last_name
-          }
-        >
-          {row.account_manager_officer_first_name +
-            " " +
-            row.account_manager_officer_last_name}
-        </div>
-      ),
-      selector: (row) =>
-        row.account_manager_officer_first_name +
-        " " +
-        row.account_manager_officer_last_name,
-      sortable: true,
-    },
     {
       name: "Outbook Account Manager",
       cell: (row) => (
@@ -441,24 +419,6 @@ const ClientList = () => {
       width: "325px",
     },
     {
-      name: "Employee ID",
-      selector: (row) => row.account_manager_employee_number,
-      cell: (row) => (
-        <div title={row.account_manager_employee_number}>
-          {row.account_manager_employee_number}
-        </div>
-      ),
-      sortable: true,
-    },
-    {
-      name: "Allocated To",
-      selector: (row) =>
-        row.allocated_id != null
-          ? row.allocated_first_name + " " + row.allocated_last_name
-          : "",
-      sortable: true,
-    },
-    {
       name: "Invoicing",
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
@@ -467,24 +427,6 @@ const ClientList = () => {
         const bVal = b.invoiced == "1" ? "YES" : "NO";
         return aVal.localeCompare(bVal);
       },
-    },
-
-    {
-      name: "Created By",
-      cell: (row) => (
-        <div title={row.job_created_by || "-"}>{row.job_created_by || "-"}</div>
-      ),
-      selector: (row) => row.job_created_by || "-",
-      sortable: true,
-    },
-
-    {
-      name: "Created At",
-      cell: (row) => (
-        <div title={row.created_at || "-"}>{row.created_at || "-"}</div>
-      ),
-      selector: (row) => row.created_at || "-",
-      sortable: true,
     },
     ...((hasAccess("job", "update") || hasAccess("job", "copy") || hasAccess("job", "delete") || role === "SUPERADMIN") ? [
       {
@@ -922,10 +864,7 @@ const ClientList = () => {
       item.outbooks_acount_manager_first_name +
       " " +
       item.outbooks_acount_manager_last_name,
-    "Allocated To": item.allocated_first_name + " " + item.allocated_last_name,
     Invoiced: item.invoiced == "1" ? "YES" : "NO",
-    "Created By": item.job_created_by,
-    "Created At": item.created_at,
     Status: item.status,
   }));
 
@@ -995,25 +934,11 @@ const ClientList = () => {
       "Job Priority": item.job_priority || "-",
       "Client Trading Name": item.client_trading_name || "-",
       "Job Type Name": item.job_type_name || "-",
-      "Client Contact Person":
-        item.account_manager_officer_first_name &&
-          item.account_manager_officer_last_name
-          ? item.account_manager_officer_first_name +
-          " " +
-          item.account_manager_officer_last_name
-          : "-",
       "Outbooks Account Manager":
         item.outbooks_acount_manager_first_name +
         " " +
         item.outbooks_acount_manager_last_name || "-",
-      "Employee ID": item.account_manager_employee_number || "-",
-      "Allocated To":
-        item.allocated_id != null
-          ? item.allocated_first_name + " " + item.allocated_last_name
-          : "-",
       Invoiced: item.invoiced == "1" ? "YES" : "NO" || "-",
-      "Created By": item.job_created_by || "-",
-      "Created At": item.created_at || "-",
       Status: item.status || "-",
     }));
 
