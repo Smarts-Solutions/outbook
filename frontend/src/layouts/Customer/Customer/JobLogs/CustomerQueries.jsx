@@ -5,6 +5,8 @@ import Datatable from "../../../../Components/ExtraComponents/Datatable";
 import CommonModal from "../../../../Components/ExtraComponents/Modals/CommanModal";
 import {
   CustomerQueryAction,
+  CustomerAddQuery,
+  CustomerEditQuery,
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
 import { convertDate } from "../../../../Utils/Comman_function";
@@ -142,7 +144,7 @@ const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
     };
     const data = { req: req, authToken: token };
 
-    await dispatch(CustomerQueryAction(data))
+    await dispatch(CustomerAddQuery(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
@@ -313,7 +315,7 @@ const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
       return;
     }
 
-    await dispatch(CustomerQueryAction(data))
+    await dispatch(CustomerEditQuery(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {

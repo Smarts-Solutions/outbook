@@ -32,7 +32,7 @@ const CustomerLogUpdateOperation = async (logData) => {
     SET 
         staff_logs.log_message_all = CONCAT(
           CASE 
-            WHEN staffs.role_id = 12 THEN 'CUSTOMERUSER'
+            WHEN staffs.role_id = 12 THEN 'Customer User'
             ELSE IFNULL(COALESCE(roles.role, roles.role_name), 'STAFF')
           END, ' ', 
           IFNULL(staffs.first_name, ''), ' ', 

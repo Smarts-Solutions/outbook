@@ -279,25 +279,6 @@ const ClientLists = () => {
       selector: (row) => row.client_type_name || "-",
       sortable: true,
     },
-    {
-      name: "Created By",
-      selector: (row) => row.client_created_by || "-",
-      sortable: true,
-    },
-    {
-      name: "Created At",
-      selector: (row) => row.created_at || "-",
-      sortable: true,
-    },
-    {
-      name: "Status",
-      cell: (row) => (
-        <span className={row.status === "1" ? "text-success" : "text-danger"}>
-          {row.status === "1" ? "Active" : "Deactive"}
-        </span>
-      ),
-      sortable: true,
-    },
     ...((hasAccess("client", "update") || hasAccess("client", "delete")) ? [
       {
         name: "Actions",
@@ -373,21 +354,6 @@ const ClientLists = () => {
       width: "250px",
     },
     {
-      name: "Client Contact Person",
-      cell: (row) => (
-        <div title={row.account_manager_officer_first_name + " " + row.account_manager_officer_last_name || "-"}>
-          {row.account_manager_officer_first_name + " " + row.account_manager_officer_last_name || "-"}
-        </div>
-      ),
-      selector: (row) => row.account_manager_officer_first_name + " " + row.account_manager_officer_last_name || "-",
-      sortable: true,
-    },
-    {
-      name: "Client Job Code",
-      selector: (row) => row.client_job_code || "-",
-      sortable: true,
-    },
-    {
       name: "Outbook Account Manager",
       cell: (row) => (
         <div title={row.outbooks_acount_manager_first_name + " " + row.outbooks_acount_manager_last_name || "-"}>
@@ -398,33 +364,8 @@ const ClientLists = () => {
       sortable: true,
     },
     {
-      name: "Allocated To",
-      selector: (row) => row.allocated_id != null ? row.allocated_first_name + " " + row.allocated_last_name : "-",
-      sortable: true,
-    },
-    {
-      name: "Timesheet",
-      cell: (row) => (
-        <div title={row.total_hours_status == "1" && row.total_hours != null ? row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m" : "-"}>
-          {row.total_hours_status == "1" && row.total_hours != null ? row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m" : "-"}
-        </div>
-      ),
-      selector: (row) => row.total_hours_status == "1" && row.total_hours != null ? row.total_hours : "-",
-      sortable: true,
-    },
-    {
       name: "Invoicing",
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
-      sortable: true,
-    },
-    {
-      name: "Created By",
-      selector: (row) => row.job_created_by || "-",
-      sortable: true,
-    },
-    {
-      name: "Created At",
-      selector: (row) => row.created_at || "-",
       sortable: true,
     },
     ...((hasAccess("job", "update") || hasAccess("job", "delete")) ? [
@@ -485,9 +426,6 @@ const ClientLists = () => {
           "Client Code": item.client_code,
           "Customer Name": item.customer_name,
           "Client Type Name": item.client_type_name,
-          "Created By": item.client_created_by,
-          "Created At": item.created_at,
-          Status: item.status == 1 ? "Active" : "Deactive",
         }));
       }
     } else if (activeTab === "job") {
@@ -499,8 +437,6 @@ const ClientLists = () => {
           "Client Name": item.client_trading_name,
           "Job Type": item.job_type_name,
           Status: item.status,
-          "Created By": item.job_created_by,
-          "Created At": item.created_at,
         }));
       }
     }

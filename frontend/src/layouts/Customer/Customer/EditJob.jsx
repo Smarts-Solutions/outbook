@@ -1327,6 +1327,13 @@ const EditJob = () => {
       }
     }
 
+    if (name === "processing_checklist") {
+      setChecklistModal(prev => ({ ...prev, processing: [] }));
+    }
+    if (name === "reviewing_checklist") {
+      setChecklistModal(prev => ({ ...prev, reviewing: [] }));
+    }
+
     setJobData((prevState) => ({
       ...prevState,
       [name]: value,

@@ -56,8 +56,14 @@ import {
   CUSTOMER_JOB_TIMELINE,
   CUSTOMER_TASK_TIMESHEET_ACTION,
   CUSTOMER_MISSING_LOG_ACTION,
+  CUSTOMER_ADD_MISSING_LOG,
+  CUSTOMER_EDIT_MISSING_LOG,
   CUSTOMER_QUERY_ACTION,
+  CUSTOMER_ADD_QUERY,
+  CUSTOMER_EDIT_QUERY,
   CUSTOMER_DRAFT_ACTION,
+  CUSTOMER_ADD_DRAFT,
+  CUSTOMER_EDIT_DRAFT,
   CUSTOMER_DOCUMENT_ACTION,
   CUSTOMER_ADD_JOB_DATA,
   CUSTOMER_JOB_ADD,
@@ -1043,8 +1049,9 @@ export const CustomerTaskTimesheetAction = createAsyncThunk("customerTaskTimeshe
 export const CustomerMissingLogAction = createAsyncThunk("customerMissingLogAction", async (data) => {
   try {
     const { req, authToken } = data;
-    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
+    const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId?.id };
     const res = await CUSTOMER_MISSING_LOG_ACTION(updatedReq, authToken);
     return res;
   } catch (err) {
@@ -1055,8 +1062,9 @@ export const CustomerMissingLogAction = createAsyncThunk("customerMissingLogActi
 export const CustomerQueryAction = createAsyncThunk("customerQueryAction", async (data) => {
   try {
     const { req, authToken } = data;
-    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
+    const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId?.id };
     const res = await CUSTOMER_QUERY_ACTION(updatedReq, authToken);
     return res;
   } catch (err) {
@@ -1067,9 +1075,36 @@ export const CustomerQueryAction = createAsyncThunk("customerQueryAction", async
 export const CustomerDraftAction = createAsyncThunk("customerDraftAction", async (data) => {
   try {
     const { req, authToken } = data;
-    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
-    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId.id };
+    const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId?.id };
     const res = await CUSTOMER_DRAFT_ACTION(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerAddDraft = createAsyncThunk("customerAddDraft", async (data) => {
+  try {
+    const { req, authToken } = data;
+    const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId?.id };
+    const res = await CUSTOMER_ADD_DRAFT(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerEditDraft = createAsyncThunk("customerEditDraft", async (data) => {
+  try {
+    const { req, authToken } = data;
+    const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
+    const updatedReq = { ...req, ip: IP_Data, StaffUserId: StaffUserId?.id };
+    const res = await CUSTOMER_EDIT_DRAFT(updatedReq, authToken);
     return res;
   } catch (err) {
     throw err;
@@ -1099,6 +1134,74 @@ export const getCustomerMasterStatus = createAsyncThunk("getCustomerMasterStatus
       StaffUserId: StaffUserId.id,
     };
     const res = await CUSTOMER_MASTER_STATUS(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerAddMissingLog = createAsyncThunk("customerAddMissingLog", async (data) => {
+  try {
+    const { req, authToken } = data;
+    const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId?.id,
+    };
+    const res = await CUSTOMER_ADD_MISSING_LOG(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerEditMissingLog = createAsyncThunk("customerEditMissingLog", async (data) => {
+  try {
+    const { req, authToken } = data;
+    const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId?.id,
+    };
+    const res = await CUSTOMER_EDIT_MISSING_LOG(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerAddQuery = createAsyncThunk("customerAddQuery", async (data) => {
+  try {
+    const { req, authToken } = data;
+    const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId?.id,
+    };
+    const res = await CUSTOMER_ADD_QUERY(updatedReq, authToken);
+    return res;
+  } catch (err) {
+    throw err;
+  }
+});
+
+export const CustomerEditQuery = createAsyncThunk("customerEditQuery", async (data) => {
+  try {
+    const { req, authToken } = data;
+    const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId?.id,
+    };
+    const res = await CUSTOMER_EDIT_QUERY(updatedReq, authToken);
     return res;
   } catch (err) {
     throw err;
@@ -1137,6 +1240,10 @@ const CustomerSlice = createSlice({
     getjobtimeline: [],
     updatestatus: [],
     customerchcklist: [],
+    addmissinglog: [],
+    editmissinglog: [],
+    editquery: [],
+    editdraft: [],
   },
   reducers: {
     addCustomer: (state, action) => {
@@ -1496,6 +1603,72 @@ const CustomerSlice = createSlice({
         state.updatejob = action.payload;
       })
       .addCase(CustomerJobUpdate.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(CustomerAddMissingLog.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(CustomerAddMissingLog.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.addmissinglog = action.payload;
+      })
+      .addCase(CustomerAddMissingLog.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(CustomerEditMissingLog.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(CustomerEditMissingLog.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.editmissinglog = action.payload;
+      })
+      .addCase(CustomerEditMissingLog.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(CustomerAddQuery.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(CustomerAddQuery.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.addquery = action.payload;
+      })
+      .addCase(CustomerAddQuery.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(CustomerEditQuery.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(CustomerEditQuery.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.editquery = action.payload;
+      })
+      .addCase(CustomerEditQuery.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(CustomerAddDraft.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(CustomerAddDraft.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.adddraft = action.payload;
+      })
+      .addCase(CustomerAddDraft.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
+      })
+      .addCase(CustomerEditDraft.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(CustomerEditDraft.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.editdraft = action.payload;
+      })
+      .addCase(CustomerEditDraft.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
       });

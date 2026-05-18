@@ -718,28 +718,6 @@ const CustomerClientProfile = () => {
       ),
       width: "325px",
     },
-
-    {
-      name: "Client Contact Person",
-      cell: (row) => (
-        <div
-          title={
-            row.account_manager_officer_first_name +
-            " " +
-            row.account_manager_officer_last_name
-          }
-        >
-          {row.account_manager_officer_first_name +
-            " " +
-            row.account_manager_officer_last_name}
-        </div>
-      ),
-      selector: (row) =>
-        row.account_manager_officer_first_name +
-        " " +
-        row.account_manager_officer_last_name,
-      sortable: true,
-    },
     {
       name: "Outbook Account Manager",
       cell: (row) => (
@@ -763,24 +741,6 @@ const CustomerClientProfile = () => {
       width: "325px",
     },
     {
-      name: "Employee ID",
-      selector: (row) => row.account_manager_employee_number,
-      cell: (row) => (
-        <div title={row.account_manager_employee_number}>
-          {row.account_manager_employee_number}
-        </div>
-      ),
-      sortable: true,
-    },
-    {
-      name: "Allocated To",
-      selector: (row) =>
-        row.allocated_id != null
-          ? row.allocated_first_name + " " + row.allocated_last_name
-          : "",
-      sortable: true,
-    },
-    {
       name: "Invoicing",
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
@@ -789,24 +749,6 @@ const CustomerClientProfile = () => {
         const bVal = b.invoiced == "1" ? "YES" : "NO";
         return aVal.localeCompare(bVal);
       },
-    },
-
-    {
-      name: "Created By",
-      cell: (row) => (
-        <div title={row.job_created_by || "-"}>{row.job_created_by || "-"}</div>
-      ),
-      selector: (row) => row.job_created_by || "-",
-      sortable: true,
-    },
-
-    {
-      name: "Created At",
-      cell: (row) => (
-        <div title={row.created_at || "-"}>{row.created_at || "-"}</div>
-      ),
-      selector: (row) => row.created_at || "-",
-      sortable: true,
     },
     ...((hasAccess("job", "update") || hasAccess("job", "copy") || hasAccess("job", "delete") || role === "SUPERADMIN") ? [
       {
