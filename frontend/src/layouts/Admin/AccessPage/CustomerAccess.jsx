@@ -9,7 +9,8 @@ const CustomerAccess = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const [checkboxState, setCheckboxState] = useState([]);
   const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
-  const [accessData, setAccessData] = useState({ loading: true, data: [], role_id: null });
+  const [roleStructures, setRoleStructures] = useState({});
+  const [loadingRoles, setLoadingRoles] = useState({});
 
   const roleData = async () => {
     try {
@@ -70,37 +71,46 @@ const CustomerAccess = () => {
   };
 
   const OpenAccourdian = async (val) => {
+    // If already loading or data already exists, don't fetch again
+    if (loadingRoles[val.id] || roleStructures[val.id]) return;
+
     try {
+      setLoadingRoles(prev => ({ ...prev, [val.id]: true }));
       const req = { action: "get", role_id: val.id };
       const data = { req, authToken: token };
 
       const response = await dispatch(CustomerContactPersonAccess(data)).unwrap();
       if (response.status) {
+        setRoleStructures(prev => ({ ...prev, [val.id]: response.data }));
+        
         setCheckboxState((prevState) => {
-            // Remove existing permissions for this role to avoid duplicates
-            let updatedState = prevState.filter(item => item.role_id !== val.id);
+            // Only add permissions that are assigned on the server
+            // We don't filter out previous state because we want to preserve other roles' changes
+            let updatedState = [...prevState];
             
             response.data.forEach((item) => {
                 item.items.forEach((perm) => {
                     if (perm.is_assigned === 1) {
-                        updatedState.push({
-                            permission_id: perm.id,
-                            role_id: val.id,
-                            is_assigned: true,
-                            permission_name: item.permission_name,
-                        });
+                        // Check if we already have this permission in state to avoid duplicates
+                        const exists = updatedState.some(p => p.permission_id == perm.id && p.role_id == val.id);
+                        if (!exists) {
+                            updatedState.push({
+                                permission_id: perm.id,
+                                role_id: val.id,
+                                is_assigned: true,
+                                permission_name: item.permission_name,
+                            });
+                        }
                     }
                 });
             });
             return updatedState;
         });
-
-        setAccessData({ loading: false, data: response.data, role_id: val.id });
-      } else {
-        setAccessData({ loading: false, data: [], role_id: val.id });
       }
     } catch (error) {
-      setAccessData({ loading: false, data: [], role_id: val.id });
+      console.error("Error fetching role access:", error);
+    } finally {
+      setLoadingRoles(prev => ({ ...prev, [val.id]: false }));
     }
   };
 
@@ -175,46 +185,54 @@ const CustomerAccess = () => {
   };
 
   const handleSaveChanges = async () => {
-    try {
-      const response = await dispatch(
-        CustomerContactPersonAccess({
-          req: {
-            action: "update",
-            permissions: checkboxState,
-          },
-          authToken: token,
-        }),
-      ).unwrap();
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to save these permission changes?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, save it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await dispatch(
+            CustomerContactPersonAccess({
+              req: {
+                action: "update",
+                permissions: checkboxState,
+              },
+              authToken: token,
+            }),
+          ).unwrap();
 
-      if (response.status) {
-        Swal.fire({
-          title: "Success!",
-          text: "Permissions updated successfully.",
-          icon: "success",
-          confirmButtonText: "OK",
-          timer: 1000,
-        }).then(() => {
-          setTimeout(() => {
-             window.location.reload();
-          }, 1000);
-        });
-      } else {
-        Swal.fire({
-          title: "Error!",
-          text: "Failed to update permissions. Please try again.",
-          icon: "error",
-          confirmButtonText: "OK",
-          timer: 1000,
-        });
+          if (response.status) {
+            Swal.fire({
+              title: "Success!",
+              text: "Permissions updated successfully.",
+              icon: "success",
+              confirmButtonText: "OK",
+            }).then(() => {
+              // No reload needed
+            });
+          } else {
+            Swal.fire({
+              title: "Error!",
+              text: "Failed to update permissions. Please try again.",
+              icon: "error",
+              confirmButtonText: "OK",
+            });
+          }
+        } catch (error) {
+          Swal.fire({
+            title: "Error!",
+            text: "An error occurred while updating permissions. Please try again later.",
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+        }
       }
-    } catch (error) {
-      Swal.fire({
-        title: "Error!",
-        text: "An error occurred while updating permissions. Please try again later.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-    }
+    });
   };
 
   useEffect(() => {
@@ -260,69 +278,79 @@ const CustomerAccess = () => {
                     data-bs-parent="#customer-access-accordion"
                   >
                     <div className="accordion-body">
-                      <div className="d-flex justify-content-end mb-3 border-bottom pb-2">
-                        <div className="form-check form-check-outline form-check-dark">
-                          <input
-                            className="form-check-input new-checkbox"
-                            type="checkbox"
-                            id={`global-select-all-${val.id}`}
-                            checked={
-                                accessData.role_id == val.id &&
-                                accessData.data.length > 0 && 
-                                accessData.data.every(section => 
-                                    section.items.every(item => 
-                                        checkboxState.some(p => p.role_id == val.id && p.permission_id == item.id && p.is_assigned)
+                      {loadingRoles[val.id] ? (
+                        <div className="text-center py-4">
+                          <div className="spinner-border text-primary" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
+                        </div>
+                      ) : roleStructures[val.id] ? (
+                        <>
+                          <div className="d-flex justify-content-end mb-3 border-bottom pb-2">
+                            <div className="form-check form-check-outline form-check-dark">
+                              <input
+                                className="form-check-input new-checkbox"
+                                type="checkbox"
+                                id={`global-select-all-${val.id}`}
+                                checked={
+                                    roleStructures[val.id].length > 0 && 
+                                    roleStructures[val.id].every(section => 
+                                        section.items.every(item => 
+                                            checkboxState.some(p => p.role_id == val.id && p.permission_id == item.id && p.is_assigned)
+                                        )
                                     )
-                                )
-                            }
-                            onChange={(e) => {
-                                const checked = e.target.checked;
-                                if (accessData.role_id != val.id) return;
-
-                                setCheckboxState(prevState => {
-                                    // Clear existing records for this role
-                                    let updatedState = prevState.filter(item => item.role_id != val.id);
-                                    
-                                    // Push all permissions for this role with the toggle status
-                                    accessData.data.forEach(section => {
-                                        section.items.forEach(item => {
-                                            updatedState.push({
-                                                permission_id: item.id,
-                                                role_id: val.id,
-                                                is_assigned: checked,
-                                                permission_name: section.permission_name,
+                                }
+                                onChange={(e) => {
+                                    const checked = e.target.checked;
+                                    setCheckboxState(prevState => {
+                                        let updatedState = prevState.filter(item => item.role_id != val.id);
+                                        roleStructures[val.id].forEach(section => {
+                                            section.items.forEach(item => {
+                                                updatedState.push({
+                                                    permission_id: item.id,
+                                                    role_id: val.id,
+                                                    is_assigned: checked,
+                                                    permission_name: section.permission_name,
+                                                });
                                             });
                                         });
+                                        return updatedState;
                                     });
-                                    return updatedState;
-                                });
-                            }}
-                          />
-                          <label 
-                            className="form-check-label new_checkbox mb-0 ms-2 fw-bold text-primary" 
-                            htmlFor={`global-select-all-${val.id}`}
-                          >
-                            Select All Permissions for {val.name}
-                          </label>
-                        </div>
-                      </div>
-                      <div className="row">
-                        {accessData &&
-                          accessData.data.map((section, idx) => (
-                            <div key={idx} className="col-lg-2 col-md-6">
-                              <AccordionItem
-                                section={section}
-                                role_id={val.id}
+                                }}
                               />
+                              <label 
+                                className="form-check-label new_checkbox mb-0 ms-2 fw-bold text-primary" 
+                                htmlFor={`global-select-all-${val.id}`}
+                              >
+                                Select All Permissions
+                              </label>
                             </div>
-                          ))}
-                      </div>
+                          </div>
+                          <div className="row">
+                            {roleStructures[val.id]
+                              ?.filter((section) => section.permission_name !== "report")
+                              ?.map((section, idx) => (
+                                <div key={idx} className="col-lg-2 col-md-6">
+                                  <AccordionItem
+                                    section={section}
+                                    role_id={val.id}
+                                  />
+                                </div>
+                              ))}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-center py-4 text-muted">
+                          Click to load permissions
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
               ))}
           </div>
         </div>
+
         <div className="modal-footer">
           <button
             type="button"

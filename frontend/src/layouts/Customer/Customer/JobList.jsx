@@ -24,7 +24,7 @@ const ClientList = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  const { hasAccess, selectedCustomer } = useCustomerAccess();
+  const { hasAccess, hasAnyJobAccess, selectedCustomer, loading: accessLoading } = useCustomerAccess();
 
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const token = JSON.parse(localStorage.getItem("token"));
@@ -50,11 +50,12 @@ const ClientList = () => {
   const [jobLoading, setJobLoading] = useState(false);
   const debounceRef = useRef(null);
 
-  useEffect(() => {
-    if (!hasAccess("job", "view") && role !== "SUPERADMIN") {
-      navigate("/customer/dashboard");
-    }
-  }, [hasAccess, role, navigate]);
+  // Removed permission-based redirect as requested
+  // useEffect(() => {
+  //   if (!accessLoading && !hasAccess("job", "view") && role !== "SUPERADMIN") {
+  //     navigate("/customer/dashboard");
+  //   }
+  // }, [hasAccess, role, navigate, accessLoading]);
 
   useEffect(() => {
     GetAllCustomer();
@@ -207,7 +208,7 @@ const ClientList = () => {
 
   const tabs = [
     { id: "NoOfJobs", label: "No. Of Jobs", icon: <Briefcase size={16} /> },
-    ...(clientDetailSingle.id !== "" && (hasAccess("client", "view") || role === "SUPERADMIN")
+    ...(clientDetailSingle.id !== "" && hasAccess("client_overview", "view")
       ? [{ id: "view client", label: "View Client", icon: <User size={16} /> }]
       : []),
   ];
@@ -317,21 +318,20 @@ const ClientList = () => {
   const columns = [
     {
       name: "Job ID",
-      cell: (row) => (
-        <div title={row.job_code_id}>
-          {hasAccess("job", "view") ||
-            role === "SUPERADMIN" ? (
+      cell: (row) => {
+        return hasAnyJobAccess() ? (
+          <div title={row.job_code_id}>
             <a
               onClick={() => HandleJob(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
             >
               {row.job_code_id}
             </a>
-          ) : (
-            <a>{row.job_code_id}</a>
-          )}
-        </div>
-      ),
+          </div>
+        ) : (
+          <div title={row.job_code_id}>{row.job_code_id}</div>
+        );
+      },
       selector: (row) => row.job_code_id,
       sortable: true,
     },
@@ -396,28 +396,6 @@ const ClientList = () => {
       ),
       width: "325px",
     },
-
-    {
-      name: "Client Contact Person",
-      cell: (row) => (
-        <div
-          title={
-            row.account_manager_officer_first_name +
-            " " +
-            row.account_manager_officer_last_name
-          }
-        >
-          {row.account_manager_officer_first_name +
-            " " +
-            row.account_manager_officer_last_name}
-        </div>
-      ),
-      selector: (row) =>
-        row.account_manager_officer_first_name +
-        " " +
-        row.account_manager_officer_last_name,
-      sortable: true,
-    },
     {
       name: "Outbook Account Manager",
       cell: (row) => (
@@ -441,24 +419,6 @@ const ClientList = () => {
       width: "325px",
     },
     {
-      name: "Employee ID",
-      selector: (row) => row.account_manager_employee_number,
-      cell: (row) => (
-        <div title={row.account_manager_employee_number}>
-          {row.account_manager_employee_number}
-        </div>
-      ),
-      sortable: true,
-    },
-    {
-      name: "Allocated To",
-      selector: (row) =>
-        row.allocated_id != null
-          ? row.allocated_first_name + " " + row.allocated_last_name
-          : "",
-      sortable: true,
-    },
-    {
       name: "Invoicing",
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
@@ -468,55 +428,39 @@ const ClientList = () => {
         return aVal.localeCompare(bVal);
       },
     },
-
-    {
-      name: "Created By",
-      cell: (row) => (
-        <div title={row.job_created_by || "-"}>{row.job_created_by || "-"}</div>
-      ),
-      selector: (row) => row.job_created_by || "-",
-      sortable: true,
-    },
-
-    {
-      name: "Created At",
-      cell: (row) => (
-        <div title={row.created_at || "-"}>{row.created_at || "-"}</div>
-      ),
-      selector: (row) => row.created_at || "-",
-      sortable: true,
-    },
-    {
-      name: "Actions",
-      cell: (row) => (
-        <div className="d-flex">
-          {(hasAccess("job", "update") || role === "SUPERADMIN") && (
-            <button className="edit-icon" onClick={() => handleEdit(row)}>
-              <i className="ti-pencil" />
-            </button>
-          )}
-
-          {(hasAccess("job", "copy") || role === "SUPERADMIN") && (
-            <button className="copy-icon" onClick={() => copyRow(row)}>
-              <i className="ti-files"></i>
-            </button>
-          )}
-
-          {row.timesheet_job_id == null
-            ? (hasAccess("job", "delete") || role === "SUPERADMIN") && (
-              <button
-                className="delete-icon"
-                onClick={() => handleDelete(row, "job")}
-              >
-                <i className="ti-trash text-danger" />
+    ...((hasAccess("job", "update") || hasAccess("job", "copy") || hasAccess("job", "delete") || role === "SUPERADMIN") ? [
+      {
+        name: "Actions",
+        cell: (row) => (
+          <div className="d-flex">
+            {(hasAccess("job", "update") || role === "SUPERADMIN") && (
+              <button className="edit-icon" onClick={() => handleEdit(row)}>
+                <i className="ti-pencil" />
               </button>
-            )
-            : ""}
-        </div>
-      ),
-      width: "180px",
-      ignoreRowClick: true,
-    },
+            )}
+
+            {(hasAccess("job", "copy") || role === "SUPERADMIN") && (
+              <button className="copy-icon" onClick={() => copyRow(row)}>
+                <i className="ti-files"></i>
+              </button>
+            )}
+
+            {row.timesheet_job_id == null
+              ? (hasAccess("job", "delete") || role === "SUPERADMIN") && (
+                <button
+                  className="delete-icon"
+                  onClick={() => handleDelete(row, "job")}
+                >
+                  <i className="ti-trash text-danger" />
+                </button>
+              )
+              : ""}
+          </div>
+        ),
+        width: "180px",
+        ignoreRowClick: true,
+      }
+    ] : []),
   ];
 
   const HandleJob = (row) => {
@@ -920,10 +864,7 @@ const ClientList = () => {
       item.outbooks_acount_manager_first_name +
       " " +
       item.outbooks_acount_manager_last_name,
-    "Allocated To": item.allocated_first_name + " " + item.allocated_last_name,
     Invoiced: item.invoiced == "1" ? "YES" : "NO",
-    "Created By": item.job_created_by,
-    "Created At": item.created_at,
     Status: item.status,
   }));
 
@@ -993,25 +934,11 @@ const ClientList = () => {
       "Job Priority": item.job_priority || "-",
       "Client Trading Name": item.client_trading_name || "-",
       "Job Type Name": item.job_type_name || "-",
-      "Client Contact Person":
-        item.account_manager_officer_first_name &&
-          item.account_manager_officer_last_name
-          ? item.account_manager_officer_first_name +
-          " " +
-          item.account_manager_officer_last_name
-          : "-",
       "Outbooks Account Manager":
         item.outbooks_acount_manager_first_name +
         " " +
         item.outbooks_acount_manager_last_name || "-",
-      "Employee ID": item.account_manager_employee_number || "-",
-      "Allocated To":
-        item.allocated_id != null
-          ? item.allocated_first_name + " " + item.allocated_last_name
-          : "-",
       Invoiced: item.invoiced == "1" ? "YES" : "NO" || "-",
-      "Created By": item.job_created_by || "-",
-      "Created At": item.created_at || "-",
       Status: item.status || "-",
     }));
 

@@ -20,8 +20,8 @@ const getAllCustomerUsers = async (req, res) => {
     const action = customerUsers.action;
     let result;
 
-    try { await pool.execute(`ALTER TABLE customer_access ADD COLUMN client_id TEXT`); } catch (e) {}
-    try { await pool.execute(`ALTER TABLE customer_access MODIFY COLUMN job_id TEXT`); } catch (e) {}
+    try { await pool.execute(`ALTER TABLE customer_access ADD COLUMN client_id TEXT`); } catch (e) { }
+    try { await pool.execute(`ALTER TABLE customer_access MODIFY COLUMN job_id TEXT`); } catch (e) { }
 
     if (action === 'getCustomerUsers') {
       const page = customerUsers.page || 1;
@@ -109,7 +109,7 @@ const getAllCustomerUsers = async (req, res) => {
         (role_id, customer_contact_person_role_id, first_name, last_name, email, phone, phone_code, status, password,created_by, created_at) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`;
       const [insertResult] = await pool.execute(insertQuery,
-        [12, customer_contact_person_role_id, first_name, last_name, email, phone, phone_code, status, hashedPassword,created_by]);
+        [12, customer_contact_person_role_id, first_name, last_name, email, phone, phone_code, status, hashedPassword, created_by]);
       const newCustomerUserId = insertResult.insertId;
 
       // insert into customer_access table
@@ -153,6 +153,7 @@ const getAllCustomerUsers = async (req, res) => {
 
       let subject = "Customer Login Details";
       let html = `
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -160,83 +161,222 @@ const getAllCustomerUsers = async (req, res) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Account Created</title>
 </head>
-<body style="margin:0; padding:0; background-color:#f0f4f8; font-family:'Segoe UI', Arial, sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 40px 0;">
+
+<body style="margin:0; padding:20px 0; background:#eef2f7; font-family:Segoe UI, Arial, sans-serif;">
+
+  <table width="100%" cellpadding="0" cellspacing="0">
     <tr>
       <td align="center">
-        <table width="520" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:12px; overflow:hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08);">
-          
-          <!-- Header -->
+
+        <table width="500" cellpadding="0" cellspacing="0"
+          style="background:#ffffff; border-radius:14px; overflow:hidden; box-shadow:0 6px 24px rgba(0,0,0,0.08);">
+
           <tr>
-            <td style="background: #00afef; padding: 36px 40px; text-align:center;">
-              <div style="width:56px; height:56px; background:rgba(255,255,255,0.2); border-radius:50%; margin: 0 auto 16px; display:flex; align-items:center; justify-content:center;">
-                <span style="font-size:28px;">✓</span>
-              </div>
-              <h1 style="color:#ffffff; margin:0; font-size:22px; font-weight:700; letter-spacing:0.3px;">Account Successfully Created</h1>
-              <p style="color:rgba(255,255,255,0.8); margin:8px 0 0; font-size:14px;">Welcome aboard! Here are your login credentials.</p>
-            </td>
-          </tr>
+            <td align="center"
+              style="background:linear-gradient(135deg,#00afef,#008acb); padding:28px 30px;">
 
-          <!-- Body -->
-          <tr>
-            <td style="padding: 36px 40px;">
-              
-              <!-- Credentials Box -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8faff; border:1px solid #e3eaf7; border-radius:8px; overflow:hidden;">
-                
-                <tr>
-                  <td style="padding: 16px 20px; border-bottom: 1px solid #e3eaf7;">
-                    <span style="font-size:11px; font-weight:600; color:#6b7a99; text-transform:uppercase; letter-spacing:0.8px;">User ID</span><br/>
-                    <span style="font-size:15px; color:#1a1a2e; font-weight:500; margin-top:4px; display:block;">${email}</span>
-                  </td>
-                </tr>
 
-                <tr>
-                  <td style="padding: 16px 20px; border-bottom: 1px solid #e3eaf7;">
-                    <span style="font-size:11px; font-weight:600; color:#6b7a99; text-transform:uppercase; letter-spacing:0.8px;">Password</span><br/>
-                    <span style="font-size:15px; color:#1a1a2e; font-weight:500; margin-top:4px; display:block; font-family: monospace; background:#eef2ff; padding:4px 10px; border-radius:4px; display:inline-block;">${password}</span>
-                  </td>
-                </tr>
+              <h1 style="margin:0; color:#fff; font-size:24px; font-weight:700;">
+                Account Created
+              </h1>
 
-                <!--<tr>
-                  <td style="padding: 16px 20px;">
-                    <span style="font-size:11px; font-weight:600; color:#6b7a99; text-transform:uppercase; letter-spacing:0.8px;">Login URL</span><br/>
-                    <a href="${loginUrl}" style="font-size:14px; color:#1a73e8; margin-top:4px; display:block; text-decoration:none; word-break:break-all;">${loginUrl}</a>
-                  </td>
-                </tr> -->
-
-              </table>
-
-              <!-- CTA Button -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;">
-                <tr>
-                  <td align="center">
-                    <a href="${loginUrl}" style="display:inline-block; background: #00afef; color:#ffffff; text-decoration:none; padding:13px 36px; border-radius:8px; font-size:15px; font-weight:600; letter-spacing:0.3px;">Login to Your Account →</a>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Warning -->
-              <p style="margin-top:24px; padding:12px 16px; background:#fff8e1; border-left:3px solid #f9a825; border-radius:4px; font-size:13px; color:#795548; line-height:1.5;">
-                🔒 <strong>Security Tip:</strong> Please change your password after your first login for better security.
+              <p style="margin:8px 0 0; color:rgba(255,255,255,0.85);
+                font-size:14px; line-height:22px;">
+                Your account has been successfully created.<br/>
+                Use the credentials below to login.
               </p>
 
             </td>
           </tr>
 
-          <!-- Footer -->
           <tr>
-            <td style="background:#f8faff; border-top:1px solid #e3eaf7; padding:20px 40px; text-align:center;">
-              <p style="margin:0; font-size:12px; color:#a0aec0;">If you didn't create this account, please ignore this email or contact support.</p>
+            <td style="padding:28px 30px;">
+
+
+
+<table width="100%" cellpadding="0" cellspacing="0"
+  style="margin-top:22px;">
+
+  <tr>
+    <td style="padding-bottom:14px;">
+
+      <table width="100%" cellpadding="0" cellspacing="0"
+        style="background:#f9fbff;
+        border:1px solid #e2e8f0;
+        border-radius:10px;
+        padding:14px 18px;">
+
+        <tr>
+
+          <td width="90"
+            style="font-size:13px;
+            font-weight:700;
+            color:#64748b;
+            text-transform:uppercase;
+            letter-spacing:0.8px;">
+
+            Email
+
+          </td>
+
+          <td width="20"
+            style="text-align:center;
+            color:#cbd5e1;
+            font-size:18px;
+            font-weight:300;">
+
+            |
+
+          </td>
+
+          <td style="font-size:14px;
+            color:#111827;
+            font-weight:500;
+            word-break:break-word;">
+
+            ${email}
+
+          </td>
+
+        </tr>
+
+      </table>
+
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+
+      <table width="100%" cellpadding="0" cellspacing="0"
+        style="background:#f9fbff;
+        border:1px solid #e2e8f0;
+        border-radius:10px;
+        padding:14px 18px;">
+
+        <tr>
+
+          <td width="90"
+            style="font-size:13px;
+            font-weight:700;
+            color:#64748b;
+            text-transform:uppercase;
+            letter-spacing:0.8px;">
+
+            Password
+
+          </td>
+
+          <td width="20"
+            style="text-align:center;
+            color:#cbd5e1;
+            font-size:18px;
+            font-weight:300;">
+
+            |
+
+          </td>
+
+          <td>
+
+            <span style="display:inline-block;
+              background:#e0f2fe;
+              color:#0f172a;
+              padding:7px 14px;
+              border-radius:6px;
+              font-size:14px;
+              font-family:monospace;
+              font-weight:600;">
+
+              ${password}
+
+            </span>
+
+          </td>
+
+        </tr>
+
+      </table>
+
+    </td>
+  </tr>
+
+</table>
+
+
+
+
+<table width="100%" cellpadding="0" cellspacing="0" style="margin-top:24px;">
+  <tr>
+    <td align="center">
+
+      <a href="${loginUrl}"
+        style="display:block;
+        width:100%;
+        box-sizing:border-box;
+        text-align:center;
+        background:linear-gradient(135deg,#00afef,#008acb);
+        color:#ffffff;
+        text-decoration:none;
+        padding:14px 20px;
+        border-radius:10px;
+        font-size:15px;
+        font-weight:600;
+        box-shadow:0 4px 12px rgba(0,175,239,0.25);">
+
+        Login to Account →
+
+      </a>
+
+    </td>
+  </tr>
+</table>
+
+              <div style="margin-top:22px;
+                background:#fff7e6;
+                border-left:4px solid #f4b400;
+                padding:12px 14px;
+                border-radius:6px;
+                font-size:13px;
+                line-height:20px;
+                color:#6b4f1d;">
+
+                🔒 <strong>Security Tip:</strong>
+                Please change your password after your first login.
+
+              </div>
+
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center"
+              style="padding:18px 25px;
+              background:#f9fbfd;
+              border-top:1px solid #e6edf5;">
+
+              <p style="margin:0;
+                font-size:12px;
+                line-height:18px;
+                color:#8b98a9;">
+
+                If you did not create this account,
+                please ignore this email or contact support.
+
+              </p>
+
             </td>
           </tr>
 
         </table>
+
       </td>
     </tr>
   </table>
+
 </body>
 </html>
+
 `;
       const result = await commonEmail(email, subject, html);
 

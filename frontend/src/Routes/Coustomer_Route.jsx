@@ -15,8 +15,11 @@ import CreateJob from "../layouts/Customer/Customer/CreateJob";
 import JobEdit from "../layouts/Customer/Customer/EditJob";
 import JobLogs from "../layouts/Customer/Customer/JobLogs/CustomerJobLogs";
 import AddNewClient from "../layouts/Customer/Customer/CreateClient";
-import CustomerReports from "../layouts/Customer/Customer/Reports";
+import CustomerReports from "../layouts/Customer/Reports/Reports";
+import CustomerReportJobs from "../layouts/Customer/Reports/CustomerReportJobs";
 import CustomerProfile from "../layouts/Customer/CustomerProfile";
+import CustomerTimesheetReport from "../layouts/Customer/Timesheet/CustomerTimesheetReport";
+import CustomerJobCustomReport from "../layouts/Customer/Reports/CustomerJobCustomReport";
 
 const Customer_Route = () => {
     return (
@@ -39,6 +42,9 @@ const Customer_Route = () => {
                         <Route path="/job/edit" element={<JobEdit />} />
                         <Route path="/job/logs" element={<JobLogs />} />
                         <Route path="/reports" element={<CustomerReports />} />
+                        <Route path="/report/jobs" element={<CustomerReportJobs />} />
+                        <Route path="/timesheetReports" element={<CustomerTimesheetReport />} />
+                        <Route path="/job/customreport" element={<CustomerJobCustomReport />} />
                         <Route path="/profile" element={<CustomerProfile />} />
 
                     </Routes>

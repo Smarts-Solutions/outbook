@@ -11,7 +11,6 @@ import Formicform from "../../../Components/ExtraComponents/Forms/Comman.form";
 import { useFormik } from "formik";
 
 import Swal from "sweetalert2";
-import sweatalert from "sweetalert2";
 import ReactPaginate from "react-paginate";
 import * as Yup from "yup";
 import { Plus, Download, Trash2, AlertCircle, ArrowRightLeft, User, Clock } from "lucide-react";
@@ -438,7 +437,7 @@ const CustomerUsers = () => {
       cell: (row) => <div title={row.email}>{row.email}</div>,
       selector: (row) => row.email,
       sortable: true,
-      idth: "300px",
+      width: "300px",
       reorder: false,
     },
     {
@@ -605,44 +604,59 @@ const CustomerUsers = () => {
       return;
     }
 
-    setIsTransferring(true);
-    try {
-      const req = { 
-        customer_user_id: selectedUserForDeletion.id, 
-        replace_id: transferUserId,
-        action: 'deleteCustomerUsers' 
-      };
-      const res = await dispatch(getAllCustomerUsers({ req, authToken: token })).unwrap();
+    Swal.fire({
+      title: "Are you sure?",
+      text: "All assignments will be transferred, and this user will be permanently deleted.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, transfer and delete!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        setIsTransferring(true);
+        try {
+          const req = {
+            customer_user_id: selectedUserForDeletion.id,
+            replace_id: transferUserId,
+            action: "deleteCustomerUsers",
+          };
+          const res = await dispatch(
+            getAllCustomerUsers({ req, authToken: token }),
+          ).unwrap();
 
-      if (res.status) {
-        Swal.fire({
-          title: "Success",
-          text: res.message || "Assignments transferred and user deleted successfully.",
-          icon: "success",
-          timer: 2000,
-          showConfirmButton: false,
-        });
-        setShowTransferModal(false);
-        setTransferUserId("");
-        GetAllCustomerData(currentPage, pageSize, searchTerm);
-      } else {
-        Swal.fire({
-          title: "Error",
-          text: res.message,
-          icon: "error",
-          confirmButtonText: "Ok",
-        });
+          if (res.status) {
+            Swal.fire({
+              title: "Success",
+              text:
+                res.message ||
+                "Assignments transferred and user deleted successfully.",
+              icon: "success",
+            }).then(() => {
+              setShowTransferModal(false);
+              setTransferUserId("");
+              GetAllCustomerData(currentPage, pageSize, searchTerm);
+            });
+          } else {
+            Swal.fire({
+              title: "Error",
+              text: res.message,
+              icon: "error",
+              confirmButtonText: "Ok",
+            });
+          }
+        } catch (error) {
+          Swal.fire({
+            title: "Error",
+            text: "An error occurred during transfer and deletion.",
+            icon: "error",
+            confirmButtonText: "Ok",
+          });
+        } finally {
+          setIsTransferring(false);
+        }
       }
-    } catch (error) {
-      Swal.fire({
-        title: "Error",
-        text: "An error occurred during transfer and deletion.",
-        icon: "error",
-        confirmButtonText: "Ok",
-      });
-    } finally {
-      setIsTransferring(false);
-    }
+    });
   };
 
   const performDelete = async (userId) => {
@@ -653,12 +667,11 @@ const CustomerUsers = () => {
       if (res.status) {
         Swal.fire({
           title: "Success",
-          text: res.message,
+          text: res.message || "Customer user deleted successfully",
           icon: "success",
-          timer: 1000,
-          showConfirmButton: false,
+        }).then(() => {
+          GetAllCustomerData(currentPage, pageSize, searchTerm);
         });
-        GetAllCustomerData(currentPage, pageSize, searchTerm);
       } else {
         Swal.fire({
           title: "Error",
@@ -895,6 +908,13 @@ const CustomerUsers = () => {
       label_size: 12,
       col_size: 6,
       disable: false,
+      styles: {
+        menuPortal: (base) => ({
+          ...base,
+          zIndex: 999,
+        }),
+      },
+      menuPortalTarget: document.body,
       options: customerDataAll?.map((item) => ({
         value: item.id,
         label: item.trading_name,
@@ -951,11 +971,10 @@ const CustomerUsers = () => {
     }),
 
     onSubmit: async (values) => {
-
       let req = {
-        first_name: (values.first_name).trim(),
-        last_name: (values.last_name).trim(),
-        email: (values.email).trim(),
+        first_name: values.first_name.trim(),
+        last_name: values.last_name.trim(),
+        email: values.email.trim(),
         phone: values.phone,
         phone_code: values.phone_code,
         role_id: values.role,
@@ -968,44 +987,55 @@ const CustomerUsers = () => {
         created_by: staffDetails.id,
         action: type === "edit" ? "updateCustomerUsers" : "addCustomerUsers",
         staff_id: staffDetails.id,
-        customer_user_id: updatedata?.id
-
+        customer_user_id: updatedata?.id,
       };
 
-      try {
-        const data = { req, authToken: token };
-        const response = await dispatch(getAllCustomerUsers(data)).unwrap();
+      Swal.fire({
+        title: "Are you sure?",
+        text: `Do you want to ${type === "edit" ? "update" : "add"} this customer user?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: `Yes, ${type === "edit" ? "update" : "add"} it!`,
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            const data = { req, authToken: token };
+            const response = await dispatch(getAllCustomerUsers(data)).unwrap();
 
-        if (response.status) {
-          sweatalert.fire({
-            icon: "success",
-            title: "Success",
-            text: response.message || "Customer user added successfully",
-            timer: 1500,
-            timerProgressBar: true,
-          });
-
-          setTimeout(() => {
-            setShowAddCustomerModal(false);
-            formik.resetForm();
-            GetAllCustomerData(1, pageSize, '');
-          }, 1500);
-
-          setType("")
-        } else {
-          sweatalert.fire({
-            icon: "error",
-            title: "Error",
-            text: response.response.data.message || "Failed to add customer user",
-          });
+            if (response.status) {
+              Swal.fire({
+                icon: "success",
+                title: "Success",
+                text:
+                  response.message ||
+                  `Customer user ${type === "edit" ? "updated" : "added"} successfully`,
+              }).then(() => {
+                setShowAddCustomerModal(false);
+                formik.resetForm();
+                GetAllCustomerData(1, pageSize, "");
+                setType("");
+              });
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: response.message || "Failed to process request",
+              });
+            }
+          } catch (error) {
+            Swal.fire({
+              title: "Error",
+              text:
+                error.message ||
+                error ||
+                "An error occurred while processing request",
+              icon: "error",
+            });
+          }
         }
-      } catch (error) {
-        sweatalert.fire({
-          icon: "error",
-          title: "Error",
-          text: error.message || "An error occurred while adding customer user",
-        });
-      }
+      });
     },
   });
 
@@ -1027,12 +1057,12 @@ const CustomerUsers = () => {
     }
 
     // Only auto-select for customers that were NOT in the initial list (genuinely newly added by user)
-    const added = (formik.values.allCustomerAccess || []).filter(id => 
-      !(prevCustomerAccess.current || []).includes(id) && 
+    const added = (formik.values.allCustomerAccess || []).filter(id =>
+      !(prevCustomerAccess.current || []).includes(id) &&
       !(formik.initialValues.allCustomerAccess || []).includes(id)
     );
-    
-    const removed = (prevCustomerAccess.current || []).filter(id => 
+
+    const removed = (prevCustomerAccess.current || []).filter(id =>
       !(formik.values.allCustomerAccess || []).includes(id)
     );
 
@@ -1108,7 +1138,7 @@ const CustomerUsers = () => {
                   </h5>
                 </div>
                 <div className="job-assignment-scroll-area">
-                  <div className="accordion custom-accordion" id="customerAccordion">
+                  <div className="accordion " id="customerAccordion">
                     {formik.values.allCustomerAccess.map((customerId) => {
                       const customer = allCustomers.find((c) => c.id === customerId);
                       if (!customer) return null;
@@ -1171,13 +1201,13 @@ const CustomerUsers = () => {
                                             {client.trading_name}
                                           </label>
                                         </div>
-                                        <span 
+                                        <span
                                           className="select-all-link"
                                           onClick={() => {
                                             const jobIds = clientJobs.map((j) => j.id);
                                             let newSelectedJobs = [...(formik.values.selectedJobs || [])];
                                             let newSelectedClients = [...(formik.values.selectedClients || [])];
-                                            
+
                                             if (!isAllSelected) {
                                               jobIds.forEach((id) => {
                                                 if (!newSelectedJobs.includes(id)) newSelectedJobs.push(id);
@@ -1309,7 +1339,7 @@ const CustomerUsers = () => {
           </div>
 
           <div className="d-flex gap-3 mt-4 pt-3 border-top">
-            <button 
+            <button
               className="btn btn-danger w-100 py-2 fw-bold"
               onClick={handleTransferAndDelete}
               disabled={isTransferring || !transferUserId}
@@ -1323,7 +1353,7 @@ const CustomerUsers = () => {
                 "Transfer & Delete"
               )}
             </button>
-            <button 
+            <button
               className="btn btn-outline-secondary w-100 py-2 fw-bold"
               onClick={() => setShowTransferModal(false)}
             >

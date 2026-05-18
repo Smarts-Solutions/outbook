@@ -23,14 +23,14 @@ const CreateJob = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { hasAccess } = useCustomerAccess();
+  const { hasAccess, loading: accessLoading } = useCustomerAccess();
   const role = JSON.parse(localStorage.getItem("role"));
 
   useEffect(() => {
-    if (!hasAccess("job", "add") && role !== "SUPERADMIN") {
+    if (!accessLoading && !hasAccess("job", "add") && role !== "SUPERADMIN") {
       navigate("/customer/dashboard");
     }
-  }, [hasAccess, role, navigate]);
+  }, [hasAccess, role, navigate, accessLoading]);
 
 
 
@@ -789,6 +789,13 @@ const CreateJob = () => {
       ].includes(name)
     ) {
       value = value.replace(":", "");
+    }
+
+    if (name === "processing_checklist") {
+      setChecklistModal(prev => ({ ...prev, processing: [] }));
+    }
+    if (name === "reviewing_checklist") {
+      setChecklistModal(prev => ({ ...prev, reviewing: [] }));
     }
 
     setJobData((prevState) => ({

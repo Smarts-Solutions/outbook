@@ -1,4 +1,5 @@
 const customerDashboardService = require('../../services/customers/customerDashboardService');
+const { CustomerLogUpdateOperation } = require("../../utils/customerHelper");
 
 const getCustomerDashboardData = async (req, res) => {
   try {
@@ -80,6 +81,7 @@ const getCustomerDropdown = async (req, res) => {
 const getCustomerList = async (req, res) => {
   try {
     const result = await customerDashboardService.getCustomerList(req.body);
+
     return res.status(200).send(result);
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -89,6 +91,7 @@ const getCustomerList = async (req, res) => {
 const getCustomerClients = async (req, res) => {
   try {
     const result = await customerDashboardService.getCustomerClientList(req.body);
+
     return res.status(200).send(result);
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -98,6 +101,7 @@ const getCustomerClients = async (req, res) => {
 const getCustomerJobs = async (req, res) => {
   try {
     const result = await customerDashboardService.getCustomerJobList(req.body);
+
     return res.status(200).send(result);
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -107,6 +111,7 @@ const getCustomerJobs = async (req, res) => {
 const customerClientAction = async (req, res) => {
   try {
     const result = await customerDashboardService.customerClientAction(req.body);
+
     return res.status(200).send(result);
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -116,6 +121,7 @@ const customerClientAction = async (req, res) => {
 const customerClientAdd = async (req, res) => {
   try {
     const result = await customerDashboardService.customerClientAdd(req.body);
+
     return res.status(200).send(result);
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -125,6 +131,7 @@ const customerClientAdd = async (req, res) => {
 const customerJobAction = async (req, res) => {
   try {
     const result = await customerDashboardService.customerJobAction(req.body);
+
     return res.status(200).send(result);
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -134,6 +141,7 @@ const customerJobAction = async (req, res) => {
 const customerJobUpdate = async (req, res) => {
   try {
     const result = await customerDashboardService.customerJobUpdate(req.body);
+
     return res.status(200).send(result);
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -151,7 +159,8 @@ const customerJobTimeline = async (req, res) => {
 
 const customerTaskTimesheetAction = async (req, res) => {
   try {
-    const result = await customerDashboardService.customerTaskTimesheetAction(req.body);
+    const result = await customerDashboardService.customerTaskTimesheetAction(req);
+
     return res.status(200).send(result);
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -160,7 +169,7 @@ const customerTaskTimesheetAction = async (req, res) => {
 
 const customerMissingLogAction = async (req, res) => {
   try {
-    const result = await customerDashboardService.customerMissingLogAction(req.body);
+    const result = await customerDashboardService.customerMissingLogAction(req);
     return res.status(200).send(result);
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -169,7 +178,8 @@ const customerMissingLogAction = async (req, res) => {
 
 const customerQueryAction = async (req, res) => {
   try {
-    const result = await customerDashboardService.customerQueryAction(req.body);
+    const result = await customerDashboardService.customerQueryAction(req);
+
     return res.status(200).send(result);
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -178,7 +188,8 @@ const customerQueryAction = async (req, res) => {
 
 const customerDraftAction = async (req, res) => {
   try {
-    const result = await customerDashboardService.customerDraftAction(req.body);
+    const result = await customerDashboardService.customerDraftAction(req);
+
     return res.status(200).send(result);
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -188,6 +199,7 @@ const customerDraftAction = async (req, res) => {
 const customerDocumentAction = async (req, res) => {
   try {
     const result = await customerDashboardService.customerDocumentAction(req.body);
+
     return res.status(200).send(result);
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -206,6 +218,7 @@ const getCustomerAddJobData = async (req, res) => {
 const customerJobAdd = async (req, res) => {
   try {
     const result = await customerDashboardService.customerJobAdd(req.body);
+
     return res.status(200).send(result);
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -215,6 +228,7 @@ const customerJobAdd = async (req, res) => {
 const customerChecklistAction = async (req, res) => {
   try {
     const result = await customerDashboardService.customerChecklistAction(req.body);
+
     return res.status(200).send(result);
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });

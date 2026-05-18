@@ -5,6 +5,7 @@ const { commonEmail } = require("../../utils/commonEmail");
 const e = require('cors');
 const jwt = require("jsonwebtoken");
 const { getStaffAccessFilters } = require("../../utils/helper");
+const { CustomerLogUpdateOperation } = require("../../utils/customerHelper");
 
 exports.customerLogin = async (req, res) => {
   const { email, password } = req.body;
@@ -36,6 +37,17 @@ exports.customerLogin = async (req, res) => {
 
   await pool.query(`UPDATE staffs SET login_auth_token = ? WHERE id = ?`, [token, customer.id]);
 
+  // Log Login Activity
+  const currentDate = new Date();
+  await CustomerLogUpdateOperation({
+    staff_id: customer.id,
+    date: currentDate.toISOString().split("T")[0],
+    module_name: "-",
+    log_message: `Logged in.`,
+    permission_type: "-",
+    ip: req.ip,
+  });
+
   res.cookie("customer_token", token, {
     httpOnly: true,
     secure: false, // production me true
@@ -49,6 +61,29 @@ exports.customerLogin = async (req, res) => {
     customer,
     token
   });
+};
+
+exports.customerLogout = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const currentDate = new Date();
+    
+    if (userId) {
+      await CustomerLogUpdateOperation({
+        staff_id: userId,
+        date: currentDate.toISOString().split("T")[0],
+        module_name: "-",
+        log_message: `Logged out.`,
+        permission_type: "-",
+        ip: req.ip,
+      });
+    }
+
+    res.clearCookie("customer_token");
+    res.json({ status: true, message: "Logged out successfully" });
+  } catch (error) {
+    res.json({ status: false, message: error.message });
+  }
 };
 
 exports.customerUpdatePassword = async (req, res) => {
@@ -67,6 +102,17 @@ exports.customerUpdatePassword = async (req, res) => {
     );
 
     await pool.query(`UPDATE staffs SET login_auth_token = ? WHERE id = ?`, [token, customer_user_id]);
+
+    // Log Password Update
+    const currentDate = new Date();
+    await CustomerLogUpdateOperation({
+      staff_id: customer_user_id,
+      date: currentDate.toISOString().split("T")[0],
+      module_name: "-",
+      log_message: `Updated Password successfully`,
+      permission_type: "-",
+      ip: req.ip,
+    });
 
     res.cookie("customer_token", token, {
       httpOnly: true,

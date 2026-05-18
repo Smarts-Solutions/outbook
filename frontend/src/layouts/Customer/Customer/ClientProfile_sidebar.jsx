@@ -231,8 +231,7 @@ const CustomerClientProfile = () => {
   });
   const [statusDataAll, setStatusDataAll] = useState([]);
   const [selectStatusIs, setStatusId] = useState("");
-  const { hasAccess } = useCustomerAccess();
-
+  const { hasAccess, hasAnyJobAccess } = useCustomerAccess();
 
   const handleCreateJob = () => {
     navigate("/customer/createjob", {
@@ -643,8 +642,7 @@ const CustomerClientProfile = () => {
       name: "Job ID",
       cell: (row) => (
         <div title={row.job_code_id}>
-          {hasAccess("job", "view") ||
-            role === "SUPERADMIN" ? (
+          {hasAnyJobAccess() ? (
             <a
               onClick={() => HandleJob(row)}
               style={{ cursor: "pointer", color: "#26bdf0" }}
@@ -652,7 +650,7 @@ const CustomerClientProfile = () => {
               {row.job_code_id}
             </a>
           ) : (
-            <a>{row.job_code_id}</a>
+            <div>{row.job_code_id}</div>
           )}
         </div>
       ),
@@ -720,28 +718,6 @@ const CustomerClientProfile = () => {
       ),
       width: "325px",
     },
-
-    {
-      name: "Client Contact Person",
-      cell: (row) => (
-        <div
-          title={
-            row.account_manager_officer_first_name +
-            " " +
-            row.account_manager_officer_last_name
-          }
-        >
-          {row.account_manager_officer_first_name +
-            " " +
-            row.account_manager_officer_last_name}
-        </div>
-      ),
-      selector: (row) =>
-        row.account_manager_officer_first_name +
-        " " +
-        row.account_manager_officer_last_name,
-      sortable: true,
-    },
     {
       name: "Outbook Account Manager",
       cell: (row) => (
@@ -765,24 +741,6 @@ const CustomerClientProfile = () => {
       width: "325px",
     },
     {
-      name: "Employee ID",
-      selector: (row) => row.account_manager_employee_number,
-      cell: (row) => (
-        <div title={row.account_manager_employee_number}>
-          {row.account_manager_employee_number}
-        </div>
-      ),
-      sortable: true,
-    },
-    {
-      name: "Allocated To",
-      selector: (row) =>
-        row.allocated_id != null
-          ? row.allocated_first_name + " " + row.allocated_last_name
-          : "",
-      sortable: true,
-    },
-    {
       name: "Invoicing",
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
@@ -792,57 +750,41 @@ const CustomerClientProfile = () => {
         return aVal.localeCompare(bVal);
       },
     },
-
-    {
-      name: "Created By",
-      cell: (row) => (
-        <div title={row.job_created_by || "-"}>{row.job_created_by || "-"}</div>
-      ),
-      selector: (row) => row.job_created_by || "-",
-      sortable: true,
-    },
-
-    {
-      name: "Created At",
-      cell: (row) => (
-        <div title={row.created_at || "-"}>{row.created_at || "-"}</div>
-      ),
-      selector: (row) => row.created_at || "-",
-      sortable: true,
-    },
-    {
-      name: "Actions",
-      cell: (row) => (
-        <div className="d-flex">
-          {(hasAccess("job", "update") || role === "SUPERADMIN") && (
-            <button className="edit-icon" onClick={() => handleEdit(row)}>
-              <i className="ti-pencil" />
-            </button>
-          )}
-
-          {(hasAccess("job", "copy") || role === "SUPERADMIN") && (
-            <button className="copy-icon" onClick={() => copyRow(row)}>
-              <i className="ti-files"></i>
-            </button>
-          )}
-
-          {row.timesheet_job_id == null
-            ? (hasAccess("job", "delete") || role === "SUPERADMIN") && (
-              <button
-                className="delete-icon"
-                onClick={() => handleDelete(row, "job")}
-              >
-                <i className="ti-trash text-danger" />
+    ...((hasAccess("job", "update") || hasAccess("job", "copy") || hasAccess("job", "delete") || role === "SUPERADMIN") ? [
+      {
+        name: "Actions",
+        cell: (row) => (
+          <div className="d-flex">
+            {(hasAccess("job", "update") || role === "SUPERADMIN") && (
+              <button className="edit-icon" onClick={() => handleEdit(row)}>
+                <i className="ti-pencil" />
               </button>
-            )
-            : ""}
-        </div>
-      ),
-      width: "180px",
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-    },
+            )}
+
+            {(hasAccess("job", "copy") || role === "SUPERADMIN") && (
+              <button className="copy-icon" onClick={() => copyRow(row)}>
+                <i className="ti-files"></i>
+              </button>
+            )}
+
+            {row.timesheet_job_id == null
+              ? (hasAccess("job", "delete") || role === "SUPERADMIN") && (
+                <button
+                  className="delete-icon"
+                  onClick={() => handleDelete(row, "job")}
+                >
+                  <i className="ti-trash text-danger" />
+                </button>
+              )
+              : ""}
+          </div>
+        ),
+        width: "180px",
+        ignoreRowClick: true,
+        allowOverflow: true,
+        button: true,
+      }
+    ] : []),
   ];
 
   const HandleJob = (row) => {
@@ -1563,22 +1505,6 @@ const CustomerClientProfile = () => {
                       </ul>
                     </div>
                   </div>
-                  {(hasAccess("client", "update") || role === "SUPERADMIN") && (
-                    <div className="text-end mt-3">
-                      <button
-                        className="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1"
-                        onClick={() => navigate("/customer/client/edit", {
-                          state: {
-                            row: informationData,
-                            id: customerDetails.id,
-                            activeTab: activeTab
-                          }
-                        })}
-                      >
-                        <Pencil size={14} /> Edit
-                      </button>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>

@@ -1,5 +1,5 @@
 const pool = require('../config/database');
-const { getDateRange, SatffLogUpdateOperation, generateNextUniqueCode, JobStatusUpdate, getStaffAccessFilters } = require('../utils/helper');
+const { getDateRange, SatffLogUpdateOperation, generateNextUniqueCode, JobStatusUpdate, getStaffAccessFilters, grantStaffAccess, QueryRoleHelperFunction } = require('../utils/helper');
 const { CustomerLogUpdateOperation } = require('../utils/customerHelper');
 const { getCompanyOfficerDetailsFun } = require('../controllers/companies/companyController');
 
@@ -152,7 +152,17 @@ const getCustomerDashboardActivityLog = async (dashboard) => {
 
     const query = `
       SELECT 
-        staff_logs.*,
+        staff_logs.id,
+        staff_logs.staff_id,
+        staff_logs.date,
+        staff_logs.module_name,
+        staff_logs.module_id,
+        staff_logs.log_message,
+        REPLACE(REPLACE(staff_logs.log_message_all, 'CUSTOMERUSER ', ''), 'Customer User ', '') AS log_message_all,
+        staff_logs.permission_type,
+        staff_logs.ip,
+        staff_logs.created_at,
+        staff_logs.updated_at,
         CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name
       FROM 
         staff_logs
@@ -204,21 +214,18 @@ const updateJobStatus = async (data) => {
   const { job_id, status_type, StaffUserId, ip } = data;
 
   try {
-    // 1. Security Check: Does the staff have access to this job?
+    const access = await getStaffAccessFilters(StaffUserId);
+    if (!access.assignedCustomerIds.length) {
+      return { status: false, message: "No assigned customers found." };
+    }
+
     const checkQuery = `
       SELECT j.id, j.status_type, j.customer_id 
       FROM jobs j
-      WHERE j.id = ? AND j.customer_id IN (
-        SELECT customer_id FROM customer_access WHERE staff_id = ?
-        UNION
-        SELECT customer_id FROM staff_portfolio WHERE staff_id = ?
-        UNION
-        SELECT id FROM customers WHERE staff_id = ? OR account_manager_id = ?
-        UNION
-        SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
-      )
+      WHERE j.id = ? AND j.customer_id IN (${access.assignedCustomerIds.join(',')})
+      AND j.${access.jobCondition}
     `;
-    const [jobRows] = await pool.execute(checkQuery, [job_id, StaffUserId, StaffUserId, StaffUserId, StaffUserId, StaffUserId]);
+    const [jobRows] = await pool.execute(checkQuery, [job_id]);
 
     if (jobRows.length === 0) {
       return { status: false, message: "Job not found or access denied." };
@@ -478,7 +485,7 @@ const getByCustomerClient = async (dashboard) => {
     if (ids) {
       const cleane_ids = ids.replace(/^,+|,+$/g, "");
       if (cleane_ids) {
-        filterCondition = `AND clients.id IN (${cleane_ids})`;
+        filterCondition = `AND clients.id IN (${cleane_ids}) AND clients.${access.clientCondition}`;
       }
     } else if (customer_id) {
       filterCondition = `AND clients.customer_id = ${customer_id} AND clients.${access.clientCondition}`;
@@ -655,7 +662,7 @@ const getByCustomerJob = async (dashboard) => {
     if (ids) {
       const cleane_ids = ids.replace(/^,+|,+$/g, "");
       if (cleane_ids) {
-        filterCondition = `AND jobs.id IN (${cleane_ids})`;
+        filterCondition = `AND jobs.id IN (${cleane_ids}) AND jobs.${access.jobCondition}`;
       }
     } else if (customer_id) {
       filterCondition = `AND jobs.customer_id = ${customer_id} AND jobs.${access.jobCondition}`;
@@ -1156,7 +1163,7 @@ const getCustomerJobList = async (dashboard) => {
     const assignedIds = access.assignedCustomerIds;
 
     if (action === "getByClient" && client_id) {
-      assignedCondition = `AND jobs.client_id = ${client_id}`;
+      assignedCondition = `AND jobs.client_id = ${client_id} AND jobs.${access.jobCondition}`;
     } else if (action === "getByCustomer" && customer_id) {
       assignedCondition = `AND jobs.customer_id = ${customer_id} AND jobs.${access.jobCondition}`;
     } else {
@@ -1623,7 +1630,14 @@ const customerJobAction = async (dashboard) => {
         const jobData = rows[0];
 
         // Get tasks
-        const [tasks] = await pool.execute("SELECT * FROM client_job_task WHERE job_id = ?", [job_id]);
+        const [tasks] = await pool.execute(`
+          SELECT 
+            client_job_task.*,
+            task.name AS task_name
+          FROM client_job_task
+          LEFT JOIN task ON client_job_task.task_id = task.id
+          WHERE client_job_task.job_id = ?
+        `, [job_id]);
 
         // Get allowed staff
         const [staff] = await pool.execute("SELECT staff_id FROM job_allowed_staffs WHERE job_id = ?", [job_id]);
@@ -1734,6 +1748,46 @@ const customerJobAction = async (dashboard) => {
         await pool.execute(`INSERT INTO job_allowed_staffs SET job_id = ?, staff_id = ?`, [insertId, staff.staff_id]);
       }
 
+      // --- ADD DESCRIPTIVE LOGGING START ---
+      try {
+        const queryJobCode = `
+          SELECT 
+          CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id
+          FROM jobs
+          JOIN clients ON jobs.client_id = clients.id
+          JOIN customers ON clients.customer_id = customers.id
+          JOIN job_types ON jobs.job_type_id = job_types.id
+          WHERE jobs.id = ?;
+        `;
+        const [[oldJob]] = await pool.execute(queryJobCode, [id]);
+        const [[newJob]] = await pool.execute(queryJobCode, [insertId]);
+
+        await CustomerLogUpdateOperation({
+          staff_id: StaffUserId,
+          ip: ip,
+          date: new Date().toISOString().split("T")[0],
+          module_name: "job",
+          log_message: `Copied Job Code: From ${oldJob?.job_code_id || 'Unknown'} To `,
+          permission_type: "copied",
+          module_id: insertId,
+        });
+      } catch (logErr) {
+        console.error("Log error in copy_job:", logErr);
+      }
+      // --- ADD DESCRIPTIVE LOGGING END ---
+      
+      // --- GRANT ACCESS TO CREATOR START ---
+      const roleData = await QueryRoleHelperFunction(StaffUserId);
+      if (roleData.length > 0 && roleData[0].role_id === 12) {
+        await grantStaffAccess(StaffUserId, data.customer_id, "job", insertId);
+      }
+      // --- GRANT ACCESS TO CREATOR END ---
+
       return { status: true, message: "Job copied successfully.", data: insertId };
     } catch (err) {
       console.error("copy_job error:", err);
@@ -1746,7 +1800,8 @@ const customerJobAction = async (dashboard) => {
 
 const customerJobUpdate = async (job) => {
   const {
-    job_id, client_id, service_id, job_type_id, status_type,
+    job_id, account_manager_id, customer_id, client_id, client_job_code, customer_contact_details_id,
+    service_id, job_type_id, status_type,
     reviewer, allocated_to, allocated_on, date_received_on, year_end,
     budgeted_hours, total_preparation_time, review_time, feedback_incorporation_time,
     total_time, engagement_model, expected_delivery_date, due_on,
@@ -1755,7 +1810,7 @@ const customerJobUpdate = async (job) => {
     opening_balance_required, opening_balance_date, number_of_transaction, number_of_balance_items,
     turnover, number_of_employees, vat_reconciliation, bookkeeping, processing_type,
     invoiced, currency, invoice_value, invoice_date, invoice_hours, invoice_remark,
-    notes, tasks, selectedStaffData, StaffUserId, ip, client_job_code,
+    notes, tasks, selectedStaffData, StaffUserId, ip,
     processing_checklist, reviewing_checklist, processing_checklist_status, reviewing_checklist_status,
     checklist_modal_data, job_priority,
     field, row: updateRow
@@ -1917,7 +1972,8 @@ const customerJobUpdate = async (job) => {
       job.Payroll_Month_id_31, job.Payroll_Quarter_Year_id_31, job.Payroll_Quarter_id_31, job.Payroll_Year_id_31,
       job.Audit_Year_Ending_id_27, job.Filing_Frequency_id_8, job.Period_Ending_Date_id_8, job.Filing_Date_id_8,
       job.Year_id_28, job_priority, processing_checklist, reviewing_checklist,
-      processing_checklist_status, reviewing_checklist_status, JSON.stringify(checklist_modal_data),
+      processing_checklist_status, reviewing_checklist_status, 
+      (checklist_modal_data && typeof checklist_modal_data === 'object') ? JSON.stringify(checklist_modal_data) : (checklist_modal_data || null),
       job_id
     ].map(handleUndefined);
 
@@ -2096,26 +2152,10 @@ const customerJobTimeline = async (dashboard) => {
     staff_logs.staff_id AS staff_id,
     DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
     staff_logs.created_at AS created_at,
-    CONCAT(
-      roles.role_name, ' ',
-      staffs.first_name, ' ',
-      staffs.last_name, ' ',
-      staff_logs.log_message, ' ',
-      CASE
-         WHEN staff_logs.module_name = 'job' THEN (
-          SELECT CONCAT(SUBSTRING(customers.trading_name, 1, 3),'_', SUBSTRING(clients.trading_name, 1, 3),'_',jobs.job_id)
-          FROM jobs
-          JOIN clients ON jobs.client_id = clients.id
-          JOIN customers ON clients.customer_id = customers.id
-          WHERE jobs.id = staff_logs.module_id
-        )
-        ELSE ''
-      END
-    ) AS log_message
+    REPLACE(IFNULL(staff_logs.log_message_all, staff_logs.log_message), 'CUSTOMERUSER ', '') AS log_message
   FROM staff_logs
   JOIN staffs ON staffs.id = staff_logs.staff_id
   JOIN roles ON roles.id = staffs.role_id
-  LEFT JOIN jobs ON staff_logs.module_name = 'job' AND staff_logs.module_id = jobs.id
   WHERE staff_logs.module_name = 'job' AND staff_logs.module_id = ?
   ORDER BY staff_logs.id DESC`;
   const [result] = await pool.execute(query, [job_id]);
@@ -2131,8 +2171,9 @@ const customerJobTimeline = async (dashboard) => {
   return { status: true, message: "success.", data: groupedResult };
 };
 
-const customerTaskTimesheetAction = async (dashboard) => {
+const customerTaskTimesheetAction = async (req) => {
   const taskTimeSheetModel = require('./taskTimeSheetModel');
+  const dashboard = req.body || req;
   const { action } = dashboard;
   if (action === 'get') return taskTimeSheetModel.getTaskTimeSheet(dashboard);
   if (action === 'getJobTimeSheet') return taskTimeSheetModel.getjobTimeSheet(dashboard);
@@ -2141,45 +2182,49 @@ const customerTaskTimesheetAction = async (dashboard) => {
   return { status: false, message: 'Invalid action.' };
 };
 
-const customerMissingLogAction = async (dashboard) => {
+const customerMissingLogAction = async (req) => {
   const taskTimeSheetModel = require('./taskTimeSheetModel');
+  const dashboard = req.body || req;
   const { action } = dashboard;
   if (action === 'get') return taskTimeSheetModel.getMissingLog(dashboard);
   if (action === 'getSingleView') return taskTimeSheetModel.getMissingLogSingleView(dashboard);
-  if (action === 'add') return taskTimeSheetModel.addMissingLog(dashboard);
-  if (action === 'edit') return taskTimeSheetModel.editMissingLog(dashboard);
-  if (action === 'uploadDocument') return taskTimeSheetModel.uploadDocumentMissingLogAndQuery(dashboard);
+  if (action === 'add') return taskTimeSheetModel.addMissingLog(req);
+  if (action === 'edit') return taskTimeSheetModel.editMissingLog(req);
+  if (action === 'uploadDocument') return taskTimeSheetModel.uploadDocumentMissingLogAndQuery(req);
   return { status: false, message: 'Invalid action.' };
 };
 
-const customerQueryAction = async (dashboard) => {
+const customerQueryAction = async (req) => {
   const taskTimeSheetModel = require('./taskTimeSheetModel');
+  const dashboard = req.body || req;
   const { action } = dashboard;
   if (action === 'get') return taskTimeSheetModel.getQuerie(dashboard);
   if (action === 'getSingleView') return taskTimeSheetModel.getQuerieSingleView(dashboard);
-  if (action === 'add') return taskTimeSheetModel.addQuerie(dashboard);
-  if (action === 'edit') return taskTimeSheetModel.editQuerie(dashboard);
-  if (action === 'uploadDocument') return taskTimeSheetModel.uploadDocumentMissingLogAndQuery(dashboard);
+  if (action === 'add') return taskTimeSheetModel.addQuerie(req);
+  if (action === 'edit') return taskTimeSheetModel.editQuerie(req);
+  if (action === 'uploadDocument') return taskTimeSheetModel.uploadDocumentMissingLogAndQuery(req);
   return { status: false, message: 'Invalid action.' };
 };
 
-const customerDraftAction = async (dashboard) => {
+const customerDraftAction = async (req) => {
   const taskTimeSheetModel = require('./taskTimeSheetModel');
+  const dashboard = req.body || req;
   const { action } = dashboard;
   if (action === 'get') return taskTimeSheetModel.getDraft(dashboard);
   if (action === 'getSingleView') return taskTimeSheetModel.getDraftSingleView(dashboard);
   if (action === 'add') return taskTimeSheetModel.addDraft(dashboard);
-  if (action === 'edit') return taskTimeSheetModel.editDraft(dashboard);
+  if (action === 'edit') return taskTimeSheetModel.editDraft(req);
   return { status: false, message: 'Invalid action.' };
 };
 
-const customerDocumentAction = async (dashboard) => {
+const customerDocumentAction = async (req) => {
   const taskTimeSheetModel = require('./taskTimeSheetModel');
+  const dashboard = req.body || req;
   const { action } = dashboard;
   if (action === 'get') return taskTimeSheetModel.getJobDocument(dashboard);
   if (action === 'delete') return taskTimeSheetModel.deleteJobDocument(dashboard);
   if (action === 'add') return taskTimeSheetModel.addedJobDocument(dashboard);
-  if (action === 'addJobDocument') return taskTimeSheetModel.addJobDocument(dashboard);
+  if (action === 'addJobDocument') return taskTimeSheetModel.addJobDocument(req);
   return { status: false, message: 'Invalid action.' };
 };
 

@@ -4,7 +4,9 @@ const {
   generateNextUniqueCode,
   LineManageStaffIdHelperFunction,
   QueryRoleHelperFunction,
-  JobStatusUpdate
+  JobStatusUpdate,
+  getStaffAccessFilters,
+  grantStaffAccess
 } = require("../../app/utils/helper");
 const { CustomerLogUpdateOperation } = require("../../app/utils/customerHelper");
 
@@ -22,13 +24,8 @@ const getCustomerAddJobData = async (job) => {
 
     // 2. If customer_id is still missing, find assigned customers for this staff/user
     if (!customer_id) {
-      const assignedQuery = `
-        SELECT customer_id FROM customer_access WHERE staff_id = ?
-        UNION
-        SELECT id FROM customers WHERE staff_id = ? OR account_manager_id = ?
-      `;
-      const [assignedRows] = await pool.execute(assignedQuery, [StaffUserId, StaffUserId, StaffUserId]);
-      const assignedCustomerIds = assignedRows.map(r => r.customer_id).filter(id => id);
+      const access = await getStaffAccessFilters(StaffUserId);
+      const assignedCustomerIds = access.assignedCustomerIds;
 
       if (assignedCustomerIds.length === 0) {
         return { status: false, message: "No customers assigned to this user." };
@@ -376,7 +373,8 @@ const customerJobAdd = async (job) => {
       job.Audit_Year_Ending_id_27, job.Filing_Frequency_id_8, job.Period_Ending_Date_id_8,
       job.Filing_Date_id_8, job.Year_id_28, job.job_priority || 'normal',
       job.processing_checklist, job.reviewing_checklist, job.processing_checklist_status,
-      job.reviewing_checklist_status, job.checklist_modal_data
+      job.reviewing_checklist_status,
+      (job.checklist_modal_data && typeof job.checklist_modal_data === 'object') ? JSON.stringify(job.checklist_modal_data) : (job.checklist_modal_data || null)
     ].map(handleUndefined);
 
     const [result] = await pool.execute(query + "(" + Array(values.length).fill("?").join(",") + ")", values);
@@ -440,6 +438,11 @@ const customerJobAdd = async (job) => {
           await pool.execute("INSERT INTO job_allowed_staffs (job_id, staff_id) VALUES (?, ?)", [result.insertId, allocated_to]);
         }
       }
+    }
+
+    const roleData = await QueryRoleHelperFunction(StaffUserId);
+    if (roleData.length > 0 && roleData[0].role_id === 12) {
+      await grantStaffAccess(StaffUserId, customer_id, "job", result.insertId);
     }
 
     return { status: true, message: "Job created successfully.", data: result.insertId };

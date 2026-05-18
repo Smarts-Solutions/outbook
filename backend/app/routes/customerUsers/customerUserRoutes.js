@@ -10,6 +10,7 @@ const router = express.Router();
 
 // Customer Users Routes Start
 router.post('/customer/login', customerAuthController.customerLogin);
+router.post('/customer/logout', verifyToken, customerAuthController.customerLogout);
 router.post('/customer/update-password', customerAuthController.customerUpdatePassword);
 router.get('/customer/assigned-customers', verifyToken, customerAuthController.getAssignedCustomers);
 router.get('/customer/assigned-clients', verifyToken, customerAuthController.getAssignedClients);

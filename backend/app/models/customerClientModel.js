@@ -2,7 +2,10 @@ const pool = require("../config/database");
 const {
   SatffLogUpdateOperation,
   generateNextUniqueCode,
+  grantStaffAccess,
+  QueryRoleHelperFunction,
 } = require("../../app/utils/helper");
+const { CustomerLogUpdateOperation } = require("../../app/utils/customerHelper");
 
 const createClient = async (client) => {
   // client Code(cli_CUS_CLI_00001)
@@ -65,13 +68,13 @@ const createClient = async (client) => {
         ]);
         client_id = result.insertId;
         const currentDate = new Date();
-        await SatffLogUpdateOperation({
+        await CustomerLogUpdateOperation({
           staff_id: client.StaffUserId,
           ip: client.ip,
           date: currentDate.toISOString().split("T")[0],
           module_name: "client",
-          log_message: `created client profile. client code : ${client_code}`,
-          permission_type: "created",
+          log_message: `Created client profile. client code:`,
+          permission_type: "Created",
           module_id: client_id,
         });
       } catch (err) {
@@ -98,13 +101,13 @@ const createClient = async (client) => {
         ]);
         client_id = result.insertId;
         const currentDate = new Date();
-        await SatffLogUpdateOperation({
+        await CustomerLogUpdateOperation({
           staff_id: client.StaffUserId,
           ip: client.ip,
           date: currentDate.toISOString().split("T")[0],
           module_name: "client",
-          log_message: `created client profile. client code : ${client_code}`,
-          permission_type: "created",
+          log_message: `Created client profile. client code:`,
+          permission_type: "Created",
           module_id: client_id,
         });
       } catch (err) {
@@ -132,13 +135,13 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ]);
         client_id = result.insertId;
         const currentDate = new Date();
-        await SatffLogUpdateOperation({
+        await CustomerLogUpdateOperation({
           staff_id: client.StaffUserId,
           ip: client.ip,
           date: currentDate.toISOString().split("T")[0],
           module_name: "client",
-          log_message: `created client profile. client code : ${client_code}`,
-          permission_type: "created",
+          log_message: `Created client profile. client code:`,
+          permission_type: "Created",
           module_id: client_id,
         });
       } catch (err) {
@@ -164,13 +167,13 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ]);
       client_id = result.insertId;
       const currentDate = new Date();
-      await SatffLogUpdateOperation({
+      await CustomerLogUpdateOperation({
         staff_id: client.StaffUserId,
         ip: client.ip,
         date: currentDate.toISOString().split("T")[0],
         module_name: "client",
-        log_message: `created client profile. client code : ${client_code}`,
-        permission_type: "created",
+        log_message: `Created client profile. client code:`,
+        permission_type: "Created",
         module_id: client_id,
       });
     } catch (err) {
@@ -574,6 +577,11 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       console.error("Error inserting data:", err);
       throw err;
     }
+  }
+
+  const roleData = await QueryRoleHelperFunction(StaffUserId);
+  if (roleData.length > 0 && roleData[0].role_id === 12) {
+    await grantStaffAccess(StaffUserId, customer_id, "client", client_id);
   }
 
   return { status: true, message: "Client Added Successfully.", data: client_id };

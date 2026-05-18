@@ -15,8 +15,7 @@ export async function get_All_Customer_Users(data, token) {
     });
     return await res?.data;
   } catch (err) {
-    return await
-      err;
+    throw err;
   }
 }
 
@@ -834,6 +833,86 @@ export async function CUSTOMER_MISSING_LOG_ACTION(data, token) {
   }
 }
 
+export async function CUSTOMER_ADD_MISSING_LOG(data, token) {
+  try {
+    const formData = new FormData();
+    formData.append('job_id', data.job_id);
+    formData.append('missing_log', data.missionDetails.missing_log);
+    formData.append('missing_log_sent_on', data.missionDetails.missing_log_sent_on);
+    formData.append('missing_log_prepared_date', data.missionDetails.missing_log_prepared_date);
+    formData.append('missing_log_reviewed_by', data.StaffUserId);
+    formData.append('missing_log_reviewed_date', data.missionDetails.missing_log_reviewed_date);
+    formData.append('last_chaser', data.missionDetails.last_chaser);
+    formData.append('status', data.missionDetails.status);
+    formData.append('StaffUserId', data.StaffUserId);
+    formData.append('ip', data.ip);
+    formData.append('action', 'add');
+
+    if (Array.isArray(data.missionDetails.missing_log_document)) {
+      data.missionDetails.missing_log_document.forEach((file) => {
+        formData.append('files[]', file);
+      });
+    } else if (data.missionDetails.missing_log_document) {
+      formData.append('files[]', data.missionDetails.missing_log_document);
+    }
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${Config.base_url}customerMissingLogAction`,
+      headers: {
+        Authorization: token,
+        "Content-Type": "multipart/form-data",
+      },
+      data: formData,
+    };
+    const res = await axios.request(config);
+    return await res?.data;
+  } catch (err) {
+    return err;
+  }
+}
+
+export async function CUSTOMER_EDIT_MISSING_LOG(data, token) {
+  try {
+    const formData = new FormData();
+    formData.append('id', data.id);
+    formData.append('missing_log', data.missionDetails.missing_log);
+    formData.append('missing_log_sent_on', data.missionDetails.missing_log_sent_on);
+    formData.append('missing_log_prepared_date', data.missionDetails.missing_log_prepared_date);
+    formData.append('missing_log_reviewed_by', data.StaffUserId);
+    formData.append('missing_log_reviewed_date', data.missionDetails.missing_log_reviewed_date);
+    formData.append('last_chaser', data.missionDetails.last_chaser);
+    formData.append('status', data.missionDetails.status);
+    formData.append('StaffUserId', data.StaffUserId);
+    formData.append('ip', data.ip);
+    formData.append('action', 'edit');
+
+    if (Array.isArray(data.missionDetails.missing_log_document)) {
+      data.missionDetails.missing_log_document.forEach((file) => {
+        formData.append('files[]', file);
+      });
+    } else if (data.missionDetails.missing_log_document) {
+      formData.append('files[]', data.missionDetails.missing_log_document);
+    }
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${Config.base_url}customerMissingLogAction`,
+      headers: {
+        Authorization: token,
+        "Content-Type": "multipart/form-data",
+      },
+      data: formData,
+    };
+    const res = await axios.request(config);
+    return await res?.data;
+  } catch (err) {
+    return err;
+  }
+}
+
 export async function CUSTOMER_QUERY_ACTION(data, token) {
   try {
     const res = await axios.post(`${Config.base_url}customerQueryAction`, data, {
@@ -845,7 +924,111 @@ export async function CUSTOMER_QUERY_ACTION(data, token) {
   }
 }
 
+export async function CUSTOMER_ADD_QUERY(data, token) {
+  try {
+    const formData = new FormData();
+    formData.append('job_id', data.job_id);
+    formData.append('queries_remaining', data.data.QueriesRemaining);
+    formData.append('reviewed_by', data.data.ReviewedBy);
+    formData.append('missing_queries_prepared_date', data.data.MissingQueriesPreparedDate);
+    formData.append('query_sent_date', data.data.QuerySentDate);
+    formData.append('response_received', data.data.ResponseReceived);
+    formData.append('status', data.data.status);
+    formData.append('final_query_response_received_date', data.data.FinalQueryResponseReceivedDate);
+    formData.append('last_chaser', data.data.last_chaser);
+    formData.append('StaffUserId', data.StaffUserId);
+    formData.append('ip', data.ip);
+    formData.append('action', 'add');
+
+    if (Array.isArray(data.data.QueryDocument)) {
+      data.data.QueryDocument.forEach((file) => {
+        formData.append('files[]', file);
+      });
+    } else if (data.data.QueryDocument) {
+      formData.append('files[]', data.data.QueryDocument);
+    }
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${Config.base_url}customerQueryAction`,
+      headers: {
+        Authorization: token,
+        "Content-Type": "multipart/form-data",
+      },
+      data: formData,
+    };
+    const res = await axios.request(config);
+    return await res?.data;
+  } catch (err) {
+    return err;
+  }
+}
+
+export async function CUSTOMER_EDIT_QUERY(data, token) {
+  try {
+    const formData = new FormData();
+    formData.append('id', Number(data.data.id));
+    formData.append('queries_remaining', data.data.QueriesRemaining);
+    formData.append('reviewed_by', data.data.ReviewedBy);
+    formData.append('missing_queries_prepared_date', data.data.MissingQueriesPreparedDate);
+    formData.append('query_sent_date', data.data.QuerySentDate);
+    formData.append('last_chaser', data.data.last_chaser);
+    formData.append('response_received', data.data.ResponseReceived);
+    formData.append('status', data.data.status);
+    formData.append('final_query_response_received_date', data.data.FinalQueryResponseReceivedDate);
+    formData.append('StaffUserId', data.StaffUserId);
+    formData.append('ip', data.ip);
+    formData.append('action', 'edit');
+
+    if (Array.isArray(data.data.QueryDocument)) {
+      data.data.QueryDocument.forEach((file) => {
+        formData.append('files[]', file);
+      });
+    } else if (data.data.QueryDocument) {
+      formData.append('files[]', data.data.QueryDocument);
+    }
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${Config.base_url}customerQueryAction`,
+      headers: {
+        Authorization: token,
+        "Content-Type": "multipart/form-data",
+      },
+      data: formData,
+    };
+    const res = await axios.request(config);
+    return await res?.data;
+  } catch (err) {
+    return err;
+  }
+}
+
 export async function CUSTOMER_DRAFT_ACTION(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerDraftAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_ADD_DRAFT(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}customerDraftAction`, data, {
+      headers: header(token),
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function CUSTOMER_EDIT_DRAFT(data, token) {
   try {
     const res = await axios.post(`${Config.base_url}customerDraftAction`, data, {
       headers: header(token),
