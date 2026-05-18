@@ -38,13 +38,23 @@ const commonEmail = async (toEmail, subjectEmail, htmlEmail, cc = '', bcc = '', 
             bcc: bcc,
             subject: subjectEmail,
             html: htmlEmail,
-            attachments: [
+            // attachments: [
+            //     {
+            //         filename: filename,
+            //         content: dynamic_attachment,
+            //     },
+            // ],
+        };
+
+        // Add attachment only if exists
+        if (dynamic_attachment && filename) {
+            mailOptions.attachments = [
                 {
                     filename: filename,
                     content: dynamic_attachment,
                 },
-            ],
-        };
+            ];
+        }
 
         const info = await transport.sendMail(mailOptions);
         console.log("✅ Mail sent successfully:", info.messageId);
