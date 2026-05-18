@@ -107,7 +107,7 @@ JOIN staffs ON staffs.id = job_allowed_staffs.staff_id;
 
 */
 
-const getDashboardData1 = async (dashboard) => {
+const getDashboardData_1 = async (dashboard) => {
   const { staff_id, date_filter } = dashboard;
 
   //time check 
@@ -498,7 +498,7 @@ const getDashboardData1 = async (dashboard) => {
 };
 
 
-const getDashboardData = async (dashboard) => {
+const getDashboardData_2 = async (dashboard) => {
   const { staff_id, date_filter } = dashboard;
 
   console.log("dashboard Time - START -", new Date());
@@ -685,6 +685,223 @@ const getDashboardData = async (dashboard) => {
   } catch (err) {
     console.error("Dashboard error:", err);
     return { status: false, message: "Err Dashboard Data View Get", error: err.message };
+  }
+};
+
+const getDashboardData = async (dashboard) => {
+  const { staff_id, date_filter } = dashboard;
+
+  console.log("dashboard Time - START -", new Date());
+
+  // ── Step 1: Parallel init ────────────────────────────────────────────────────
+  const [{ startDate, endDate }, LineManageStaffId, rowRoles] = await Promise.all([
+    getDateRange(date_filter),
+    LineManageStaffIdHelperFunction(staff_id),
+    QueryRoleHelperFunction(staff_id),
+  ]);
+
+  console.log("dashboard Time - after parallel init -", new Date());
+
+  if (!rowRoles.length) {
+    return { status: false, message: "Role not found." };
+  }
+
+  const role_id     = rowRoles[0].role_id;
+  const isSuperAdmin = rowRoles[0].role_name === "SUPERADMIN";
+
+  // ── Step 2: staffIds string (safe, used in dynamic IN clauses) ───────────────
+  // LineManageStaffId already comes as a comma-separated string or single id
+  // from the helper. We keep it as-is for IN() usage.
+  const staffIds = `${staff_id}, ${LineManageStaffId}`;
+
+  try {
+    // ── Step 3: Single permission fetch instead of 3 queries ────────────────────
+    const [rolePermissions] = await pool.execute(
+      `SELECT permission_id
+         FROM role_permissions
+        WHERE role_id = ?
+          AND permission_id IN (33, 34, 35)`,
+      [role_id]
+    );
+
+    const permissionSet    = new Set(rolePermissions.map((r) => r.permission_id));
+    const RoleAccessCustomer = isSuperAdmin || permissionSet.has(33);
+    const RoleAccessClient   = isSuperAdmin || permissionSet.has(34);
+    const RoleAccessJob      = isSuperAdmin || permissionSet.has(35);
+
+    // ── Step 4: Query definitions ─────────────────────────────────────────────
+
+    // ── CUSTOMER ──────────────────────────────────────────────────────────────
+    // FIX: Use direct range on created_at so the index is usable.
+    const customerQuery = RoleAccessCustomer
+      ? {
+          sql: `SELECT id
+                  FROM customers
+                 WHERE created_at BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 23:59:59')
+                 ORDER BY id DESC`,
+          params: [startDate, endDate],
+        }
+      : {
+          sql: `SELECT customers.id
+                  FROM customers
+                  LEFT JOIN assigned_jobs_staff_view ajsv
+                    ON  ajsv.customer_id = customers.id
+                    AND ajsv.staff_id    IN (${staffIds})
+                 WHERE (
+                         customers.staff_id IN (${staffIds})
+                         OR ajsv.staff_id IS NOT NULL
+                       )
+                   AND customers.created_at BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 23:59:59')
+                 GROUP BY customers.id
+                 ORDER BY customers.id DESC`,
+          params: [startDate, endDate],
+        };
+
+    // ── CLIENT ────────────────────────────────────────────────────────────────
+    const clientQuery = RoleAccessClient
+      ? {
+          sql: `SELECT id
+                  FROM clients
+                 WHERE created_at BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 23:59:59')
+                 ORDER BY id DESC`,
+          params: [startDate, endDate],
+        }
+      : {
+          sql: `SELECT clients.id
+                  FROM clients
+                  LEFT JOIN assigned_jobs_staff_view ajsv
+                    ON  ajsv.client_id = clients.id
+                    AND ajsv.staff_id  IN (${staffIds})
+                 WHERE (
+                         clients.staff_created_id IN (${staffIds})
+                         OR ajsv.staff_id IS NOT NULL
+                       )
+                   AND clients.created_at BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 23:59:59')
+                 GROUP BY clients.id
+                 ORDER BY clients.id DESC`,
+          params: [startDate, endDate],
+        };
+
+    // ── STAFF ─────────────────────────────────────────────────────────────────
+    const staffQuery = isSuperAdmin
+      ? {
+          sql: `SELECT id
+                  FROM staffs
+                 WHERE created_at BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 23:59:59')
+                 ORDER BY id DESC`,
+          params: [startDate, endDate],
+        }
+      : {
+          sql: `SELECT id
+                  FROM staffs
+                 WHERE created_by = ?
+                   AND created_at BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 23:59:59')
+                 ORDER BY id DESC`,
+          params: [staff_id, startDate, endDate],
+        };
+
+    // ── JOB ───────────────────────────────────────────────────────────────────
+    // FIX 1: Removed DATE() wrapping — use direct created_at range for index usage.
+    // FIX 2: Removed unnecessary JOINs (clients, customers, master_status) for
+    //        non-admin path. client filter now done via subquery; customers.status
+    //        check removed (irrelevant for job count).
+    // FIX 3: Removed JOIN staffs AS staffs4 — staff_created_id filter is enough.
+    const jobQuery = RoleAccessJob
+      ? {
+          sql: `SELECT id, status_type
+                  FROM jobs
+                 WHERE created_at BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 23:59:59')
+                 ORDER BY id DESC`,
+          params: [startDate, endDate],
+        }
+      : {
+          sql: `SELECT
+                    jobs.id,
+                    jobs.status_type
+                  FROM jobs
+                  LEFT JOIN assigned_jobs_staff_view ajsv
+                    ON  ajsv.job_id = jobs.id
+                    AND ajsv.staff_id IN (${LineManageStaffId})
+                 WHERE (
+                         ajsv.staff_id             IS NOT NULL
+                         OR jobs.staff_created_id  IN (${LineManageStaffId})
+                         OR jobs.client_id IN (
+                               SELECT id
+                                 FROM clients
+                                WHERE staff_created_id IN (${LineManageStaffId})
+                            )
+                       )
+                   AND jobs.created_at BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 23:59:59')
+                   AND (
+                         ajsv.source IS NULL
+                         OR ajsv.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+                         OR jobs.service_id = ajsv.service_id_assign
+                       )
+                 GROUP BY jobs.id
+                 ORDER BY jobs.id DESC`,
+          params: [startDate, endDate],
+        };
+
+    // ── Step 5: All 4 queries in parallel ────────────────────────────────────
+    console.log("dashboard Time - before parallel queries -", new Date());
+
+    const [
+      [CustomerResult],
+      [ClientResult],
+      [StaffResult],
+      [JobResult],
+    ] = await Promise.all([
+      pool.execute(customerQuery.sql, customerQuery.params),
+      pool.execute(clientQuery.sql,   clientQuery.params),
+      pool.execute(staffQuery.sql,    staffQuery.params),
+      pool.execute(jobQuery.sql,      jobQuery.params),
+    ]);
+
+    console.log("dashboard Time - after parallel queries -", new Date());
+
+    // ── Step 6: Result assembly ───────────────────────────────────────────────
+    const toIds = (arr) => arr.map((r) => r.id).join(",");
+
+    const pendingJobs   = JobResult.filter((r) => Number(r.status_type) !== 6);
+    const completedJobs = JobResult.filter((r) => Number(r.status_type) === 6);
+
+    const result = {
+      customer: {
+        count : CustomerResult.length,
+        ids   : toIds(CustomerResult),
+      },
+      client: {
+        count : ClientResult.length,
+        ids   : toIds(ClientResult),
+      },
+      staff: {
+        count : StaffResult.length,
+        ids   : toIds(StaffResult),
+      },
+      job: {
+        count : JobResult.length,
+        ids   : toIds(JobResult),
+      },
+      pending_job: {
+        count : pendingJobs.length,
+        ids   : toIds(pendingJobs),
+      },
+      completed_job: {
+        count : completedJobs.length,
+        ids   : toIds(completedJobs),
+      },
+    };
+
+    console.log("dashboard Time - END -", new Date());
+    return { status: true, message: "success.", data: result };
+
+  } catch (err) {
+    console.error("Dashboard error:", err);
+    return {
+      status  : false,
+      message : "Err Dashboard Data View Get",
+      error   : err.message,
+    };
   }
 };
 
