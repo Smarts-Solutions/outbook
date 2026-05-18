@@ -375,19 +375,6 @@ const DashboardLinkData = () => {
       sortable: true,
     },
     {
-      name: "Account Manager",
-      cell: (row) => <div title={row.account_manager_name || "-"}>{row.account_manager_name || "-"}</div>,
-      selector: (row) => row.account_manager_name || "-",
-      sortable: true,
-    },
-    {
-      name: "Employee ID",
-      cell: (row) => <div title={row.account_manager_employee_number || "-"}>{row.account_manager_employee_number || "-"}</div>,
-      selector: (row) => row.account_manager_employee_number || "-",
-      sortable: true,
-    },
-    ...dynamicManagerColumns,
-    {
       name: "Job Type",
       cell: (row) => <div title={row.job_type_name}>{row.job_type_name}</div>,
       selector: (row) => row.job_type_name,
@@ -418,83 +405,30 @@ const DashboardLinkData = () => {
       width: "250px"
     },
     {
-      name: "Client Contact Person",
+      name:"Outbook Account Manager",
       cell: (row) => (
         <div
           title={
-            row.account_manager_officer_first_name +
+            row.outbooks_acount_manager_first_name +
             " " +
-            row.account_manager_officer_last_name || "-"
+            row.outbooks_acount_manager_last_name
           }
         >
-          {row.account_manager_officer_first_name +
+          {row.outbooks_acount_manager_first_name +
             " " +
-            row.account_manager_officer_last_name || "-"}
+            row.outbooks_acount_manager_last_name}
         </div>
       ),
       selector: (row) =>
-        row.account_manager_officer_first_name +
+        row.outbooks_acount_manager_first_name +
         " " +
-        row.account_manager_officer_last_name || "-",
+        row.outbooks_acount_manager_last_name,
       sortable: true,
-    },
-    {
-      name: "Client Job Code",
-      cell: (row) => <div title={row.client_job_code || "-"}>{row.client_job_code || "-"}</div>,
-      selector: (row) => row.client_job_code || "-",
-      sortable: true,
-    },
-    {
-      name: "Allocated To",
-      cell: (row) => (
-        <div>
-          {row?.allocated_first_name != null
-            ? row?.allocated_first_name + " " + row?.allocated_last_name
-            : "-"}
-        </div>
-      ),
-      selector: (row) => row.allocated_first_name || "-",
-      sortable: true,
-    },
-    {
-      name: "Timesheet",
-      cell: (row) => (
-        <div
-          title={
-            row.total_hours_status == "1" && row.total_hours != null
-              ? row.total_hours.split(":")[0] +
-              "h " +
-              row.total_hours.split(":")[1] +
-              "m"
-              : "-"
-          }
-        >
-          {row.total_hours_status == "1" && row.total_hours != null
-            ? row.total_hours.split(":")[0] +
-            "h " +
-            row.total_hours.split(":")[1] +
-            "m"
-            : "-"}
-        </div>
-      ),
-      selector: (row) => row.total_hours || "-",
-      sortable: true,
+      width: "325px",
     },
     {
       name: "Invoicing",
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
-      sortable: true,
-    },
-    {
-      name: "Created By",
-      cell: (row) => <div title={row.job_created_by || "-"}>{row.job_created_by || "-"}</div>,
-      selector: (row) => row.job_created_by || "-",
-      sortable: true,
-    },
-    {
-      name: "Created At",
-      cell: (row) => <div title={row.created_at}>{row.created_at}</div>,
-      selector: (row) => row.created_at,
       sortable: true,
     },
   ];
@@ -534,28 +468,6 @@ const DashboardLinkData = () => {
       name: "Client Type",
       cell: (row) => <div title={row.client_type_name}>{row.client_type_name}</div>,
       selector: (row) => row.client_type_name,
-      sortable: true,
-    },
-    {
-      name: "Created By",
-      cell: (row) => <div title={row.client_created_by}>{row.client_created_by}</div>,
-      selector: (row) => row.client_created_by,
-      sortable: true,
-    },
-    {
-      name: "Created At",
-      cell: (row) => <div title={row.created_at}>{row.created_at}</div>,
-      selector: (row) => row.created_at,
-      sortable: true,
-    },
-    {
-      name: "Status",
-      cell: (row) => (
-        <span className={row.status === "1" ? "text-success" : "text-danger"}>
-          {row.status === "1" ? "Active" : "Inactive"}
-        </span>
-      ),
-      selector: (row) => row.status,
       sortable: true,
     },
   ];
