@@ -81,14 +81,25 @@ const CustomerAccess = () => {
 
       const response = await dispatch(CustomerContactPersonAccess(data)).unwrap();
       if (response.status) {
-        setRoleStructures(prev => ({ ...prev, [val.id]: response.data }));
+        // Filter out everything except 'view' for the 'customer' module
+        const filteredData = response.data.map(item => {
+          if (item.permission_name === "customer") {
+            return {
+              ...item,
+              items: item.items.filter(perm => perm.type === "view")
+            };
+          }
+          return item;
+        });
+
+        setRoleStructures(prev => ({ ...prev, [val.id]: filteredData }));
         
         setCheckboxState((prevState) => {
             // Only add permissions that are assigned on the server
             // We don't filter out previous state because we want to preserve other roles' changes
             let updatedState = [...prevState];
             
-            response.data.forEach((item) => {
+            filteredData.forEach((item) => {
                 item.items.forEach((perm) => {
                     if (perm.is_assigned === 1) {
                         // Check if we already have this permission in state to avoid duplicates
