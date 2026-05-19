@@ -107,7 +107,7 @@ JOIN staffs ON staffs.id = job_allowed_staffs.staff_id;
 
 */
 
-const getDashboardData = async (dashboard) => {
+const getDashboardData_1 = async (dashboard) => {
   const { staff_id, date_filter } = dashboard;
 
   //time check 
@@ -497,7 +497,7 @@ const getDashboardData = async (dashboard) => {
   }
 };
 
-const getDashboardData_correct = async (dashboard) => {
+const getDashboardData = async (dashboard) => {
   const { staff_id, date_filter } = dashboard;
 
   const [{ startDate, endDate }, LineManageStaffId, rowRoles] = await Promise.all([
