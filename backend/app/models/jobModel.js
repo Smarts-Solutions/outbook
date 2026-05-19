@@ -1331,21 +1331,6 @@ async function getAllJobsSidebar(
   let searchCondition = "";
   let searchParams = [];
 
-
-
-  // if (search) {
-  //   searchCondition = `
-  //     AND (
-  //       jobs.client_job_code LIKE ?
-  //       OR clients.trading_name LIKE ?
-  //       OR customers.trading_name LIKE ?
-  //       OR job_types.type LIKE ?
-  //     )
-  //   `;
-  //   const likeSearch = `%${search}%`;
-  //   searchParams = [likeSearch, likeSearch, likeSearch, likeSearch];
-  // }
-
   const jobCodeExpr = `
     CONCAT(
       SUBSTRING(customers.trading_name, 1, 3), '_',
