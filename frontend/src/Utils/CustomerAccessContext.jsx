@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { GetCustomerAccessById } from '../ReduxStore/Slice/Settings/settingSlice';
 import { GetCustomerDropdown } from '../ReduxStore/Slice/Customer/CustomerSlice';
+import { Status } from '../ReduxStore/Slice/Auth/authSlice';
 
 const CustomerAccessContext = createContext();
 
@@ -109,11 +110,33 @@ export const CustomerAccessProvider = ({ children }) => {
         }
     }, [dispatch, selectedCustomer.value]);
 
+    const checkCustomerStatus = useCallback(async () => {
+        const staffDetails = JSON.parse(localStorage.getItem('staffDetails'));
+        const token = JSON.parse(localStorage.getItem('token'));
+        const role = JSON.parse(localStorage.getItem('role'));
+
+        if (staffDetails?.id && role?.toString().toUpperCase() === "CUSTOMER") {
+            const data = { id: staffDetails.id, authToken: token };
+            try {
+                const response = await dispatch(Status(data)).unwrap();
+                if (response.status && response?.data?.[0]?.status == '0') {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    window.location.href = '/#/customer/login';
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error("Error checking customer status:", error);
+            }
+        }
+    }, [dispatch]);
+
     // Fetch on mount and on route change
     useEffect(() => {
+        checkCustomerStatus();
         fetchAccessData();
         fetchAssignedCustomers();
-    }, [location.pathname, fetchAccessData, fetchAssignedCustomers]);
+    }, [location.pathname, fetchAccessData, fetchAssignedCustomers, checkCustomerStatus]);
 
     const hasAccess = (permission, type = "view") => {
         const role = JSON.parse(localStorage.getItem("role"));
