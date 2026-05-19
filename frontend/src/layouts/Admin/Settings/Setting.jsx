@@ -3650,18 +3650,16 @@ const Setting = () => {
                                           let updatedState = prevState.filter(
                                             (item) => item.role_id != personRoleModalData.id
                                           );
-                                          if (checked) {
-                                            personRoleStructure.forEach((section) => {
-                                              section.items.forEach((item) => {
-                                                updatedState.push({
-                                                  permission_id: item.id,
-                                                  role_id: personRoleModalData.id,
-                                                  is_assigned: true,
-                                                  permission_name: section.permission_name,
-                                                });
+                                          personRoleStructure.forEach((section) => {
+                                            section.items.forEach((item) => {
+                                              updatedState.push({
+                                                permission_id: item.id,
+                                                role_id: personRoleModalData.id,
+                                                is_assigned: checked,
+                                                permission_name: section.permission_name,
                                               });
                                             });
-                                          }
+                                          });
                                           return updatedState;
                                         });
                                       }}
@@ -3701,16 +3699,14 @@ const Setting = () => {
                                               )
                                           );
 
-                                          if (checked) {
-                                            section.items.forEach((item) => {
-                                              updatedState.push({
-                                                permission_id: item.id,
-                                                role_id: personRoleModalData.id,
-                                                is_assigned: true,
-                                                permission_name: section.permission_name,
-                                              });
+                                          section.items.forEach((item) => {
+                                            updatedState.push({
+                                              permission_id: item.id,
+                                              role_id: personRoleModalData.id,
+                                              is_assigned: checked,
+                                              permission_name: section.permission_name,
                                             });
-                                          }
+                                          });
                                           return updatedState;
                                         });
                                       };
@@ -3761,14 +3757,12 @@ const Setting = () => {
                                                         p.role_id == personRoleModalData.id
                                                       )
                                                   );
-                                                  if (checked) {
-                                                    updatedState.push({
-                                                      permission_id: item.id,
-                                                      role_id: personRoleModalData.id,
-                                                      is_assigned: true,
-                                                      permission_name: section.permission_name,
-                                                    });
-                                                  }
+                                                  updatedState.push({
+                                                    permission_id: item.id,
+                                                    role_id: personRoleModalData.id,
+                                                    is_assigned: checked,
+                                                    permission_name: section.permission_name,
+                                                  });
                                                   return updatedState;
                                                 });
                                               };
