@@ -1664,7 +1664,7 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                   <div className="mb-3 col-lg-4">
                     <label className="form-label">
                       {" "}
-                      Outbook Account Manager
+                      Outbooks Account Manager
                       <span className="text-danger">*</span>
                     </label>
                     <input

@@ -354,7 +354,7 @@ const ClientLists = () => {
       width: "250px",
     },
     {
-      name: "Outbook Account Manager",
+      name: "Outbooks Account Manager",
       cell: (row) => (
         <div title={row.outbooks_acount_manager_first_name + " " + row.outbooks_acount_manager_last_name || "-"}>
           {row.outbooks_acount_manager_first_name + " " + row.outbooks_acount_manager_last_name || "-"}
