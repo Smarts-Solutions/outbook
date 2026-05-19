@@ -2000,6 +2000,87 @@ module.exports = {
 
 
 
+// DELIMITER $$
+
+// DROP PROCEDURE IF EXISTS get_assigned_jobs_staff$$
+
+// CREATE PROCEDURE get_assigned_jobs_staff(IN p_staff_id INT)
+// BEGIN
+//     INSERT INTO temp_assigned_jobs_staff
+//     SELECT  
+//         customers.id, clients.id, jobs.id, staffs.id,
+//         'assign_customer_portfolio', NULL
+//     FROM customers
+//     JOIN staff_portfolio ON staff_portfolio.customer_id = customers.id
+//     JOIN staffs ON staffs.id = staff_portfolio.staff_id
+//     LEFT JOIN clients ON clients.customer_id = customers.id
+//     LEFT JOIN jobs ON jobs.client_id = clients.id
+//     WHERE staffs.id = p_staff_id
+
+//     UNION ALL
+
+//     SELECT  
+//         customers.id, clients.id, jobs.id, staffs.id,
+//         'assign_customer_service', customer_services.service_id
+//     FROM customers
+//     JOIN customer_services ON customer_services.customer_id = customers.id
+//     JOIN customer_service_account_managers 
+//         ON customer_service_account_managers.customer_service_id = customer_services.id
+//     JOIN staffs ON staffs.id = customer_service_account_managers.account_manager_id
+//     LEFT JOIN clients ON clients.customer_id = customers.id
+//     LEFT JOIN jobs ON jobs.client_id = clients.id
+//     WHERE staffs.id = p_staff_id
+
+//     UNION ALL
+
+//     SELECT  
+//         customers.id, clients.id, jobs.id, staffs.id,
+//         'assign_customer_main_account_manager', NULL
+//     FROM customers
+//     JOIN staffs ON staffs.id = customers.account_manager_id
+//     LEFT JOIN clients ON clients.customer_id = customers.id
+//     LEFT JOIN jobs ON jobs.client_id = clients.id
+//     WHERE staffs.id = p_staff_id
+
+//     UNION ALL
+
+//     SELECT  
+//         customers.id, clients.id, jobs.id, jobs.reviewer,
+//         'reviewer', NULL
+//     FROM jobs
+//     JOIN clients ON clients.id = jobs.client_id
+//     JOIN customers ON customers.id = clients.customer_id
+//     JOIN staffs ON staffs.id = jobs.reviewer
+//     WHERE jobs.reviewer = p_staff_id
+
+//     UNION ALL
+
+//     SELECT  
+//         customers.id, clients.id, jobs.id, jobs.allocated_to,
+//         'allocated_to', NULL
+//     FROM jobs
+//     JOIN clients ON clients.id = jobs.client_id
+//     JOIN customers ON customers.id = clients.customer_id
+//     JOIN staffs ON staffs.id = jobs.allocated_to
+//     WHERE jobs.allocated_to = p_staff_id
+
+//     UNION ALL
+
+//     SELECT  
+//         customers.id, clients.id, jobs.id, job_allowed_staffs.staff_id,
+//         'job_allowed_staffs', NULL
+//     FROM jobs
+//     JOIN clients ON clients.id = jobs.client_id
+//     JOIN customers ON customers.id = clients.customer_id
+//     LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
+//     JOIN staffs ON staffs.id = job_allowed_staffs.staff_id
+//     WHERE job_allowed_staffs.staff_id = p_staff_id;
+// END$$
+
+// DELIMITER ;
+
+
+
 
 
 
