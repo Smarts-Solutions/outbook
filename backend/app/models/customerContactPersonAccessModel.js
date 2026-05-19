@@ -102,20 +102,24 @@ const getCustomerAccessByCustomerId = async (data) => {
     const { customer_id } = data;
 
     try {
-        // Get the customer_contact_person_role_id from staffs table
+        // Get the customer_contact_person_role_id and name from staffs table
         const [staffRows] = await pool.execute(
-            `SELECT customer_contact_person_role_id FROM staffs WHERE id = ? AND role_id = 12`,
+            `SELECT staffs.customer_contact_person_role_id, customer_contact_person_role.name AS role_name
+             FROM staffs 
+             LEFT JOIN customer_contact_person_role ON customer_contact_person_role.id = staffs.customer_contact_person_role_id
+             WHERE staffs.id = ? AND staffs.role_id = 12`,
             [customer_id]
         );
 
         if (staffRows.length === 0) {
-            return [];
+            return { roleInfo: null, permissions: [] };
         }
 
         const role_id = staffRows[0].customer_contact_person_role_id;
+        const role_name = staffRows[0].role_name;
 
         if (!role_id) {
-            return [];
+            return { roleInfo: null, permissions: [] };
         }
 
         // Get permissions for this role
@@ -139,7 +143,13 @@ const getCustomerAccessByCustomerId = async (data) => {
         const [rows] = await pool.execute(query, [role_id]);
         console.log("rows", rows)
 
-        return rows;
+        return {
+            roleInfo: {
+                role_id,
+                role_name
+            },
+            permissions: rows
+        };
     } catch (err) {
         console.error('Error fetching customer access by customer_id:', err);
         throw err;

@@ -18,7 +18,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
   const dispatch = useDispatch();
-  const { hasAccess, selectedCustomer } = useCustomerAccess();
+  const { hasAccess, selectedCustomer, contactPersonRole } = useCustomerAccess();
 
   const [dashboard, setDashboard] = useState({
     customer: { count: 0, ids: "" },
@@ -509,7 +509,7 @@ const Dashboard = () => {
               <div className="row">
                 <div className="col">
                   <p className="mb-0 page-subtitle">{greeting}</p>
-                  <h2 className="page-title mt-1">{staffDetails.first_name} {staffDetails.last_name}</h2>
+                  <h2 className="page-title mt-1">{contactPersonRole?.role_name || staffDetails?.role_name || "Customer"}</h2>
                 </div>
                 <div className="col-md-3">
                   <div className="d-flex justify-content-end">

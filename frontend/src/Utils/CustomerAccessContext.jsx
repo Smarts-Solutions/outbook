@@ -20,6 +20,7 @@ export const CustomerAccessProvider = ({ children }) => {
     const [accessData, setAccessData] = useState([]);
     const [assignedCustomers, setAssignedCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [contactPersonRole, setContactPersonRole] = useState(null);
     
     const [selectedCustomer, setSelectedCustomerState] = useState(() => {
         const saved = localStorage.getItem('selectedCustomer');
@@ -57,6 +58,9 @@ export const CustomerAccessProvider = ({ children }) => {
                 const response = await dispatch(GetCustomerAccessById(data)).unwrap();
                 if (response.status && response.data) {
                     setAccessData(response.data);
+                }
+                if (response.status && response.roleInfo) {
+                    setContactPersonRole(response.roleInfo);
                 }
             } catch (error) {
                 console.error("Error fetching customer access:", error);
@@ -152,6 +156,8 @@ export const CustomerAccessProvider = ({ children }) => {
             assignedCustomers, 
             selectedCustomer, 
             setSelectedCustomer,
+            contactPersonRole,
+            setContactPersonRole,
             loading 
         }}>
             {children}
