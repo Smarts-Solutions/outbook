@@ -25,7 +25,7 @@ const AccessDenied = () => {
                   Permission Required
                 </h4>
                 <p className="text-muted mb-0" style={{ textTransform: 'none', fontSize: '15px', lineHeight: '1.6' }}>
-                  You do not have the required permissions to view this page. Please contact your system administrator if you believe this is an error or need access.
+                  You do not have the required permissions.<br/> Please contact your system administrator.
                 </p>
               </div>
             </div>
