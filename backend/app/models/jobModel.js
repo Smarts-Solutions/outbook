@@ -1623,7 +1623,6 @@ async function getAllJobsSidebar(
       // ALL STAFF IDS
       // =========================================
       await connection.execute("DROP TEMPORARY TABLE IF EXISTS temp_assigned_jobs_staff");
-
       await connection.execute(`
       CREATE TEMPORARY TABLE temp_assigned_jobs_staff (
         customer_id       INT,
@@ -1657,9 +1656,7 @@ async function getAllJobsSidebar(
       // =========================================
       const makePlaceholders = (arr) =>
         arr.map(() => "?").join(",");
-
       const placeholders = makePlaceholders(allStaffIds);
-
       // =========================================
       // COMMON JOINS
       // =========================================
@@ -1698,31 +1695,23 @@ async function getAllJobsSidebar(
       ON timesheet.job_id = jobs.id 
       AND timesheet.task_type = '2'
   `;
-
       // =========================================
       // WHERE CLAUSE
       // =========================================
       const WHERE_CLAUSE = `
     WHERE (
-
       (
         temp_assigned_jobs_staff.staff_id IN (${placeholders})
-
         OR jobs.staff_created_id IN (${placeholders})
-
         OR clients.staff_created_id IN (${placeholders})
       )
-
       AND (
         temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
-
         OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
       )
-
     )
 
     AND customers.status = '1'
-
     ${searchCondition}
   `;
 
@@ -1742,17 +1731,11 @@ async function getAllJobsSidebar(
       const countQuery = `
     SELECT COUNT(*) AS total
     FROM (
-
       SELECT jobs.id
-
       FROM jobs
-
       ${COMMON_JOINS}
-
       ${WHERE_CLAUSE}
-
       GROUP BY jobs.id
-
     ) AS counted
   `;
 
@@ -1762,63 +1745,34 @@ async function getAllJobsSidebar(
       const dataQuery = `
     SELECT
       jobs.id AS job_id,
-
       timesheet.job_id AS timesheet_job_id,
-
       job_types.type AS job_type_name,
-
       jobs.status_type AS status_type,
-
       jobs.job_priority AS job_priority,
-
       customer_contact_details.id AS account_manager_officer_id,
-
       customer_contact_details.first_name AS account_manager_officer_first_name,
-
       customer_contact_details.last_name AS account_manager_officer_last_name,
-
       clients.trading_name AS client_trading_name,
-
       jobs.client_job_code AS client_job_code,
-
       jobs.invoiced AS invoiced,
-
       jobs.total_hours AS total_hours,
-
       jobs.total_hours_status AS total_hours_status,
-
       DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
-
       staffs.id AS allocated_id,
-
       staffs.first_name AS allocated_first_name,
-
       staffs.last_name AS allocated_last_name,
-
       staffs2.id AS reviewer_id,
-
       staffs2.first_name AS reviewer_first_name,
-
       staffs2.last_name AS reviewer_last_name,
-
       staffs3.id AS outbooks_acount_manager_id,
-
       staffs3.first_name AS outbooks_acount_manager_first_name,
-
       staffs3.last_name AS outbooks_acount_manager_last_name,
-
       staffs3.employee_number AS account_manager_employee_number,
-
       jobs.staff_created_id AS staff_created_id,
-
       temp_assigned_jobs_staff.source AS assigned_source,
-
       temp_assigned_jobs_staff.service_id_assign AS service_id_assign,
-
       jobs.service_id AS job_service_id,
-
       master_status.name AS status,
-
       CONCAT(
         staffs4.first_name,
         ' ',
@@ -1836,25 +1790,19 @@ async function getAllJobsSidebar(
       ) AS updated_at,
 
       ${jobCodeExpr} AS job_code_id,
-
       EXISTS (
         SELECT 1
         FROM client_job_task
         WHERE client_job_task.job_id = jobs.id
       ) AS has_client_job_task
 
-    FROM jobs
-
-    ${COMMON_JOINS}
-
-    ${WHERE_CLAUSE}
-
-    GROUP BY jobs.id
-
-    ORDER BY job_code_id ASC
-
-    LIMIT ? OFFSET ?
-  `;
+        FROM jobs
+        ${COMMON_JOINS}
+        ${WHERE_CLAUSE}
+        GROUP BY jobs.id
+        ORDER BY job_code_id ASC
+        LIMIT ? OFFSET ?
+      `;
 
       // =========================================
       // EXECUTE QUERIES
@@ -1898,9 +1846,7 @@ async function getAllJobsSidebar(
       };
 
     } catch (error) {
-
       console.log("ERROR ===>", error);
-
       return {
         status: false,
         message: "Something went wrong.",
@@ -1908,14 +1854,8 @@ async function getAllJobsSidebar(
       };
 
     } finally {
-
       connection.release();
-
     }
-
-
-
-
 
 
   } catch (error) {
