@@ -948,13 +948,12 @@ const getDashboardData = async (dashboard) => {
       }
     :
      {
-      sql: `SELECT COUNT(DISTINCT customers.id) AS cnt
+          sql: `SELECT COUNT(DISTINCT customers.id) AS cnt
                 FROM customers
                 LEFT JOIN assigned_jobs_staff_view ajsv
                   ON ajsv.customer_id = customers.id
-                 AND ajsv.staff_id IN (${staffIds})
-               WHERE (customers.staff_id IN (${staffIds}) OR ajsv.staff_id IS NOT NULL)
-               AND customers.created_at BETWEEN ? AND ?`,
+                WHERE (ajsv.staff_id IN (${staffIds}))
+                AND customers.created_at BETWEEN ? AND ?`,
         params: [startDate, endDate],
       }
      
