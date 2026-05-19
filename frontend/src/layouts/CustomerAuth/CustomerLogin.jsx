@@ -446,7 +446,15 @@ const CustomerLogin = () => {
                                 Sign In <ArrowRight size={16} className="ms-1" />
                               </button>
                             </div>
-
+                            <div className="col-12 mt-3">
+                              <button
+                                className="w-100 btn btn-outline-info fw-normal"
+                                type="button"
+                                onClick={() => navigate("/login")}
+                              >
+                                Login as Staff
+                              </button>
+                            </div>
                           </div>
                         </div>
 
