@@ -119,7 +119,9 @@ export const CustomerAccessProvider = ({ children }) => {
             const data = { id: staffDetails.id, authToken: token };
             try {
                 const response = await dispatch(Status(data)).unwrap();
-                if (response.status && response?.data?.[0]?.status == '0') {
+                
+                // If user is inactive (status == '0') OR hard deleted (status is false or data is empty)
+                if (!response.status || !response?.data?.length || response?.data?.[0]?.status == '0') {
                     localStorage.clear();
                     sessionStorage.clear();
                     window.location.href = '/#/customer/login';
