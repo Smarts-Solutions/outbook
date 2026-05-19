@@ -365,7 +365,7 @@ const CustomerLogin = () => {
                   <div className="col-md-6">
                     <div className="py-5 px-3">
                       <div className="card-header text-center">
-                        <h1 className="">Customer User Login</h1>
+                        <h1 className="">Customer Login</h1>
                       </div>
                       <div className="card-body">
                         <div
