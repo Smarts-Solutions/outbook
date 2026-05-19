@@ -1009,43 +1009,55 @@ const CustomerUsers = () => {
         customer_user_id: updatedata?.id,
       };
 
-      setLoading(true);
-      try {
-        const data = { req, authToken: token };
-        const response = await dispatch(getAllCustomerUsers(data)).unwrap();
+      Swal.fire({
+        title: "Are you sure?",
+        text: `Do you want to ${type === "edit" ? "update" : "add"} this customer user?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: `Yes, ${type === "edit" ? "update" : "add"} it!`,
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          setLoading(true);
+          try {
+            const data = { req, authToken: token };
+            const response = await dispatch(getAllCustomerUsers(data)).unwrap();
 
-        if (response.status) {
-          Swal.fire({
-            icon: "success",
-            title: "Success",
-            text:
-              response.message ||
-              `Customer user ${type === "edit" ? "updated" : "added"} successfully`,
-          }).then(() => {
-            setShowAddCustomerModal(false);
-            formik.resetForm();
-            GetAllCustomerData(1, pageSize, "");
-            setType("");
-          });
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: response.message || "Failed to process request",
-          });
+            if (response.status) {
+              Swal.fire({
+                icon: "success",
+                title: "Success",
+                text:
+                  response.message ||
+                  `Customer user ${type === "edit" ? "updated" : "added"} successfully`,
+              }).then(() => {
+                setShowAddCustomerModal(false);
+                formik.resetForm();
+                GetAllCustomerData(1, pageSize, "");
+                setType("");
+              });
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: response.message || "Failed to process request",
+              });
+            }
+          } catch (error) {
+            Swal.fire({
+              title: "Error",
+              text:
+                error.message ||
+                error ||
+                "An error occurred while processing request",
+              icon: "error",
+            });
+          } finally {
+            setLoading(false);
+          }
         }
-      } catch (error) {
-        Swal.fire({
-          title: "Error",
-          text:
-            error.message ||
-            error ||
-            "An error occurred while processing request",
-          icon: "error",
-        });
-      } finally {
-        setLoading(false);
-      }
+      });
     },
   });
 
