@@ -12,7 +12,8 @@ import {
   getList,
   InternalApi,
   JobType,
-  GETTASKDATA
+  GETTASKDATA,
+  CustomerContactPersonAccess
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import Modal from "../../../Components/ExtraComponents/Modals/Modal";
@@ -153,6 +154,12 @@ const Setting = () => {
   const [deletePersonRoleStatus, setDeletePersonRoleStatus] = useState(null);
   const [assignedPersonUsers, setAssignedPersonUsers] = useState([]);
   const [replacePersonRole, setReplacePersonRole] = useState(null);
+  const [isPersonRoleModalOpen, setIsPersonRoleModalOpen] = useState(false);
+  const [personRoleModalData, setPersonRoleModalData] = useState({});
+  const [personRoleCheckboxState, setPersonRoleCheckboxState] = useState([]);
+  const [personRoleStructure, setPersonRoleStructure] = useState([]);
+  const [loadingPersonRolePerms, setLoadingPersonRolePerms] = useState(false);
+  const [isAccordionOpen, setIsAccordionOpen] = useState(true);
 
   const [getAccessDataSetting, setAccessDataSetting] = useState({
     insert: 0,
@@ -2313,32 +2320,46 @@ const Setting = () => {
         id: data.id,
       });
     } else if (tabStatus === "2") {
-      setModalData({
-        ...modalData,
-        fields: [
-          {
-            type: "text",
-            name: "name",
-            label: "Role Name",
-            placeholder: "Service Name",
-            value: data.name,
-          },
-          {
-            type: "select",
-            name: "status",
-            label: "Status",
-            placeholder: "Select Status",
-            value: data.status === "1" ? "1" : "0",
-            options: [
-              { label: "Active", value: "1" },
-              { label: "Deactive", value: "0" },
-            ],
-          },
-        ],
-        title: " Contact Person Role",
-        tabStatus: tabStatus,
-        id: data.id,
-      });
+      setPersonRoleModalData(data);
+      setPersonRoleCheckboxState([]);
+      setPersonRoleStructure([]);
+      setLoadingPersonRolePerms(true);
+      setIsPersonRoleModalOpen(true);
+      setIsAccordionOpen(true);
+
+      const req = { action: "get", role_id: data.id };
+      const apiData = { req, authToken: token };
+
+      dispatch(CustomerContactPersonAccess(apiData))
+        .unwrap()
+        .then((response) => {
+          if (response.status) {
+            const filteredData = response.data.filter(item => item.permission_name !== "customer");
+            setPersonRoleStructure(filteredData);
+            
+            const initialCheckboxes = [];
+            filteredData.forEach((item) => {
+              item.items.forEach((perm) => {
+                if (perm.is_assigned === 1) {
+                  initialCheckboxes.push({
+                    permission_id: perm.id,
+                    role_id: data.id,
+                    is_assigned: true,
+                    permission_name: item.permission_name,
+                  });
+                }
+              });
+            });
+            setPersonRoleCheckboxState(initialCheckboxes);
+          }
+        })
+        .catch((error) => {
+          console.error("Error loading permissions:", error);
+        })
+        .finally(() => {
+          setLoadingPersonRolePerms(false);
+        });
+      return;
     } else if (tabStatus === "3") {
       setModalData({
         ...modalData,
@@ -2622,6 +2643,84 @@ const Setting = () => {
     }
     setModalData({});
     setIsModalOpen(false);
+  };
+
+  const handleSavePersonRoleWithPermissions = async () => {
+    if (!personRoleModalData.name || personRoleModalData.name.trim() === "") {
+      sweatalert.fire({
+        title: "Role Name is required",
+        icon: "warning",
+        timer: 2000,
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // 1. Update the role name & status
+      const roleUpdateRes = await dispatch(
+        PersonRole({
+          req: {
+            action: "update",
+            id: personRoleModalData.id,
+            name: personRoleModalData.name,
+            status: personRoleModalData.status || "1",
+          },
+          authToken: token,
+        })
+      ).unwrap();
+
+      if (!roleUpdateRes.status) {
+        sweatalert.fire({
+          title: roleUpdateRes.message || "Failed to update role details",
+          icon: "error",
+          timer: 2000,
+        });
+        return;
+      }
+
+      // 2. Update the permissions
+      const permsUpdateRes = await dispatch(
+        CustomerContactPersonAccess({
+          req: {
+            action: "update",
+            permissions: personRoleCheckboxState,
+          },
+          authToken: token,
+        })
+      ).unwrap();
+
+      if (permsUpdateRes.status) {
+        sweatalert.fire({
+          title: "Success!",
+          text: "Role and permissions updated successfully.",
+          icon: "success",
+          timer: 2000,
+        });
+        setIsPersonRoleModalOpen(false);
+        setPersonRoleModalData({});
+        setPersonRoleCheckboxState([]);
+        setPersonRoleStructure([]);
+        // Refresh the list
+        PersonRoleData({ action: "getAll" });
+      } else {
+        sweatalert.fire({
+          title: permsUpdateRes.message || "Failed to update permissions",
+          icon: "error",
+          timer: 2000,
+        });
+      }
+    } catch (error) {
+      console.error("Error updating role and permissions:", error);
+      sweatalert.fire({
+        title: "An error occurred",
+        text: "Could not save role and permissions.",
+        icon: "error",
+        timer: 2000,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = (data, tabStatus) => {
@@ -3449,6 +3548,286 @@ const Setting = () => {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </CommonModal>
+          )}
+          {isPersonRoleModalOpen && (
+            <CommonModal
+              isOpen={isPersonRoleModalOpen}
+              backdrop="static"
+              size="xl"
+              title="Edit Customer Contact Person Role & Permissions"
+              hideBtn={true}
+              handleClose={() => {
+                setIsPersonRoleModalOpen(false);
+                setPersonRoleModalData({});
+                setPersonRoleCheckboxState([]);
+                setPersonRoleStructure([]);
+              }}
+            >
+              <div className="p-3">
+                <div className="row mb-4">
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">Role Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={personRoleModalData?.name || ""}
+                      onChange={(e) =>
+                        setPersonRoleModalData((prev) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }))
+                      }
+                      placeholder="Enter role name"
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold">Status</label>
+                    <select
+                      className="form-select"
+                      value={personRoleModalData?.status || "1"}
+                      onChange={(e) =>
+                        setPersonRoleModalData((prev) => ({
+                          ...prev,
+                          status: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="1">Active</option>
+                      <option value="0">Deactive</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="report-data mt-4">
+                  <div className="tab-title">
+                    <h3>Set Role Access</h3>
+                  </div>
+                  <div className="mt-3">
+                    <div className="accordion" id="customer-access-accordion-modal">
+                      <div className="accordion-item mt-2">
+                        <h2 className="accordion-header" onClick={() => setIsAccordionOpen(!isAccordionOpen)} style={{ cursor: "pointer" }}>
+                          <button
+                            className={`accordion-button ${isAccordionOpen ? "" : "collapsed"}`}
+                            type="button"
+                          >
+                            {personRoleModalData?.name || ""}
+                          </button>
+                        </h2>
+                        <div className={`accordion-collapse collapse ${isAccordionOpen ? "show" : ""}`}>
+                          <div className="accordion-body bg-white">
+                            {loadingPersonRolePerms ? (
+                              <div className="text-center py-5">
+                                <div className="spinner-border text-primary" role="status">
+                                  <span className="visually-hidden">Loading...</span>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="d-flex justify-content-end mb-3 border-bottom pb-2">
+                                  <div className="form-check form-check-outline form-check-dark">
+                                    <input
+                                      className="form-check-input new-checkbox"
+                                      type="checkbox"
+                                      id="global-select-all-person-role"
+                                      checked={
+                                        personRoleStructure.length > 0 &&
+                                        personRoleStructure.every((section) =>
+                                          section.items.every((item) =>
+                                            personRoleCheckboxState.some(
+                                              (p) =>
+                                                p.role_id == personRoleModalData.id &&
+                                                p.permission_id == item.id &&
+                                                p.is_assigned
+                                            )
+                                          )
+                                        )
+                                      }
+                                      onChange={(e) => {
+                                        const checked = e.target.checked;
+                                        setPersonRoleCheckboxState((prevState) => {
+                                          let updatedState = prevState.filter(
+                                            (item) => item.role_id != personRoleModalData.id
+                                          );
+                                          if (checked) {
+                                            personRoleStructure.forEach((section) => {
+                                              section.items.forEach((item) => {
+                                                updatedState.push({
+                                                  permission_id: item.id,
+                                                  role_id: personRoleModalData.id,
+                                                  is_assigned: true,
+                                                  permission_name: section.permission_name,
+                                                });
+                                              });
+                                            });
+                                          }
+                                          return updatedState;
+                                        });
+                                      }}
+                                    />
+                                    <label
+                                      className="form-check-label new_checkbox mb-0 ms-2 fw-bold text-primary cursor-pointer"
+                                      htmlFor="global-select-all-person-role"
+                                    >
+                                      Select All Permissions
+                                    </label>
+                                  </div>
+                                </div>
+
+                                <div className="row">
+                                  {personRoleStructure
+                                    ?.filter((section) => section.permission_name !== "report")
+                                    ?.map((section, idx) => {
+                                      const sectionPermissions = section.items.map((item) => item.id);
+                                      const selectedSectionPermissions = personRoleCheckboxState.filter(
+                                        (item) =>
+                                          item.role_id == personRoleModalData.id &&
+                                          sectionPermissions.some((pid) => pid == item.permission_id) &&
+                                          item.is_assigned
+                                      );
+                                      const isAllSelected =
+                                        sectionPermissions.length > 0 &&
+                                        selectedSectionPermissions.length === sectionPermissions.length;
+
+                                      const handleSelectAllSection = (event) => {
+                                        const checked = event.target.checked;
+                                        setPersonRoleCheckboxState((prevState) => {
+                                          let updatedState = prevState.filter(
+                                            (item) =>
+                                              !(
+                                                item.role_id == personRoleModalData.id &&
+                                                sectionPermissions.some((pid) => pid == item.permission_id)
+                                              )
+                                          );
+
+                                          if (checked) {
+                                            section.items.forEach((item) => {
+                                              updatedState.push({
+                                                permission_id: item.id,
+                                                role_id: personRoleModalData.id,
+                                                is_assigned: true,
+                                                permission_name: section.permission_name,
+                                              });
+                                            });
+                                          }
+                                          return updatedState;
+                                        });
+                                      };
+
+                                      return (
+                                        <div key={idx} className="col-lg-2 col-md-6 mb-3">
+                                          <h4
+                                            className="card-title fs-16 mb-2 flex-grow-1"
+                                            style={{ textTransform: 'capitalize' }}
+                                          >
+                                            {section.permission_name && section.permission_name.replace(/_/g, " ")}
+                                          </h4>
+                                          <div className="mb-3 border-bottom pb-2">
+                                            <div className="form-check form-check-outline form-check-dark">
+                                              <input
+                                                className="form-check-input new-checkbox me-2"
+                                                type="checkbox"
+                                                id={`select-all-${section.permission_name}`}
+                                                checked={isAllSelected}
+                                                onChange={handleSelectAllSection}
+                                              />
+                                              <label
+                                                className="form-check-label new_checkbox mb-0 cursor-pointer"
+                                                htmlFor={`select-all-${section.permission_name}`}
+                                                style={{ fontSize: '12px', fontWeight: 'bold', color: '#007bff' }}
+                                              >
+                                                Select All
+                                              </label>
+                                            </div>
+                                          </div>
+
+                                          <div className="row">
+                                            {section.items.map((item) => {
+                                              const isChecked = personRoleCheckboxState.some(
+                                                (p) =>
+                                                  p.permission_id == item.id &&
+                                                  p.role_id == personRoleModalData.id &&
+                                                  p.is_assigned
+                                              );
+
+                                              const handleCheckboxChange = (event) => {
+                                                const checked = event.target.checked;
+                                                setPersonRoleCheckboxState((prevState) => {
+                                                  let updatedState = prevState.filter(
+                                                    (p) =>
+                                                      !(
+                                                        p.permission_id == item.id &&
+                                                        p.role_id == personRoleModalData.id
+                                                      )
+                                                  );
+                                                  if (checked) {
+                                                    updatedState.push({
+                                                      permission_id: item.id,
+                                                      role_id: personRoleModalData.id,
+                                                      is_assigned: true,
+                                                      permission_name: section.permission_name,
+                                                    });
+                                                  }
+                                                  return updatedState;
+                                                });
+                                              };
+
+                                              return (
+                                                <div className="mb-3" key={item.id}>
+                                                  <div className="form-check form-check-outline form-check-dark">
+                                                    <input
+                                                      className="form-check-input new-checkbox me-2"
+                                                      type="checkbox"
+                                                      id={`perm-${item.id}-${personRoleModalData.id}`}
+                                                      checked={isChecked}
+                                                      onChange={handleCheckboxChange}
+                                                    />
+                                                    <label
+                                                      className="form-check-label new_checkbox mb-0 text-capitalize cursor-pointer"
+                                                      htmlFor={`perm-${item.id}-${personRoleModalData.id}`}
+                                                    >
+                                                      {item.type && item.type.replace(/_/g, " ")}
+                                                    </label>
+                                                  </div>
+                                                </div>
+                                              );
+                                            })}
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer border-top pt-3">
+                <button
+                  type="button"
+                  className="btn btn-secondary rounded-pill px-4"
+                  onClick={() => {
+                    setIsPersonRoleModalOpen(false);
+                    setPersonRoleModalData({});
+                    setPersonRoleCheckboxState([]);
+                    setPersonRoleStructure([]);
+                  }}
+                >
+                  <X size={16} className="me-1" /> Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-success rounded-pill px-4"
+                  onClick={handleSavePersonRoleWithPermissions}
+                  disabled={loadingPersonRolePerms}
+                >
+                  <Save size={16} className="me-1" /> Save changes
+                </button>
               </div>
             </CommonModal>
           )}
