@@ -1,23 +1,33 @@
 import React from 'react';
-import { CircleAlert } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 
 const AccessDenied = () => {
+  const navigate = useNavigate();
 
   return (
     <div className="container-fluid">
-      <div className="row mt-4 justify-content-center">
-        <div className="col-md-8 col-lg-6 mt-5">
-          <div className="card shadow-sm border-0 rounded-4">
-            <div className="card-body p-5 text-center">
-              <div className="mb-4 d-flex justify-content-center">
-                <div className="bg-danger bg-opacity-10 rounded-circle p-4 d-inline-flex">
-                  <CircleAlert size={64} className="text-danger" />
+      <div className="report-data mt-4">
+        <div className="row">
+          <div className="col-md-12">
+           
+            
+            <div className="row justify-content-center my-5">
+              <div className="col-lg-6 text-center">
+                <div className="mb-4">
+                  <img
+                    src="/assets/images/error.svg"
+                    alt="Access Denied"
+                    style={{ width: '280px', height: 'auto' }}
+                  />
                 </div>
+                <h4 className="fw-bold mb-3 text-dark" style={{ textTransform: 'none' }}>
+                  Permission Required
+                </h4>
+                <p className="text-muted mb-0" style={{ textTransform: 'none', fontSize: '15px', lineHeight: '1.6' }}>
+                  You do not have the required permissions to view this page. Please contact your system administrator if you believe this is an error or need access.
+                </p>
               </div>
-              <h2 className="fw-bold mb-3">Access Denied</h2>
-              <p className="text-muted mb-4 fs-5" style={{ textTransform: 'none' }}>
-                You do not have permission to view this page. Please contact your administrator if you believe this is an error and you need access.
-              </p>
             </div>
           </div>
         </div>
@@ -27,3 +37,5 @@ const AccessDenied = () => {
 };
 
 export default AccessDenied;
+
+
