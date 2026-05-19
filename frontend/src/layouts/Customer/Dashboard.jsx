@@ -18,7 +18,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
   const dispatch = useDispatch();
-  const { hasAccess, selectedCustomer, contactPersonRole } = useCustomerAccess();
+  const { hasAccess, selectedCustomer, contactPersonRole, loading: accessLoading } = useCustomerAccess();
 
   const [dashboard, setDashboard] = useState({
     customer: { count: 0, ids: "" },
@@ -236,9 +236,7 @@ const Dashboard = () => {
         return;
       }
     } else if (type === "customer") {
-      if (!hasAccess("customer", "view") && role !== "SUPERADMIN") {
-        return;
-      }
+      // Bypassed customer view permission check for customer portal
     }
 
     const req = {
@@ -500,6 +498,23 @@ const Dashboard = () => {
     return Number(value).toLocaleString("en-IN");
   }
 
+  if (!accessLoading && !hasAccess("dashboard", "view") && role !== "SUPERADMIN") {
+    return (
+      <div className="container-fluid">
+        <div className="row mt-4">
+          <div className="col-12">
+            <div className="alert alert-danger border-2 d-flex align-items-center gap-2" role="alert" style={{ textTransform: 'none' }}>
+              <CircleAlert size={20} />
+              <div>
+                <strong>Access Denied:</strong> You do not have permission to view the Dashboard. Please contact your administrator if you believe this is an error.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="container-fluid">
@@ -614,9 +629,7 @@ const Dashboard = () => {
                         className="col-md-12 col-lg-4"
                         style={{
                           cursor:
-                            (hasAccess("customer", "view") ||
-                              role === "SUPERADMIN") &&
-                              parseInt(dashboard.customer.count) > 0
+                            parseInt(dashboard.customer.count) > 0
                               ? "pointer"
                               : "default",
                         }}

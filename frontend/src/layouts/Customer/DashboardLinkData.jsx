@@ -45,8 +45,8 @@ const DashboardLinkData = () => {
 
   useEffect(() => {
     const key = location?.state?.req?.key;
-    if (key) {
-      const module = key === "client" ? "client" : (key === "customer" ? "customer" : "job");
+    if (key && key !== "customer") {
+      const module = key === "client" ? "client" : "job";
       if (!hasAccess(module, "view") && role !== "SUPERADMIN") {
         navigate("/customer/dashboard");
       }
@@ -572,7 +572,7 @@ const DashboardLinkData = () => {
                   <ArrowLeft size={16} className="me-1" /> Back
                 </div>
 
-                {((location?.state?.req?.key === "client" ? hasAccess("client", "export") : location?.state?.req?.key === "customer" ? hasAccess("customer", "export") : hasAccess("job", "export")) || role === "SUPERADMIN") && allLinkedData && allLinkedData.length > 0 && (
+                {((location?.state?.req?.key === "client" ? hasAccess("client", "export") : location?.state?.req?.key === "customer" ? true : hasAccess("job", "export")) || role === "SUPERADMIN") && allLinkedData && allLinkedData.length > 0 && (
                   <div className="ms-2">
                     <button
                       className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"

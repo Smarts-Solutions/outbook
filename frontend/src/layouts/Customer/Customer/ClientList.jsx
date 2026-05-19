@@ -505,7 +505,7 @@ const ClientLists = () => {
       <div className="content-title">
         <div className="row ">
           <div className="col-sm-12">
-            {(selectedCustomer?.value === "All" && (hasAccess("customer", "view") || role === "SUPERADMIN")) && (
+            {selectedCustomer?.value === "All" && (
               <div className="form-group col-md-4 mb-0">
                 <label className="form-label mb-2"> Customer</label>
                 <Select
