@@ -892,7 +892,7 @@ const CustomerUsers = () => {
     {
       type: "select",
       name: "customer_contact_person_role_id",
-      label: "Customer Role",
+      label: "Customer contact person role",
       label_size: 12,
       col_size: 6,
       disable: false,
