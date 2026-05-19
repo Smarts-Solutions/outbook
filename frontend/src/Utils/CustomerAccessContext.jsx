@@ -83,13 +83,27 @@ export const CustomerAccessProvider = ({ children }) => {
                         value: item.id,
                         label: item.trading_name
                     }));
-                    setAssignedCustomers([{ value: "All", label: "All" }, ...formattedOptions]);
+
+                    if (formattedOptions.length === 1) {
+                        setAssignedCustomers(formattedOptions);
+                        // If only one customer is assigned, automatically select it if not already selected
+                        if (selectedCustomer.value !== formattedOptions[0].value) {
+                            setSelectedCustomer(formattedOptions[0]);
+                        }
+                    } else if (formattedOptions.length > 1) {
+                        setAssignedCustomers([{ value: "All", label: "All" }, ...formattedOptions]);
+                    } else {
+                        setAssignedCustomers([]);
+                        if (selectedCustomer.value !== "All") {
+                            setSelectedCustomer({ value: "All", label: "All" });
+                        }
+                    }
                 }
             } catch (error) {
                 console.error("Error fetching assigned customers:", error);
             }
         }
-    }, [dispatch]);
+    }, [dispatch, selectedCustomer.value]);
 
     // Fetch on mount and on route change
     useEffect(() => {
@@ -108,11 +122,33 @@ export const CustomerAccessProvider = ({ children }) => {
         return access?.is_assigned === 1;
     };
 
+    const hasAnyJobAccess = () => {
+        return (
+            hasAccess("job_information", "view") ||
+            hasAccess("task_timesheet", "view") ||
+            hasAccess("job_timeline", "view") ||
+            hasAccess("missing_logs", "view") ||
+            hasAccess("queries", "view") ||
+            hasAccess("draft", "view") ||
+            hasAccess("job_document", "view")
+        );
+    };
+
+    const hasAnyClientAccess = () => {
+        return (
+            hasAccess("no_of_jobs", "view") ||
+            hasAccess("client_overview", "view") ||
+            hasAccess("client_document", "view")
+        );
+    };
+
     return (
         <CustomerAccessContext.Provider value={{ 
             accessData, 
             fetchAccessData, 
             hasAccess, 
+            hasAnyJobAccess,
+            hasAnyClientAccess,
             assignedCustomers, 
             selectedCustomer, 
             setSelectedCustomer,

@@ -183,11 +183,83 @@ const updateCustomerContactPersonRole = async (CustomerContactPersonRole) => {
 };
 
 
+const checkCustomerContactPersonRoleAssignment = async (id) => {
+    const query = `
+        SELECT id, first_name, last_name, 'Customer User' as user_type
+        FROM customer_users 
+        WHERE customer_contact_person_role_id = ? AND status = '1'
+        UNION ALL
+        SELECT id, first_name, last_name, 'Staff' as user_type
+        FROM staffs 
+        WHERE customer_contact_person_role_id = ? AND status = '1'
+    `;
+    try {
+        const [result] = await pool.execute(query, [id, id]);
+        return result;
+    } catch (err) {
+        console.error('Error checking assignments:', err);
+        throw err;
+    }
+};
+
+const reassignAndDeleteCustomerContactPersonRole = async (data) => {
+    const { id, replace_id, StaffUserId, ip } = data;
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // 1. Reassign users in customer_users
+        const updateCustomerUsersQuery = `
+            UPDATE customer_users 
+            SET customer_contact_person_role_id = ? 
+            WHERE customer_contact_person_role_id = ?
+        `;
+        await connection.execute(updateCustomerUsersQuery, [replace_id, id]);
+
+        // 2. Reassign users in staffs
+        const updateStaffsQuery = `
+            UPDATE staffs 
+            SET customer_contact_person_role_id = ? 
+            WHERE customer_contact_person_role_id = ?
+        `;
+        await connection.execute(updateStaffsQuery, [replace_id, id]);
+
+        // 3. Get role name for logging
+        const [[existName]] = await connection.execute(`SELECT name FROM customer_contact_person_role WHERE id = ?`, [id]);
+
+        // 4. Delete the role
+        const deleteQuery = `DELETE FROM customer_contact_person_role WHERE id = ?`;
+        await connection.execute(deleteQuery, [id]);
+
+        // 5. Log the deletion
+        const currentDate = new Date();
+        await SatffLogUpdateOperation({
+            staff_id: StaffUserId,
+            ip: ip,
+            date: currentDate.toISOString().split('T')[0],
+            module_name: "customer contact person role",
+            log_message: `deleted customer contact person role ${existName.name} after reassigning users`,
+            permission_type: "deleted",
+            module_id: id
+        });
+
+        await connection.commit();
+        return { status: true, message: 'Users reassigned and role deleted successfully.' };
+    } catch (err) {
+        await connection.rollback();
+        console.error('Error in reassignAndDelete:', err);
+        throw err;
+    } finally {
+        connection.release();
+    }
+};
+
 module.exports = {
     createCustomerContactPersonRole,
     deleteCustomerContactPersonRole,
     updateCustomerContactPersonRole,
     getCustomerContactPersonRole,
-    getCustomerContactPersonRoleAll
-  
-};
+    getCustomerContactPersonRoleAll,
+    checkCustomerContactPersonRoleAssignment,
+    reassignAndDeleteCustomerContactPersonRole
+};

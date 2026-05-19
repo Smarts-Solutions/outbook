@@ -10,81 +10,55 @@ const commonEmail = async (toEmail, subjectEmail, htmlEmail, cc = '', bcc = '', 
         let smtpUsername = process.env.SMTP_USERNAME;
         let smtpPassword = process.env.SMTP_PASSWORD;
 
-        smtpHost = "mail.esignaadhaar.com"
-        smtpPort = "465"
-        smtpUsername = "esign@esignaadhaar.com"
-        smtpPassword = "r*7@)_-nwe.W"
-
+       
         // console.log("SMTP Host:", smtpHost);
         // console.log("SMTP Port:", smtpPort);
         // console.log("smtp Username:", smtpUsername);
         // console.log("smtp Password:", smtpPassword); 
-
-        // const transport = nodemailer.createTransport({
-        //     host: smtpHost,
-        //     port: smtpPort,
-        //     secure: false, // STARTTLS
-        //     auth: {
-        //         user: smtpUsername,
-        //         pass: smtpPassword,
-        //     },
-        //     tls: {
-        //         rejectUnauthorized: false,
-        //     },
-        // });
-        // const mailOptions = {
-        //     from: smtpUsername,
-        //     to: toEmail,
-        //     cc: cc,
-        //     bcc: bcc,
-        //     subject: subjectEmail,
-        //     html: htmlEmail,
-        //     attachments: [
-        //         {
-        //             filename: filename,
-        //             content: dynamic_attachment,
-        //         },
-        //     ],
-        // };
-        // const info = await transport.sendMail(mailOptions);
-        // console.log("✅ Mail sent successfully:", info.messageId);
-        // return true;
-
-        try {
+      
         const transport = nodemailer.createTransport({
-            type: "smtp",
             host: smtpHost,
             port: smtpPort,
-            secure: smtpPort == 465 || smtpPort == "465",
+            secure: false, // STARTTLS
             auth: {
                 user: smtpUsername,
-                pass: smtpPassword
+                pass: smtpPassword,
             },
             tls: {
-                rejectUnauthorized: false // ✅ Ignore self-signed certificates
-            }
+                rejectUnauthorized: false,
+            },
         });
 
-        const attachments = [];
-         const mailOptions = {
+
+        // Mail options
+        const mailOptions = {
             from: smtpUsername,
             to: toEmail,
             cc: cc,
             bcc: bcc,
             subject: subjectEmail,
-            text: 'Please find the attached PDF.',
             html: htmlEmail,
-            attachments : attachments
+            // attachments: [
+            //     {
+            //         filename: filename,
+            //         content: dynamic_attachment,
+            //     },
+            // ],
         };
 
+        // Add attachment only if exists
+        if (dynamic_attachment && filename) {
+            mailOptions.attachments = [
+                {
+                    filename: filename,
+                    content: dynamic_attachment,
+                },
+            ];
+        }
 
-        await transport.sendMail(mailOptions);
-        console.log("Email sent successfully.");
+        const info = await transport.sendMail(mailOptions);
+        console.log("✅ Mail sent successfully:", info.messageId);
         return true;
-    } catch (error) {
-        console.log("Error sending email:", error);
-        return false;
-    }
     } catch (error) {
         console.error("❌ Error sending email:", error);
         return false;

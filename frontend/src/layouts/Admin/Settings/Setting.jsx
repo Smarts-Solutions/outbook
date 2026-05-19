@@ -150,6 +150,9 @@ const Setting = () => {
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
   const [replaceStatue, setReplaceStatue] = useState(null);
+  const [deletePersonRoleStatus, setDeletePersonRoleStatus] = useState(null);
+  const [assignedPersonUsers, setAssignedPersonUsers] = useState([]);
+  const [replacePersonRole, setReplacePersonRole] = useState(null);
 
   const [getAccessDataSetting, setAccessDataSetting] = useState({
     insert: 0,
@@ -501,15 +504,15 @@ const Setting = () => {
       }))
     };
 
-   //console.log("Payload", payload)
+    //console.log("Payload", payload)
 
-   // setLoading(true);
+    // setLoading(true);
     const req = { action: "deletExistingJob", data: payload };
     await dispatch(Service({ req: req, authToken: token }))
       .unwrap()
       .then(async (response) => {
         setLoading(false);
-       
+
         if (response.status) {
           setDeleteServiceModal(false);
           sweatalert.fire({
@@ -2650,7 +2653,19 @@ const Setting = () => {
               roleData(req);
               break;
             case "2":
-              PersonRoleData(req);
+              // First check if role is assigned to any user
+              dispatch(PersonRole({ req: { action: "checkAssignment", id: data.id }, authToken: token }))
+                .unwrap()
+                .then((res) => {
+                  if (res.status && res.data.length > 0) {
+                    // It is assigned, open modal
+                    setDeletePersonRoleStatus(data);
+                    setAssignedPersonUsers(res.data);
+                  } else {
+                    // Not assigned, proceed with direct delete
+                    PersonRoleData(req);
+                  }
+                });
               break;
             case "3":
               statusTypeData(req);
@@ -2810,6 +2825,59 @@ const Setting = () => {
     ?.map((staff) => ({
       value: staff.id,
       label: staff.role_name,
+    }));
+
+  const handlePersonRoleReassignDelete = async () => {
+    if (!replacePersonRole) {
+      sweatalert.fire({
+        title: "Please select a replacement role",
+        icon: "warning",
+        timer: 2000,
+      });
+      return;
+    }
+
+    try {
+      const req = {
+        action: "reassignAndDelete",
+        id: deletePersonRoleStatus.id,
+        replace_id: replacePersonRole,
+        ip: "127.0.0.1",
+        StaffUserId: JSON.parse(localStorage.getItem("userId"))
+      };
+      const data = { req: req, authToken: token };
+      const res = await dispatch(PersonRole(data)).unwrap();
+
+      if (res.status) {
+        sweatalert.fire({
+          title: res.message,
+          icon: "success",
+          timer: 2000,
+        });
+        setDeletePersonRoleStatus(null);
+        setAssignedPersonUsers([]);
+        setReplacePersonRole(null);
+        setTimeout(() => {
+          PersonRoleData({ action: "getAll" });
+        }, 2000);
+      } else {
+        sweatalert.fire({
+          title: res.message,
+          icon: "error",
+          timer: 2000,
+        });
+      }
+    } catch (error) {
+      console.error("Error in reassign and delete:", error);
+    }
+  };
+
+  const personRoleOptions = personRoleDataAll?.data
+    ?.filter((role) => role.id !== deletePersonRoleStatus?.id)
+    ?.sort((a, b) => a.name.localeCompare(b.name))
+    ?.map((role) => ({
+      value: role.id,
+      label: role.name,
     }));
 
   return (
@@ -3397,7 +3465,7 @@ const Setting = () => {
           <div className="">
             {/* Heading */}
             <div className="text-start mb-4 border-bottom pb-2">
-              <h6 className=" fw-bold d-flex align-items-center  alert alert-warning">
+              <h6 className=" fw-bold d-flex align-items-center ">
                 <i className="bi bi-trash3 me-2"></i>
                 Delete Role:{" "}
                 <span className=" ms-2">{deleteStatus?.role_name}</span>
@@ -3495,6 +3563,104 @@ const Setting = () => {
         </CommonModal>
 
         <CommonModal
+          isOpen={deletePersonRoleStatus}
+          backdrop="static"
+          size="md"
+          title="Delete Customer Role"
+          hideBtn={true}
+          handleClose={() => setDeletePersonRoleStatus(null)}
+        >
+          <div className="">
+            <div className="text-start mb-4 border-bottom pb-2">
+              <h6 className=" fw-bold d-flex align-items-center">
+                <i className="bi bi-trash3 me-2"></i>
+                Delete Contact  Person Role:{" "}
+                <span className=" ms-2">{deletePersonRoleStatus?.name}</span>
+              </h6>
+            </div>
+
+            {assignedPersonUsers.length > 0 ? (
+              <>
+                <div className="mb-4">
+                  <label className="form-label fw-semibold">
+                    Select Role to Replace
+                  </label>
+                  <Select
+                    options={personRoleOptions}
+                    value={
+                      personRoleOptions?.find((opt) => opt.value === replacePersonRole) ||
+                      null
+                    }
+                    onChange={(selected) => setReplacePersonRole(selected?.value)}
+                    isSearchable
+                    placeholder="Choose Role"
+                    className="shadow-sm"
+                    classNamePrefix="select"
+                    menuPortalTarget={document.body}
+                    menuPosition="fixed"
+                    styles={{
+                      menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                    }}
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className=" form-label fw-semibold d-flex align-items-center">
+                    <User2 size={16} className="me-1" /> Customer Users Assigned
+                  </label>
+                  {/* <ul className="list-group mt-2 gap-2">
+                    {assignedPersonUsers.map((user, index) => (
+                      <li
+                        key={index}
+                        className="list-group-item d-flex justify-content-between align-items-center rounded-pill"
+                      >
+                        <span className="text-dark">
+                          {`${user?.first_name} ${user.last_name}`}
+                        </span>
+                      </li>
+                    ))}
+                  </ul> */}
+                  <ul
+                    className="list-group mt-2 gap-2"
+                    style={{
+                      maxHeight: "220px",
+                      overflowY: "auto",
+                    }}
+                  >
+                    {assignedPersonUsers.map((user, index) => (
+                      <li
+                        key={index}
+                        className="list-group-item d-flex justify-content-between align-items-center"
+                      >
+                        <span className="text-dark">
+                          {`${user?.first_name} ${user.last_name}`}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="d-flex gap-2">
+                  <button
+                    disabled={!replacePersonRole}
+                    onClick={handlePersonRoleReassignDelete}
+                    className="swal2-confirm swal2-styled w-100"
+                  >
+                    Delete & Reassign
+                  </button>
+                  <button
+                    onClick={() => setDeletePersonRoleStatus(null)}
+                    className="swal2-cancel swal2-styled w-100"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            ) : null}
+          </div>
+        </CommonModal>
+
+        <CommonModal
           isOpen={deleteServiceModal}
           backdrop="static"
           size="xl"
@@ -3557,7 +3723,7 @@ const Setting = () => {
                                       value={hours}
                                       onChange={(e) => handleBudgetTime(e, index, "hour")}
                                       style={{ minWidth: "35px", width: "55px", fontSize: "14px" }}
-                                    
+
                                     />
                                     <span className="text-muted small ms-1" style={{ fontSize: "12px" }}>h</span>
                                   </div>
@@ -3569,7 +3735,7 @@ const Setting = () => {
                                       value={minutes}
                                       onChange={(e) => handleBudgetTime(e, index, "minute")}
                                       style={{ width: "32px", fontSize: "14px" }}
-                                     
+
                                     />
                                     <span className="text-muted small ms-1" style={{ fontSize: "12px" }}>m</span>
                                   </div>
@@ -3772,7 +3938,7 @@ const Setting = () => {
                                             value={hours}
                                             onChange={(e) => handleBudgetTimeDeleteService(e, index, taskIndex, "hour")}
                                             style={{ minWidth: "32px", width: "50px", fontSize: "13px" }}
-                                           
+
                                           />
                                           <span className="text-muted" style={{ fontSize: "11px" }}>h</span>
                                           <div className="text-muted mx-0" style={{ fontSize: "11px" }}>:</div>
@@ -3782,7 +3948,7 @@ const Setting = () => {
                                             value={minutes}
                                             onChange={(e) => handleBudgetTimeDeleteService(e, index, taskIndex, "minute")}
                                             style={{ width: "26px", fontSize: "13px" }}
-                                           
+
                                           />
                                           <span className="text-muted" style={{ fontSize: "11px" }}>m</span>
                                         </div>

@@ -2486,9 +2486,13 @@ const CustomerJobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
                                 );
                               })
                             ) : (
-                              <div className="text-center py-4 bg-light rounded-3 border border-dashed">
-                                <Info size={30} className="text-muted mb-2 opacity-50" />
-                                <p className="text-muted fs-13 mb-0">No history available</p>
+                              <div className="text-center py-4">
+                                <img
+                                  src="/assets/images/No-data-amico.png"
+                                  alt="No history found"
+                                  style={{ maxWidth: "150px", height: "auto" }}
+                                />
+                                <p className="text-muted fs-13 mb-0 mt-2">No Status History Found</p>
                               </div>
                             )}
                           </div>

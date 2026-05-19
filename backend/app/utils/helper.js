@@ -31,7 +31,10 @@ const SatffLogUpdateOperation = async (logData) => {
         jobs ON staff_logs.module_name = 'job' AND staff_logs.module_id = jobs.id
     SET 
         staff_logs.log_message_all = CONCAT(
-          roles.role_name, ' ', 
+          CASE 
+            WHEN staffs.role_id = 12 THEN 'Customer User'
+            ELSE IFNULL(roles.role_name, 'STAFF')
+          END, ' ', 
           staffs.first_name, ' ', 
           staffs.last_name, ' ', 
           staff_logs.log_message, ' ',

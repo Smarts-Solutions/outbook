@@ -159,7 +159,7 @@ const customerJobTimeline = async (req, res) => {
 
 const customerTaskTimesheetAction = async (req, res) => {
   try {
-    const result = await customerDashboardService.customerTaskTimesheetAction(req.body);
+    const result = await customerDashboardService.customerTaskTimesheetAction(req);
 
     return res.status(200).send(result);
   } catch (error) {
@@ -169,7 +169,7 @@ const customerTaskTimesheetAction = async (req, res) => {
 
 const customerMissingLogAction = async (req, res) => {
   try {
-    const result = await customerDashboardService.customerMissingLogAction(req.body);
+    const result = await customerDashboardService.customerMissingLogAction(req);
     return res.status(200).send(result);
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -178,7 +178,7 @@ const customerMissingLogAction = async (req, res) => {
 
 const customerQueryAction = async (req, res) => {
   try {
-    const result = await customerDashboardService.customerQueryAction(req.body);
+    const result = await customerDashboardService.customerQueryAction(req);
 
     return res.status(200).send(result);
   } catch (error) {
@@ -188,7 +188,7 @@ const customerQueryAction = async (req, res) => {
 
 const customerDraftAction = async (req, res) => {
   try {
-    const result = await customerDashboardService.customerDraftAction(req.body);
+    const result = await customerDashboardService.customerDraftAction(req);
 
     return res.status(200).send(result);
   } catch (error) {

@@ -58,7 +58,7 @@ const CustomerDiscrepancyReport = () => {
   const columns = [
     {
       name: 'Job Name',
-      selector: row => row.job_code_id, 
+      selector: row => row.job_code_id,
       sortable: true
     },
     {
@@ -74,10 +74,10 @@ const CustomerDiscrepancyReport = () => {
   ];
 
   const handleExport = () => {
-    const exportData = reportData.map(row => ({
-        "Job Name": row.job_code_id,
-        "Timesheet Total Hours": convertTimeFormatString(convertTimeFormat(row.total_spent_hours)),
-        "Job Total Hours": convertTimeFormatString(row.job_total_time)
+    const exportData = (reportData || []).map(row => ({
+      "Job Name": row.job_code_id,
+      "Timesheet Total Hours": convertTimeFormatString(convertTimeFormat(row.total_spent_hours)),
+      "Job Total Hours": convertTimeFormatString(row.job_total_time)
     }));
     downloadCSV(exportData, "Discrepancy_Report.csv");
   };
@@ -111,13 +111,13 @@ const CustomerDiscrepancyReport = () => {
           </div>
           <div className="col-md-5 d-flex justify-content-end align-items-center mb-5">
             {reportData && reportData.length > 0 && (
-                <button
-                  className="btn btn-outline-info fw-bold border-3 d-inline-flex align-items-center gap-2 lh-1"
-                  onClick={handleExport}
-                >
-                  <Download size={16} />
-                  <span>Export Excel</span>
-                </button>
+              <button
+                className="btn btn-outline-info fw-bold border-3 d-inline-flex align-items-center gap-2 lh-1"
+                onClick={handleExport}
+              >
+                <Download size={16} />
+                <span>Export Excel</span>
+              </button>
             )}
           </div>
         </div>

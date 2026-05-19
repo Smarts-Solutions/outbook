@@ -373,7 +373,8 @@ const customerJobAdd = async (job) => {
       job.Audit_Year_Ending_id_27, job.Filing_Frequency_id_8, job.Period_Ending_Date_id_8,
       job.Filing_Date_id_8, job.Year_id_28, job.job_priority || 'normal',
       job.processing_checklist, job.reviewing_checklist, job.processing_checklist_status,
-      job.reviewing_checklist_status, job.checklist_modal_data
+      job.reviewing_checklist_status,
+      (job.checklist_modal_data && typeof job.checklist_modal_data === 'object') ? JSON.stringify(job.checklist_modal_data) : (job.checklist_modal_data || null)
     ].map(handleUndefined);
 
     const [result] = await pool.execute(query + "(" + Array(values.length).fill("?").join(",") + ")", values);

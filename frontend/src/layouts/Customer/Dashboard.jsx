@@ -247,16 +247,16 @@ const Dashboard = () => {
       ids: data.ids,
       heading: heading,
     };
-    navigate("/customer/dashboard/data", { 
-      state: { 
-        req: req, 
-        data: { 
-          customer: { 
-            id: selectedCustomer.value === "All" ? "" : selectedCustomer.value, 
-            trading_name: selectedCustomer.label === "All" ? "" : selectedCustomer.label 
-          } 
-        } 
-      } 
+    navigate("/customer/dashboard/data", {
+      state: {
+        req: req,
+        data: {
+          customer: {
+            id: selectedCustomer.value === "All" ? "" : selectedCustomer.value,
+            trading_name: selectedCustomer.label === "All" ? "" : selectedCustomer.label
+          }
+        }
+      }
     });
   };
 
@@ -611,7 +611,7 @@ const Dashboard = () => {
                   ) : (
                     <div className="row justify-content-center">
                       <div
-                        className="col-md-12 col-lg-6"
+                        className="col-md-12 col-lg-4"
                         style={{
                           cursor:
                             (hasAccess("customer", "view") ||
@@ -655,7 +655,7 @@ const Dashboard = () => {
                         </div>
                       </div>
                       <div
-                        className="col-md-12 col-lg-6"
+                        className="col-md-12 col-lg-4"
                         style={{
                           cursor:
                             (hasAccess("client_overview", "view") ||
@@ -699,7 +699,7 @@ const Dashboard = () => {
                         </div>
                       </div>
                       <div
-                        className="col-md-12  col-lg-6"
+                        className="col-md-12  col-lg-4"
                         style={{
                           cursor:
                             (hasAccess("no_of_jobs", "view") ||
@@ -737,7 +737,7 @@ const Dashboard = () => {
                         </div>
                       </div>
                       <div
-                        className="col-md-12  col-lg-6"
+                        className="col-md-12  col-lg-4"
                         style={{
                           cursor:
                             (hasAccess("no_of_jobs", "view") ||
@@ -782,7 +782,7 @@ const Dashboard = () => {
                         </div>
                       </div>
                       <div
-                        className="col-md-12  col-lg-6"
+                        className="col-md-12  col-lg-4"
                         style={{
                           cursor:
                             (hasAccess("no_of_jobs", "view") ||

@@ -5,6 +5,8 @@ import Datatable from "../../../../Components/ExtraComponents/Datatable";
 import CommonModal from "../../../../Components/ExtraComponents/Modals/CommanModal";
 import {
   CustomerMissingLogAction,
+  CustomerAddMissingLog,
+  CustomerEditMissingLog,
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getProfile } from "../../../../ReduxStore/Slice/Staff/staffSlice";
 import sweatalert from "sweetalert2";
@@ -202,7 +204,7 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
     };
     const data = { req: req, authToken: token };
 
-    await dispatch(CustomerMissingLogAction(data))
+    await dispatch(CustomerAddMissingLog(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {
@@ -380,7 +382,7 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
       return;
     }
 
-    await dispatch(CustomerMissingLogAction(data))
+    await dispatch(CustomerEditMissingLog(data))
       .unwrap()
       .then(async (response) => {
         if (response.status) {

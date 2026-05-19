@@ -24,7 +24,7 @@ const ClientLists = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const role = JSON.parse(localStorage.getItem("role"));
-  const { hasAccess, selectedCustomer, loading: accessLoading } = useCustomerAccess();
+  const { hasAccess, hasAnyJobAccess, hasAnyClientAccess, selectedCustomer, loading: accessLoading } = useCustomerAccess();
 
   const customer_id_sidebar = sessionStorage.getItem("cust_id_sidebar");
   const [CustomerData, setCustomerData] = useState([]);
@@ -132,11 +132,12 @@ const ClientLists = () => {
     }
   }, [activeTab, customerId, pageSize]);
 
-  useEffect(() => {
-    if (!accessLoading && !hasAccess("client", "view") && !hasAccess("job", "view") && role !== "SUPERADMIN") {
-      navigate("/customer/dashboard");
-    }
-  }, [hasAccess, role, navigate, accessLoading]);
+  // Removed permission-based redirect as requested
+  // useEffect(() => {
+  //   if (!accessLoading && !hasAccess("client", "view") && !hasAccess("job", "view") && role !== "SUPERADMIN") {
+  //     navigate("/customer/dashboard");
+  //   }
+  // }, [hasAccess, role, navigate, accessLoading]);
 
   const SetTab = (e) => {
     setActiveTab(e);
@@ -251,15 +252,15 @@ const ClientLists = () => {
   const ClientListColumns = [
     {
       name: "Client Name",
-      cell: (row) => (
-        (hasAccess("job", "view") || role === "SUPERADMIN") ? (
+      cell: (row) => {
+        return hasAnyClientAccess() ? (
           <a onClick={() => HandleClientView(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
             {row.client_name}
           </a>
         ) : (
-          <span>{row.client_name}</span>
-        )
-      ),
+          <div title={row.client_name}>{row.client_name}</div>
+        );
+      },
       selector: (row) => row.client_name,
       sortable: true,
     },
@@ -276,25 +277,6 @@ const ClientLists = () => {
     {
       name: "Client Type",
       selector: (row) => row.client_type_name || "-",
-      sortable: true,
-    },
-    {
-      name: "Created By",
-      selector: (row) => row.client_created_by || "-",
-      sortable: true,
-    },
-    {
-      name: "Created At",
-      selector: (row) => row.created_at || "-",
-      sortable: true,
-    },
-    {
-      name: "Status",
-      cell: (row) => (
-        <span className={row.status === "1" ? "text-success" : "text-danger"}>
-          {row.status === "1" ? "Active" : "Deactive"}
-        </span>
-      ),
       sortable: true,
     },
     ...((hasAccess("client", "update") || hasAccess("client", "delete")) ? [
@@ -321,11 +303,15 @@ const ClientLists = () => {
   const JobColumns = [
     {
       name: "Job ID",
-      cell: (row) => (
-        <a onClick={() => HandleJobView(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
-          {row.job_code_id}
-        </a>
-      ),
+      cell: (row) => {
+        return hasAnyJobAccess() ? (
+          <a onClick={() => HandleJobView(row)} style={{ cursor: "pointer", color: "#26bdf0" }}>
+            {row.job_code_id}
+          </a>
+        ) : (
+          <div title={row.job_code_id}>{row.job_code_id}</div>
+        );
+      },
       selector: (row) => row.job_code_id,
       sortable: true,
     },
@@ -368,21 +354,6 @@ const ClientLists = () => {
       width: "250px",
     },
     {
-      name: "Client Contact Person",
-      cell: (row) => (
-        <div title={row.account_manager_officer_first_name + " " + row.account_manager_officer_last_name || "-"}>
-          {row.account_manager_officer_first_name + " " + row.account_manager_officer_last_name || "-"}
-        </div>
-      ),
-      selector: (row) => row.account_manager_officer_first_name + " " + row.account_manager_officer_last_name || "-",
-      sortable: true,
-    },
-    {
-      name: "Client Job Code",
-      selector: (row) => row.client_job_code || "-",
-      sortable: true,
-    },
-    {
       name: "Outbook Account Manager",
       cell: (row) => (
         <div title={row.outbooks_acount_manager_first_name + " " + row.outbooks_acount_manager_last_name || "-"}>
@@ -393,33 +364,8 @@ const ClientLists = () => {
       sortable: true,
     },
     {
-      name: "Allocated To",
-      selector: (row) => row.allocated_id != null ? row.allocated_first_name + " " + row.allocated_last_name : "-",
-      sortable: true,
-    },
-    {
-      name: "Timesheet",
-      cell: (row) => (
-        <div title={row.total_hours_status == "1" && row.total_hours != null ? row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m" : "-"}>
-          {row.total_hours_status == "1" && row.total_hours != null ? row.total_hours.split(":")[0] + "h " + row.total_hours.split(":")[1] + "m" : "-"}
-        </div>
-      ),
-      selector: (row) => row.total_hours_status == "1" && row.total_hours != null ? row.total_hours : "-",
-      sortable: true,
-    },
-    {
       name: "Invoicing",
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
-      sortable: true,
-    },
-    {
-      name: "Created By",
-      selector: (row) => row.job_created_by || "-",
-      sortable: true,
-    },
-    {
-      name: "Created At",
-      selector: (row) => row.created_at || "-",
       sortable: true,
     },
     ...((hasAccess("job", "update") || hasAccess("job", "delete")) ? [
@@ -480,9 +426,6 @@ const ClientLists = () => {
           "Client Code": item.client_code,
           "Customer Name": item.customer_name,
           "Client Type Name": item.client_type_name,
-          "Created By": item.client_created_by,
-          "Created At": item.created_at,
-          Status: item.status == 1 ? "Active" : "Deactive",
         }));
       }
     } else if (activeTab === "job") {
@@ -494,8 +437,6 @@ const ClientLists = () => {
           "Client Name": item.client_trading_name,
           "Job Type": item.job_type_name,
           Status: item.status,
-          "Created By": item.job_created_by,
-          "Created At": item.created_at,
         }));
       }
     }
@@ -522,13 +463,13 @@ const ClientLists = () => {
   };
 
   const HandleClientView = (row) => {
-    const updatedData = { 
-      ...hararchyData, 
-      customer: { 
-        id: customerId || row.customer_id, 
-        trading_name: (customerName && customerName !== "All") ? customerName : row.customer_name 
+    const updatedData = {
+      ...hararchyData,
+      customer: {
+        id: customerId || row.customer_id,
+        trading_name: (customerName && customerName !== "All") ? customerName : row.customer_name
       },
-      client: row 
+      client: row
     };
     setHararchyData(updatedData);
     sessionStorage.setItem("cli_id_sidebar", row.id);
@@ -537,26 +478,25 @@ const ClientLists = () => {
   };
 
   const HandleJobView = (row) => {
-    const updatedData = { 
-      customer: { 
-        id: customerId || row.customer_id, 
-        trading_name: (customerName && customerName !== "All") ? customerName : (row.customer_name || row.customer_trading_name) 
-      }, 
+    const updatedData = {
+      customer: {
+        id: customerId || row.customer_id,
+        trading_name: (customerName && customerName !== "All") ? customerName : (row.customer_name || row.customer_trading_name)
+      },
       client: {
         id: row.client_id,
         client_name: row.client_trading_name || row.client_name
       },
-      job: row 
+      job: row
     };
     setHararchyData(updatedData);
     navigate("/customer/job/logs", { state: { job_id: row.job_id, activeTab: activeTab, customer_id: customerId || row.customer_id, data: updatedData } });
   };
 
-  const tabs = [];
-  if (hasAccess("client", "view")) {
-    tabs.push({ id: "client", label: "Client", icon: <User size={16} /> });
-  }
-  if (customerId && hasAccess("job", "view")) {
+  const tabs = [
+    { id: "client", label: "Client", icon: <User size={16} /> }
+  ];
+  if (customerId && (hasAccess("job", "view") || role === "SUPERADMIN")) {
     tabs.push({ id: "job", label: "Job", icon: <Briefcase size={16} /> });
   }
 

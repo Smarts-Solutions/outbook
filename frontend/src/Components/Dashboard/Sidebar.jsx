@@ -203,7 +203,7 @@ const Sidebar = () => {
                     </Link>
                   </li>
                 )}
-                {role === "CUSTOMER" && hasAccess("report") && (
+                {/* {role === "CUSTOMER" && hasAccess("report") && (
                   <li
                     className={
                       activeLink.startsWith("/customer/reports") ||
@@ -279,7 +279,7 @@ const Sidebar = () => {
                       </li>
                     </ul>
                   </li>
-                )}
+                )} */}
               </>
             )}
             {role !== "CUSTOMER" && (

@@ -9,6 +9,8 @@ import CustomerTaxWeeklyReport from './CustomerTaxWeeklyReport';
 import CustomerAverageTatReport from './CustomerAverageTatReport';
 import CustomerMissingTimesheetReport from './CustomerMissingTimesheetReport';
 import CustomerDiscrepancyReport from './CustomerDiscrepancyReport';
+import CustomerDiscrepancyReportProcessor from './CustomerDiscrepancyReportProcessor';
+import CustomerCapacityReport from './CustomerCapacityReport';
 import { useCustomerAccess } from '../../../Utils/CustomerAccessContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -53,6 +55,10 @@ function CustomerReports() {
         return <CustomerMissingTimesheetReport />;
       case 'discrepancyReport':
         return <CustomerDiscrepancyReport />;
+      case 'discrepancyReportProcessor':
+        return <CustomerDiscrepancyReportProcessor />;
+      case 'capacityReport':
+        return <CustomerCapacityReport />;
       default:
         return <div className="p-4 text-center"><h5>Coming Soon...</h5></div>;
     }
@@ -65,24 +71,26 @@ function CustomerReports() {
           <div className="page-title-box">
             <div className="row">
               <div>
-                <h5 className="mb-4" style={{ fontWeight: 600 }}>Customer Reports</h5>
+                <h5 className="mb-4" style={{ fontWeight: 600 }}>Reports</h5>
               </div>
               <div className="col-lg-4 col-md-6 ">
-                  <select className="form-select" id="tabSelect"
-                    value={activeTab}
-                    onChange={(e) => handleTabClick(e.target.value)}
-                  >
-                    <option value="jobStatusReport">Job Status Report</option>
-                    <option value="jobsReceivedSentReports">Jobs Received Sent Reports</option>
-                    <option value="jobSummaryReport">Job Summary Report</option>
-                    <option value="jobsPendingReport">Jobs Pending Report</option>
-                    <option value="dueByReport">Due By Report</option>
-                    <option value="teamMonthlyReports">Team Monthly Reports</option>
-                    <option value="taxWeeklyStatusReport">Tax Weekly Status Report</option>
-                    <option value="averageTatReport">Average TAT Report</option>
-                    <option value="missingTimesheetReport">Missing Timesheet Report</option>
-                    <option value="discrepancyReport">Discrepancy Report</option>
-                  </select>
+                <select className="form-select" id="tabSelect"
+                  value={activeTab}
+                  onChange={(e) => handleTabClick(e.target.value)}
+                >
+                  <option value="jobStatusReport">Job Status Report</option>
+                  <option value="jobsReceivedSentReports">Jobs Received Sent Reports</option>
+                  <option value="jobSummaryReport">Job Summary Report</option>
+                  <option value="jobsPendingReport">Jobs Pending Report</option>
+                  <option value="dueByReport">Due By Report</option>
+                  <option value="teamMonthlyReports">Team Performance Report by Month</option>
+                  <option value="taxWeeklyStatusReport">Tax Weekly Status Report</option>
+                  <option value="averageTatReport">Average TAT Report</option>
+                  <option value="missingTimesheetReport">Missing Timesheet Report</option>
+                  <option value="discrepancyReport">Discrepancy Report Job</option>
+                  <option value="discrepancyReportProcessor">Discrepancy Report Processor</option>
+                  <option value="capacityReport">Capacity Report</option>
+                </select>
               </div>
             </div>
           </div>

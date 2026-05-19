@@ -28,7 +28,16 @@ const handleCustomerContactPersonRole = async (req, res) => {
                 await customerContactPersonRoleService.removeCustomerContactPersonRole(CustomerContactPersonRole);
                 res.status(200).json({ status: true, message: 'Customer contact person role deleted successfully' });
                 break;
+            case 'checkAssignment':
+                result = await customerContactPersonRoleService.checkCustomerContactPersonRoleAssignment(CustomerContactPersonRole.id);
+                res.status(200).json({ status: true, data: result });
+                break;
+            case 'reassignAndDelete':
+                result = await customerContactPersonRoleService.reassignAndDeleteCustomerContactPersonRole(CustomerContactPersonRole);
+                res.status(200).json({ status: true, message: result.message });
+                break;
             case 'update':
+
                 result = await customerContactPersonRoleService.modifyCustomerContactPersonRole(CustomerContactPersonRole);
                 if (!result.status) {
                     res.status(200).json({ status: false, message: result.message });

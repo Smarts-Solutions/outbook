@@ -1,5 +1,5 @@
 const pool = require('../config/database');
-const { getDateRange, SatffLogUpdateOperation, generateNextUniqueCode, JobStatusUpdate, getStaffAccessFilters } = require('../utils/helper');
+const { getDateRange, SatffLogUpdateOperation, generateNextUniqueCode, JobStatusUpdate, getStaffAccessFilters, grantStaffAccess, QueryRoleHelperFunction } = require('../utils/helper');
 const { CustomerLogUpdateOperation } = require('../utils/customerHelper');
 const { getCompanyOfficerDetailsFun } = require('../controllers/companies/companyController');
 
@@ -152,7 +152,17 @@ const getCustomerDashboardActivityLog = async (dashboard) => {
 
     const query = `
       SELECT 
-        staff_logs.*,
+        staff_logs.id,
+        staff_logs.staff_id,
+        staff_logs.date,
+        staff_logs.module_name,
+        staff_logs.module_id,
+        staff_logs.log_message,
+        REPLACE(REPLACE(staff_logs.log_message_all, 'CUSTOMERUSER ', ''), 'Customer User ', '') AS log_message_all,
+        staff_logs.permission_type,
+        staff_logs.ip,
+        staff_logs.created_at,
+        staff_logs.updated_at,
         CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name
       FROM 
         staff_logs
@@ -1770,6 +1780,13 @@ const customerJobAction = async (dashboard) => {
         console.error("Log error in copy_job:", logErr);
       }
       // --- ADD DESCRIPTIVE LOGGING END ---
+      
+      // --- GRANT ACCESS TO CREATOR START ---
+      const roleData = await QueryRoleHelperFunction(StaffUserId);
+      if (roleData.length > 0 && roleData[0].role_id === 12) {
+        await grantStaffAccess(StaffUserId, data.customer_id, "job", insertId);
+      }
+      // --- GRANT ACCESS TO CREATOR END ---
 
       return { status: true, message: "Job copied successfully.", data: insertId };
     } catch (err) {
@@ -1956,7 +1973,7 @@ const customerJobUpdate = async (job) => {
       job.Audit_Year_Ending_id_27, job.Filing_Frequency_id_8, job.Period_Ending_Date_id_8, job.Filing_Date_id_8,
       job.Year_id_28, job_priority, processing_checklist, reviewing_checklist,
       processing_checklist_status, reviewing_checklist_status, 
-      (checklist_modal_data && typeof checklist_modal_data === 'object') ? JSON.stringify(checklist_modal_data) : null,
+      (checklist_modal_data && typeof checklist_modal_data === 'object') ? JSON.stringify(checklist_modal_data) : (checklist_modal_data || null),
       job_id
     ].map(handleUndefined);
 
@@ -2135,7 +2152,7 @@ const customerJobTimeline = async (dashboard) => {
     staff_logs.staff_id AS staff_id,
     DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
     staff_logs.created_at AS created_at,
-    IFNULL(staff_logs.log_message_all, staff_logs.log_message) AS log_message
+    REPLACE(IFNULL(staff_logs.log_message_all, staff_logs.log_message), 'CUSTOMERUSER ', '') AS log_message
   FROM staff_logs
   JOIN staffs ON staffs.id = staff_logs.staff_id
   JOIN roles ON roles.id = staffs.role_id
@@ -2154,8 +2171,9 @@ const customerJobTimeline = async (dashboard) => {
   return { status: true, message: "success.", data: groupedResult };
 };
 
-const customerTaskTimesheetAction = async (dashboard) => {
+const customerTaskTimesheetAction = async (req) => {
   const taskTimeSheetModel = require('./taskTimeSheetModel');
+  const dashboard = req.body || req;
   const { action } = dashboard;
   if (action === 'get') return taskTimeSheetModel.getTaskTimeSheet(dashboard);
   if (action === 'getJobTimeSheet') return taskTimeSheetModel.getjobTimeSheet(dashboard);
@@ -2164,45 +2182,49 @@ const customerTaskTimesheetAction = async (dashboard) => {
   return { status: false, message: 'Invalid action.' };
 };
 
-const customerMissingLogAction = async (dashboard) => {
+const customerMissingLogAction = async (req) => {
   const taskTimeSheetModel = require('./taskTimeSheetModel');
+  const dashboard = req.body || req;
   const { action } = dashboard;
   if (action === 'get') return taskTimeSheetModel.getMissingLog(dashboard);
   if (action === 'getSingleView') return taskTimeSheetModel.getMissingLogSingleView(dashboard);
-  if (action === 'add') return taskTimeSheetModel.addMissingLog(dashboard);
-  if (action === 'edit') return taskTimeSheetModel.editMissingLog(dashboard);
-  if (action === 'uploadDocument') return taskTimeSheetModel.uploadDocumentMissingLogAndQuery(dashboard);
+  if (action === 'add') return taskTimeSheetModel.addMissingLog(req);
+  if (action === 'edit') return taskTimeSheetModel.editMissingLog(req);
+  if (action === 'uploadDocument') return taskTimeSheetModel.uploadDocumentMissingLogAndQuery(req);
   return { status: false, message: 'Invalid action.' };
 };
 
-const customerQueryAction = async (dashboard) => {
+const customerQueryAction = async (req) => {
   const taskTimeSheetModel = require('./taskTimeSheetModel');
+  const dashboard = req.body || req;
   const { action } = dashboard;
   if (action === 'get') return taskTimeSheetModel.getQuerie(dashboard);
   if (action === 'getSingleView') return taskTimeSheetModel.getQuerieSingleView(dashboard);
-  if (action === 'add') return taskTimeSheetModel.addQuerie(dashboard);
-  if (action === 'edit') return taskTimeSheetModel.editQuerie(dashboard);
-  if (action === 'uploadDocument') return taskTimeSheetModel.uploadDocumentMissingLogAndQuery(dashboard);
+  if (action === 'add') return taskTimeSheetModel.addQuerie(req);
+  if (action === 'edit') return taskTimeSheetModel.editQuerie(req);
+  if (action === 'uploadDocument') return taskTimeSheetModel.uploadDocumentMissingLogAndQuery(req);
   return { status: false, message: 'Invalid action.' };
 };
 
-const customerDraftAction = async (dashboard) => {
+const customerDraftAction = async (req) => {
   const taskTimeSheetModel = require('./taskTimeSheetModel');
+  const dashboard = req.body || req;
   const { action } = dashboard;
   if (action === 'get') return taskTimeSheetModel.getDraft(dashboard);
   if (action === 'getSingleView') return taskTimeSheetModel.getDraftSingleView(dashboard);
   if (action === 'add') return taskTimeSheetModel.addDraft(dashboard);
-  if (action === 'edit') return taskTimeSheetModel.editDraft(dashboard);
+  if (action === 'edit') return taskTimeSheetModel.editDraft(req);
   return { status: false, message: 'Invalid action.' };
 };
 
-const customerDocumentAction = async (dashboard) => {
+const customerDocumentAction = async (req) => {
   const taskTimeSheetModel = require('./taskTimeSheetModel');
+  const dashboard = req.body || req;
   const { action } = dashboard;
   if (action === 'get') return taskTimeSheetModel.getJobDocument(dashboard);
   if (action === 'delete') return taskTimeSheetModel.deleteJobDocument(dashboard);
   if (action === 'add') return taskTimeSheetModel.addedJobDocument(dashboard);
-  if (action === 'addJobDocument') return taskTimeSheetModel.addJobDocument(dashboard);
+  if (action === 'addJobDocument') return taskTimeSheetModel.addJobDocument(req);
   return { status: false, message: 'Invalid action.' };
 };
 

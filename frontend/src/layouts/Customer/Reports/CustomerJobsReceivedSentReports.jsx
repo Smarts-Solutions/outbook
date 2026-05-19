@@ -97,56 +97,88 @@ const CustomerJobsReceivedSentReports = () => {
                         </tr>
                       </thead>
                       <tbody className="list form-check-all">
-                        {paginatedData.map((data, index) => {
-                          const Icon = expandedRows[index] ? MinusCircle : PlusCircle;
-                          return (
-                            <React.Fragment key={index}>
-                              <tr className="tabel_new">
-                                <td className="d-flex">
-                                  <Icon
-                                    size={18}
-                                    className="exp_icon"
-                                    onClick={() => toggleRow(index)}
-                                    style={{ cursor: "pointer", color: "#26bdf0" }}
-                                  />
-                                  <span>{data.month_name}</span>
-                                </td>
-                                <td>
-                                  {data.job_received > 0 ? (
-                                    <span
-                                      style={{ color: "rgb(38, 189, 240)", cursor: "pointer", textDecoration: "none" }}
-                                      onClick={() => handleOnClick(data.job_ids)}
-                                    >
-                                      {data.job_received}
-                                    </span>
-                                  ) : (
-                                    data.job_received
-                                  )}
-                                </td>
-                                <td>{data.draft_count}</td>
-                              </tr>
-                              {expandedRows[index] &&
-                                data.week.map((week, i) => (
-                                  <tr key={i}>
-                                    <td className="ps-4">Week {week.week_number}</td>
-                                    <td>
-                                      {week.job_received > 0 ? (
-                                        <span
-                                          style={{ color: "rgb(38, 189, 240)", cursor: "pointer", textDecoration: "none" }}
-                                          onClick={() => handleOnClick(week.job_ids)}
-                                        >
-                                          {week.job_received}
-                                        </span>
-                                      ) : (
-                                        week.job_received
-                                      )}
-                                    </td>
-                                    <td>{week.draft_count}</td>
-                                  </tr>
-                                ))}
-                            </React.Fragment>
-                          );
-                        })}
+                        {receivedSentData.length === 0 ? (
+                          <tr>
+                            <td colSpan="3" className="text-center py-5">
+                              <img
+                                src="/assets/images/No-data-amico.png"
+                                alt="No data found"
+                                style={{ maxWidth: "200px", height: "auto" }}
+                              />
+                              <h5 className="mt-3 text-muted">No Data Found</h5>
+                            </td>
+                          </tr>
+                        ) : (
+                          paginatedData.map((data, index) => {
+                            const Icon = expandedRows[index]
+                              ? MinusCircle
+                              : PlusCircle;
+                            return (
+                              <React.Fragment key={index}>
+                                <tr className="tabel_new">
+                                  <td className="d-flex">
+                                    <Icon
+                                      size={18}
+                                      className="exp_icon"
+                                      onClick={() => toggleRow(index)}
+                                      style={{
+                                        cursor: "pointer",
+                                        color: "#26bdf0",
+                                      }}
+                                    />
+                                    <span>{data.month_name}</span>
+                                  </td>
+                                  <td>
+                                    {data.job_received > 0 ? (
+                                      <span
+                                        style={{
+                                          color: "rgb(38, 189, 240)",
+                                          cursor: "pointer",
+                                          textDecoration: "none",
+                                        }}
+                                        onClick={() =>
+                                          handleOnClick(data.job_ids)
+                                        }
+                                      >
+                                        {data.job_received}
+                                      </span>
+                                    ) : (
+                                      data.job_received
+                                    )}
+                                  </td>
+                                  <td>{data.draft_count}</td>
+                                </tr>
+                                {expandedRows[index] &&
+                                  data.week.map((week, i) => (
+                                    <tr key={i}>
+                                      <td className="ps-4">
+                                        Week {week.week_number}
+                                      </td>
+                                      <td>
+                                        {week.job_received > 0 ? (
+                                          <span
+                                            style={{
+                                              color: "rgb(38, 189, 240)",
+                                              cursor: "pointer",
+                                              textDecoration: "none",
+                                            }}
+                                            onClick={() =>
+                                              handleOnClick(week.job_ids)
+                                            }
+                                          >
+                                            {week.job_received}
+                                          </span>
+                                        ) : (
+                                          week.job_received
+                                        )}
+                                      </td>
+                                      <td>{week.draft_count}</td>
+                                    </tr>
+                                  ))}
+                              </React.Fragment>
+                            );
+                          })
+                        )}
                       </tbody>
                     </table>
                   </div>

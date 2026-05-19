@@ -81,14 +81,25 @@ const CustomerAccess = () => {
 
       const response = await dispatch(CustomerContactPersonAccess(data)).unwrap();
       if (response.status) {
-        setRoleStructures(prev => ({ ...prev, [val.id]: response.data }));
+        // Filter out everything except 'view' for the 'customer' module
+        const filteredData = response.data.map(item => {
+          if (item.permission_name === "customer") {
+            return {
+              ...item,
+              items: item.items.filter(perm => perm.type === "view")
+            };
+          }
+          return item;
+        });
+
+        setRoleStructures(prev => ({ ...prev, [val.id]: filteredData }));
         
         setCheckboxState((prevState) => {
             // Only add permissions that are assigned on the server
             // We don't filter out previous state because we want to preserve other roles' changes
             let updatedState = [...prevState];
             
-            response.data.forEach((item) => {
+            filteredData.forEach((item) => {
                 item.items.forEach((perm) => {
                     if (perm.is_assigned === 1) {
                         // Check if we already have this permission in state to avoid duplicates
@@ -185,46 +196,54 @@ const CustomerAccess = () => {
   };
 
   const handleSaveChanges = async () => {
-    try {
-      const response = await dispatch(
-        CustomerContactPersonAccess({
-          req: {
-            action: "update",
-            permissions: checkboxState,
-          },
-          authToken: token,
-        }),
-      ).unwrap();
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to save these permission changes?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, save it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await dispatch(
+            CustomerContactPersonAccess({
+              req: {
+                action: "update",
+                permissions: checkboxState,
+              },
+              authToken: token,
+            }),
+          ).unwrap();
 
-      if (response.status) {
-        Swal.fire({
-          title: "Success!",
-          text: "Permissions updated successfully.",
-          icon: "success",
-          confirmButtonText: "OK",
-          timer: 1000,
-        }).then(() => {
-          setTimeout(() => {
-             window.location.reload();
-          }, 1000);
-        });
-      } else {
-        Swal.fire({
-          title: "Error!",
-          text: "Failed to update permissions. Please try again.",
-          icon: "error",
-          confirmButtonText: "OK",
-          timer: 1000,
-        });
+          if (response.status) {
+            Swal.fire({
+              title: "Success!",
+              text: "Permissions updated successfully.",
+              icon: "success",
+              confirmButtonText: "OK",
+            }).then(() => {
+              // No reload needed
+            });
+          } else {
+            Swal.fire({
+              title: "Error!",
+              text: "Failed to update permissions. Please try again.",
+              icon: "error",
+              confirmButtonText: "OK",
+            });
+          }
+        } catch (error) {
+          Swal.fire({
+            title: "Error!",
+            text: "An error occurred while updating permissions. Please try again later.",
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+        }
       }
-    } catch (error) {
-      Swal.fire({
-        title: "Error!",
-        text: "An error occurred while updating permissions. Please try again later.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-    }
+    });
   };
 
   useEffect(() => {
@@ -314,12 +333,14 @@ const CustomerAccess = () => {
                                 className="form-check-label new_checkbox mb-0 ms-2 fw-bold text-primary" 
                                 htmlFor={`global-select-all-${val.id}`}
                               >
-                                Select All Permissions for {val.name}
+                                Select All Permissions
                               </label>
                             </div>
                           </div>
                           <div className="row">
-                            {roleStructures[val.id].map((section, idx) => (
+                            {roleStructures[val.id]
+                              ?.filter((section) => section.permission_name !== "report")
+                              ?.map((section, idx) => (
                                 <div key={idx} className="col-lg-2 col-md-6">
                                   <AccordionItem
                                     section={section}

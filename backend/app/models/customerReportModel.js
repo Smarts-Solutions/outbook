@@ -235,11 +235,11 @@ const jobStatusReports = async (Report) => {
       LIMIT ? OFFSET ?
     `;
 
-        let [rowsData] = await pool.execute(dataQuery, [
-            ...searchValues,
-            Number(limit),
-            Number(offset),
-        ]);
+    let [rowsData] = await pool.execute(dataQuery, [
+      ...searchValues,
+      Number(limit),
+      Number(offset),
+    ]);
 
     const countQuery = `
       SELECT COUNT(DISTINCT jobs.id) AS total
@@ -266,13 +266,13 @@ const jobStatusReports = async (Report) => {
 
     const [[{ total }]] = await pool.execute(countQuery, searchValues);
 
-        if (rowsData && rowsData.length > 0) {
+    if (rowsData && rowsData.length > 0) {
 
-            rowsData = await Promise.all(
-                rowsData.map(async (element, index) => {
+      rowsData = await Promise.all(
+        rowsData.map(async (element, index) => {
 
 
-                    const Get_account_manger_id = `
+          const Get_account_manger_id = `
       SELECT s.id,
              CONCAT(s.first_name, ' ', s.last_name) AS full_name,
              s.employee_number
@@ -286,33 +286,33 @@ const jobStatusReports = async (Report) => {
       AND s.id != ?
     `;
 
-                    const [rowsAccountManager] = await pool.execute(
-                        Get_account_manger_id,
-                        [element.customer_id, element.service_id, element.account_manager_id]
-                    );
+          const [rowsAccountManager] = await pool.execute(
+            Get_account_manger_id,
+            [element.customer_id, element.service_id, element.account_manager_id]
+          );
 
-                    return {
-                        ...element,
-                        account_managers: rowsAccountManager
-                    };
+          return {
+            ...element,
+            account_managers: rowsAccountManager
+          };
 
-                })
-            );
+        })
+      );
 
-        }
-
-
-        return {
-            status: true,
-            message: "Success.",
-            data: { rows: rowsData, total },
-        };
-
-
-    } catch (error) {
-        console.log("error ", error);
-        return { status: false, message: "Error getting job status report." };
     }
+
+
+    return {
+      status: true,
+      message: "Success.",
+      data: { rows: rowsData, total },
+    };
+
+
+  } catch (error) {
+    console.log("error ", error);
+    return { status: false, message: "Error getting job status report." };
+  }
 };
 
 const jobSummaryReports = async (Report) => {
@@ -905,9 +905,9 @@ const taxWeeklyStatusReport = async (Report) => {
 
     // âœ… Apply access filters for non-admins
     if (!(rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
-        query += ` AND ${customerCondition.replace(/customer_id/g, "customers.id")} `;
-        query += ` AND ${clientCondition.replace(/id/g, "clients.id")} `;
-        query += ` AND ${jobCondition.replace(/id/g, "jobs.id")} `;
+      query += ` AND ${customerCondition.replace(/customer_id/g, "customers.id")} `;
+      query += ` AND ${clientCondition.replace(/id/g, "clients.id")} `;
+      query += ` AND ${jobCondition.replace(/id/g, "jobs.id")} `;
     }
 
     // ðŸ” Dynamic filters
@@ -967,16 +967,16 @@ const taxWeeklyStatusReport = async (Report) => {
         grouped[key].weeks[0][`WE_${weekNum}_${currentYear}`];
       const existingIds = existingWeek.job_ids
         ? existingWeek.job_ids
-            .split(",")
-            .map((id) => id.trim())
-            .filter((id) => id)
+          .split(",")
+          .map((id) => id.trim())
+          .filter((id) => id)
         : [];
 
       const newIds = row.job_ids
         ? row.job_ids
-            .split(",")
-            .map((id) => id.trim())
-            .filter((id) => id)
+          .split(",")
+          .map((id) => id.trim())
+          .filter((id) => id)
         : [];
 
       // Combine and keep unique job IDs
@@ -991,9 +991,9 @@ const taxWeeklyStatusReport = async (Report) => {
       // --- Update Grand Total (unique across all weeks) ---
       const existingTotalIds = grouped[key].Grand_Total.job_ids
         ? grouped[key].Grand_Total.job_ids
-            .split(",")
-            .map((id) => id.trim())
-            .filter((id) => id)
+          .split(",")
+          .map((id) => id.trim())
+          .filter((id) => id)
         : [];
 
       const totalUniqueIds = [...new Set([...existingTotalIds, ...newIds])];
@@ -1044,18 +1044,18 @@ const taxWeeklyStatusReportFilterKey = async (Report) => {
       const [data] = await pool.execute(queryCustomer);
       custumerData = data;
     } else {
-        if (assignedCustomerIds.length > 0) {
-            const queryCustomer = `
+      if (assignedCustomerIds.length > 0) {
+        const queryCustomer = `
                 SELECT id AS customer_id, trading_name AS customer_name
                 FROM customers
                 WHERE id IN (${assignedCustomerIds.join(',')})
                 ORDER BY trading_name ASC;
             `;
-            const [data] = await pool.execute(queryCustomer);
-            custumerData = data;
-        } else {
-            custumerData = [];
-        }
+        const [data] = await pool.execute(queryCustomer);
+        custumerData = data;
+      } else {
+        custumerData = [];
+      }
     }
 
     if (custumerData.length > 0) {
@@ -1538,8 +1538,34 @@ const missingTimesheetReport = async (Report) => {
   if (rows.length > 0 && rows[0].role_name == "SUPERADMIN") {
     where.push(`ts.submit_status = '0' OR ts.submit_status IS NULL`);
   } else {
+    let staffIds = [...LineManageStaffId];
+    const { assignedCustomerIds } = await getStaffAccessFilters(StaffUserId);
+    if (assignedCustomerIds && assignedCustomerIds.length > 0) {
+      const customerIdsStr = assignedCustomerIds.join(",");
+      const [allStaff] = await pool.execute(
+        `SELECT DISTINCT staff_id FROM (
+            SELECT staff_id FROM assigned_jobs_staff_view WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT staff_id FROM staff_portfolio WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT allocated_to as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT reviewer as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT account_manager_id as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT staff_created_id as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT staff_created_id as staff_id FROM clients WHERE customer_id IN (${customerIdsStr})
+        ) as t WHERE staff_id IS NOT NULL`,
+      );
+      allStaff.forEach((s) => staffIds.push(s.staff_id));
+    }
+
+    const uniqueStaffIds = [...new Set(staffIds)].filter((id) => id);
+
     where.push(
-      `(ts.submit_status = '0' OR ts.submit_status IS NULL) AND st.id IN (${LineManageStaffId})`,
+      `(ts.submit_status = '0' OR ts.submit_status IS NULL) AND st.id IN (${uniqueStaffIds.length > 0 ? uniqueStaffIds.join(",") : StaffUserId})`,
     );
   }
 
@@ -1621,7 +1647,33 @@ const discrepancyReport = async (Report) => {
   if (rows.length > 0 && rows[0].role_name == "SUPERADMIN") {
     // Allow access to all data
   } else {
-    query += ` WHERE timesheet.staff_id IN (${LineManageStaffId})`;
+    let staffIds = [...LineManageStaffId];
+    const { assignedCustomerIds } = await getStaffAccessFilters(StaffUserId);
+    if (assignedCustomerIds && assignedCustomerIds.length > 0) {
+      const customerIdsStr = assignedCustomerIds.join(",");
+      const [allStaff] = await pool.execute(
+        `SELECT DISTINCT staff_id FROM (
+            SELECT staff_id FROM assigned_jobs_staff_view WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT staff_id FROM staff_portfolio WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT allocated_to as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT reviewer as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT account_manager_id as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT staff_created_id as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT staff_created_id as staff_id FROM clients WHERE customer_id IN (${customerIdsStr})
+        ) as t WHERE staff_id IS NOT NULL`,
+      );
+      allStaff.forEach((s) => staffIds.push(s.staff_id));
+    }
+
+    const uniqueStaffIds = [...new Set(staffIds)].filter((id) => id);
+
+    query += ` WHERE timesheet.staff_id IN (${uniqueStaffIds.length > 0 ? uniqueStaffIds.join(",") : StaffUserId})`;
   }
 
   query += ` GROUP BY jobs.id, job_code_id, jobs.total_time`;
@@ -1638,6 +1690,124 @@ const discrepancyReport = async (Report) => {
 /////////////------  START Timesheet Report START-------//////////////////////
 
 /** get date range for timePeriod */
+async function getDateRange(timePeriod, fromDateParam, toDateParam) {
+  const today = new Date();
+  const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const copy = (d) => new Date(d.getTime());
+};
+
+const discrepancyReportProcessor = async (Report) => {
+  let { StaffUserId } = Report;
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  const rows = await QueryRoleHelperFunction(StaffUserId);
+
+  let query = `
+        SELECT 
+            jobs.id AS job_id,
+            CONCAT(
+                SUBSTRING(customers.trading_name, 1, 3), '_',
+                SUBSTRING(clients.trading_name, 1, 3), '_',
+                SUBSTRING(job_types.type, 1, 4), '_',
+                SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id,
+
+            jobs.total_preparation_time AS total_preparation_time,
+            jobs.feedback_incorporation_time AS feedback_incorporation_time,
+
+            SEC_TO_TIME(
+                COALESCE(TIME_TO_SEC(jobs.total_preparation_time), 0) + 
+                COALESCE(TIME_TO_SEC(jobs.feedback_incorporation_time), 0)
+            ) AS job_total_time_processor,
+
+            SUM(
+                COALESCE(CAST(REPLACE(timesheet.monday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+                COALESCE(CAST(REPLACE(timesheet.tuesday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+                COALESCE(CAST(REPLACE(timesheet.wednesday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+                COALESCE(CAST(REPLACE(timesheet.thursday_hours, ':', '.') AS DECIMAL(10,2)), 0) +
+                COALESCE(CAST(REPLACE(timesheet.friday_hours, ':', '.') AS DECIMAL(10,2)), 0)
+            ) AS total_spent_hours
+
+        FROM timesheet
+        JOIN jobs ON (timesheet.task_type = '2' AND timesheet.job_id = jobs.id)
+        JOIN staffs ON staffs.id = timesheet.staff_id
+        JOIN roles ON roles.id = staffs.role_id
+        JOIN customers ON customers.id = jobs.customer_id
+        JOIN clients ON clients.id = jobs.client_id
+        JOIN job_types ON jobs.job_type_id = job_types.id
+        WHERE staffs.role_id = 3 -- Only Processors
+    `;
+
+  if (rows.length > 0 && rows[0].role_name == "SUPERADMIN") {
+    // Allow access to all data
+  } else {
+    let staffIds = [...LineManageStaffId];
+    const { assignedCustomerIds } = await getStaffAccessFilters(StaffUserId);
+    if (assignedCustomerIds && assignedCustomerIds.length > 0) {
+      const customerIdsStr = assignedCustomerIds.join(",");
+      const [allStaff] = await pool.execute(
+        `SELECT DISTINCT staff_id FROM (
+            SELECT staff_id FROM assigned_jobs_staff_view WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT staff_id FROM staff_portfolio WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT allocated_to as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT reviewer as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT account_manager_id as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT staff_created_id as staff_id FROM jobs WHERE customer_id IN (${customerIdsStr})
+            UNION
+            SELECT staff_created_id as staff_id FROM clients WHERE customer_id IN (${customerIdsStr})
+        ) as t WHERE staff_id IS NOT NULL`,
+      );
+      allStaff.forEach((s) => staffIds.push(s.staff_id));
+    }
+
+    const uniqueStaffIds = [...new Set(staffIds)].filter((id) => id);
+
+    query += ` AND timesheet.staff_id IN (${uniqueStaffIds.length > 0 ? uniqueStaffIds.join(",") : StaffUserId})`;
+  }
+
+  query += ` GROUP BY jobs.id, job_code_id, jobs.total_time`;
+
+  try {
+    const [result] = await pool.execute(query);
+    return { status: true, message: "Success.", data: result };
+  } catch (error) {
+    console.log("error ", error);
+    return { status: false, message: "Error getting discrepancy report processor." };
+  }
+};
+
+const capacityReport = async (Report) => {
+  const { StaffUserId } = Report;
+  try {
+    const { customerCondition, jobCondition } = await getStaffAccessFilters(StaffUserId);
+
+    const query = `
+      SELECT 
+          CONCAT(s.first_name, ' ', s.last_name) AS staff_fullname,
+          r.role AS role_name,
+          COUNT(j.id) AS active_jobs,
+          COALESCE(SEC_TO_TIME(SUM(TIME_TO_SEC(NULLIF(j.total_time, '')))), '00:00:00') AS total_budgeted_time
+      FROM staffs s
+      JOIN roles r ON s.role_id = r.id
+      JOIN jobs j ON (j.allocated_to = s.id OR j.reviewer = s.id OR j.account_manager_id = s.id)
+      WHERE j.status_type NOT IN (6) AND j.${customerCondition} AND j.${jobCondition}
+      GROUP BY s.id, r.role
+      ORDER BY s.first_name ASC
+    `;
+
+
+    const [result] = await pool.execute(query);
+    return { status: true, message: "Success.", data: result };
+  } catch (error) {
+    console.error("capacityReport error", error);
+    return { status: false, message: "Error fetching capacity report." };
+  }
+};
+
 async function getDateRange(timePeriod, fromDateParam, toDateParam) {
   const today = new Date();
   const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -2153,9 +2323,9 @@ const getJobCustomReport = async (Report) => {
       periodSet.add(periodKey);
 
       if (!groups[gid]) {
-        groups[gid] = { 
-          ...r, 
-          periodSeconds: {} 
+        groups[gid] = {
+          ...r,
+          periodSeconds: {}
         };
       }
       groups[gid].periodSeconds[periodKey] = (groups[gid].periodSeconds[periodKey] || 0) + 1;
@@ -2203,7 +2373,7 @@ const getJobCustomReport = async (Report) => {
     const total_count_header = !["", null, undefined].includes(displayBy) ? ["total_count"] : [];
     const weeks = !["", null, undefined].includes(displayBy) ? getWeekEndings(new Date(fromDate), new Date(toDate), displayBy) : [];
     const columnsWeeks = [...groupBy, ...weeks, ...total_count_header];
-    
+
     const finalRows = normalizeRows(columnsWeeks, outRows);
     const fixed = [...groupBy];
     const dynamic = columnsWeeks.filter(col => !fixed.includes(col));
@@ -2260,6 +2430,10 @@ const getAllTaskByStaff = async (Report) => {
       return await saveFilters(Report);
     case "deleteFilterId":
       return await deleteFilterId(Report);
+    case "discrepancyReportProcessor":
+      return await discrepancyReportProcessor(Report);
+    case "capacityReport":
+      return await capacityReport(Report);
     case "get_customers_filter":
       return await getCustomersFilter(Report);
     case "get_clients_filter":
@@ -2274,7 +2448,7 @@ const getAllTaskByStaff = async (Report) => {
 async function getAllTaskByStaffData(Report) {
   const { StaffUserId } = Report;
   const filters = await getStaffAccessFilters(StaffUserId);
-  
+
   const [jobs] = await pool.execute(`SELECT id FROM jobs WHERE 1=1 AND ${filters.jobCondition}`);
   const jobIds = jobs.length > 0 ? jobs.map(j => j.id).join(",") : "0";
 
@@ -2305,7 +2479,7 @@ async function getStaffWithRole(Report) {
   const { role_id } = data;
   let query = "SELECT id, CONCAT(first_name, ' ', last_name) as name, employee_number FROM staffs WHERE status = 1";
   let params = [];
-  
+
   if (role_id === "employee_number") {
     query += " AND employee_number IS NOT NULL AND employee_number != ''";
   } else if (role_id === "other") {
@@ -2314,7 +2488,7 @@ async function getStaffWithRole(Report) {
     query += " AND role_id = ?";
     params.push(role_id);
   }
-  
+
   const [result] = await pool.execute(query, params);
   return { status: true, message: "Success.", data: result };
 }
@@ -2460,7 +2634,7 @@ async function getTimesheetReportDataInternal(Report) {
 
     // Apply customer-scoped filters
     if (accessFilters.customer_ids && accessFilters.customer_ids.length > 0) {
-        where.push(`raw.customer_id IN (${accessFilters.customer_ids.join(",")})`);
+      where.push(`raw.customer_id IN (${accessFilters.customer_ids.join(",")})`);
     }
 
     where = where.length ? `WHERE ${where.join(" AND ")}` : "";
@@ -2468,24 +2642,24 @@ async function getTimesheetReportDataInternal(Report) {
     const groupValueSQL = `CONCAT_WS('::', ${groupBy.map((f) => (f === "employee_number" ? "s.employee_number" : `${f}`)).join(", ")}) AS group_value`;
 
     const groupLabelSQL = groupBy.map((f) => {
-        if (f === "staff_id") return "CONCAT(s.first_name,' ',s.last_name)";
-        if (f === "customer_id") return "c.id";
-        if (f === "client_id") return "cl.id";
-        if (f === "job_id") {
-          return `CASE 
+      if (f === "staff_id") return "CONCAT(s.first_name,' ',s.last_name)";
+      if (f === "customer_id") return "c.id";
+      if (f === "client_id") return "cl.id";
+      if (f === "job_id") {
+        return `CASE 
                     WHEN raw.task_type = '1' THEN internal.name
                     WHEN raw.task_type = '2' THEN j.job_id
                 END`;
-        }
-        if (f === "task_id") {
-          return `CASE 
+      }
+      if (f === "task_id") {
+        return `CASE 
                     WHEN raw.task_type = '1' THEN sub_internal.name
                     WHEN raw.task_type = '2' THEN t.name
                 END`;
-        }
-        if (f === "employee_number") return "s.employee_number";
-        return f;
-      }).join(", ' - ', ");
+      }
+      if (f === "employee_number") return "s.employee_number";
+      return f;
+    }).join(", ' - ', ");
 
     const groupLabelFinal = `CONCAT(${groupLabelSQL}) AS group_label`;
     const staffName = `CONCAT(s.first_name,' ',s.last_name) AS staff_name`;
@@ -2640,7 +2814,7 @@ async function getCustomersFilter(Report) {
   const userRole = userRoleRows.length > 0 ? userRoleRows[0].role_name : "";
   const isAdmin = ["SUPERADMIN", "ADMIN"].includes(userRole);
   const filters = isAdmin ? null : await getStaffAccessFilters(StaffUserId);
-  
+
   let where = [];
   if (filters) {
     const customerCondition = filters.customerCondition.replace(/\bcustomer_id\b/g, "id");
@@ -2660,7 +2834,7 @@ async function getCustomersFilter(Report) {
     WHERE ${where.join(" AND ")}
     ORDER BY trading_name ASC
   `;
-  
+
   const [rows] = await pool.execute(query, params.length > 0 ? params : undefined);
   return { status: true, data: rows };
 }
@@ -2673,7 +2847,7 @@ async function getClientsFilter(Report) {
   const userRole = userRoleRows.length > 0 ? userRoleRows[0].role_name : "";
   const isAdmin = ["SUPERADMIN", "ADMIN"].includes(userRole);
   const filters = isAdmin ? null : await getStaffAccessFilters(StaffUserId);
-  
+
   let where = [];
   if (filters) {
     const customerCondition = filters.customerCondition.replace(/\bcustomer_id\b/g, "cl.customer_id");
@@ -2694,7 +2868,7 @@ async function getClientsFilter(Report) {
     WHERE ${where.join(" AND ")}
     ORDER BY cl.trading_name ASC
   `;
-  
+
   const [rows] = await pool.execute(query, params.length > 0 ? params : undefined);
   const mapped = rows.map(r => ({ id: r.id, name: `${r.trading_name} (${r.client_code})` }));
   return { status: true, data: mapped };
@@ -2708,7 +2882,7 @@ async function getJobsFilter(Report) {
   const userRole = userRoleRows.length > 0 ? userRoleRows[0].role_name : "";
   const isAdmin = ["SUPERADMIN", "ADMIN"].includes(userRole);
   const filters = isAdmin ? null : await getStaffAccessFilters(StaffUserId);
-  
+
   let where = [];
   if (filters) {
     const customerCondition = filters.customerCondition.replace(/\bcustomer_id\b/g, "j.customer_id");
@@ -2730,7 +2904,7 @@ async function getJobsFilter(Report) {
     WHERE ${where.join(" AND ")}
     ORDER BY j.job_id ASC
   `;
-  
+
   const [rows] = await pool.execute(query, params.length > 0 ? params : undefined);
   return { status: true, data: rows };
 }
@@ -2748,6 +2922,8 @@ module.exports = {
   reportCountJob,
   missingTimesheetReport,
   discrepancyReport,
+  discrepancyReportProcessor,
+  capacityReport,
   getTimesheetReportData,
   getAllTaskByStaff,
   getJobCustomReport
@@ -2762,7 +2938,7 @@ async function getDateRange(timePeriod, fromDateParam, toDateParam) {
   switch ((timePeriod || "").toLowerCase()) {
     case "this_week": {
       const cur = copy(today);
-      const day = (cur.getDay() + 6) % 7; 
+      const day = (cur.getDay() + 6) % 7;
       start = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() - day);
       end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
       break;
