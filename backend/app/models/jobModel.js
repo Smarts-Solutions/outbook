@@ -1794,15 +1794,9 @@ async function getAllJobsSidebar(
       // =========================================
       const [[countRows], [dataRows]] = await Promise.all([
 
-        connection.execute(
-          countQuery,
-          [...commonParams]
-        ),
+        connection.execute(countQuery,[...commonParams]),
 
-        connection.execute(
-          dataQuery,
-          [...commonParams, limit, offset]
-        ),
+        connection.execute(dataQuery, [...commonParams, limit, offset]),
 
       ]);
 
