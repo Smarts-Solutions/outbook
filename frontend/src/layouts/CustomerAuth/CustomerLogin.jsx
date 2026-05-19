@@ -16,7 +16,7 @@ import {
 } from "../../Utils/Common_Message";
 import { RoleAccess } from "../../ReduxStore/Slice/Access/AccessSlice";
 import sweatalert from "sweetalert2";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 
 const CustomerLogin = () => {
 
@@ -34,6 +34,10 @@ const CustomerLogin = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorConfirmPassword, setErrorConfirmPassword] = useState("");
   const [customerUserId, setCustomerUserId] = useState(null);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   let isExpirytoken = location?.state?.isExpirytoken;
 
@@ -361,7 +365,7 @@ const CustomerLogin = () => {
                   <div className="col-md-6">
                     <div className="py-5 px-3">
                       <div className="card-header text-center">
-                        <h1 className="">Cutomer Login</h1>
+                        <h1 className="">Customer User Login</h1>
                       </div>
                       <div className="card-body">
                         <div
@@ -391,16 +395,33 @@ const CustomerLogin = () => {
                           </div>
                           <div className="form-group">
 
-                            <div className="input-group ">
+                            <div className="position-relative">
                               <input
-                                type="password"
-
+                                type={showPassword ? "text" : "password"}
+                                className={errorPassword ? "error-field form-control" : "form-control"}
                                 name="password"
                                 id="userpassword"
                                 placeholder="Enter password"
                                 onChange={(e) => setPassword(e.target.value)}
                                 onKeyPress={handleKeyPress}
+                                style={{ paddingRight: "40px" }}
                               />
+                              <span
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{
+                                  position: "absolute",
+                                  right: "15px",
+                                  top: "50%",
+                                  transform: "translateY(-50%)",
+                                  cursor: "pointer",
+                                  zIndex: 10,
+                                  color: "#6c757d",
+                                  display: "flex",
+                                  alignItems: "center"
+                                }}
+                              >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                              </span>
                             </div>
                             {password == "" ? (
                               <span className="error-text"> {errorPassword}</span>
@@ -449,9 +470,9 @@ const CustomerLogin = () => {
                           <div className="form-group mb-2">
 
 
-                            <div className="input-group ">
+                            <div className="position-relative">
                               <input
-                                type="password"
+                                type={showNewPassword ? "text" : "password"}
                                 name="new_password"
                                 id="new_password"
                                 placeholder="New Password"
@@ -462,7 +483,24 @@ const CustomerLogin = () => {
                                 value={newPassword}
                                 onKeyPress={handleKeyPress1}
                                 className={errorNewPassword ? "error-field form-control" : "form-control"}
+                                style={{ paddingRight: "40px" }}
                               />
+                              <span
+                                onClick={() => setShowNewPassword(!showNewPassword)}
+                                style={{
+                                  position: "absolute",
+                                  right: "15px",
+                                  top: "50%",
+                                  transform: "translateY(-50%)",
+                                  cursor: "pointer",
+                                  zIndex: 10,
+                                  color: "#6c757d",
+                                  display: "flex",
+                                  alignItems: "center"
+                                }}
+                              >
+                                {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                              </span>
                             </div>
                             {errorNewPassword && (
                               <span className="error-text">{errorNewPassword}</span>
@@ -470,9 +508,9 @@ const CustomerLogin = () => {
                           </div>
                           <div className="form-group">
 
-                            <div className="input-group ">
+                            <div className="position-relative">
                               <input
-                                type="password"
+                                type={showConfirmPassword ? "text" : "password"}
                                 name="confirm_password"
                                 id="confirm_password"
                                 placeholder="Confirm Password"
@@ -483,7 +521,24 @@ const CustomerLogin = () => {
                                 value={confirmPassword}
                                 onKeyPress={handleKeyPress1}
                                 className={errorConfirmPassword ? "error-field form-control" : "form-control"}
+                                style={{ paddingRight: "40px" }}
                               />
+                              <span
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                style={{
+                                  position: "absolute",
+                                  right: "15px",
+                                  top: "50%",
+                                  transform: "translateY(-50%)",
+                                  cursor: "pointer",
+                                  zIndex: 10,
+                                  color: "#6c757d",
+                                  display: "flex",
+                                  alignItems: "center"
+                                }}
+                              >
+                                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                              </span>
                             </div>
                             {errorConfirmPassword && (
                               <span className="error-text">{errorConfirmPassword}</span>
