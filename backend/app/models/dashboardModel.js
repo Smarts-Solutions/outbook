@@ -510,7 +510,7 @@ const getDashboardData = async (dashboard) => {
   const rowRoles = await QueryRoleHelperFunction(staff_id);
   console.log("dashboard Time - 4 -", new Date());
 
-  // ─── DB Connection लो (procedure + temp table के लिए same connection चाहिए) ───
+  // ─── DB Connection लो (procedure + temp table for same connection) ───
   const connection = await pool.getConnection();
 
   try {
@@ -529,7 +529,7 @@ const getDashboardData = async (dashboard) => {
 
     const isSuperAdmin = rowRoles.length > 0 && rowRoles[0].role_name === "SUPERADMIN";
 
-    // ─── Procedure call करो और Temp Table में डालो (सिर्फ non-admin के लिए) ───
+    // ─── Procedure call 
     if (!isSuperAdmin) {
       await connection.execute("DROP TEMPORARY TABLE IF EXISTS temp_assigned_jobs_staff");
 
@@ -544,14 +544,14 @@ const getDashboardData = async (dashboard) => {
       )
     `);
 
-      // हर staff_id के लिए CALL करो — procedure खुद temp table में INSERT करेगा
+      
       const allStaffIds = [...new Set([
         Number(staff_id),
         ...LineManageStaffId.toString().split(",").map(Number)
       ])];
 
       for (const sid of allStaffIds) {
-        await connection.execute("CALL get_assigned_jobs_staff(?)", [sid]); // ✅ सिर्फ CALL
+        await connection.execute("CALL get_assigned_jobs_staff(?)", [sid]); 
       }
 
       // Index add करो
@@ -777,7 +777,7 @@ const getDashboardData = async (dashboard) => {
     console.error("eeee", err);
     return { status: false, message: "Err Dashboard Data View Get", error: err.message };
   } finally {
-    // ─── Connection हमेशा release करो ───
+    
     connection.release();
   }
 };
