@@ -1639,8 +1639,7 @@ async function getAllJobsSidebar(
       // =========================================
       // PLACEHOLDERS
       // =========================================
-      const makePlaceholders = (arr) =>
-        arr.map(() => "?").join(",");
+      const makePlaceholders = (arr) => arr.map(() => "?").join(",");
       const placeholders = makePlaceholders(allStaffIds);
       // =========================================
       // COMMON JOINS
@@ -5474,3 +5473,48 @@ module.exports = {
 //     DROP TEMPORARY TABLE IF EXISTS tmp_staff_ids;
 
 // END;
+
+
+
+
+
+
+
+// const { buildAssignedJobsTempTable } = require('./helpers/buildAssignedJobsTemp');
+// await buildAssignedJobsTempTable(connection, LineManageStaffId);
+// helpers/buildAssignedJobsTemp.js
+
+// const CHUNK_SIZE = 10; // parallel mein kitne SP calls ek saath
+
+// async function buildAssignedJobsTempTable(connection, staffIds) {
+//   // ── 1. Temp table — indexes CREATE time pe hi ──────────────────────────
+//   await connection.execute("DROP TEMPORARY TABLE IF EXISTS temp_assigned_jobs_staff");
+//   await connection.execute(`
+//     CREATE TEMPORARY TABLE temp_assigned_jobs_staff (
+//       customer_id       INT,
+//       client_id         INT,
+//       job_id            INT,
+//       staff_id          INT,
+//       source            VARCHAR(100),
+//       service_id_assign INT,
+//       INDEX idx_staff    (staff_id),
+//       INDEX idx_customer (customer_id),
+//       INDEX idx_client   (client_id),
+//       INDEX idx_job      (job_id)
+//     )
+//   `);
+
+//   const uniqueIds = [...new Set(staffIds)];
+//   if (uniqueIds.length === 0) return;
+
+//   // ── 2. SP calls — chunks mein parallel ────────────────────────────────
+//   //    (ek hi connection use hoti hai, isliye full parallel safe nahi hota)
+//   for (let i = 0; i < uniqueIds.length; i += CHUNK_SIZE) {
+//     const chunk = uniqueIds.slice(i, i + CHUNK_SIZE);
+//     await Promise.all(
+//       chunk.map(sid => connection.execute("CALL get_assigned_jobs_staff(?)", [sid]))
+//     );
+//   }
+// }
+
+// module.exports = { buildAssignedJobsTempTable };
