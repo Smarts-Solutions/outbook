@@ -334,7 +334,7 @@ const CustomerLogin = () => {
   };
 
   return (
-    <div className="account-body accountbg">
+    <div className="account-body accountbg" style={{ textTransform: "none" }}>
       <div className="container">
         <div className="row  d-flex justify-content-center vh-100">
 
