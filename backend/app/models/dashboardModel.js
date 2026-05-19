@@ -107,7 +107,7 @@ JOIN staffs ON staffs.id = job_allowed_staffs.staff_id;
 
 */
 
-const getDashboardData_1 = async (dashboard) => {
+const getDashboardData = async (dashboard) => {
   const { staff_id, date_filter } = dashboard;
 
   //time check 
@@ -497,420 +497,9 @@ const getDashboardData_1 = async (dashboard) => {
   }
 };
 
-
-const getDashboardData_2 = async (dashboard) => {
+const getDashboardData_correct = async (dashboard) => {
   const { staff_id, date_filter } = dashboard;
 
-  console.log("dashboard Time - START -", new Date());
-
-  // ✅ FIX 1: Parallel mein chalao — ye 3 independent hain
-  const [{ startDate, endDate }, LineManageStaffId, rowRoles] = await Promise.all([
-    getDateRange(date_filter),
-    LineManageStaffIdHelperFunction(staff_id),
-    QueryRoleHelperFunction(staff_id),
-  ]);
-
-  console.log("dashboard Time - after parallel init -", new Date());
-
-  if (!rowRoles.length) {
-    return { status: false, message: "Role not found." };
-  }
-
-  const role_id = rowRoles[0].role_id;
-  const isSuperAdmin = rowRoles[0].role_name === "SUPERADMIN";
-
-  try {
-    // ✅ FIX 2: 3 queries ki jagah ek mein role permissions fetch karo
-    const [rolePermissions] = await pool.execute(
-      `SELECT permission_id FROM role_permissions 
-       WHERE role_id = ? AND permission_id IN (33, 34, 35)`,
-      [role_id]
-    );
-
-    const permissionSet = new Set(rolePermissions.map((r) => r.permission_id));
-    const RoleAccessCustomer = isSuperAdmin || permissionSet.has(33);
-    const RoleAccessClient = isSuperAdmin || permissionSet.has(34);
-    const RoleAccessJob = isSuperAdmin || permissionSet.has(35);
-
-    // ─── Query Definitions ───────────────────────────────────────────
-
-    // CUSTOMER
-    const customerQuery = RoleAccessCustomer
-      ? {
-        sql: `SELECT id FROM customers 
-                WHERE created_at BETWEEN ? AND ? 
-                ORDER BY id DESC`,
-        params: [startDate, endDate],
-      }
-      : {
-        sql: `SELECT customers.id
-                FROM customers
-                LEFT JOIN assigned_jobs_staff_view ajsv 
-                  ON ajsv.customer_id = customers.id 
-                  AND ajsv.staff_id IN (${staff_id}, ${LineManageStaffId})
-                WHERE 
-                  (customers.staff_id IN (${staff_id}, ${LineManageStaffId})
-                   OR ajsv.staff_id IS NOT NULL)
-                  AND customers.created_at BETWEEN ? AND ?
-                GROUP BY customers.id
-                ORDER BY customers.id DESC`,
-        params: [startDate, endDate],
-      };
-
-    // CLIENT
-    const clientQuery = RoleAccessClient
-      ? {
-        sql: `SELECT id FROM clients 
-                WHERE created_at BETWEEN ? AND ? 
-                ORDER BY id DESC`,
-        params: [startDate, endDate],
-      }
-      : {
-        sql: `SELECT clients.id
-                FROM clients
-                LEFT JOIN assigned_jobs_staff_view ajsv 
-                  ON ajsv.client_id = clients.id
-                  AND ajsv.staff_id IN (${staff_id}, ${LineManageStaffId})
-                WHERE 
-                  (clients.staff_created_id IN (${staff_id}, ${LineManageStaffId})
-                   OR ajsv.staff_id IS NOT NULL)
-                  AND clients.created_at BETWEEN ? AND ?
-                GROUP BY clients.id
-                ORDER BY clients.id DESC`,
-        params: [startDate, endDate],
-      };
-
-    // STAFF
-    const staffQuery = isSuperAdmin
-      ? {
-        sql: `SELECT id FROM staffs 
-                WHERE created_at BETWEEN ? AND ? 
-                ORDER BY id DESC`,
-        params: [startDate, endDate],
-      }
-      : {
-        sql: `SELECT id FROM staffs 
-                WHERE created_by = ? 
-                  AND created_at BETWEEN ? AND ? 
-                ORDER BY id DESC`,
-        params: [staff_id, startDate, endDate],
-      };
-
-    // JOB
-    const jobStartDate = RoleAccessJob ? startDate : startDate + " 00:00:00";
-    const jobEndDate = RoleAccessJob ? endDate : endDate + " 00:00:00";
-
-    const jobQuery = RoleAccessJob
-      ? {
-        sql: `SELECT jobs.id, jobs.status_type
-                FROM jobs
-                WHERE jobs.created_at BETWEEN ? AND ?
-                GROUP BY jobs.id
-                ORDER BY jobs.id DESC`,
-        params: [jobStartDate, jobEndDate],
-      }
-      : {
-        sql: `SELECT 
-                  jobs.id,
-                  jobs.status_type,
-                  ajsv.source        AS assigned_source,
-                  ajsv.service_id_assign,
-                  jobs.service_id    AS job_service_id
-                FROM jobs
-                JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
-                LEFT JOIN assigned_jobs_staff_view ajsv ON ajsv.job_id = jobs.id
-                LEFT JOIN clients  ON jobs.client_id   = clients.id
-                LEFT JOIN customers ON jobs.customer_id = customers.id
-                LEFT JOIN master_status ON master_status.id = jobs.status_type
-                WHERE
-                  (ajsv.staff_id IN (${LineManageStaffId})
-                   OR jobs.staff_created_id IN (${LineManageStaffId})
-                   OR clients.staff_created_id IN (${LineManageStaffId}))
-                  AND DATE(jobs.created_at) BETWEEN ? AND ?
-                  AND (
-                  ajsv.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
-                  OR jobs.service_id = ajsv.service_id_assign
-                 )  
-                  AND customers.status = '1'
-                GROUP BY jobs.id
-                ORDER BY jobs.id DESC`,
-        params: [jobStartDate, jobEndDate],
-      };
-
-
-    // ✅ FIX 3: Charo queries ek saath parallel mein
-    console.log("dashboard Time - before parallel queries -", new Date());
-
-    const [
-      [CustomerResult],
-      [ClientResult],
-      [StaffResult],
-      [JobResult],
-    ] = await Promise.all([
-      pool.execute(customerQuery.sql, customerQuery.params),
-      pool.execute(clientQuery.sql, clientQuery.params),
-      pool.execute(staffQuery.sql, staffQuery.params),
-      pool.execute(jobQuery.sql, jobQuery.params),
-    ]);
-
-    console.log("dashboard Time - after parallel queries -", new Date());
-
-    // ─── Job filtering (non-admin assign_customer_service logic) ─────
-   
-    
-    // ─── Result Assembly ─────────────────────────────────────────────
-    const toIds = (arr) => arr.map((r) => r.id).join(",");
-
-    const result = {
-      customer: { count: CustomerResult.length, ids: toIds(CustomerResult) },
-      client: { count: ClientResult.length, ids: toIds(ClientResult) },
-      staff: { count: StaffResult.length, ids: toIds(StaffResult) },
-      job: {
-        count: JobResult.length,
-        ids: toIds(JobResult),
-      },
-      pending_job: {
-        count: JobResult.filter((r) => Number(r.status_type) !== 6).length,
-        ids: toIds(JobResult.filter((r) => Number(r.status_type) !== 6)),
-      },
-      completed_job: {
-        count: JobResult.filter((r) => Number(r.status_type) === 6).length,
-        ids: toIds(JobResult.filter((r) => Number(r.status_type) === 6)),
-      },
-    };
-
-    console.log("dashboard Time - END -", new Date());
-    return { status: true, message: "success.", data: result };
-
-  } catch (err) {
-    console.error("Dashboard error:", err);
-    return { status: false, message: "Err Dashboard Data View Get", error: err.message };
-  }
-};
-
-const getDashboardData_3 = async (dashboard) => {
-  const { staff_id, date_filter } = dashboard;
-
-  console.log("dashboard Time - START -", new Date());
-
-  // ── Step 1: Parallel init ────────────────────────────────────────────────────
-  const [{ startDate, endDate }, LineManageStaffId, rowRoles] = await Promise.all([
-    getDateRange(date_filter),
-    LineManageStaffIdHelperFunction(staff_id),
-    QueryRoleHelperFunction(staff_id),
-  ]);
-
-  console.log("dashboard Time - after parallel init -", new Date());
-
-  if (!rowRoles.length) {
-    return { status: false, message: "Role not found." };
-  }
-
-  const role_id     = rowRoles[0].role_id;
-  const isSuperAdmin = rowRoles[0].role_name === "SUPERADMIN";
-
-  // ── Step 2: staffIds string (safe, used in dynamic IN clauses) ───────────────
-  // LineManageStaffId already comes as a comma-separated string or single id
-  // from the helper. We keep it as-is for IN() usage.
-  const staffIds = `${staff_id}, ${LineManageStaffId}`;
-
-  try {
-    // ── Step 3: Single permission fetch instead of 3 queries ────────────────────
-    const [rolePermissions] = await pool.execute(
-      `SELECT permission_id
-         FROM role_permissions
-        WHERE role_id = ?
-          AND permission_id IN (33, 34, 35)`,
-      [role_id]
-    );
-
-    const permissionSet    = new Set(rolePermissions.map((r) => r.permission_id));
-    const RoleAccessCustomer = isSuperAdmin || permissionSet.has(33);
-    const RoleAccessClient   = isSuperAdmin || permissionSet.has(34);
-    const RoleAccessJob      = isSuperAdmin || permissionSet.has(35);
-
-    // ── Step 4: Query definitions ─────────────────────────────────────────────
-
-    // ── CUSTOMER ──────────────────────────────────────────────────────────────
-    // FIX: Use direct range on created_at so the index is usable.
-    const customerQuery = RoleAccessCustomer
-      ? {
-          sql: `SELECT id
-                  FROM customers
-                 WHERE created_at BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 23:59:59')
-                 ORDER BY id DESC`,
-          params: [startDate, endDate],
-        }
-      : {
-          sql: `SELECT customers.id
-                  FROM customers
-                  LEFT JOIN assigned_jobs_staff_view ajsv
-                    ON  ajsv.customer_id = customers.id
-                    AND ajsv.staff_id    IN (${staffIds})
-                 WHERE (
-                         customers.staff_id IN (${staffIds})
-                         OR ajsv.staff_id IS NOT NULL
-                       )
-                   AND customers.created_at BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 23:59:59')
-                 GROUP BY customers.id
-                 ORDER BY customers.id DESC`,
-          params: [startDate, endDate],
-        };
-
-    // ── CLIENT ────────────────────────────────────────────────────────────────
-    const clientQuery = RoleAccessClient
-      ? {
-          sql: `SELECT id
-                  FROM clients
-                 WHERE created_at BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 23:59:59')
-                 ORDER BY id DESC`,
-          params: [startDate, endDate],
-        }
-      : {
-          sql: `SELECT clients.id
-                  FROM clients
-                  LEFT JOIN assigned_jobs_staff_view ajsv
-                    ON  ajsv.client_id = clients.id
-                    AND ajsv.staff_id  IN (${staffIds})
-                 WHERE (
-                         clients.staff_created_id IN (${staffIds})
-                         OR ajsv.staff_id IS NOT NULL
-                       )
-                   AND clients.created_at BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 23:59:59')
-                 GROUP BY clients.id
-                 ORDER BY clients.id DESC`,
-          params: [startDate, endDate],
-        };
-
-    // ── STAFF ─────────────────────────────────────────────────────────────────
-    const staffQuery = isSuperAdmin
-      ? {
-          sql: `SELECT id
-                  FROM staffs
-                 WHERE created_at BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 23:59:59')
-                 ORDER BY id DESC`,
-          params: [startDate, endDate],
-        }
-      : {
-          sql: `SELECT id
-                  FROM staffs
-                 WHERE created_by = ?
-                   AND created_at BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 23:59:59')
-                 ORDER BY id DESC`,
-          params: [staff_id, startDate, endDate],
-        };
-
-    // ── JOB ───────────────────────────────────────────────────────────────────
-    // FIX 1: Removed DATE() wrapping — use direct created_at range for index usage.
-    // FIX 2: Removed unnecessary JOINs (clients, customers, master_status) for
-    //        non-admin path. client filter now done via subquery; customers.status
-    //        check removed (irrelevant for job count).
-    // FIX 3: Removed JOIN staffs AS staffs4 — staff_created_id filter is enough.
-    const jobQuery = RoleAccessJob
-      ? {
-          sql: `SELECT id, status_type
-                  FROM jobs
-                 WHERE created_at BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 23:59:59')
-                 ORDER BY id DESC`,
-          params: [startDate, endDate],
-        }
-      : {
-          sql: `SELECT
-                    jobs.id,
-                    jobs.status_type
-                  FROM jobs
-                  LEFT JOIN assigned_jobs_staff_view ajsv
-                    ON  ajsv.job_id = jobs.id
-                    AND ajsv.staff_id IN (${LineManageStaffId})
-                 WHERE (
-                         ajsv.staff_id             IS NOT NULL
-                         OR jobs.staff_created_id  IN (${LineManageStaffId})
-                         OR jobs.client_id IN (
-                               SELECT id
-                                 FROM clients
-                                WHERE staff_created_id IN (${LineManageStaffId})
-                            )
-                       )
-                   AND jobs.created_at BETWEEN CONCAT(?, ' 00:00:00') AND CONCAT(?, ' 23:59:59')
-                   AND (
-                         ajsv.source IS NULL
-                         OR ajsv.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
-                         OR jobs.service_id = ajsv.service_id_assign
-                       )
-                 GROUP BY jobs.id
-                 ORDER BY jobs.id DESC`,
-          params: [startDate, endDate],
-        };
-
-    // ── Step 5: All 4 queries in parallel ────────────────────────────────────
-    console.log("dashboard Time - before parallel queries -", new Date());
-
-    const [
-      [CustomerResult],
-      [ClientResult],
-      [StaffResult],
-      [JobResult],
-    ] = await Promise.all([
-      pool.execute(customerQuery.sql, customerQuery.params),
-      pool.execute(clientQuery.sql,   clientQuery.params),
-      pool.execute(staffQuery.sql,    staffQuery.params),
-      pool.execute(jobQuery.sql,      jobQuery.params),
-    ]);
-
-    console.log("dashboard Time - after parallel queries -", new Date());
-
-    // ── Step 6: Result assembly ───────────────────────────────────────────────
-    const toIds = (arr) => arr.map((r) => r.id).join(",");
-
-    const pendingJobs   = JobResult.filter((r) => Number(r.status_type) !== 6);
-    const completedJobs = JobResult.filter((r) => Number(r.status_type) === 6);
-
-    const result = {
-      customer: {
-        count : CustomerResult.length,
-        ids   : toIds(CustomerResult),
-      },
-      client: {
-        count : ClientResult.length,
-        ids   : toIds(ClientResult),
-      },
-      staff: {
-        count : StaffResult.length,
-        ids   : toIds(StaffResult),
-      },
-      job: {
-        count : JobResult.length,
-        ids   : toIds(JobResult),
-      },
-      pending_job: {
-        count : pendingJobs.length,
-        ids   : toIds(pendingJobs),
-      },
-      completed_job: {
-        count : completedJobs.length,
-        ids   : toIds(completedJobs),
-      },
-    };
-
-    console.log("dashboard Time - END -", new Date());
-    return { status: true, message: "success.", data: result };
-
-  } catch (err) {
-    console.error("Dashboard error:", err);
-    return {
-      status  : false,
-      message : "Err Dashboard Data View Get",
-      error   : err.message,
-    };
-  }
-};
-
-const getDashboardData = async (dashboard) => {
-  const { staff_id, date_filter } = dashboard;
-
-  console.time("dashboard_total");
-
-  // ── Step 1: Parallel init ────────────────────────────────────────────────
   const [{ startDate, endDate }, LineManageStaffId, rowRoles] = await Promise.all([
     getDateRange(date_filter),
     LineManageStaffIdHelperFunction(staff_id),
@@ -923,22 +512,40 @@ const getDashboardData = async (dashboard) => {
   const isSuperAdmin = rowRoles[0].role_name === "SUPERADMIN";
   const staffIds     = `${staff_id},${LineManageStaffId}`;
 
-  // ── Step 2: Permissions ──────────────────────────────────────────────────
   const [rolePermissions] = await pool.execute(
     `SELECT permission_id FROM role_permissions
       WHERE role_id = ? AND permission_id IN (33,34,35)`,
     [role_id]
   );
 
-  const permSet          = new Set(rolePermissions.map((r) => r.permission_id));
+  const permSet            = new Set(rolePermissions.map(r => r.permission_id));
   const RoleAccessCustomer = isSuperAdmin || permSet.has(33);
   const RoleAccessClient   = isSuperAdmin || permSet.has(34);
   const RoleAccessJob      = isSuperAdmin || permSet.has(35);
 
-  // ── Step 3: Query definitions (COUNT only, no ids unless needed) ─────────
-  // 🔑 KEY OPTIMIZATION: SELECT COUNT(*) instead of SELECT id
-  // ids assembling JS mein nahi hoga — DB se hi count lo
-  // Agar ids zaroor chahiye toh alag endpoint banao
+  // ── Agar restricted access hai toh pehle procedure se IDs lo ──
+  let assignedCustomerIds = new Set();
+  let assignedClientIds   = new Set();
+  let assignedJobIds      = new Set();
+
+  if (!RoleAccessCustomer || !RoleAccessClient || !RoleAccessJob) {
+    // Ek baar procedure call karo
+    const [procRows] = await pool.execute(
+      'CALL get_assigned_jobs_staff(?)',
+      [staffIds]
+    );
+
+    const assigned = procRows[0]; // actual rows yahan hain
+
+    assigned.forEach(row => {
+      if (row.customer_id) assignedCustomerIds.add(row.customer_id);
+      if (row.client_id)   assignedClientIds.add(row.client_id);
+      if (row.job_id)      assignedJobIds.add(row.job_id);
+    });
+  }
+
+  // ── Queries define karo ──
+  const toList = (set) => [...set].join(',') || '0';
 
   const customerQuery = RoleAccessCustomer
     ? {
@@ -946,21 +553,15 @@ const getDashboardData = async (dashboard) => {
                WHERE created_at BETWEEN ? AND ?`,
         params: [startDate, endDate],
       }
-    :
-     {
-          sql: `SELECT COUNT(DISTINCT customers.id) AS cnt
-                FROM customers
-                LEFT JOIN assigned_jobs_staff_view ajsv
-                  ON ajsv.customer_id = customers.id
-                WHERE (ajsv.staff_id IN (${staffIds}))
-                AND customers.created_at BETWEEN ? AND ?`,
+    : {
+        sql: `SELECT COUNT(*) AS cnt FROM customers
+               WHERE created_at BETWEEN ? AND ?
+                 AND (
+                   staff_id IN (${staffIds})
+                   OR id IN (${toList(assignedCustomerIds)})
+                 )`,
         params: [startDate, endDate],
-      }
-     
-      ;
-
-      console.log("customerQuery -", customerQuery.sql);
-      console.log("params -", customerQuery.params);
+      };
 
   const clientQuery = RoleAccessClient
     ? {
@@ -968,23 +569,15 @@ const getDashboardData = async (dashboard) => {
                WHERE created_at BETWEEN ? AND ?`,
         params: [startDate, endDate],
       }
-    : 
-      // {
-      //   sql: `SELECT COUNT(DISTINCT clients.id) AS cnt
-      //           FROM clients
-      //           LEFT JOIN assigned_jobs_staff_view ajsv
-      //             ON ajsv.client_id = clients.id
-      //            AND ajsv.staff_id IN (${staffIds})
-      //          WHERE (clients.staff_created_id IN (${staffIds}) OR ajsv.staff_id IS NOT NULL)
-      //            AND clients.created_at BETWEEN ? AND ?`,
-      //   params: [startDate, endDate],
-      // }
-      {
+    : {
         sql: `SELECT COUNT(*) AS cnt FROM clients
-               WHERE created_at BETWEEN ? AND ?`,
+               WHERE created_at BETWEEN ? AND ?
+                 AND (
+                   staff_created_id IN (${staffIds})
+                   OR id IN (${toList(assignedClientIds)})
+                 )`,
         params: [startDate, endDate],
-      }
-      ;
+      };
 
   const staffQuery = isSuperAdmin
     ? {
@@ -999,90 +592,46 @@ const getDashboardData = async (dashboard) => {
         params: [staff_id, startDate, endDate],
       };
 
-  // Job query — pending/completed ek hi query mein
   const jobQuery = RoleAccessJob
     ? {
-        sql: `SELECT status_type, COUNT(*) AS cnt
-                FROM jobs
+        sql: `SELECT status_type, COUNT(*) AS cnt FROM jobs
                WHERE created_at BETWEEN ? AND ?
                GROUP BY status_type`,
         params: [startDate, endDate],
       }
-    : 
-    
-    // {
-    //     sql: `SELECT jobs.status_type, COUNT(DISTINCT jobs.id) AS cnt
-    //             FROM jobs
-    //             LEFT JOIN assigned_jobs_staff_view ajsv
-    //               ON ajsv.job_id = jobs.id
-    //              AND ajsv.staff_id IN (${LineManageStaffId})
-    //            WHERE (
-    //                    ajsv.staff_id IS NOT NULL
-    //                    OR jobs.staff_created_id IN (${LineManageStaffId})
-    //                    OR jobs.client_id IN (
-    //                          SELECT id FROM clients
-    //                           WHERE staff_created_id IN (${LineManageStaffId})
-    //                       )
-    //                  )
-    //              AND jobs.created_at BETWEEN ? AND ?
-    //              AND (
-    //                    ajsv.source IS NULL
-    //                    OR ajsv.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
-    //                    OR jobs.service_id = ajsv.service_id_assign
-    //                  )
-    //            GROUP BY jobs.status_type`,
-    //     params: [startDate, endDate],
-    //   }
-    {
-        sql: `SELECT status_type, COUNT(*) AS cnt
-                FROM jobs
+    : {
+        sql: `SELECT status_type, COUNT(*) AS cnt FROM jobs
                WHERE created_at BETWEEN ? AND ?
+                 AND id IN (${toList(assignedJobIds)})
                GROUP BY status_type`,
         params: [startDate, endDate],
-      }
-      ;
+      };
 
-  try {
-    console.time("parallel_queries");
+  // ── Parallel run karo ──
+  const [[custRows], [clientRows], [staffRows], [jobRows]] = await Promise.all([
+    pool.execute(customerQuery.sql, customerQuery.params),
+    pool.execute(clientQuery.sql,   clientQuery.params),
+    pool.execute(staffQuery.sql,    staffQuery.params),
+    pool.execute(jobQuery.sql,      jobQuery.params),
+  ]);
 
-    // ── Step 4: Parallel execution ──────────────────────────────────────────
-    const [
-      [custRows],
-      [clientRows],
-      [staffRows],
-      [jobRows],
-    ] = await Promise.all([
-      pool.execute(customerQuery.sql, customerQuery.params),
-      pool.execute(clientQuery.sql,   clientQuery.params),
-      pool.execute(staffQuery.sql,    staffQuery.params),
-      pool.execute(jobQuery.sql,      jobQuery.params),
-    ]);
+  const totalJobs     = jobRows.reduce((s, r) => s + Number(r.cnt), 0);
+  const completedJobs = jobRows
+    .filter(r => Number(r.status_type) === 6)
+    .reduce((s, r) => s + Number(r.cnt), 0);
 
-    console.timeEnd("parallel_queries");
-
-    // ── Step 5: Assemble counts from GROUP BY rows ──────────────────────────
-    const totalJobs     = jobRows.reduce((s, r) => s + Number(r.cnt), 0);
-    const completedJobs = jobRows
-      .filter((r) => Number(r.status_type) === 6)
-      .reduce((s, r) => s + Number(r.cnt), 0);
-    const pendingJobs   = totalJobs - completedJobs;
-
-    const result = {
+  return {
+    status: true,
+    message: "success.",
+    data: {
       customer     : { count: Number(custRows[0]?.cnt   ?? 0) },
       client       : { count: Number(clientRows[0]?.cnt ?? 0) },
       staff        : { count: Number(staffRows[0]?.cnt  ?? 0) },
       job          : { count: totalJobs },
-      pending_job  : { count: pendingJobs },
+      pending_job  : { count: totalJobs - completedJobs },
       completed_job: { count: completedJobs },
-    };
-
-    console.timeEnd("dashboard_total");
-    return { status: true, message: "success.", data: result };
-
-  } catch (err) {
-    console.error("Dashboard error:", err);
-    return { status: false, message: "Err Dashboard Data View Get", error: err.message };
-  }
+    }
+  };
 };
 
 const getDashboardActivityLog = async (dashboard) => {
@@ -2299,3 +1848,103 @@ module.exports = {
   getByAllPendingJob,
   getByAllStaff,
 };
+
+
+
+
+
+
+
+
+// DELIMITER $$
+
+// CREATE PROCEDURE get_assigned_jobs_staff(
+//   IN p_staff_id VARCHAR(500)  -- "34" ya "34,35,36" pass karo
+// )
+// BEGIN
+
+//   -- UNION 1: assign_customer_portfolio
+//   SELECT 
+//     c.id    AS customer_id,
+//     cl.id   AS client_id,
+//     j.id    AS job_id,
+//     sp.staff_id,
+//     'assign_customer_portfolio' AS source,
+//     NULL    AS service_id_assign
+//   FROM staff_portfolio sp
+//   JOIN customers c  ON c.id = sp.customer_id
+//   LEFT JOIN clients cl ON cl.customer_id = c.id
+//   LEFT JOIN jobs j     ON j.client_id = cl.id
+//   WHERE FIND_IN_SET(sp.staff_id, p_staff_id)
+
+//   UNION ALL
+
+//   -- UNION 2: assign_customer_service
+//   SELECT 
+//     c.id, cl.id, j.id,
+//     csam.account_manager_id,
+//     'assign_customer_service',
+//     cs.service_id
+//   FROM customer_service_account_managers csam
+//   JOIN customer_services cs ON cs.id = csam.customer_service_id
+//   JOIN customers c          ON c.id = cs.customer_id
+//   LEFT JOIN clients cl      ON cl.customer_id = c.id
+//   LEFT JOIN jobs j          ON j.client_id = cl.id
+//   WHERE FIND_IN_SET(csam.account_manager_id, p_staff_id)
+
+//   UNION ALL
+
+//   -- UNION 3: assign_customer_main_account_manager
+//   SELECT 
+//     c.id, cl.id, j.id,
+//     c.account_manager_id,
+//     'assign_customer_main_account_manager',
+//     NULL
+//   FROM customers c
+//   LEFT JOIN clients cl ON cl.customer_id = c.id
+//   LEFT JOIN jobs j     ON j.client_id = cl.id
+//   WHERE FIND_IN_SET(c.account_manager_id, p_staff_id)
+
+//   UNION ALL
+
+//   -- UNION 4: reviewer
+//   SELECT 
+//     cu.id, cl.id, j.id,
+//     j.reviewer,
+//     'reviewer',
+//     NULL
+//   FROM jobs j
+//   JOIN clients cl   ON cl.id = j.client_id
+//   JOIN customers cu ON cu.id = cl.customer_id
+//   WHERE FIND_IN_SET(j.reviewer, p_staff_id)
+
+//   UNION ALL
+
+//   -- UNION 5: allocated_to
+//   SELECT 
+//     cu.id, cl.id, j.id,
+//     j.allocated_to,
+//     'allocated_to',
+//     NULL
+//   FROM jobs j
+//   JOIN clients cl   ON cl.id = j.client_id
+//   JOIN customers cu ON cu.id = cl.customer_id
+//   WHERE FIND_IN_SET(j.allocated_to, p_staff_id)
+
+//   UNION ALL
+
+//   -- UNION 6: job_allowed_staffs
+//   SELECT 
+//     cu.id, cl.id, j.id,
+//     jas.staff_id,
+//     'job_allowed_staffs',
+//     NULL
+//   FROM job_allowed_staffs jas
+//   JOIN jobs j       ON j.id = jas.job_id
+//   JOIN clients cl   ON cl.id = j.client_id
+//   JOIN customers cu ON cu.id = cl.customer_id
+//   WHERE FIND_IN_SET(jas.staff_id, p_staff_id);
+
+// END$$
+
+// DELIMITER ;
