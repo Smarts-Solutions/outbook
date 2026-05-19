@@ -20,6 +20,7 @@ import CustomerReportJobs from "../layouts/Customer/Reports/CustomerReportJobs";
 import CustomerProfile from "../layouts/Customer/CustomerProfile";
 import CustomerTimesheetReport from "../layouts/Customer/Timesheet/CustomerTimesheetReport";
 import CustomerJobCustomReport from "../layouts/Customer/Reports/CustomerJobCustomReport";
+import AccessDenied from "../layouts/Customer/AccessDenied";
 
 const Customer_Route = () => {
     return (
@@ -46,7 +47,7 @@ const Customer_Route = () => {
                         <Route path="/timesheetReports" element={<CustomerTimesheetReport />} />
                         <Route path="/job/customreport" element={<CustomerJobCustomReport />} />
                         <Route path="/profile" element={<CustomerProfile />} />
-
+                        <Route path="/access-denied" element={<AccessDenied />} />
                     </Routes>
                 </div>
             </div>

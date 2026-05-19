@@ -4,7 +4,7 @@ import {
   CustomerDashboardData,
   CustomerActivityLog,
 } from "../../ReduxStore/Slice/Customer/CustomerSlice";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import Select from "react-select";
@@ -499,20 +499,7 @@ const Dashboard = () => {
   }
 
   if (!accessLoading && !hasAccess("dashboard", "view") && role !== "SUPERADMIN") {
-    return (
-      <div className="container-fluid">
-        <div className="row mt-4">
-          <div className="col-12">
-            <div className="alert alert-danger border-2 d-flex align-items-center gap-2" role="alert" style={{ textTransform: 'none' }}>
-              <CircleAlert size={20} />
-              <div>
-                <strong>Access Denied:</strong> You do not have permission to view the Dashboard. Please contact your administrator if you believe this is an error.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <Navigate to="/customer/access-denied" replace />;
   }
 
   return (
