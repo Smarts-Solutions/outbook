@@ -500,138 +500,286 @@ const getDashboardData_1 = async (dashboard) => {
 const getDashboardData = async (dashboard) => {
   const { staff_id, date_filter } = dashboard;
 
-  const [{ startDate, endDate }, LineManageStaffId, rowRoles] = await Promise.all([
-    getDateRange(date_filter),
-    LineManageStaffIdHelperFunction(staff_id),
-    QueryRoleHelperFunction(staff_id),
-  ]);
+  console.log("dashboard Time - 1 -", new Date());
+  let { startDate, endDate } = await getDateRange(date_filter);
+  console.log("dashboard Time - 2 -", new Date());
 
-  if (!rowRoles.length) return { status: false, message: "Role not found." };
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id);
+  console.log("dashboard Time - 3 -", new Date());
 
-  const role_id      = rowRoles[0].role_id;
-  const isSuperAdmin = rowRoles[0].role_name === "SUPERADMIN";
-  const staffIds     = `${staff_id},${LineManageStaffId}`;
+  const rowRoles = await QueryRoleHelperFunction(staff_id);
+  console.log("dashboard Time - 4 -", new Date());
 
-  const [rolePermissions] = await pool.execute(
-    `SELECT permission_id FROM role_permissions
-      WHERE role_id = ? AND permission_id IN (33,34,35)`,
-    [role_id]
-  );
+  // ─── DB Connection लो (procedure + temp table के लिए same connection चाहिए) ───
+  const connection = await pool.getConnection();
 
-  const permSet            = new Set(rolePermissions.map(r => r.permission_id));
-  const RoleAccessCustomer = isSuperAdmin || permSet.has(33);
-  const RoleAccessClient   = isSuperAdmin || permSet.has(34);
-  const RoleAccessJob      = isSuperAdmin || permSet.has(35);
-
-  // ── Agar restricted access hai toh pehle procedure se IDs lo ──
-  let assignedCustomerIds = new Set();
-  let assignedClientIds   = new Set();
-  let assignedJobIds      = new Set();
-
-  if (!RoleAccessCustomer || !RoleAccessClient || !RoleAccessJob) {
-    // Ek baar procedure call karo
-    const [procRows] = await pool.execute(
-      'CALL get_assigned_jobs_staff(?)',
-      [staffIds]
+  try {
+    const [RoleAccessCustomer] = await connection.execute(
+      "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+      [rowRoles[0].role_id, 33]
+    );
+    const [RoleAccessClient] = await connection.execute(
+      "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+      [rowRoles[0].role_id, 34]
+    );
+    const [RoleAccessJob] = await connection.execute(
+      "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+      [rowRoles[0].role_id, 35]
     );
 
-    const assigned = procRows[0]; // actual rows yahan hain
+    const isSuperAdmin = rowRoles.length > 0 && rowRoles[0].role_name === "SUPERADMIN";
 
-    assigned.forEach(row => {
-      if (row.customer_id) assignedCustomerIds.add(row.customer_id);
-      if (row.client_id)   assignedClientIds.add(row.client_id);
-      if (row.job_id)      assignedJobIds.add(row.job_id);
-    });
-  }
+    // ─── Procedure call करो और Temp Table में डालो (सिर्फ non-admin के लिए) ───
+    if (!isSuperAdmin) {
+      await connection.execute("DROP TEMPORARY TABLE IF EXISTS temp_assigned_jobs_staff");
 
-  // ── Queries define karo ──
-  const toList = (set) => [...set].join(',') || '0';
+      await connection.execute(`
+      CREATE TEMPORARY TABLE temp_assigned_jobs_staff (
+        customer_id       INT,
+        client_id         INT,
+        job_id            INT,
+        staff_id          INT,
+        source            VARCHAR(100),
+        service_id_assign INT
+      )
+    `);
 
-  const customerQuery = RoleAccessCustomer
-    ? {
-        sql: `SELECT COUNT(*) AS cnt FROM customers
-               WHERE created_at BETWEEN ? AND ?`,
-        params: [startDate, endDate],
+      // हर staff_id के लिए CALL करो — procedure खुद temp table में INSERT करेगा
+      const allStaffIds = [...new Set([
+        Number(staff_id),
+        ...LineManageStaffId.toString().split(",").map(Number)
+      ])];
+
+      for (const sid of allStaffIds) {
+        await connection.execute("CALL get_assigned_jobs_staff(?)", [sid]); // ✅ सिर्फ CALL
       }
-    : {
-        sql: `SELECT COUNT(*) AS cnt FROM customers
-               WHERE created_at BETWEEN ? AND ?
-                 AND (
-                   staff_id IN (${staffIds})
-                   OR id IN (${toList(assignedCustomerIds)})
-                 )`,
-        params: [startDate, endDate],
-      };
 
-  const clientQuery = RoleAccessClient
-    ? {
-        sql: `SELECT COUNT(*) AS cnt FROM clients
-               WHERE created_at BETWEEN ? AND ?`,
-        params: [startDate, endDate],
-      }
-    : {
-        sql: `SELECT COUNT(*) AS cnt FROM clients
-               WHERE created_at BETWEEN ? AND ?
-                 AND (
-                   staff_created_id IN (${staffIds})
-                   OR id IN (${toList(assignedClientIds)})
-                 )`,
-        params: [startDate, endDate],
-      };
+      // Index add करो
+      await connection.execute(`
+      ALTER TABLE temp_assigned_jobs_staff 
+        ADD INDEX idx_staff    (staff_id),
+        ADD INDEX idx_customer (customer_id),
+        ADD INDEX idx_client   (client_id),
+        ADD INDEX idx_job      (job_id)
+    `);
 
-  const staffQuery = isSuperAdmin
-    ? {
-        sql: `SELECT COUNT(*) AS cnt FROM staffs
-               WHERE created_at BETWEEN ? AND ?`,
-        params: [startDate, endDate],
-      }
-    : {
-        sql: `SELECT COUNT(*) AS cnt FROM staffs
-               WHERE created_by = ?
-                 AND created_at BETWEEN ? AND ?`,
-        params: [staff_id, startDate, endDate],
-      };
-
-  const jobQuery = RoleAccessJob
-    ? {
-        sql: `SELECT status_type, COUNT(*) AS cnt FROM jobs
-               WHERE created_at BETWEEN ? AND ?
-               GROUP BY status_type`,
-        params: [startDate, endDate],
-      }
-    : {
-        sql: `SELECT status_type, COUNT(*) AS cnt FROM jobs
-               WHERE created_at BETWEEN ? AND ?
-                 AND id IN (${toList(assignedJobIds)})
-               GROUP BY status_type`,
-        params: [startDate, endDate],
-      };
-
-  // ── Parallel run karo ──
-  const [[custRows], [clientRows], [staffRows], [jobRows]] = await Promise.all([
-    pool.execute(customerQuery.sql, customerQuery.params),
-    pool.execute(clientQuery.sql,   clientQuery.params),
-    pool.execute(staffQuery.sql,    staffQuery.params),
-    pool.execute(jobQuery.sql,      jobQuery.params),
-  ]);
-
-  const totalJobs     = jobRows.reduce((s, r) => s + Number(r.cnt), 0);
-  const completedJobs = jobRows
-    .filter(r => Number(r.status_type) === 6)
-    .reduce((s, r) => s + Number(r.cnt), 0);
-
-  return {
-    status: true,
-    message: "success.",
-    data: {
-      customer     : { count: Number(custRows[0]?.cnt   ?? 0) },
-      client       : { count: Number(clientRows[0]?.cnt ?? 0) },
-      staff        : { count: Number(staffRows[0]?.cnt  ?? 0) },
-      job          : { count: totalJobs },
-      pending_job  : { count: totalJobs - completedJobs },
-      completed_job: { count: completedJobs },
+      console.log("dashboard Time - Procedure Done -", new Date());
     }
-  };
+
+    // ─── CUSTOMER ───
+    let CustomerResult = [];
+    if (isSuperAdmin || RoleAccessCustomer.length > 0) {
+      const [CustomerData] = await connection.execute(
+        `SELECT customers.id AS id
+         FROM customers
+         WHERE customers.created_at BETWEEN ? AND ?
+         ORDER BY id DESC`,
+        [startDate, endDate]
+      );
+      CustomerResult = CustomerData;
+      console.log("dashboard Time - ADMIN CUSTOMER -", new Date());
+    } else {
+      const [CustomerData] = await connection.execute(
+        `SELECT customers.id AS id
+         FROM customers
+         LEFT JOIN temp_assigned_jobs_staff AS tajv
+               ON tajv.customer_id = customers.id
+         WHERE
+           (customers.staff_id = ${staff_id}
+            OR tajv.staff_id = ${staff_id}
+            OR customers.staff_id IN (${LineManageStaffId})
+            OR tajv.staff_id IN (${LineManageStaffId}))
+           AND customers.created_at BETWEEN ? AND ?
+         GROUP BY customers.id
+         ORDER BY customers.id DESC`,
+        [startDate, endDate]
+      );
+      CustomerResult = CustomerData;
+      console.log("dashboard Time - USER CUSTOMER -", new Date());
+    }
+
+    // ─── CLIENT ───
+    let ClientResult = [];
+    if (isSuperAdmin || RoleAccessClient.length > 0) {
+      const [ClientData] = await connection.execute(
+        `SELECT clients.id AS id
+         FROM clients
+         JOIN customers ON customers.id = clients.customer_id
+         JOIN client_types ON client_types.id = clients.client_type
+         LEFT JOIN jobs ON clients.id = jobs.client_id
+         LEFT JOIN client_contact_details ON client_contact_details.id = (
+             SELECT MIN(cd.id) FROM client_contact_details cd WHERE cd.client_id = clients.id
+         )
+         WHERE clients.created_at BETWEEN ? AND ?
+         GROUP BY clients.id
+         ORDER BY clients.id DESC`,
+        [startDate, endDate]
+      );
+      ClientResult = ClientData;
+      console.log("dashboard Time - ADMIN CLIENT -", new Date());
+    } else {
+      const [ClientData] = await connection.execute(
+        `SELECT clients.id AS id
+         FROM clients
+         LEFT JOIN temp_assigned_jobs_staff AS tajv ON tajv.client_id = clients.id
+         JOIN customers ON customers.id = clients.customer_id
+         JOIN client_types ON client_types.id = clients.client_type
+         LEFT JOIN jobs ON clients.id = jobs.client_id
+         LEFT JOIN client_contact_details ON client_contact_details.id = (
+             SELECT MIN(cd.id) FROM client_contact_details cd WHERE cd.client_id = clients.id
+         )
+         WHERE
+           (clients.staff_created_id = ${staff_id}
+            OR tajv.staff_id = ${staff_id}
+            OR clients.staff_created_id IN (${LineManageStaffId})
+            OR tajv.staff_id IN (${LineManageStaffId}))
+           AND clients.created_at BETWEEN ? AND ?
+         GROUP BY clients.id
+         ORDER BY clients.id DESC`,
+        [startDate, endDate]
+      );
+      ClientResult = ClientData;
+      console.log("dashboard Time - USER CLIENT -", new Date());
+    }
+
+    // ─── STAFF ───
+    let StaffResult = [];
+    if (isSuperAdmin) {
+      const [StaffData] = await connection.execute(
+        `SELECT id FROM staffs WHERE created_at BETWEEN ? AND ? ORDER BY id DESC`,
+        [startDate, endDate]
+      );
+      StaffResult = StaffData;
+    } else {
+      const [StaffData] = await connection.execute(
+        `SELECT id FROM staffs WHERE created_by = ${staff_id} AND created_at BETWEEN ? AND ? ORDER BY id DESC`,
+        [startDate, endDate]
+      );
+      StaffResult = StaffData;
+    }
+
+    // ─── JOBS ───
+    let JobResult = [];
+    if (isSuperAdmin || RoleAccessJob.length > 0) {
+      const [JobData] = await connection.execute(
+        `SELECT jobs.id AS id, jobs.status_type AS status_type
+         FROM jobs
+         LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+         LEFT JOIN clients ON jobs.client_id = clients.id
+         LEFT JOIN customers ON jobs.customer_id = customers.id AND customers.status = '1'
+         LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+         LEFT JOIN services ON jobs.service_id = services.id
+         LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+         LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+         LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+         LEFT JOIN master_status ON master_status.id = jobs.status_type
+         LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+         WHERE jobs.created_at BETWEEN ? AND ?
+         GROUP BY jobs.id
+         ORDER BY jobs.id DESC`,
+        [startDate, endDate]
+      );
+      JobResult = JobData;
+      console.log("dashboard Time - ADMIN JOB -", new Date());
+    } else {
+      startDate = startDate + " 00:00:00";
+      endDate = endDate + " 00:00:00";
+
+      const [JobData] = await connection.execute(
+        `SELECT 
+           jobs.id AS id,
+           jobs.status_type AS status_type,
+           tajv.source AS assigned_source,
+           tajv.service_id_assign AS service_id_assign,
+           jobs.service_id AS job_service_id
+         FROM jobs
+         JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+         LEFT JOIN temp_assigned_jobs_staff AS tajv ON tajv.job_id = jobs.id
+         LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+         LEFT JOIN clients ON jobs.client_id = clients.id
+         LEFT JOIN customers ON jobs.customer_id = customers.id
+         LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+         LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+         LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+         LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+         LEFT JOIN master_status ON master_status.id = jobs.status_type
+         LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+         WHERE
+           ((tajv.staff_id IN (${LineManageStaffId})
+             OR jobs.staff_created_id IN (${LineManageStaffId})
+             OR clients.staff_created_id IN (${LineManageStaffId}))
+            AND DATE(jobs.created_at) BETWEEN ? AND ?)
+           AND (
+             tajv.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+             OR jobs.service_id = tajv.service_id_assign
+           )
+           AND customers.status = '1'
+         GROUP BY jobs.id
+         ORDER BY jobs.id DESC`,
+        [startDate, endDate]
+      );
+
+      // assign_customer_service filter (पहले जैसा logic)
+      const isExistAssignCustomer = JobData?.find(
+        (item) => item?.assigned_source === "assign_customer_service"
+      );
+      if (isExistAssignCustomer !== undefined) {
+        const matched = JobData.filter(
+          (item) => item.assigned_source === "assign_customer_service" &&
+            Number(item.service_id_assign) === Number(item.job_service_id)
+        );
+        const matched2 = JobData.filter(
+          (item) => item.assigned_source !== "assign_customer_service"
+        );
+        JobResult = [...matched, ...matched2];
+        console.log("dashboard Time - USER ACCOUNT MANAGER JOB -", new Date());
+      } else {
+        JobResult = JobData;
+        console.log("dashboard Time - USER JOB -", new Date());
+      }
+    }
+
+    // ─── Cleanup ───
+    if (!isSuperAdmin) {
+      await connection.execute("DROP TEMPORARY TABLE IF EXISTS temp_assigned_jobs_staff");
+    }
+
+    const result = {
+      customer: {
+        count: CustomerResult.length,
+        ids: CustomerResult.map((r) => r.id).join(","),
+      },
+      client: {
+        count: ClientResult.length,
+        ids: ClientResult.map((r) => r.id).join(","),
+      },
+      staff: {
+        count: StaffResult.length,
+        ids: StaffResult.map((r) => r.id).join(","),
+      },
+      job: {
+        count: JobResult.length,
+        ids: JobResult.map((r) => r.id).join(","),
+      },
+      pending_job: {
+        count: JobResult.filter((r) => Number(r.status_type) !== 6).length,
+        ids: JobResult.filter((r) => Number(r.status_type) !== 6).map((r) => r.id).join(","),
+      },
+      completed_job: {
+        count: JobResult.filter((r) => Number(r.status_type) === 6).length,
+        ids: JobResult.filter((r) => Number(r.status_type) === 6).map((r) => r.id).join(","),
+      },
+    };
+
+    return { status: true, message: "success.", data: result };
+
+  } catch (err) {
+    console.error("eeee", err);
+    return { status: false, message: "Err Dashboard Data View Get", error: err.message };
+  } finally {
+    // ─── Connection हमेशा release करो ───
+    connection.release();
+  }
 };
 
 const getDashboardActivityLog = async (dashboard) => {
@@ -1856,95 +2004,3 @@ module.exports = {
 
 
 
-// DELIMITER $$
-
-// CREATE PROCEDURE get_assigned_jobs_staff(
-//   IN p_staff_id VARCHAR(500)  -- "34" ya "34,35,36" pass karo
-// )
-// BEGIN
-
-//   -- UNION 1: assign_customer_portfolio
-//   SELECT 
-//     c.id    AS customer_id,
-//     cl.id   AS client_id,
-//     j.id    AS job_id,
-//     sp.staff_id,
-//     'assign_customer_portfolio' AS source,
-//     NULL    AS service_id_assign
-//   FROM staff_portfolio sp
-//   JOIN customers c  ON c.id = sp.customer_id
-//   LEFT JOIN clients cl ON cl.customer_id = c.id
-//   LEFT JOIN jobs j     ON j.client_id = cl.id
-//   WHERE FIND_IN_SET(sp.staff_id, p_staff_id)
-
-//   UNION ALL
-
-//   -- UNION 2: assign_customer_service
-//   SELECT 
-//     c.id, cl.id, j.id,
-//     csam.account_manager_id,
-//     'assign_customer_service',
-//     cs.service_id
-//   FROM customer_service_account_managers csam
-//   JOIN customer_services cs ON cs.id = csam.customer_service_id
-//   JOIN customers c          ON c.id = cs.customer_id
-//   LEFT JOIN clients cl      ON cl.customer_id = c.id
-//   LEFT JOIN jobs j          ON j.client_id = cl.id
-//   WHERE FIND_IN_SET(csam.account_manager_id, p_staff_id)
-
-//   UNION ALL
-
-//   -- UNION 3: assign_customer_main_account_manager
-//   SELECT 
-//     c.id, cl.id, j.id,
-//     c.account_manager_id,
-//     'assign_customer_main_account_manager',
-//     NULL
-//   FROM customers c
-//   LEFT JOIN clients cl ON cl.customer_id = c.id
-//   LEFT JOIN jobs j     ON j.client_id = cl.id
-//   WHERE FIND_IN_SET(c.account_manager_id, p_staff_id)
-
-//   UNION ALL
-
-//   -- UNION 4: reviewer
-//   SELECT 
-//     cu.id, cl.id, j.id,
-//     j.reviewer,
-//     'reviewer',
-//     NULL
-//   FROM jobs j
-//   JOIN clients cl   ON cl.id = j.client_id
-//   JOIN customers cu ON cu.id = cl.customer_id
-//   WHERE FIND_IN_SET(j.reviewer, p_staff_id)
-
-//   UNION ALL
-
-//   -- UNION 5: allocated_to
-//   SELECT 
-//     cu.id, cl.id, j.id,
-//     j.allocated_to,
-//     'allocated_to',
-//     NULL
-//   FROM jobs j
-//   JOIN clients cl   ON cl.id = j.client_id
-//   JOIN customers cu ON cu.id = cl.customer_id
-//   WHERE FIND_IN_SET(j.allocated_to, p_staff_id)
-
-//   UNION ALL
-
-//   -- UNION 6: job_allowed_staffs
-//   SELECT 
-//     cu.id, cl.id, j.id,
-//     jas.staff_id,
-//     'job_allowed_staffs',
-//     NULL
-//   FROM job_allowed_staffs jas
-//   JOIN jobs j       ON j.id = jas.job_id
-//   JOIN clients cl   ON cl.id = j.client_id
-//   JOIN customers cu ON cu.id = cl.customer_id
-//   WHERE FIND_IN_SET(jas.staff_id, p_staff_id);
-
-// END$$
-
-// DELIMITER ;
