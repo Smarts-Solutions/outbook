@@ -500,15 +500,15 @@ const getDashboardData_1 = async (dashboard) => {
 const getDashboardData = async (dashboard) => {
   const { staff_id, date_filter } = dashboard;
 
-  console.log("dashboard Time - 1 -", new Date());
+  //console.log("dashboard Time - 1 -", new Date());
   let { startDate, endDate } = await getDateRange(date_filter);
-  console.log("dashboard Time - 2 -", new Date());
+  //console.log("dashboard Time - 2 -", new Date());
 
   const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id);
-  console.log("dashboard Time - 3 -", new Date());
+  //console.log("dashboard Time - 3 -", new Date());
 
   const rowRoles = await QueryRoleHelperFunction(staff_id);
-  console.log("dashboard Time - 4 -", new Date());
+  //console.log("dashboard Time - 4 -", new Date());
 
   // ─── DB Connection लो (procedure + temp table for same connection) ───
   const connection = await pool.getConnection();
@@ -563,7 +563,7 @@ const getDashboardData = async (dashboard) => {
         ADD INDEX idx_job      (job_id)
     `);
 
-      console.log("dashboard Time - Procedure Done -", new Date());
+     // console.log("dashboard Time - Procedure Done -", new Date());
     }
 
     // ─── CUSTOMER ───
@@ -595,7 +595,7 @@ const getDashboardData = async (dashboard) => {
         [startDate, endDate]
       );
       CustomerResult = CustomerData;
-      console.log("dashboard Time - USER CUSTOMER -", new Date());
+      //console.log("dashboard Time - USER CUSTOMER -", new Date());
     }
 
     // ─── CLIENT ───
@@ -616,7 +616,7 @@ const getDashboardData = async (dashboard) => {
         [startDate, endDate]
       );
       ClientResult = ClientData;
-      console.log("dashboard Time - ADMIN CLIENT -", new Date());
+      //console.log("dashboard Time - ADMIN CLIENT -", new Date());
     } else {
       const [ClientData] = await connection.execute(
         `SELECT clients.id AS id
@@ -639,7 +639,7 @@ const getDashboardData = async (dashboard) => {
         [startDate, endDate]
       );
       ClientResult = ClientData;
-      console.log("dashboard Time - USER CLIENT -", new Date());
+     // console.log("dashboard Time - USER CLIENT -", new Date());
     }
 
     // ─── STAFF ───
@@ -680,7 +680,7 @@ const getDashboardData = async (dashboard) => {
         [startDate, endDate]
       );
       JobResult = JobData;
-      console.log("dashboard Time - ADMIN JOB -", new Date());
+      //console.log("dashboard Time - ADMIN JOB -", new Date());
     } else {
       startDate = startDate + " 00:00:00";
       endDate = endDate + " 00:00:00";
@@ -718,25 +718,25 @@ const getDashboardData = async (dashboard) => {
          ORDER BY jobs.id DESC`,
         [startDate, endDate]
       );
-
-      // assign_customer_service filter (पहले जैसा logic)
-      const isExistAssignCustomer = JobData?.find(
-        (item) => item?.assigned_source === "assign_customer_service"
-      );
-      if (isExistAssignCustomer !== undefined) {
-        const matched = JobData.filter(
-          (item) => item.assigned_source === "assign_customer_service" &&
-            Number(item.service_id_assign) === Number(item.job_service_id)
-        );
-        const matched2 = JobData.filter(
-          (item) => item.assigned_source !== "assign_customer_service"
-        );
-        JobResult = [...matched, ...matched2];
-        console.log("dashboard Time - USER ACCOUNT MANAGER JOB -", new Date());
-      } else {
-        JobResult = JobData;
-        console.log("dashboard Time - USER JOB -", new Date());
-      }
+       JobResult = JobData;
+      // assign_customer_service 
+      // const isExistAssignCustomer = JobData?.find(
+      //   (item) => item?.assigned_source === "assign_customer_service"
+      // );
+      // if (isExistAssignCustomer !== undefined) {
+      //   const matched = JobData.filter(
+      //     (item) => item.assigned_source === "assign_customer_service" &&
+      //       Number(item.service_id_assign) === Number(item.job_service_id)
+      //   );
+      //   const matched2 = JobData.filter(
+      //     (item) => item.assigned_source !== "assign_customer_service"
+      //   );
+      //   JobResult = [...matched, ...matched2];
+      //   console.log("dashboard Time - USER ACCOUNT MANAGER JOB -", new Date());
+      // } else {
+      //   JobResult = JobData;
+      //   console.log("dashboard Time - USER JOB -", new Date());
+      // }
     }
 
     // ─── Cleanup ───
