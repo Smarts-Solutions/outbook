@@ -688,7 +688,7 @@ const getDashboardData_2 = async (dashboard) => {
   }
 };
 
-const getDashboardData = async (dashboard) => {
+const getDashboardData_3 = async (dashboard) => {
   const { staff_id, date_filter } = dashboard;
 
   console.log("dashboard Time - START -", new Date());
@@ -902,6 +902,187 @@ const getDashboardData = async (dashboard) => {
       message : "Err Dashboard Data View Get",
       error   : err.message,
     };
+  }
+};
+
+const getDashboardData = async (dashboard) => {
+  const { staff_id, date_filter } = dashboard;
+
+  console.time("dashboard_total");
+
+  // ── Step 1: Parallel init ────────────────────────────────────────────────
+  const [{ startDate, endDate }, LineManageStaffId, rowRoles] = await Promise.all([
+    getDateRange(date_filter),
+    LineManageStaffIdHelperFunction(staff_id),
+    QueryRoleHelperFunction(staff_id),
+  ]);
+
+  if (!rowRoles.length) return { status: false, message: "Role not found." };
+
+  const role_id      = rowRoles[0].role_id;
+  const isSuperAdmin = rowRoles[0].role_name === "SUPERADMIN";
+  const staffIds     = `${staff_id},${LineManageStaffId}`;
+
+  // ── Step 2: Permissions ──────────────────────────────────────────────────
+  const [rolePermissions] = await pool.execute(
+    `SELECT permission_id FROM role_permissions
+      WHERE role_id = ? AND permission_id IN (33,34,35)`,
+    [role_id]
+  );
+
+  const permSet          = new Set(rolePermissions.map((r) => r.permission_id));
+  const RoleAccessCustomer = isSuperAdmin || permSet.has(33);
+  const RoleAccessClient   = isSuperAdmin || permSet.has(34);
+  const RoleAccessJob      = isSuperAdmin || permSet.has(35);
+
+  // ── Step 3: Query definitions (COUNT only, no ids unless needed) ─────────
+  // 🔑 KEY OPTIMIZATION: SELECT COUNT(*) instead of SELECT id
+  // ids assembling JS mein nahi hoga — DB se hi count lo
+  // Agar ids zaroor chahiye toh alag endpoint banao
+
+  const customerQuery = RoleAccessCustomer
+    ? {
+        sql: `SELECT COUNT(*) AS cnt FROM customers
+               WHERE created_at BETWEEN ? AND ?`,
+        params: [startDate, endDate],
+      }
+    :
+     {
+      sql: `SELECT COUNT(DISTINCT customers.id) AS cnt
+                FROM customers
+                LEFT JOIN assigned_jobs_staff_view ajsv
+                  ON ajsv.customer_id = customers.id
+                 AND ajsv.staff_id IN (${staffIds})
+               WHERE (customers.staff_id IN (${staffIds}) OR ajsv.staff_id IS NOT NULL)
+               AND customers.created_at BETWEEN ? AND ?`,
+        params: [startDate, endDate],
+      }
+     
+      ;
+
+      console.log("customerQuery -", customerQuery.sql);
+      console.log("params -", customerQuery.params);
+
+  const clientQuery = RoleAccessClient
+    ? {
+        sql: `SELECT COUNT(*) AS cnt FROM clients
+               WHERE created_at BETWEEN ? AND ?`,
+        params: [startDate, endDate],
+      }
+    : 
+      // {
+      //   sql: `SELECT COUNT(DISTINCT clients.id) AS cnt
+      //           FROM clients
+      //           LEFT JOIN assigned_jobs_staff_view ajsv
+      //             ON ajsv.client_id = clients.id
+      //            AND ajsv.staff_id IN (${staffIds})
+      //          WHERE (clients.staff_created_id IN (${staffIds}) OR ajsv.staff_id IS NOT NULL)
+      //            AND clients.created_at BETWEEN ? AND ?`,
+      //   params: [startDate, endDate],
+      // }
+      {
+        sql: `SELECT COUNT(*) AS cnt FROM clients
+               WHERE created_at BETWEEN ? AND ?`,
+        params: [startDate, endDate],
+      }
+      ;
+
+  const staffQuery = isSuperAdmin
+    ? {
+        sql: `SELECT COUNT(*) AS cnt FROM staffs
+               WHERE created_at BETWEEN ? AND ?`,
+        params: [startDate, endDate],
+      }
+    : {
+        sql: `SELECT COUNT(*) AS cnt FROM staffs
+               WHERE created_by = ?
+                 AND created_at BETWEEN ? AND ?`,
+        params: [staff_id, startDate, endDate],
+      };
+
+  // Job query — pending/completed ek hi query mein
+  const jobQuery = RoleAccessJob
+    ? {
+        sql: `SELECT status_type, COUNT(*) AS cnt
+                FROM jobs
+               WHERE created_at BETWEEN ? AND ?
+               GROUP BY status_type`,
+        params: [startDate, endDate],
+      }
+    : 
+    
+    // {
+    //     sql: `SELECT jobs.status_type, COUNT(DISTINCT jobs.id) AS cnt
+    //             FROM jobs
+    //             LEFT JOIN assigned_jobs_staff_view ajsv
+    //               ON ajsv.job_id = jobs.id
+    //              AND ajsv.staff_id IN (${LineManageStaffId})
+    //            WHERE (
+    //                    ajsv.staff_id IS NOT NULL
+    //                    OR jobs.staff_created_id IN (${LineManageStaffId})
+    //                    OR jobs.client_id IN (
+    //                          SELECT id FROM clients
+    //                           WHERE staff_created_id IN (${LineManageStaffId})
+    //                       )
+    //                  )
+    //              AND jobs.created_at BETWEEN ? AND ?
+    //              AND (
+    //                    ajsv.source IS NULL
+    //                    OR ajsv.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+    //                    OR jobs.service_id = ajsv.service_id_assign
+    //                  )
+    //            GROUP BY jobs.status_type`,
+    //     params: [startDate, endDate],
+    //   }
+    {
+        sql: `SELECT status_type, COUNT(*) AS cnt
+                FROM jobs
+               WHERE created_at BETWEEN ? AND ?
+               GROUP BY status_type`,
+        params: [startDate, endDate],
+      }
+      ;
+
+  try {
+    console.time("parallel_queries");
+
+    // ── Step 4: Parallel execution ──────────────────────────────────────────
+    const [
+      [custRows],
+      [clientRows],
+      [staffRows],
+      [jobRows],
+    ] = await Promise.all([
+      pool.execute(customerQuery.sql, customerQuery.params),
+      pool.execute(clientQuery.sql,   clientQuery.params),
+      pool.execute(staffQuery.sql,    staffQuery.params),
+      pool.execute(jobQuery.sql,      jobQuery.params),
+    ]);
+
+    console.timeEnd("parallel_queries");
+
+    // ── Step 5: Assemble counts from GROUP BY rows ──────────────────────────
+    const totalJobs     = jobRows.reduce((s, r) => s + Number(r.cnt), 0);
+    const completedJobs = jobRows
+      .filter((r) => Number(r.status_type) === 6)
+      .reduce((s, r) => s + Number(r.cnt), 0);
+    const pendingJobs   = totalJobs - completedJobs;
+
+    const result = {
+      customer     : { count: Number(custRows[0]?.cnt   ?? 0) },
+      client       : { count: Number(clientRows[0]?.cnt ?? 0) },
+      staff        : { count: Number(staffRows[0]?.cnt  ?? 0) },
+      job          : { count: totalJobs },
+      pending_job  : { count: pendingJobs },
+      completed_job: { count: completedJobs },
+    };
+
+    console.timeEnd("dashboard_total");
+    return { status: true, message: "success.", data: result };
+
+  } catch (err) {
+    console.error("Dashboard error:", err);
+    return { status: false, message: "Err Dashboard Data View Get", error: err.message };
   }
 };
 
