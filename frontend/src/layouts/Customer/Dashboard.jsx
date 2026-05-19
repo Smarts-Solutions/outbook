@@ -498,9 +498,6 @@ const Dashboard = () => {
     return Number(value).toLocaleString("en-IN");
   }
 
-  if (!accessLoading && !hasAccess("dashboard", "view") && role !== "SUPERADMIN") {
-    return <Navigate to="/customer/access-denied" replace />;
-  }
 
   return (
     <div>

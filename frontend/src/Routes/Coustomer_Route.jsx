@@ -1,7 +1,8 @@
 
-import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import CustomerDashboard from '../layouts/Customer/Dashboard'
+import { useCustomerAccess } from '../Utils/CustomerAccessContext';
 import DashboardLinkData from '../layouts/Customer/DashboardLinkData';
 import CustomerList from '../layouts/Customer/Customer/CustomerList';
 import ClientList from '../layouts/Customer/Customer/ClientList';
@@ -23,6 +24,48 @@ import CustomerJobCustomReport from "../layouts/Customer/Reports/CustomerJobCust
 import AccessDenied from "../layouts/Customer/AccessDenied";
 
 const Customer_Route = () => {
+    const { hasAccess, loading: accessLoading } = useCustomerAccess();
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (accessLoading) return;
+        const role = JSON.parse(localStorage.getItem("role"));
+        if (role === "SUPERADMIN") return;
+
+        const canViewDashboard = hasAccess("dashboard", "view");
+        const canViewClient = hasAccess("client", "view");
+        const canViewJob = hasAccess("job", "view");
+
+        // 1. If none of the 3 permissions exist, go to access-denied
+        if (!canViewDashboard && !canViewClient && !canViewJob) {
+            if (location.pathname !== "/customer/access-denied") {
+                navigate("/customer/access-denied");
+            }
+            return;
+        }
+
+        // 2. Handle direct hits to pages they don't have access to
+        if (location.pathname.startsWith("/customer/dashboard") && !canViewDashboard) {
+            if (canViewClient) navigate("/customer/client");
+            else if (canViewJob) navigate("/customer/job");
+        } 
+        else if (location.pathname.startsWith("/customer/client") && !canViewClient) {
+            if (canViewDashboard) navigate("/customer/dashboard");
+            else if (canViewJob) navigate("/customer/job");
+        }
+        else if (location.pathname.startsWith("/customer/job") && !canViewJob) {
+            if (canViewDashboard) navigate("/customer/dashboard");
+            else if (canViewClient) navigate("/customer/client");
+        }
+        else if (location.pathname === "/customer/access-denied") {
+            if (canViewDashboard) navigate("/customer/dashboard");
+            else if (canViewClient) navigate("/customer/client");
+            else if (canViewJob) navigate("/customer/job");
+        }
+
+    }, [accessLoading, location.pathname, hasAccess, navigate]);
+
     return (
         <div className="app-container">
             <Sidebar />
