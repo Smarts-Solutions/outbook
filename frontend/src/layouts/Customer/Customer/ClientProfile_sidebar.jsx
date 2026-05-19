@@ -719,7 +719,7 @@ const CustomerClientProfile = () => {
       width: "325px",
     },
     {
-      name: "Outbook Account Manager",
+      name: "Outbooks Account Manager",
       cell: (row) => (
         <div
           title={

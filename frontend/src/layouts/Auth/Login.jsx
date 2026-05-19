@@ -326,6 +326,13 @@ const Login = () => {
                       ></img>{" "}
                       Login with Microsoft
                     </button>
+                    <button
+                      type="button"
+                      className="btn d-block mx-auto btn-outline-info w-100 mt-3"
+                      onClick={() => navigate("/customer/login")}
+                    >
+                      Login as Customer
+                    </button>
                   </div>
                 </div>
               </div>

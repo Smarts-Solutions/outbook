@@ -11,8 +11,8 @@ const accessRolePermissions = async (req, res) => {
 
 const getCustomerAccessByCustomerId = async (req, res) => {
     try {
-        const data = await customerContactPersonAccessService.getCustomerAccessByCustomerId(req.body);
-        return res.send({ status: true, data: data, message: "success" });
+        const { roleInfo, permissions } = await customerContactPersonAccessService.getCustomerAccessByCustomerId(req.body);
+        return res.send({ status: true, data: permissions, roleInfo: roleInfo, message: "success" });
     } catch (error) {
         return res.send({ status: false, message: error.message });
     }

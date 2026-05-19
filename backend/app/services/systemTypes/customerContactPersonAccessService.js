@@ -28,11 +28,11 @@ const accessRolePermissions = async (data) => {
 
 const getCustomerAccessByCustomerId = async (data) => {
     const rowData = await customerContactPersonAccessModel.getCustomerAccessByCustomerId(data);
-    if (!rowData.length) {
-        return [];
+    if (!rowData || !rowData.permissions || !rowData.permissions.length) {
+        return { roleInfo: rowData?.roleInfo || null, permissions: [] };
     }
 
-    const result = rowData.reduce((acc, curr) => {
+    const result = rowData.permissions.reduce((acc, curr) => {
         const { permission_name, id, type, is_assigned } = curr;
         let permission = acc.find(p => p.permission_name === permission_name);
         if (!permission) {
@@ -43,7 +43,7 @@ const getCustomerAccessByCustomerId = async (data) => {
         return acc;
     }, []);
 
-    return result;
+    return { roleInfo: rowData.roleInfo, permissions: result };
 }
 
 module.exports = {

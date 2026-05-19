@@ -354,7 +354,7 @@ const ClientLists = () => {
       width: "250px",
     },
     {
-      name: "Outbook Account Manager",
+      name: "Outbooks Account Manager",
       cell: (row) => (
         <div title={row.outbooks_acount_manager_first_name + " " + row.outbooks_acount_manager_last_name || "-"}>
           {row.outbooks_acount_manager_first_name + " " + row.outbooks_acount_manager_last_name || "-"}
@@ -505,7 +505,7 @@ const ClientLists = () => {
       <div className="content-title">
         <div className="row ">
           <div className="col-sm-12">
-            {(selectedCustomer?.value === "All" && (hasAccess("customer", "view") || role === "SUPERADMIN")) && (
+            {selectedCustomer?.value === "All" && (
               <div className="form-group col-md-4 mb-0">
                 <label className="form-label mb-2"> Customer</label>
                 <Select

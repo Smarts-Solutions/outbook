@@ -4,7 +4,7 @@ import {
   CustomerDashboardData,
   CustomerActivityLog,
 } from "../../ReduxStore/Slice/Customer/CustomerSlice";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import Select from "react-select";
@@ -18,7 +18,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
   const dispatch = useDispatch();
-  const { hasAccess, selectedCustomer } = useCustomerAccess();
+  const { hasAccess, selectedCustomer, contactPersonRole, loading: accessLoading } = useCustomerAccess();
 
   const [dashboard, setDashboard] = useState({
     customer: { count: 0, ids: "" },
@@ -236,9 +236,7 @@ const Dashboard = () => {
         return;
       }
     } else if (type === "customer") {
-      if (!hasAccess("customer", "view") && role !== "SUPERADMIN") {
-        return;
-      }
+      // Bypassed customer view permission check for customer portal
     }
 
     const req = {
@@ -500,6 +498,7 @@ const Dashboard = () => {
     return Number(value).toLocaleString("en-IN");
   }
 
+
   return (
     <div>
       <div className="container-fluid">
@@ -509,7 +508,7 @@ const Dashboard = () => {
               <div className="row">
                 <div className="col">
                   <p className="mb-0 page-subtitle">{greeting}</p>
-                  <h2 className="page-title mt-1">{staffDetails.first_name} {staffDetails.last_name}</h2>
+                  <h2 className="page-title mt-1">{contactPersonRole?.role_name || staffDetails?.role_name || "Customer"}</h2>
                 </div>
                 <div className="col-md-3">
                   <div className="d-flex justify-content-end">
@@ -614,9 +613,7 @@ const Dashboard = () => {
                         className="col-md-12 col-lg-4"
                         style={{
                           cursor:
-                            (hasAccess("customer", "view") ||
-                              role === "SUPERADMIN") &&
-                              parseInt(dashboard.customer.count) > 0
+                            parseInt(dashboard.customer.count) > 0
                               ? "pointer"
                               : "default",
                         }}
