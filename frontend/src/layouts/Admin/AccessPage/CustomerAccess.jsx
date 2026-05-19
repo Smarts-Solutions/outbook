@@ -81,16 +81,8 @@ const CustomerAccess = () => {
 
       const response = await dispatch(CustomerContactPersonAccess(data)).unwrap();
       if (response.status) {
-        // Filter out everything except 'view' for the 'customer' module
-        const filteredData = response.data.map(item => {
-          if (item.permission_name === "customer") {
-            return {
-              ...item,
-              items: item.items.filter(perm => perm.type === "view")
-            };
-          }
-          return item;
-        });
+        // Filter out the entire 'customer' module so it's hidden from the UI
+        const filteredData = response.data.filter(item => item.permission_name !== "customer");
 
         setRoleStructures(prev => ({ ...prev, [val.id]: filteredData }));
         
