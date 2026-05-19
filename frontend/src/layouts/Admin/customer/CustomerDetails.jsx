@@ -1338,7 +1338,7 @@ const CustomerUsers = () => {
             />
           </div>
 
-          <div className="d-flex gap-3 mt-4 pt-3 border-top">
+          <div className="d-flex flex-column gap-2 mt-4 pt-3 border-top">
             <button
               className="btn btn-danger w-100 py-2 fw-bold"
               onClick={handleTransferAndDelete}
@@ -1352,6 +1352,28 @@ const CustomerUsers = () => {
               ) : (
                 "Transfer & Delete"
               )}
+            </button>
+            <button
+              className="btn btn-warning text-white w-100 py-2 fw-bold"
+              onClick={() => {
+                Swal.fire({
+                  title: "Delete Without Transfer?",
+                  text: "This will permanently delete the user without reassigning their customers, clients, or jobs. Proceed?",
+                  icon: "warning",
+                  showCancelButton: true,
+                  confirmButtonColor: "#d33",
+                  cancelButtonColor: "#3085d6",
+                  confirmButtonText: "Yes, delete!",
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    performDelete(selectedUserForDeletion.id);
+                    setShowTransferModal(false);
+                  }
+                });
+              }}
+              disabled={isTransferring}
+            >
+              Delete Without Transfer
             </button>
             <button
               className="btn btn-outline-secondary w-100 py-2 fw-bold"
