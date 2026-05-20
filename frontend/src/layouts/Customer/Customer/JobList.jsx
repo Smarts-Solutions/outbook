@@ -906,13 +906,23 @@ const ClientList = () => {
 
   const handleExport = async () => {
     setLoading(true);
-    const req = {
-      action: "getByCustomer",
-      customer_id: customerDetails.id || "",
-      page: 1,
-      limit: 100000,
-      search: "",
-    };
+    const req = clientDetailSingle.id
+      ? {
+          action: "getByClient",
+          client_id: clientDetailSingle.id,
+          staff_id: staffDetails.id,
+          page: 1,
+          limit: 100000,
+          search: "",
+        }
+      : {
+          action: "getByCustomer",
+          customer_id: customerDetails.id || "",
+          staff_id: staffDetails.id,
+          page: 1,
+          limit: 100000,
+          search: "",
+        };
 
     const data = { req: req, authToken: token };
     const response = await dispatch(CustomerJobList(data)).unwrap();
