@@ -334,6 +334,7 @@ const ClientList = () => {
       },
       selector: (row) => row.job_code_id,
       sortable: true,
+      width: "140px",
     },
     {
       name: "Job Priority",
@@ -350,6 +351,7 @@ const ClientList = () => {
         );
       },
       sortable: true,
+      width: "150px"
     },
     {
       name: "Client Name",
@@ -360,6 +362,8 @@ const ClientList = () => {
       ),
       selector: (row) => row.client_trading_name || "-",
       sortable: true,
+      width: "150px"
+
     },
 
     {
@@ -367,6 +371,7 @@ const ClientList = () => {
       cell: (row) => <div title={row.job_type_name}>{row.job_type_name}</div>,
       selector: (row) => row.job_type_name,
       sortable: true,
+      width: "130px"
     },
 
     {
@@ -416,12 +421,13 @@ const ClientList = () => {
         " " +
         row.outbooks_acount_manager_last_name,
       sortable: true,
-      width: "325px",
+      width: "270px",
     },
     {
       name: "Invoicing",
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
+      width: "140px",
       sortFunction: (a, b) => {
         const aVal = a.invoiced == "1" ? "YES" : "NO";
         const bVal = b.invoiced == "1" ? "YES" : "NO";
@@ -852,7 +858,7 @@ const ClientList = () => {
   };
 
   const exportData = customerData.map((item) => ({
-    "Job Code Id": item.job_code_id,
+    "Job Id": item.job_code_id,
     "Job Priority": item.job_priority,
     "Client Trading Name": item.client_trading_name,
     "Job Type Name": item.job_type_name,
@@ -906,13 +912,23 @@ const ClientList = () => {
 
   const handleExport = async () => {
     setLoading(true);
-    const req = {
-      action: "getByCustomer",
-      customer_id: customerDetails.id || "",
-      page: 1,
-      limit: 100000,
-      search: "",
-    };
+    const req = clientDetailSingle.id
+      ? {
+          action: "getByClient",
+          client_id: clientDetailSingle.id,
+          staff_id: staffDetails.id,
+          page: 1,
+          limit: 100000,
+          search: "",
+        }
+      : {
+          action: "getByCustomer",
+          customer_id: customerDetails.id || "",
+          staff_id: staffDetails.id,
+          page: 1,
+          limit: 100000,
+          search: "",
+        };
 
     const data = { req: req, authToken: token };
     const response = await dispatch(CustomerJobList(data)).unwrap();
@@ -930,7 +946,7 @@ const ClientList = () => {
     }
 
     const exportData = apiData?.map((item) => ({
-      "Job Code Id": item.job_code_id || "-",
+      "Job Id": item.job_code_id || "-",
       "Job Priority": item.job_priority || "-",
       "Client Trading Name": item.client_trading_name || "-",
       "Job Type Name": item.job_type_name || "-",
