@@ -3376,7 +3376,7 @@ span.sidebar-icons {
 }
 
 .datatable-container .rdt_TableRow:hover {
-  z-index: 99;
+  z-index: 9;
 }
 
 button.secondary-icon {
