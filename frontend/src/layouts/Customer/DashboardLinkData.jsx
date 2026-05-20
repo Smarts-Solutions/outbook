@@ -268,34 +268,36 @@ const DashboardLinkData = () => {
         let exportData = [];
         if (key === "client") {
           exportData = res.data.map(item => ({
-            "Client Name": item.client_name,
-            "Client Code": item.client_code,
-            "Customer Name": item.customer_name,
-            "Type": item.client_type_name,
-            "Created By": item.client_created_by,
-            "Created At": item.created_at,
+            "Client Name": item.client_name || "-",
+            "Client Code": item.client_code || "-",
+            "Customer Name": item.customer_name || "-",
+            "Client Type": item.client_type_name || "-",
           }));
         } else if (key === "customer") {
           exportData = res.data.map(item => ({
-            "Trading Name": item.trading_name,
-            "Customer Code": item.customer_code,
+            "Trading Name": item.trading_name || "-",
+            "Customer Code": item.customer_code || "-",
             "Type": item.customer_type === '1' ? "Sole Trader" : item.customer_type === '2' ? "Company" : item.customer_type === '3' ? "Partnership" : "-",
-            "Account Manager": item.account_manager_firstname + " " + item.account_manager_lastname,
-            "Emloyee ID": item.creator_employee_number,
-            "Created by": item.customer_created_by,
-            "Created At": item.created_at,
+            "Account Manager": ((item.account_manager_firstname || "") + " " + (item.account_manager_lastname || "")).trim() || "-",
+            "Emloyee ID": item.creator_employee_number || "-",
+            "Created by": item.customer_created_by || "-",
+            "Created At": item.created_at || "-",
             "Status": item.status == 1 ? "Active" : "Inactive",
           }));
         } else {
-          exportData = res.data.map(item => ({
-            "Job ID": item.job_code_id,
-            "Job Priority": item.job_priority || "-",
-            "Client Name": item.client_trading_name,
-            "Account Manager": item.account_manager_name || "-",
-            "Job Type": item.job_type_name,
-            "Status": item.status,
-            "Created At": item.created_at,
-          }));
+          exportData = res.data.map(item => {
+            const statusObj = statusDataAll?.find(s => Number(s.id) === Number(item.status_type));
+            const statusText = statusObj ? statusObj.name : item.status || "-";
+            return {
+              "Job ID": item.job_code_id || "-",
+              "Job Priority": item.job_priority ? item.job_priority.charAt(0).toUpperCase() + item.job_priority.slice(1).toLowerCase() : "-",
+              "Client Name": item.client_trading_name || "-",
+              "Job Type": item.job_type_name || "-",
+              "Status": statusText,
+              "Outbooks Account Manager": ((item.outbooks_acount_manager_first_name || "") + " " + (item.outbooks_acount_manager_last_name || "")).trim() || "-",
+              "Invoicing": item.invoiced == "1" ? "YES" : "NO",
+            };
+          });
         }
         downloadCSV(exportData, `${location?.state?.req?.heading || "Data"}.csv`);
       }
