@@ -1175,13 +1175,26 @@ const CustomerClientProfile = () => {
 
   const handleExport = async () => {
     setLoading(true);
-    const req = {
-      action: "getByCustomer",
-      customer_id: customerDetails.id || "",
-      page: 1,
-      limit: 100000,
-      search: "",
-    };
+    let req;
+    if (clientDetailSingle.id) {
+      req = {
+        action: "getByClient",
+        client_id: clientDetailSingle.id,
+        staff_id: staffDetails.id,
+        page: 1,
+        limit: 100000,
+        search: searchTerm,
+      };
+    } else {
+      req = {
+        action: "getByCustomer",
+        customer_id: customerDetails.id || "",
+        staff_id: staffDetails.id,
+        page: 1,
+        limit: 100000,
+        search: searchTerm,
+      };
+    }
     const data = { req, authToken: token };
     const response = await dispatch(CustomerJobList(data)).unwrap();
     if (!response.status || !response.data || response.data.length === 0) {
@@ -1189,25 +1202,22 @@ const CustomerClientProfile = () => {
       setLoading(false);
       return;
     }
-    const exportData = response.data.map((item) => ({
-      "Job Code Id": item.job_code_id || "-",
-      "Job Priority": item.job_priority || "-",
-      "Client Trading Name": item.client_trading_name || "-",
-      "Job Type Name": item.job_type_name || "-",
-      "Client Contact Person":
-        item.account_manager_officer_first_name && item.account_manager_officer_last_name
-          ? item.account_manager_officer_first_name + " " + item.account_manager_officer_last_name
-          : "-",
-      "Outbooks Account Manager":
-        item.outbooks_acount_manager_first_name + " " + item.outbooks_acount_manager_last_name || "-",
-      "Employee ID": item.account_manager_employee_number || "-",
-      "Allocated To":
-        item.allocated_id != null ? item.allocated_first_name + " " + item.allocated_last_name : "-",
-      Invoiced: item.invoiced == "1" ? "YES" : "NO",
-      "Created By": item.job_created_by || "-",
-      "Created At": item.created_at || "-",
-      Status: item.status || "-",
-    }));
+    const exportData = response.data.map((item) => {
+      const statusObj = statusDataAll.find((s) => Number(s.id) === Number(item.status_type));
+      const statusName = statusObj ? statusObj.name.toLowerCase() : "-";
+      const priority = item.job_priority ? item.job_priority.charAt(0).toUpperCase() + item.job_priority.slice(1).toLowerCase() : "-";
+      const outbooksManager = (item.outbooks_acount_manager_first_name || "") + " " + (item.outbooks_acount_manager_last_name || "");
+
+      return {
+        "Job ID": item.job_code_id || "-",
+        "Job Priority": priority,
+        "Client Name": item.client_trading_name || "-",
+        "Job Type": item.job_type_name || "-",
+        "Status": statusName,
+        "Outbooks Account Manager": outbooksManager.trim() || "-",
+        "Invoicing": item.invoiced == "1" ? "YES" : "NO",
+      };
+    });
     setLoading(false);
     downloadCSV(exportData, "Job Details.csv");
   };
