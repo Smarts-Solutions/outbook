@@ -334,6 +334,7 @@ const ClientList = () => {
       },
       selector: (row) => row.job_code_id,
       sortable: true,
+      width: "140px",
     },
     {
       name: "Job Priority",
@@ -350,6 +351,7 @@ const ClientList = () => {
         );
       },
       sortable: true,
+      width: "150px"
     },
     {
       name: "Client Name",
@@ -360,6 +362,8 @@ const ClientList = () => {
       ),
       selector: (row) => row.client_trading_name || "-",
       sortable: true,
+      width: "150px"
+
     },
 
     {
@@ -367,6 +371,7 @@ const ClientList = () => {
       cell: (row) => <div title={row.job_type_name}>{row.job_type_name}</div>,
       selector: (row) => row.job_type_name,
       sortable: true,
+      width: "130px"
     },
 
     {
@@ -416,12 +421,13 @@ const ClientList = () => {
         " " +
         row.outbooks_acount_manager_last_name,
       sortable: true,
-      width: "325px",
+      width: "270px",
     },
     {
       name: "Invoicing",
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
+      width: "140px",
       sortFunction: (a, b) => {
         const aVal = a.invoiced == "1" ? "YES" : "NO";
         const bVal = b.invoiced == "1" ? "YES" : "NO";

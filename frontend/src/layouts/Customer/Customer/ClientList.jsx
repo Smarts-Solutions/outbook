@@ -314,6 +314,7 @@ const ClientLists = () => {
       },
       selector: (row) => row.job_code_id,
       sortable: true,
+      width: "140px",
     },
     {
       name: "Job Priority",
@@ -323,16 +324,19 @@ const ClientLists = () => {
       },
       selector: (row) => row.job_priority || "-",
       sortable: true,
+      width: "140px",
     },
     {
       name: "Client Name",
       selector: (row) => row.client_trading_name || "-",
       sortable: true,
+      width: "140px",
     },
     {
       name: "Job Type",
       selector: (row) => row.job_type_name || "-",
       sortable: true,
+      width: "130px",
     },
     {
       name: "Status",
@@ -362,11 +366,13 @@ const ClientLists = () => {
       ),
       selector: (row) => row.outbooks_acount_manager_first_name + " " + row.outbooks_acount_manager_last_name || "-",
       sortable: true,
+      width: "270px",
     },
     {
       name: "Invoicing",
       selector: (row) => (row.invoiced == "1" ? "YES" : "NO"),
       sortable: true,
+      width: "140px",
     },
     ...((hasAccess("job", "update") || hasAccess("job", "delete")) ? [
       {
