@@ -852,7 +852,7 @@ const ClientList = () => {
   };
 
   const exportData = customerData.map((item) => ({
-    "Job Code Id": item.job_code_id,
+    "Job Id": item.job_code_id,
     "Job Priority": item.job_priority,
     "Client Trading Name": item.client_trading_name,
     "Job Type Name": item.job_type_name,
@@ -930,7 +930,7 @@ const ClientList = () => {
     }
 
     const exportData = apiData?.map((item) => ({
-      "Job Code Id": item.job_code_id || "-",
+      "Job Id": item.job_code_id || "-",
       "Job Priority": item.job_priority || "-",
       "Client Trading Name": item.client_trading_name || "-",
       "Job Type Name": item.job_type_name || "-",

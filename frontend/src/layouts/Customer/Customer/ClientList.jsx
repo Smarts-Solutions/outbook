@@ -425,7 +425,7 @@ const ClientLists = () => {
           "Client Name": item.client_name,
           "Client Code": item.client_code,
           "Customer Name": item.customer_name,
-          "Client Type Name": item.client_type_name,
+          "Client Type": item.client_type_name,
         }));
       }
     } else if (activeTab === "job") {
@@ -437,6 +437,8 @@ const ClientLists = () => {
           "Client Name": item.client_trading_name,
           "Job Type": item.job_type_name,
           Status: item.status,
+          "Outbooks Account Mnager":item.outbooks_acount_manager_first_name + " " + item.outbooks_acount_manager_last_name || "-",
+          "Invoicing":item.invoiced == "1" ? "YES" : "NO",
         }));
       }
     }
