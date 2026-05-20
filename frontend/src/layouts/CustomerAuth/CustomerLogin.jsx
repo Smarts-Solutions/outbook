@@ -83,11 +83,8 @@ const CustomerLogin = () => {
           showConfirmButton: false,
           timerProgressBar: true,
         });
-
-        setTimeout(() => {
-          navigate("/customer/dashboard");
-          window.location.reload();
-        }, 1000);
+        
+        navigate("/customer/dashboard");
       }
     } else {
       sweatalert.fire({
@@ -319,10 +316,7 @@ const CustomerLogin = () => {
         timerProgressBar: true,
       });
 
-      setTimeout(() => {
-        navigate("/admin/dashboard");
-        window.location.reload();
-      }, 1000);
+      navigate("/customer/dashboard");
     } else {
       sweatalert.fire({
         title: response.message,
