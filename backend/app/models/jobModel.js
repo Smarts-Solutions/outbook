@@ -1047,6 +1047,7 @@ const getJobByCustomer = async (job) => {
   }
   // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+
   // Get Role
   const rows = await QueryRoleHelperFunction(StaffUserId);
   if (Array.isArray(customer_id)) {
