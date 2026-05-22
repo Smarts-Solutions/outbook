@@ -5,7 +5,8 @@ const {
   getAllCustomerIds,
   LineManageStaffIdHelperFunction,
   QueryRoleHelperFunction,
-  JobStatusUpdate
+  JobStatusUpdate,
+  buildAssignedJobsTempTable
 } = require("../../app/utils/helper");
 
 const { getCompanyOfficerDetailsFun } = require("../controllers/companies/companyController")
@@ -1111,7 +1112,7 @@ const getJobByCustomer = async (job) => {
         jobs.total_hours AS total_hours,
         jobs.total_hours_status AS total_hours_status,
         DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
-   
+
         staffs.id AS allocated_id,
         staffs.first_name AS allocated_first_name,
         staffs.last_name AS allocated_last_name,
@@ -1605,38 +1606,38 @@ async function getAllJobsSidebar(
 
     try {
 
-      // =========================================
-      // ALL STAFF IDS
-      // =========================================
-      await connection.execute("DROP TEMPORARY TABLE IF EXISTS temp_assigned_jobs_staff");
-      await connection.execute(`
-      CREATE TEMPORARY TABLE temp_assigned_jobs_staff (
-        customer_id       INT,
-        client_id         INT,
-        job_id            INT,
-        staff_id          INT,
-        source            VARCHAR(100),
-        service_id_assign INT
-      )
-    `);
-
-
       const allStaffIds = [
         ...new Set(LineManageStaffId),
       ];
 
-      for (const sid of allStaffIds) {
-        await connection.execute("CALL get_assigned_jobs_staff(?)", [sid]);
-      }
+      await buildAssignedJobsTempTable(connection, LineManageStaffId);
 
-      // Index add करो
-      await connection.execute(`
-      ALTER TABLE temp_assigned_jobs_staff 
-        ADD INDEX idx_staff    (staff_id),
-        ADD INDEX idx_customer (customer_id),
-        ADD INDEX idx_client   (client_id),
-        ADD INDEX idx_job      (job_id)
-    `);
+      // =========================================
+      // ALL STAFF IDS
+      // =========================================
+    //   await connection.execute("DROP TEMPORARY TABLE IF EXISTS temp_assigned_jobs_staff");
+    //   await connection.execute(`
+    //   CREATE TEMPORARY TABLE temp_assigned_jobs_staff (
+    //     customer_id       INT,
+    //     client_id         INT,
+    //     job_id            INT,
+    //     staff_id          INT,
+    //     source            VARCHAR(100),
+    //     service_id_assign INT
+    //   )
+    // `);
+    //   for (const sid of allStaffIds) {
+    //     await connection.execute("CALL get_assigned_jobs_staff(?)", [sid]);
+    //   }
+
+    //   // Index add
+    //   await connection.execute(`
+    //   ALTER TABLE temp_assigned_jobs_staff 
+    //     ADD INDEX idx_staff    (staff_id),
+    //     ADD INDEX idx_customer (customer_id),
+    //     ADD INDEX idx_client   (client_id),
+    //     ADD INDEX idx_job      (job_id)
+    // `);
       // =========================================
       // PLACEHOLDERS
       // =========================================
