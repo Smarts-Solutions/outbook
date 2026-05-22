@@ -1,6 +1,6 @@
 const pool = require('../config/database');
 const deleteUploadFile = require('../../app/middlewares/deleteUploadFile');
-const { SatffLogUpdateOperation, generateNextUniqueCode, LineManageStaffIdHelperFunction, QueryRoleHelperFunction } = require('../../app/utils/helper');
+const { SatffLogUpdateOperation, generateNextUniqueCode, LineManageStaffIdHelperFunction, QueryRoleHelperFunction ,buildAssignedJobsTempTable } = require('../../app/utils/helper');
 
 
 
@@ -667,7 +667,7 @@ const getCustomer = async (customer) => {
   const search = customer.search ? customer.search.trim() : "";
   const pattern = `%${search}%`;
 
-  const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id);
+  let LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id);
   const rows = await QueryRoleHelperFunction(staff_id);
 
   const RoleAccessQuery = `
@@ -782,32 +782,208 @@ const getCustomer = async (customer) => {
   // ===============================
   // 🚀 NON SUPERADMIN (OPTIMIZED)
   // ===============================
+
+//   try {
+//     // 🔥 UNION BASE FILTER
+//     const unionFilter = `
+//       SELECT id FROM customers WHERE staff_id = ?
+
+//       UNION
+
+//       SELECT c.id
+//       FROM customers c
+//       JOIN assigned_jobs_staff_view ajsv 
+//         ON ajsv.customer_id = c.id
+//       WHERE ajsv.staff_id = ?
+
+//       UNION
+
+//       SELECT id FROM customers 
+//       WHERE staff_id IN (${LineManageStaffId})
+
+//       UNION
+
+//       SELECT c.id
+//       FROM customers c
+//       JOIN assigned_jobs_staff_view ajsv 
+//         ON ajsv.customer_id = c.id
+//       WHERE ajsv.staff_id IN (${LineManageStaffId})
+//     `;
+
+//     // =====================
+//     // ✅ COUNT QUERY
+//     // =====================
+//     let countQuery = `
+//       SELECT COUNT(*) as total FROM (
+//         ${unionFilter}
+//       ) AS filtered_ids
+//     `;
+
+//     let countParams = [staff_id, staff_id];
+
+//     if (search) {
+//       countQuery = `
+//         SELECT COUNT(*) as total
+//         FROM (
+//           ${unionFilter}
+//         ) ids
+//         JOIN customers c ON c.id = ids.id
+//         JOIN staffs s1 ON c.staff_id = s1.id
+//         JOIN staffs s2 ON c.account_manager_id = s2.id
+//         WHERE
+//           c.trading_name LIKE ?
+//           OR s2.first_name LIKE ?
+//           OR s2.last_name LIKE ?
+//           OR CONCAT(s1.first_name,' ',s1.last_name) LIKE ?
+//           OR CONCAT('cust_',SUBSTRING(c.trading_name,1,3),'_',SUBSTRING(c.customer_code,1,15)) LIKE ?
+//       `;
+
+//       countParams.push(
+//         pattern,
+//         pattern,
+//         pattern,
+//         pattern,
+//         pattern
+//       );
+//     }
+
+//     const [[{ total }]] = await pool.execute(countQuery, countParams);
+
+//     // =====================
+//     // ✅ MAIN DATA QUERY
+//     // =====================
+//     let query = `
+//       SELECT
+//         c.id,
+//         c.customer_type,
+//         c.staff_id,
+//         c.account_manager_id,
+//         c.trading_name,
+//         c.trading_address,
+//         c.vat_registered,
+//         c.vat_number,
+//         c.website,
+//         c.form_process,
+//         DATE_FORMAT(c.created_at,'%d/%m/%Y') AS created_at,
+//         DATE_FORMAT(c.updated_at,'%d/%m/%Y') AS updated_at,
+//         c.status,
+
+//         s1.first_name AS staff_firstname,
+//         s1.last_name AS staff_lastname,
+//         CONCAT(s1.first_name,' ',s1.last_name) AS customer_created_by,
+
+//         s2.first_name AS account_manager_firstname,
+//         s2.last_name AS account_manager_lastname,
+
+//         cci.company_name,
+//         cci.company_number,
+
+//         CONCAT(
+//           'cust_',
+//           SUBSTRING(c.trading_name,1,3),'_',
+//           SUBSTRING(c.customer_code,1,15)
+//         ) AS customer_code,
+
+//         CASE WHEN cl.id IS NOT NULL THEN 1 ELSE 0 END AS is_client
+
+//       FROM (
+//         ${unionFilter}
+//       ) ids
+
+//       JOIN customers c ON c.id = ids.id
+//       JOIN staffs s1 ON c.staff_id = s1.id
+//       JOIN staffs s2 ON c.account_manager_id = s2.id
+
+//       LEFT JOIN clients cl ON cl.customer_id = c.id
+//       LEFT JOIN customer_company_information cci 
+//         ON c.id = cci.customer_id
+//     `;
+
+//     let params = [staff_id, staff_id];
+
+//     if (search) {
+//       query += `
+//         WHERE
+//           c.trading_name LIKE ?
+//           OR s2.first_name LIKE ?
+//           OR s2.last_name LIKE ?
+//           OR CONCAT(s1.first_name,' ',s1.last_name) LIKE ?
+//           OR CONCAT('cust_',SUBSTRING(c.trading_name,1,3),'_',SUBSTRING(c.customer_code,1,15)) LIKE ?
+//       `;
+
+//       params.push(
+//         pattern,
+//         pattern,
+//         pattern,
+//         pattern,
+//         pattern
+//       );
+//     }
+
+//     query += `
+//       GROUP BY c.id
+//       ORDER BY c.id DESC
+//       LIMIT ? OFFSET ?
+//     `;
+
+//     params.push(limit, offset);
+
+//     const [result] = await pool.execute(query, params);
+    
+//     return {
+//       status: true,
+//       message: "Success",
+//       data: {
+//         data: result,
+//         pagination: {
+//           totalItems: total,
+//           totalPages: Math.ceil(total / limit),
+//           currentPage: page,
+//           limit,
+//         },
+//       },
+//     };
+//   } catch (error) {
+//     console.error(error);
+//     return {
+//       status: false,
+//       message: "Error fetching data",
+//       error: error.message,
+//     };
+//   }
+
   try {
+
+      
+     ////////////////////////////////
+     LineManageStaffId = [
+        ...new Set(LineManageStaffId),
+      ];
+    const connection = await pool.getConnection();
+    await buildAssignedJobsTempTable(connection, LineManageStaffId);
+
     // 🔥 UNION BASE FILTER
+    
+
     const unionFilter = `
-      SELECT id FROM customers WHERE staff_id = ?
+  SELECT id FROM customers WHERE staff_id = ?
 
-      UNION
+  UNION
 
-      SELECT c.id
-      FROM customers c
-      JOIN assigned_jobs_staff_view ajsv 
-        ON ajsv.customer_id = c.id
-      WHERE ajsv.staff_id = ?
+  SELECT id FROM customers 
+  WHERE staff_id IN (${LineManageStaffId})
 
-      UNION
+  UNION
 
-      SELECT id FROM customers 
-      WHERE staff_id IN (${LineManageStaffId})
-
-      UNION
-
-      SELECT c.id
-      FROM customers c
-      JOIN assigned_jobs_staff_view ajsv 
-        ON ajsv.customer_id = c.id
-      WHERE ajsv.staff_id IN (${LineManageStaffId})
-    `;
+  SELECT c.id
+  FROM customers c
+  WHERE c.id IN (
+    SELECT customer_id 
+    FROM temp_assigned_jobs_staff 
+    WHERE staff_id = ? 
+       OR staff_id IN (${LineManageStaffId})
+  )
+`;
 
     // =====================
     // ✅ COUNT QUERY
@@ -846,7 +1022,7 @@ const getCustomer = async (customer) => {
       );
     }
 
-    const [[{ total }]] = await pool.execute(countQuery, countParams);
+    const [[{ total }]] = await connection.execute(countQuery, countParams);
 
     // =====================
     // ✅ MAIN DATA QUERY
@@ -927,7 +1103,7 @@ const getCustomer = async (customer) => {
 
     params.push(limit, offset);
 
-    const [result] = await pool.execute(query, params);
+    const [result] = await connection.execute(query, params);
     
     return {
       status: true,
@@ -950,6 +1126,7 @@ const getCustomer = async (customer) => {
       error: error.message,
     };
   }
+
 }
 
 const getCustomer_dropdown = async (customer) => {
