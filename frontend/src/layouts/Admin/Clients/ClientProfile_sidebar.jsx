@@ -62,7 +62,6 @@ const ClientList = () => {
   // }, []);
 
   useEffect(() => {
-    GetAllCustomer();
     GetStatus();
 
     if (
@@ -1011,9 +1010,9 @@ const ClientList = () => {
   const selectedOption =
     customerDetails.id === ""
       ? { value: "", label: "All" }
-      : customerOptions.find(
-        (opt) => Number(opt.value) === Number(customerDetails.id),
-      );
+    : customerOptions.find(
+      (opt) => Number(opt.value) === Number(customerDetails.id),
+    ) || { value: customerDetails.id, label: customerDetails.trading_name };
 
   // CHANGED: Client options mein "All" option sabse pehle add kiya
   const clientOptions = [
@@ -1143,6 +1142,7 @@ const ClientList = () => {
               }}
               classNamePrefix="react-select"
               isSearchable
+              onMenuOpen={GetAllCustomer}
               placeholder="All"
             />
           </div>

@@ -6,6 +6,7 @@ const {
   getAllCustomerIds,
   LineManageStaffIdHelperFunction,
   QueryRoleHelperFunction,
+  buildAssignedJobsTempTable
 } = require("../../app/utils/helper");
 
 const createClient = async (client) => {
@@ -893,27 +894,97 @@ async function getAllClientsSidebar(
 
   // ================= OTHER ROLES =================
   try {
-    const [[{ total }]] = await pool.execute(
-      `
-      SELECT COUNT(DISTINCT clients.id) AS total
+    // const [[{ total1 }]] = await pool.execute(
+    //   `
+    //   SELECT COUNT(DISTINCT clients.id) AS total
+    //   FROM clients
+    //   JOIN staffs ON clients.staff_created_id = staffs.id
+    //   JOIN customers ON customers.id = clients.customer_id
+    //   JOIN client_types ON client_types.id = clients.client_type
+    //   LEFT JOIN assigned_jobs_staff_view 
+    //     ON assigned_jobs_staff_view.client_id = clients.id
+    //     AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+    //   WHERE 
+    //     (clients.staff_created_id IN (${LineManageStaffId})
+    //     OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))
+    //     ${searchCondition}
+    //   `,
+    //   [...searchParams]
+    // );
+
+    // const [data1] = await pool.execute(
+    //   `SELECT  
+    //     clients.id AS id,
+    //     clients.trading_name AS client_name,
+    //     customers.trading_name AS customer_name,
+    //     clients.status AS status,
+    //     client_types.type AS client_type_name,
+    //     jobs.id AS Delete_Status,
+    //     CONCAT(staffs.first_name,' ',staffs.last_name) AS client_created_by,
+    //     DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at,
+    //     DATE_FORMAT(clients.updated_at, '%d/%m/%Y') AS updated_at,
+    //     CONCAT(
+    //       'cli_', 
+    //       SUBSTRING(customers.trading_name, 1, 3), '_',
+    //       SUBSTRING(clients.trading_name, 1, 3), '_',
+    //       SUBSTRING(clients.client_code, 1, 15)
+    //     ) AS client_code
+    //   FROM clients
+    //   JOIN staffs ON clients.staff_created_id = staffs.id
+    //   JOIN customers ON customers.id = clients.customer_id    
+    //   JOIN client_types ON client_types.id = clients.client_type
+    //   LEFT JOIN jobs ON clients.id = jobs.client_id
+    //   LEFT JOIN assigned_jobs_staff_view 
+    //     ON assigned_jobs_staff_view.client_id = clients.id
+    //     AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+    //   WHERE 
+    //     (clients.staff_created_id IN (${LineManageStaffId})
+    //     OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))
+    //     ${searchCondition}
+    //   GROUP BY clients.id
+    //   ORDER BY clients.trading_name ASC
+    //   LIMIT ? OFFSET ?
+    //   `,
+    //   [...searchParams, limit, offset]
+    // );
+
+    // return {
+    //   status: true,
+    //   message: "success",
+    //   pagination: {
+    //     total,
+    //     page,
+    //     limit,
+    //     totalPages: Math.ceil(total1 / limit),
+    //     search,
+    //   },
+    //   data1,
+    // };
+
+ 
+    ////////////////////////////////
+     LineManageStaffId = [
+        ...new Set(LineManageStaffId),
+      ];
+    const connection = await pool.getConnection();
+    await buildAssignedJobsTempTable(connection, LineManageStaffId);
+
+    const countQuery = `SELECT COUNT(DISTINCT clients.id) AS total
       FROM clients
       JOIN staffs ON clients.staff_created_id = staffs.id
       JOIN customers ON customers.id = clients.customer_id
       JOIN client_types ON client_types.id = clients.client_type
-      LEFT JOIN assigned_jobs_staff_view 
-        ON assigned_jobs_staff_view.client_id = clients.id
-        AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+      LEFT JOIN temp_assigned_jobs_staff 
+        ON temp_assigned_jobs_staff.client_id = clients.id
+        AND temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
       WHERE 
         (clients.staff_created_id IN (${LineManageStaffId})
-        OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))
+        OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId}))
         ${searchCondition}
-      `,
-      [...searchParams]
-    );
+  `;
 
-    const [data] = await pool.execute(
-      `
-      SELECT  
+    const dataQuery = 
+    `SELECT  
         clients.id AS id,
         clients.trading_name AS client_name,
         customers.trading_name AS customer_name,
@@ -934,19 +1005,30 @@ async function getAllClientsSidebar(
       JOIN customers ON customers.id = clients.customer_id    
       JOIN client_types ON client_types.id = clients.client_type
       LEFT JOIN jobs ON clients.id = jobs.client_id
-      LEFT JOIN assigned_jobs_staff_view 
-        ON assigned_jobs_staff_view.client_id = clients.id
-        AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+      LEFT JOIN temp_assigned_jobs_staff 
+        ON temp_assigned_jobs_staff.client_id = clients.id
+        AND temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
       WHERE 
         (clients.staff_created_id IN (${LineManageStaffId})
-        OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))
+        OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId}))
         ${searchCondition}
       GROUP BY clients.id
       ORDER BY clients.trading_name ASC
       LIMIT ? OFFSET ?
-      `,
-      [...searchParams, limit, offset]
-    );
+      `;
+    
+
+   const [
+      [[{ total }]],
+      [data]
+    ] = await Promise.all([
+      connection.execute(countQuery, [...searchParams]),
+      connection.execute(dataQuery, [...searchParams, limit, offset]),
+    ]);
+
+
+
+
 
     return {
       status: true,

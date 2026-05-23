@@ -1,0 +1,5410 @@
+const pool = require("../config/database");
+const {
+  SatffLogUpdateOperation,
+  generateNextUniqueCode,
+  getAllCustomerIds,
+  LineManageStaffIdHelperFunction,
+  QueryRoleHelperFunction,
+  JobStatusUpdate
+} = require("../../app/utils/helper");
+
+const { getCompanyOfficerDetailsFun } = require("../controllers/companies/companyController")
+
+const getAddJobData = async (job) => {
+  const { customer_id, StaffUserId, job_id } = job;
+
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  const roleData = await QueryRoleHelperFunction(StaffUserId);
+  // customer Client
+  try {
+    const queryCustomerWithClient = `
+    SELECT  
+        customers.id AS customer_id,
+        customers.trading_name AS customer_trading_name,
+        customers.account_manager_id  AS customer_account_manager_id,
+
+        clients.id AS client_id,
+        clients.trading_name AS client_trading_name,
+        clients.client_type AS client_client_type,
+        clients.company_number AS company_number,
+
+        client_company_information.company_number AS client_company_number
+
+    FROM 
+        customers
+    JOIN 
+        clients ON customers.id = clients.customer_id
+   LEFT JOIN
+       client_company_information ON clients.id = client_company_information.client_id     
+   WHERE customers.id = ?    
+   ORDER BY 
+    clients.trading_name ASC;
+  `;
+    const [rows] = await pool.execute(queryCustomerWithClient, [customer_id]);
+
+
+    const [clientData] = await pool.execute(
+      `
+      SELECT  
+        customers.id AS customer_id,
+        customers.trading_name AS customer_trading_name,
+        customers.account_manager_id  AS customer_account_manager_id,
+
+        clients.id AS client_id,
+        clients.trading_name AS client_trading_name,
+        clients.client_type AS client_client_type,
+        clients.company_number AS company_number,
+
+        client_company_information.company_number AS client_company_number
+
+      FROM 
+      clients
+      JOIN 
+      customers ON customers.id = clients.customer_id
+      LEFT JOIN
+      client_company_information ON clients.id = client_company_information.client_id  
+      LEFT JOIN 
+      assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id 
+        AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+      WHERE 
+        (clients.staff_created_id IN (${LineManageStaffId})
+        OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))
+        AND clients.customer_id = ?
+      GROUP BY clients.id
+      ORDER BY clients.trading_name ASC
+      `,
+      [customer_id]
+    );
+
+
+
+    let customer = [];
+    let client = [];
+    if (rows.length > 0) {
+      customer = {
+        customer_id: rows[0].customer_id,
+        customer_trading_name: rows[0].customer_trading_name,
+        customer_account_manager_id: rows[0].customer_account_manager_id,
+      };
+
+      const [RoleAccess] = await pool.execute(
+        "SELECT * FROM role_permissions WHERE role_id = ? AND permission_id = ?",
+        [roleData[0].role_id, 34]
+      );
+
+      if (roleData.length > 0 && (roleData[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)) {
+        client = rows.map((row) => ({
+          client_id: row.client_id,
+          client_trading_name: row.client_trading_name,
+          client_client_type: row.client_client_type,
+          client_company_number: row.client_company_number,
+          company_number: row.company_number,
+        }));
+
+      } else {
+        client = clientData.map((row) => ({
+          client_id: row.client_id,
+          client_trading_name: row.client_trading_name,
+          client_client_type: row.client_client_type,
+          client_company_number: row.client_company_number,
+          company_number: row.company_number,
+        }));
+      }
+    }
+
+    const queryCustomerDetails = `
+    SELECT  
+        customers.id AS customer_id,
+        customers.trading_name AS customer_trading_name,
+        customers.account_manager_id  AS customer_account_manager_id,
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign
+    FROM 
+        customers
+   LEFT JOIN 
+        assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+   WHERE customers.id = ? AND assigned_jobs_staff_view.staff_id = ?
+   GROUP BY assigned_jobs_staff_view.service_id_assign , customers.id
+   ORDER BY 
+    customers.id DESC;
+  `;
+
+    const [customerDetails] = await pool.execute(queryCustomerDetails, [
+      customer_id,
+      StaffUserId,
+    ]);
+
+    // CustomerAccountManager
+    const queryCustomerWithCustomerAccountManager = `
+    SELECT  
+        customer_contact_details.id AS customer_account_manager_officer_id,
+        customer_contact_details.first_name AS customer_account_manager_officer_first_name,
+        customer_contact_details.last_name AS customer_account_manager_officer_last_name
+   FROM 
+        customers
+   JOIN 
+        customer_contact_details ON customers.id = customer_contact_details.customer_id
+   WHERE customers.id = ?     
+   ORDER BY 
+    customers.id DESC;
+  `;
+
+    const [rows2] = await pool.execute(
+      queryCustomerWithCustomerAccountManager,
+      [customer_id]
+    );
+
+    let customer_account_manager = [];
+    if (rows2.length > 0) {
+      customer_account_manager = rows2.map((row) => ({
+        customer_account_manager_officer_id:
+          row.customer_account_manager_officer_id,
+        customer_account_manager_officer_name:
+          row.customer_account_manager_officer_first_name +
+          " " +
+          row.customer_account_manager_officer_last_name,
+      }));
+    }
+
+    // job type
+    const queryCustomerWithJobType = `
+     SELECT  
+         job_types.id AS job_type_id,
+         job_types.type AS job_type_name
+    FROM 
+         customers
+    JOIN 
+         customer_services ON customers.id = customer_services.customer_id
+    JOIN 
+         job_types ON job_types.service_id = customer_services.service_id
+    WHERE customers.id = ?
+    ORDER BY 
+     customers.id DESC;
+   `;
+
+    const [rows3] = await pool.execute(queryCustomerWithJobType, [customer_id]);
+    let job_type = [];
+    if (rows3.length > 0) {
+      job_type = rows3.filter(
+        (value, index, self) =>
+          index === self.findIndex((t) => t.job_type_id === value.job_type_id)
+      );
+    }
+
+    // job Reviewer
+    const queryReviewer = `
+     SELECT  
+         staffs.id AS reviewer_id,
+         staffs.first_name AS reviewer_first_name,
+         staffs.last_name AS reviewer_last_name,
+         staffs.email AS reviewer_email
+    FROM 
+         staffs
+    JOIN 
+         roles ON staffs.role_id = roles.id
+    WHERE  
+     (staffs.role_id = 6 || staffs.role_id = 4) AND staffs.status = '1' 
+    ORDER BY 
+     staffs.first_name ASC;
+   `;
+
+    const [rows4] = await pool.execute(queryReviewer, [customer_id]);
+    let reviewer = [];
+    if (rows4.length > 0) {
+      reviewer = rows4.map((row) => ({
+        reviewer_id: row.reviewer_id,
+        reviewer_name: row.reviewer_first_name + " " + row.reviewer_last_name,
+        reviewer_email: row.reviewer_email,
+      }));
+    }
+
+    // Allocated
+    const queryAllocated = `
+     SELECT  
+         staffs.id AS staff_id,
+         staffs.first_name AS staff_first_name,
+         staffs.last_name AS staff_last_name,
+          staffs.email AS staff_email
+    FROM 
+         staffs
+    JOIN 
+         roles ON staffs.role_id = roles.id
+    WHERE  
+     (staffs.role_id = 3 || staffs.role_id = 4) AND staffs.status = '1' 
+    ORDER BY 
+     staffs.first_name ASC
+   `;
+
+    const [rows5] = await pool.execute(queryAllocated, [customer_id]);
+    let allocated = [];
+    if (rows5.length > 0) {
+      allocated = rows5.map((row) => ({
+        allocated_id: row.staff_id,
+        allocated_name: row.staff_first_name + " " + row.staff_last_name,
+        allocated_email: row.staff_email,
+      }));
+    }
+
+    // engagement_model
+    const queryEngagementModel = `
+     SELECT  
+         customer_engagement_model.fte_dedicated_staffing AS fte_dedicated_staffing,
+         customer_engagement_model.percentage_model AS percentage_model,
+         customer_engagement_model.adhoc_payg_hourly AS adhoc_payg_hourly,
+         customer_engagement_model.customised_pricing AS customised_pricing
+    FROM 
+         customers
+    JOIN 
+         customer_engagement_model ON customer_engagement_model.customer_id = customers.id 
+    WHERE  
+     customers.id = ?
+   `;
+
+    const [rows6] = await pool.execute(queryEngagementModel, [customer_id]);
+    let engagement_model = [];
+    if (rows6.length > 0) {
+      engagement_model = rows6.map((row) => ({
+        fte_dedicated_staffing: row.fte_dedicated_staffing,
+        percentage_model: row.percentage_model,
+        adhoc_payg_hourly: row.adhoc_payg_hourly,
+        customised_pricing: row.customised_pricing,
+      }));
+    }
+
+    // Services
+
+
+
+    let queryCustomerWithServices = `
+     SELECT  
+         services.id AS service_id,
+         services.name AS service_name
+    FROM 
+         customers
+    JOIN 
+         customer_services ON customers.id = customer_services.customer_id
+    JOIN 
+         services ON services.id = customer_services.service_id
+    WHERE  
+     customer_services.customer_id = ?     
+    ORDER BY 
+     services.id DESC;
+   `;
+
+    if (roleData?.length > 0 && (roleData[0]?.role_name != "SUPERADMIN")) {
+
+      if (roleData[0]?.role_id == 4) {
+        queryCustomerWithServices = `
+     SELECT  
+         services.id AS service_id,
+         services.name AS service_name
+    FROM 
+         customers
+    JOIN 
+         customer_services ON customers.id = customer_services.customer_id  
+    JOIN 
+         services ON services.id = customer_services.service_id
+    JOIN 
+         customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+    JOIN 
+         staffs ON staffs.id = customer_service_account_managers.account_manager_id          
+    WHERE  
+     customer_services.customer_id = ? AND staffs.id IN (${LineManageStaffId})     
+    ORDER BY 
+     services.id DESC;
+   `;
+      } else {
+        queryCustomerWithServices = `
+     SELECT  
+         services.id AS service_id,
+         services.name AS service_name
+    FROM 
+         customers
+    JOIN 
+         customer_services ON customers.id = customer_services.customer_id  
+    JOIN 
+         services ON services.id = customer_services.service_id          
+    WHERE  
+     customer_services.customer_id = ?    
+    ORDER BY 
+     services.id DESC;
+   `;
+      }
+    }
+
+
+    const [rows7] = await pool.execute(queryCustomerWithServices, [
+      customer_id,
+    ]);
+
+
+    let services = [];
+    if (rows7.length > 0) {
+      services = rows7.map((row) => ({
+        service_id: row.service_id,
+        service_name: row.service_name,
+      }));
+    }
+
+    // Currency
+    const queryCustomerWithCurrency = `
+     SELECT  
+         countries.id AS country_id,
+         countries.currency AS currency_name
+    FROM 
+         countries     
+    ORDER BY 
+     countries.id DESC;
+   `;
+
+    const [rows8] = await pool.execute(queryCustomerWithCurrency);
+
+    const queryAccountManeger = `
+       SELECT  
+           staffs.id AS manager_id,
+           staffs.first_name AS manager_first_name,
+           staffs.last_name AS manager_last_name
+      FROM 
+           staffs
+      WHERE  
+       staffs.id = ${rows[0].customer_account_manager_id}`;
+    const [rows9] = await pool.execute(queryAccountManeger);
+
+    let AccountManagerArr = [];
+    if (rows9.length > 0) {
+      AccountManagerArr = rows9.map((row) => ({
+        manager_id: row.manager_id,
+        manager_name: row.manager_first_name + " " + row.manager_last_name,
+      }));
+    }
+
+    // Return the data
+    const allStaff = `
+       SELECT  
+           staffs.id AS id,
+           CONCAT(staffs.first_name, ' ', staffs.last_name,' (',staffs.email,')') AS full_name
+      FROM 
+           staffs
+      WHERE  
+       (staffs.role_id != 1  AND staffs.role_id != 2) AND staffs.status = '1'
+       ORDER BY
+       staffs.first_name ASC;
+         `;
+    const [rowsStaff] = await pool.execute(allStaff);
+
+
+    // Check list data Processing type
+    const queryProcessingType = `
+    SELECT *
+    FROM checklists
+    WHERE 
+        (FIND_IN_SET(?, customer_id)
+        OR customer_id IS NULL) AND work_flow_type = "3"
+  `;
+
+    const [processing_checklist_data] = await pool.execute(queryProcessingType, [customer_id]);
+
+
+    // Check list data reviewing type
+    const queryReviewingType = `
+    SELECT *
+    FROM checklists
+    WHERE 
+        (FIND_IN_SET(?, customer_id)
+        OR customer_id IS NULL) AND work_flow_type = "6"
+  `;
+
+    const [reviewing_checklist_data] = await pool.execute(queryReviewingType, [customer_id]);
+
+
+    // console.log("processing_checklist_data ",processing_checklist_data)
+    // console.log("reviewing_checklist_data ",reviewing_checklist_data)
+
+    let status_history = [];
+    if (job_id) {
+      const historyQuery = `
+        SELECT 
+          jsu.id,
+          jsu.job_id,
+          jsu.status_type,
+          ms.name AS status_name,
+          jsu.status_update_date
+        FROM job_status_updation jsu
+        LEFT JOIN master_status ms ON jsu.status_type = ms.id
+        WHERE jsu.job_id = ?
+        ORDER BY jsu.id ASC;
+      `;
+      const [historyRows] = await pool.execute(historyQuery, [job_id]);
+      status_history = historyRows;
+    }
+
+
+    return {
+      status: true,
+      message: "success.",
+      data: {
+        customer: customer,
+        client: client,
+        customer_account_manager: customer_account_manager,
+        services: services,
+        job_type: job_type,
+        reviewer: reviewer,
+        allocated: allocated,
+        engagement_model: engagement_model,
+        currency: rows8,
+        Manager: AccountManagerArr,
+        allStaff: rowsStaff,
+        customerDetails: customerDetails,
+        processing_checklist_data: processing_checklist_data,
+        reviewing_checklist_data: reviewing_checklist_data,
+        status_history: status_history
+      },
+    };
+  } catch (err) {
+    return { status: false, message: "Err Customer Get" };
+  }
+};
+
+const jobAdd = async (job) => {
+  const {
+    selectedStaffData,
+    staffCreatedId,
+    account_manager_id,
+    customer_id,
+    client_id,
+    client_job_code,
+    customer_contact_details_id,
+    service_id,
+    job_type_id,
+    tasks,
+    budgeted_hours,
+    reviewer,
+    allocated_to,
+    allocated_on,
+    date_received_on,
+    year_end,
+    total_preparation_time,
+    review_time,
+    feedback_incorporation_time,
+    total_time,
+    engagement_model,
+    expected_delivery_date,
+    due_on,
+    submission_deadline,
+    customer_deadline_date,
+    sla_deadline_date,
+    internal_deadline_date,
+    filing_Companies_required,
+    filing_Companies_date,
+    filing_hmrc_required,
+    filing_hmrc_date,
+    opening_balance_required,
+    opening_balance_date,
+    number_of_transaction,
+    number_of_balance_items,
+    turnover,
+    number_of_employees,
+    vat_reconciliation,
+    bookkeeping,
+    processing_type,
+    invoiced,
+    currency,
+    invoice_value,
+    invoice_date,
+    invoice_hours,
+    invoice_remark,
+    job_priority,
+  } = job;
+
+  // console.log("selectedStaffData", selectedStaffData);
+  // console.log("job", job.processing_checklist_status);
+
+  let notes = job.notes == undefined ? "" : job.notes;
+
+  // Set Status type
+  let status_type = 1; // To Be Started
+
+  /// validation for reviewing checklist status
+  if (reviewer > 0) {
+    if (Number(job?.reviewing_checklist_status) === 2) {
+      return {
+        status: false,
+        message: "Please complete the reviewing checklist first.",
+        data: "W",
+      };
+    }
+  }
+
+
+  if (allocated_to > 0) {
+
+    if (Number(job?.processing_checklist_status) === 2) {
+      return {
+        status: false,
+        message: "Please complete the processing checklist first.",
+        data: "W",
+      };
+    }
+    status_type = 3;
+  }
+
+
+
+  if (reviewer > 0 && allocated_to == 0) {
+    status_type = 5;
+  }
+
+  if (reviewer == 0 && allocated_to == 0) {
+    status_type = 1;
+  }
+
+  let data = {
+    table: "jobs",
+    field: "job_id",
+  };
+  //CUS_CLI_00001
+  const job_id = await generateNextUniqueCode(data);
+
+  try {
+    // Helper function to replace undefined with null
+    const handleUndefined = (value) => (value === undefined ? null : value);
+
+    const query = `
+INSERT INTO jobs (
+    staff_created_id,
+    job_id,
+    account_manager_id,
+    customer_id,
+    client_id,
+    client_job_code,
+    customer_contact_details_id,
+    service_id,
+    job_type_id,
+    budgeted_hours,
+    reviewer,
+    allocated_to,
+    allocated_on,
+    date_received_on,
+    year_end,
+    total_preparation_time,
+    review_time,
+    feedback_incorporation_time,
+    total_time,
+    engagement_model,
+    expected_delivery_date,
+    expected_delivery_date_old,
+    due_on,
+    submission_deadline,
+    customer_deadline_date,
+    sla_deadline_date,
+    internal_deadline_date,
+    filing_Companies_required,
+    filing_Companies_date,
+    filing_hmrc_required,
+    filing_hmrc_date,
+    opening_balance_required,
+    opening_balance_date,
+    number_of_transaction,
+    number_of_balance_items,
+    turnover,
+    number_of_employees,
+    vat_reconciliation,
+    bookkeeping,
+    processing_type,
+    invoiced,
+    currency,
+    invoice_value,
+    invoice_date,
+    invoice_hours,
+    invoice_remark,
+    status_type,
+    notes,
+    Turnover_Period_id_0,
+    Turnover_Currency_id_0,
+    Turnover_id_0,
+    VAT_Registered_id_0,
+    VAT_Frequency_id_0,
+    Who_Did_The_Bookkeeping_id_1,
+    PAYE_Registered_id_1,
+    Number_of_Trial_Balance_Items_id_1,
+    Bookkeeping_Frequency_id_2,
+    Number_of_Total_Transactions_id_2,
+    Number_of_Bank_Transactions_id_2,
+    Number_of_Purchase_Invoices_id_2,
+    Number_of_Sales_Invoices_id_2,
+    Number_of_Petty_Cash_Transactions_id_2,
+    Number_of_Journal_Entries_id_2,
+    Number_of_Other_Transactions_id_2,
+    Transactions_Posting_id_2,
+    Quality_of_Paperwork_id_2,
+    Number_of_Integration_Software_Platforms_id_2,
+    CIS_id_2,
+    Posting_Payroll_Journals_id_2,
+    Department_Tracking_id_2,
+    Sales_Reconciliation_Required_id_2,
+    Factoring_Account_id_2,
+    Payment_Methods_id_2,
+    Payroll_Frequency_id_3,
+    Type_of_Payslip_id_3,
+    Percentage_of_Variable_Payslips_id_3,
+    Is_CIS_Required_id_3,
+    CIS_Frequency_id_3,
+    Number_of_Sub_contractors_id_3,
+    Whose_Tax_Return_is_it_id_4,
+    Number_of_Income_Sources_id_4,
+    If_Landlord_Number_of_Properties_id_4,
+    If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+    Management_Accounts_Frequency_id_6,
+
+Year_Ending_id_1,
+Day_Date_id_2,
+Week_Year_id_2,
+Week_Month_id_2,
+Week_id_2,
+Fortnight_Year_id_2,
+Fortnight_Month_id_2,
+Fortnight_id_2,
+Month_Year_id_2,
+Month_id_2,
+Quarter_Year_id_2,
+Quarter_id_2,
+Year_id_2,
+Other_FromDate_id_2,
+Other_ToDate_id_2,
+Payroll_Week_Year_id_3,
+Payroll_Week_Month_id_3,
+Payroll_Week_id_3,
+Payroll_Fortnight_Year_id_3,
+Payroll_Fortnight_Month_id_3,
+Payroll_Fortnight_id_3,
+Payroll_Month_Year_id_3,
+Payroll_Month_id_3,
+Payroll_Quarter_Year_id_3,
+Payroll_Quarter_id_3,
+Payroll_Year_id_3,
+Tax_Year_id_4,
+Management_Accounts_FromDate_id_6,
+Management_Accounts_ToDate_id_6,
+Year_id_33,
+Period_id_32,
+Day_Date_id_32,
+Week_Year_id_32,
+Week_Month_id_32,
+Week_id_32,
+Fortnight_Year_id_32,
+Fortnight_Month_id_32,
+Fortnight_id_32,
+Month_Year_id_32,
+Month_id_32,
+Quarter_Year_id_32,
+Quarter_id_32,
+Year_id_32,
+Other_FromDate_id_32,
+Other_ToDate_id_32,
+Payroll_Frequency_id_31,
+Payroll_Week_Year_id_31,
+Payroll_Week_Month_id_31,
+Payroll_Week_id_31,
+Payroll_Fortnight_Year_id_31,
+Payroll_Fortnight_Month_id_31,
+Payroll_Fortnight_id_31,
+Payroll_Month_Year_id_31,
+Payroll_Month_id_31,
+Payroll_Quarter_Year_id_31,
+Payroll_Quarter_id_31,
+Payroll_Year_id_31,
+Audit_Year_Ending_id_27,
+Filing_Frequency_id_8,
+Period_Ending_Date_id_8,
+Filing_Date_id_8,
+Year_id_28,
+job_priority,
+processing_checklist,
+reviewing_checklist,
+processing_checklist_status,
+reviewing_checklist_status,
+checklist_modal_data
+)
+VALUES (
+    ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+    
+    )`;
+
+    const values = [
+      staffCreatedId,
+      job_id,
+      account_manager_id,
+      customer_id,
+      client_id,
+      client_job_code,
+      customer_contact_details_id,
+      service_id,
+      job_type_id,
+      budgeted_hours,
+      reviewer,
+      allocated_to,
+      allocated_on,
+      date_received_on,
+      year_end,
+      total_preparation_time,
+      review_time,
+      feedback_incorporation_time,
+      total_time,
+      engagement_model,
+      expected_delivery_date,
+      expected_delivery_date,
+      due_on,
+      submission_deadline,
+      customer_deadline_date,
+      sla_deadline_date,
+      internal_deadline_date,
+      filing_Companies_required,
+      filing_Companies_date,
+      filing_hmrc_required,
+      filing_hmrc_date,
+      opening_balance_required,
+      opening_balance_date,
+      number_of_transaction,
+      number_of_balance_items,
+      turnover,
+      number_of_employees,
+      vat_reconciliation,
+      bookkeeping,
+      processing_type,
+      invoiced,
+      currency,
+      invoice_value,
+      invoice_date,
+      invoice_hours,
+      invoice_remark,
+      status_type,
+      notes,
+      job.Turnover_Period_id_0,
+      job.Turnover_Currency_id_0,
+      job.Turnover_id_0,
+      job.VAT_Registered_id_0,
+      job.VAT_Frequency_id_0,
+      job.Who_Did_The_Bookkeeping_id_1,
+      job.PAYE_Registered_id_1,
+      job.Number_of_Trial_Balance_Items_id_1,
+      job.Bookkeeping_Frequency_id_2,
+      job.Number_of_Total_Transactions_id_2,
+      job.Number_of_Bank_Transactions_id_2,
+      job.Number_of_Purchase_Invoices_id_2,
+      job.Number_of_Sales_Invoices_id_2,
+      job.Number_of_Petty_Cash_Transactions_id_2,
+      job.Number_of_Journal_Entries_id_2,
+      job.Number_of_Other_Transactions_id_2,
+      job.Transactions_Posting_id_2,
+      job.Quality_of_Paperwork_id_2,
+      job.Number_of_Integration_Software_Platforms_id_2,
+      job.CIS_id_2,
+      job.Posting_Payroll_Journals_id_2,
+      job.Department_Tracking_id_2,
+      job.Sales_Reconciliation_Required_id_2,
+      job.Factoring_Account_id_2,
+      job.Payment_Methods_id_2,
+      job.Payroll_Frequency_id_3,
+      job.Type_of_Payslip_id_3,
+      job.Percentage_of_Variable_Payslips_id_3,
+      job.Is_CIS_Required_id_3,
+      job.CIS_Frequency_id_3,
+      job.Number_of_Sub_contractors_id_3,
+      job.Whose_Tax_Return_is_it_id_4,
+      job.Number_of_Income_Sources_id_4,
+      job.If_Landlord_Number_of_Properties_id_4,
+      job.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+      job.Management_Accounts_Frequency_id_6,
+
+      job.Year_Ending_id_1,
+      job.Day_Date_id_2,
+      job.Week_Year_id_2,
+      job.Week_Month_id_2,
+      job.Week_id_2,
+      job.Fortnight_Year_id_2,
+      job.Fortnight_Month_id_2,
+      job.Fortnight_id_2,
+      job.Month_Year_id_2,
+      job.Month_id_2,
+      job.Quarter_Year_id_2,
+      job.Quarter_id_2,
+      job.Year_id_2,
+      job.Other_FromDate_id_2,
+      job.Other_ToDate_id_2,
+      job.Payroll_Week_Year_id_3,
+      job.Payroll_Week_Month_id_3,
+      job.Payroll_Week_id_3,
+      job.Payroll_Fortnight_Year_id_3,
+      job.Payroll_Fortnight_Month_id_3,
+      job.Payroll_Fortnight_id_3,
+      job.Payroll_Month_Year_id_3,
+      job.Payroll_Month_id_3,
+      job.Payroll_Quarter_Year_id_3,
+      job.Payroll_Quarter_id_3,
+      job.Payroll_Year_id_3,
+      job.Tax_Year_id_4,
+      job.Management_Accounts_FromDate_id_6,
+      job.Management_Accounts_ToDate_id_6,
+      job.Year_id_33,
+      job.Period_id_32,
+      job.Day_Date_id_32,
+      job.Week_Year_id_32,
+      job.Week_Month_id_32,
+      job.Week_id_32,
+      job.Fortnight_Year_id_32,
+      job.Fortnight_Month_id_32,
+      job.Fortnight_id_32,
+      job.Month_Year_id_32,
+      job.Month_id_32,
+      job.Quarter_Year_id_32,
+      job.Quarter_id_32,
+      job.Year_id_32,
+      job.Other_FromDate_id_32,
+      job.Other_ToDate_id_32,
+      job.Payroll_Frequency_id_31,
+      job.Payroll_Week_Year_id_31,
+      job.Payroll_Week_Month_id_31,
+      job.Payroll_Week_id_31,
+      job.Payroll_Fortnight_Year_id_31,
+      job.Payroll_Fortnight_Month_id_31,
+      job.Payroll_Fortnight_id_31,
+      job.Payroll_Month_Year_id_31,
+      job.Payroll_Month_id_31,
+      job.Payroll_Quarter_Year_id_31,
+      job.Payroll_Quarter_id_31,
+      job.Payroll_Year_id_31,
+      job.Audit_Year_Ending_id_27,
+      job.Filing_Frequency_id_8,
+      job.Period_Ending_Date_id_8,
+      job.Filing_Date_id_8,
+      job.Year_id_28,
+      job_priority,
+
+      job.processing_checklist,
+      job.reviewing_checklist,
+      job.processing_checklist_status,
+      job.reviewing_checklist_status,
+      job.checklist_modal_data,
+    ];
+
+    // Apply the undefined check for each field
+    const cleanedValues = values.map(handleUndefined);
+
+    // console.log("cleanedValues", JSON.stringify(cleanedValues));
+    //console.log("query", query);
+
+    //  return
+
+
+
+    // Execute the query with the cleaned values
+    const [result] = await pool.execute(query, cleanedValues);
+
+    const status_update_date = new Date().toLocaleString('sv-SE');
+    await JobStatusUpdate(result.insertId, status_type, status_update_date);
+
+    if (result.insertId > 0) {
+      const currentDate = new Date();
+      await SatffLogUpdateOperation({
+        staff_id: job.StaffUserId,
+        ip: job.ip,
+        date: currentDate.toISOString().split("T")[0],
+        module_name: "job",
+        log_message: `created job code:`,
+        permission_type: "created",
+        module_id: result.insertId,
+      });
+
+      if (tasks.task.length > 0) {
+        const job_id = result.insertId;
+        //const checklist_id = tasks.checklist_id;
+        for (const tsk of tasks.task) {
+          let checklist_id = tsk.checklist_id;
+          let task_id = tsk.task_id;
+          let task_name = tsk.task_name;
+          let budgeted_hour = tsk.budgeted_hour;
+          if (task_id == "" || task_id == undefined || task_id == null) {
+            const checkQuery = `
+                    SELECT id FROM task WHERE name = ? AND service_id = ? AND job_type_id = ?
+                `;
+            const [existing] = await pool.execute(checkQuery, [
+              task_name,
+              service_id,
+              job_type_id,
+            ]);
+
+            if (existing.length === 0) {
+              const query = `INSERT INTO task (name,service_id,job_type_id) VALUES (?, ?, ?) `;
+              const [result] = await pool.execute(query, [
+                task_name,
+                service_id,
+                job_type_id,
+              ]);
+              if (result.insertId > 0) {
+                let task_id_new = result.insertId;
+                const query3 = `
+               INSERT INTO client_job_task (job_id,client_id,task_id,time)
+               VALUES (?, ?, ?, ?)
+               `;
+                const [result3] = await pool.execute(query3, [
+                  job_id,
+                  client_id,
+                  task_id_new,
+                  budgeted_hour,
+                ]);
+              }
+            }
+          } else {
+            const query = `
+               INSERT INTO client_job_task (job_id,client_id,task_id,time)
+               VALUES (?, ?, ?, ?)
+               `;
+            const [result] = await pool.execute(query, [
+              job_id,
+              client_id,
+              task_id,
+              budgeted_hour,
+            ]);
+          }
+        }
+      }
+
+      if (selectedStaffData && selectedStaffData.length > 0) {
+        for (const staff of selectedStaffData) {
+          let { value } = staff;
+          const [[isExistJobId]] = await pool.execute(
+            `SELECT id FROM job_allowed_staffs WHERE staff_id = ${value} AND job_id = ${result.insertId}`
+          );
+          if (!isExistJobId) {
+            const query = `
+        INSERT INTO job_allowed_staffs (job_id, staff_id)
+        VALUES (?, ?)
+        `;
+            await pool.execute(query, [result.insertId, value]);
+          }
+        }
+      }
+    }
+
+    return {
+      status: true,
+      message: "Job created successfully.",
+      data: result.insertId,
+    };
+  } catch (err) {
+    console.log("err -", err);
+    return { status: false, message: "Error adding job." };
+  }
+};
+
+const getJobByCustomer = async (job) => {
+  let { customer_id, StaffUserId, page, limit, search } = job;
+
+  //console.log("getJobByCustomer", job);
+
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const offset = (page - 1) * limit;
+  search = search ? search.trim() : "";
+
+  // 🔍 SEARCH CONDITION
+  let searchCondition = "";
+  let searchParams = [];
+
+  // if (search) {
+  //   searchCondition = `
+  //     AND (
+  //       jobs.client_job_code LIKE ?
+  //       OR clients.trading_name LIKE ?
+  //       OR customers.trading_name LIKE ?
+  //       OR job_types.type LIKE ?
+  //     )
+  //   `;
+  //   const likeSearch = `%${search}%`;
+  //   searchParams = [likeSearch, likeSearch, likeSearch, likeSearch];
+  // }
+  const jobCodeExpr = `
+    CONCAT(
+      SUBSTRING(customers.trading_name, 1, 3), '_',
+      SUBSTRING(clients.trading_name, 1, 3), '_',
+      SUBSTRING(job_types.type, 1, 4), '_',
+      SUBSTRING(jobs.job_id, 1, 15)
+    )
+  `;
+
+  if (search) {
+    searchCondition = `
+      AND (
+        customers.trading_name LIKE ?
+        OR clients.trading_name LIKE ?
+        OR job_types.type LIKE ?
+        OR jobs.job_id LIKE ?
+        OR ${jobCodeExpr} LIKE ?
+      )
+    `;
+    const likeSearch = `%${search}%`;
+    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
+  }
+  // Line Manager
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  // Get Role
+  const rows = await QueryRoleHelperFunction(StaffUserId);
+  if (Array.isArray(customer_id)) {
+    return await getAllJobsBYCustomerfilter({ StaffUserId, customer_id, rows, LineManageStaffId });
+  }
+
+  try {
+    // If no customer_id, use sidebar function
+    if (!customer_id) {
+      return await getAllJobsSidebar(StaffUserId, LineManageStaffId, rows, {
+        page,
+        limit,
+        offset,
+        search,
+      });
+    }
+
+    // Check role access
+    const [RoleAccess] = await pool.execute(
+      "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+      [rows[0].role_id, 35]
+    );
+
+    let total = 0;
+    let result = [];
+
+    // SUPERADMIN or permission access
+    if (
+      rows.length > 0 &&
+      (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)
+    ) {
+      // 🔹 TOTAL COUNT
+      const [countResult] = await pool.execute(
+        `
+        SELECT COUNT(DISTINCT jobs.id) AS total
+        FROM jobs
+        LEFT JOIN customers ON jobs.customer_id = customers.id
+        LEFT JOIN clients ON jobs.client_id = clients.id
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+        WHERE jobs.customer_id = ?
+        ${searchCondition}
+        `,
+        [customer_id, ...searchParams]
+      );
+      total = countResult[0].total;
+
+      // 🔹 DATA
+      const query = `
+        SELECT 
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+   
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+   
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+   
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
+        master_status.name AS status,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+        ${jobCodeExpr} AS job_code_id,
+        CASE 
+            WHEN EXISTS (
+                SELECT 1 
+                FROM client_job_task 
+                WHERE client_job_task.job_id = jobs.id
+            ) THEN true 
+            ELSE false 
+        END AS has_client_job_task 
+        FROM 
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN clients ON jobs.client_id = clients.id
+        LEFT JOIN customers ON jobs.customer_id = customers.id
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN master_status ON master_status.id = jobs.status_type
+        LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE jobs.customer_id = ?
+        ${searchCondition}
+        GROUP BY jobs.id
+        ORDER BY jobs.id DESC
+        LIMIT ? OFFSET ?;
+      `;
+      [result] = await pool.execute(query, [
+        customer_id,
+        ...searchParams,
+        limit,
+        offset,
+      ]);
+    } else {
+      // 🔹 OTHER ROLE
+
+      const placeholders = LineManageStaffId?.map(() => '?').join(',');
+
+
+      // TOTAL COUNT
+      const [countResult] = await pool.execute(
+        `
+        SELECT COUNT(DISTINCT jobs.id) AS total
+        FROM jobs
+        LEFT JOIN customers ON jobs.customer_id = customers.id
+        LEFT JOIN clients ON jobs.client_id = clients.id
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        WHERE (
+          assigned_jobs_staff_view.staff_id IN (${placeholders})
+          OR jobs.staff_created_id IN (${placeholders})
+          OR clients.staff_created_id IN (${placeholders})
+        )
+          AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          ) 
+        AND jobs.customer_id = ?
+        ${searchCondition}
+        `,
+        [
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          customer_id,
+          ...searchParams,
+        ]
+      );
+      total = countResult[0].total;
+
+      // DATA
+      const query = `
+        SELECT 
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
+
+        jobs.staff_created_id AS staff_created_id,
+
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id,
+
+        master_status.name AS status,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+        ${jobCodeExpr} AS job_code_id,
+        CASE 
+            WHEN EXISTS (
+                SELECT 1 
+                FROM client_job_task 
+                WHERE client_job_task.job_id = jobs.id
+            ) THEN true 
+            ELSE false 
+        END AS has_client_job_task 
+        FROM 
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN clients ON jobs.client_id = clients.id
+        LEFT JOIN customers ON jobs.customer_id = customers.id
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN master_status ON master_status.id = jobs.status_type
+        LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE (
+          assigned_jobs_staff_view.staff_id IN (${placeholders})
+          OR jobs.staff_created_id IN (${placeholders})
+          OR clients.staff_created_id IN (${placeholders})
+        )
+        AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          )  
+        AND jobs.customer_id = ?
+        ${searchCondition}
+        GROUP BY jobs.id
+        ORDER BY jobs.id DESC
+        LIMIT ? OFFSET ?;
+      `;
+      [result] = await pool.execute(query, [
+        ...LineManageStaffId,
+        ...LineManageStaffId,
+        ...LineManageStaffId,
+        customer_id,
+        ...searchParams,
+        limit,
+        offset,
+      ]);
+
+      // assign_customer_service logic (UNCHANGED)
+      // let isExistAssignCustomer = result?.find(
+      //   (item) => item?.assigned_source === "assign_customer_service"
+      // );
+      // if (isExistAssignCustomer) {
+      //   const matched = result.filter(
+      //     (item) =>
+      //       item.assigned_source === "assign_customer_service" &&
+      //       Number(item.service_id_assign) === Number(item.job_service_id)
+      //   );
+      //   const matched2 = result.filter(
+      //     (item) => item.assigned_source !== "assign_customer_service"
+      //   );
+      //   result = [...matched, ...matched2];
+      // }
+    }
+
+    return {
+      status: true,
+      message: "Success.",
+      data: result,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        search,
+      },
+    };
+  } catch (error) {
+    console.log("err -", error);
+    return { status: false, message: "Error getting job by customer." };
+  }
+};
+
+async function getAllJobsSidebar(
+  StaffUserId,
+  LineManageStaffId,
+  rows,
+  paginationData
+) {
+  const { limit, offset, page, search } = paginationData;
+  let total = 0;
+
+  // 🔍 SEARCH CONDITION
+  let searchCondition = "";
+  let searchParams = [];
+
+
+
+  // if (search) {
+  //   searchCondition = `
+  //     AND (
+  //       jobs.client_job_code LIKE ?
+  //       OR clients.trading_name LIKE ?
+  //       OR customers.trading_name LIKE ?
+  //       OR job_types.type LIKE ?
+  //     )
+  //   `;
+  //   const likeSearch = `%${search}%`;
+  //   searchParams = [likeSearch, likeSearch, likeSearch, likeSearch];
+  // }
+
+  const jobCodeExpr = `
+    CONCAT(
+      SUBSTRING(customers.trading_name, 1, 3), '_',
+      SUBSTRING(clients.trading_name, 1, 3), '_',
+      SUBSTRING(job_types.type, 1, 4), '_',
+      SUBSTRING(jobs.job_id, 1, 15)
+    )
+  `;
+
+  if (search) {
+    searchCondition = `
+      AND (
+        customers.trading_name LIKE ?
+        OR clients.trading_name LIKE ?
+        OR job_types.type LIKE ?
+        OR jobs.job_id LIKE ?
+        OR ${jobCodeExpr} LIKE ?
+      )
+    `;
+    const likeSearch = `%${search}%`;
+    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
+  }
+
+  try {
+    // Check role access
+    const [RoleAccess] = await pool.execute(
+      "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+      [rows[0].role_id, 35]
+    );
+
+    // ================= SUPERADMIN / PERMISSION =================
+    if (
+      rows.length > 0 &&
+      (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)
+    ) {
+      // 🔹 TOTAL COUNT
+      const [countResult] = await pool.execute(
+        `
+        SELECT COUNT(DISTINCT jobs.id) AS total
+        FROM jobs
+        LEFT JOIN customers ON jobs.customer_id = customers.id
+        LEFT JOIN clients ON jobs.client_id = clients.id
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+        WHERE 1 = 1
+        AND customers.status = '1'
+        ${searchCondition}
+        `,
+        [...searchParams]
+      );
+      total = countResult[0].total || 0;
+
+
+      // 🔹 DATA
+      const query = `
+         SELECT 
+        customers.trading_name AS customers_trading_name,
+        clients.trading_name AS client_trading_name,
+        job_types.type AS job_type_name,
+        jobs.job_id AS jobs_job_id,
+        ${jobCodeExpr} AS job_code_id,
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+   
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+   
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+   
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
+        master_status.name AS status,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+
+        CASE 
+            WHEN EXISTS (
+                SELECT 1 
+                FROM client_job_task 
+                WHERE client_job_task.job_id = jobs.id
+            ) THEN true 
+            ELSE false 
+        END AS has_client_job_task
+
+        FROM
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN customers ON jobs.customer_id = customers.id 
+        LEFT JOIN clients ON jobs.client_id = clients.id
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN master_status ON master_status.id = jobs.status_type
+        LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE 1 = 1
+        AND customers.status = '1'
+        ${searchCondition}
+        GROUP BY jobs.id
+        ORDER BY job_code_id ASC
+        LIMIT ? OFFSET ?;
+      `;
+
+      const [result] = await pool.execute(query, [
+        ...searchParams,
+        limit,
+        offset,
+      ]);
+
+      return {
+        status: true,
+        message: "Success.",
+        data: result,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+          search,
+        },
+      };
+    }
+
+
+    // ================= OTHER ROLE =================
+    // const placeholders = LineManageStaffId?.map(() => '?').join(',');
+    // const [countResult] = await pool.execute(
+    //   `
+    //   SELECT 
+    //     jobs.id AS id,
+    //     jobs.status_type AS status_type,
+        
+    //     assigned_jobs_staff_view.source AS assigned_source,
+    //     assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+    //     jobs.service_id AS job_service_id
+
+    //     FROM 
+    //     jobs
+    //     JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+    //     LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+    //     LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+    //     LEFT JOIN clients ON jobs.client_id = clients.id
+    //     LEFT JOIN customers ON jobs.customer_id = customers.id
+    //     LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+    //     LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+    //     LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+    //     LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+    //     LEFT JOIN master_status ON master_status.id = jobs.status_type
+    //     LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+    //    WHERE (
+    //     (assigned_jobs_staff_view.staff_id IN (${placeholders})
+    //     OR jobs.staff_created_id IN (${placeholders})
+    //     OR clients.staff_created_id IN (${placeholders})) 
+    //     AND (
+    //         assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+    //         OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+    //       )
+    //   ) 
+    //   AND customers.status = '1'
+    //   ${searchCondition}
+    //   GROUP BY jobs.id
+    //   `,
+    //   [
+    //     ...LineManageStaffId,
+    //     ...LineManageStaffId,
+    //     ...LineManageStaffId,
+    //     ...searchParams,
+    //   ]
+    // );
+    // // console.log("total ",countResult.length)
+    // total = countResult.length || 0;
+    // // total = countResult[0].total || 0;
+    // // 🔹 DATA
+    // const query = `
+    //     SELECT 
+    //     jobs.id AS job_id,
+    //     timesheet.job_id AS timesheet_job_id,
+    //     job_types.type AS job_type_name,
+    //     jobs.status_type AS status_type,
+    //     jobs.job_priority AS job_priority,
+    //     customer_contact_details.id AS account_manager_officer_id,
+    //     customer_contact_details.first_name AS account_manager_officer_first_name,
+    //     customer_contact_details.last_name AS account_manager_officer_last_name,
+    //     clients.trading_name AS client_trading_name,
+    //     jobs.client_job_code AS client_job_code,
+    //     jobs.invoiced AS invoiced,
+    //     jobs.total_hours AS total_hours,
+    //     jobs.total_hours_status AS total_hours_status,
+    //     DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+
+   
+    //     staffs.id AS allocated_id,
+    //     staffs.first_name AS allocated_first_name,
+    //     staffs.last_name AS allocated_last_name,
+   
+    //     staffs2.id AS reviewer_id,
+    //     staffs2.first_name AS reviewer_first_name,
+    //     staffs2.last_name AS reviewer_last_name,
+   
+    //     staffs3.id AS outbooks_acount_manager_id,
+    //     staffs3.first_name AS outbooks_acount_manager_first_name,
+    //     staffs3.last_name AS outbooks_acount_manager_last_name,
+    //     staffs3.employee_number AS account_manager_employee_number,
+
+    //     jobs.staff_created_id AS staff_created_id,
+
+    //     assigned_jobs_staff_view.source AS assigned_source,
+    //     assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+    //     jobs.service_id AS job_service_id,
+
+    //     master_status.name AS status,
+
+    //     CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+    //     DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+    //     DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+    //     ${jobCodeExpr} AS job_code_id,
+
+    //     CASE 
+    //         WHEN EXISTS (
+    //             SELECT 1 
+    //             FROM client_job_task 
+    //             WHERE client_job_task.job_id = jobs.id
+    //         ) THEN true 
+    //         ELSE false 
+    //     END AS has_client_job_task
+   
+    //   FROM
+    //   jobs
+    //   JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+    //   LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+    //   LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+    //   LEFT JOIN clients ON jobs.client_id = clients.id
+    //   LEFT JOIN customers ON jobs.customer_id = customers.id
+    //   LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+    //   LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+    //   LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+    //   LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+    //   LEFT JOIN master_status ON master_status.id = jobs.status_type
+    //   LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+    //   WHERE (
+    //     (assigned_jobs_staff_view.staff_id IN (${placeholders})
+    //     OR jobs.staff_created_id IN (${placeholders})
+    //     OR clients.staff_created_id IN (${placeholders})) 
+    //     AND (
+    //         assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+    //         OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+    //       )
+    //   ) 
+    //   AND customers.status = '1'
+    //   ${searchCondition}
+    //   GROUP BY jobs.id
+    //   ORDER BY job_code_id ASC
+    //   LIMIT ? OFFSET ?;
+    // `;
+
+    // let [result] = await pool.execute(query, [
+    //   ...LineManageStaffId,
+    //   ...LineManageStaffId,
+    //   ...LineManageStaffId,
+    //   ...searchParams,
+    //   limit,
+    //   offset,
+    // ]);
+
+    // //console.log("result 1 -->", result.length)
+
+    // // 🔹 assign_customer_service logic (UNCHANGED)
+    // // let isExistAssignCustomer = result.find(
+    // //   (item) => item.assigned_source === "assign_customer_service"
+    // // );
+    // // if (isExistAssignCustomer) {
+    // //   const matched = result.filter(
+    // //     (item) =>
+    // //       item.assigned_source === "assign_customer_service" &&
+    // //       Number(item.service_id_assign) === Number(item.job_service_id)
+    // //   );
+    // //   const matched2 = result.filter(
+    // //     (item) => item.assigned_source !== "assign_customer_service"
+    // //   );
+    // //   result = [...matched, ...matched2];
+    // // }
+
+    //console.log("result 2 -->", result.length)
+
+
+    // ================= OPTIMIZED WITH Promise.all =================
+
+    const makePlaceholders = (arr) => arr.map(() => '?').join(',');
+    
+    const COMMON_JOINS = `
+      JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+      LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+      LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+      LEFT JOIN clients ON jobs.client_id = clients.id
+      LEFT JOIN customers ON jobs.customer_id = customers.id
+      LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+      LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+      LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+      LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+      LEFT JOIN master_status ON master_status.id = jobs.status_type
+      LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+    `;  
+    const placeholders = makePlaceholders(LineManageStaffId);
+    
+    const WHERE_CLAUSE = `
+      WHERE (
+        (
+          assigned_jobs_staff_view.staff_id IN (${placeholders})
+          OR jobs.staff_created_id IN (${placeholders})
+          OR clients.staff_created_id IN (${placeholders})
+        )
+        AND (
+          assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+          OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+        )
+      )
+      AND customers.status = '1'
+      ${searchCondition}
+    `;
+    
+    // Params — define common params
+    const commonParams = [
+      ...LineManageStaffId,
+      ...LineManageStaffId,
+      ...LineManageStaffId,
+      ...searchParams,
+    ];
+  
+    // COUNT query
+    const countQuery = `
+      SELECT COUNT(*) AS total
+      FROM (
+        SELECT jobs.id
+        FROM jobs
+        ${COMMON_JOINS}
+        ${WHERE_CLAUSE}
+        GROUP BY jobs.id
+      ) AS counted
+    `;
+    
+    // DATA query
+    const dataQuery = `
+      SELECT
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
+        jobs.staff_created_id AS staff_created_id,
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id,
+        master_status.name AS status,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+        ${jobCodeExpr} AS job_code_id,
+        EXISTS (
+          SELECT 1 FROM client_job_task
+          WHERE client_job_task.job_id = jobs.id
+        ) AS has_client_job_task
+      FROM jobs
+      ${COMMON_JOINS}
+      ${WHERE_CLAUSE}
+      GROUP BY jobs.id
+      ORDER BY job_code_id ASC
+      LIMIT ? OFFSET ?
+    `;
+    
+    // ✅ Promise.all —  (parallel)
+    const [[countRows], [dataRows]] = await Promise.all([
+      pool.execute(countQuery, [...commonParams]),
+      pool.execute(dataQuery,  [...commonParams, limit, offset]),
+    ]);
+    
+    total  = countRows[0]?.total || 0; 
+    const result = dataRows;
+
+    return {
+      status: true,
+      message: "Success.",
+      data: result,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        search,
+      },
+    };
+  } catch (error) {
+    console.log("err -", error);
+    return { status: false, message: "Error getting job. All Jobs" };
+  }
+}
+
+const getJobByClient = async (job) => {
+  const { client_id, StaffUserId } = job;
+
+  // Line Manager
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  // Get Role
+  const rows = await QueryRoleHelperFunction(StaffUserId);
+  try {
+    // console.log("LineManageStaffId", LineManageStaffId);
+    const [RoleAccess] = await pool.execute(
+      "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+      [rows[0].role_id, 35]
+    );
+
+    if (
+      rows.length > 0 &&
+      (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)
+    ) {
+      const query = `
+        SELECT 
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+   
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+   
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+   
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
+        master_status.name AS status,
+
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+        CONCAT(
+          SUBSTRING(customers.trading_name, 1, 3), '_',
+          SUBSTRING(clients.trading_name, 1, 3), '_',
+          SUBSTRING(job_types.type, 1, 4), '_',
+          SUBSTRING(jobs.job_id, 1, 15)
+          ) AS job_code_id,
+
+        CASE 
+            WHEN EXISTS (
+                SELECT 1 
+                FROM client_job_task 
+                WHERE client_job_task.job_id = jobs.id
+            ) THEN true 
+            ELSE false 
+        END AS has_client_job_task
+
+        FROM 
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN 
+        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN 
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN 
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN 
+        staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN 
+        staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN 
+        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type
+        LEFT JOIN
+        timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE
+        jobs.client_id = ${client_id}
+        GROUP BY jobs.id
+        ORDER BY 
+         jobs.id DESC;
+        `;
+      const [rows] = await pool.execute(query);
+      return { status: true, message: "Success.", data: rows };
+    }
+
+    // Other Role Data
+    const query = `
+        SELECT 
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+   
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+   
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+   
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
+
+        jobs.staff_created_id AS staff_created_id,
+
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id,
+
+        master_status.name AS status,
+
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+
+        CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id,
+        
+        CASE 
+            WHEN EXISTS (
+                SELECT 1 
+                FROM client_job_task 
+                WHERE client_job_task.job_id = jobs.id
+            ) THEN true 
+            ELSE false 
+        END AS has_client_job_task
+   
+        FROM 
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN 
+        assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        LEFT JOIN 
+        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN 
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN 
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN 
+        staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN 
+        staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN 
+        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type
+         LEFT JOIN
+         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE
+        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND jobs.client_id = ${client_id}
+        AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          ) 
+        GROUP BY 
+        jobs.id 
+        ORDER BY 
+        jobs.id DESC;
+        `;
+
+    //console.log("query -", query);
+
+
+    const [result] = await pool.execute(query);
+
+    //////-----START Assign Customer Service Data START----////////
+    // let isExistAssignCustomer = result?.find(
+    //   (item) => item?.assigned_source === "assign_customer_service"
+    // );
+    // if (isExistAssignCustomer != undefined) {
+    //   let matched = result?.filter(
+    //     (item) =>
+    //       item?.assigned_source === "assign_customer_service" &&
+    //       Number(item?.service_id_assign) === Number(item?.job_service_id)
+    //   );
+    //   let matched2 = result?.filter(
+    //     (item) => item?.assigned_source !== "assign_customer_service"
+    //   );
+    //   const resultAssignCustomer = [...matched, ...matched2];
+    //   return { status: true, message: "Success.", data: resultAssignCustomer };
+    // }
+    //////-----END Assign Customer Service Data END----////////
+
+    return { status: true, message: "Success.", data: result };
+  } catch (error) {
+    console.log("err -", error);
+    return { status: false, message: "Error getting job. BY Client" };
+  }
+};
+
+const getAllJobsBYCustomerfilter = async (job) => {
+  const { StaffUserId, customer_id, rows, LineManageStaffId } = job;
+  try {
+    const jobCodeExpr = `
+    CONCAT(
+      SUBSTRING(customers.trading_name, 1, 3), '_',
+      SUBSTRING(clients.trading_name, 1, 3), '_',
+      SUBSTRING(job_types.type, 1, 4), '_',
+      SUBSTRING(jobs.job_id, 1, 15)
+    )
+  `;
+    const placeholders = LineManageStaffId?.map(() => '?').join(',');
+    const query = `
+        SELECT 
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
+
+        jobs.staff_created_id AS staff_created_id,
+
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id,
+
+        master_status.name AS status,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+        ${jobCodeExpr} AS job_code_id ,
+        CASE 
+            WHEN EXISTS (
+                SELECT 1 
+                FROM client_job_task 
+                WHERE client_job_task.job_id = jobs.id
+            ) THEN true 
+            ELSE false 
+        END AS has_client_job_task 
+        FROM 
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN clients ON jobs.client_id = clients.id
+        LEFT JOIN customers ON jobs.customer_id = customers.id
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN master_status ON master_status.id = jobs.status_type
+        LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE (
+          assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+          OR jobs.staff_created_id IN (${LineManageStaffId})
+          OR clients.staff_created_id IN (${LineManageStaffId})
+        )
+        AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          )  
+        AND jobs.customer_id IN (${customer_id})
+        GROUP BY jobs.id
+        ORDER BY jobs.id DESC
+      `;
+    const [result] = await pool.execute(query);
+    return { status: true, message: "Success.", data: result };
+  } catch (error) {
+    console.log("err -", error);
+    return { status: false, message: "Error getting job." };
+  }
+
+}
+
+const get_jobs_filter = async (job) => {
+  const { StaffUserId, filters, pagination } = job;
+
+  // Line Manager
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  // Get Role
+  const rows = await QueryRoleHelperFunction(StaffUserId);
+  return await getAllJobsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination);
+
+  const { client_id, customer_id } = filters;
+  if (client_id === undefined && customer_id === undefined) {
+    // Line Manager
+    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+    // Get Role
+    const rows = await QueryRoleHelperFunction(StaffUserId);
+    return await getAllJobsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination);
+  }
+  else if (client_id.length > 0 && customer_id.length === 0) {
+    return await getJobByClientId({ StaffUserId, client_id });
+  } else if (customer_id.length > 0 && client_id.length === 0) {
+    return await getJobByCustomerId({ StaffUserId, customer_id });
+  } else if (client_id.length > 0 && customer_id.length > 0) {
+    return await getJobByClientIdAndCustomerId({ StaffUserId, customer_id, client_id });
+  } else {
+    // Line Manager
+    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+    // Get Role
+    const rows = await QueryRoleHelperFunction(StaffUserId);
+    return await getAllJobsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination);
+  }
+
+}
+
+
+async function getAllJobsSidebarFilter(
+  StaffUserId,
+  LineManageStaffId,
+  rows,
+  pagination
+) {
+
+  const page = Number(pagination.page) || 1;
+  const limit = Number(pagination.limit) || 20;
+  const search = pagination.search || "";
+  const offset = (page - 1) * limit;
+
+  let searchCondition = "";
+  let searchParams = [];
+
+  const jobCodeExpr = `
+    CONCAT(
+      SUBSTRING(customers.trading_name, 1, 3), '_',
+      SUBSTRING(clients.trading_name, 1, 3), '_',
+      SUBSTRING(job_types.type, 1, 4), '_',
+      SUBSTRING(jobs.job_id, 1, 15)
+    )
+  `;
+
+  if (search) {
+    searchCondition = `
+      AND (
+        customers.trading_name LIKE ?
+        OR clients.trading_name LIKE ?
+        OR job_types.type LIKE ?
+        OR jobs.job_id LIKE ?
+        OR ${jobCodeExpr} LIKE ?
+      )
+    `;
+    const likeSearch = `%${search}%`;
+    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
+  }
+
+
+  try {
+    // Check role access
+    const [RoleAccess] = await pool.execute(
+      "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+      [rows[0].role_id, 35]
+    );
+
+    // ================= SUPERADMIN / PERMISSION =================
+    if (
+      rows.length > 0 &&
+      (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)
+    ) {
+
+      // 🔹 DATA
+      const query = `
+         SELECT 
+        customers.trading_name AS customers_trading_name,
+        clients.trading_name AS client_trading_name,
+        job_types.type AS job_type_name,
+        jobs.job_id AS jobs_job_id,
+        ${jobCodeExpr} AS job_code_id,
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+   
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+   
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+   
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
+        master_status.name AS status,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+        CASE 
+            WHEN EXISTS (
+                SELECT 1 
+                FROM client_job_task 
+                WHERE client_job_task.job_id = jobs.id
+            ) THEN true 
+            ELSE false 
+        END AS has_client_job_task
+        FROM
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN customers ON jobs.customer_id = customers.id 
+        LEFT JOIN clients ON jobs.client_id = clients.id
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN master_status ON master_status.id = jobs.status_type
+        LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE 1 = 1
+        AND customers.status = '1'
+         ${searchCondition}
+        GROUP BY jobs.id
+        ORDER BY job_code_id ASC
+        LIMIT ? OFFSET ?
+      `;
+
+      const [result] = await pool.execute(query, [...searchParams, limit, offset]);
+
+      return {
+        status: true,
+        message: "Success.",
+        data: result,
+        hasMore: rows.length === limit
+      };
+    }
+
+
+    // ================= OTHER ROLE =================
+    const placeholders = LineManageStaffId?.map(() => '?').join(',');
+    // 🔹 DATA
+    const query = `
+        SELECT 
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+
+   
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+   
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+   
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
+
+        jobs.staff_created_id AS staff_created_id,
+
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id,
+
+        master_status.name AS status,
+
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+        ${jobCodeExpr} AS job_code_id,
+
+        CASE 
+            WHEN EXISTS (
+                SELECT 1 
+                FROM client_job_task 
+                WHERE client_job_task.job_id = jobs.id
+            ) THEN true 
+            ELSE false 
+        END AS has_client_job_task
+   
+      FROM
+      jobs
+      JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+      LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+      LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+      LEFT JOIN clients ON jobs.client_id = clients.id
+      LEFT JOIN customers ON jobs.customer_id = customers.id
+      LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+      LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+      LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+      LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+      LEFT JOIN master_status ON master_status.id = jobs.status_type
+      LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+      WHERE (
+        (assigned_jobs_staff_view.staff_id IN (${placeholders})
+        OR jobs.staff_created_id IN (${placeholders})
+        OR clients.staff_created_id IN (${placeholders})) 
+        AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          )
+      ) 
+      AND customers.status = '1'
+      ${searchCondition}
+      GROUP BY jobs.id
+      ORDER BY job_code_id ASC
+      LIMIT ? OFFSET ?
+    `;
+
+    let [result] = await pool.execute(query, [
+      ...LineManageStaffId,
+      ...LineManageStaffId,
+      ...LineManageStaffId,
+      ...searchParams,
+      limit,
+      offset
+    ]);
+
+    return {
+      status: true,
+      message: "Success.",
+      data: result
+    };
+  } catch (error) {
+    console.log("err -", error);
+    return { status: false, message: "Error getting job. All Jobs" };
+  }
+}
+
+async function getJobByClientId(data) {
+  const { StaffUserId, client_id } = data;
+  // Line Manager
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  // Get Role
+  const rows = await QueryRoleHelperFunction(StaffUserId);
+  try {
+    // console.log("LineManageStaffId", LineManageStaffId);
+    const [RoleAccess] = await pool.execute(
+      "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+      [rows[0].role_id, 35]
+    );
+
+    if (
+      rows.length > 0 &&
+      (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)
+    ) {
+      const query = `
+        SELECT 
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+   
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+   
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+   
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
+        master_status.name AS status,
+
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+          CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id,
+
+            CASE 
+            WHEN EXISTS (
+                SELECT 1 
+                FROM client_job_task 
+                WHERE client_job_task.job_id = jobs.id
+            ) THEN true 
+            ELSE false 
+        END AS has_client_job_task
+        FROM 
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN 
+        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN 
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN 
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN 
+        staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN 
+        staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN 
+        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type
+        LEFT JOIN
+        timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE
+        jobs.client_id IN (${client_id})
+        GROUP BY jobs.id
+        ORDER BY 
+         jobs.id DESC;
+        `;
+      const [rows] = await pool.execute(query);
+      return { status: true, message: "Success.", data: rows };
+    }
+
+    // Other Role Data
+    const query = `
+        SELECT 
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+   
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+   
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+   
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
+
+        jobs.staff_created_id AS staff_created_id,
+
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id,
+
+        master_status.name AS status,
+
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+
+        CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id,
+
+            CASE 
+            WHEN EXISTS (
+                SELECT 1 
+                FROM client_job_task 
+                WHERE client_job_task.job_id = jobs.id
+            ) THEN true 
+            ELSE false 
+        END AS has_client_job_task
+   
+        FROM 
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN 
+        assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        LEFT JOIN 
+        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN 
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN 
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN 
+        staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN 
+        staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN 
+        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type
+         LEFT JOIN
+         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE
+        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND jobs.client_id IN (${client_id})
+        AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          ) 
+        GROUP BY 
+        jobs.id 
+        ORDER BY 
+        jobs.id DESC;
+        `;
+    const [result] = await pool.execute(query);
+
+
+
+    return { status: true, message: "Success.", data: result };
+  } catch (error) {
+    console.log("err -", error);
+    return { status: false, message: "Error getting job. BY Client" };
+  }
+
+}
+
+async function getJobByCustomerId(data) {
+  const { StaffUserId, customer_id } = data;
+
+  const jobCodeExpr = `
+    CONCAT(
+      SUBSTRING(customers.trading_name, 1, 3), '_',
+      SUBSTRING(clients.trading_name, 1, 3), '_',
+      SUBSTRING(job_types.type, 1, 4), '_',
+      SUBSTRING(jobs.job_id, 1, 15)
+    )
+  `;
+  // Line Manager
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  // Get Role
+  const rows = await QueryRoleHelperFunction(StaffUserId);
+  try {
+
+
+    // Check role access
+    const [RoleAccess] = await pool.execute(
+      "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+      [rows[0].role_id, 35]
+    );
+    // SUPERADMIN or permission access
+    if (
+      rows.length > 0 &&
+      (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)
+    ) {
+      //  DATA
+      const query = `
+        SELECT 
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+   
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+   
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+   
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
+        master_status.name AS status,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+        ${jobCodeExpr} AS job_code_id,
+        
+        CASE 
+            WHEN EXISTS (
+                SELECT 1 
+                FROM client_job_task 
+                WHERE client_job_task.job_id = jobs.id
+            ) THEN true 
+            ELSE false 
+        END AS has_client_job_task
+        FROM 
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN clients ON jobs.client_id = clients.id
+        LEFT JOIN customers ON jobs.customer_id = customers.id
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN master_status ON master_status.id = jobs.status_type
+        LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE jobs.customer_id IN (${customer_id})
+        GROUP BY jobs.id
+        ORDER BY jobs.id DESC
+      `;
+      [result] = await pool.execute(query);
+    } else {
+      // 🔹 OTHER ROLE
+
+      const placeholders = LineManageStaffId?.map(() => '?').join(',');
+      // DATA
+      const query = `
+        SELECT 
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
+
+        jobs.staff_created_id AS staff_created_id,
+
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id,
+
+        master_status.name AS status,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+        ${jobCodeExpr} AS job_code_id,
+        CASE 
+            WHEN EXISTS (
+                SELECT 1 
+                FROM client_job_task 
+                WHERE client_job_task.job_id = jobs.id
+            ) THEN true 
+            ELSE false 
+        END AS has_client_job_task
+        FROM 
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN clients ON jobs.client_id = clients.id
+        LEFT JOIN customers ON jobs.customer_id = customers.id
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN master_status ON master_status.id = jobs.status_type
+        LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE (
+          assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+          OR jobs.staff_created_id IN (${LineManageStaffId})
+          OR clients.staff_created_id IN (${LineManageStaffId})
+        )
+        AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          )  
+        AND jobs.customer_id IN (${customer_id})
+        GROUP BY jobs.id
+        ORDER BY jobs.id DESC
+      `;
+      [result] = await pool.execute(query);
+    }
+
+    return {
+      status: true,
+      message: "Success.",
+      data: result
+    };
+  } catch (error) {
+    console.log("err -", error);
+    return { status: false, message: "Error getting job by filter customer." };
+  }
+
+
+}
+
+async function getJobByClientIdAndCustomerId(data) {
+  const { StaffUserId, customer_id, client_id } = data;
+
+  // Line Manager
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  // Get Role
+  const rows = await QueryRoleHelperFunction(StaffUserId);
+  try {
+    // console.log("LineManageStaffId", LineManageStaffId);
+    const [RoleAccess] = await pool.execute(
+      "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+      [rows[0].role_id, 35]
+    );
+
+    if (
+      rows.length > 0 &&
+      (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)
+    ) {
+      const query = `
+        SELECT 
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+   
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+   
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+   
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        master_status.name AS status,
+
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+          CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id,
+
+         CASE 
+            WHEN EXISTS (
+                SELECT 1 
+                FROM client_job_task 
+                WHERE client_job_task.job_id = jobs.id
+            ) THEN true 
+            ELSE false 
+        END AS has_client_job_task
+
+        FROM 
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN 
+        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN 
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN 
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN 
+        staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN 
+        staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN 
+        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type
+        LEFT JOIN
+        timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE
+        jobs.client_id IN (${client_id}) OR jobs.customer_id IN (${customer_id})
+        GROUP BY jobs.id
+        ORDER BY 
+         jobs.id DESC;
+        `;
+      const [rows] = await pool.execute(query);
+      return { status: true, message: "Success.", data: rows };
+    }
+
+    // Other Role Data
+    const query = `
+        SELECT 
+        jobs.id AS job_id,
+        timesheet.job_id AS timesheet_job_id,
+        job_types.type AS job_type_name,
+        jobs.status_type AS status_type,
+        jobs.job_priority AS job_priority,
+        customer_contact_details.id AS account_manager_officer_id,
+        customer_contact_details.first_name AS account_manager_officer_first_name,
+        customer_contact_details.last_name AS account_manager_officer_last_name,
+        clients.trading_name AS client_trading_name,
+        jobs.client_job_code AS client_job_code,
+        jobs.invoiced AS invoiced,
+        jobs.total_hours AS total_hours,
+        jobs.total_hours_status AS total_hours_status,
+        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+   
+        staffs.id AS allocated_id,
+        staffs.first_name AS allocated_first_name,
+        staffs.last_name AS allocated_last_name,
+   
+        staffs2.id AS reviewer_id,
+        staffs2.first_name AS reviewer_first_name,
+        staffs2.last_name AS reviewer_last_name,
+   
+        staffs3.id AS outbooks_acount_manager_id,
+        staffs3.first_name AS outbooks_acount_manager_first_name,
+        staffs3.last_name AS outbooks_acount_manager_last_name,
+        staffs3.employee_number AS account_manager_employee_number,
+
+        jobs.staff_created_id AS staff_created_id,
+
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        jobs.service_id AS job_service_id,
+
+        master_status.name AS status,
+
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+
+        CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+            SUBSTRING(job_types.type, 1, 4), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id,
+
+        CASE 
+            WHEN EXISTS (
+                SELECT 1 
+                FROM client_job_task 
+                WHERE client_job_task.job_id = jobs.id
+            ) THEN true 
+            ELSE false 
+        END AS has_client_job_task    
+   
+        FROM 
+        jobs
+        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+        LEFT JOIN 
+        assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        LEFT JOIN 
+        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN 
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN 
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN 
+        staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN 
+        staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN 
+        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type
+         LEFT JOIN
+         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+        WHERE
+        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND (jobs.client_id IN (${client_id}) OR jobs.customer_id IN (${customer_id}))
+        AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          ) 
+        GROUP BY 
+        jobs.id 
+        ORDER BY 
+        jobs.id DESC;
+        `;
+    const [result] = await pool.execute(query);
+
+
+
+    return { status: true, message: "Success.", data: result };
+  } catch (error) {
+    console.log("err -", error);
+    return { status: false, message: "Error getting job. BY Client" };
+  }
+
+
+}
+
+const getByJobStaffId = async (job) => {
+  const { Staff_id } = job;
+  try {
+    const query = `
+  SELECT 
+  jobs.id AS job_id,
+  timesheet.job_id AS timesheet_job_id,
+  job_types.type AS job_type_name,
+  jobs.status_type AS status_type,
+  customer_contact_details.id AS account_manager_officer_id,
+  customer_contact_details.first_name AS account_manager_officer_first_name,
+  customer_contact_details.last_name AS account_manager_officer_last_name,
+  clients.trading_name AS client_trading_name,
+  jobs.client_job_code AS client_job_code,
+  jobs.invoiced AS invoiced,
+  jobs.total_hours AS total_hours,
+  jobs.total_hours_status AS total_hours_status,
+
+  staffs.id AS allocated_id,
+  staffs.first_name AS allocated_first_name,
+  staffs.last_name AS allocated_last_name,
+
+  staffs2.id AS reviewer_id,
+  staffs2.first_name AS reviewer_first_name,
+  staffs2.last_name AS reviewer_last_name,
+
+  staffs3.id AS outbooks_acount_manager_id,
+  staffs3.first_name AS outbooks_acount_manager_first_name,
+  staffs3.last_name AS outbooks_acount_manager_last_name,
+  staffs3.employee_number AS account_manager_employee_number,
+
+  master_status.name AS status,
+  CONCAT(
+            SUBSTRING(customers.trading_name, 1, 3), '_',
+            SUBSTRING(clients.trading_name, 1, 3), '_',
+             SUBSTRING(job_types.type, 1, 4), '_',
+            SUBSTRING(jobs.job_id, 1, 15)
+            ) AS job_code_id,
+
+            CASE 
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM client_job_task 
+                    WHERE client_job_task.job_id = jobs.id
+                ) THEN true 
+                ELSE false 
+            END AS has_client_job_task
+
+  FROM 
+  jobs
+  LEFT JOIN 
+  customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+  LEFT JOIN 
+  clients ON jobs.client_id = clients.id
+  LEFT JOIN 
+  customers ON jobs.customer_id = customers.id
+  LEFT JOIN 
+  job_types ON jobs.job_type_id = job_types.id
+  LEFT JOIN 
+  services ON jobs.service_id = services.id
+  LEFT JOIN 
+  staffs ON jobs.allocated_to = staffs.id
+  LEFT JOIN 
+  staffs AS staffs2 ON jobs.reviewer = staffs2.id
+  LEFT JOIN 
+  staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+  LEFT JOIN 
+  staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+  LEFT JOIN
+  master_status ON master_status.id = jobs.status_type
+  LEFT JOIN
+  timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+ WHERE 
+  jobs.staff_created_id = ? OR 
+  jobs.allocated_to = ? OR 
+  jobs.reviewer = ?
+  GROUP BY jobs.id
+  ORDER BY
+  jobs.id DESC
+  `;
+    const [rows] = await pool.execute(query, [Staff_id, Staff_id, Staff_id]);
+    return { status: true, message: "Success.", data: rows };
+  } catch (error) {
+    console.log("err -", error);
+    return { status: false, message: "Error getting job." };
+  }
+};
+
+const getJobById = async (job) => {
+  const { job_id } = job;
+  try {
+    const query = `
+    SELECT 
+     jobs.id AS job_id,
+     timesheet.job_id AS timesheet_job_id,
+     jobs.staff_created_id AS staff_created_id,
+     staffs3.id AS outbooks_acount_manager_id,
+     staffs3.first_name AS outbooks_acount_manager_first_name,
+     staffs3.last_name AS outbooks_acount_manager_last_name,
+     staffs3.employee_number AS account_manager_employee_number,
+     customers.id AS customer_id,
+     customers.trading_name AS customer_trading_name,
+     customers.staff_id AS customer_staff_id,
+     customers.account_manager_id AS customer_account_manager_id,
+     clients.id AS client_id,
+     clients.trading_name AS client_trading_name,
+     clients.client_type AS client_type,
+     client_company_information.company_number AS client_company_number,
+     clients.company_number AS company_number,
+     jobs.client_job_code AS client_job_code,
+     customer_contact_details.id AS account_manager_officer_id,
+     customer_contact_details.first_name AS account_manager_officer_first_name,
+     customer_contact_details.last_name AS account_manager_officer_last_name,
+     services.id AS service_id,
+     services.name AS service_name,
+     job_types.id AS job_type_id,
+     job_types.type AS job_type_name,
+     jobs.budgeted_hours AS budgeted_hours,
+     staffs2.id AS reviewer_id,
+     staffs2.first_name AS reviewer_first_name,
+     staffs2.last_name AS reviewer_last_name,
+     staffs2.email AS reviewer_email,
+     
+     staffs.id AS allocated_id,
+     staffs.first_name AS allocated_first_name,
+     staffs.last_name AS allocated_last_name,
+     staffs.email AS staff_email,
+     DATE_FORMAT(jobs.allocated_on, '%Y-%m-%d') AS allocated_on,
+     DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+     jobs.year_end AS year_end,
+     jobs.total_preparation_time AS total_preparation_time,
+     jobs.review_time AS review_time,
+     jobs.feedback_incorporation_time AS feedback_incorporation_time,
+     jobs.total_time AS total_time,
+     jobs.engagement_model AS engagement_model,
+     DATE_FORMAT(jobs.expected_delivery_date, '%Y-%m-%d') AS expected_delivery_date,
+     DATE_FORMAT(jobs.due_on, '%Y-%m-%d') AS due_on,
+     DATE_FORMAT(jobs.submission_deadline, '%Y-%m-%d') AS submission_deadline,
+     DATE_FORMAT(jobs.customer_deadline_date, '%Y-%m-%d') AS customer_deadline_date,
+     DATE_FORMAT(jobs.sla_deadline_date, '%Y-%m-%d') AS sla_deadline_date,
+     DATE_FORMAT(jobs.internal_deadline_date, '%Y-%m-%d') AS internal_deadline_date,
+     jobs.filing_Companies_required AS filing_Companies_required,
+     DATE_FORMAT(jobs.filing_Companies_date, '%Y-%m-%d') AS filing_Companies_date,
+     jobs.filing_hmrc_required AS filing_hmrc_required,
+     DATE_FORMAT(jobs.filing_hmrc_date, '%Y-%m-%d') AS filing_hmrc_date,
+     jobs.opening_balance_required AS opening_balance_required,
+     DATE_FORMAT(jobs.opening_balance_date, '%Y-%m-%d') AS opening_balance_date,
+     jobs.number_of_transaction AS number_of_transaction,
+     jobs.number_of_balance_items AS number_of_balance_items,
+     jobs.turnover AS turnover,
+     jobs.number_of_employees AS number_of_employees,
+     jobs.vat_reconciliation AS vat_reconciliation,
+     jobs.bookkeeping AS bookkeeping,
+     jobs.processing_type AS processing_type,
+     jobs.invoiced AS invoiced,
+     jobs.total_hours AS total_hours,
+     jobs.total_hours_status AS total_hours_status,
+     countries.id AS currency_id,
+     countries.currency AS currency,
+     jobs.invoice_value AS invoice_value,
+     DATE_FORMAT(jobs.invoice_date, '%Y-%m-%d') AS invoice_date,
+     jobs.invoice_hours AS invoice_hours,
+     jobs.invoice_remark AS invoice_remark,
+     jobs.status_type AS status_type,
+     jobs.notes AS notes,
+     jobs.Turnover_Period_id_0 AS Turnover_Period_id_0,
+     jobs.Turnover_Currency_id_0 AS Turnover_Currency_id_0,
+     jobs.Turnover_id_0 AS Turnover_id_0,
+     jobs.VAT_Registered_id_0 AS VAT_Registered_id_0,
+     jobs.VAT_Frequency_id_0 AS VAT_Frequency_id_0,
+     jobs.Who_Did_The_Bookkeeping_id_1 AS Who_Did_The_Bookkeeping_id_1,
+     jobs.PAYE_Registered_id_1 AS PAYE_Registered_id_1,
+     jobs.Number_of_Trial_Balance_Items_id_1 AS Number_of_Trial_Balance_Items_id_1,
+     jobs.Bookkeeping_Frequency_id_2 AS Bookkeeping_Frequency_id_2,
+     jobs.Number_of_Total_Transactions_id_2 AS Number_of_Total_Transactions_id_2,
+     jobs.Number_of_Bank_Transactions_id_2 AS Number_of_Bank_Transactions_id_2,
+     jobs.Number_of_Purchase_Invoices_id_2 AS Number_of_Purchase_Invoices_id_2,
+     jobs.Number_of_Sales_Invoices_id_2 AS Number_of_Sales_Invoices_id_2,
+     jobs.Number_of_Petty_Cash_Transactions_id_2 AS Number_of_Petty_Cash_Transactions_id_2,
+     jobs.Number_of_Journal_Entries_id_2 AS Number_of_Journal_Entries_id_2,
+     jobs.Number_of_Other_Transactions_id_2 AS Number_of_Other_Transactions_id_2,
+     jobs.Transactions_Posting_id_2 AS Transactions_Posting_id_2,
+     jobs.Quality_of_Paperwork_id_2 AS Quality_of_Paperwork_id_2,
+     jobs.Number_of_Integration_Software_Platforms_id_2 AS Number_of_Integration_Software_Platforms_id_2,
+     jobs.CIS_id_2 AS CIS_id_2,
+     jobs.Posting_Payroll_Journals_id_2 AS Posting_Payroll_Journals_id_2,
+     jobs.Department_Tracking_id_2 AS Department_Tracking_id_2,
+     jobs.Sales_Reconciliation_Required_id_2 AS Sales_Reconciliation_Required_id_2,
+     jobs.Factoring_Account_id_2 AS Factoring_Account_id_2,
+     jobs.Payment_Methods_id_2 AS Payment_Methods_id_2,
+     jobs.Payroll_Frequency_id_3 AS Payroll_Frequency_id_3,
+     jobs.Type_of_Payslip_id_3 AS Type_of_Payslip_id_3,
+     jobs.Percentage_of_Variable_Payslips_id_3 AS Percentage_of_Variable_Payslips_id_3,
+     jobs.Is_CIS_Required_id_3 AS Is_CIS_Required_id_3,
+     jobs.CIS_Frequency_id_3 AS CIS_Frequency_id_3,
+     jobs.Number_of_Sub_contractors_id_3 AS Number_of_Sub_contractors_id_3,
+     jobs.Whose_Tax_Return_is_it_id_4 AS Whose_Tax_Return_is_it_id_4,
+     jobs.Number_of_Income_Sources_id_4 AS Number_of_Income_Sources_id_4,
+     jobs.If_Landlord_Number_of_Properties_id_4 AS If_Landlord_Number_of_Properties_id_4,
+     jobs.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4 AS If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+     jobs.Management_Accounts_Frequency_id_6 AS Management_Accounts_Frequency_id_6,
+
+  
+      DATE_FORMAT(jobs.Year_Ending_id_1, '%Y-%m-%d') AS Year_Ending_id_1,
+ 
+ 
+      DATE_FORMAT(jobs.Day_Date_id_2, '%Y-%m-%d') AS Day_Date_id_2,
+
+      jobs.Week_Year_id_2 AS Week_Year_id_2,
+      jobs.Week_Month_id_2 AS Week_Month_id_2,
+      jobs.Week_id_2 AS Week_id_2,
+      jobs.Fortnight_Year_id_2 AS Fortnight_Year_id_2,
+      jobs.Fortnight_Month_id_2 AS Fortnight_Month_id_2,
+      jobs.Fortnight_id_2 AS Fortnight_id_2,
+      jobs.Month_Year_id_2 AS Month_Year_id_2,
+      jobs.Month_id_2 AS Month_id_2,
+      jobs.Quarter_Year_id_2 AS Quarter_Year_id_2,
+      jobs.Quarter_id_2 AS Quarter_id_2,
+      jobs.Year_id_2 AS Year_id_2,
+      DATE_FORMAT(jobs.Other_FromDate_id_2, '%Y-%m-%d') AS Other_FromDate_id_2,
+      DATE_FORMAT(jobs.Other_ToDate_id_2, '%Y-%m-%d') AS Other_ToDate_id_2,
+      jobs.Payroll_Week_Year_id_3 AS Payroll_Week_Year_id_3,
+      jobs.Payroll_Week_Month_id_3 AS Payroll_Week_Month_id_3,
+      jobs.Payroll_Week_id_3 AS Payroll_Week_id_3,
+      jobs.Payroll_Fortnight_Year_id_3 AS Payroll_Fortnight_Year_id_3,
+      jobs.Payroll_Fortnight_Month_id_3 AS Payroll_Fortnight_Month_id_3,
+      jobs.Payroll_Fortnight_id_3 AS Payroll_Fortnight_id_3,
+      jobs.Payroll_Month_Year_id_3 AS Payroll_Month_Year_id_3,
+      jobs.Payroll_Month_id_3 AS Payroll_Month_id_3,
+      jobs.Payroll_Quarter_Year_id_3 AS Payroll_Quarter_Year_id_3,
+      jobs.Payroll_Quarter_id_3 AS Payroll_Quarter_id_3,
+      jobs.Payroll_Year_id_3 AS Payroll_Year_id_3,
+      jobs.Tax_Year_id_4 AS Tax_Year_id_4,
+      DATE_FORMAT(jobs.Management_Accounts_FromDate_id_6, '%Y-%m-%d') AS Management_Accounts_FromDate_id_6,
+      DATE_FORMAT(jobs.Management_Accounts_ToDate_id_6, '%Y-%m-%d') AS Management_Accounts_ToDate_id_6,
+      jobs.Year_id_33 AS Year_id_33,
+      jobs.Period_id_32 AS Period_id_32,
+      DATE_FORMAT(jobs.Day_Date_id_32, '%Y-%m-%d') AS Day_Date_id_32,
+      jobs.Week_Year_id_32 AS Week_Year_id_32,
+      jobs.Week_Month_id_32 AS Week_Month_id_32,
+      jobs.Week_id_32 AS Week_id_32,
+      jobs.Fortnight_Year_id_32 AS Fortnight_Year_id_32,
+      jobs.Fortnight_Month_id_32 AS Fortnight_Month_id_32,
+      jobs.Fortnight_id_32 AS Fortnight_id_32,
+      jobs.Month_Year_id_32 AS Month_Year_id_32,
+      jobs.Month_id_32 AS Month_id_32,
+      jobs.Quarter_Year_id_32 AS Quarter_Year_id_32,
+      jobs.Quarter_id_32 AS Quarter_id_32,
+      jobs.Year_id_32 AS Year_id_32,
+      DATE_FORMAT(jobs.Other_FromDate_id_32, '%Y-%m-%d') AS Other_FromDate_id_32,
+      DATE_FORMAT(jobs.Other_ToDate_id_32, '%Y-%m-%d') AS Other_ToDate_id_32,
+      jobs.Payroll_Frequency_id_31 AS Payroll_Frequency_id_31,
+      jobs.Payroll_Week_Year_id_31 AS Payroll_Week_Year_id_31,
+      jobs.Payroll_Week_Month_id_31 AS Payroll_Week_Month_id_31,
+      jobs.Payroll_Week_id_31 AS Payroll_Week_id_31,
+      jobs.Payroll_Fortnight_Year_id_31 AS Payroll_Fortnight_Year_id_31,
+      jobs.Payroll_Fortnight_Month_id_31 AS Payroll_Fortnight_Month_id_31,
+      jobs.Payroll_Fortnight_id_31 AS Payroll_Fortnight_id_31,
+      jobs.Payroll_Month_Year_id_31 AS Payroll_Month_Year_id_31,
+      jobs.Payroll_Month_id_31 AS Payroll_Month_id_31,
+      jobs.Payroll_Quarter_Year_id_31 AS Payroll_Quarter_Year_id_31,
+      jobs.Payroll_Quarter_id_31 AS Payroll_Quarter_id_31,
+      jobs.Payroll_Year_id_31 AS Payroll_Year_id_31,
+      DATE_FORMAT(jobs.Audit_Year_Ending_id_27, '%Y-%m-%d') AS Audit_Year_Ending_id_27,
+      jobs.Filing_Frequency_id_8 AS Filing_Frequency_id_8,
+      DATE_FORMAT(jobs.Period_Ending_Date_id_8, '%Y-%m-%d') AS Period_Ending_Date_id_8,
+      DATE_FORMAT(jobs.Filing_Date_id_8, '%Y-%m-%d') AS Filing_Date_id_8,
+      jobs.Year_id_28 AS Year_id_28,
+      jobs.job_priority AS job_priority,
+
+      jobs.processing_checklist AS processing_checklist,
+      jobs.reviewing_checklist AS reviewing_checklist,
+      jobs.processing_checklist_status AS processing_checklist_status,
+      jobs.reviewing_checklist_status AS reviewing_checklist_status,
+      jobs.checklist_modal_data AS checklist_modal_data,
+
+     client_job_task.time AS task_budgeted_hour,
+     task.id AS task_id,
+     task.name AS task_name
+     FROM 
+     jobs
+     LEFT JOIN 
+     assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+     JOIN 
+     customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+     JOIN 
+     clients ON jobs.client_id = clients.id
+     LEFT JOIN 
+     client_company_information ON clients.id = client_company_information.client_id
+     JOIN 
+     customers ON jobs.customer_id = customers.id
+     JOIN 
+     job_types ON jobs.job_type_id = job_types.id
+     JOIN 
+     services ON jobs.service_id = services.id
+     LEFT JOIN 
+     staffs ON jobs.allocated_to = staffs.id
+     LEFT JOIN 
+     staffs AS staffs2 ON jobs.reviewer = staffs2.id
+     LEFT JOIN 
+     staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+     LEFT JOIN 
+     countries ON jobs.currency = countries.id
+     LEFT JOIN 
+     client_job_task ON client_job_task.job_id = jobs.id
+     LEFT JOIN task ON client_job_task.task_id = task.id
+     LEFT JOIN
+     timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+     WHERE
+      jobs.id = ?
+      GROUP BY jobs.id 
+     `;
+
+    //  checklist_tasks ON checklist_tasks.checklist_id = client_job_task.checklist_id AND
+    //  checklist_tasks.checklist_id = client_job_task.checklist_id AND checklist_tasks.task_id = client_job_task.task_id
+
+    const [rows] = await pool.execute(query, [job_id]);
+    const [selectedStaffData] = await pool.execute(
+      `SELECT CONCAT(staffs.first_name, ' ', staffs.last_name) AS label , staffs.id AS value
+   FROM job_allowed_staffs
+   JOIN staffs ON job_allowed_staffs.staff_id = staffs.id
+   WHERE job_id = ?`,
+      [job_id]
+    );
+
+    const [taskData] = await pool.execute(
+      `SELECT 
+      client_job_task.task_id AS task_id,
+      client_job_task.time AS budgeted_hour,
+      task.name AS task_name
+      FROM client_job_task
+      JOIN task ON client_job_task.task_id = task.id
+      WHERE client_job_task.job_id = ${job_id}`
+    );
+
+    // console.log("rows", rows);
+    // console.log("taskData", taskData);
+    let result = {};
+    if (rows.length > 0) {
+      let tasks = [];
+      if (taskData.length > 0) {
+        tasks = await taskData?.map((row) => ({
+          task_id: row?.task_id,
+          task_name: row?.task_name,
+          budgeted_hour: row?.budgeted_hour,
+        }));
+      }
+
+      // Linemanager Staff id
+      // Linemanager Staff id
+      const [lineManaegerStaff] = await pool.execute(
+        `SELECT 
+       staff_by
+      FROM line_managers
+      WHERE staff_to = ${rows[0].staff_created_id} || staff_to = ${rows[0].customer_account_manager_id}`
+      );
+
+      result = {
+        timesheet_job_id: rows[0].timesheet_job_id,
+        job_id: rows[0].job_id,
+        staff_created_id: rows[0].staff_created_id,
+        job_code_id: rows[0].job_code_id,
+        customer_id: rows[0].customer_id,
+        customer_trading_name: rows[0].customer_trading_name,
+        customer_staff_id: rows[0].customer_staff_id,
+        customer_account_manager_id: rows[0].customer_account_manager_id,
+        line_manaeger_staff: lineManaegerStaff?.map((item) => item.staff_by),
+        client_id: rows[0].client_id,
+        client_trading_name: rows[0].client_trading_name,
+        client_type: rows[0].client_type,
+        client_company_number: rows[0].client_company_number,
+        company_number: rows[0].company_number,
+        client_job_code: rows[0].client_job_code,
+        outbooks_acount_manager_id: rows[0].outbooks_acount_manager_id,
+        outbooks_acount_manager_first_name:
+          rows[0].outbooks_acount_manager_first_name,
+        outbooks_acount_manager_last_name:
+          rows[0].outbooks_acount_manager_last_name,
+        account_manager_officer_id: rows[0].account_manager_officer_id,
+        account_manager_officer_first_name:
+          rows[0].account_manager_officer_first_name,
+        account_manager_officer_last_name:
+          rows[0].account_manager_officer_last_name,
+        service_id: rows[0].service_id,
+        service_name: rows[0].service_name,
+        job_type_id: rows[0].job_type_id,
+        job_type_name: rows[0].job_type_name,
+        budgeted_hours: rows[0].budgeted_hours,
+        reviewer_id: rows[0].reviewer_id,
+        reviewer_first_name: rows[0].reviewer_first_name,
+        reviewer_last_name: rows[0].reviewer_last_name,
+        allocated_id: rows[0].allocated_id,
+        allocated_first_name: rows[0].allocated_first_name,
+        allocated_last_name: rows[0].allocated_last_name,
+        staff_email: rows[0].staff_email,
+        reviewer_email: rows[0].reviewer_email,
+        allocated_on: rows[0].allocated_on,
+        date_received_on: rows[0].date_received_on,
+        year_end: rows[0].year_end,
+        total_preparation_time: rows[0].total_preparation_time,
+        review_time: rows[0].review_time,
+        feedback_incorporation_time: rows[0].feedback_incorporation_time,
+        total_time: rows[0].total_time,
+        engagement_model: rows[0].engagement_model,
+        expected_delivery_date: rows[0].expected_delivery_date,
+        due_on: rows[0].due_on,
+        submission_deadline: rows[0].submission_deadline,
+        customer_deadline_date: rows[0].customer_deadline_date,
+        sla_deadline_date: rows[0].sla_deadline_date,
+        internal_deadline_date: rows[0].internal_deadline_date,
+        filing_Companies_required: rows[0].filing_Companies_required,
+        filing_Companies_date: rows[0].filing_Companies_date,
+        filing_hmrc_required: rows[0].filing_hmrc_required,
+        filing_hmrc_date: rows[0].filing_hmrc_date,
+        opening_balance_required: rows[0].opening_balance_required,
+        opening_balance_date: rows[0].opening_balance_date,
+        number_of_transaction: rows[0].number_of_transaction,
+        number_of_balance_items: rows[0].number_of_balance_items,
+        turnover: rows[0].turnover,
+        number_of_employees: rows[0].number_of_employees,
+        vat_reconciliation: rows[0].vat_reconciliation,
+        bookkeeping: rows[0].bookkeeping,
+        processing_type: rows[0].processing_type,
+        invoiced: rows[0].invoiced,
+        total_hours: rows[0].total_hours,
+        total_hours_status: rows[0].total_hours_status,
+        currency_id: rows[0].currency_id,
+        currency: rows[0].currency,
+        invoice_value: rows[0].invoice_value,
+        invoice_date: rows[0].invoice_date,
+        invoice_hours: rows[0].invoice_hours,
+        invoice_remark: rows[0].invoice_remark,
+        status_type: rows[0].status_type,
+        notes: rows[0].notes,
+        Turnover_Period_id_0: rows[0].Turnover_Period_id_0,
+        Turnover_Currency_id_0: rows[0].Turnover_Currency_id_0,
+        Turnover_id_0: rows[0].Turnover_id_0,
+        VAT_Registered_id_0: rows[0].VAT_Registered_id_0,
+        VAT_Frequency_id_0: rows[0].VAT_Frequency_id_0,
+        Who_Did_The_Bookkeeping_id_1: rows[0].Who_Did_The_Bookkeeping_id_1,
+        PAYE_Registered_id_1: rows[0].PAYE_Registered_id_1,
+        Number_of_Trial_Balance_Items_id_1:
+          rows[0].Number_of_Trial_Balance_Items_id_1,
+        Bookkeeping_Frequency_id_2: rows[0].Bookkeeping_Frequency_id_2,
+        Number_of_Total_Transactions_id_2:
+          rows[0].Number_of_Total_Transactions_id_2,
+        Number_of_Bank_Transactions_id_2:
+          rows[0].Number_of_Bank_Transactions_id_2,
+        Number_of_Purchase_Invoices_id_2:
+          rows[0].Number_of_Purchase_Invoices_id_2,
+        Number_of_Sales_Invoices_id_2: rows[0].Number_of_Sales_Invoices_id_2,
+        Number_of_Petty_Cash_Transactions_id_2:
+          rows[0].Number_of_Petty_Cash_Transactions_id_2,
+        Number_of_Journal_Entries_id_2: rows[0].Number_of_Journal_Entries_id_2,
+        Number_of_Other_Transactions_id_2:
+          rows[0].Number_of_Other_Transactions_id_2,
+        Transactions_Posting_id_2: rows[0].Transactions_Posting_id_2,
+        Quality_of_Paperwork_id_2: rows[0].Quality_of_Paperwork_id_2,
+        Number_of_Integration_Software_Platforms_id_2:
+          rows[0].Number_of_Integration_Software_Platforms_id_2,
+        CIS_id_2: rows[0].CIS_id_2,
+        Posting_Payroll_Journals_id_2: rows[0].Posting_Payroll_Journals_id_2,
+        Department_Tracking_id_2: rows[0].Department_Tracking_id_2,
+        Sales_Reconciliation_Required_id_2:
+          rows[0].Sales_Reconciliation_Required_id_2,
+        Factoring_Account_id_2: rows[0].Factoring_Account_id_2,
+        Payment_Methods_id_2: rows[0].Payment_Methods_id_2,
+        Payroll_Frequency_id_3: rows[0].Payroll_Frequency_id_3,
+        Type_of_Payslip_id_3: rows[0].Type_of_Payslip_id_3,
+        Percentage_of_Variable_Payslips_id_3:
+          rows[0].Percentage_of_Variable_Payslips_id_3,
+        Is_CIS_Required_id_3: rows[0].Is_CIS_Required_id_3,
+        CIS_Frequency_id_3: rows[0].CIS_Frequency_id_3,
+        Number_of_Sub_contractors_id_3: rows[0].Number_of_Sub_contractors_id_3,
+        Whose_Tax_Return_is_it_id_4: rows[0].Whose_Tax_Return_is_it_id_4,
+        Number_of_Income_Sources_id_4: rows[0].Number_of_Income_Sources_id_4,
+        If_Landlord_Number_of_Properties_id_4:
+          rows[0].If_Landlord_Number_of_Properties_id_4,
+        If_Sole_Trader_Who_is_doing_Bookkeeping_id_4:
+          rows[0].If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+        Management_Accounts_Frequency_id_6:
+          rows[0].Management_Accounts_Frequency_id_6,
+
+        Year_Ending_id_1: rows[0].Year_Ending_id_1,
+        Day_Date_id_2: rows[0].Day_Date_id_2,
+        Week_Year_id_2: rows[0].Week_Year_id_2,
+        Week_Month_id_2: rows[0].Week_Month_id_2,
+        Week_id_2: rows[0].Week_id_2,
+        Fortnight_Year_id_2: rows[0].Fortnight_Year_id_2,
+        Fortnight_Month_id_2: rows[0].Fortnight_Month_id_2,
+        Fortnight_id_2: rows[0].Fortnight_id_2,
+        Month_Year_id_2: rows[0].Month_Year_id_2,
+        Month_id_2: rows[0].Month_id_2,
+        Quarter_Year_id_2: rows[0].Quarter_Year_id_2,
+        Quarter_id_2: rows[0].Quarter_id_2,
+        Year_id_2: rows[0].Year_id_2,
+        Other_FromDate_id_2: rows[0].Other_FromDate_id_2,
+        Other_ToDate_id_2: rows[0].Other_ToDate_id_2,
+        Payroll_Week_Year_id_3: rows[0].Payroll_Week_Year_id_3,
+        Payroll_Week_Month_id_3: rows[0].Payroll_Week_Month_id_3,
+        Payroll_Week_id_3: rows[0].Payroll_Week_id_3,
+        Payroll_Fortnight_Year_id_3: rows[0].Payroll_Fortnight_Year_id_3,
+        Payroll_Fortnight_Month_id_3: rows[0].Payroll_Fortnight_Month_id_3,
+        Payroll_Fortnight_id_3: rows[0].Payroll_Fortnight_id_3,
+        Payroll_Month_Year_id_3: rows[0].Payroll_Month_Year_id_3,
+        Payroll_Month_id_3: rows[0].Payroll_Month_id_3,
+        Payroll_Quarter_Year_id_3: rows[0].Payroll_Quarter_Year_id_3,
+        Payroll_Quarter_id_3: rows[0].Payroll_Quarter_id_3,
+        Payroll_Year_id_3: rows[0].Payroll_Year_id_3,
+        Tax_Year_id_4: rows[0].Tax_Year_id_4,
+        Management_Accounts_FromDate_id_6:
+          rows[0].Management_Accounts_FromDate_id_6,
+        Management_Accounts_ToDate_id_6:
+          rows[0].Management_Accounts_ToDate_id_6,
+        Year_id_33: rows[0].Year_id_33,
+        Period_id_32: rows[0].Period_id_32,
+        Day_Date_id_32: rows[0].Day_Date_id_32,
+        Week_Year_id_32: rows[0].Week_Year_id_32,
+        Week_Month_id_32: rows[0].Week_Month_id_32,
+        Week_id_32: rows[0].Week_id_32,
+        Fortnight_Year_id_32: rows[0].Fortnight_Year_id_32,
+        Fortnight_Month_id_32: rows[0].Fortnight_Month_id_32,
+        Fortnight_id_32: rows[0].Fortnight_id_32,
+        Month_Year_id_32: rows[0].Month_Year_id_32,
+        Month_id_32: rows[0].Month_id_32,
+        Quarter_Year_id_32: rows[0].Quarter_Year_id_32,
+        Quarter_id_32: rows[0].Quarter_id_32,
+        Year_id_32: rows[0].Year_id_32,
+        Other_FromDate_id_32: rows[0].Other_FromDate_id_32,
+        Other_ToDate_id_32: rows[0].Other_ToDate_id_32,
+        Payroll_Frequency_id_31: rows[0].Payroll_Frequency_id_31,
+        Payroll_Week_Year_id_31: rows[0].Payroll_Week_Year_id_31,
+        Payroll_Week_Month_id_31: rows[0].Payroll_Week_Month_id_31,
+        Payroll_Week_id_31: rows[0].Payroll_Week_id_31,
+        Payroll_Fortnight_Year_id_31: rows[0].Payroll_Fortnight_Year_id_31,
+        Payroll_Fortnight_Month_id_31: rows[0].Payroll_Fortnight_Month_id_31,
+        Payroll_Fortnight_id_31: rows[0].Payroll_Fortnight_id_31,
+        Payroll_Month_Year_id_31: rows[0].Payroll_Month_Year_id_31,
+        Payroll_Month_id_31: rows[0].Payroll_Month_id_31,
+        Payroll_Quarter_Year_id_31: rows[0].Payroll_Quarter_Year_id_31,
+        Payroll_Quarter_id_31: rows[0].Payroll_Quarter_id_31,
+        Payroll_Year_id_31: rows[0].Payroll_Year_id_31,
+        Audit_Year_Ending_id_27: rows[0].Audit_Year_Ending_id_27,
+        Filing_Frequency_id_8: rows[0].Filing_Frequency_id_8,
+        Period_Ending_Date_id_8: rows[0].Period_Ending_Date_id_8,
+        Filing_Date_id_8: rows[0].Filing_Date_id_8,
+        Year_id_28: rows[0].Year_id_28,
+        job_priority: rows[0].job_priority,
+
+        processing_checklist: rows[0].processing_checklist,
+        reviewing_checklist: rows[0].reviewing_checklist,
+        processing_checklist_status: rows[0].processing_checklist_status,
+        reviewing_checklist_status: rows[0].reviewing_checklist_status,
+        checklist_modal_data: rows[0].checklist_modal_data,
+
+        tasks: {
+          checklist_id: rows[0].checklist_id,
+          task: tasks,
+        },
+        selectedStaffData: selectedStaffData || [],
+      };
+    }
+
+    return { status: true, message: "Success.", data: result };
+  } catch (error) {
+    console.log("error ", error);
+    return { status: false, message: "Error getting job." };
+  }
+};
+
+const jobUpdate = async (job) => {
+  const {
+    job_id, // Assuming job_id is provided for the update
+    selectedStaffData,
+    account_manager_id,
+    customer_id,
+    client_id,
+    client_job_code,
+    customer_contact_details_id,
+    service_id,
+    job_type_id,
+    tasks,
+    budgeted_hours,
+    reviewer,
+    allocated_to,
+    allocated_on,
+    date_received_on,
+    year_end,
+    total_preparation_time,
+    review_time,
+    feedback_incorporation_time,
+    total_time,
+    engagement_model,
+    expected_delivery_date,
+    due_on,
+    submission_deadline,
+    customer_deadline_date,
+    sla_deadline_date,
+    internal_deadline_date,
+    filing_Companies_required,
+    filing_Companies_date,
+    filing_hmrc_required,
+    filing_hmrc_date,
+    opening_balance_required,
+    opening_balance_date,
+    number_of_transaction,
+    number_of_balance_items,
+    turnover,
+    number_of_employees,
+    vat_reconciliation,
+    bookkeeping,
+    processing_type,
+    status_type,
+    job_priority,
+  } = job;
+
+  let invoiced = job.invoiced == "" || job.invoiced == "0" ? "0" : "1";
+  let currency = job.currency == "" ? 0 : job.currency;
+  let invoice_value = job.invoice_value == "" ? "0.00" : job.invoice_value;
+  let invoice_date = job.invoice_date == "" ? null : job.invoice_date;
+  let invoice_hours = job.invoice_hours == "" ? null : job.invoice_hours;
+  let invoice_remark = job.invoice_remark == "" ? null : job.invoice_remark;
+  let notes = job.notes == "" ? null : job.notes;
+
+
+
+
+  if (reviewer > 0) {
+    if (Number(job?.reviewing_checklist_status) === 2) {
+      return {
+        status: false,
+        message: "Please complete the reviewing checklist first.",
+        data: "W",
+      };
+    }
+  }
+
+
+  if (allocated_to > 0) {
+    if (Number(job?.processing_checklist_status) === 2) {
+      return {
+        status: false,
+        message: "Please complete the processing checklist first.",
+        data: "W",
+      };
+    }
+  }
+
+
+
+
+
+  const ExistJobQuery = `
+ SELECT 
+ account_manager_id,
+ customer_id,
+ client_id,
+ client_job_code,
+ customer_contact_details_id,
+ service_id,
+ job_type_id,
+ budgeted_hours,
+ reviewer,
+ allocated_to,
+ DATE_FORMAT(allocated_on, '%Y-%m-%d') AS allocated_on,
+ DATE_FORMAT(date_received_on, '%Y-%m-%d') AS date_received_on,
+ year_end,
+ total_preparation_time,
+ review_time,
+ feedback_incorporation_time,
+ total_time, engagement_model,
+ status_type,
+ 
+ DATE_FORMAT(expected_delivery_date, '%Y-%m-%d') AS expected_delivery_date,
+ DATE_FORMAT(expected_delivery_date_old, '%Y-%m-%d') AS expected_delivery_date_old,
+ DATE_FORMAT(due_on, '%Y-%m-%d') AS due_on,
+ DATE_FORMAT(submission_deadline, '%Y-%m-%d') AS submission_deadline,
+ DATE_FORMAT(customer_deadline_date, '%Y-%m-%d') AS customer_deadline_date,
+ DATE_FORMAT(sla_deadline_date, '%Y-%m-%d') AS sla_deadline_date,
+ DATE_FORMAT(internal_deadline_date, '%Y-%m-%d') AS internal_deadline_date,
+
+ filing_Companies_required,
+ DATE_FORMAT(filing_Companies_date, '%Y-%m-%d') AS filing_Companies_date,
+ filing_hmrc_required,
+ DATE_FORMAT(filing_hmrc_date, '%Y-%m-%d') AS filing_hmrc_date,
+ opening_balance_required,
+ DATE_FORMAT(opening_balance_date, '%Y-%m-%d') AS opening_balance_date,
+ 
+ number_of_transaction,
+ number_of_balance_items,
+ turnover,
+ number_of_employees,
+ vat_reconciliation,
+ bookkeeping,
+ processing_type,
+
+ invoiced,
+ currency,
+ invoice_value,
+ DATE_FORMAT(invoice_date, '%Y-%m-%d') AS invoice_date,
+ invoice_hours,
+ invoice_remark,
+ notes
+ 
+ FROM jobs WHERE id = ?
+ `;
+  try {
+    const [[ExistJob]] = await pool.execute(ExistJobQuery, [job_id]);
+
+    // console.log("ExistJob?.job_type_id ",ExistJob?.job_type_id)
+    // console.log("ExistJob?.job_type_id ",job_type_id)
+
+    // return
+
+    // console.log("ExistJob", ExistJob);
+    // console.log("expected_delivery_date", expected_delivery_date);
+    let expected_delivery_date_old = ExistJob.expected_delivery_date_old;
+    if (expected_delivery_date == null) {
+      expected_delivery_date_old = null;
+    } else if (
+      expected_delivery_date != null &&
+      ExistJob.expected_delivery_date_old == null
+    ) {
+      expected_delivery_date_old = expected_delivery_date;
+    } else if (
+      expected_delivery_date != null &&
+      ExistJob.expected_delivery_date_old != null
+    ) {
+      expected_delivery_date_old = ExistJob.expected_delivery_date;
+    }
+
+    let status_type_update = status_type;
+
+    if (status_type == null || status_type == 0 || status_type == 1) {
+      if (allocated_to > 0) {
+        status_type_update = 3;
+      }
+      // if (reviewer > 0) {
+      //   status_type_update = 5;
+      // }
+    } else {
+      if (allocated_to > 0 && ExistJob.allocated_to == 0) {
+        status_type_update = 3;
+      }
+      // if (reviewer > 0 && ExistJob.reviewer == 0) {
+      //   status_type_update = 5;
+      // }
+
+      // if (status_type == 3) {
+      //   if (reviewer > 0 && ExistJob.reviewer != reviewer) {
+      //     status_type_update = 5;
+      //   }
+      // }
+      //  else if (status_type == 5) {
+      //   if (allocated_to > 0 && ExistJob.allocated_to != allocated_to) {
+      //     status_type_update = 3;
+      //   }
+      // }
+    }
+
+    const query = `
+         UPDATE jobs 
+         SET account_manager_id = ?, customer_id = ?, client_id = ?, client_job_code = ?, customer_contact_details_id = ?, 
+             service_id = ?, job_type_id = ?, budgeted_hours = ?, reviewer = ?, allocated_to = ?, allocated_on = ?, 
+             date_received_on = ?, year_end = ?, total_preparation_time = ?, review_time = ?, 
+             feedback_incorporation_time = ?, total_time = ?, engagement_model = ?, expected_delivery_date = ?,expected_delivery_date_old = ?, due_on = ?, 
+             submission_deadline = ?, customer_deadline_date = ?, sla_deadline_date = ?, internal_deadline_date = ?, 
+             filing_Companies_required = ?, filing_Companies_date = ?, filing_hmrc_required = ?, filing_hmrc_date = ?, 
+             opening_balance_required = ?, opening_balance_date = ?, number_of_transaction = ?, number_of_balance_items = ?, 
+             turnover = ?, number_of_employees = ?, vat_reconciliation = ?, bookkeeping = ?, processing_type = ?, 
+             invoiced = ?, currency = ?, invoice_value = ?, invoice_date = ?, invoice_hours = ?, invoice_remark = ?,status_type = ? , notes = ?,Turnover_Period_id_0=?,
+             Turnover_Currency_id_0=?,
+             Turnover_id_0=?,
+             VAT_Registered_id_0=?,
+             VAT_Frequency_id_0=?,
+             Who_Did_The_Bookkeeping_id_1=?,
+             PAYE_Registered_id_1=?,
+             Number_of_Trial_Balance_Items_id_1=?,
+             Bookkeeping_Frequency_id_2=?,
+             Number_of_Total_Transactions_id_2=?,
+             Number_of_Bank_Transactions_id_2=?,
+             Number_of_Purchase_Invoices_id_2=?,
+             Number_of_Sales_Invoices_id_2=?,
+             Number_of_Petty_Cash_Transactions_id_2=?,
+             Number_of_Journal_Entries_id_2=?,
+             Number_of_Other_Transactions_id_2=?,
+             Transactions_Posting_id_2=?,
+             Quality_of_Paperwork_id_2=?,
+             Number_of_Integration_Software_Platforms_id_2=?,
+             CIS_id_2=?,
+             Posting_Payroll_Journals_id_2=?,
+             Department_Tracking_id_2=?,
+             Sales_Reconciliation_Required_id_2=?,
+             Factoring_Account_id_2=?,
+             Payment_Methods_id_2=?,
+             Payroll_Frequency_id_3=?,
+             Type_of_Payslip_id_3=?,
+             Percentage_of_Variable_Payslips_id_3=?,
+             Is_CIS_Required_id_3=?,
+             CIS_Frequency_id_3=?,
+             Number_of_Sub_contractors_id_3=?,
+             Whose_Tax_Return_is_it_id_4=?,
+             Number_of_Income_Sources_id_4=?,
+             If_Landlord_Number_of_Properties_id_4=?,
+             If_Sole_Trader_Who_is_doing_Bookkeeping_id_4=?,
+             Management_Accounts_Frequency_id_6=?,
+
+             Year_Ending_id_1 = ?,
+             Day_Date_id_2 = ?,
+             Week_Year_id_2 = ?,
+             Week_Month_id_2 = ?,
+             Week_id_2 = ?,
+             Fortnight_Year_id_2 = ?,
+             Fortnight_Month_id_2 = ?,
+             Fortnight_id_2 = ?,
+             Month_Year_id_2 = ?,
+             Month_id_2 = ?,
+             Quarter_Year_id_2 = ?,
+             Quarter_id_2 = ?,
+             Year_id_2 = ?,
+             Other_FromDate_id_2 = ?,
+             Other_ToDate_id_2 = ?,
+             Payroll_Week_Year_id_3 = ?,
+             Payroll_Week_Month_id_3 = ?,
+             Payroll_Week_id_3 = ?,
+             Payroll_Fortnight_Year_id_3 = ?,
+             Payroll_Fortnight_Month_id_3 = ?,
+             Payroll_Fortnight_id_3 = ?,
+             Payroll_Month_Year_id_3 = ?,
+             Payroll_Month_id_3 = ?,
+             Payroll_Quarter_Year_id_3 = ?,
+             Payroll_Quarter_id_3 = ?,
+             Payroll_Year_id_3 = ?,
+             Tax_Year_id_4 = ?,
+             Management_Accounts_FromDate_id_6 = ?,
+             Management_Accounts_ToDate_id_6 = ?,
+             Year_id_33 = ?,
+             Period_id_32 = ?,
+             Day_Date_id_32 = ?,
+             Week_Year_id_32 = ?,
+             Week_Month_id_32 = ?,
+             Week_id_32 = ?,
+             Fortnight_Year_id_32 = ?,
+             Fortnight_Month_id_32 = ?,
+             Fortnight_id_32 = ?,
+             Month_Year_id_32 = ?,
+             Month_id_32 = ?,
+             Quarter_Year_id_32 = ?,
+             Quarter_id_32 = ?,
+             Year_id_32 = ?,
+             Other_FromDate_id_32 = ?,
+             Other_ToDate_id_32 = ?,
+             Payroll_Frequency_id_31 = ?,
+             Payroll_Week_Year_id_31 = ?,
+             Payroll_Week_Month_id_31 = ?,
+             Payroll_Week_id_31 = ?,
+             Payroll_Fortnight_Year_id_31 = ?,
+             Payroll_Fortnight_Month_id_31 = ?,
+             Payroll_Fortnight_id_31 = ?,
+             Payroll_Month_Year_id_31 = ?,
+             Payroll_Month_id_31 = ?,
+             Payroll_Quarter_Year_id_31 = ?,
+             Payroll_Quarter_id_31 = ?,
+             Payroll_Year_id_31 = ?,
+             Audit_Year_Ending_id_27 = ?,
+             Filing_Frequency_id_8 = ?,
+             Period_Ending_Date_id_8 = ?,
+             Filing_Date_id_8 = ?,
+             Year_id_28 = ?,
+             job_priority = ?,
+             processing_checkList = ?,
+             reviewing_checkList = ?,
+             processing_checklist_status = ?,
+             reviewing_checklist_status = ?,
+             checklist_modal_data = ?
+
+
+         WHERE id = ?
+       `;
+
+    const sanitizeParams = (params) => {
+      return params.map((param) => (param === undefined ? null : param));
+    };
+
+    const params = [
+      account_manager_id,
+      customer_id,
+      client_id,
+      client_job_code,
+      customer_contact_details_id,
+      service_id,
+      job_type_id,
+      budgeted_hours,
+      reviewer,
+      allocated_to,
+      allocated_on,
+      date_received_on,
+      year_end,
+      total_preparation_time,
+      review_time,
+      feedback_incorporation_time,
+      total_time,
+      engagement_model,
+      expected_delivery_date,
+      expected_delivery_date_old,
+      due_on,
+      submission_deadline,
+      customer_deadline_date,
+      sla_deadline_date,
+      internal_deadline_date,
+      filing_Companies_required,
+      filing_Companies_date,
+      filing_hmrc_required,
+      filing_hmrc_date,
+      opening_balance_required,
+      opening_balance_date,
+      number_of_transaction,
+      number_of_balance_items,
+      turnover,
+      number_of_employees,
+      vat_reconciliation,
+      bookkeeping,
+      processing_type,
+      invoiced,
+      currency,
+      invoice_value,
+      invoice_date,
+      invoice_hours,
+      invoice_remark,
+      status_type_update,
+      notes,
+      job.Turnover_Period_id_0,
+      job.Turnover_Currency_id_0,
+      job.Turnover_id_0,
+      job.VAT_Registered_id_0,
+      job.VAT_Frequency_id_0,
+      job.Who_Did_The_Bookkeeping_id_1,
+      job.PAYE_Registered_id_1,
+      job.Number_of_Trial_Balance_Items_id_1,
+      job.Bookkeeping_Frequency_id_2,
+      job.Number_of_Total_Transactions_id_2,
+      job.Number_of_Bank_Transactions_id_2,
+      job.Number_of_Purchase_Invoices_id_2,
+      job.Number_of_Sales_Invoices_id_2,
+      job.Number_of_Petty_Cash_Transactions_id_2,
+      job.Number_of_Journal_Entries_id_2,
+      job.Number_of_Other_Transactions_id_2,
+      job.Transactions_Posting_id_2,
+      job.Quality_of_Paperwork_id_2,
+      job.Number_of_Integration_Software_Platforms_id_2,
+      job.CIS_id_2,
+      job.Posting_Payroll_Journals_id_2,
+      job.Department_Tracking_id_2,
+      job.Sales_Reconciliation_Required_id_2,
+      job.Factoring_Account_id_2,
+      job.Payment_Methods_id_2,
+      job.Payroll_Frequency_id_3,
+      job.Type_of_Payslip_id_3,
+      job.Percentage_of_Variable_Payslips_id_3,
+      job.Is_CIS_Required_id_3,
+      job.CIS_Frequency_id_3,
+      job.Number_of_Sub_contractors_id_3,
+      job.Whose_Tax_Return_is_it_id_4,
+      job.Number_of_Income_Sources_id_4,
+      job.If_Landlord_Number_of_Properties_id_4,
+      job.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+      job.Management_Accounts_Frequency_id_6,
+
+      job.Year_Ending_id_1,
+      job.Day_Date_id_2,
+      job.Week_Year_id_2,
+      job.Week_Month_id_2,
+      job.Week_id_2,
+      job.Fortnight_Year_id_2,
+      job.Fortnight_Month_id_2,
+      job.Fortnight_id_2,
+      job.Month_Year_id_2,
+      job.Month_id_2,
+      job.Quarter_Year_id_2,
+      job.Quarter_id_2,
+      job.Year_id_2,
+      job.Other_FromDate_id_2,
+      job.Other_ToDate_id_2,
+      job.Payroll_Week_Year_id_3,
+      job.Payroll_Week_Month_id_3,
+      job.Payroll_Week_id_3,
+      job.Payroll_Fortnight_Year_id_3,
+      job.Payroll_Fortnight_Month_id_3,
+      job.Payroll_Fortnight_id_3,
+      job.Payroll_Month_Year_id_3,
+      job.Payroll_Month_id_3,
+      job.Payroll_Quarter_Year_id_3,
+      job.Payroll_Quarter_id_3,
+      job.Payroll_Year_id_3,
+      job.Tax_Year_id_4,
+      job.Management_Accounts_FromDate_id_6,
+      job.Management_Accounts_ToDate_id_6,
+      job.Year_id_33,
+      job.Period_id_32,
+      job.Day_Date_id_32,
+      job.Week_Year_id_32,
+      job.Week_Month_id_32,
+      job.Week_id_32,
+      job.Fortnight_Year_id_32,
+      job.Fortnight_Month_id_32,
+      job.Fortnight_id_32,
+      job.Month_Year_id_32,
+      job.Month_id_32,
+      job.Quarter_Year_id_32,
+      job.Quarter_id_32,
+      job.Year_id_32,
+      job.Other_FromDate_id_32,
+      job.Other_ToDate_id_32,
+      job.Payroll_Frequency_id_31,
+      job.Payroll_Week_Year_id_31,
+      job.Payroll_Week_Month_id_31,
+      job.Payroll_Week_id_31,
+      job.Payroll_Fortnight_Year_id_31,
+      job.Payroll_Fortnight_Month_id_31,
+      job.Payroll_Fortnight_id_31,
+      job.Payroll_Month_Year_id_31,
+      job.Payroll_Month_id_31,
+      job.Payroll_Quarter_Year_id_31,
+      job.Payroll_Quarter_id_31,
+      job.Payroll_Year_id_31,
+      job.Audit_Year_Ending_id_27,
+      job.Filing_Frequency_id_8,
+      job.Period_Ending_Date_id_8,
+      job.Filing_Date_id_8,
+      job.Year_id_28,
+      job.job_priority,
+
+      job.processing_checklist,
+      job.reviewing_checklist,
+      job.processing_checklist_status,
+      job.reviewing_checklist_status,
+      job.checklist_modal_data,
+
+      job_id,
+    ];
+
+    if (Number(ExistJob.status_type) != Number(status_type_update)) {
+      let status_update_query = ` UPDATE jobs 
+         SET status_updation_date = NOW() WHERE id = ? `;
+      await pool.execute(status_update_query, [job_id]);
+    }
+
+    // Sanitize the parameters
+    const sanitizedParams = sanitizeParams(params);
+
+    const status_update_date = new Date().toLocaleString('sv-SE');
+    await JobStatusUpdate(job_id, status_type_update, status_update_date);
+
+    // Execute the query with sanitized parameters
+    const [result] = await pool.execute(query, sanitizedParams);
+
+    // INSERT AND DELETE selectedStaffData
+    if (selectedStaffData && selectedStaffData.length > 0) {
+      // Delete existing staff assignments for the job
+      const deleteQuery = `
+        DELETE FROM job_allowed_staffs WHERE job_id = ?
+      `;
+      await pool.execute(deleteQuery, [job_id]);
+      const insertQuery = `
+        INSERT INTO job_allowed_staffs (job_id, staff_id) VALUES (?, ?)
+      `;
+      for (const staff of selectedStaffData) {
+        await pool.execute(insertQuery, [job_id, staff.value]);
+      }
+    } else {
+      const deleteQuery = `
+        DELETE FROM job_allowed_staffs WHERE job_id = ?
+      `;
+      await pool.execute(deleteQuery, [job_id]);
+    }
+
+    if (result.affectedRows > 0) {
+      if (tasks.task.length > 0) {
+        // console.log("ExistJob?.job_type_id ",ExistJob?.job_type_id)
+        // console.log("ExistJob?.job_type_id ",job_type_id)
+        if (Number(ExistJob?.job_type_id) != Number(job_type_id)) {
+          const deleteQuery = `
+              DELETE FROM client_job_task 
+              WHERE job_id = ? AND client_id = ?
+          `;
+          await pool.execute(deleteQuery, [job_id, client_id]);
+        }
+
+
+
+
+        const checklist_id = tasks.checklist_id;
+        const providedTaskIds = tasks.task
+          .filter((tsk) => tsk.task_id !== null && tsk.task_id !== "")
+          .map((tsk) => tsk.task_id);
+
+
+        // Get existing task IDs for the checklist
+        const getExistingTasksQuery = `
+            SELECT task_id FROM client_job_task WHERE job_id = ?
+          `;
+        const [existingTasks] = await pool.execute(getExistingTasksQuery, [
+          job_id,
+        ]);
+        const existingTaskIds = existingTasks.map((task) => task.task_id);
+        // Find task IDs that need to be deleted
+        const tasksToDelete = existingTaskIds.filter(
+          (id) => !providedTaskIds.includes(id)
+        );
+        if (tasksToDelete.length > 0) {
+
+          const deleteQuery = `
+              DELETE FROM client_job_task 
+              WHERE job_id = ? AND client_id = ? AND task_id IN (${tasksToDelete
+              .map(() => "?")
+              .join(",")})
+          `;
+          await pool.execute(deleteQuery, [
+            job_id,
+            client_id,
+            ...tasksToDelete,
+          ]);
+        }
+        // Insert or update tasks
+        // console.log("tasks --  ", tasks);
+        for (const tsk of tasks.task) {
+          let task_id = tsk.task_id;
+          let task_name = tsk.task_name;
+          let budgeted_hour = tsk.budgeted_hour;
+
+          if (task_id == "" || task_id == undefined || task_id == null) {
+            const checkQuery = `
+                SELECT id FROM task WHERE name = ?
+              `;
+            const [existing] = await pool.execute(checkQuery, [task_name]);
+
+            if (existing.length === 0) {
+              const query = `
+                  INSERT INTO task (name, service_id, job_type_id) VALUES (?, ?, ?)
+                `;
+
+              const [result] = await pool.execute(query, [
+                task_name,
+                service_id,
+                job_type_id,
+              ]);
+
+              if (result.insertId > 0) {
+                let task_id_new = result.insertId;
+                const query3 = `
+                    INSERT INTO client_job_task (job_id, client_id, task_id,time)
+                    VALUES (?, ?, ?, ?)
+                  `;
+                await pool.execute(query3, [
+                  job_id,
+                  client_id,
+                  task_id_new,
+                  budgeted_hour,
+                ]);
+              }
+            }
+          } else {
+            // Update existing task or add to the job
+            // console.log("job_id ", job_id);
+            // console.log("client_id ", client_id);
+            // console.log("task_id ", task_id);
+            // console.log("budgeted_hour ", budgeted_hour);
+
+            // is existing for the job
+            const checkQuery2 = `
+                SELECT id FROM client_job_task WHERE job_id = ? AND client_id = ? AND task_id = ?
+              `;
+            const [existing2] = await pool.execute(checkQuery2, [
+              job_id,
+              client_id,
+              task_id,
+            ]);
+            if (existing2.length === 0) {
+              const query2 = `
+                  INSERT INTO client_job_task (job_id, client_id, task_id,time)
+                  VALUES (?, ?, ?, ?)
+                `;
+              await pool.execute(query2, [
+                job_id,
+                client_id,
+                task_id,
+                budgeted_hour,
+              ]);
+              continue; // Skip the update if it was just inserted
+            } else {
+              const query = `
+              UPDATE client_job_task
+              SET 
+                time = ?
+              WHERE 
+                job_id = ? 
+                AND client_id = ? 
+                AND task_id = ?;
+            `;
+              await pool.execute(query, [
+                budgeted_hour,
+                job_id,
+                client_id,
+                task_id,
+              ]);
+            }
+          }
+        }
+
+
+      }
+
+      //Add log
+      if (result.changedRows > 0) {
+        let job_heading_name = [];
+
+        if (
+          ExistJob.client_job_code !== client_job_code ||
+          ExistJob.customer_contact_details_id !==
+          customer_contact_details_id ||
+          ExistJob.service_id !== service_id ||
+          ExistJob.job_type_id !== job_type_id ||
+          ExistJob.budgeted_hours.split(":").slice(0, 2).join(":") !==
+          budgeted_hours ||
+          ExistJob.reviewer !== reviewer ||
+          ExistJob.allocated_to !== allocated_to ||
+          ExistJob.allocated_on !== allocated_on ||
+          ExistJob.date_received_on !== date_received_on ||
+          ExistJob.year_end !== year_end ||
+          ExistJob.total_preparation_time.split(":").slice(0, 2).join(":") !==
+          total_preparation_time ||
+          ExistJob.review_time.split(":").slice(0, 2).join(":") !==
+          review_time ||
+          ExistJob.feedback_incorporation_time
+            .split(":")
+            .slice(0, 2)
+            .join(":") !== feedback_incorporation_time ||
+          ExistJob.total_time.split(":").slice(0, 2).join(":") !== total_time ||
+          ExistJob.engagement_model !== engagement_model
+        ) {
+          job_heading_name.push("edited the job information");
+        }
+
+        if (
+          ExistJob.expected_delivery_date !== expected_delivery_date ||
+          ExistJob.due_on !== due_on ||
+          ExistJob.submission_deadline !== submission_deadline ||
+          ExistJob.customer_deadline_date !== customer_deadline_date ||
+          ExistJob.sla_deadline_date !== sla_deadline_date ||
+          ExistJob.internal_deadline_date !== internal_deadline_date
+        ) {
+          job_heading_name.push("edited the job deadline");
+        }
+
+        if (
+          ExistJob.filing_Companies_required !== filing_Companies_required ||
+          ExistJob.filing_Companies_date !== filing_Companies_date ||
+          ExistJob.filing_hmrc_required !== filing_hmrc_required ||
+          ExistJob.filing_hmrc_date !== filing_hmrc_date ||
+          ExistJob.opening_balance_required !== opening_balance_required ||
+          ExistJob.opening_balance_date !== opening_balance_date
+        ) {
+          job_heading_name.push("edited the job other tasks");
+        }
+
+        if (
+          Number(ExistJob.number_of_transaction) !== number_of_transaction ||
+          ExistJob.number_of_balance_items !== number_of_balance_items ||
+          Number(ExistJob.turnover) !== turnover ||
+          ExistJob.number_of_employees !== number_of_employees ||
+          ExistJob.vat_reconciliation !== vat_reconciliation ||
+          ExistJob.bookkeeping !== bookkeeping ||
+          ExistJob.processing_type !== processing_type
+        ) {
+          job_heading_name.push("edited the job other data");
+        }
+
+        ExistJob.invoice_remark == ""
+          ? (ExistJob.invoice_remark = null)
+          : ExistJob.invoice_remark;
+
+        if (
+          ExistJob.invoiced !== invoiced ||
+          ExistJob.currency !== currency ||
+          ExistJob.invoice_value !== invoice_value ||
+          ExistJob.invoice_date !== invoice_date ||
+          ExistJob.invoice_hours.split(":").slice(0, 2).join(":") !==
+          invoice_hours ||
+          ExistJob.invoice_remark != invoice_remark
+        ) {
+          job_heading_name.push("edited the job invoice data");
+        }
+
+        // reviewer,
+        if (parseInt(ExistJob.reviewer) == 0) {
+          if (reviewer > 0) {
+            const [[getStaff]] = await pool.execute(
+              'SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ',
+              [reviewer]
+            );
+            job_heading_name.push(
+              "has assigned the job to the reviewer, " + getStaff.name
+            );
+          }
+        } else {
+          if (reviewer == 0) {
+            job_heading_name.push(
+              "has removed the reviewer from the job"
+            );
+          }
+          else if (reviewer != ExistJob.reviewer) {
+            const [[getStaff]] = await pool.execute(
+              'SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ',
+              [reviewer]
+            );
+            job_heading_name.push(
+              "changed the job to the reviewer, " + getStaff.name
+            );
+          }
+        }
+
+        // allocated_to,
+        if (parseInt(ExistJob.allocated_to) == 0) {
+          if (allocated_to > 0) {
+            const [[getStaff]] = await pool.execute(
+              'SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ',
+              [allocated_to]
+            );
+            job_heading_name.push(
+              "has assigned the job to the processor, " + getStaff.name
+            );
+          }
+        } else {
+          if (allocated_to == 0) {
+            job_heading_name.push(
+              "has removed the processor from the job"
+            );
+          }
+          else if (allocated_to != ExistJob.allocated_to) {
+            const [[getStaff]] = await pool.execute(
+              'SELECT id , CONCAT(first_name," ",last_name) AS name FROM staffs WHERE id = ? ',
+              [allocated_to]
+            );
+            job_heading_name.push(
+              "changed the job to the processor, " + getStaff.name
+            );
+          }
+
+
+        }
+
+        //console.log("job_heading_name ", job_heading_name)
+
+        if (job_heading_name.length > 0) {
+          const msgLog =
+            job_heading_name.length > 1
+              ? job_heading_name.slice(0, -1).join(", ") +
+              " and " +
+              job_heading_name.slice(-1)
+              : job_heading_name[0];
+          const currentDate = new Date();
+          await SatffLogUpdateOperation({
+            staff_id: job.StaffUserId,
+            ip: job.ip,
+            date: currentDate.toISOString().split("T")[0],
+            module_name: "job",
+            log_message: `${msgLog} job code:`,
+            permission_type: "updated",
+            module_id: job_id,
+          });
+        }
+      }
+
+      return {
+        status: true,
+        message: "Job updated successfully.",
+        data: job_id,
+      };
+    } else {
+      return { status: false, message: "No job found with the given job_id." };
+    }
+  } catch (err) {
+    console.log("err -", err);
+    return { status: false, message: "Error updating job." };
+  }
+};
+
+const deleteJobById = async (job) => {
+  const { job_id } = job;
+  try {
+    if (parseInt(job_id) > 0) {
+      const currentDate = new Date();
+      await SatffLogUpdateOperation({
+        staff_id: job.StaffUserId,
+        ip: job.ip,
+        date: currentDate.toISOString().split("T")[0],
+        module_name: "job",
+        log_message: `deletes job code:`,
+        permission_type: "deleted",
+        module_id: job_id,
+      });
+    }
+    const [result] = await pool.execute("DELETE FROM jobs WHERE id = ?", [
+      job_id,
+    ]);
+    await pool.execute("DELETE FROM client_job_task WHERE job_id = ?", [
+      job_id,
+    ]);
+    await pool.execute("DELETE FROM drafts WHERE job_id = ?", [job_id]);
+    await pool.execute("DELETE FROM missing_logs WHERE job_id = ?", [job_id]);
+    await pool.execute("DELETE FROM queries WHERE job_id = ?", [job_id]);
+    if (result.affectedRows > 0) {
+      return {
+        status: true,
+        message: "Job deleted successfully.",
+        data: job_id,
+      };
+    } else {
+      return { status: false, message: "No job found with the given job_id." };
+    }
+  } catch (err) {
+    return { status: false, message: "Error deleting job." };
+  }
+};
+
+const getJobTimeLine = async (job) => {
+  const { job_id, staff_id } = job;
+  const query = `SELECT
+    staff_logs.id AS log_id,
+    staff_logs.staff_id AS staff_id,
+    DATE_FORMAT(staff_logs.date, '%Y-%m-%d') AS date,
+    staff_logs.created_at AS created_at,
+    CONCAT(
+      roles.role_name, ' ', 
+      staffs.first_name, ' ', 
+      staffs.last_name, ' ', 
+      staff_logs.log_message, ' ',
+      CASE 
+         WHEN staff_logs.module_name = 'job' THEN (
+          SELECT CONCAT(SUBSTRING(customers.trading_name, 1, 3),'_', SUBSTRING(clients.trading_name, 1, 3),'_',jobs.job_id)
+          FROM jobs
+          JOIN clients ON jobs.client_id = clients.id
+          JOIN customers ON clients.customer_id = customers.id
+          WHERE jobs.id = staff_logs.module_id
+        )
+        ELSE ''
+      END
+    ) AS log_message
+FROM 
+    staff_logs
+JOIN 
+    staffs ON staffs.id = staff_logs.staff_id
+JOIN 
+    roles ON roles.id = staffs.role_id
+LEFT JOIN 
+    jobs  ON staff_logs.module_name = 'job' AND staff_logs.module_id = jobs.id         
+WHERE
+    staff_logs.module_name = "job" AND staff_logs.module_id = ${job_id}
+ORDER BY
+    staff_logs.id DESC
+`;
+
+  // WHERE
+  //     staff_logs.staff_id = ${staff_id} AND  staff_logs.module_name = "job" AND staff_logs.module_id = ${job_id}
+  const [result] = await pool.execute(query);
+
+  const groupedResult = result.reduce((acc, log) => {
+    const existingDate = acc.find((item) => item.date === log.date);
+    if (existingDate) {
+      existingDate.allContain.push({
+        created_at: log.created_at,
+        log_message: log.log_message,
+      });
+    } else {
+      acc.push({
+        date: log.date,
+        allContain: [
+          {
+            created_at: log.created_at,
+            log_message: log.log_message,
+          },
+        ],
+      });
+    }
+
+    return acc;
+  }, []);
+
+  return { status: true, message: "success.", data: groupedResult };
+};
+
+const updateJobStatus = async (job) => {
+  const { job_id, status_type } = job;
+  const [ExistJobData] = await pool.execute(
+    `SELECT id , status_type FROM jobs WHERE id = ?`,
+    [job_id]
+  );
+
+  try {
+    // only Processing sent one record
+    if ([4, 5, 7, 3].includes(parseInt(status_type))) {
+      const [[ExistAllocatedTo]] = await pool.execute(
+        `SELECT allocated_to FROM jobs WHERE id = ?`,
+        [job_id]
+      );
+
+      if (
+        ["", null, undefined, 0, "0"].includes(ExistAllocatedTo?.allocated_to)
+      ) {
+        return {
+          status: false,
+          message: "Please assign the job to the Processor.",
+          data: "W",
+        };
+      }
+    }
+
+    // only Reviewer sent one record
+    if ([5, 7, 17, 18, 19, 20].includes(parseInt(status_type))) {
+      const [[ExistReviewer]] = await pool.execute(
+        `SELECT reviewer FROM jobs WHERE id = ?`,
+        [job_id]
+      );
+
+      if (["", null, undefined, 0, "0"].includes(ExistReviewer?.reviewer)) {
+        return {
+          status: false,
+          message: "Please assign the job to the reviewer.",
+          data: "W",
+        };
+      }
+    }
+
+    // only Draft sent one record
+    if ([7, 18, 19, 20].includes(parseInt(status_type))) {
+      const [ExistDraft] = await pool.execute(
+        `SELECT job_id FROM drafts WHERE job_id = ?`,
+        [job_id]
+      );
+      if (ExistDraft.length === 0) {
+        return {
+          status: false,
+          message: "Please send the first draft.",
+          data: "W",
+        };
+      }
+    }
+
+    // check draft feedback received yes or no
+    if ([17].includes(parseInt(status_type))) {
+      const [ExistDraftFeedbackYes] = await pool.execute(
+        `SELECT 
+          CASE 
+            WHEN COUNT(*) > 0 THEN TRUE 
+            ELSE FALSE 
+          END AS is_condition_true
+      FROM drafts
+      WHERE job_id = ?
+        AND feedback_received = '1'
+        AND was_it_complete = '0'`,
+        [job_id]
+      );
+
+      console.log("ExistDraftFeedbackYes", ExistDraftFeedbackYes);
+      const isCondition = ExistDraftFeedbackYes[0]?.is_condition_true;
+      if (isCondition == 0) {
+        return {
+          status: false,
+          message: "Please sent the draft feedback first.",
+          data: "W",
+        };
+      }
+    }
+
+    // only queries sent one record check
+    if ([4].includes(parseInt(status_type))) {
+      const [ExistQueries] = await pool.execute(
+        `SELECT job_id FROM queries WHERE job_id = ?`,
+        [job_id]
+      );
+      if (ExistQueries.length === 0) {
+        return {
+          status: false,
+          message: "Please send the Queries.",
+          data: "W",
+        };
+      }
+    }
+
+    // only missing log sent one record check
+    if ([2].includes(parseInt(status_type))) {
+      const [ExistMissingLogs] = await pool.execute(
+        `SELECT job_id FROM missing_logs WHERE job_id = ?`,
+        [job_id]
+      );
+      if (ExistMissingLogs.length === 0) {
+        return {
+          status: false,
+          message: "Please send Missing Paper Logs.",
+          data: "W",
+        };
+      }
+    }
+
+    if ([6].includes(parseInt(status_type))) {
+      const [ExistDraft] = await pool.execute(
+        `SELECT job_id FROM drafts WHERE job_id = ?`,
+        [job_id]
+      );
+      if (ExistDraft.length === 0) {
+        return {
+          status: false,
+          message: "Please sent first draft.",
+          data: "W",
+        };
+      }
+
+      const [[rowsDraftProcess]] = await pool.execute(
+        `SELECT 
+          CASE
+              WHEN NOT EXISTS (
+                  SELECT 1 
+                  FROM drafts 
+                  WHERE job_id = ? 
+                    AND was_it_complete <> '1'
+              )
+              THEN 1
+              ELSE 0
+          END AS status_check;`,
+        [job_id]
+      );
+
+      if (rowsDraftProcess.status_check === 0) {
+        return {
+          status: false,
+          message: "Please complete the draft.",
+          data: "W",
+        };
+      }
+    } else {
+      //  Missing Log
+      const [ExistMissingLog] = await pool.execute(
+        `SELECT job_id FROM missing_logs WHERE missing_log_reviewed_date IS NULL AND job_id = ? LIMIT 1`,
+        [job_id]
+      );
+
+      if (ExistMissingLog.length > 0) {
+        return {
+          status: false,
+          message: "Please review the missing log.",
+          data: "W",
+        };
+      }
+
+      // Query to
+      const [ExistQuery] = await pool.execute(
+        `SELECT job_id FROM queries WHERE final_query_response_received_date IS NULL AND job_id = ? LIMIT 1`,
+        [job_id]
+      );
+
+      if (ExistQuery.length > 0) {
+        return {
+          status: false,
+          message: "Please review the query.",
+          data: "W",
+        };
+      }
+    }
+
+    console.log("status_type UPDATEEEEE", status_type);
+
+    let query = `
+         UPDATE jobs 
+         SET status_type = ? , status_updation_date = NOW()
+         WHERE id = ?
+       `;
+
+    if (parseInt(status_type) == 20) {
+      query = `
+        UPDATE jobs 
+        SET status_type = ?,status_updation_date = NOW(), filing_hmrc_required = '1' , filing_hmrc_date = CURDATE()
+        WHERE id = ?
+      `;
+    } else if (parseInt(status_type) == 19) {
+      query = `
+        UPDATE jobs 
+        SET status_type = ?, status_updation_date = NOW(),filing_Companies_required = '1' , filing_Companies_date = CURDATE()
+        WHERE id = ?
+      `;
+    } else if (parseInt(status_type) == 18) {
+      query = `
+        UPDATE jobs 
+        SET status_type = ?,status_updation_date = NOW(), filing_hmrc_required = '1', filing_hmrc_date = CURDATE() , filing_Companies_required = '1' , filing_Companies_date = CURDATE()
+        WHERE id = ?
+      `;
+    }
+
+    const status_update_date = new Date().toLocaleString('sv-SE');
+    await JobStatusUpdate(job_id, status_type, status_update_date);
+
+    const [result] = await pool.execute(query, [status_type, job_id]);
+
+    if (result.changedRows > 0) {
+      const [[StatusName]] = await pool.execute(
+        `SELECT  MAX(CASE WHEN id = ${ExistJobData[0].status_type} THEN name END) AS from_status, MAX(CASE WHEN id = ${status_type} THEN name END) AS to_status FROM master_status WHERE id IN (${ExistJobData[0].status_type}, ${status_type})`
+      );
+
+      const currentDate = new Date();
+      await SatffLogUpdateOperation({
+        staff_id: job.StaffUserId,
+        ip: job.ip,
+        date: currentDate.toISOString().split("T")[0],
+        module_name: "job",
+        log_message: `updated the job status from ${StatusName.from_status} to ${StatusName.to_status}. job code:`,
+        permission_type: "updated",
+        module_id: job_id,
+      });
+
+      return {
+        status: true,
+        message: "Job status updated successfully.",
+        data: job_id,
+      };
+    } else {
+      return { status: false, message: "No job found with the given job_id." };
+    }
+  } catch (err) {
+    console.log(err);
+    return { status: false, message: "Error updating job status." };
+  }
+};
+
+const GetJobStatus = async (job) => {
+  const { status_id } = job;
+  try {
+    // console.log("status_id",status_id)
+
+    const query = `SELECT 
+        jobs.job_id AS job_id,
+        customers.trading_name AS customer_name,
+        clients.trading_name AS client_name,
+        CONCAT(
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(clients.trading_name, 1, 3), '_',
+        SUBSTRING(job_types.type, 1, 4), '_',
+        SUBSTRING(jobs.job_id, 1, 15)
+      ) AS job_code_id
+        FROM jobs
+        LEFT JOIN
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+         job_types ON jobs.job_type_id = job_types.id
+        WHERE jobs.status_type = ?`;
+    const [result] = await pool.execute(query, [status_id]);
+
+    if (result.length > 0) {
+      return {
+        status: true,
+        message: "Success.",
+        data: result,
+      };
+    } else {
+      return {
+        status: false,
+        message: "No job found with the given status_id.",
+      };
+    }
+  } catch {
+    console.log("DDD", err);
+    return { status: false, message: "Error getting job status." };
+  }
+};
+
+const copy_job = async (job) => {
+  const { field, row, StaffUserId, ip } = job;
+
+  try {
+
+    let id = row.job_id;
+    // find job 
+    const [[data]] = await pool.execute(
+      `SELECT * FROM jobs WHERE id = ?`,
+      [id]
+    );
+
+    if (!data) {
+      return { status: false, message: "Job not found" };
+    }
+
+    const [[clientInfo]] = await pool.execute(
+      `
+    SELECT 
+    clients.client_type,
+    client_company_information.company_number
+    FROM jobs
+    JOIN clients ON jobs.client_id = clients.id
+    LEFT JOIN client_company_information ON client_company_information.client_id = clients.id
+    WHERE jobs.id = ?
+    `,
+      [id]
+    );
+
+    console.log("service id -->>", data?.service_id)
+    console.log("clientInfo -->>", clientInfo?.client_type)
+    console.log("clientInfo company_number -->>", clientInfo?.company_number)
+
+
+
+    delete data.id;
+
+    let input = {
+      table: "jobs",
+      field: "job_id",
+    };
+    //CUS_CLI_00001
+    const job_id = await generateNextUniqueCode(input);
+
+    data.created_at = new Date();
+    data.updated_at = new Date();
+    data.date_received_on = new Date();
+    data.allocated_on = new Date();
+    data.status_type = 1;
+    data.job_id = job_id;
+    data.status_updation_date = new Date();
+
+    //Other Data Field
+    data.filing_Companies_required = "0";
+    data.filing_Companies_date = null;
+    data.filing_hmrc_required = "0"
+    data.filing_hmrc_date = null
+    data.opening_balance_required = "0"
+    data.opening_balance_date = null
+
+
+    // Due Date Logic START //
+    let Year_Ending_id_1 = null;
+    let due_on = null
+    let sla_deadline_date = new Date().toISOString().split("T")[0];
+
+    if ([2, 5].includes(Number(clientInfo?.client_type)) && Number(data?.service_id) == 1) {
+      const compayDetails = await getCompanyOfficerDetailsFun(clientInfo?.company_number)
+      // console.log("compayDetails", JSON.stringify(compayDetails , null ,2))
+      if (compayDetails.status) {
+        Year_Ending_id_1 = compayDetails?.data?.accounts?.next_accounts?.period_end_on;
+        due_on = compayDetails?.data?.accounts?.next_accounts?.due_on;
+      }
+    } else {
+      due_on = await getDueDate(clientInfo?.client_type, data?.service_id);
+    }
+
+
+    data.Year_Ending_id_1 = Year_Ending_id_1
+    data.due_on = due_on
+
+    // Due Date Logic END //
+
+
+
+    /// SLA Dead Line Logic START ////
+    let getSLAData = await getSLADeadline(data?.service_id, data?.Bookkeeping_Frequency_id_2)
+    sla_deadline_date = ['', null, undefined].includes(getSLAData) ? null : getSLAData
+    data.sla_deadline_date = sla_deadline_date
+    /// SLA Dead Line Logic END ////
+
+
+
+    ///--- field false logic allocated_to and reviewer chekclist status and checklist modal data set to default value START ----////
+
+
+    if (field == false) {
+      data.reviewer = null;
+      data.allocated_to = null;
+      data.processing_checklist = null;
+      data.reviewing_checklist = null;
+      data.processing_checklist_status = "0";
+      data.reviewing_checklist_status = "0";
+      data.checklist_modal_data = null;
+    }
+
+
+    //// ---- field false logic allocated_to and reviewer chekclist status and checklist modal data set to default value END ---////
+
+
+
+
+    const columns = Object.keys(data).join(",");
+    const values = Object.values(data);
+
+    const placeholders = Object.keys(data).map(() => "?").join(",");
+
+    const [result] = await pool.execute(
+      `INSERT INTO jobs (${columns}) VALUES (${placeholders})`,
+      values
+    );
+
+    // last insert id
+    const insertId = result.insertId;
+
+    const status_update_date = new Date().toLocaleString('sv-SE');
+    await JobStatusUpdate(insertId, data.status_type, status_update_date);
+
+    // insert job tasks
+    const [tasks] = await pool.execute(
+      `SELECT * FROM client_job_task WHERE job_id = ?`,
+      [id]
+    );
+
+    for (const task of tasks) {
+
+      let job_id = insertId;
+      let client_id = task.client_id;
+      let task_id = task.task_id;
+      let task_status = task.task_status;
+      let time = task.time;
+      await pool.execute(
+        `INSERT INTO client_job_task SET job_id = ?, client_id = ?, task_id = ?, task_status = ?, time = ?`,
+        [job_id, client_id, task_id, task_status, time]
+      );
+    }
+
+    // insert job allocated staff
+    const [allocatedStaff] = await pool.execute(
+      `SELECT * FROM job_allowed_staffs WHERE job_id = ?`,
+      [id]
+    );
+
+    for (const staff of allocatedStaff) {
+      let job_id = insertId;
+      let staff_id = staff.staff_id;
+
+      await pool.execute(
+        `INSERT INTO job_allowed_staffs SET job_id = ?, staff_id = ?`,
+        [job_id, staff_id]
+      );
+    }
+
+
+    const queryOldJob = `
+        SELECT 
+        CONCAT(
+          SUBSTRING(customers.trading_name, 1, 3), '_',
+          SUBSTRING(clients.trading_name, 1, 3), '_',
+          SUBSTRING(job_types.type, 1, 4), '_',
+          SUBSTRING(jobs.job_id, 1, 15)
+          ) AS job_code_id
+
+        FROM 
+        jobs
+        JOIN 
+        clients ON jobs.client_id = clients.id
+        JOIN 
+        customers ON jobs.customer_id = customers.id
+        JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        WHERE
+        jobs.id = ${id};
+        `;    
+    const [[oldJob]] = await pool.execute(queryOldJob);
+
+
+    // old job copy log
+
+    let log_message = `Copied job code: From ${oldJob?.job_code_id} To `
+
+    const currentDate = new Date();
+    await SatffLogUpdateOperation({
+      staff_id: StaffUserId,
+      ip: ip,
+      date: currentDate.toISOString().split("T")[0],
+      module_name: "job",
+      log_message: log_message,
+      permission_type: "copied",
+      module_id: insertId,
+    });
+
+
+
+    return { status: true, message: "Job copied successfully" };
+  }
+  catch (err) {
+    console.log(err);
+    return { status: false, message: "Error copying job" };
+  }
+
+}
+
+
+
+// const getJobsDeleteService = async (job) => {
+
+//   // SELECT 
+//   //   jobs.id AS job_id,
+//   //   customers.trading_name AS customer_name,
+//   //   clients.trading_name AS client_name,
+//   //   CONCAT(
+//   //     SUBSTRING(customers.trading_name, 1, 3), '_',
+//   //     SUBSTRING(clients.trading_name, 1, 3), '_',
+//   //     SUBSTRING(job_types.type, 1, 4), '_',
+//   //     SUBSTRING(jobs.job_id, 1, 15)
+//   //   ) AS job_code_id
+//   //   FROM jobs
+//   //   JOIN customers ON jobs.customer_id = customers.id
+//   //   JOIN clients ON customers.id = clients.customer_id
+//   //   JOIN job_types ON jobs.job_type_id = job_types.id
+//   //   WHERE jobs.service_id = ?
+
+//   const { service_id } = job;
+
+//   try {
+
+
+//     const [results] = await pool.execute(
+//       ` SELECT 
+//       jobs.id AS job_id,
+//       customers.trading_name AS customer_name,
+//       clients.trading_name AS client_name,
+
+//       CONCAT(
+//           SUBSTRING(customers.trading_name, 1, 3), '_',
+//           SUBSTRING(clients.trading_name, 1, 3), '_',
+//           SUBSTRING(job_types.type, 1, 4), '_',
+//           SUBSTRING(jobs.job_id, 1, 15)
+//       ) AS job_code_id,
+
+//       JSON_ARRAYAGG(
+//           JSON_OBJECT(
+//               'service_id', services.id,
+//               'service_name', services.name
+//           )
+//       ) AS services,
+
+//       JSON_ARRAYAGG(
+//         JSON_OBJECT(
+//             'job_type_id', job_types.id,
+//             'job_type_name', job_types.type,
+//             'service_id', job_types.service_id
+//         )
+//     ) AS jobTypes,
+
+//     JSON_ARRAYAGG(
+//         JSON_OBJECT(
+//             'task_id', task.id,
+//             'task_name', task.name,
+//             'service_id', task.service_id,
+//             'job_type_id', task.job_type_id,
+//             'budgeted_hour', task.budgeted_hour
+//         )
+//     ) AS tasks
+
+//       FROM jobs
+//       JOIN customers ON jobs.customer_id = customers.id
+//       JOIN clients ON customers.id = clients.customer_id
+
+//       JOIN customer_services ON customer_services.customer_id = customers.id
+//       JOIN services ON services.id = customer_services.service_id
+
+//       JOIN job_types ON job_types.service_id = services.id
+
+//       JOIN task ON task.service_id = services.id
+      
+//       WHERE jobs.service_id = ?
+//       GROUP BY 
+//           jobs.id,
+//           customers.trading_name,
+//           clients.trading_name,
+//           jobs.job_id
+
+//       ORDER BY jobs.id DESC
+//     `,
+//       [service_id]
+//     );
+
+//     return { status: true, message: "Success", data: results };
+
+//   } catch (error) {
+//     console.log(error);
+//   }
+
+// }
+
+
+const getJobsDeleteService = async (job) => {
+
+  const { service_id } = job;
+
+  try {
+
+    const [results] = await pool.execute(
+      ` SELECT 
+      jobs.id AS job_id,
+      clients.id AS client_id,
+      customers.trading_name AS customer_name,
+      clients.trading_name AS client_name,
+
+      CONCAT(
+          SUBSTRING(customers.trading_name, 1, 3), '_',
+          SUBSTRING(clients.trading_name, 1, 3), '_',
+          SUBSTRING(job_types.type, 1, 4), '_',
+          SUBSTRING(jobs.job_id, 1, 15)
+      ) AS job_code_id,
+
+      services.id AS s_id,
+      services.name AS s_name,
+      job_types.id AS jt_id,
+      job_types.type AS jt_type,
+      job_types.service_id AS jt_s_id,
+      task.id AS t_id,
+      task.name AS t_name,
+      task.service_id AS t_s_id,
+      task.job_type_id AS t_jt_id,
+      task.budgeted_hour AS t_budgeted_hour
+
+      FROM jobs
+      JOIN customers ON jobs.customer_id = customers.id
+      JOIN clients ON customers.id = clients.customer_id
+
+      JOIN customer_services ON customer_services.customer_id = customers.id
+      JOIN services ON services.id = customer_services.service_id
+
+      JOIN job_types ON job_types.service_id = services.id
+
+      JOIN task ON task.service_id = services.id
+      
+      WHERE jobs.service_id = ? AND services.deleted = '0'
+      ORDER BY jobs.id DESC
+    `,
+      [service_id]
+    );
+
+    const groupedData = results.reduce((acc, row) => {
+      let jobItem = acc.find(item => item.job_id === row.job_id);
+
+      if (!jobItem) {
+        jobItem = {
+          job_id: row.job_id,
+          client_id: row.client_id,
+          customer_name: row.customer_name,
+          client_name: row.client_name,
+          job_code_id: row.job_code_id,
+          services: [],
+          jobTypes: [],
+          tasks: []
+        };
+        acc.push(jobItem);
+      }
+
+      if (row.s_id && !jobItem.services.some(s => s.service_id === row.s_id)) {
+        jobItem.services.push({
+          service_id: row.s_id,
+          service_name: row.s_name
+        });
+      }
+
+      if (row.jt_id && !jobItem.jobTypes.some(jt => jt.job_type_id === row.jt_id)) {
+        jobItem.jobTypes.push({
+          job_type_id: row.jt_id,
+          job_type_name: row.jt_type,
+          service_id: row.jt_s_id
+        });
+      }
+
+      if (row.t_id && !jobItem.tasks.some(t => t.task_id === row.t_id)) {
+        jobItem.tasks.push({
+          task_id: row.t_id,
+          task_name: row.t_name,
+          service_id: row.t_s_id,
+          job_type_id: row.t_jt_id,
+          budgeted_hour: row.t_budgeted_hour
+        });
+      }
+
+      return acc;
+    }, []);
+
+    return { status: true, message: "Success", data: groupedData };
+
+  } catch (error) {
+    console.log(error);
+  }
+
+}
+
+
+async function getDueDate(client_type, service_id) {
+
+  if (["1", "3", "7"].includes(client_type)) {
+    // Service Account Production
+    if (Number(service_id) === 1) {
+      const d = new Date();
+      const year = d.getFullYear();
+      let dueYear = year;
+      // If created date is AFTER Jan 31 → next year's Jan 31
+      if (d > new Date(`${year}-01-31`)) {
+        dueYear = year + 1;
+      }
+      return `${dueYear}-01-31`;
+    }
+    // Service Personal Tax Return
+    else if (Number(service_id) === 4) {
+
+      //const d = new Date('2026-02-31'); // Example date
+      const d = new Date(); // Example date
+      const y = d.getFullYear();
+      const m = d.getMonth() + 1;
+      if (m >= 4 || m <= 1) {
+        return `${m >= 4 ? y + 1 : y}-01-31`;
+      }
+      return `${y}-01-31`;
+    }
+
+    // 1 month + 7 day added for this service
+    else if (Number(service_id) === 8) {
+
+      const today = new Date();
+      const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+      const nextNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 1);
+      nextNextMonth.setDate(nextNextMonth.getDate() + 6);
+      const y = nextNextMonth.getFullYear();
+      const m = String(nextNextMonth.getMonth() + 1).padStart(2, "0");
+      const d = String(nextNextMonth.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+
+    } else {
+      return null;
+    }
+  }
+  else {
+    // 1 month + 7 day added for this service
+    if (Number(service_id) === 8) {
+      const today = new Date();
+      const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+      const nextNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 1);
+      nextNextMonth.setDate(nextNextMonth.getDate() + 6);
+      const y = nextNextMonth.getFullYear();
+      const m = String(nextNextMonth.getMonth() + 1).padStart(2, "0");
+      const d = String(nextNextMonth.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+
+    }
+    // Service Personal Tax Return
+    else if (Number(service_id) === 4) {
+      //const d = new Date('2026-02-31'); // Example date
+      const d = new Date(); // Example date
+      const y = d.getFullYear();
+      const m = d.getMonth() + 1;
+      if (m >= 4 || m <= 1) {
+        return `${m >= 4 ? y + 1 : y}-01-31`;
+      }
+      return `${y}-01-31`;
+    }
+
+    else {
+      return null;
+    }
+
+  }
+
+}
+
+async function getSLADeadline(value, Bookkeeping_Frequency_id_2) {
+  const date = new Date();
+  if ([1, 3, 4, 5, 6, 7, 8].includes(Number(value))) {
+    if (value == 1) {
+      date.setDate(date.getDate() + 28);
+      return date.toISOString().split("T")[0];
+    }
+    else if (value == 4) {
+
+      date.setDate(date.getDate() + 5);
+      return date.toISOString().split("T")[0];
+
+    }
+
+    else if (value == 3) {
+      date.setDate(date.getDate() + 5);
+      return date.toISOString().split("T")[0];
+    }
+
+    else if (value == 8) {
+      date.setDate(date.getDate() + 10);
+      return date.toISOString().split("T")[0];
+    }
+
+
+  }
+  else if ([2].includes(Number(value))) {
+    if (Bookkeeping_Frequency_id_2 == "Daily") {
+      date.setDate(date.getDate() + 1);
+      return date.toISOString().split("T")[0];
+    } else if (Bookkeeping_Frequency_id_2 == "Weekly") {
+      date.setDate(date.getDate() + 3);
+      return date.toISOString().split("T")[0];
+    } else if (Bookkeeping_Frequency_id_2 == "Monthly") {
+      date.setDate(date.getDate() + 10);
+      return date.toISOString().split("T")[0];
+    } else if (Bookkeeping_Frequency_id_2 == "Quarterly") {
+      date.setDate(date.getDate() + 15);
+      return date.toISOString().split("T")[0];
+    } else if (Bookkeeping_Frequency_id_2 == "Yearly") {
+      date.setDate(date.getDate() + 30);
+      return date.toISOString().split("T")[0];
+    } else {
+      date.setDate(date.getDate() + 1);
+      return date.toISOString().split("T")[0];
+    }
+  }
+
+}
+
+
+
+module.exports = {
+  getAddJobData,
+  jobAdd,
+  getJobByCustomer,
+  getJobByClient,
+  getByJobStaffId,
+  getJobById,
+  jobUpdate,
+  deleteJobById,
+  getJobTimeLine,
+  updateJobStatus,
+  GetJobStatus,
+  get_jobs_filter,
+  copy_job,
+  getJobsDeleteService
+};
+
+
+
+
+
+// CREATE PROCEDURE GetJobsByCustomerSideBar(
+//     IN p_staff_ids      JSON,        -- '["1","2","3"]'
+//     IN p_search_name    VARCHAR(255),
+//     IN p_search_status  VARCHAR(50),
+//     IN p_limit          INT,
+//     IN p_offset         INT
+// )
+// BEGIN
+
+//     -- ─── Temp table: staff IDs ───────────────────────────────────────
+//     DROP TEMPORARY TABLE IF EXISTS tmp_staff_ids;
+//     CREATE TEMPORARY TABLE tmp_staff_ids (staff_id VARCHAR(50));
+
+//     INSERT INTO tmp_staff_ids (staff_id)
+//     SELECT jt.value
+//     FROM JSON_TABLE(p_staff_ids, '$[*]' COLUMNS (value VARCHAR(50) PATH '$')) AS jt;
+
+//     -- ─── COUNT ───────────────────────────────────────────────────────
+//     SELECT COUNT(*) AS total
+//     FROM (
+//         SELECT jobs.id
+//         FROM jobs
+//         JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+//         LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+//         LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+//         LEFT JOIN clients  ON jobs.client_id   = clients.id
+//         LEFT JOIN customers ON jobs.customer_id = customers.id
+//         LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+//         LEFT JOIN staffs   ON jobs.allocated_to = staffs.id
+//         LEFT JOIN staffs AS staffs2 ON jobs.reviewer          = staffs2.id
+//         LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+//         LEFT JOIN master_status ON master_status.id = jobs.status_type
+//         LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+//         WHERE (
+//             (
+//                 assigned_jobs_staff_view.staff_id IN (SELECT staff_id FROM tmp_staff_ids)
+//                 OR jobs.staff_created_id           IN (SELECT staff_id FROM tmp_staff_ids)
+//                 OR clients.staff_created_id        IN (SELECT staff_id FROM tmp_staff_ids)
+//             )
+//             AND (
+//                 assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+//                 OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+//             )
+//         )
+//         AND customers.status = '1'
+//         AND (p_search_name   IS NULL OR clients.trading_name LIKE CONCAT('%', p_search_name, '%'))
+//         AND (p_search_status IS NULL OR jobs.status_type     = p_search_status)
+//         GROUP BY jobs.id
+//     ) AS counted;
+
+//     -- ─── DATA ────────────────────────────────────────────────────────
+//     SELECT
+//         jobs.id AS job_id,
+//         timesheet.job_id AS timesheet_job_id,
+//         job_types.type AS job_type_name,
+//         jobs.status_type,
+//         jobs.job_priority,
+//         customer_contact_details.id         AS account_manager_officer_id,
+//         customer_contact_details.first_name AS account_manager_officer_first_name,
+//         customer_contact_details.last_name  AS account_manager_officer_last_name,
+//         clients.trading_name                AS client_trading_name,
+//         jobs.client_job_code,
+//         jobs.invoiced,
+//         jobs.total_hours,
+//         jobs.total_hours_status,
+//         DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+//         staffs.id         AS allocated_id,
+//         staffs.first_name AS allocated_first_name,
+//         staffs.last_name  AS allocated_last_name,
+//         staffs2.id         AS reviewer_id,
+//         staffs2.first_name AS reviewer_first_name,
+//         staffs2.last_name  AS reviewer_last_name,
+//         staffs3.id              AS outbooks_acount_manager_id,
+//         staffs3.first_name      AS outbooks_acount_manager_first_name,
+//         staffs3.last_name       AS outbooks_acount_manager_last_name,
+//         staffs3.employee_number AS account_manager_employee_number,
+//         jobs.staff_created_id,
+//         assigned_jobs_staff_view.source           AS assigned_source,
+//         assigned_jobs_staff_view.service_id_assign,
+//         jobs.service_id                           AS job_service_id,
+//         master_status.name                        AS status,
+//         CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+//         DATE_FORMAT(jobs.created_at,  '%d/%m/%Y') AS created_at,
+//         DATE_FORMAT(jobs.updated_at,  '%d/%m/%Y') AS updated_at,
+//         jobs.id                                   AS job_code_id,
+//         EXISTS (
+//             SELECT 1 FROM client_job_task
+//             WHERE client_job_task.job_id = jobs.id
+//         ) AS has_client_job_task
+//     FROM jobs
+//     JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+//     LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+//     LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+//     LEFT JOIN clients   ON jobs.client_id    = clients.id
+//     LEFT JOIN customers ON jobs.customer_id  = customers.id
+//     LEFT JOIN job_types ON jobs.job_type_id  = job_types.id
+//     LEFT JOIN staffs    ON jobs.allocated_to = staffs.id
+//     LEFT JOIN staffs AS staffs2 ON jobs.reviewer           = staffs2.id
+//     LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+//     LEFT JOIN master_status ON master_status.id = jobs.status_type
+//     LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+//     WHERE (
+//         (
+//             assigned_jobs_staff_view.staff_id IN (SELECT staff_id FROM tmp_staff_ids)
+//             OR jobs.staff_created_id           IN (SELECT staff_id FROM tmp_staff_ids)
+//             OR clients.staff_created_id        IN (SELECT staff_id FROM tmp_staff_ids)
+//         )
+//         AND (
+//             assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+//             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+//         )
+//     )
+//     AND customers.status = '1'
+//     AND (p_search_name   IS NULL OR clients.trading_name LIKE CONCAT('%', p_search_name, '%'))
+//     AND (p_search_status IS NULL OR jobs.status_type     = p_search_status)
+//     GROUP BY jobs.id
+//     ORDER BY job_code_id ASC
+//     LIMIT  p_limit
+//     OFFSET p_offset;
+
+//     -- ─── Cleanup ─────────────────────────────────────────────────────
+//     DROP TEMPORARY TABLE IF EXISTS tmp_staff_ids;
+
+// END;

@@ -1,0 +1,4865 @@
+-- phpMyAdmin SQL Dump
+-- version 5.1.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1:3306
+<<<<<<<< HEAD:outbook (2).sql
+-- Generation Time: May 07, 2026 at 12:23 PM
+========
+-- Generation Time: May 15, 2026 at 11:47 AM
+>>>>>>>> ae168fb62f845281ce298b9596b249377f3a2be7:outbook_copy.sql
+-- Server version: 5.7.36
+-- PHP Version: 7.4.26
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `outbook_copy`
+--
+
+DELIMITER $$
+--
+-- Procedures
+--
+DROP PROCEDURE IF EXISTS `GetCustomersData`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetCustomersData` (IN `LineManageStaffId` VARCHAR(255), IN `searchTerm` VARCHAR(255), IN `limitVal` INT, IN `offsetVal` INT)  BEGIN
+    SET @sql_main = CONCAT(
+        "SELECT DISTINCT customers.id AS id,
+                customers.customer_type,
+                customers.staff_id,
+                CONCAT(staffs.first_name, ' ', staffs.last_name) AS customer_created_by,
+                customers.account_manager_id,
+                customers.trading_name,
+                customers.trading_address,
+                customers.vat_registered,
+                customers.vat_number,
+                customers.website,
+                customers.form_process,
+                DATE_FORMAT(customers.created_at, '%d/%m/%Y') AS created_at,
+                DATE_FORMAT(customers.updated_at, '%d/%m/%Y') AS updated_at,
+                customers.status,
+                staff2.first_name AS account_manager_firstname, 
+                staff2.last_name AS account_manager_lastname,
+                CONCAT('cust_', SUBSTRING(customers.trading_name, 1, 3), '_',
+                       SUBSTRING(customers.customer_code, 1, 15)) AS customer_code,
+                CASE
+        WHEN EXISTS (SELECT 1 FROM clients WHERE clients.customer_id = customers.id) 
+        THEN 1 ELSE 0
+    END AS is_client
+    
+         FROM customers
+         JOIN staffs ON customers.staff_id = staffs.id
+         JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
+         LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+         WHERE (customers.staff_id IN (", LineManageStaffId, ")
+                OR assigned_jobs_staff_view.staff_id IN (", LineManageStaffId, "))"
+    );
+
+    -- search condition
+    IF searchTerm IS NOT NULL AND searchTerm <> '' THEN
+        SET @sql_main = CONCAT(@sql_main, 
+            " AND customers.trading_name LIKE ", QUOTE(CONCAT('%', searchTerm, '%')));
+    END IF;
+
+    SET @sql_main = CONCAT(@sql_main, 
+        " ORDER BY customers.id DESC LIMIT ", limitVal, " OFFSET ", offsetVal);
+
+    -- execute main query
+    PREPARE stmt FROM @sql_main;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+
+
+    -- Count Query
+    SET @sql_count = CONCAT(
+        "SELECT COUNT(DISTINCT customers.id) AS total
+         FROM customers
+         JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
+         LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+         WHERE (customers.staff_id IN (", LineManageStaffId, ")
+                OR assigned_jobs_staff_view.staff_id IN (", LineManageStaffId, "))"
+    );
+
+    IF searchTerm IS NOT NULL AND searchTerm <> '' THEN
+        SET @sql_count = CONCAT(@sql_count, 
+            " AND customers.trading_name LIKE ", QUOTE(CONCAT('%', searchTerm, '%')));
+    END IF;
+
+    PREPARE stmt2 FROM @sql_count;
+    EXECUTE stmt2;
+    DEALLOCATE PREPARE stmt2;
+END$$
+
+DROP PROCEDURE IF EXISTS `GetLastWeekMissingTimesheetReport`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetLastWeekMissingTimesheetReport` (IN `p_StaffUserId` INT)  BEGIN
+    DECLARE v_role_name VARCHAR(50);
+    DECLARE done INT DEFAULT 0;
+    DECLARE current_staff INT;
+
+    -- 1. Get role
+    SELECT r.role INTO v_role_name
+    FROM staffs s
+    JOIN roles r ON s.role_id = r.id
+    WHERE s.id = p_StaffUserId
+    LIMIT 1;
+
+    -- 2. Temporary table for queue (simulate JS queue)
+    CREATE TEMPORARY TABLE tmp_queue (
+        staff_id INT PRIMARY KEY
+    );
+    TRUNCATE TABLE tmp_queue;
+
+    -- 3. Temporary table for all collected staff IDs
+    CREATE TEMPORARY TABLE tmp_all_staffs (
+        staff_id INT PRIMARY KEY
+    );
+    TRUNCATE TABLE tmp_all_staffs;
+
+    -- Insert initial staff into both tables
+    INSERT INTO tmp_queue(staff_id) VALUES (p_StaffUserId);
+    INSERT INTO tmp_all_staffs(staff_id) VALUES (p_StaffUserId);
+
+    -- 4. Iterative loop simulating JS queue
+    WHILE EXISTS (SELECT 1 FROM tmp_queue) DO
+        -- Take one staff from queue
+        SELECT staff_id INTO current_staff FROM tmp_queue LIMIT 1;
+
+        -- Delete it from queue
+        DELETE FROM tmp_queue WHERE staff_id = current_staff;
+
+        -- Insert subordinates who are not already in all_staffs
+        INSERT IGNORE INTO tmp_queue(staff_id)
+        SELECT staff_to
+        FROM line_managers
+        WHERE staff_by = current_staff
+        AND staff_to NOT IN (SELECT staff_id FROM tmp_all_staffs);
+
+        -- Insert the same new staff into all_staffs
+        INSERT IGNORE INTO tmp_all_staffs(staff_id)
+        SELECT staff_to
+        FROM line_managers
+        WHERE staff_by = current_staff;
+    END WHILE;
+
+    -- 5. Build WHERE clause
+    SET @where_clause = '';
+    IF v_role_name IN ('SUPERADMIN', 'ADMIN', 'MANAGEMENT') THEN
+        SET @where_clause = "ts.submit_status = '0' OR ts.submit_status IS NULL";
+    ELSE
+        SET @where_clause = "(ts.submit_status = '0' OR ts.submit_status IS NULL) AND st.id IN (SELECT staff_id FROM tmp_all_staffs)";
+    END IF;
+
+    -- 6. Final dynamic SQL
+    SET @sql = CONCAT("
+        SELECT 
+            CONCAT(st.first_name, ' ', st.last_name) AS staff_fullname,
+            st.email AS staff_email,
+            st.id AS staff_id,
+            COALESCE(ts.submit_status, 0) AS submit_status,
+            COALESCE(
+                DATE_FORMAT(ts.monday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.tuesday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.wednesday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.thursday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.friday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.saturday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.sunday_date, '%Y-%m-%d')
+            ) AS week_date
+        FROM staffs st
+        LEFT JOIN timesheet ts 
+            ON st.id = ts.staff_id
+            AND YEARWEEK(
+                COALESCE(
+                    ts.monday_date,
+                    ts.tuesday_date,
+                    ts.wednesday_date,
+                    ts.thursday_date,
+                    ts.friday_date,
+                    ts.saturday_date,
+                    ts.sunday_date
+                ), 1
+            ) = YEARWEEK(CURDATE() - INTERVAL 1 WEEK, 1)
+        WHERE ", @where_clause, "
+        GROUP BY st.id, st.first_name, st.last_name, st.email, ts.submit_status, week_date
+        ORDER BY st.first_name ASC
+    ");
+
+    -- 7. Execute
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+
+    -- 8. Cleanup
+    DROP TEMPORARY TABLE IF EXISTS tmp_queue;
+    DROP TEMPORARY TABLE IF EXISTS tmp_all_staffs;
+
+END$$
+
+DROP PROCEDURE IF EXISTS `GetLastWeekSubmitTimesheetReport`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetLastWeekSubmitTimesheetReport` (IN `p_StaffUserId` INT)  BEGIN
+    DECLARE v_role_name VARCHAR(50);
+    DECLARE done INT DEFAULT 0;
+    DECLARE current_staff INT;
+
+    -- 1. Get role
+    SELECT r.role INTO v_role_name
+    FROM staffs s
+    JOIN roles r ON s.role_id = r.id
+    WHERE s.id = p_StaffUserId
+    LIMIT 1;
+
+    -- 2. Temporary table for queue (simulate JS queue)
+    CREATE TEMPORARY TABLE tmp_queue (
+        staff_id INT PRIMARY KEY
+    );
+    TRUNCATE TABLE tmp_queue;
+
+    -- 3. Temporary table for all collected staff IDs
+    CREATE TEMPORARY TABLE tmp_all_staffs (
+        staff_id INT PRIMARY KEY
+    );
+    TRUNCATE TABLE tmp_all_staffs;
+
+    -- Insert initial staff into both tables
+    INSERT INTO tmp_queue(staff_id) VALUES (p_StaffUserId);
+    INSERT INTO tmp_all_staffs(staff_id) VALUES (p_StaffUserId);
+
+    -- 4. Iterative loop simulating JS queue
+    WHILE EXISTS (SELECT 1 FROM tmp_queue) DO
+        -- Take one staff from queue
+        SELECT staff_id INTO current_staff FROM tmp_queue LIMIT 1;
+
+        -- Delete it from queue
+        DELETE FROM tmp_queue WHERE staff_id = current_staff;
+
+        -- Insert subordinates who are not already in all_staffs
+        INSERT IGNORE INTO tmp_queue(staff_id)
+        SELECT staff_to
+        FROM line_managers
+        WHERE staff_by = current_staff
+        AND staff_to NOT IN (SELECT staff_id FROM tmp_all_staffs);
+
+        -- Insert the same new staff into all_staffs
+        INSERT IGNORE INTO tmp_all_staffs(staff_id)
+        SELECT staff_to
+        FROM line_managers
+        WHERE staff_by = current_staff;
+    END WHILE;
+
+    -- 5. Build WHERE clause
+    SET @where_clause = '';
+    IF v_role_name IN ('SUPERADMIN', 'ADMIN', 'MANAGEMENT') THEN
+        SET @where_clause = "ts.submit_status = '1'";
+    ELSE
+        SET @where_clause = "(ts.submit_status = '1') AND st.id IN (SELECT staff_id FROM tmp_all_staffs)";
+    END IF;
+
+    -- 6. Final dynamic SQL
+    SET @sql = CONCAT("
+        SELECT 
+            CONCAT(st.first_name, ' ', st.last_name) AS staff_fullname,
+            st.email AS staff_email,
+            st.id AS staff_id,
+            COALESCE(ts.submit_status, 0) AS submit_status,
+            COALESCE(
+                DATE_FORMAT(ts.monday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.tuesday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.wednesday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.thursday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.friday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.saturday_date, '%Y-%m-%d'),
+                DATE_FORMAT(ts.sunday_date, '%Y-%m-%d')
+            ) AS week_date
+        FROM staffs st
+        LEFT JOIN timesheet ts 
+            ON st.id = ts.staff_id
+            AND YEARWEEK(
+                COALESCE(
+                    ts.monday_date,
+                    ts.tuesday_date,
+                    ts.wednesday_date,
+                    ts.thursday_date,
+                    ts.friday_date,
+                    ts.saturday_date,
+                    ts.sunday_date
+                ), 1
+            ) = YEARWEEK(CURDATE() - INTERVAL 1 WEEK, 1)
+        WHERE ", @where_clause, "
+        GROUP BY st.id, st.first_name, st.last_name, st.email, ts.submit_status, week_date
+        ORDER BY st.first_name ASC
+    ");
+
+    -- 7. Execute
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+
+    -- 8. Cleanup
+    DROP TEMPORARY TABLE IF EXISTS tmp_queue;
+    DROP TEMPORARY TABLE IF EXISTS tmp_all_staffs;
+
+END$$
+
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `assigned_jobs_staff_view`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `assigned_jobs_staff_view`;
+CREATE TABLE IF NOT EXISTS `assigned_jobs_staff_view` (
+);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `checklists`
+--
+
+DROP TABLE IF EXISTS `checklists`;
+CREATE TABLE IF NOT EXISTS `checklists` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `work_flow_type` varchar(50) NOT NULL,
+  `customer_id` longtext,
+  `is_all_customer` longtext,
+  `service_id` longtext,
+  `job_type_id` longtext,
+  `client_type_id` varchar(250) NOT NULL,
+  `check_list_name` varchar(100) NOT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `upload_checklist_name` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `client_type_id` (`client_type_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `checklists`
+--
+
+INSERT INTO `checklists` (`id`, `work_flow_type`, `customer_id`, `is_all_customer`, `service_id`, `job_type_id`, `client_type_id`, `check_list_name`, `status`, `upload_checklist_name`, `created_at`, `updated_at`) VALUES
+(13, '3', NULL, NULL, NULL, NULL, '1,2,3,4,5,6,7', 'HYHYHY', '1', 'checklist_excel_13.csv', '2026-04-06 10:16:18', '2026-04-06 10:16:18'),
+(9, '3', NULL, NULL, NULL, NULL, '1,2,3,4,5,6,7', 'CH1', '1', 'checklist_excel_9.csv', '2026-03-30 09:44:13', '2026-03-30 11:36:52'),
+(10, '6', NULL, NULL, NULL, NULL, '1,2,3,4,5,6,7', 'dbdgvd', '1', NULL, '2026-03-30 11:38:13', '2026-03-30 11:38:42'),
+(11, '6', '13,14', NULL, '32,5', '8,14', '1,2,3,4,5,6,7', 'RE-CHI', '1', 'checklist_excel_11.csv', '2026-03-30 11:50:16', '2026-04-10 11:19:29'),
+(12, '3', NULL, NULL, NULL, NULL, '1,2,3,4,5,6,7', 'FFFFFFF', '1', 'checklist_excel_12.csv', '2026-04-06 06:59:14', '2026-04-10 06:50:18'),
+(14, '3', NULL, NULL, NULL, NULL, '1,2,3,4,5,6,7', 'Short', '1', 'checklist_excel_14.csv', '2026-04-07 05:37:43', '2026-04-07 05:37:43');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `checklists_copy`
+--
+
+DROP TABLE IF EXISTS `checklists_copy`;
+CREATE TABLE IF NOT EXISTS `checklists_copy` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `is_all_customer` longtext,
+  `service_id` int(11) NOT NULL,
+  `job_type_id` int(11) NOT NULL,
+  `client_type_id` varchar(250) NOT NULL,
+  `check_list_name` varchar(100) NOT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `service_id` (`service_id`),
+  KEY `job_type_id` (`job_type_id`),
+  KEY `client_type_id` (`client_type_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `checklists_copy`
+--
+
+INSERT INTO `checklists_copy` (`id`, `customer_id`, `is_all_customer`, `service_id`, `job_type_id`, `client_type_id`, `check_list_name`, `status`, `created_at`, `updated_at`) VALUES
+(1, 0, '[1, 5, 10, 3, 13]', 7, 2, '1,2,3,4,7', 'checklist1', '1', '2025-01-30 09:06:45', '2026-01-01 12:16:51'),
+(3, 5, NULL, 2, 4, '1,2,3,4', 'DDD', '1', '2025-07-12 10:13:23', '2025-07-12 10:13:23'),
+(4, 8, NULL, 2, 4, '1,2,3,4,5,6,7', 'FFFFFFF', '1', '2025-07-17 06:00:49', '2025-07-17 09:00:46'),
+(5, 0, NULL, 33, 9, '2', 'yjjj', '1', '2026-03-18 10:17:25', '2026-03-18 10:17:25');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `checklist_tasks`
+--
+
+DROP TABLE IF EXISTS `checklist_tasks`;
+CREATE TABLE IF NOT EXISTS `checklist_tasks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `checklist_id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  `task_name` varchar(100) NOT NULL,
+  `budgeted_hour` varchar(100) DEFAULT NULL COMMENT 'Budgeted hours for the task',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `checklist_id` (`checklist_id`,`task_id`),
+  KEY `task_id` (`task_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `clients`
+--
+
+DROP TABLE IF EXISTS `clients`;
+CREATE TABLE IF NOT EXISTS `clients` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_type` enum('1','2','3','4','5','6','7') NOT NULL DEFAULT '1' COMMENT '1: SoleTrader, 2: Company , 3:Partnership , 4 : Individual , 5 = Charity Incorporated Organisation , 6 = Unincorporated Association,\r\n7 = Trust',
+  `customer_id` int(11) NOT NULL,
+  `staff_created_id` int(11) NOT NULL,
+  `client_industry_id` int(11) DEFAULT '0',
+  `trading_name` varchar(255) NOT NULL,
+  `client_code` varchar(100) NOT NULL,
+  `trading_address` longtext,
+  `service_address` longtext,
+  `charity_commission_number` varchar(255) DEFAULT NULL,
+  `vat_registered` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: No, 1: Yes',
+  `vat_number` varchar(255) DEFAULT NULL,
+  `website` varchar(255) DEFAULT NULL,
+  `notes` longtext,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `company_number` varchar(100) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `trading_name` (`trading_name`),
+  UNIQUE KEY `client_code` (`client_code`),
+  KEY `customer_id` (`customer_id`),
+  KEY `client_industry_id` (`client_industry_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `clients`
+--
+
+INSERT INTO `clients` (`id`, `client_type`, `customer_id`, `staff_created_id`, `client_industry_id`, `trading_name`, `client_code`, `trading_address`, `service_address`, `charity_commission_number`, `vat_registered`, `vat_number`, `website`, `notes`, `status`, `company_number`, `created_at`, `updated_at`) VALUES
+(1, '1', 1, 1, 3, 'SSHH11', '00001', 'a', NULL, NULL, '0', '', '', '', '1', NULL, '2025-07-05 12:38:21', '2025-07-05 12:38:21'),
+(2, '1', 3, 1, 3, 'SSSHK22', '00002', 'SSSHK22', NULL, NULL, '0', '', '', '', '1', NULL, '2025-07-10 11:43:36', '2025-07-10 11:43:36'),
+(3, '1', 5, 1, 3, 'GGG', '00003', 'dd', NULL, NULL, '0', '', '', '', '1', NULL, '2025-07-12 10:08:37', '2025-07-12 10:08:37'),
+(4, '1', 8, 1, 3, 'RTRT', '00004', 'r', NULL, NULL, '0', '', '', '', '1', NULL, '2025-07-17 06:27:39', '2025-07-17 06:27:39'),
+(5, '7', 8, 1, 0, 'GGGGGGGGG', '00005', 's', NULL, NULL, '0', '', '', '', '1', NULL, '2025-07-17 06:39:05', '2025-07-17 06:39:05'),
+(6, '1', 9, 15, 3, 'CLI---1', '00006', 's', NULL, NULL, '0', 'HHHH33', '', '', '1', NULL, '2025-07-24 11:35:02', '2025-11-19 10:59:48'),
+(7, '1', 9, 15, 3, 'CLI--2', '00007', 's', NULL, NULL, '0', '', '', '', '1', NULL, '2025-07-24 11:35:21', '2025-07-24 11:35:21'),
+(8, '1', 10, 13, 3, 'NEW_A_CLI', '00008', 'hj', NULL, NULL, '0', '', '', '', '1', NULL, '2025-08-13 06:04:47', '2025-08-13 06:04:47'),
+(9, '1', 3, 1, 3, 'SHK333', '00009', 's', NULL, NULL, '0', '', '', '', '1', NULL, '2025-08-16 11:31:39', '2025-08-16 11:31:39'),
+(10, '1', 2, 1, 3, 'FFFFFFF', '000010', 's', NULL, NULL, '0', '', '', '', '1', NULL, '2025-08-23 08:42:30', '2025-08-23 08:42:30'),
+(11, '1', 6, 1, 3, 'DDDDDDDD', '000011', 'fedg', NULL, NULL, '0', '', '', '', '1', NULL, '2025-10-25 06:53:31', '2025-10-25 06:53:31'),
+(12, '1', 10, 1, 3, 'FFFFF', '000012', 'ff', NULL, NULL, '0', '333', '', '', '1', NULL, '2025-11-03 10:04:18', '2025-11-19 10:36:24'),
+(13, '1', 10, 1, 3, 'HHH', '000013', 'gg', NULL, NULL, '0', '', '', '', '1', NULL, '2025-11-03 10:05:18', '2025-11-03 10:05:18'),
+(14, '1', 10, 1, 3, 'JJJJJJJJJ', '000014', 'fvd', NULL, NULL, '0', '', '', '', '1', NULL, '2025-11-03 10:06:06', '2025-11-03 10:06:26'),
+(15, '1', 10, 1, 3, 'bfb', '000015', 'fb', NULL, NULL, '0', 'FDGGGG33', '', '', '1', NULL, '2025-11-19 10:11:39', '2025-11-19 10:59:19'),
+(16, '2', 10, 1, 3, 'D LIMITED', '000016', '25 South Road, Saffron Walden, Essex, CB11 3DG', NULL, NULL, '0', '', '', '', '1', NULL, '2025-11-21 09:48:49', '2025-11-21 09:48:49'),
+(17, '2', 6, 1, 3, 'AFROFRING ENTERTAINMENT LIMITED', '000017', '10 Salvesen Grove, Edinburgh, Scotland, EH4 5JP', NULL, NULL, '0', '', '', '', '1', NULL, '2025-11-24 13:40:15', '2025-11-24 13:40:15'),
+(18, '5', 12, 1, 0, 'DFD', '000018', 'sss', '', '21616', '0', '', '', '', '1', '05202396', '2025-11-25 10:55:15', '2025-11-25 11:31:29'),
+(19, '2', 12, 1, 3, 'AQUATECH SURFACING LTD', '000019', '1a Kingsburys Lane, Ringwood, Hampshire, United Kingdom, BH24 1EL', NULL, NULL, '0', '', '', '', '1', NULL, '2026-03-27 06:26:24', '2026-03-27 06:26:24'),
+(20, '1', 14, 1, 3, 'WWWWW', '000020', 'sfgdgd', NULL, NULL, '0', '', '', '', '1', NULL, '2026-03-28 10:16:39', '2026-03-28 10:16:39'),
+(21, '1', 13, 1, 3, 'oooooooooooooo', '000021', 'gjng', NULL, NULL, '0', '', '', '', '1', NULL, '2026-04-09 11:17:26', '2026-04-09 11:17:26');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `client_company_information`
+--
+
+DROP TABLE IF EXISTS `client_company_information`;
+CREATE TABLE IF NOT EXISTS `client_company_information` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_id` int(11) NOT NULL,
+  `company_name` varchar(100) NOT NULL,
+  `entity_type` varchar(255) NOT NULL,
+  `company_status` varchar(100) NOT NULL COMMENT '0: deactive, 1: active',
+  `company_number` varchar(50) DEFAULT NULL,
+  `registered_office_address` longtext NOT NULL,
+  `incorporation_date` date NOT NULL,
+  `incorporation_in` varchar(50) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `client_id` (`client_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `client_company_information`
+--
+
+INSERT INTO `client_company_information` (`id`, `client_id`, `company_name`, `entity_type`, `company_status`, `company_number`, `registered_office_address`, `incorporation_date`, `incorporation_in`, `created_at`, `updated_at`) VALUES
+(3, 16, 'D LIMITED', 'ltd', 'active', '05202396', '25 South Road, Saffron Walden, Essex, CB11 3DG', '2004-08-10', '4', '2025-11-21 09:48:49', '2025-11-21 09:48:49'),
+(4, 17, 'AFROFRING ENTERTAINMENT LIMITED', 'ltd', 'active', 'SC712681', '10 Salvesen Grove, Edinburgh, Scotland, EH4 5JP', '2021-10-20', '4', '2025-11-24 13:40:15', '2025-11-24 13:40:15'),
+(5, 19, 'AQUATECH SURFACING LTD', 'ltd', 'active', '16537519', '1a Kingsburys Lane, Ringwood, Hampshire, United Kingdom, BH24 1EL', '2025-06-24', '4', '2026-03-27 06:26:24', '2026-03-27 06:26:24');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `client_contact_details`
+--
+
+DROP TABLE IF EXISTS `client_contact_details`;
+CREATE TABLE IF NOT EXISTS `client_contact_details` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_id` int(11) NOT NULL,
+  `role` int(11) NOT NULL DEFAULT '0',
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `alternate_email` varchar(100) DEFAULT NULL,
+  `phone_code` varchar(6) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `alternate_phone_code` varchar(6) DEFAULT NULL,
+  `alternate_phone` varchar(20) DEFAULT NULL,
+  `residential_address` text,
+  `authorised_signatory_status` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0: off, 1: on',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `client_id` (`client_id`),
+  KEY `role` (`role`)
+) ENGINE=MyISAM AUTO_INCREMENT=41 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `client_contact_details`
+--
+
+INSERT INTO `client_contact_details` (`id`, `client_id`, `role`, `first_name`, `last_name`, `email`, `alternate_email`, `phone_code`, `phone`, `alternate_phone_code`, `alternate_phone`, `residential_address`, `authorised_signatory_status`, `created_at`, `updated_at`) VALUES
+(20, 1, 0, 's', 's', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-07-05 12:38:21', '2025-07-05 12:38:21'),
+(21, 2, 0, 's', 's', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-07-10 11:43:36', '2025-07-10 11:43:36'),
+(22, 3, 0, 'd', 'd', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-07-12 10:08:37', '2025-07-12 10:08:37'),
+(23, 4, 0, 'r', 'r', 's@gmail.com', NULL, '+44', '', NULL, NULL, 'r', '0', '2025-07-17 06:27:39', '2025-07-17 06:27:39'),
+(24, 5, 2, 's', 's', '', '', '+44', '', '+44', '', NULL, '0', '2025-07-17 06:39:05', '2025-07-17 06:39:05'),
+(25, 6, 0, 's', 's', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-07-24 11:35:02', '2025-07-24 11:35:02'),
+(26, 7, 0, 's', 's', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-07-24 11:35:21', '2025-07-24 11:35:21'),
+(27, 8, 0, 's', 's', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-08-13 06:04:47', '2025-08-13 06:04:47'),
+(28, 9, 0, 's', 's', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-08-16 11:31:39', '2025-08-16 11:31:39'),
+(29, 10, 0, 's', 's', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-08-23 08:42:30', '2025-08-23 08:42:30'),
+(30, 11, 0, 'grrg', 'rgr', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-10-25 06:53:31', '2025-10-25 06:53:31'),
+(31, 12, 0, 'fvf', 'fvf', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-11-03 10:04:18', '2025-11-03 10:04:18'),
+(32, 13, 0, 'gbg', 'bg', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-11-03 10:05:18', '2025-11-03 10:05:18'),
+(33, 14, 0, 'cvdsvs', 'vsdv', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-11-03 10:06:06', '2025-11-03 10:06:06'),
+(34, 15, 0, 'fbfb', 'bfbfSS', '', NULL, '+44', '', NULL, NULL, '', '0', '2025-11-19 10:11:39', '2025-11-19 10:56:54'),
+(35, 16, 2, 'Sebastian Douglas Leonard', 'CLARK', '', NULL, '+44', '', NULL, NULL, NULL, '0', '2025-11-21 09:48:49', '2025-11-21 09:48:49'),
+(36, 17, 2, 'Olasunkanmi Jide', 'OJO', '', NULL, '+44', '', NULL, NULL, NULL, '0', '2025-11-24 13:40:15', '2025-11-24 13:40:15'),
+(37, 18, 2, 'ss', 'ss', '', '', '+44', '', '+44', '', NULL, '0', '2025-11-25 10:55:16', '2025-11-25 10:55:16'),
+(38, 19, 11, 'fef', 'fef', '', NULL, '+44', '', NULL, NULL, NULL, '0', '2026-03-27 06:26:24', '2026-03-27 06:26:24'),
+(39, 20, 0, 'ghng', 'ghngn', 'h@gmail.com', NULL, '+44', '', NULL, NULL, 'ghfbhh', '0', '2026-03-28 10:16:39', '2026-03-28 10:16:39'),
+(40, 21, 0, 'd', 'd', '', NULL, '+44', '', NULL, NULL, '', '0', '2026-04-09 11:17:26', '2026-04-09 11:17:26');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `client_documents`
+--
+
+DROP TABLE IF EXISTS `client_documents`;
+CREATE TABLE IF NOT EXISTS `client_documents` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_id` int(11) NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `original_name` varchar(255) NOT NULL,
+  `file_type` text NOT NULL,
+  `file_size` int(11) NOT NULL,
+  `web_url` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `client_id` (`client_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `client_industry_types`
+--
+
+DROP TABLE IF EXISTS `client_industry_types`;
+CREATE TABLE IF NOT EXISTS `client_industry_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `business_type` varchar(100) NOT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `business_type` (`business_type`)
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `client_industry_types`
+--
+
+INSERT INTO `client_industry_types` (`id`, `business_type`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'LTD', '1', '2024-06-28 13:22:23', '2024-07-26 10:54:08'),
+(3, 'LTD 1', '1', '2024-08-05 07:24:55', '2024-09-25 10:24:24');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `client_job_task`
+--
+
+DROP TABLE IF EXISTS `client_job_task`;
+CREATE TABLE IF NOT EXISTS `client_job_task` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `job_id` int(11) NOT NULL,
+  `client_id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  `task_status` int(11) DEFAULT NULL,
+  `time` varchar(100) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `job_id` (`job_id`,`client_id`,`task_id`),
+  KEY `client_id` (`client_id`),
+  KEY `task_id` (`task_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=124 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `client_job_task`
+--
+
+INSERT INTO `client_job_task` (`id`, `job_id`, `client_id`, `task_id`, `task_status`, `time`, `created_at`, `updated_at`) VALUES
+(1, 2, 1, 1, NULL, '12:12', '2025-07-09 12:10:37', '2025-07-09 12:10:37'),
+(5, 11, 1, 9, NULL, '1:1', '2025-08-13 11:57:45', '2025-08-13 11:57:45'),
+(4, 5, 1, 1, NULL, '12:12', '2025-07-11 09:58:58', '2025-07-11 09:58:58'),
+(6, 12, 3, 8, NULL, '08:08', '2025-08-22 06:57:43', '2025-08-22 06:57:43'),
+(7, 12, 3, 5, NULL, '08:08', '2025-08-22 06:57:43', '2025-08-22 06:57:43'),
+(8, 13, 3, 5, NULL, '08:08', '2025-08-22 06:58:15', '2025-08-22 06:58:15'),
+(10, 10, 8, 10, NULL, '25:25', '2025-08-25 06:26:31', '2025-08-25 06:26:31'),
+(11, 18, 8, 20, NULL, '0:45', '2025-10-04 06:49:02', '2025-10-04 06:49:02'),
+(12, 18, 8, 19, NULL, '1:00', '2025-10-04 06:49:02', '2025-10-04 06:49:02'),
+(13, 19, 8, 20, NULL, '2:45', '2025-10-04 06:58:30', '2025-10-04 06:58:30'),
+(14, 19, 8, 19, NULL, '6:00', '2025-10-04 06:58:30', '2025-10-04 09:43:38'),
+(19, 21, 8, 27, NULL, '12:15', '2025-10-06 06:13:41', '2025-10-06 06:14:20'),
+(16, 20, 8, 25, NULL, '1:00', '2025-10-04 10:45:30', '2025-10-04 10:45:30'),
+(18, 22, 8, 27, NULL, '18:20', '2025-10-06 05:56:07', '2025-10-06 06:13:08'),
+(20, 23, 8, 24, NULL, '00:55', '2025-10-25 06:34:23', '2025-10-25 06:34:23'),
+(21, 24, 11, 8, NULL, '1:30', '2025-10-25 06:53:57', '2025-10-25 06:53:57'),
+(22, 25, 11, 8, NULL, '0:30', '2025-10-25 10:48:13', '2025-10-25 10:48:13'),
+(23, 26, 8, 26, NULL, '1:1', '2025-10-27 08:26:38', '2025-10-27 08:26:38'),
+(24, 27, 10, 8, NULL, '1:0', '2025-10-31 06:12:22', '2025-10-31 06:12:22'),
+(25, 28, 10, 8, NULL, '1:0', '2025-10-31 06:12:38', '2025-10-31 06:12:38'),
+(26, 29, 10, 8, NULL, '1:0', '2025-10-31 06:15:24', '2025-10-31 06:15:24'),
+(27, 30, 9, 24, NULL, '00:55', '2025-10-31 06:32:06', '2025-10-31 06:32:06'),
+(28, 31, 5, 8, NULL, '1:0', '2025-11-06 09:52:32', '2025-11-06 09:52:32'),
+(29, 32, 7, 28, NULL, '9:9', '2025-11-11 15:03:20', '2025-11-11 15:03:20'),
+(30, 33, 7, 28, NULL, '9:59', '2025-11-11 15:07:13', '2025-11-11 15:07:13'),
+(31, 6, 7, 28, NULL, '1:0', '2025-11-13 05:04:04', '2025-11-13 05:04:04'),
+(32, 7, 7, 28, NULL, '1:0', '2025-11-13 05:23:55', '2025-11-13 05:23:55'),
+(33, 8, 7, 28, NULL, '1:0', '2025-11-13 05:53:55', '2025-11-13 05:53:55'),
+(34, 34, 7, 28, NULL, '5:0', '2025-11-13 12:43:32', '2025-11-13 12:43:32'),
+(35, 35, 7, 28, NULL, '6:0', '2025-11-14 06:53:06', '2025-11-14 06:53:06'),
+(36, 36, 7, 28, NULL, '6:0', '2025-11-14 06:54:36', '2025-11-14 06:54:36'),
+(37, 37, 15, 24, NULL, '00:55', '2025-11-20 05:07:09', '2025-11-20 05:07:09'),
+(38, 38, 15, 25, NULL, '11:00', '2025-11-20 05:09:43', '2025-11-20 05:09:43'),
+(39, 39, 16, 24, NULL, '00:55', '2025-11-21 11:25:10', '2025-11-21 11:25:10'),
+(40, 40, 16, 30, NULL, '2:10', '2025-11-25 05:19:01', '2025-11-25 05:19:01'),
+(41, 40, 16, 29, NULL, '1:10', '2025-11-25 05:19:01', '2025-11-25 05:19:01'),
+(42, 41, 15, 32, NULL, '1:10', '2025-11-27 08:53:40', '2025-11-27 08:53:40'),
+(43, 42, 18, 34, NULL, '1:10', '2025-11-28 06:09:38', '2025-11-28 06:09:38'),
+(44, 43, 17, 30, NULL, '2:10', '2025-12-01 04:55:19', '2025-12-01 04:55:19'),
+(45, 44, 18, 34, NULL, '1:10', '2025-12-01 05:30:20', '2025-12-01 05:30:20'),
+(46, 45, 13, 26, NULL, '1:1', '2025-12-01 05:32:11', '2025-12-01 05:32:11'),
+(47, 46, 14, 29, NULL, '1:10', '2025-12-01 05:42:41', '2025-12-01 05:42:41'),
+(106, 47, 17, 29, NULL, '1:10', '2026-04-11 08:44:43', '2026-04-11 08:44:43'),
+(49, 1, 1, 28, NULL, '1:0', '2026-02-03 05:10:01', '2026-02-03 05:10:01'),
+(50, 48, 15, 24, NULL, '00:55', '2026-03-10 08:44:34', '2026-03-10 08:44:34'),
+(51, 48, 15, 23, NULL, '25:10', '2026-03-10 08:44:34', '2026-03-10 08:44:34'),
+(52, 51, 17, 8, NULL, '1:0', '2026-03-16 11:48:08', '2026-03-16 11:48:08'),
+(53, 51, 17, 7, NULL, '1:0', '2026-03-16 11:48:08', '2026-03-16 11:48:08'),
+(67, 61, 17, 29, NULL, '1:10', '2026-03-28 06:32:57', '2026-03-28 06:32:57'),
+(66, 56, 17, 30, NULL, '2:10', '2026-03-28 06:32:08', '2026-03-28 06:32:08'),
+(59, 4, 2, 30, NULL, '2:10', '2026-03-27 05:39:49', '2026-03-27 05:39:49'),
+(60, 57, 19, 29, NULL, '1:10', '2026-03-27 06:40:59', '2026-03-27 06:40:59'),
+(61, 58, 19, 8, NULL, '1:0', '2026-03-27 08:49:39', '2026-03-27 08:49:39'),
+(62, 59, 19, 29, NULL, '1:10', '2026-03-27 08:56:34', '2026-03-27 08:56:34'),
+(65, 60, 15, 30, NULL, '2:10', '2026-03-28 06:11:20', '2026-03-28 06:11:20'),
+(68, 62, 17, 29, NULL, '1:10', '2026-03-28 06:33:15', '2026-03-28 06:33:15'),
+(69, 63, 20, 8, NULL, '10:0', '2026-03-30 07:00:04', '2026-03-30 07:00:04'),
+(70, 64, 20, 8, NULL, '10:0', '2026-03-30 07:00:23', '2026-03-30 07:00:23'),
+(71, 65, 20, 8, NULL, '10:0', '2026-03-30 07:16:13', '2026-03-30 07:16:13'),
+(72, 66, 20, 8, NULL, '10:0', '2026-03-30 08:19:45', '2026-03-30 08:19:45'),
+(73, 67, 20, 28, NULL, '10:0', '2026-03-30 13:17:50', '2026-03-30 13:17:50'),
+(74, 68, 20, 34, NULL, '1:10', '2026-03-31 05:13:34', '2026-03-31 05:13:34'),
+(75, 69, 20, 8, NULL, '10:0', '2026-03-31 06:45:47', '2026-03-31 06:45:47'),
+(76, 70, 20, 34, NULL, '1:10', '2026-03-31 06:54:37', '2026-03-31 06:54:37'),
+(77, 71, 20, 34, NULL, '1:10', '2026-03-31 09:04:35', '2026-03-31 09:04:35'),
+(82, 72, 20, 36, NULL, '15:10', '2026-04-06 06:35:39', '2026-04-06 06:35:39'),
+(81, 73, 20, 36, NULL, '10:10', '2026-04-06 06:20:10', '2026-04-06 06:20:10'),
+(83, 74, 20, 34, NULL, '1:10', '2026-04-06 07:05:14', '2026-04-06 07:05:14'),
+(88, 79, 20, 34, NULL, '1:10', '2026-04-06 09:25:22', '2026-04-06 09:25:22'),
+(102, 80, 20, 35, NULL, '10:0', '2026-04-10 06:27:31', '2026-04-10 06:27:31'),
+(90, 81, 17, 30, NULL, '2:10', '2026-04-06 11:11:04', '2026-04-06 11:11:04'),
+(91, 82, 20, 36, NULL, '15:10', '2026-04-06 11:11:23', '2026-04-06 11:11:23'),
+(92, 83, 20, 34, NULL, '1:10', '2026-04-07 05:38:14', '2026-04-07 05:38:14'),
+(100, 85, 20, 40, NULL, '10:10', '2026-04-09 07:14:15', '2026-04-09 07:14:15'),
+(116, 86, 20, 32, NULL, '1:10', '2026-04-30 10:44:03', '2026-04-30 10:44:03'),
+(101, 87, 21, 40, NULL, '10:0', '2026-04-09 11:18:23', '2026-04-09 11:18:23'),
+(103, 88, 19, 28, NULL, '10:0', '2026-04-10 09:09:04', '2026-04-10 09:09:04'),
+(104, 89, 20, 40, NULL, '10:0', '2026-04-10 11:20:44', '2026-04-10 11:20:44'),
+(107, 90, 17, 29, NULL, '1:10', '2026-04-11 08:48:33', '2026-04-11 08:48:33'),
+(108, 91, 17, 29, NULL, '1:10', '2026-04-11 09:08:11', '2026-04-11 09:08:11'),
+(109, 92, 17, 29, NULL, '1:10', '2026-04-11 09:08:59', '2026-04-11 09:08:59'),
+(110, 93, 17, 30, NULL, '2:10', '2026-04-11 09:09:48', '2026-04-11 09:09:48'),
+(112, 94, 20, 5, NULL, '10:20', '2026-04-30 10:36:49', '2026-04-30 10:36:49'),
+(113, 94, 20, 7, NULL, '09:20', '2026-04-30 10:36:49', '2026-04-30 10:36:49'),
+(115, 95, 20, 5, NULL, '10:10', '2026-04-30 10:44:03', '2026-04-30 10:44:03'),
+(117, 56, 17, 43, NULL, '2:10', '2026-05-02 10:07:35', '2026-05-02 10:07:35'),
+(118, 56, 17, 44, NULL, '10:10', '2026-05-02 10:16:53', '2026-05-02 10:16:53'),
+(119, 43, 17, 43, NULL, '10:10', '2026-05-02 10:28:13', '2026-05-02 10:28:13'),
+(120, 96, 20, 8, NULL, '10:10', '2026-05-02 10:29:35', '2026-05-02 10:29:35'),
+(121, 96, 20, 6, NULL, '10:10', '2026-05-02 10:29:35', '2026-05-02 10:29:35'),
+(122, 96, 20, 45, NULL, '10:08', '2026-05-02 10:47:52', '2026-05-02 10:47:52'),
+(123, 97, 20, 46, NULL, '1:1', '2026-05-12 04:42:26', '2026-05-12 04:42:26');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `client_trustee_contact_details`
+--
+
+DROP TABLE IF EXISTS `client_trustee_contact_details`;
+CREATE TABLE IF NOT EXISTS `client_trustee_contact_details` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_id` int(11) NOT NULL,
+  `role` int(11) NOT NULL DEFAULT '0',
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `alternate_email` varchar(100) DEFAULT NULL,
+  `phone_code` varchar(6) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `alternate_phone_code` varchar(6) DEFAULT NULL,
+  `alternate_phone` varchar(20) DEFAULT NULL,
+  `residential_address` text,
+  `authorised_signatory_status` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0: off, 1: on',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `client_id` (`client_id`),
+  KEY `role` (`role`)
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `client_trustee_contact_details`
+--
+
+INSERT INTO `client_trustee_contact_details` (`id`, `client_id`, `role`, `first_name`, `last_name`, `email`, `alternate_email`, `phone_code`, `phone`, `alternate_phone_code`, `alternate_phone`, `residential_address`, `authorised_signatory_status`, `created_at`, `updated_at`) VALUES
+(1, 1, 0, 'a', 'a', '', '', '+44', '', '+44', '', NULL, '0', '2025-01-30 09:02:25', '2025-01-30 09:02:25'),
+(2, 6, 0, 's', 's', '', '', '+44', '', '+44', '', NULL, '0', '2025-02-10 11:45:33', '2025-02-10 11:45:33'),
+(3, 8, 0, 'dd', 'dd', '', '', '+44', '', '+44', '', NULL, '0', '2025-02-10 11:47:41', '2025-02-10 11:47:41'),
+(4, 5, 2, 's', 's', '', '', '+44', '', '+44', '', NULL, '0', '2025-07-17 06:39:05', '2025-07-17 06:39:05'),
+(5, 18, 2, 'ss', 'ss', '', '', '+44', '', '+44', '', NULL, '0', '2025-11-25 10:55:16', '2025-11-25 10:55:16');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `client_types`
+--
+
+DROP TABLE IF EXISTS `client_types`;
+CREATE TABLE IF NOT EXISTS `client_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` varchar(100) NOT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `type` (`type`)
+) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `client_types`
+--
+
+INSERT INTO `client_types` (`id`, `type`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'SoleTrader', '1', '2024-06-27 10:48:40', '2024-06-27 10:48:40'),
+(2, 'Company', '1', '2024-06-27 10:48:40', '2024-06-27 10:48:40'),
+(3, 'Partnership', '1', '2024-06-27 10:48:40', '2024-06-27 10:48:40'),
+(4, 'Individual', '1', '2024-06-27 10:48:40', '2024-06-27 10:48:40'),
+(5, 'Charity Incorporated Organisation', '1', '2025-01-23 10:13:34', '2025-01-23 10:13:34'),
+(6, 'Unincorporated Association', '1', '2025-01-23 10:13:34', '2025-01-23 10:13:34'),
+(7, 'Trust', '1', '2025-01-23 10:13:34', '2025-01-23 10:13:34');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `countries`
+--
+
+DROP TABLE IF EXISTS `countries`;
+CREATE TABLE IF NOT EXISTS `countries` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `code` varchar(10) NOT NULL,
+  `currency` varchar(50) NOT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `code` (`code`)
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `countries`
+--
+
+INSERT INTO `countries` (`id`, `name`, `code`, `currency`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'United Kingdom', '+44', 'Dollar', '1', '2024-06-29 06:07:35', '2024-07-26 10:54:55'),
+(3, 'India', '+91', 'Rupee', '1', '2024-07-26 10:55:34', '2024-07-26 10:55:34');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customers`
+--
+
+DROP TABLE IF EXISTS `customers`;
+CREATE TABLE IF NOT EXISTS `customers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_type` enum('1','2','3') NOT NULL DEFAULT '1' COMMENT '1: SoleTrader, 2: Company , 3:Partnership',
+  `staff_id` int(11) NOT NULL,
+  `account_manager_id` int(11) NOT NULL COMMENT 'Only staff members who are account managers',
+  `trading_name` varchar(255) NOT NULL,
+  `customer_code` varchar(100) NOT NULL,
+  `trading_address` longtext,
+  `vat_registered` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: yes',
+  `vat_number` varchar(255) DEFAULT NULL,
+  `website` varchar(255) DEFAULT NULL,
+  `customerJoiningDate` date DEFAULT NULL,
+  `customerSource` int(11) DEFAULT NULL,
+  `customerSubSource` int(11) DEFAULT NULL,
+  `form_process` enum('0','1','2','3','4') NOT NULL DEFAULT '0' COMMENT '0: Pending All, 1: Customer Information Complete ,2: Services Complete ,3:Engagement Model Complete ,4:Paper Work Complete',
+  `notes` longtext,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `trading_name` (`trading_name`),
+  UNIQUE KEY `customer_code` (`customer_code`),
+  KEY `staff_id` (`staff_id`),
+  KEY `account_manager_id` (`account_manager_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `customers`
+--
+
+INSERT INTO `customers` (`id`, `customer_type`, `staff_id`, `account_manager_id`, `trading_name`, `customer_code`, `trading_address`, `vat_registered`, `vat_number`, `website`, `customerJoiningDate`, `customerSource`, `customerSubSource`, `form_process`, `notes`, `status`, `created_at`, `updated_at`) VALUES
+(1, '1', 1, 10, 'SHK', '00001', 'ss', '0', '', '', '2025-07-05', 10, 14, '4', '', '1', '2025-07-05 12:34:12', '2025-07-11 09:58:07'),
+(2, '2', 1, 10, 'F LIMITED', '00002', '1  The Crescent, King Street, Leicester, United Kingdom, LE1 6RX', '0', '', '', '2025-07-08', 10, 14, '4', '', '1', '2025-07-08 11:59:15', '2025-07-08 12:42:36'),
+(3, '1', 1, 10, 'SHK11', '00003', '', '0', '', '', '2025-07-10', 10, 14, '4', '', '1', '2025-07-10 11:42:50', '2025-07-10 11:43:02'),
+(5, '1', 15, 15, 'SFFFF', '00004', 's', '0', '', '', '2025-07-12', 10, 14, '4', '', '1', '2025-07-12 09:07:12', '2025-07-12 09:07:42'),
+(6, '1', 1, 13, 'DDDDDDEEEE', '00005', 's', '0', '', '', '2025-07-12', 9, 15, '4', '', '1', '2025-07-12 12:11:26', '2025-07-12 12:15:32'),
+(13, '1', 11, 11, 'HGHGHG', '000011', 'HGHGHG', '0', '', '', '2026-01-01', 9, 15, '4', '', '1', '2026-01-01 12:16:45', '2026-01-01 12:17:02'),
+(8, '1', 1, 11, 'ERER', '00007', '', '0', '', '', '2025-07-14', 10, 14, '4', '', '1', '2025-07-14 09:41:02', '2025-12-13 10:57:25'),
+(9, '2', 15, 15, 'F & HELLMAN ASIA PACIFIC INVESTMENT INC', '00008', 'Portcullis Chambers, P.O. Box 1225, Apia, Samoa', '0', '', '', '2025-07-24', 10, 14, '4', '', '1', '2025-07-24 11:34:09', '2025-07-24 11:34:28'),
+(10, '1', 13, 13, 'NEW', '00009', 'ddd', '0', 'sdcsf6562', '', '2025-08-13', 9, 15, '4', '', '1', '2025-08-13 06:03:47', '2025-12-13 10:56:44'),
+(12, '1', 22, 15, 'IGAAH', '000010', 'dsf', '0', '', '', '2025-11-24', 10, 14, '4', '', '1', '2025-11-24 09:36:14', '2025-12-13 10:56:44'),
+(14, '1', 22, 14, 'wrwr', '000012', 'wrwr', '0', '', '', '2026-03-28', 10, 14, '4', '', '1', '2026-03-28 06:56:03', '2026-03-31 05:09:49');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_access`
+--
+
+DROP TABLE IF EXISTS `customer_access`;
+CREATE TABLE IF NOT EXISTS `customer_access` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `staff_id` int(11) DEFAULT NULL,
+  `customer_id` int(11) NOT NULL,
+  `job_id` text,
+  `client_id` text,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `customer_access`
+--
+
+INSERT INTO `customer_access` (`id`, `staff_id`, `customer_id`, `job_id`, `client_id`) VALUES
+(2, 25, 13, '87', '21');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_company_information`
+--
+
+DROP TABLE IF EXISTS `customer_company_information`;
+CREATE TABLE IF NOT EXISTS `customer_company_information` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `company_name` varchar(100) NOT NULL,
+  `entity_type` varchar(50) NOT NULL,
+  `company_status` varchar(50) NOT NULL,
+  `company_number` varchar(50) NOT NULL,
+  `registered_office_address` longtext NOT NULL,
+  `incorporation_date` date NOT NULL,
+  `incorporation_in` longtext NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `customer_id` (`customer_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `customer_company_information`
+--
+
+INSERT INTO `customer_company_information` (`id`, `customer_id`, `company_name`, `entity_type`, `company_status`, `company_number`, `registered_office_address`, `incorporation_date`, `incorporation_in`, `created_at`, `updated_at`) VALUES
+(11, 2, 'F LIMITED', 'ltd', 'dissolved', '06016470', '1  The Crescent, King Street, Leicester, United Kingdom, LE1 6RX', '2006-12-01', '4', '2025-07-08 11:59:15', '2025-11-19 12:08:40'),
+(12, 9, 'F & HELLMAN ASIA PACIFIC INVESTMENT INC', 'registered-overseas-entity', 'registered', 'OE025511', 'Portcullis Chambers, P.O. Box 1225, Apia, Samoa', '2023-02-10', '4', '2025-07-24 11:34:09', '2025-07-24 11:34:09');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_contact_details`
+--
+
+DROP TABLE IF EXISTS `customer_contact_details`;
+CREATE TABLE IF NOT EXISTS `customer_contact_details` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `contact_person_role_id` int(11) DEFAULT '0',
+  `first_name` varchar(50) NOT NULL,
+  `last_name` varchar(50) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `alternate_email` varchar(100) DEFAULT NULL,
+  `phone_code` varchar(10) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `alternate_phone` varchar(20) DEFAULT NULL,
+  `residential_address` text,
+  `authorised_signatory_status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: off, 1: on',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `contact_person_role_id` (`contact_person_role_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=49 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `customer_contact_details`
+--
+
+INSERT INTO `customer_contact_details` (`id`, `customer_id`, `contact_person_role_id`, `first_name`, `last_name`, `email`, `alternate_email`, `phone_code`, `phone`, `alternate_phone`, `residential_address`, `authorised_signatory_status`, `created_at`, `updated_at`) VALUES
+(35, 1, 0, 's', 's', 's@gmail.com', NULL, '+44', '', NULL, 's', '1', '2025-07-05 12:34:12', '2025-07-05 12:34:12'),
+(36, 2, 2, 'WILD ANGEL LIMITED', 's', 's@gmail.com', NULL, '+44', '', NULL, NULL, '1', '2025-07-08 11:59:15', '2025-07-08 11:59:15'),
+(37, 3, 0, 's', 's', 's@gmail.com', NULL, '+44', '', NULL, 's', '1', '2025-07-10 11:42:50', '2025-07-10 11:42:50'),
+(39, 5, 0, 's', 's', 's@gmail.com', NULL, '+44', '', NULL, 's', '1', '2025-07-12 09:07:12', '2025-07-12 09:07:12'),
+(40, 6, 0, 's', 's', 's@gmail.com', NULL, '+44', '', NULL, 's', '1', '2025-07-12 12:11:26', '2025-07-12 12:11:26'),
+(47, 13, 0, 'ss', 'ss', 'sevintechnology11@gmail.com', NULL, '+44', '', NULL, 'sevintechnology11@gmail.com', '1', '2026-01-01 12:16:45', '2026-01-01 12:16:45'),
+(42, 8, 0, 's', 's', 's@gmail.com', NULL, '+44', '', NULL, 's', '1', '2025-07-14 09:41:02', '2025-07-14 09:41:02'),
+(43, 9, 2, 's', 's', 's@gmail.com', NULL, '+44', '', NULL, NULL, '1', '2025-07-24 11:34:09', '2025-07-24 11:34:09'),
+(44, 10, 0, 'ss', 'sss', 's@gmail.com', NULL, '+44', '', NULL, 'ss', '1', '2025-08-13 06:03:47', '2025-08-13 06:03:47'),
+(46, 12, 0, 'ds', 'ds', 'ighaa@gmail.com', NULL, '+44', '', NULL, 'h', '1', '2025-11-24 09:36:14', '2025-11-24 09:36:14'),
+(48, 14, 0, 'wrw', 'wrw', 'fd@gmail.com', NULL, '+44', '', NULL, '255s', '1', '2026-03-28 06:56:03', '2026-03-28 06:56:03');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_contact_person_role`
+--
+
+DROP TABLE IF EXISTS `customer_contact_person_role`;
+CREATE TABLE IF NOT EXISTS `customer_contact_person_role` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `customer_contact_person_role`
+--
+
+INSERT INTO `customer_contact_person_role` (`id`, `name`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Partner', '1', '2025-05-12 12:30:58', '2025-05-12 12:30:58'),
+(2, 'Client Manager', '1', '2025-05-12 12:31:06', '2025-05-12 12:31:06'),
+(3, 'Accountant', '1', '2025-05-12 12:31:20', '2025-05-12 12:31:20'),
+(4, 'Bookkeeper', '1', '2025-05-12 12:31:24', '2025-05-12 12:31:24'),
+(5, 'Payroll Expert', '1', '2025-05-12 12:31:34', '2025-05-12 12:31:34'),
+(6, 'Tax Expert', '1', '2025-05-12 12:31:39', '2025-05-12 12:31:48'),
+(7, 'CS Expert', '1', '2025-05-12 12:31:55', '2025-05-12 12:31:55'),
+(8, 'Director ', '1', '2025-05-23 11:19:43', '2025-05-23 11:19:43'),
+(9, 'Secretary', '1', '2025-05-28 06:45:22', '2025-05-28 06:45:22'),
+(10, 'LLP Designated Member', '1', '2025-05-28 07:06:58', '2025-05-28 07:06:58'),
+(11, 'Trustee', '1', '2025-06-16 11:34:52', '2025-06-16 11:34:52'),
+(12, 'Primary Contact', '1', '2026-05-02 08:44:37', '2026-05-02 08:44:37'),
+(13, 'Billing Contact', '1', '2026-05-02 08:44:37', '2026-05-02 08:44:37'),
+(14, 'Technical Contact', '1', '2026-05-02 08:44:37', '2026-05-02 08:44:37');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_contact_person_role_permissions`
+--
+
+DROP TABLE IF EXISTS `customer_contact_person_role_permissions`;
+CREATE TABLE IF NOT EXISTS `customer_contact_person_role_permissions` (
+  `role_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY `role_id` (`role_id`,`permission_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `customer_contact_person_role_permissions`
+--
+
+INSERT INTO `customer_contact_person_role_permissions` (`role_id`, `permission_id`, `created_at`, `updated_at`) VALUES
+(14, 1, '2026-05-02 12:55:37', '2026-05-02 12:55:37'),
+(14, 9, '2026-05-02 12:56:07', '2026-05-02 12:56:07'),
+(14, 13, '2026-05-02 12:56:07', '2026-05-02 12:56:07');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_documents`
+--
+
+DROP TABLE IF EXISTS `customer_documents`;
+CREATE TABLE IF NOT EXISTS `customer_documents` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `original_name` varchar(255) NOT NULL,
+  `file_type` varchar(50) NOT NULL,
+  `file_size` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `customer_id` (`customer_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_engagement_adhoc_hourly`
+--
+
+DROP TABLE IF EXISTS `customer_engagement_adhoc_hourly`;
+CREATE TABLE IF NOT EXISTS `customer_engagement_adhoc_hourly` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_engagement_model_id` int(11) NOT NULL,
+  `adhoc_accountants` decimal(10,2) DEFAULT NULL,
+  `adhoc_bookkeepers` decimal(10,2) DEFAULT NULL,
+  `adhoc_payroll_experts` decimal(10,2) DEFAULT NULL,
+  `adhoc_tax_experts` decimal(10,2) DEFAULT NULL,
+  `adhoc_admin_staff` decimal(10,2) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `customer_engagement_model_id` (`customer_engagement_model_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_engagement_customised_pricing`
+--
+
+DROP TABLE IF EXISTS `customer_engagement_customised_pricing`;
+CREATE TABLE IF NOT EXISTS `customer_engagement_customised_pricing` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_engagement_model_id` int(11) NOT NULL,
+  `minimum_number_of_jobs` int(11) DEFAULT NULL,
+  `job_type_id` int(11) DEFAULT NULL,
+  `service_id` int(11) DEFAULT NULL,
+  `cost_per_job` decimal(10,2) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `customer_engagement_model_id` (`customer_engagement_model_id`),
+  KEY `job_type_id` (`job_type_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_engagement_fte`
+--
+
+DROP TABLE IF EXISTS `customer_engagement_fte`;
+CREATE TABLE IF NOT EXISTS `customer_engagement_fte` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_engagement_model_id` int(11) NOT NULL,
+  `number_of_accountants` int(11) DEFAULT NULL,
+  `fee_per_accountant` decimal(10,2) DEFAULT NULL,
+  `number_of_bookkeepers` int(11) DEFAULT NULL,
+  `fee_per_bookkeeper` decimal(10,2) DEFAULT NULL,
+  `number_of_payroll_experts` int(11) DEFAULT NULL,
+  `fee_per_payroll_expert` decimal(10,2) DEFAULT NULL,
+  `number_of_tax_experts` int(11) DEFAULT NULL,
+  `fee_per_tax_expert` decimal(10,2) DEFAULT NULL,
+  `number_of_admin_staff` int(11) DEFAULT NULL,
+  `fee_per_admin_staff` decimal(10,2) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `customer_engagement_model_id` (`customer_engagement_model_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=29 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `customer_engagement_fte`
+--
+
+INSERT INTO `customer_engagement_fte` (`id`, `customer_engagement_model_id`, `number_of_accountants`, `fee_per_accountant`, `number_of_bookkeepers`, `fee_per_bookkeeper`, `number_of_payroll_experts`, `fee_per_payroll_expert`, `number_of_tax_experts`, `fee_per_tax_expert`, `number_of_admin_staff`, `fee_per_admin_staff`, `created_at`, `updated_at`) VALUES
+(16, 23, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-07-05 12:34:24', '2025-07-05 12:34:24'),
+(17, 24, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-07-08 11:59:26', '2025-07-08 11:59:26'),
+(18, 25, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-07-10 11:43:01', '2025-07-10 11:43:01'),
+(20, 27, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-07-12 09:07:41', '2025-07-12 09:07:41'),
+(21, 28, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-07-12 12:11:47', '2025-07-12 12:11:47'),
+(27, 34, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-01 12:17:01', '2026-01-01 12:17:01'),
+(23, 30, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-07-14 09:41:12', '2025-07-14 09:41:12'),
+(24, 31, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-07-24 11:34:27', '2025-07-24 11:34:27'),
+(25, 32, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-08-13 06:04:11', '2025-08-13 06:04:11'),
+(26, 33, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-11-24 09:36:25', '2025-11-24 09:36:25'),
+(28, 35, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-03-28 10:16:22', '2026-03-28 10:16:22');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_engagement_model`
+--
+
+DROP TABLE IF EXISTS `customer_engagement_model`;
+CREATE TABLE IF NOT EXISTS `customer_engagement_model` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `fte_dedicated_staffing` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0: off, 1: on',
+  `percentage_model` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0: off, 1: on',
+  `adhoc_payg_hourly` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0: off, 1: on',
+  `customised_pricing` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0: off, 1: on',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `customer_id` (`customer_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=36 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `customer_engagement_model`
+--
+
+INSERT INTO `customer_engagement_model` (`id`, `customer_id`, `fte_dedicated_staffing`, `percentage_model`, `adhoc_payg_hourly`, `customised_pricing`, `created_at`, `updated_at`) VALUES
+(23, 1, '1', '0', '0', '0', '2025-07-05 12:34:24', '2025-07-05 12:34:24'),
+(24, 2, '1', '0', '0', '0', '2025-07-08 11:59:26', '2025-07-08 11:59:26'),
+(25, 3, '1', '0', '0', '0', '2025-07-10 11:43:01', '2025-07-10 11:43:01'),
+(27, 5, '1', '0', '0', '0', '2025-07-12 09:07:41', '2025-07-12 09:07:41'),
+(28, 6, '1', '0', '0', '0', '2025-07-12 12:11:47', '2025-07-12 12:11:47'),
+(34, 13, '1', '0', '0', '0', '2026-01-01 12:17:01', '2026-01-01 12:17:01'),
+(30, 8, '1', '0', '0', '0', '2025-07-14 09:41:12', '2025-07-14 09:41:12'),
+(31, 9, '1', '0', '0', '0', '2025-07-24 11:34:27', '2025-07-24 11:34:27'),
+(32, 10, '1', '0', '0', '0', '2025-08-13 06:04:11', '2025-08-13 06:04:11'),
+(33, 12, '1', '0', '0', '0', '2025-11-24 09:36:25', '2025-11-24 09:36:25'),
+(35, 14, '1', '0', '0', '0', '2026-03-28 10:16:22', '2026-03-28 10:16:22');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_engagement_percentage`
+--
+
+DROP TABLE IF EXISTS `customer_engagement_percentage`;
+CREATE TABLE IF NOT EXISTS `customer_engagement_percentage` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_engagement_model_id` int(11) NOT NULL,
+  `total_outsourcing` decimal(15,2) DEFAULT NULL,
+  `accountants` decimal(10,2) DEFAULT NULL,
+  `bookkeepers` decimal(10,2) DEFAULT NULL,
+  `payroll_experts` decimal(10,2) DEFAULT NULL,
+  `tax_experts` decimal(10,2) DEFAULT NULL,
+  `admin_staff` decimal(10,2) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `customer_engagement_model_id` (`customer_engagement_model_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_paper_work`
+--
+
+DROP TABLE IF EXISTS `customer_paper_work`;
+CREATE TABLE IF NOT EXISTS `customer_paper_work` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `original_name` varchar(255) NOT NULL,
+  `file_type` text NOT NULL,
+  `file_size` int(11) NOT NULL,
+  `web_url` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `customer_id` (`customer_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_permissions`
+--
+
+DROP TABLE IF EXISTS `customer_permissions`;
+CREATE TABLE IF NOT EXISTS `customer_permissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `permission_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_permission` (`permission_name`,`type`)
+) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `customer_permissions`
+--
+
+INSERT INTO `customer_permissions` (`id`, `permission_name`, `type`, `created_at`, `updated_at`) VALUES
+(1, 'dashboard', 'view', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(2, 'customer', 'view', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(3, 'customer', 'add', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(4, 'customer', 'update', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(5, 'customer', 'delete', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(6, 'customer', 'export', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(7, 'client', 'view', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(8, 'client', 'add', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(9, 'client', 'update', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(10, 'client', 'delete', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(11, 'client', 'export', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(12, 'job', 'view', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(13, 'job', 'add', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(14, 'job', 'update', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(15, 'job', 'delete', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(16, 'job', 'copy', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(17, 'job', 'status_update', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(18, 'job', 'export', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(19, 'report', 'view', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(20, 'client_document', 'view', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(21, 'client_document', 'add', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(22, 'client_document', 'upload', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(23, 'client_document', 'delete', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(24, 'client_document', 'download', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(25, 'no_of_jobs', 'view', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(26, 'client_overview', 'view', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(27, 'job_information', 'view', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(28, 'task_timesheet', 'view', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(29, 'task_timesheet', 'add', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(30, 'task_timesheet', 'update', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(31, 'task_timesheet', 'delete', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(32, 'task_timesheet', 'export', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(33, 'job_timeline', 'view', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(34, 'missing_logs', 'view', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(35, 'missing_logs', 'add', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(36, 'missing_logs', 'update', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(37, 'missing_logs', 'delete', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(38, 'missing_logs', 'export', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(39, 'queries', 'view', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(40, 'queries', 'add', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(41, 'queries', 'update', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(42, 'queries', 'delete', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(43, 'queries', 'export', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(44, 'draft', 'view', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(45, 'draft', 'add', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(46, 'draft', 'update', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(47, 'draft', 'delete', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(48, 'draft', 'export', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(49, 'job_document', 'view', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(50, 'job_document', 'add', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(51, 'job_document', 'update', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(52, 'job_document', 'delete', '2026-05-07 12:22:20', '2026-05-07 12:22:20'),
+(53, 'job_document', 'download', '2026-05-07 12:22:20', '2026-05-07 12:22:20');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_services`
+--
+
+DROP TABLE IF EXISTS `customer_services`;
+CREATE TABLE IF NOT EXISTS `customer_services` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `service_id` int(11) NOT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `customer_id` (`customer_id`,`service_id`),
+  KEY `service_id` (`service_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=134 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `customer_services`
+--
+
+INSERT INTO `customer_services` (`id`, `customer_id`, `service_id`, `status`, `created_at`, `updated_at`) VALUES
+(45, 2, 3, '1', '2025-07-08 11:59:20', '2025-07-08 11:59:20'),
+(42, 1, 2, '1', '2025-07-05 12:34:19', '2025-07-05 12:34:19'),
+(43, 1, 3, '1', '2025-07-05 12:34:19', '2025-07-05 12:34:19'),
+(44, 1, 4, '1', '2025-07-05 12:34:19', '2025-07-05 12:34:19'),
+(46, 2, 2, '1', '2025-07-08 11:59:20', '2025-07-08 11:59:20'),
+(47, 3, 1, '1', '2025-07-10 11:42:53', '2025-07-10 11:42:53'),
+(48, 3, 2, '1', '2025-07-10 11:42:53', '2025-07-10 11:42:53'),
+(51, 5, 2, '1', '2025-07-12 09:07:21', '2025-07-12 09:07:21'),
+(52, 5, 1, '1', '2025-07-12 09:07:21', '2025-07-12 09:07:21'),
+(53, 5, 7, '1', '2025-07-12 10:10:40', '2025-07-12 10:10:40'),
+(54, 6, 2, '1', '2025-07-12 12:11:36', '2025-07-12 12:11:36'),
+(55, 6, 1, '1', '2025-07-12 12:11:36', '2025-07-12 12:11:36'),
+(61, 8, 1, '1', '2025-07-14 10:20:44', '2025-07-14 10:20:44'),
+(60, 8, 2, '1', '2025-07-14 10:20:44', '2025-07-14 10:20:44'),
+(62, 9, 3, '1', '2025-07-24 11:34:21', '2025-07-24 11:34:21'),
+(63, 10, 8, '1', '2025-08-13 06:03:59', '2025-08-13 06:03:59'),
+(64, 10, 7, '1', '2025-08-13 06:03:59', '2025-08-13 06:03:59'),
+(65, 10, 33, '1', '2025-09-17 06:51:43', '2025-09-17 06:51:43'),
+(66, 10, 32, '1', '2025-09-17 06:51:43', '2025-09-17 06:51:43'),
+(67, 10, 31, '1', '2025-09-17 06:51:43', '2025-09-17 06:51:43'),
+(68, 10, 30, '1', '2025-09-17 06:51:43', '2025-09-17 06:51:43'),
+(69, 10, 29, '1', '2025-09-17 06:51:43', '2025-09-17 06:51:43'),
+(70, 10, 28, '1', '2025-09-17 06:51:43', '2025-09-17 06:51:43'),
+(71, 10, 27, '1', '2025-09-17 06:51:43', '2025-09-17 06:51:43'),
+(72, 10, 26, '1', '2025-09-17 06:51:43', '2025-09-17 06:51:43'),
+(73, 10, 6, '1', '2025-09-17 06:51:43', '2025-09-17 06:51:43'),
+(74, 10, 5, '1', '2025-09-17 06:51:43', '2025-09-17 06:51:43'),
+(75, 10, 4, '1', '2025-09-17 06:51:43', '2025-09-17 06:51:43'),
+(76, 10, 3, '1', '2025-09-17 06:51:43', '2025-09-17 06:51:43'),
+(77, 10, 2, '1', '2025-09-17 06:51:43', '2025-09-17 06:51:43'),
+(78, 10, 1, '1', '2025-09-17 06:51:43', '2025-09-17 06:51:43'),
+(79, 3, 33, '1', '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(80, 3, 32, '1', '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(81, 3, 31, '1', '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(82, 3, 30, '1', '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(83, 3, 29, '1', '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(84, 3, 28, '1', '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(85, 3, 27, '1', '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(86, 3, 26, '1', '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(87, 3, 8, '1', '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(88, 3, 3, '1', '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(89, 3, 4, '1', '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(90, 3, 5, '1', '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(91, 3, 6, '1', '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(92, 3, 7, '1', '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(133, 13, 36, '1', '2026-04-09 11:18:07', '2026-04-09 11:18:07'),
+(95, 12, 8, '1', '2025-11-24 09:36:20', '2025-11-24 09:36:20'),
+(101, 12, 26, '1', '2026-03-11 09:19:51', '2026-03-11 09:19:51'),
+(102, 12, 7, '1', '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
+(103, 12, 6, '1', '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
+(104, 12, 5, '1', '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
+(105, 12, 4, '1', '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
+(106, 12, 3, '1', '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
+(107, 12, 2, '1', '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
+(108, 12, 1, '1', '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
+(111, 13, 3, '1', '2026-03-28 06:46:31', '2026-03-28 06:46:31'),
+(112, 13, 2, '1', '2026-03-28 06:46:31', '2026-03-28 06:46:31'),
+(118, 14, 2, '1', '2026-03-28 10:35:07', '2026-03-28 10:35:07'),
+(119, 14, 1, '1', '2026-03-28 10:35:28', '2026-03-28 10:35:28'),
+(120, 14, 3, '1', '2026-03-28 11:44:33', '2026-03-28 11:44:33'),
+(121, 14, 4, '1', '2026-03-30 06:22:08', '2026-03-30 06:22:08'),
+(122, 14, 5, '1', '2026-03-30 06:22:08', '2026-03-30 06:22:08'),
+(123, 14, 6, '1', '2026-03-30 06:22:08', '2026-03-30 06:22:08'),
+(124, 14, 7, '1', '2026-03-30 06:22:08', '2026-03-30 06:22:08'),
+(125, 14, 8, '1', '2026-03-30 06:22:08', '2026-03-30 06:22:08'),
+(126, 14, 26, '1', '2026-03-30 06:22:08', '2026-03-30 06:22:08'),
+(127, 14, 34, '1', '2026-04-08 06:18:42', '2026-04-08 06:18:42'),
+(128, 14, 35, '1', '2026-04-08 06:54:36', '2026-04-08 06:54:36'),
+(129, 14, 37, '1', '2026-04-09 05:07:45', '2026-04-09 05:07:45'),
+(132, 13, 35, '1', '2026-04-09 11:16:53', '2026-04-09 11:16:53'),
+(131, 14, 36, '1', '2026-04-09 07:13:25', '2026-04-09 07:13:25');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_service_account_managers`
+--
+
+DROP TABLE IF EXISTS `customer_service_account_managers`;
+CREATE TABLE IF NOT EXISTS `customer_service_account_managers` (
+  `customer_service_id` int(11) NOT NULL,
+  `account_manager_id` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY `customer_service_id` (`customer_service_id`,`account_manager_id`),
+  KEY `account_manager_id` (`account_manager_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `customer_service_account_managers`
+--
+
+INSERT INTO `customer_service_account_managers` (`customer_service_id`, `account_manager_id`, `created_at`, `updated_at`) VALUES
+(44, 10, '2025-11-06 09:30:13', '2025-11-06 09:30:13'),
+(101, 15, '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
+(43, 11, '2025-11-06 09:30:13', '2025-11-06 09:30:13'),
+(44, 11, '2025-11-06 09:30:13', '2025-11-06 09:30:13'),
+(42, 10, '2025-11-06 09:30:13', '2025-11-06 09:30:13'),
+(43, 10, '2025-11-06 09:30:13', '2025-11-06 09:30:13'),
+(45, 11, '2025-11-19 12:08:42', '2025-11-19 12:08:42'),
+(46, 11, '2025-11-19 12:08:42', '2025-11-19 12:08:42'),
+(45, 10, '2025-11-19 12:08:42', '2025-11-19 12:08:42'),
+(46, 10, '2025-11-19 12:08:42', '2025-11-19 12:08:42'),
+(47, 10, '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(48, 10, '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(51, 15, '2025-08-22 06:58:38', '2025-08-22 06:58:38'),
+(52, 15, '2025-08-22 06:58:38', '2025-08-22 06:58:38'),
+(53, 15, '2025-08-22 06:58:38', '2025-08-22 06:58:38'),
+(54, 12, '2025-07-12 12:15:33', '2025-07-12 12:15:33'),
+(55, 12, '2025-07-12 12:15:33', '2025-07-12 12:15:33'),
+(51, 14, '2025-08-22 06:58:38', '2025-08-22 06:58:38'),
+(54, 13, '2025-07-12 12:15:33', '2025-07-12 12:15:33'),
+(55, 13, '2025-07-12 12:15:33', '2025-07-12 12:15:33'),
+(133, 11, '2026-04-09 11:18:07', '2026-04-09 11:18:07'),
+(60, 11, '2025-07-14 11:07:04', '2025-07-14 11:07:04'),
+(61, 11, '2025-07-14 11:07:04', '2025-07-14 11:07:04'),
+(62, 15, '2025-08-13 09:47:39', '2025-08-13 09:47:39'),
+(63, 13, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(65, 13, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(64, 13, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(45, 14, '2025-11-19 12:08:42', '2025-11-19 12:08:42'),
+(66, 13, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(67, 13, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(68, 13, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(69, 13, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(70, 13, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(71, 13, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(72, 13, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(73, 13, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(74, 13, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(75, 13, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(76, 13, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(77, 13, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(78, 13, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(79, 10, '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(80, 10, '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(81, 10, '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(82, 10, '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(83, 10, '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(84, 10, '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(85, 10, '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(86, 10, '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(87, 10, '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(88, 10, '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(89, 10, '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(90, 10, '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(91, 10, '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(92, 10, '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(78, 10, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(78, 14, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(72, 11, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(72, 10, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(72, 14, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(72, 15, '2025-11-19 10:04:15', '2025-11-19 10:04:15'),
+(95, 15, '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
+(102, 15, '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
+(103, 15, '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
+(104, 15, '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
+(105, 15, '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
+(106, 15, '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
+(107, 15, '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
+(108, 15, '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
+(111, 11, '2026-04-09 11:18:07', '2026-04-09 11:18:07'),
+(112, 11, '2026-04-09 11:18:07', '2026-04-09 11:18:07'),
+(126, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(125, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(124, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(123, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(122, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(121, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(120, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(119, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(118, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(118, 15, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(124, 15, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(127, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(128, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(129, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(132, 11, '2026-04-09 11:18:07', '2026-04-09 11:18:07'),
+(131, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_service_task`
+--
+
+DROP TABLE IF EXISTS `customer_service_task`;
+CREATE TABLE IF NOT EXISTS `customer_service_task` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `service_id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `customer_id` (`customer_id`,`service_id`,`task_id`),
+  KEY `service_id` (`service_id`),
+  KEY `task_id` (`task_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_source`
+--
+
+DROP TABLE IF EXISTS `customer_source`;
+CREATE TABLE IF NOT EXISTS `customer_source` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `customer_source`
+--
+
+INSERT INTO `customer_source` (`id`, `name`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'cust', '1', '2024-09-10 08:58:59', '2024-09-10 09:01:48'),
+(4, 'abc', '1', '2024-09-13 10:47:01', '2024-09-13 10:47:01'),
+(3, 'cust2', '1', '2024-09-10 08:59:21', '2024-09-10 08:59:21'),
+(5, 'social media', '1', '2024-09-13 10:51:17', '2024-09-13 10:51:17'),
+(6, 'okk', '1', '2024-09-13 10:54:06', '2024-09-13 10:54:06'),
+(7, 'ayz', '1', '2024-09-13 11:05:11', '2024-09-13 11:05:11'),
+(9, 'DDD', '1', '2024-09-25 11:46:40', '2024-09-25 11:46:40'),
+(10, 'AAAAA', '1', '2024-11-23 07:21:40', '2024-11-23 07:21:40');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_staff`
+--
+
+DROP TABLE IF EXISTS `customer_staff`;
+CREATE TABLE IF NOT EXISTS `customer_staff` (
+  `staff_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `customer_staff`
+--
+
+INSERT INTO `customer_staff` (`staff_id`, `customer_id`) VALUES
+(1, 1),
+(1, 2),
+(1, 3),
+(15, 5),
+(1, 6),
+(1, 7),
+(1, 8),
+(15, 9),
+(13, 10);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_sub_source`
+--
+
+DROP TABLE IF EXISTS `customer_sub_source`;
+CREATE TABLE IF NOT EXISTS `customer_sub_source` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_source_id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `customer_source_id` (`customer_source_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `customer_sub_source`
+--
+
+INSERT INTO `customer_sub_source` (`id`, `customer_source_id`, `name`, `status`, `created_at`, `updated_at`) VALUES
+(1, 1, 'subSorce', '1', '2024-09-10 09:41:21', '2024-09-10 09:41:21'),
+(2, 3, 'SSSSS', '1', '2024-09-13 10:39:48', '2024-09-13 10:39:48'),
+(3, 4, 'a', '1', '2024-09-13 10:47:12', '2024-09-13 10:47:12'),
+(4, 4, 'b', '1', '2024-09-13 10:47:15', '2024-09-13 10:47:15'),
+(5, 4, 'c', '1', '2024-09-13 10:47:19', '2024-09-13 10:47:19'),
+(6, 5, 'facebook', '1', '2024-09-13 10:51:46', '2024-09-13 10:51:46'),
+(7, 5, 'twitter', '1', '2024-09-13 10:52:01', '2024-09-13 10:52:01'),
+(8, 6, 'o', '1', '2024-09-13 10:54:14', '2024-09-13 10:54:14'),
+(9, 6, 'k', '1', '2024-09-13 10:54:18', '2024-09-13 10:54:18'),
+(10, 7, 'x', '1', '2024-09-13 11:05:25', '2024-09-13 11:05:25'),
+(11, 7, 'y', '1', '2024-09-13 11:05:29', '2024-09-13 11:05:29'),
+(13, 10, 'f', '1', '2024-11-23 07:22:00', '2024-11-23 07:22:00'),
+(14, 10, 'ff', '1', '2024-11-23 07:22:04', '2024-11-23 07:22:04'),
+(15, 9, 'f', '1', '2025-01-08 07:27:15', '2025-01-08 07:27:15');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_users`
+--
+
+DROP TABLE IF EXISTS `customer_users`;
+CREATE TABLE IF NOT EXISTS `customer_users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_contact_person_role_id` int(11) NOT NULL,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone_code` varchar(10) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `is_disable` enum('0','1') NOT NULL DEFAULT '0',
+  `staff_id` int(11) NOT NULL,
+  `employee_number` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `login_auth_token` text,
+  `is_first_login` int(1) NOT NULL DEFAULT '0',
+  `mfa_enabled` int(1) NOT NULL DEFAULT '0',
+  `mfa_secret` text,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `dashboard_data_view`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `dashboard_data_view`;
+CREATE TABLE IF NOT EXISTS `dashboard_data_view` (
+);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `drafts`
+--
+
+DROP TABLE IF EXISTS `drafts`;
+CREATE TABLE IF NOT EXISTS `drafts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `job_id` int(11) NOT NULL,
+  `draft_sent_on` date DEFAULT NULL,
+  `draft_title` varchar(100) DEFAULT NULL,
+  `final_draft_sent_on` date DEFAULT NULL,
+  `feedback_received` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
+  `updated_amendment` enum('1','2','3','4') NOT NULL DEFAULT '1' COMMENT '1:Amendment, 2: Update ,2: Both ,2: None',
+  `feedback` text,
+  `was_it_complete` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `job_id` (`job_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `drafts`
+--
+
+INSERT INTO `drafts` (`id`, `job_id`, `draft_sent_on`, `draft_title`, `final_draft_sent_on`, `feedback_received`, `updated_amendment`, `feedback`, `was_it_complete`, `created_at`, `updated_at`) VALUES
+(10, 24, '2025-10-27', 'D_00001', '2025-10-27', '1', '1', 'uou', '1', '2025-10-27 05:32:51', '2025-10-27 05:32:51'),
+(11, 24, '2025-10-27', 'D_00002', '2025-11-12', '1', '2', 'rgrg', '1', '2025-10-27 05:37:30', '2025-11-12 15:09:27'),
+(12, 24, '2025-10-27', 'D_00003', '2025-11-12', '1', '1', 'adasdd', '1', '2025-10-27 05:45:29', '2025-11-12 15:08:59'),
+(13, 6, '2025-11-11', 'D_00001', '2025-11-13', '1', '1', 'yes', '1', '2025-11-11 07:24:22', '2025-11-13 05:04:26'),
+(14, 33, '2025-11-11', 'D_00001', '2025-11-11', '1', '1', 'rg', '1', '2025-11-11 21:18:02', '2025-11-11 21:21:27'),
+(15, 27, '2025-11-13', 'D_00001', NULL, '0', '1', NULL, '0', '2025-11-13 05:40:49', '2025-11-13 05:40:49'),
+(16, 25, '2025-11-13', 'D_00001', '2025-11-19', '1', '1', 'uyuju', '1', '2025-11-13 11:37:25', '2025-11-19 08:48:24'),
+(17, 25, '2025-11-13', 'D_00002', '2025-11-19', '1', '1', 'erhr', '1', '2025-11-13 11:55:07', '2025-11-19 08:47:45'),
+(18, 34, '2025-11-14', 'D_00001', NULL, '0', '1', NULL, '0', '2025-11-14 06:42:38', '2025-11-14 06:42:38'),
+(19, 73, '2026-04-01', 'D_00001', '2026-04-01', '1', '1', 'jkl,ikl', '1', '2026-04-01 06:15:45', '2026-04-01 06:15:45'),
+(20, 62, '2026-04-01', 'D_00001', '2026-04-01', '1', '1', 'n,', '1', '2026-04-01 07:21:45', '2026-04-01 07:21:45'),
+(21, 61, '2026-04-01', 'D_00001', '2026-04-01', '1', '1', 'j', '1', '2026-04-01 07:30:41', '2026-04-01 07:30:41');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `incorporation_in`
+--
+
+DROP TABLE IF EXISTS `incorporation_in`;
+CREATE TABLE IF NOT EXISTS `incorporation_in` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `incorporation_in`
+--
+
+INSERT INTO `incorporation_in` (`id`, `name`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'ENGLAND AND WALES', '1', '2024-09-02 07:00:20', '2024-09-14 05:31:31'),
+(4, 'United Kingdom', '1', '2024-09-25 11:46:03', '2025-10-22 05:55:54'),
+(8, 'ireland', '1', '2025-10-22 05:56:22', '2025-10-22 05:56:22');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `internal`
+--
+
+DROP TABLE IF EXISTS `internal`;
+CREATE TABLE IF NOT EXISTS `internal` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `internal`
+--
+
+INSERT INTO `internal` (`id`, `name`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'abc', '1', '2024-10-05 12:12:35', '2024-10-05 12:12:35'),
+(2, 'xyz', '1', '2024-10-05 12:12:44', '2024-10-05 12:12:44'),
+(7, 'ddddd', '1', '2024-11-18 10:15:46', '2024-11-18 10:15:46'),
+(6, 'SSS', '1', '2024-10-14 07:13:59', '2024-10-14 07:13:59'),
+(10, 'FFFF1', '1', '2024-11-26 05:26:00', '2024-11-26 05:27:21');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `jobs`
+--
+
+DROP TABLE IF EXISTS `jobs`;
+CREATE TABLE IF NOT EXISTS `jobs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `staff_created_id` int(11) DEFAULT NULL,
+  `job_id` varchar(100) NOT NULL,
+  `account_manager_id` int(11) NOT NULL COMMENT 'Only staff members who are account managers',
+  `customer_id` int(11) NOT NULL,
+  `client_id` int(11) NOT NULL,
+  `client_job_code` varchar(50) DEFAULT NULL,
+  `customer_contact_details_id` int(11) NOT NULL,
+  `service_id` int(11) NOT NULL,
+  `job_type_id` int(11) NOT NULL,
+  `budgeted_hours` varchar(100) DEFAULT NULL,
+  `reviewer` int(11) DEFAULT NULL,
+  `allocated_to` varchar(255) DEFAULT NULL,
+  `allocated_on` date DEFAULT NULL,
+  `date_received_on` date DEFAULT NULL,
+  `year_end` varchar(7) DEFAULT NULL,
+  `total_preparation_time` varchar(100) DEFAULT NULL,
+  `review_time` varchar(100) DEFAULT NULL,
+  `feedback_incorporation_time` varchar(100) DEFAULT NULL,
+  `total_time` varchar(100) DEFAULT NULL,
+  `engagement_model` varchar(255) DEFAULT NULL,
+  `expected_delivery_date` date DEFAULT NULL,
+  `expected_delivery_date_old` date DEFAULT NULL,
+  `due_on` date DEFAULT NULL,
+  `submission_deadline` date DEFAULT NULL,
+  `customer_deadline_date` date DEFAULT NULL,
+  `sla_deadline_date` date DEFAULT NULL,
+  `internal_deadline_date` date DEFAULT NULL,
+  `filing_Companies_required` enum('0','1') DEFAULT '1' COMMENT '0: No, 1: Yes',
+  `filing_Companies_date` date DEFAULT NULL,
+  `filing_hmrc_required` enum('0','1') DEFAULT '1' COMMENT '0: No, 1: Yes',
+  `filing_hmrc_date` date DEFAULT NULL,
+  `opening_balance_required` enum('0','1') DEFAULT '1' COMMENT '0: No, 1: Yes',
+  `opening_balance_date` date DEFAULT NULL,
+  `number_of_transaction` decimal(10,2) DEFAULT NULL,
+  `number_of_balance_items` int(11) DEFAULT NULL,
+  `turnover` decimal(15,2) DEFAULT NULL,
+  `number_of_employees` int(11) DEFAULT NULL,
+  `vat_reconciliation` enum('0','1') DEFAULT '1' COMMENT '0: No, 1: Yes',
+  `bookkeeping` enum('0','1') DEFAULT '1' COMMENT '0: No, 1: Yes',
+  `processing_type` enum('0','1','2') DEFAULT '1' COMMENT '1: Manual, 2: Software',
+  `invoiced` enum('0','1') DEFAULT '1' COMMENT '0: No, 1: Yes',
+  `currency` int(11) DEFAULT '0',
+  `invoice_value` decimal(15,2) DEFAULT NULL,
+  `invoice_date` date DEFAULT NULL,
+  `invoice_hours` varchar(100) DEFAULT NULL,
+  `invoice_remark` text,
+  `status_type` int(11) DEFAULT NULL,
+  `total_hours` varchar(100) DEFAULT NULL,
+  `total_hours_status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `notes` longtext,
+  `Turnover_Period_id_0` varchar(255) DEFAULT NULL,
+  `Turnover_Currency_id_0` varchar(255) DEFAULT NULL,
+  `Turnover_id_0` int(11) DEFAULT NULL,
+  `VAT_Registered_id_0` varchar(255) DEFAULT NULL,
+  `VAT_Frequency_id_0` varchar(255) DEFAULT NULL,
+  `Who_Did_The_Bookkeeping_id_1` varchar(255) DEFAULT NULL,
+  `PAYE_Registered_id_1` varchar(255) DEFAULT NULL,
+  `Number_of_Trial_Balance_Items_id_1` varchar(255) DEFAULT NULL,
+  `Year_Ending_id_1` date DEFAULT NULL,
+  `Bookkeeping_Frequency_id_2` varchar(255) DEFAULT NULL,
+  `Day_Date_id_2` date DEFAULT NULL,
+  `Week_Year_id_2` varchar(100) DEFAULT NULL,
+  `Week_Month_id_2` varchar(100) DEFAULT NULL,
+  `Week_id_2` varchar(100) DEFAULT NULL,
+  `Fortnight_Year_id_2` varchar(100) DEFAULT NULL,
+  `Fortnight_Month_id_2` varchar(100) DEFAULT NULL,
+  `Fortnight_id_2` varchar(100) DEFAULT NULL,
+  `Month_Year_id_2` varchar(100) DEFAULT NULL,
+  `Month_id_2` varchar(100) DEFAULT NULL,
+  `Quarter_Year_id_2` varchar(100) DEFAULT NULL,
+  `Quarter_id_2` varchar(100) DEFAULT NULL,
+  `Year_id_2` varchar(100) DEFAULT NULL,
+  `Other_FromDate_id_2` date DEFAULT NULL,
+  `Other_ToDate_id_2` date DEFAULT NULL,
+  `Number_of_Total_Transactions_id_2` int(11) DEFAULT NULL,
+  `Number_of_Bank_Transactions_id_2` int(11) DEFAULT NULL,
+  `Number_of_Purchase_Invoices_id_2` int(11) DEFAULT NULL,
+  `Number_of_Sales_Invoices_id_2` int(11) DEFAULT NULL,
+  `Number_of_Petty_Cash_Transactions_id_2` int(11) DEFAULT NULL,
+  `Number_of_Journal_Entries_id_2` int(11) DEFAULT NULL,
+  `Number_of_Other_Transactions_id_2` int(11) DEFAULT NULL,
+  `Transactions_Posting_id_2` varchar(255) DEFAULT NULL,
+  `Quality_of_Paperwork_id_2` varchar(255) DEFAULT NULL,
+  `Number_of_Integration_Software_Platforms_id_2` varchar(255) DEFAULT NULL,
+  `CIS_id_2` varchar(255) DEFAULT NULL,
+  `Posting_Payroll_Journals_id_2` varchar(255) DEFAULT NULL,
+  `Department_Tracking_id_2` varchar(255) DEFAULT NULL,
+  `Sales_Reconciliation_Required_id_2` varchar(255) DEFAULT NULL,
+  `Factoring_Account_id_2` varchar(255) DEFAULT NULL,
+  `Payment_Methods_id_2` varchar(255) DEFAULT NULL,
+  `Payroll_Frequency_id_3` varchar(255) DEFAULT NULL,
+  `Payroll_Week_Year_id_3` varchar(100) DEFAULT NULL,
+  `Payroll_Week_Month_id_3` varchar(100) DEFAULT NULL,
+  `Payroll_Week_id_3` varchar(100) DEFAULT NULL,
+  `Payroll_Fortnight_Year_id_3` varchar(100) DEFAULT NULL,
+  `Payroll_Fortnight_Month_id_3` varchar(100) DEFAULT NULL,
+  `Payroll_Fortnight_id_3` varchar(100) DEFAULT NULL,
+  `Payroll_Month_Year_id_3` varchar(100) DEFAULT NULL,
+  `Payroll_Month_id_3` varchar(100) DEFAULT NULL,
+  `Payroll_Quarter_Year_id_3` varchar(100) DEFAULT NULL,
+  `Payroll_Quarter_id_3` varchar(100) DEFAULT NULL,
+  `Payroll_Year_id_3` varchar(100) DEFAULT NULL,
+  `Type_of_Payslip_id_3` varchar(255) DEFAULT NULL,
+  `Percentage_of_Variable_Payslips_id_3` varchar(255) DEFAULT NULL,
+  `Is_CIS_Required_id_3` varchar(255) DEFAULT NULL,
+  `CIS_Frequency_id_3` varchar(255) DEFAULT NULL,
+  `Number_of_Sub_contractors_id_3` int(11) DEFAULT NULL,
+  `Whose_Tax_Return_is_it_id_4` varchar(255) DEFAULT NULL,
+  `Number_of_Income_Sources_id_4` varchar(255) DEFAULT NULL,
+  `If_Landlord_Number_of_Properties_id_4` varchar(255) DEFAULT NULL,
+  `If_Sole_Trader_Who_is_doing_Bookkeeping_id_4` varchar(255) DEFAULT NULL,
+  `Tax_Year_id_4` varchar(100) DEFAULT NULL,
+  `Management_Accounts_Frequency_id_6` varchar(255) DEFAULT NULL,
+  `Management_Accounts_FromDate_id_6` date DEFAULT NULL,
+  `Management_Accounts_ToDate_id_6` date DEFAULT NULL,
+  `Year_id_33` varchar(100) DEFAULT NULL,
+  `Period_id_32` varchar(100) DEFAULT NULL,
+  `Day_Date_id_32` date DEFAULT NULL,
+  `Week_Year_id_32` varchar(100) DEFAULT NULL,
+  `Week_Month_id_32` varchar(100) DEFAULT NULL,
+  `Week_id_32` varchar(100) DEFAULT NULL,
+  `Fortnight_Year_id_32` varchar(100) DEFAULT NULL,
+  `Fortnight_Month_id_32` varchar(100) DEFAULT NULL,
+  `Fortnight_id_32` varchar(100) DEFAULT NULL,
+  `Month_Year_id_32` varchar(100) DEFAULT NULL,
+  `Month_id_32` varchar(100) DEFAULT NULL,
+  `Quarter_Year_id_32` varchar(100) DEFAULT NULL,
+  `Quarter_id_32` varchar(100) DEFAULT NULL,
+  `Year_id_32` varchar(100) DEFAULT NULL,
+  `Other_FromDate_id_32` date DEFAULT NULL,
+  `Other_ToDate_id_32` date DEFAULT NULL,
+  `Payroll_Frequency_id_31` varchar(100) DEFAULT NULL,
+  `Payroll_Week_Year_id_31` varchar(100) DEFAULT NULL,
+  `Payroll_Week_Month_id_31` varchar(100) DEFAULT NULL,
+  `Payroll_Week_id_31` varchar(100) DEFAULT NULL,
+  `Payroll_Fortnight_Year_id_31` varchar(100) DEFAULT NULL,
+  `Payroll_Fortnight_Month_id_31` varchar(100) DEFAULT NULL,
+  `Payroll_Fortnight_id_31` varchar(100) DEFAULT NULL,
+  `Payroll_Month_Year_id_31` varchar(100) DEFAULT NULL,
+  `Payroll_Month_id_31` varchar(100) DEFAULT NULL,
+  `Payroll_Quarter_Year_id_31` varchar(100) DEFAULT NULL,
+  `Payroll_Quarter_id_31` varchar(100) DEFAULT NULL,
+  `Payroll_Year_id_31` varchar(100) DEFAULT NULL,
+  `Audit_Year_Ending_id_27` date DEFAULT NULL,
+  `Filing_Frequency_id_8` varchar(100) DEFAULT NULL,
+  `Period_Ending_Date_id_8` date DEFAULT NULL,
+  `Filing_Date_id_8` date DEFAULT NULL,
+  `Year_id_28` varchar(100) DEFAULT NULL,
+  `job_priority` enum('normal','urgent') NOT NULL DEFAULT 'normal',
+  `status_updation_date` datetime DEFAULT CURRENT_TIMESTAMP,
+  `processing_checklist` int(11) DEFAULT NULL,
+  `reviewing_checklist` int(11) DEFAULT NULL,
+  `processing_checklist_status` enum('0','1','2') NOT NULL DEFAULT '0' COMMENT '0=not required,1=complete,2=inprogres',
+  `reviewing_checklist_status` enum('0','1','2') NOT NULL DEFAULT '0' COMMENT '0=not required,1=complete,2=inprogres',
+  `checklist_modal_data` longtext,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `job_id` (`job_id`),
+  KEY `account_manager_id` (`account_manager_id`),
+  KEY `reviewer` (`reviewer`),
+  KEY `allocated_to` (`allocated_to`),
+  KEY `customer_id` (`customer_id`),
+  KEY `client_id` (`client_id`),
+  KEY `customer_contact_details_id` (`customer_contact_details_id`),
+  KEY `service_id` (`service_id`),
+  KEY `job_type_id` (`job_type_id`),
+  KEY `currency` (`currency`)
+) ENGINE=MyISAM AUTO_INCREMENT=98 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `jobs`
+--
+
+INSERT INTO `jobs` (`id`, `staff_created_id`, `job_id`, `account_manager_id`, `customer_id`, `client_id`, `client_job_code`, `customer_contact_details_id`, `service_id`, `job_type_id`, `budgeted_hours`, `reviewer`, `allocated_to`, `allocated_on`, `date_received_on`, `year_end`, `total_preparation_time`, `review_time`, `feedback_incorporation_time`, `total_time`, `engagement_model`, `expected_delivery_date`, `expected_delivery_date_old`, `due_on`, `submission_deadline`, `customer_deadline_date`, `sla_deadline_date`, `internal_deadline_date`, `filing_Companies_required`, `filing_Companies_date`, `filing_hmrc_required`, `filing_hmrc_date`, `opening_balance_required`, `opening_balance_date`, `number_of_transaction`, `number_of_balance_items`, `turnover`, `number_of_employees`, `vat_reconciliation`, `bookkeeping`, `processing_type`, `invoiced`, `currency`, `invoice_value`, `invoice_date`, `invoice_hours`, `invoice_remark`, `status_type`, `total_hours`, `total_hours_status`, `notes`, `Turnover_Period_id_0`, `Turnover_Currency_id_0`, `Turnover_id_0`, `VAT_Registered_id_0`, `VAT_Frequency_id_0`, `Who_Did_The_Bookkeeping_id_1`, `PAYE_Registered_id_1`, `Number_of_Trial_Balance_Items_id_1`, `Year_Ending_id_1`, `Bookkeeping_Frequency_id_2`, `Day_Date_id_2`, `Week_Year_id_2`, `Week_Month_id_2`, `Week_id_2`, `Fortnight_Year_id_2`, `Fortnight_Month_id_2`, `Fortnight_id_2`, `Month_Year_id_2`, `Month_id_2`, `Quarter_Year_id_2`, `Quarter_id_2`, `Year_id_2`, `Other_FromDate_id_2`, `Other_ToDate_id_2`, `Number_of_Total_Transactions_id_2`, `Number_of_Bank_Transactions_id_2`, `Number_of_Purchase_Invoices_id_2`, `Number_of_Sales_Invoices_id_2`, `Number_of_Petty_Cash_Transactions_id_2`, `Number_of_Journal_Entries_id_2`, `Number_of_Other_Transactions_id_2`, `Transactions_Posting_id_2`, `Quality_of_Paperwork_id_2`, `Number_of_Integration_Software_Platforms_id_2`, `CIS_id_2`, `Posting_Payroll_Journals_id_2`, `Department_Tracking_id_2`, `Sales_Reconciliation_Required_id_2`, `Factoring_Account_id_2`, `Payment_Methods_id_2`, `Payroll_Frequency_id_3`, `Payroll_Week_Year_id_3`, `Payroll_Week_Month_id_3`, `Payroll_Week_id_3`, `Payroll_Fortnight_Year_id_3`, `Payroll_Fortnight_Month_id_3`, `Payroll_Fortnight_id_3`, `Payroll_Month_Year_id_3`, `Payroll_Month_id_3`, `Payroll_Quarter_Year_id_3`, `Payroll_Quarter_id_3`, `Payroll_Year_id_3`, `Type_of_Payslip_id_3`, `Percentage_of_Variable_Payslips_id_3`, `Is_CIS_Required_id_3`, `CIS_Frequency_id_3`, `Number_of_Sub_contractors_id_3`, `Whose_Tax_Return_is_it_id_4`, `Number_of_Income_Sources_id_4`, `If_Landlord_Number_of_Properties_id_4`, `If_Sole_Trader_Who_is_doing_Bookkeeping_id_4`, `Tax_Year_id_4`, `Management_Accounts_Frequency_id_6`, `Management_Accounts_FromDate_id_6`, `Management_Accounts_ToDate_id_6`, `Year_id_33`, `Period_id_32`, `Day_Date_id_32`, `Week_Year_id_32`, `Week_Month_id_32`, `Week_id_32`, `Fortnight_Year_id_32`, `Fortnight_Month_id_32`, `Fortnight_id_32`, `Month_Year_id_32`, `Month_id_32`, `Quarter_Year_id_32`, `Quarter_id_32`, `Year_id_32`, `Other_FromDate_id_32`, `Other_ToDate_id_32`, `Payroll_Frequency_id_31`, `Payroll_Week_Year_id_31`, `Payroll_Week_Month_id_31`, `Payroll_Week_id_31`, `Payroll_Fortnight_Year_id_31`, `Payroll_Fortnight_Month_id_31`, `Payroll_Fortnight_id_31`, `Payroll_Month_Year_id_31`, `Payroll_Month_id_31`, `Payroll_Quarter_Year_id_31`, `Payroll_Quarter_id_31`, `Payroll_Year_id_31`, `Audit_Year_Ending_id_27`, `Filing_Frequency_id_8`, `Period_Ending_Date_id_8`, `Filing_Date_id_8`, `Year_id_28`, `job_priority`, `status_updation_date`, `processing_checklist`, `reviewing_checklist`, `processing_checklist_status`, `reviewing_checklist_status`, `checklist_modal_data`, `created_at`, `updated_at`) VALUES
+(1, 1, '00001', 10, 1, 1, '', 35, 3, 3, '01:00', 6, '6', '2025-07-05', '2025-07-05', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, '2026-02-06', NULL, '2025-07-10', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 5, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-07-05 12:39:14', '2026-02-03 05:10:01'),
+(2, 1, '00002', 11, 1, 1, '', 35, 3, 3, '24:24', 13, '13', '2025-07-09', '2025-07-09', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-07-14', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 5, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-07-09 12:10:36', '2025-07-11 10:23:00'),
+(3, 1, '00003', 10, 3, 2, '', 37, 2, 4, '00:00', 14, '11', '2025-07-10', '2025-07-10', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-07-11', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 5, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-07-10 11:44:28', '2025-07-11 10:44:42'),
+(4, 1, '00004', 10, 3, 2, '', 37, 1, 11, '02:10', 14, '0', '2025-07-11', '2025-07-11', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2027-01-31', NULL, NULL, '2026-04-24', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 5, NULL, '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-07-11 06:49:52', '2026-03-27 05:39:49'),
+(57, 1, '000057', 15, 12, 19, '', 46, 1, 11, '01:10', 0, '0', '2026-03-27', '2026-03-27', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2027-03-24', NULL, NULL, '2026-04-24', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', '2026-06-30', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-27 12:10:59', NULL, NULL, '0', '0', NULL, '2026-03-27 06:40:59', '2026-03-27 06:40:59'),
+(5, 1, '00005', 10, 1, 1, '', 35, 2, 4, '24:24', 11, '14', '2025-07-11', '2025-07-11', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-07-12', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-07-11 09:58:58', '2025-08-13 10:11:21'),
+(6, 15, '00006', 15, 9, 7, '', 43, 3, 3, '01:00', 6, '17', '2025-07-24', '2025-07-24', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-07-25', NULL, '1', '2025-11-13', '1', '2025-11-13', '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 18, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-07-24 11:35:52', '2025-11-13 05:04:55'),
+(7, 1, '00007', 15, 9, 7, '', 43, 3, 3, '01:00', 11, '0', '2025-08-02', '2025-08-02', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-08-03', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 5, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-11-11 09:59:35', '2025-11-13 05:23:54'),
+(8, 1, '00008', 15, 9, 7, '', 43, 3, 3, '01:00', 0, '15', '2025-08-05', '2025-08-05', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-08-06', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 4, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-08-05 13:20:47', '2025-11-13 05:54:11'),
+(9, 1, '00009', 15, 9, 7, '', 43, 3, 3, '00:00', 0, '0', '2025-08-05', '2025-08-05', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-08-10', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 2, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-08-05 13:22:42', '2025-11-13 06:04:16'),
+(10, 13, '000010', 13, 10, 8, '', 44, 7, 2, '01:01', 15, '14', '2025-08-13', '2025-08-13', '', '12:35', '13:35', '14:35', '40:45', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-08-14', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 5, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-08-13 06:07:06', '2025-09-19 10:09:49'),
+(11, 5, '000011', 10, 1, 1, '', 35, 3, 3, '01:011', 0, '0', '2025-08-13', '2025-08-13', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-08-18', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-08-13 11:57:45', '2026-01-05 12:23:15'),
+(12, 1, '000012', 15, 5, 3, '', 39, 2, 4, '16:16', 0, '0', '2025-08-22', '2025-08-22', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-08-23', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-08-22 06:57:43', '2025-08-22 06:57:43'),
+(13, 1, '000013', 15, 5, 3, '', 39, 7, 2, '16:16', 11, '0', '2025-08-22', '2025-08-22', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-08-23', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', 'Weekly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-08-22 06:58:15', '2025-12-26 10:53:24'),
+(14, 1, '000014', 13, 10, 8, '', 44, 2, 5, '00:00', 0, '0', '2025-09-17', '2025-09-17', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-10-02', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-09-17 11:33:45', '2025-09-17 11:57:13'),
+(15, 1, '000015', 13, 10, 8, '', 44, 32, 6, '00:00', 0, '0', '2025-09-18', '2025-09-18', '4', '12:05', '05:05', '05:55', '23:05', 'fte_dedicated_staffing', '2025-09-19', '2025-09-20', NULL, NULL, NULL, '2025-09-19', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, 'Fortnight', NULL, NULL, NULL, NULL, '2023', 'December', '2nd Half', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'llll', 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-09-18 05:58:29', '2025-11-11 14:57:48'),
+(16, 1, '000016', 13, 10, 8, '', 44, 32, 6, '00:00', 0, '0', '2025-09-24', '2025-09-24', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-09-25', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, 'Day', '2025-05-18', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-09-24 05:21:05', '2025-09-24 05:36:22'),
+(17, 1, '000017', 13, 10, 8, '', 44, 32, 6, '00:00', 0, '0', '2025-09-24', '2025-09-24', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-09-25', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, 'Day', '2026-05-29', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-09-24 05:46:12', '2025-09-24 05:47:18'),
+(18, 1, '000018', 13, 10, 8, '', 44, 32, 6, '01:45', 0, '0', '2025-10-04', '2025-10-04', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-10-05', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-10-04 06:49:02', '2025-10-04 06:49:02'),
+(19, 1, '000019', 13, 10, 8, '', 44, 32, 6, '08:45', 0, '0', '2025-10-04', '2025-10-04', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-10-05', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-10-04 06:58:30', '2025-10-04 10:16:00'),
+(20, 1, '000020', 13, 10, 8, '', 44, 33, 9, '01:00', 0, '0', '2025-10-04', '2025-10-04', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-10-05', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-10-04 10:45:30', '2025-10-04 10:45:52'),
+(21, 1, '000021', 13, 10, 8, '', 44, 32, 8, '12:15', 0, '0', '2025-10-06', '2025-10-06', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-10-07', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-10-06 05:06:35', '2025-10-06 06:14:20'),
+(22, 1, '000022', 13, 10, 8, '', 44, 32, 8, '18:20', 0, '0', '2025-10-06', '2025-10-06', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-10-07', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '1', 0, '0.00', NULL, '00:00', NULL, 6, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-10-06 05:56:07', '2025-10-24 05:05:07'),
+(23, 1, '000023', 13, 10, 8, '', 44, 33, 10, '00:55', 14, '15', '2025-10-25', '2025-10-25', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-10-26', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 5, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-10-25 06:34:23', '2025-10-25 06:34:23'),
+(24, 1, '000024', 13, 6, 11, '', 40, 1, 4, '01:30', 14, '15', '2025-10-25', '2025-10-25', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2025-11-15', NULL, NULL, '2025-12-22', NULL, '1', '2025-11-12', '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 19, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', '2025-11-22', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-10-25 06:53:57', '2025-11-24 06:30:47'),
+(25, 1, '000025', 13, 6, 11, '', 40, 2, 4, '00:30', 11, '5', '2025-10-25', '2025-10-10', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-11-20', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 21, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 55, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-11-19 14:18:24', NULL, NULL, '0', '0', NULL, '2025-10-25 10:48:13', '2025-11-19 08:50:00'),
+(26, 1, '000026', 13, 10, 8, '', 44, 33, 9, '01:01', 0, '0', '2025-10-27', '2025-10-27', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-10-28', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-10-27 08:26:38', '2025-10-27 08:26:38'),
+(27, 1, '000027', 10, 2, 10, '', 36, 2, 4, '01:00', 14, '13', '2025-10-31', '2025-10-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-11-01', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 7, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-10-30 06:12:22', '2025-11-13 05:57:48'),
+(28, 1, '000028', 10, 2, 10, '', 36, 2, 4, '01:00', 0, '0', '2025-10-31', '2025-10-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-11-01', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-10-30 06:12:38', '2025-10-31 06:15:50'),
+(29, 1, '000029', 10, 2, 10, '', 36, 2, 4, '01:00', 0, '0', '2025-10-31', '2025-10-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-11-01', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-11-11 06:15:24', '2025-11-11 16:44:18'),
+(30, 1, '000030', 10, 3, 9, '', 37, 33, 10, '00:55', 0, '0', '2025-10-31', '2025-10-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-11-01', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-10-31 06:32:06', '2025-10-31 06:32:06'),
+(31, 1, '000031', 11, 8, 5, '', 42, 2, 4, '01:00', 0, '0', '2025-11-06', '2025-11-06', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-11-07', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 2, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-11-06 09:52:32', '2025-11-11 16:53:39'),
+(32, 1, '000032', 15, 9, 7, '', 43, 3, 3, '09:09', 6, '13', '2025-11-11', '2025-11-11', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', '2025-11-16', '2025-11-16', NULL, NULL, NULL, '2025-11-16', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 5, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-11-22 11:45:12', NULL, NULL, '0', '0', NULL, '2025-11-11 15:03:20', '2025-11-22 06:15:12'),
+(33, 1, '000033', 15, 9, 7, '', 43, 3, 3, '09:59', 13, '0', '2025-11-11', '2025-11-11', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', '2025-11-16', '2025-11-16', NULL, NULL, NULL, '2025-11-12', NULL, '0', NULL, '1', '2025-11-12', '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 20, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-11-11 15:07:13', '2025-11-11 21:32:08'),
+(34, 1, '000034', 15, 9, 7, '', 43, 3, 3, '05:00', 6, '22', '2025-11-13', '2025-11-13', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-11-14', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 7, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'urgent', '2025-11-14 12:12:47', NULL, NULL, '0', '0', NULL, '2025-11-13 12:43:31', '2025-11-14 06:42:47'),
+(35, 1, '000035', 15, 9, 7, '', 43, 3, 3, '06:00', 0, '0', '2025-11-14', '2025-11-14', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-11-15', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 26, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2025-11-14 06:53:06', '2025-11-14 09:40:59'),
+(36, 1, '000036', 15, 9, 7, '777', 43, 3, 3, '06:00', 0, '14', '2025-11-14', '2025-11-14', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-11-15', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 27, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, '2025-11-14', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-11-20 10:39:10', NULL, NULL, '0', '0', NULL, '2025-11-14 06:54:36', '2025-11-20 05:09:10'),
+(37, 1, '000037', 13, 10, 15, '', 44, 33, 10, '00:55', 0, '0', '2025-11-20', '2025-11-20', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-11-21', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 3, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-11-20 10:37:51', NULL, NULL, '0', '0', NULL, '2025-11-20 05:07:09', '2025-11-20 05:07:51'),
+(38, 1, '000038', 13, 10, 15, '', 44, 33, 9, '11:00', 0, '10', '2025-11-20', '2025-11-20', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-11-21', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-11-20 10:53:36', NULL, NULL, '0', '0', NULL, '2025-11-20 05:09:43', '2025-11-20 05:23:36'),
+(39, 1, '000039', 13, 10, 16, '', 44, 33, 10, '00:55', 0, '0', '2025-11-21', '2025-11-21', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-11-22', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-11-21 16:55:10', NULL, NULL, '0', '0', NULL, '2025-11-21 11:25:10', '2025-11-21 11:25:10'),
+(40, 1, '000040', 13, 10, 16, '', 44, 1, 11, '03:20', 0, '0', '2025-11-25', '2025-11-25', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-05-31', NULL, NULL, '2025-12-23', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', '2025-08-31', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-11-25 10:49:01', NULL, NULL, '0', '0', NULL, '2025-11-25 05:19:01', '2025-11-25 06:34:30'),
+(41, 1, '000041', 13, 10, 15, '', 44, 4, 12, '01:10', 0, '0', '2025-11-27', '2025-11-27', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-01-31', NULL, NULL, '2025-12-02', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-11-27 14:23:40', NULL, NULL, '0', '0', NULL, '2025-11-27 08:53:40', '2025-11-27 08:53:40'),
+(42, 1, '000042', 15, 12, 18, '', 46, 8, 13, '01:10', 0, '0', '2025-11-28', '2025-11-28', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-01-07', NULL, NULL, '2025-11-29', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-11-28 11:39:38', NULL, NULL, '0', '0', NULL, '2025-11-28 06:09:38', '2025-12-27 12:09:00');
+INSERT INTO `jobs` (`id`, `staff_created_id`, `job_id`, `account_manager_id`, `customer_id`, `client_id`, `client_job_code`, `customer_contact_details_id`, `service_id`, `job_type_id`, `budgeted_hours`, `reviewer`, `allocated_to`, `allocated_on`, `date_received_on`, `year_end`, `total_preparation_time`, `review_time`, `feedback_incorporation_time`, `total_time`, `engagement_model`, `expected_delivery_date`, `expected_delivery_date_old`, `due_on`, `submission_deadline`, `customer_deadline_date`, `sla_deadline_date`, `internal_deadline_date`, `filing_Companies_required`, `filing_Companies_date`, `filing_hmrc_required`, `filing_hmrc_date`, `opening_balance_required`, `opening_balance_date`, `number_of_transaction`, `number_of_balance_items`, `turnover`, `number_of_employees`, `vat_reconciliation`, `bookkeeping`, `processing_type`, `invoiced`, `currency`, `invoice_value`, `invoice_date`, `invoice_hours`, `invoice_remark`, `status_type`, `total_hours`, `total_hours_status`, `notes`, `Turnover_Period_id_0`, `Turnover_Currency_id_0`, `Turnover_id_0`, `VAT_Registered_id_0`, `VAT_Frequency_id_0`, `Who_Did_The_Bookkeeping_id_1`, `PAYE_Registered_id_1`, `Number_of_Trial_Balance_Items_id_1`, `Year_Ending_id_1`, `Bookkeeping_Frequency_id_2`, `Day_Date_id_2`, `Week_Year_id_2`, `Week_Month_id_2`, `Week_id_2`, `Fortnight_Year_id_2`, `Fortnight_Month_id_2`, `Fortnight_id_2`, `Month_Year_id_2`, `Month_id_2`, `Quarter_Year_id_2`, `Quarter_id_2`, `Year_id_2`, `Other_FromDate_id_2`, `Other_ToDate_id_2`, `Number_of_Total_Transactions_id_2`, `Number_of_Bank_Transactions_id_2`, `Number_of_Purchase_Invoices_id_2`, `Number_of_Sales_Invoices_id_2`, `Number_of_Petty_Cash_Transactions_id_2`, `Number_of_Journal_Entries_id_2`, `Number_of_Other_Transactions_id_2`, `Transactions_Posting_id_2`, `Quality_of_Paperwork_id_2`, `Number_of_Integration_Software_Platforms_id_2`, `CIS_id_2`, `Posting_Payroll_Journals_id_2`, `Department_Tracking_id_2`, `Sales_Reconciliation_Required_id_2`, `Factoring_Account_id_2`, `Payment_Methods_id_2`, `Payroll_Frequency_id_3`, `Payroll_Week_Year_id_3`, `Payroll_Week_Month_id_3`, `Payroll_Week_id_3`, `Payroll_Fortnight_Year_id_3`, `Payroll_Fortnight_Month_id_3`, `Payroll_Fortnight_id_3`, `Payroll_Month_Year_id_3`, `Payroll_Month_id_3`, `Payroll_Quarter_Year_id_3`, `Payroll_Quarter_id_3`, `Payroll_Year_id_3`, `Type_of_Payslip_id_3`, `Percentage_of_Variable_Payslips_id_3`, `Is_CIS_Required_id_3`, `CIS_Frequency_id_3`, `Number_of_Sub_contractors_id_3`, `Whose_Tax_Return_is_it_id_4`, `Number_of_Income_Sources_id_4`, `If_Landlord_Number_of_Properties_id_4`, `If_Sole_Trader_Who_is_doing_Bookkeeping_id_4`, `Tax_Year_id_4`, `Management_Accounts_Frequency_id_6`, `Management_Accounts_FromDate_id_6`, `Management_Accounts_ToDate_id_6`, `Year_id_33`, `Period_id_32`, `Day_Date_id_32`, `Week_Year_id_32`, `Week_Month_id_32`, `Week_id_32`, `Fortnight_Year_id_32`, `Fortnight_Month_id_32`, `Fortnight_id_32`, `Month_Year_id_32`, `Month_id_32`, `Quarter_Year_id_32`, `Quarter_id_32`, `Year_id_32`, `Other_FromDate_id_32`, `Other_ToDate_id_32`, `Payroll_Frequency_id_31`, `Payroll_Week_Year_id_31`, `Payroll_Week_Month_id_31`, `Payroll_Week_id_31`, `Payroll_Fortnight_Year_id_31`, `Payroll_Fortnight_Month_id_31`, `Payroll_Fortnight_id_31`, `Payroll_Month_Year_id_31`, `Payroll_Month_id_31`, `Payroll_Quarter_Year_id_31`, `Payroll_Quarter_id_31`, `Payroll_Year_id_31`, `Audit_Year_Ending_id_27`, `Filing_Frequency_id_8`, `Period_Ending_Date_id_8`, `Filing_Date_id_8`, `Year_id_28`, `job_priority`, `status_updation_date`, `processing_checklist`, `reviewing_checklist`, `processing_checklist_status`, `reviewing_checklist_status`, `checklist_modal_data`, `created_at`, `updated_at`) VALUES
+(43, 1, '000043', 13, 6, 17, '', 40, 1, 11, '12:20', 0, '0', '2025-12-01', '2025-12-01', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, NULL, '2025-12-29', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 4, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', '2025-10-31', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-10 12:38:15', 0, 0, '0', '0', NULL, '2025-12-01 04:55:19', '2026-05-02 10:28:13'),
+(44, 1, '000044', 15, 12, 18, '', 46, 8, 13, '01:10', 0, '0', '2025-12-01', '2025-12-01', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-02-07', NULL, NULL, '2025-12-02', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-12-01 11:00:20', NULL, NULL, '0', '0', NULL, '2025-12-01 05:30:20', '2025-12-01 05:31:07'),
+(45, 1, '000045', 13, 10, 13, '', 44, 33, 9, '01:01', 0, '0', '2025-12-01', '2025-12-01', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2025-12-02', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-12-01 11:02:11', NULL, NULL, '0', '0', NULL, '2025-12-01 05:32:11', '2025-12-01 05:32:24'),
+(46, 1, '000046', 13, 10, 14, '', 44, 1, 11, '01:10', 0, '0', '2025-12-01', '2025-12-01', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-01-31', NULL, NULL, '2025-12-29', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2025-12-01 11:12:41', NULL, NULL, '0', '0', NULL, '2025-12-01 05:42:41', '2025-12-01 05:42:41'),
+(47, 1, '000047', 13, 6, 17, '', 40, 1, 11, '26:20', 0, '0', '2026-01-29', '2026-01-25', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, '2026-01-31', '2026-04-25', NULL, '0', '2026-03-29', '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 15, NULL, '1', NULL, '', '', 0, '', '', '', '', '', '2025-10-31', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', 0, '0', '0', '0', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-03 14:45:58', 0, 0, '0', '0', NULL, '2026-01-29 09:47:45', '2026-05-02 10:04:17'),
+(60, 1, '000060', 13, 10, 15, '', 44, 1, 11, '02:10', 0, '0', '2026-03-28', '2026-03-28', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2027-01-31', NULL, NULL, '2026-04-25', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-28 10:50:37', NULL, NULL, '0', '0', NULL, '2026-03-28 05:20:37', '2026-03-28 06:11:20'),
+(48, 22, '000048', 13, 10, 15, '', 44, 33, 10, '26:05', 0, '0', '2026-03-10', '2026-03-10', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-03-11', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-10 14:14:34', NULL, NULL, '0', '0', NULL, '2026-03-10 08:44:34', '2026-03-10 08:44:34'),
+(49, 1, '000049', 13, 6, 17, '', 40, 2, 4, '01:00', 0, '0', '2026-01-29', '2026-03-12', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, '2026-01-31', '2026-01-30', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-03 14:45:58', NULL, NULL, '0', '0', NULL, '2026-01-29 09:47:45', '2026-03-03 09:15:58'),
+(50, 1, '000050', 13, 6, 17, '', 40, 2, 4, '01:00', 0, '0', '2026-01-29', '2026-03-12', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, '2026-01-31', '2026-01-30', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-03 14:45:58', NULL, NULL, '0', '0', NULL, '2026-03-12 12:09:10', '2026-03-12 12:09:10'),
+(51, 1, '000051', 13, 6, 17, '', 40, 2, 4, '02:00', 0, '0', '2026-01-29', '2026-03-12', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, '2026-01-31', '2026-01-30', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2026-03-12 12:11:16', '2026-03-16 11:48:08'),
+(52, 1, '000052', 13, 6, 17, '', 40, 2, 4, '01:00', 0, '0', '2026-01-29', '2026-03-12', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, '2026-01-31', '2026-01-30', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2026-03-12 12:17:12', '2026-03-12 12:17:12'),
+(53, 1, '000053', 13, 6, 17, '', 40, 2, 4, '01:00', 0, '0', '2026-03-12', '2026-03-12', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, '2026-01-31', '2026-01-30', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2026-03-12 12:19:03', '2026-03-12 12:19:03'),
+(54, 1, '000054', 13, 6, 17, '', 40, 2, 4, '02:00', 0, '0', '2026-03-16', '2026-03-16', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, '2026-01-31', '2026-01-30', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2026-03-16 11:50:42', '2026-03-16 11:50:42'),
+(55, 1, '000055', 13, 6, 17, '', 40, 2, 4, '02:00', 0, '0', '2026-03-16', '2026-03-16', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, '2026-01-31', '2026-01-30', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', NULL, NULL, NULL, '0', '0', NULL, '2026-03-16 11:50:47', '2026-03-16 11:50:47'),
+(56, 1, '000056', 13, 6, 17, '', 40, 1, 11, '14:30', 0, '24', '2026-03-16', '2026-03-16', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, '2026-01-31', '2026-04-25', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 8, NULL, '1', NULL, '', '', 0, '', '', '', '', '', '2025-10-31', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', 0, '0', '0', '0', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-11 12:58:40', 0, 0, '0', '0', NULL, '2026-03-16 11:55:48', '2026-05-02 10:16:53'),
+(61, 22, '000061', 13, 6, 17, '', 40, 1, 11, '02:30', 12, '21', '2026-03-28', '2026-03-28', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, NULL, '2026-04-25', NULL, '1', '2026-04-01', '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 19, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', '2025-10-31', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-26 13:00:53', 0, 0, '0', '0', NULL, '2026-03-28 06:32:57', '2026-05-02 10:12:34'),
+(58, 1, '000058', 15, 12, 19, '', 46, 2, 4, '01:00', 0, '0', '2026-03-27', '2026-03-27', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-04-06', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Monthly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-27 14:19:39', NULL, NULL, '0', '0', NULL, '2026-03-27 08:49:39', '2026-03-27 08:50:09'),
+(59, 1, '000059', 15, 12, 19, '', 46, 1, 11, '01:10', 0, '0', '2026-03-27', '2026-03-27', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2027-03-24', NULL, NULL, '2026-04-24', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', '2026-06-30', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-27 12:10:59', NULL, NULL, '0', '0', NULL, '2026-03-27 08:56:34', '2026-03-27 08:56:34'),
+(62, 22, '000062', 13, 6, 17, '', 40, 1, 11, '01:10', 13, '13', '2026-03-28', '2026-03-28', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, NULL, '2026-04-25', NULL, '1', '2026-04-01', '1', '2026-04-01', '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 18, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', '2025-10-31', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-27 12:51:57', NULL, NULL, '0', '0', NULL, '2026-03-28 06:33:16', '2026-04-01 07:22:40'),
+(63, 1, '000063', 15, 14, 20, '', 48, 2, 4, '10:00', 0, '0', '2026-03-30', '2026-03-30', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-03-31', NULL, '0', NULL, '0', '2026-03-20', '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-30 12:30:04', NULL, NULL, '0', '0', NULL, '2026-03-30 07:00:04', '2026-03-30 07:00:04'),
+(64, 1, '000064', 15, 14, 20, '', 48, 2, 4, '10:00', 0, '0', '2026-03-30', '2026-03-30', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-03-31', NULL, '0', NULL, '0', '2026-03-20', '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-30 12:30:04', NULL, NULL, '0', '0', NULL, '2026-03-30 07:00:23', '2026-03-30 07:00:23'),
+(65, 1, '000065', 15, 14, 20, '', 48, 2, 4, '10:00', 0, '24', '2026-03-30', '2026-03-30', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-03-31', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-31 17:49:37', NULL, NULL, '0', '0', NULL, '2026-03-30 07:16:14', '2026-03-31 12:19:37'),
+(66, 1, '000066', 15, 14, 20, '', 48, 2, 4, '10:00', 0, '0', '2026-03-30', '2026-03-30', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-03-31', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-30 12:30:04', NULL, NULL, '0', '0', NULL, '2026-03-30 08:19:45', '2026-03-30 08:19:45'),
+(67, 1, '000067', 15, 14, 20, '', 48, 3, 3, '10:00', 0, '0', '2026-03-30', '2026-03-30', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-04-04', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-30 18:47:50', 9, NULL, '1', '2', NULL, '2026-03-30 13:17:50', '2026-03-30 13:17:50'),
+(68, 1, '000068', 14, 14, 20, '', 48, 8, 13, '01:10', 0, '0', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-05-07', NULL, NULL, '2026-04-10', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-31 10:43:34', NULL, NULL, '2', '2', NULL, '2026-03-31 05:13:34', '2026-03-31 05:13:34'),
+(69, 1, '000069', 14, 14, 20, '', 48, 2, 4, '10:00', 0, '0', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-04-01', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-31 12:15:47', 9, NULL, '2', '2', NULL, '2026-03-31 06:45:47', '2026-03-31 06:45:47'),
+(70, 1, '000070', 14, 14, 20, '', 48, 8, 13, '01:10', 0, '0', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-05-07', NULL, NULL, '2026-04-10', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-31 12:24:37', 9, NULL, '1', '2', NULL, '2026-03-31 06:54:37', '2026-03-31 06:54:37'),
+(71, 1, '000071', 14, 14, 20, '', 48, 8, 13, '01:10', 0, '0', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-05-07', NULL, NULL, '2026-04-10', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-31 14:34:35', 9, NULL, '2', '2', NULL, '2026-03-31 09:04:35', '2026-03-31 09:04:35'),
+(72, 1, '000072', 14, 14, 20, '', 48, 5, 14, '15:10', 13, '21', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-03-31 17:34:37', 9, 11, '1', '1', '{\"show\":false,\"data\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"No\",\"comment\":\"sgdgdg\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"N/A\",\"comment\":\"\",\"date\":\"2026-03-31\"}],\"title\":\"CH1\",\"loading\":false,\"type\":\"processing\",\"processing\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"No\",\"comment\":\"sgdgdg\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"}],\"reviewing\":[{\"s_no\":1,\"question\":\"X\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"Y\",\"answer\":\"No\",\"comment\":\"zsfgsdgdgbdsg\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"Z\",\"answer\":\"N/A\",\"comment\":\"\",\"date\":\"2026-03-31\"}]}', '2026-03-31 09:27:37', '2026-04-06 06:35:39'),
+(73, 1, '000073', 14, 14, 20, '', 48, 5, 14, '10:10', 13, '22', '2026-03-31', '2026-03-31', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '2026-04-01', '1', '2026-04-01', '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 18, NULL, '1', NULL, '', '', 0, '', '', '', '', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', 0, '0', '0', '0', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'urgent', '2026-04-01 11:47:11', 9, 11, '1', '1', '{\"show\":false,\"data\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"}],\"title\":\"CH1\",\"loading\":false,\"type\":\"processing\",\"processing\":[{\"s_no\":1,\"question\":\"A\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"B\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"C\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":4,\"question\":\"D\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"}],\"reviewing\":[{\"s_no\":1,\"question\":\"X\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":2,\"question\":\"Y\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"},{\"s_no\":3,\"question\":\"Z\",\"answer\":\"No\",\"comment\":\"\",\"date\":\"2026-03-31\"}]}', '2026-03-31 11:56:51', '2026-04-06 06:20:20'),
+(74, 1, '000074', 14, 14, 20, '', 48, 8, 13, '01:10', 0, '21', '2026-04-06', '2026-04-06', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-06-07', NULL, NULL, '2026-04-16', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-06 12:35:14', 12, NULL, '1', '2', '{\"show\":false,\"data\":[{\"s_no\":1,\"question\":\"Confirm nature of business and accounting method\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":2,\"question\":\"Check bank reconciliation reports for any differences.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":3,\"question\":\"Check trade creditors and debtors summary report if there is any overpaid customer or supplier.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":4,\"question\":\"Trade creditors should not have any contact of director or cash suppliers like (Amazon, Tesco, Ebay, Co Op etc.)\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":5,\"question\":\"Compare monthly profit and loss figures\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":6,\"question\":\"Always run the detailed account transaction report for the current period and of last period as well to confirm the previous practices.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":7,\"question\":\"Check the particular supplier or customer are in a single code and same type of expense is not been kept into different codes and the VAT treatment on them.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":8,\"question\":\"Make sure to check the VAT treatment for the tax sensitive account heads. i.e. (Bank charges, insurance, rates, rent, PPS etc.)\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":9,\"question\":\"The payroll liability should be correctly posted and the payment has been posted in the correct account heads with No VAT.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":10,\"question\":\"The PAYE liability should match with the P32\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"}],\"title\":\"FFFFFFF\",\"loading\":false,\"type\":\"processing\",\"processing\":[{\"s_no\":1,\"question\":\"Confirm nature of business and accounting method\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":2,\"question\":\"Check bank reconciliation reports for any differences.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":3,\"question\":\"Check trade creditors and debtors summary report if there is any overpaid customer or supplier.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":4,\"question\":\"Trade creditors should not have any contact of director or cash suppliers like (Amazon, Tesco, Ebay, Co Op etc.)\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":5,\"question\":\"Compare monthly profit and loss figures\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":6,\"question\":\"Always run the detailed account transaction report for the current period and of last period as well to confirm the previous practices.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":7,\"question\":\"Check the particular supplier or customer are in a single code and same type of expense is not been kept into different codes and the VAT treatment on them.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":8,\"question\":\"Make sure to check the VAT treatment for the tax sensitive account heads. i.e. (Bank charges, insurance, rates, rent, PPS etc.)\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":9,\"question\":\"The payroll liability should be correctly posted and the payment has been posted in the correct account heads with No VAT.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":10,\"question\":\"The PAYE liability should match with the P32\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"}]}', '2026-04-06 07:05:14', '2026-04-06 08:42:21'),
+(79, 1, '000075', 14, 14, 20, '', 48, 8, 13, '01:10', NULL, NULL, '2026-04-06', '2026-04-06', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-06-07', NULL, NULL, '2026-04-16', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-06 14:55:22', NULL, NULL, '0', '0', NULL, '2026-04-06 09:25:22', '2026-04-06 09:25:22'),
+(80, 1, '000076', 14, 14, 20, '', 48, 2, 5, '10:00', 0, '21', '2026-04-06', '2026-04-06', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-04-11', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-10 11:57:31', 12, NULL, '1', '0', '{\"show\":false,\"data\":[{\"s_no\":1,\"question\":\"Confirm nature of business and accounting method\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":2,\"question\":\"Check bank reconciliation reports for any differences.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":3,\"question\":\"Check trade creditors and debtors summary report if there is any overpaid customer or supplier.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":4,\"question\":\"Trade creditors should not have any contact of director or cash suppliers like (Amazon, Tesco, Ebay, Co Op etc.)\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":5,\"question\":\"Compare monthly profit and loss figures\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":6,\"question\":\"Always run the detailed account transaction report for the current period and of last period as well to confirm the previous practices.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":7,\"question\":\"Check the particular supplier or customer are in a single code and same type of expense is not been kept into different codes and the VAT treatment on them.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":8,\"question\":\"Make sure to check the VAT treatment for the tax sensitive account heads. i.e. (Bank charges, insurance, rates, rent, PPS etc.)\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":9,\"question\":\"The payroll liability should be correctly posted and the payment has been posted in the correct account heads with No VAT.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"s_no\":10,\"question\":\"The PAYE liability should match with the P32\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"}],\"title\":\"FFFFFFF\",\"loading\":false,\"type\":\"processing\",\"processing\":[{\"s_no\":1,\"question\":\"Confirm nature of business and accounting method\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":2,\"question\":\"Check bank reconciliation reports for any differences.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":3,\"question\":\"Check trade creditors and debtors summary report if there is any overpaid customer or supplier.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":4,\"question\":\"Trade creditors should not have any contact of director or cash suppliers like (Amazon, Tesco, Ebay, Co Op etc.)\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":5,\"question\":\"Compare monthly profit and loss figures\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":6,\"question\":\"Always run the detailed account transaction report for the current period and of last period as well to confirm the previous practices.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":7,\"question\":\"Check the particular supplier or customer are in a single code and same type of expense is not been kept into different codes and the VAT treatment on them.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":8,\"question\":\"Make sure to check the VAT treatment for the tax sensitive account heads. i.e. (Bank charges, insurance, rates, rent, PPS etc.)\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":9,\"question\":\"The payroll liability should be correctly posted and the payment has been posted in the correct account heads with No VAT.\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"},{\"s_no\":10,\"question\":\"The PAYE liability should match with the P32\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-06\"}]}', '2026-04-06 09:25:36', '2026-04-10 06:27:31'),
+(88, 1, '000083', 15, 12, 19, '', 46, 3, 3, '10:00', 0, '0', '2026-04-10', '2026-04-10', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-04-15', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-10 14:39:04', 12, NULL, '2', '0', NULL, '2026-04-10 09:09:04', '2026-04-10 09:09:04');
+INSERT INTO `jobs` (`id`, `staff_created_id`, `job_id`, `account_manager_id`, `customer_id`, `client_id`, `client_job_code`, `customer_contact_details_id`, `service_id`, `job_type_id`, `budgeted_hours`, `reviewer`, `allocated_to`, `allocated_on`, `date_received_on`, `year_end`, `total_preparation_time`, `review_time`, `feedback_incorporation_time`, `total_time`, `engagement_model`, `expected_delivery_date`, `expected_delivery_date_old`, `due_on`, `submission_deadline`, `customer_deadline_date`, `sla_deadline_date`, `internal_deadline_date`, `filing_Companies_required`, `filing_Companies_date`, `filing_hmrc_required`, `filing_hmrc_date`, `opening_balance_required`, `opening_balance_date`, `number_of_transaction`, `number_of_balance_items`, `turnover`, `number_of_employees`, `vat_reconciliation`, `bookkeeping`, `processing_type`, `invoiced`, `currency`, `invoice_value`, `invoice_date`, `invoice_hours`, `invoice_remark`, `status_type`, `total_hours`, `total_hours_status`, `notes`, `Turnover_Period_id_0`, `Turnover_Currency_id_0`, `Turnover_id_0`, `VAT_Registered_id_0`, `VAT_Frequency_id_0`, `Who_Did_The_Bookkeeping_id_1`, `PAYE_Registered_id_1`, `Number_of_Trial_Balance_Items_id_1`, `Year_Ending_id_1`, `Bookkeeping_Frequency_id_2`, `Day_Date_id_2`, `Week_Year_id_2`, `Week_Month_id_2`, `Week_id_2`, `Fortnight_Year_id_2`, `Fortnight_Month_id_2`, `Fortnight_id_2`, `Month_Year_id_2`, `Month_id_2`, `Quarter_Year_id_2`, `Quarter_id_2`, `Year_id_2`, `Other_FromDate_id_2`, `Other_ToDate_id_2`, `Number_of_Total_Transactions_id_2`, `Number_of_Bank_Transactions_id_2`, `Number_of_Purchase_Invoices_id_2`, `Number_of_Sales_Invoices_id_2`, `Number_of_Petty_Cash_Transactions_id_2`, `Number_of_Journal_Entries_id_2`, `Number_of_Other_Transactions_id_2`, `Transactions_Posting_id_2`, `Quality_of_Paperwork_id_2`, `Number_of_Integration_Software_Platforms_id_2`, `CIS_id_2`, `Posting_Payroll_Journals_id_2`, `Department_Tracking_id_2`, `Sales_Reconciliation_Required_id_2`, `Factoring_Account_id_2`, `Payment_Methods_id_2`, `Payroll_Frequency_id_3`, `Payroll_Week_Year_id_3`, `Payroll_Week_Month_id_3`, `Payroll_Week_id_3`, `Payroll_Fortnight_Year_id_3`, `Payroll_Fortnight_Month_id_3`, `Payroll_Fortnight_id_3`, `Payroll_Month_Year_id_3`, `Payroll_Month_id_3`, `Payroll_Quarter_Year_id_3`, `Payroll_Quarter_id_3`, `Payroll_Year_id_3`, `Type_of_Payslip_id_3`, `Percentage_of_Variable_Payslips_id_3`, `Is_CIS_Required_id_3`, `CIS_Frequency_id_3`, `Number_of_Sub_contractors_id_3`, `Whose_Tax_Return_is_it_id_4`, `Number_of_Income_Sources_id_4`, `If_Landlord_Number_of_Properties_id_4`, `If_Sole_Trader_Who_is_doing_Bookkeeping_id_4`, `Tax_Year_id_4`, `Management_Accounts_Frequency_id_6`, `Management_Accounts_FromDate_id_6`, `Management_Accounts_ToDate_id_6`, `Year_id_33`, `Period_id_32`, `Day_Date_id_32`, `Week_Year_id_32`, `Week_Month_id_32`, `Week_id_32`, `Fortnight_Year_id_32`, `Fortnight_Month_id_32`, `Fortnight_id_32`, `Month_Year_id_32`, `Month_id_32`, `Quarter_Year_id_32`, `Quarter_id_32`, `Year_id_32`, `Other_FromDate_id_32`, `Other_ToDate_id_32`, `Payroll_Frequency_id_31`, `Payroll_Week_Year_id_31`, `Payroll_Week_Month_id_31`, `Payroll_Week_id_31`, `Payroll_Fortnight_Year_id_31`, `Payroll_Fortnight_Month_id_31`, `Payroll_Fortnight_id_31`, `Payroll_Month_Year_id_31`, `Payroll_Month_id_31`, `Payroll_Quarter_Year_id_31`, `Payroll_Quarter_id_31`, `Payroll_Year_id_31`, `Audit_Year_Ending_id_27`, `Filing_Frequency_id_8`, `Period_Ending_Date_id_8`, `Filing_Date_id_8`, `Year_id_28`, `job_priority`, `status_updation_date`, `processing_checklist`, `reviewing_checklist`, `processing_checklist_status`, `reviewing_checklist_status`, `checklist_modal_data`, `created_at`, `updated_at`) VALUES
+(81, 1, '000077', 13, 6, 17, '', 40, 1, 11, '12:20', 0, '0', '2026-04-06', '2026-04-06', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, '2026-01-31', '2026-05-04', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, '', '', 0, '', '', '', '', '', '2025-10-31', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', 0, '0', '0', '0', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-06 16:41:03', 0, 0, '0', '0', NULL, '2026-04-06 11:11:03', '2026-05-02 10:14:57'),
+(82, 1, '000078', 14, 14, 20, '', 48, 5, 14, '15:10', NULL, NULL, '2026-04-06', '2026-04-06', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-06 16:41:24', NULL, NULL, '0', '0', NULL, '2026-04-06 11:11:24', '2026-04-06 11:11:24'),
+(83, 1, '000079', 14, 14, 20, '', 48, 8, 13, '01:10', 0, '23', '2026-04-07', '2026-04-07', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-06-07', NULL, NULL, '2026-04-17', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-07 11:08:37', NULL, NULL, '0', '0', '{\"show\":false,\"data\":[{\"question\":\"Please check/confirm that all necessary documents has been taken into considration\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-07\"},{\"question\":\"Please read all related email and confirm that all is updated as requested by client.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"question\":\"Compare/check comparative figures with filed account copy of last year\",\"answer\":\"N/A\",\"comment\":\"\",\"date\":\"2026-04-07\"},{\"question\":\"Check year end date, directors, shareholders and nature of business on Companies House\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-07\"}],\"title\":\"CH1\",\"loading\":false,\"type\":\"processing\",\"processing\":[{\"question\":\"Please check/confirm that all necessary documents has been taken into considration\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-07\"},{\"question\":\"Please read all related email and confirm that all is updated as requested by client.\",\"answer\":\"\",\"comment\":\"\",\"date\":\"\"},{\"question\":\"Compare/check comparative figures with filed account copy of last year\",\"answer\":\"N/A\",\"comment\":\"\",\"date\":\"2026-04-07\"},{\"question\":\"Check year end date, directors, shareholders and nature of business on Companies House\",\"answer\":\"Yes\",\"comment\":\"\",\"date\":\"2026-04-07\"}]}', '2026-04-07 05:38:14', '2026-04-07 06:19:33'),
+(85, 1, '000080', 14, 14, 20, '', 48, 36, 17, '10:10', 0, '0', '2026-04-08', '2026-04-08', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-08 12:24:57', NULL, NULL, '0', '0', NULL, '2026-04-08 06:54:57', '2026-04-09 07:14:15'),
+(87, 1, '000082', 11, 13, 21, '', 47, 36, 17, '10:00', 0, '0', '2026-04-09', '2026-04-09', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-09 16:48:23', NULL, NULL, '0', '0', NULL, '2026-04-09 11:18:23', '2026-04-09 11:18:23'),
+(86, 1, '000081', 14, 14, 20, '', 48, 4, 12, '15:00', 0, '24', '2026-04-09', '2026-04-09', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 3, NULL, '1', NULL, '', '', 0, '', '', '', '', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', 0, '0', '0', '0', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-10 15:36:22', NULL, NULL, '0', '0', NULL, '2026-04-09 05:08:17', '2026-04-30 10:44:03'),
+(89, 1, '000084', 14, 14, 20, '', 48, 36, 17, '10:00', 0, '0', '2026-04-10', '2026-04-10', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-10 16:50:44', 0, 0, '0', '0', NULL, '2026-04-10 11:20:44', '2026-04-10 11:23:16'),
+(90, 1, '000085', 13, 6, 17, '', 40, 1, 11, '01:10', 0, '0', '2026-04-11', '2026-04-11', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, '2026-01-31', '2026-05-09', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, '', '', 0, '', '', '', '', '', '2025-10-31', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', 0, '0', '0', '0', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-11 14:18:33', 0, 0, '0', '0', NULL, '2026-04-11 08:48:33', '2026-04-11 08:48:33'),
+(91, 1, '000086', 13, 6, 17, '', 40, 1, 11, '01:10', 0, '0', '2026-04-11', '2026-04-11', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, '2026-01-31', '2026-05-09', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, '', '', 0, '', '', '', '', '', '2025-10-31', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', 0, '0', '0', '0', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-11 14:38:11', 0, 0, '0', '0', NULL, '2026-04-11 09:08:11', '2026-04-11 09:08:11'),
+(92, 1, '000087', 13, 6, 17, '', 40, 1, 11, '01:10', 0, '0', '2026-04-11', '2026-04-11', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, '2026-01-31', '2026-05-09', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, '', '', 0, '', '', '', '', '', '2025-10-31', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', 0, '0', '0', '0', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-11 14:38:59', 0, 0, '0', '0', NULL, '2026-04-11 09:08:59', '2026-04-11 09:08:59'),
+(93, 1, '000088', 13, 6, 17, '', 40, 1, 11, '02:10', 0, '24', '2026-04-11', '2026-04-11', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, '2026-01-31', '2026-05-09', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, '', '', 0, '', '', '', '', '', '2025-10-31', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', 0, '0', '0', '0', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-11 14:39:47', 0, 0, '0', '0', NULL, '2026-04-11 09:09:47', '2026-04-11 09:09:47'),
+(94, 1, '000089', 14, 14, 20, '', 48, 2, 4, '01:01', 0, '0', '2026-04-24', '2026-04-24', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-24 16:20:59', 0, 0, '0', '0', NULL, '2026-04-24 10:50:59', '2026-04-30 10:36:49'),
+(95, 1, '000090', 14, 14, 20, '', 48, 2, 4, '10:10', 0, '0', '2026-04-30', '2026-04-30', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-30 16:12:46', 0, 0, '0', '0', NULL, '2026-04-30 10:42:46', '2026-04-30 10:44:03'),
+(96, 1, '000091', 14, 14, 20, '', 48, 2, 4, '30:28', 0, '0', '2026-05-02', '2026-05-02', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-05-03', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-05-02 15:59:35', 0, 0, '0', '0', NULL, '2026-05-02 10:29:35', '2026-05-02 10:47:52'),
+(97, 1, '000092', 14, 14, 20, '', 48, 37, 23, '01:01', 0, '0', '2026-05-12', '2026-05-12', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-05-12 10:12:26', 0, 0, '0', '0', NULL, '2026-05-12 04:42:26', '2026-05-12 04:42:26');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `job_allowed_staffs`
+--
+
+DROP TABLE IF EXISTS `job_allowed_staffs`;
+CREATE TABLE IF NOT EXISTS `job_allowed_staffs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `job_id` int(11) NOT NULL,
+  `staff_id` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=81 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `job_allowed_staffs`
+--
+
+INSERT INTO `job_allowed_staffs` (`id`, `job_id`, `staff_id`, `created_at`, `updated_at`) VALUES
+(37, 9, 12, '2025-08-13 11:41:08', '2025-08-13 11:41:08'),
+(36, 9, 5, '2025-08-13 11:41:08', '2025-08-13 11:41:08'),
+(35, 9, 13, '2025-08-13 11:41:08', '2025-08-13 11:41:08'),
+(34, 9, 11, '2025-08-13 11:41:08', '2025-08-13 11:41:08'),
+(33, 9, 7, '2025-08-13 11:41:08', '2025-08-13 11:41:08'),
+(32, 9, 6, '2025-08-13 11:41:08', '2025-08-13 11:41:08'),
+(50, 1, 16, '2026-02-03 05:10:01', '2026-02-03 05:10:01'),
+(38, 9, 16, '2025-08-13 11:41:08', '2025-08-13 11:41:08'),
+(39, 9, 3, '2025-08-16 11:20:41', '2025-08-16 11:20:41'),
+(64, 4, 14, '2026-03-27 05:39:49', '2026-03-27 05:39:49'),
+(63, 4, 17, '2026-03-27 05:39:49', '2026-03-27 05:39:49'),
+(45, 22, 15, '2025-10-22 09:52:20', '2025-10-22 09:52:20'),
+(46, 22, 6, '2025-10-22 09:52:20', '2025-10-22 09:52:20'),
+(47, 31, 14, '2025-11-06 10:20:55', '2025-11-06 10:20:55'),
+(49, 13, 14, '2025-12-26 10:53:24', '2025-12-26 10:53:24'),
+(80, 43, 13, '2026-05-02 10:28:13', '2026-05-02 10:28:13'),
+(79, 43, 24, '2026-05-02 10:28:13', '2026-05-02 10:28:13'),
+(53, 51, 24, '2026-03-16 11:48:08', '2026-03-16 11:48:08'),
+(54, 51, 22, '2026-03-16 11:48:08', '2026-03-16 11:48:08'),
+(78, 56, 24, '2026-05-02 10:16:53', '2026-05-02 10:16:53'),
+(77, 56, 22, '2026-05-02 10:16:53', '2026-05-02 10:16:53'),
+(76, 81, 24, '2026-05-02 10:14:57', '2026-05-02 10:14:57'),
+(75, 81, 22, '2026-05-02 10:14:57', '2026-05-02 10:14:57'),
+(71, 93, 24, '2026-04-11 09:09:48', '2026-04-11 09:09:48'),
+(72, 93, 22, '2026-04-11 09:09:48', '2026-04-11 09:09:48');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `job_documents`
+--
+
+DROP TABLE IF EXISTS `job_documents`;
+CREATE TABLE IF NOT EXISTS `job_documents` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `job_id` int(11) NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `original_name` varchar(255) NOT NULL,
+  `file_type` text NOT NULL,
+  `file_size` int(11) NOT NULL,
+  `web_url` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `job_id` (`job_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `job_status_updation`
+--
+
+DROP TABLE IF EXISTS `job_status_updation`;
+CREATE TABLE IF NOT EXISTS `job_status_updation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `job_id` int(11) NOT NULL,
+  `status_type` int(11) NOT NULL,
+  `status_update_date` datetime NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `job_status_updation`
+--
+
+INSERT INTO `job_status_updation` (`id`, `job_id`, `status_type`, `status_update_date`, `created_at`, `updated_at`) VALUES
+(1, 56, 3, '2026-04-11 12:57:30', '2026-04-11 07:27:30', '2026-04-11 07:27:30'),
+(2, 56, 1, '2026-04-11 12:58:29', '2026-04-11 07:28:29', '2026-04-11 07:28:29'),
+(3, 56, 8, '2026-04-11 12:58:40', '2026-04-11 07:28:40', '2026-04-11 07:28:40'),
+(4, 47, 15, '2026-04-11 14:06:20', '2026-04-11 08:36:20', '2026-04-11 08:36:20'),
+(5, 90, 1, '2026-04-11 14:18:33', '2026-04-11 08:48:33', '2026-04-11 08:48:33'),
+(6, 91, 1, '2026-04-11 14:38:11', '2026-04-11 09:08:11', '2026-04-11 09:08:11'),
+(7, 92, 1, '2026-04-11 14:38:59', '2026-04-11 09:08:59', '2026-04-11 09:08:59'),
+(8, 93, 1, '2026-04-11 14:39:48', '2026-04-11 09:09:48', '2026-04-11 09:09:48'),
+(9, 94, 1, '2026-04-24 16:20:59', '2026-04-24 10:50:59', '2026-04-24 10:50:59'),
+(10, 95, 1, '2026-04-30 16:12:46', '2026-04-30 10:42:46', '2026-04-30 10:42:46'),
+(11, 61, 19, '2026-05-02 15:42:34', '2026-05-02 10:12:34', '2026-05-02 10:12:34'),
+(12, 81, 1, '2026-05-02 15:44:57', '2026-05-02 10:14:57', '2026-05-02 10:14:57'),
+(13, 43, 4, '2026-05-02 15:58:13', '2026-05-02 10:28:13', '2026-05-02 10:28:13'),
+(14, 96, 1, '2026-05-02 15:59:35', '2026-05-02 10:29:35', '2026-05-02 10:29:35'),
+(15, 97, 1, '2026-05-12 10:12:26', '2026-05-12 04:42:26', '2026-05-12 04:42:26');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `job_types`
+--
+
+DROP TABLE IF EXISTS `job_types`;
+CREATE TABLE IF NOT EXISTS `job_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `service_id` int(11) NOT NULL,
+  `type` varchar(100) NOT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `service_id` (`service_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `job_types`
+--
+
+INSERT INTO `job_types` (`id`, `service_id`, `type`, `status`, `created_at`, `updated_at`) VALUES
+(1, 7, 'VAT1', '1', '2025-01-30 08:57:18', '2025-01-30 08:57:18'),
+(2, 7, 'VAT2', '1', '2025-01-30 08:57:26', '2025-01-30 08:57:26'),
+(3, 3, 'V3', '1', '2025-02-04 05:12:37', '2025-02-04 05:12:37'),
+(4, 2, 'V4', '1', '2025-02-04 05:14:10', '2025-02-04 05:14:10'),
+(5, 2, 'V4_4', '1', '2025-07-12 10:39:40', '2025-07-12 10:39:40'),
+(6, 32, 'Aus_book_VAT1', '1', '2025-09-18 05:49:18', '2025-09-18 05:49:18'),
+(7, 32, 'KKK', '1', '2025-09-27 11:37:06', '2025-09-27 11:37:06'),
+(8, 32, 'FFFFF', '1', '2025-09-27 11:38:43', '2025-09-27 11:38:43'),
+(9, 33, 'compilence- job type', '1', '2025-10-04 10:42:38', '2025-10-04 10:42:38'),
+(10, 33, 'compileince job type 2', '1', '2025-10-04 10:43:05', '2025-10-04 10:43:05'),
+(11, 1, 'JAP', '1', '2025-11-25 05:18:10', '2025-11-25 05:18:10'),
+(12, 4, 'DDD', '1', '2025-11-27 08:24:07', '2025-11-27 08:24:07'),
+(13, 8, 'aa', '1', '2025-11-28 05:34:57', '2025-11-28 05:34:57'),
+(14, 5, 'DDD', '1', '2026-04-06 06:15:18', '2026-04-06 06:15:18'),
+(15, 34, 'demo', '1', '2026-04-08 06:14:41', '2026-04-08 06:14:41'),
+(16, 35, 'Demo', '1', '2026-04-08 06:41:04', '2026-04-08 06:41:04'),
+(17, 36, 'DEEE', '1', '2026-04-08 07:28:17', '2026-04-08 07:28:17'),
+(18, 37, 'demooooo', '1', '2026-04-09 05:07:22', '2026-04-09 05:07:22'),
+(19, 38, 'Demo', '1', '2026-04-24 10:40:50', '2026-04-24 10:40:50'),
+(20, 34, 'Demo', '1', '2026-04-24 10:43:21', '2026-04-24 10:43:21'),
+(21, 35, 'SDDD', '1', '2026-04-30 10:40:02', '2026-04-30 10:40:02'),
+(22, 36, 'DD', '1', '2026-05-02 10:55:00', '2026-05-02 10:55:00'),
+(23, 37, 'GGGGGGG', '1', '2026-05-02 10:56:35', '2026-05-02 10:56:35');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `line_managers`
+--
+
+DROP TABLE IF EXISTS `line_managers`;
+CREATE TABLE IF NOT EXISTS `line_managers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `staff_by` int(11) NOT NULL,
+  `staff_to` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `staff_by` (`staff_by`),
+  KEY `staff_to` (`staff_to`)
+) ENGINE=MyISAM AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `line_managers`
+--
+
+INSERT INTO `line_managers` (`id`, `staff_by`, `staff_to`, `created_at`, `updated_at`) VALUES
+(15, 14, 15, '2025-09-22 11:09:50', '2025-09-22 11:09:50'),
+(16, 13, 15, '2025-10-28 07:24:18', '2025-11-01 06:44:06'),
+(17, 11, 14, '2025-11-01 06:30:36', '2025-11-01 06:30:36'),
+(18, 22, 14, '2025-11-13 07:19:56', '2025-11-24 11:36:33');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `master_status`
+--
+
+DROP TABLE IF EXISTS `master_status`;
+CREATE TABLE IF NOT EXISTS `master_status` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `status_type_id` int(11) NOT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `is_disable` enum('0','1') NOT NULL DEFAULT '0',
+  `x_days` int(11) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  KEY `status_type_id` (`status_type_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `master_status`
+--
+
+INSERT INTO `master_status` (`id`, `name`, `status_type_id`, `status`, `is_disable`, `x_days`, `created_at`, `updated_at`) VALUES
+(1, 'To Be Started - Not Yet Allocated Internally', 5, '1', '1', NULL, '2024-08-27 11:42:24', '2025-09-17 16:53:09'),
+(2, 'On Hold - Missing Paperwork', 4, '1', '1', NULL, '2024-08-27 11:53:06', '2025-11-18 06:06:08'),
+(3, 'WIP - Processing', 1, '1', '1', NULL, '2024-08-27 11:53:06', '2025-11-18 06:06:02'),
+(4, 'On Hold - In Queries', 4, '1', '1', NULL, '2024-08-27 11:53:06', '2025-11-18 06:05:58'),
+(5, 'WIP - To Be Reviewed', 1, '1', '1', NULL, '2024-08-27 11:53:06', '2025-11-18 06:05:09'),
+(6, 'Completed - Completed', 2, '1', '1', NULL, '2024-09-24 13:07:54', '2025-11-03 17:14:48'),
+(7, 'Completed - Draft Sent', 2, '1', '1', NULL, '2024-11-10 22:47:22', '2025-11-03 17:14:27'),
+(8, 'Not Progressing - Duplicate', 3, '1', '1', NULL, '2024-11-10 22:48:56', '2025-11-11 12:44:32'),
+(9, 'Awaiting Paperwork/Accounts/VAT', 7, '1', '1', NULL, '2024-11-10 22:49:22', '2025-11-11 12:44:36'),
+(10, 'Client Not Responding', 7, '1', '1', NULL, '2024-11-10 22:49:41', '2025-11-11 12:44:40'),
+(11, 'Waiting for Credentials', 7, '1', '1', NULL, '2024-11-10 22:49:57', '2025-11-11 12:44:44'),
+(12, 'Bookkeeping Not Completed', 7, '1', '1', NULL, '2024-11-10 22:50:12', '2025-11-11 12:44:48'),
+(15, 'Not Progressing - Customer Processing', 3, '1', '1', NULL, '2024-11-10 22:52:24', '2025-11-11 12:44:51'),
+(17, 'Completed - Update Sent', 2, '1', '1', NULL, '2024-11-10 22:53:06', '2025-11-11 12:44:55'),
+(18, 'Completed - Filed with Companies House and HMRC', 2, '1', '1', 3, '2024-11-10 22:53:20', '2026-04-01 07:29:38'),
+(19, 'Completed - Filed with Companies House', 2, '1', '1', 0, '2024-11-10 22:53:35', '2026-04-01 07:29:47'),
+(20, 'Completed - Filed with HMRC', 2, '1', '1', NULL, '2024-11-10 22:53:48', '2025-11-11 12:45:05'),
+(21, 'WIP - Customer Reviewed & To be Updated', 1, '1', '1', NULL, '2025-02-01 12:10:19', '2025-02-06 13:17:37');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `missing_logs`
+--
+
+DROP TABLE IF EXISTS `missing_logs`;
+CREATE TABLE IF NOT EXISTS `missing_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `job_id` int(11) NOT NULL,
+  `missing_log` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
+  `missing_paperwork` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
+  `missing_log_sent_on` date DEFAULT NULL,
+  `missing_log_prepared_date` date DEFAULT NULL,
+  `missing_log_title` varchar(100) DEFAULT NULL,
+  `missing_log_reviewed_by` int(11) DEFAULT NULL,
+  `missing_log_reviewed_date` date DEFAULT NULL,
+  `missing_paperwork_received_on` date DEFAULT NULL,
+  `last_chaser` date DEFAULT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0: Incomplete, 1: Complete',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `job_id` (`job_id`),
+  KEY `missing_log_reviewed_by` (`missing_log_reviewed_by`)
+) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `missing_logs`
+--
+
+INSERT INTO `missing_logs` (`id`, `job_id`, `missing_log`, `missing_paperwork`, `missing_log_sent_on`, `missing_log_prepared_date`, `missing_log_title`, `missing_log_reviewed_by`, `missing_log_reviewed_date`, `missing_paperwork_received_on`, `last_chaser`, `status`, `created_at`, `updated_at`) VALUES
+(2, 31, '1', '0', '2025-11-11', NULL, 'M_00001', 1, NULL, NULL, '2025-11-11', '0', '2025-11-11 16:53:39', '2025-11-11 16:53:39'),
+(3, 9, '1', '0', '2025-11-13', NULL, 'M_00001', 1, NULL, NULL, '2025-11-13', '0', '2025-11-13 06:04:16', '2025-11-13 06:04:16'),
+(4, 25, '1', '0', '2025-11-19', NULL, 'M_00001', 1, '2025-11-11', NULL, '2025-11-20', '1', '2025-11-19 06:09:49', '2025-11-19 08:46:27'),
+(5, 25, '1', '0', '2025-11-19', NULL, 'M_00002', 1, '2025-11-20', NULL, '2025-11-20', '1', '2025-11-19 08:32:31', '2025-11-19 08:45:55'),
+(6, 86, '1', '0', '2026-04-10', NULL, 'M_00001', 1, NULL, NULL, '2026-04-10', '1', '2026-04-10 05:14:28', '2026-04-10 05:14:28'),
+(7, 43, '1', '0', '2026-04-10', NULL, 'M_00001', 1, NULL, NULL, '2026-04-10', '1', '2026-04-10 07:02:10', '2026-04-10 07:02:10');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `missing_logs_documents`
+--
+
+DROP TABLE IF EXISTS `missing_logs_documents`;
+CREATE TABLE IF NOT EXISTS `missing_logs_documents` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `missing_log_id` int(11) NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `original_name` varchar(255) NOT NULL,
+  `file_type` text,
+  `file_size` int(11) NOT NULL,
+  `web_url` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `missing_log_id` (`missing_log_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `permissions`
+--
+
+DROP TABLE IF EXISTS `permissions`;
+CREATE TABLE IF NOT EXISTS `permissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `permission_name` varchar(100) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=36 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `permissions`
+--
+
+INSERT INTO `permissions` (`id`, `permission_name`, `type`, `created_at`, `updated_at`) VALUES
+(1, 'customer', 'insert', '2024-07-09 06:59:27', '2024-07-09 06:59:27'),
+(2, 'customer', 'update', '2024-07-09 06:59:27', '2024-07-09 06:59:27'),
+(3, 'customer', 'delete', '2024-07-09 06:59:27', '2024-07-09 06:59:27'),
+(4, 'customer', 'view', '2024-07-09 06:59:27', '2024-07-09 06:59:27'),
+(5, 'status', 'insert', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(6, 'status', 'update', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(7, 'status', 'delete', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(8, 'status', 'view', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(9, 'staff', 'insert', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(10, 'staff', 'update', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(11, 'staff', 'delete', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(12, 'staff', 'view', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(13, 'client', 'insert', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(14, 'client', 'update', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(15, 'client', 'delete', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(16, 'client', 'view', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(17, 'job', 'insert', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(18, 'job', 'update', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(19, 'job', 'delete', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(20, 'job', 'view', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(21, 'setting', 'insert', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(22, 'setting', 'update', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(23, 'setting', 'delete', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(24, 'setting', 'view', '2024-07-09 01:29:27', '2024-07-09 01:29:27'),
+(25, 'report', 'insert', '2024-07-09 01:29:27', '2024-09-12 12:03:35'),
+(26, 'report', 'update', '2024-07-09 01:29:27', '2024-09-12 12:03:46'),
+(27, 'report', 'delete', '2024-07-09 01:29:27', '2024-09-12 12:03:52'),
+(28, 'report', 'view', '2024-07-09 01:29:27', '2024-09-12 12:03:58'),
+(29, 'timesheet', 'insert', '2024-07-09 01:29:27', '2024-09-24 07:03:59'),
+(30, 'timesheet', 'update', '2024-07-09 01:29:27', '2024-09-24 07:05:21'),
+(31, 'timesheet', 'delete', '2024-07-09 01:29:27', '2024-09-24 07:05:28'),
+(32, 'timesheet', 'view', '2024-07-09 01:29:27', '2024-09-24 07:05:32'),
+(33, 'all_customers', 'view', '2024-07-09 01:29:27', '2025-04-04 06:42:58'),
+(34, 'all_clients', 'view', '2024-07-09 01:29:27', '2025-04-04 06:43:09'),
+(35, 'all_jobs', 'view', '2024-07-09 01:29:27', '2025-04-04 06:43:18');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `queries`
+--
+
+DROP TABLE IF EXISTS `queries`;
+CREATE TABLE IF NOT EXISTS `queries` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `job_id` int(11) NOT NULL,
+  `queries_remaining` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
+  `query_title` varchar(100) DEFAULT NULL,
+  `reviewed_by` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
+  `missing_queries_prepared_date` date DEFAULT NULL,
+  `query_sent_date` date DEFAULT NULL,
+  `response_received` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0: No, 1: Yes',
+  `response` varchar(255) DEFAULT NULL,
+  `final_query_response_received_date` date DEFAULT NULL,
+  `last_chaser` date DEFAULT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0: Incomplete, 1: Complete',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `job_id` (`job_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `queries`
+--
+
+INSERT INTO `queries` (`id`, `job_id`, `queries_remaining`, `query_title`, `reviewed_by`, `missing_queries_prepared_date`, `query_sent_date`, `response_received`, `response`, `final_query_response_received_date`, `last_chaser`, `status`, `created_at`, `updated_at`) VALUES
+(3, 8, '0', 'Q_00001', '0', NULL, '2025-11-13', '0', NULL, NULL, '2025-11-13', '0', '2025-11-13 05:54:11', '2025-11-13 05:54:11'),
+(4, 27, '1', 'Q_00001', '1', NULL, '2025-11-13', '1', NULL, '2025-11-14', '2025-11-13', '1', '2025-11-13 05:55:20', '2025-11-13 05:57:40'),
+(5, 43, '0', 'Q_00001', '0', NULL, '2026-04-10', '0', NULL, NULL, '2026-04-10', '1', '2026-04-10 07:08:15', '2026-04-10 07:08:15');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `queries_documents`
+--
+
+DROP TABLE IF EXISTS `queries_documents`;
+CREATE TABLE IF NOT EXISTS `queries_documents` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `query_id` int(11) NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `original_name` varchar(255) NOT NULL,
+  `file_type` text NOT NULL,
+  `file_size` int(11) NOT NULL,
+  `web_url` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `query_id` (`query_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `roles`
+--
+
+DROP TABLE IF EXISTS `roles`;
+CREATE TABLE IF NOT EXISTS `roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_name` varchar(100) NOT NULL,
+  `role` varchar(100) NOT NULL,
+  `hourminute` varchar(100) DEFAULT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `is_disable` enum('0','1') NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `role_name` (`role_name`)
+) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `roles`
+--
+
+INSERT INTO `roles` (`id`, `role_name`, `role`, `hourminute`, `status`, `is_disable`, `created_at`, `updated_at`) VALUES
+(1, 'Super Admin', 'SUPERADMIN', NULL, '1', '1', '2024-06-28 11:59:13', '2025-02-06 12:43:48'),
+(2, 'Admin', 'ADMIN', '125:59', '1', '1', '2024-06-28 11:59:22', '2025-02-06 12:43:48'),
+(3, 'Processor', 'PROCESSOR', '232:59', '1', '1', '2024-06-28 12:05:34', '2025-02-06 12:43:48'),
+(4, 'Manager', 'MANAGER', '2:5', '1', '1', '2024-09-07 09:17:08', '2025-02-06 12:43:48'),
+(5, 'Leadership', 'LEADERSHIP', NULL, '1', '1', '2024-09-07 09:17:08', '2025-02-06 12:43:48'),
+(6, 'Reviewer', 'REVIEWER', NULL, '1', '1', '2024-09-07 09:17:38', '2025-02-06 12:43:48'),
+(8, 'Management', 'MANAGEMENT', NULL, '1', '1', '2024-10-14 09:00:37', '2025-09-23 06:39:46'),
+(9, 'DEMO', 'DEMO', '00:00', '1', '0', '2025-02-06 05:19:54', '2025-02-06 12:43:58'),
+(12, 'Customer User', 'CUSTOMERUSER', NULL, '1', '0', '2026-05-02 08:48:59', '2026-05-02 08:48:59');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `role_permissions`
+--
+
+DROP TABLE IF EXISTS `role_permissions`;
+CREATE TABLE IF NOT EXISTS `role_permissions` (
+  `role_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY `role_id` (`role_id`,`permission_id`),
+  KEY `permission_id` (`permission_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `role_permissions`
+--
+
+INSERT INTO `role_permissions` (`role_id`, `permission_id`, `created_at`, `updated_at`) VALUES
+(3, 4, '2024-11-19 08:29:27', '2024-11-19 08:29:27'),
+(13, 24, '2024-07-30 06:31:43', '2024-07-30 08:37:46'),
+(13, 12, '2024-07-26 05:10:20', '2024-07-30 08:37:46'),
+(13, 4, '2024-07-12 10:37:55', '2024-07-30 08:37:46'),
+(4, 4, '2024-09-12 12:13:22', '2024-10-18 09:30:14'),
+(6, 4, '2024-09-12 09:39:12', '2024-11-06 12:48:17'),
+(3, 20, '2024-09-07 06:06:08', '2024-11-19 06:24:35'),
+(3, 16, '2024-09-07 06:06:08', '2024-11-19 06:24:35'),
+(3, 25, '2024-09-24 08:27:25', '2024-11-19 06:24:35'),
+(3, 29, '2024-09-24 08:27:25', '2024-11-19 06:24:35'),
+(3, 31, '2024-09-24 08:27:25', '2024-11-19 06:24:35'),
+(3, 30, '2024-09-24 08:27:25', '2024-11-19 06:24:35'),
+(3, 32, '2024-09-24 08:27:25', '2024-11-19 06:24:35'),
+(4, 30, '2024-09-24 08:27:55', '2024-10-18 09:30:14'),
+(4, 31, '2024-09-24 08:27:55', '2024-10-18 09:30:14'),
+(6, 29, '2024-09-24 08:33:18', '2024-11-06 12:48:17'),
+(6, 30, '2024-09-24 08:33:18', '2024-11-06 12:48:17'),
+(6, 31, '2024-09-24 08:33:18', '2024-11-06 12:48:17'),
+(6, 32, '2024-09-24 08:33:18', '2024-11-06 12:48:17'),
+(4, 29, '2024-09-24 08:33:30', '2024-10-18 09:30:14'),
+(4, 32, '2024-09-24 08:33:30', '2024-10-18 09:30:14'),
+(4, 16, '2024-10-07 08:30:15', '2024-10-18 09:30:14'),
+(8, 20, '2024-11-23 08:32:01', '2024-11-23 08:32:01'),
+(6, 28, '2024-11-06 12:48:17', '2024-11-06 12:48:17'),
+(4, 20, '2024-10-09 10:22:48', '2024-10-18 09:30:14'),
+(8, 31, '2024-10-14 09:00:37', '2024-10-14 09:02:43'),
+(8, 30, '2024-10-14 09:00:37', '2024-10-14 09:02:43'),
+(8, 29, '2024-10-14 09:00:37', '2024-10-14 09:02:43'),
+(3, 1, '2024-10-14 08:53:05', '2024-11-19 06:24:35'),
+(6, 20, '2024-10-11 10:33:46', '2024-11-06 12:48:17'),
+(6, 16, '2024-10-11 10:33:46', '2024-11-06 12:48:17'),
+(8, 32, '2024-10-14 09:00:37', '2024-10-14 09:02:43'),
+(8, 4, '2024-10-14 09:02:43', '2024-10-14 09:02:43'),
+(8, 1, '2024-10-14 09:02:43', '2024-10-14 09:02:43'),
+(8, 18, '2024-11-23 08:32:01', '2024-11-23 08:32:01'),
+(5, 4, '2024-11-19 06:57:58', '2024-11-19 06:57:58'),
+(4, 1, '2024-11-19 06:58:59', '2024-11-19 06:58:59'),
+(8, 5, '2024-11-19 07:03:58', '2024-11-19 07:03:58'),
+(3, 5, '2024-11-19 08:30:49', '2024-11-19 08:30:49'),
+(5, 16, '2024-11-19 08:47:31', '2024-11-19 08:47:31'),
+(6, 22, '2024-11-25 12:00:46', '2024-11-25 12:00:46'),
+(6, 13, '2024-12-25 05:38:01', '2024-12-25 05:38:01'),
+(4, 13, '2024-11-23 10:17:45', '2024-11-23 10:17:45'),
+(4, 28, '2024-11-23 11:18:11', '2024-11-23 11:18:11'),
+(6, 21, '2024-11-25 12:00:46', '2024-11-25 12:00:46'),
+(6, 23, '2024-11-25 12:00:46', '2024-11-25 12:00:46'),
+(6, 24, '2024-11-25 12:00:46', '2024-11-25 12:00:46'),
+(4, 17, '2024-11-26 05:47:11', '2024-11-26 05:47:11'),
+(4, 18, '2024-11-26 05:47:11', '2024-11-26 05:47:11'),
+(4, 19, '2024-11-26 05:47:11', '2024-11-26 05:47:11'),
+(8, 2, '2024-11-26 07:18:22', '2024-11-26 07:18:22'),
+(8, 3, '2024-11-26 07:18:22', '2024-11-26 07:18:22'),
+(8, 13, '2024-11-26 07:18:22', '2024-11-26 07:18:22'),
+(8, 14, '2024-11-26 07:18:22', '2024-11-26 07:18:22'),
+(8, 15, '2024-11-26 07:18:22', '2024-11-26 07:18:22'),
+(8, 16, '2024-11-26 07:18:22', '2024-11-26 07:18:22'),
+(8, 17, '2024-11-26 07:18:22', '2024-11-26 07:18:22'),
+(3, 17, '2024-11-26 08:46:00', '2024-11-26 08:46:00'),
+(6, 17, '2024-11-26 08:46:00', '2024-11-26 08:46:00'),
+(6, 18, '2024-11-26 08:46:00', '2024-11-26 08:46:00'),
+(6, 1, '2024-11-27 05:41:29', '2024-11-27 05:41:29'),
+(6, 2, '2024-11-27 05:41:29', '2024-11-27 05:41:29'),
+(3, 13, '2024-11-27 09:53:42', '2024-11-27 09:53:42'),
+(3, 2, '2024-11-28 06:30:30', '2024-11-28 06:30:30'),
+(4, 14, '2024-12-18 05:23:30', '2024-12-18 05:23:30'),
+(9, 29, '2025-02-06 05:19:55', '2025-02-06 05:19:55'),
+(9, 30, '2025-02-06 05:19:55', '2025-02-06 05:19:55'),
+(9, 31, '2025-02-06 05:19:55', '2025-02-06 05:19:55'),
+(9, 32, '2025-02-06 05:19:55', '2025-02-06 05:19:55'),
+(9, 1, '2025-02-08 05:25:44', '2025-02-08 05:25:44'),
+(9, 13, '2025-02-08 05:25:44', '2025-02-08 05:25:44'),
+(9, 17, '2025-02-08 05:25:44', '2025-02-08 05:25:44'),
+(9, 20, '2025-02-08 05:25:44', '2025-02-08 05:25:44'),
+(9, 4, '2025-02-08 05:25:44', '2025-02-08 05:25:44'),
+(9, 16, '2025-02-08 05:25:44', '2025-02-08 05:25:44'),
+(10, 29, '2025-02-20 11:49:19', '2025-02-20 11:49:19'),
+(10, 30, '2025-02-20 11:49:19', '2025-02-20 11:49:19'),
+(10, 31, '2025-02-20 11:49:19', '2025-02-20 11:49:19'),
+(10, 32, '2025-02-20 11:49:19', '2025-02-20 11:49:19'),
+(2, 24, '2025-04-05 06:13:37', '2025-04-05 06:13:37'),
+(9, 18, '2025-08-04 09:06:42', '2025-08-04 09:06:42'),
+(2, 2, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 3, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 33, '2025-04-05 06:24:20', '2025-04-05 06:24:20'),
+(2, 5, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 6, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 7, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(6, 14, '2025-08-13 09:41:50', '2025-08-13 09:41:50'),
+(4, 3, '2025-07-24 11:33:24', '2025-07-24 11:33:24'),
+(2, 14, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 15, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 34, '2025-04-05 06:46:16', '2025-04-05 06:46:16'),
+(2, 17, '2025-04-05 06:59:52', '2025-04-05 06:59:52'),
+(2, 18, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 19, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(4, 2, '2025-07-24 11:33:24', '2025-07-24 11:33:24'),
+(2, 21, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 22, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 23, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 12, '2025-10-28 04:52:13', '2025-10-28 04:52:13'),
+(2, 25, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 26, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 27, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 35, '2025-04-05 06:57:22', '2025-04-05 06:57:22'),
+(2, 29, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 30, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 31, '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(2, 8, '2025-04-05 06:13:37', '2025-04-05 06:13:37'),
+(2, 285, '2025-04-03 11:47:39', '2025-04-03 11:47:39'),
+(4, 15, '2025-07-24 11:33:24', '2025-07-24 11:33:24'),
+(3, 18, '2025-08-13 11:33:33', '2025-08-13 11:33:33'),
+(3, 14, '2025-08-13 11:33:33', '2025-08-13 11:33:33'),
+(3, 28, '2025-08-20 08:23:29', '2025-08-20 08:23:29'),
+(11, 29, '2025-09-08 07:28:38', '2025-09-08 07:28:38'),
+(11, 30, '2025-09-08 07:28:38', '2025-09-08 07:28:38'),
+(11, 31, '2025-09-08 07:28:38', '2025-09-08 07:28:38'),
+(11, 32, '2025-09-08 07:28:38', '2025-09-08 07:28:38');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `services`
+--
+
+DROP TABLE IF EXISTS `services`;
+CREATE TABLE IF NOT EXISTS `services` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `is_disable` enum('0','1') NOT NULL COMMENT '0: deactive, 1: active',
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `deleted` enum('0','1') NOT NULL DEFAULT '0' COMMENT '0:not_delete, 1:deleted',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=MyISAM AUTO_INCREMENT=38 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `services`
+--
+
+INSERT INTO `services` (`id`, `name`, `is_disable`, `status`, `deleted`, `created_at`, `updated_at`) VALUES
+(1, 'Accounts Production', '1', '1', '0', '2025-01-28 03:38:45', '2025-01-28 03:40:47'),
+(2, 'Bookkeeping', '1', '1', '0', '2025-01-28 03:39:00', '2025-01-28 03:40:43'),
+(3, 'Payroll', '1', '1', '0', '2025-01-28 03:39:18', '2025-01-28 11:20:06'),
+(4, 'Personal Tax Return', '1', '1', '0', '2025-01-28 03:39:26', '2025-01-28 11:20:27'),
+(5, 'Admin Support', '1', '1', '0', '2025-01-28 03:39:08', '2025-01-28 11:20:21'),
+(6, 'Management Accounts', '1', '1', '0', '2025-01-28 03:39:40', '2025-01-28 03:40:11'),
+(7, 'Company Secretarial', '1', '1', '0', '2025-01-28 03:39:46', '2025-01-28 03:39:54'),
+(8, 'VAT Returns', '1', '1', '0', '2025-01-28 09:23:31', '2025-02-01 06:57:36'),
+(27, 'Audit ', '1', '1', '0', '2025-06-24 14:01:13', '2025-09-17 05:51:20'),
+(32, 'Aus - Bookkeeping', '1', '1', '0', '2025-07-18 10:16:20', '2025-09-17 05:50:35'),
+(30, 'Aus - Admin Support', '1', '1', '0', '2025-07-18 10:15:52', '2025-09-17 05:52:22'),
+(31, 'Aus - Payroll', '1', '1', '0', '2025-07-18 10:16:07', '2025-09-17 05:50:42'),
+(26, 'Reporting', '1', '1', '0', '2025-06-18 14:50:13', '2025-09-17 05:51:42'),
+(28, 'Aus - SMSF', '1', '1', '0', '2025-07-18 09:32:05', '2025-09-17 05:51:12'),
+(29, 'Aus - Company Secretarial (ASIC)', '1', '1', '0', '2025-07-18 10:15:20', '2025-09-17 05:52:18'),
+(33, 'Aus - Compliance ', '1', '1', '0', '2025-07-18 10:16:29', '2025-09-17 05:50:26'),
+(34, 'Demo_34', '0', '1', '1', '2026-04-24 10:43:21', '2026-04-30 10:36:49'),
+(35, 'SDDD_35', '0', '1', '1', '2026-04-30 10:40:02', '2026-04-30 10:44:03'),
+(36, 'DD', '0', '1', '0', '2026-05-02 10:55:00', '2026-05-02 10:55:00'),
+(37, 'GGGGGGG', '0', '1', '0', '2026-05-02 10:56:35', '2026-05-02 10:56:35');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sharepoint_token`
+--
+
+DROP TABLE IF EXISTS `sharepoint_token`;
+CREATE TABLE IF NOT EXISTS `sharepoint_token` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `access_token` longtext,
+  `refresh_token` longtext,
+  `client_id` text,
+  `client_secret` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `sharepoint_token`
+--
+
+INSERT INTO `sharepoint_token` (`id`, `access_token`, `refresh_token`, `client_id`, `client_secret`, `created_at`, `updated_at`) VALUES
+(1, 'eyJ0eXAiOiJKV1QiLCJub25jZSI6Ik5CZE5XNEV5TTZlcEI4YWxlVmR2eWFwU0RFNUt0a2tDTDlPSTQ1OG4tYUEiLCJhbGciOiJSUzI1NiIsIng1dCI6InoxcnNZSEhKOS04bWdndDRIc1p1OEJLa0JQdyIsImtpZCI6InoxcnNZSEhKOS04bWdndDRIc1p1OEJLa0JQdyJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8zMzJkY2Q4OS1jZDM3LTQwYTAtYmJhMi1hMmI5MWFiZDQzNGEvIiwiaWF0IjoxNzM1NzMxMTg3LCJuYmYiOjE3MzU3MzExODcsImV4cCI6MTczNTczNjI5MSwiYWNjdCI6MCwiYWNyIjoiMSIsImFpbyI6IkFUUUF5LzhZQUFBQVF5dVlLWmh2VlYzcVpDWFJhRHplQWZpQnMwcjRqcEhlT3lkU242enpXaUJROXhPMmhSd0QzbTdqNUprRTNFZ3QiLCJhbXIiOlsicHdkIl0sImFwcF9kaXNwbGF5bmFtZSI6Ik91dGJvb2tBcHAiLCJhcHBpZCI6IjkxODU4NTdmLTczNjUtNGQzNS1iMDBhLTVhMzFkY2RkNThkMiIsImFwcGlkYWNyIjoiMSIsImZhbWlseV9uYW1lIjoiQmhhZ2F0IiwiZ2l2ZW5fbmFtZSI6Ik5pa2l0YSIsImlkdHlwIjoidXNlciIsImlwYWRkciI6IjEwMy4xMDMuMjEzLjIxNyIsIm5hbWUiOiJOaWtpdGEgQmhhZ2F0Iiwib2lkIjoiNDI2MWM4MTMtMjViNC00ZjM1LWJmNmItNGE5NzVjZjBhMDU3IiwicGxhdGYiOiIzIiwicHVpZCI6IjEwMDMyMDA0MUFFRkI5QTQiLCJyaCI6IjEuQVhrQWljMHRNemZOb0VDN29xSzVHcjFEU2dNQUFBQUFBQUFBd0FBQUFBQUFBQUFNQVNSNUFBLiIsInNjcCI6Ik15RmlsZXMuUmVhZCBNeUZpbGVzLldyaXRlIFNpdGVzLlJlYWRXcml0ZS5BbGwgVXNlci5SZWFkIHByb2ZpbGUgb3BlbmlkIGVtYWlsIiwic2lkIjoiZTg3M2Y2OWYtYTE5NS00N2EwLTljYWUtYjc3MDc1MDQ5NzlhIiwic2lnbmluX3N0YXRlIjpbImttc2kiXSwic3ViIjoiLUFhU09zbnd2T0hmZkhzZmJjbmgwenBKNUtZckhxQ0RiaFluN0hMZmctayIsInRlbmFudF9yZWdpb25fc2NvcGUiOiJFVSIsInRpZCI6IjMzMmRjZDg5LWNkMzctNDBhMC1iYmEyLWEyYjkxYWJkNDM0YSIsInVuaXF1ZV9uYW1lIjoiTmlraXRhLkJoYWdhdEBvdXRib29rcy5jb20iLCJ1cG4iOiJOaWtpdGEuQmhhZ2F0QG91dGJvb2tzLmNvbSIsInV0aSI6InplNFA3T3NYQkVhdzBsa1JOSGhQQVEiLCJ2ZXIiOiIxLjAiLCJ3aWRzIjpbImNmMWMzOGU1LTM2MjEtNDAwNC1hN2NiLTg3OTYyNGRjZWQ3YyIsImI3OWZiZjRkLTNlZjktNDY4OS04MTQzLTc2YjE5NGU4NTUwOSJdLCJ4bXNfaWRyZWwiOiIxIDE0IiwieG1zX3N0Ijp7InN1YiI6IjRidjJCemlEWUxUNThPVzV6UF91N2Zqc3RkLWFxVEYzamFuZHdDbF9WdkUifSwieG1zX3RjZHQiOjE2MDM0NTY2MDJ9.X8g-2_Kro89Ui4QJfI3cB_WTeRy3OBicxv6rzIqDyFe2f8oPQsrQv_oYBIvFmrGsnaqNBxMACE0oG2oY9WSShwCC3_b7uju_hjGQOXSifmShSWzAIRczdrrB57HXA6txxyCl9YGDoiwc7WVv1wckQ9cz5TupsISLHl83gPsAsg6SFGGJA6N6V5PNBHXVQCUKRFYS4hwUR0HyRDhSdVqYInAiML0QAcNw8kuZ0Tu0i8Jot3iPKMf-ablFuduBFvAurvCbl4ovj-qlE7Lvul6qtrB1xOBDfa6twjpKnFkBWEGnONMd39jqthCSzh-xzA1Qp8Sn5WCFtczuMyK1spUY6w', '1.AXkAic0tMzfNoEC7oqK5Gr1DSn-FhZFlczVNsApaMdzdWNIMASR5AA.AgABAwEAAABVrSpeuWamRam2jAF1XRQEAwDs_wUA9P-ImAq-al0Pv8qPtr24oU8OC0RVtMptaC6RWDPE0h0Q3O1l40oQP4gbdE6kxC_YpjBQKzklOY5-hmhZMWtnZk7Dgt1yZAlZG--izlK5TtBMW3TRg54nTdd99IvEhYpVZVjn6VS_c0TxMgqbuEds3mBbRCQy5IVwwRdqWkYnix4ryMPFZWcOvcTpxeahHNXvSjORokPsRROeq8muUnl2Xxs-47Ycltaik0v6Yy6yCIBNGMoxyFF3PpMbbniAvnW-_vfPRSjfLxUwBT7jLqUDYuZMh30ffK7MB7ftMfzWwEi4cc_xpiUjz6e_Wuc6aFSh37wgb7DZauGp-AFsqXOD-OzoQ1ns4awvqAQ_yGJVsrcNWS_8p_aXOr4XeuILfY-hXiwAGtt4_6SuSzzXAOGdWoaCNce6XfIgW2auB0qazKy3UxDd1aq6xxoHunEPZlxpgMHkhC7I1lA6rZZFGV9yz_mkildQxWwu4PiKNLyRNw7vq6-6zeJqnBznzQqAjxlnHoKHvXAEI62f9CkUN4SH1RuDoIU7pUJw3g0xL7yvd07wUtgTldw8dI_Vsa6ihStoTaAu9WMDVt-Ym86vLd5qLBfWqPD9GLX96vic_oodTWt-Ock8_0JuQKisPpc0sQCifCtyNP_bS3H69ARR8c9h12zaLOj4UUmHgbDgfM887pTnVQknR_9FoB22ZCzIYFvvDzKu0p9Eq9iUhDUcROSf7G7Xaw6l52pHKXdyTZat-rZw0g9TGuwFUsA0XFT-z3I1zcGvB1lOVfMr1pwA-FhekoZImJ7L1-hluVnwVI95DzbTZzFYG890', '9185857f-7365-4d35-b00a-5a31dcdd58d2', 'aCE8Q~nIMereO8MzR6cDsf4QUjJIGLhuBMlcPc-t', '2025-01-01 06:43:05', '2025-04-02 11:56:08');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `staffs`
+--
+
+DROP TABLE IF EXISTS `staffs`;
+CREATE TABLE IF NOT EXISTS `staffs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `role_id` int(11) NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `phone_code` varchar(10) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
+  `hourminute` varchar(100) DEFAULT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `is_disable` enum('0','1') NOT NULL DEFAULT '0',
+  `created_by` int(11) NOT NULL,
+  `employee_number` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `login_auth_token` text,
+  `customer_contact_person_role_id` int(11) DEFAULT NULL,
+  `is_first_login` tinyint(4) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `employee_number` (`employee_number`),
+  KEY `role_id` (`role_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=26 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `staffs`
+--
+
+INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `hourminute`, `status`, `is_disable`, `created_by`, `employee_number`, `created_at`, `updated_at`, `login_auth_token`, `customer_contact_person_role_id`, `is_first_login`) VALUES
+<<<<<<<< HEAD:outbook (2).sql
+(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2026-05-07 12:06:55', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3ODE1NTYxNSwiZXhwIjoxNzc4MTkxNjE1fQ.mSWAVLrd_yvbS7T27gNcbdDeEN42na3bgHDRge6738I', NULL, 0),
+========
+(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2026-05-12 04:41:26', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3ODU2MDg4NiwiZXhwIjoxNzc4NTk2ODg2fQ.kLTE8pbHbq8E2dq_lPJ25USFk3YMrP34mQ8KLj03Sq0', NULL, 0),
+>>>>>>>> ae168fb62f845281ce298b9596b249377f3a2be7:outbook_copy.sql
+(2, 2, 'Amit', 'Amit', 'amit@outbooks.com', NULL, '5777777777', '$2a$10$SIJMFK5k/woLfwqfEJGMruiO6.f5oZwnCBb5S9zhmoPR/MiVI5c6K', '300:85', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-06-05 10:27:47', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc0OTExOTI2NywiZXhwIjoxNzQ5MTU1MjY3fQ.ZxuPUUXxmWB0_uzOhJlJ4mMcyC8t82zKxWmJFmySHzk', NULL, 0),
+(3, 2, 'Ajit', 'Ajit', 'ajit@outbooks.com', NULL, '5777777777', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '659:00', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-10-28 04:51:33', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc2MTYyNzA5MywiZXhwIjoxNzYxNjYzMDkzfQ.JierzQ_u_26zHmk4B7Bdn8OQklN0PLDvDg7YuU4fVrs', NULL, 0),
+(5, 3, 'STAFF', 'ONE', 'staff1@gmail.com', '+44', '2777777777', '$2a$10$naFNFC8Lw.Rcu/Bt518RyOFPYntjk30TrdsfAif2jBgd8lYw4HD7i', '232:59', '1', '0', 1, NULL, '2025-02-06 07:27:58', '2025-11-11 10:20:49', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc1ODUzMzc2NCwiZXhwIjoxNzU4NTY5NzY0fQ.yc71lU2HgHpoUe4kSQN2JlxsBT6TUdDZvQoXQonoRos', NULL, 0),
+(6, 6, 'STAFF', 'TWO', 'staff2@gmail.com', '+44', '2777777777', '$2a$10$hz3Ok/jshVyP5zTIuckV.udTMy/0e9NX1eq0kEbwoFO0rivX1Xmoy', '00:00', '1', '0', 1, NULL, '2025-02-06 07:28:28', '2025-11-20 05:53:17', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImlhdCI6MTc2MzYxNzk5NywiZXhwIjoxNzYzNjUzOTk3fQ.uceEiaEi6TPVLms5bTE57gwPzqpC29X5IfzJfLFocbs', NULL, 0),
+(11, 4, 'STAFF', 'SIX', 'sss@gmail.com', '+44', '2777777777', '$2a$10$a7sfTgDavJUrU.8kFfbKIe0525d3EF4yABvGUlcZAxV/Amy1qgCVa', '2:5', '1', '0', 1, 'FGHH', '2025-02-08 11:43:22', '2026-01-05 10:46:14', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjExLCJpYXQiOjE3Njc2MDk5NzQsImV4cCI6MTc2NzY0NTk3NH0.tUTYKPxvkwH9_A7XmyNy_3tM4CeVZW-768oGmdEOCPg', NULL, 0),
+(7, 9, 'STAFF', 'FOUR', 'fs@gmail.com', '+44', '2777777777', '$2a$10$u3oT4jAvi3/U9BvschQsp.3A3HliOeqZgoXOhzx8rjTDJ9jitzvbq', '00:00', '1', '0', 1, NULL, '2025-02-07 12:50:36', '2025-08-11 10:03:21', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsImlhdCI6MTc1NDkwNjYwMSwiZXhwIjoxNzU0OTQyNjAxfQ.HdhwmS5nBwiYQI8t--vxdl3Ki42iJYnUU2z30bEU9k4', NULL, 0),
+(10, 4, 'STAFF', 'FIVE', 's@gmail.com', '+44', '2777777777', '$2a$10$NSS0.c3FvdBSfGG2u624U.l.JyHEhy1eS5VjX/YYXkd5dwB/MwVF.', '2:5', '1', '0', 1, NULL, '2025-02-08 11:36:28', '2025-10-06 07:12:17', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwLCJpYXQiOjE3NTk3MzQ3MzcsImV4cCI6MTc1OTc3MDczN30.luIo8TYrG2_9Eu3yel9cakru6lg_GzFmJJ0s964l6_c', NULL, 0),
+(12, 6, 'BBBBBB 7', 'hv', 'hgvh@gmail.com', '+44', NULL, '$2a$10$sEdgzyBiie4rSYj3BjYAZeFzDtAn7oTq./lmOhfXogBg1QTon81Bu', '232:59', '1', '0', 1, 'fff', '2025-04-17 05:56:18', '2026-02-26 04:56:49', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyLCJpYXQiOjE3NzIwODE4MDksImV4cCI6MTc3MjExNzgwOX0.v28brufOpivVZ6gnWclW3H4nKtNfSVqRO48qTsGpvE0', NULL, 0),
+(13, 4, 'shk', 'sss', 'shk@gmail.com', '+44', '2777777777', '$2a$10$WQAk8CwFZ1OX5H7E/z8Nle6j7OMGH759o.7/LXjRCyN1CWchEyN5G', '00:00', '1', '0', 1, 'SHK13', '2025-06-11 09:18:34', '2026-04-02 12:28:41', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEzLCJpYXQiOjE3NzUxMzI5MjEsImV4cCI6MTc3NTE2ODkyMX0.-wGnhO5dqq8GD9UE7Ii8CsqjMbRR8HB9Jhf0wkhL10g', NULL, 0),
+(14, 4, 'STAFF', 'EIGHT', 's4444@gmail.com', '+44', NULL, '$2a$10$k.9hbBTNvaBuK2h4.o3SQeSxcCn6Qpcaym6X0.8q0D71P1qIgLDqe', '42:50', '1', '0', 1, 'SS8', '2025-07-11 10:42:49', '2025-11-27 09:57:54', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0LCJpYXQiOjE3NjQyMzc0NzQsImV4cCI6MTc2NDI3MzQ3NH0.SZb46VVMoRuMm_K1O3thNUZUGwPOxr0i4m5kKg2iRcs', NULL, 0),
+(15, 4, 'STAFF', 'NINE', 's654654@gmail.com', '+44', NULL, '$2a$10$.jXA.q1dwp4qhAmPPwZSOuOkns50ISe88K.KAH5YSwIU00O6TtkX6', '2:5', '1', '0', 1, 'SS9', '2025-07-11 10:48:30', '2025-11-24 11:44:36', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE1LCJpYXQiOjE3NjM5ODQ2NzYsImV4cCI6MTc2NDAyMDY3Nn0.RFGkiNKzyV-vYOLMVogyRyAHynH8jUGu_82Fp3wjzSM', NULL, 0),
+(16, 3, 'STAFF', 'TEN', 's10@gmail.com', '+44', '', '$2a$10$gm.VAo7XGBktXzWQupRMcuolpXRxSo1HWI3T1Ih5qQw/1cGwBN5v6', '42:00', '1', '0', 1, NULL, '2025-08-13 11:32:32', '2025-11-27 12:21:56', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE2LCJpYXQiOjE3NjQyNDE5NTgsImV4cCI6MTc2NDI3Nzk1OH0.53U2CISui6IjiWdpiVjRnUrU8UNmwuM34YbH1s4k_jI', NULL, 0),
+(17, 3, 'STAFF', 'ELEVEN', 's11@gmail.com', '+44', '', '$2a$10$wWGObGAzdiKfAdpHipT9UuxlW5Bq1snIrxJc0vMp49VGUh5mCKY4m', '232:59', '1', '0', 1, NULL, '2025-08-18 08:20:15', '2026-02-03 05:48:48', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE3LCJpYXQiOjE3NzAwOTc3MjgsImV4cCI6MTc3MDEzMzcyOH0.dzV5Hkv0aToKJ1isYXA58Kg69KE1nrFHJqK10oifFBI', NULL, 0),
+(20, 8, 'AAAAAAA', 'ddddd', 'sasdasfwsf@gmail.com', '+44', '44020890320', '$2a$10$snor8L/CMAboV6UHDlzibufXa6WDscXEA65yIzOLql2qEPC5JeHFO', '00:00', '1', '0', 1, 'ff', '2025-09-23 06:27:54', '2025-11-17 05:22:46', NULL, NULL, 0),
+(21, 3, 'fvedgv', 'gvddvd', 'f@gmail.com', '+44', '', '$2a$10$rnnx7UQnvlGmXKjGUthJbu0a9/qYz.0BKz4y6n8OaN9R8NPo4FMRa', '232:59', '1', '0', 1, NULL, '2025-11-03 10:12:49', '2025-11-03 10:12:49', NULL, NULL, 0),
+(22, 3, 'GGGG', 'wff', 's111@gmail.com', '+44', NULL, '$2a$10$cBR2xNM//0aITVICasUBfO.FF2U2HtoeuwiDtKBOUjIWaIZPEHMM6', '40:59', '1', '0', 1, 'f', '2025-11-03 10:13:49', '2026-03-28 06:31:09', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIyLCJpYXQiOjE3NzQ2Nzk0NjksImV4cCI6MTc3NDcxNTQ2OX0.5dzFostfzJQL7yBmnoah8JYpKZCU1UwNPIdnpBfzWN8', NULL, 0),
+(23, 3, 'DDDDDD55', 'DD', 'DDss@gmail.com', '+44', NULL, '$2a$10$tcnXTmD9q4DyCNlf3K7hH.XQnSLenLSxqXP3HIaLaf4vhbB85fCXO', '42:06', '1', '0', 1, 'DREOO', '2025-11-14 13:10:31', '2026-03-28 06:30:30', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIzLCJpYXQiOjE3NzQ2Nzk0MzAsImV4cCI6MTc3NDcxNTQzMH0.vxsgsDrOxuRCgM3u04k_UWshm-BRKMOjmNhdqA38g74', NULL, 0),
+(24, 3, 'FFFFFFFF', 'hhhhh', 'hhhhhhh@gmail.com', '+44', '', '$2a$10$MWRcrqM45a7lktHrdwW3LO1.acU/klFC8Hb/y/LHJuw18PNLrJueG', '232:59', '1', '0', 1, 'ffff', '2025-11-17 05:29:30', '2026-04-10 10:07:09', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjI0LCJpYXQiOjE3NzU4MTU2MjksImV4cCI6MTc3NTg1MTYyOX0.ABEQSDYKDfRsHwfx9ScwBH1wKgh9rujY6FJM3YiqMjo', NULL, 0),
+(25, 12, 'Shk', 'h', 'shakirpnp@gmail.com', '+44', '1234567893', '$2a$10$NpTmVNLBk2H.40Unc84/TuIPfBf0slB5VaQ4OgB14EvHfM1bBI4QG', NULL, '1', '0', 1, NULL, '2026-05-02 12:52:31', '2026-05-02 12:54:46', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjI1LCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3Nzc3MjY0ODYsImV4cCI6MTc4MDMxODQ4Nn0.DKwWMAsrnNrnGm05USUxAIBt2gPJujMKq6Dc8gKPsZU', 14, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `staff_competencies`
+--
+
+DROP TABLE IF EXISTS `staff_competencies`;
+CREATE TABLE IF NOT EXISTS `staff_competencies` (
+  `staff_id` int(11) NOT NULL,
+  `service_id` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY `staff_id` (`staff_id`,`service_id`),
+  KEY `service_id` (`service_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `staff_logs`
+--
+
+DROP TABLE IF EXISTS `staff_logs`;
+CREATE TABLE IF NOT EXISTS `staff_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `staff_id` int(11) NOT NULL,
+  `date` date NOT NULL,
+  `module_name` varchar(100) NOT NULL,
+  `module_id` int(11) NOT NULL DEFAULT '0',
+  `log_message` text NOT NULL,
+  `log_message_all` text,
+  `permission_type` varchar(50) NOT NULL,
+  `ip` varchar(50) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `staff_id` (`staff_id`)
+<<<<<<<< HEAD:outbook (2).sql
+) ENGINE=MyISAM AUTO_INCREMENT=1650 DEFAULT CHARSET=latin1;
+========
+) ENGINE=MyISAM AUTO_INCREMENT=1658 DEFAULT CHARSET=latin1;
+>>>>>>>> ae168fb62f845281ce298b9596b249377f3a2be7:outbook_copy.sql
+
+--
+-- Dumping data for table `staff_logs`
+--
+
+INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, `log_message`, `log_message_all`, `permission_type`, `ip`, `created_at`, `updated_at`) VALUES
+(1, 2, '2025-01-30', 'job types', 1, 'created job types VAT1', 'Admin Amit Amit created job types VAT1 ', 'created', '122.168.114.106', '2025-01-30 08:57:18', '2025-01-30 08:57:18'),
+(2, 2, '2025-01-30', 'job types', 2, 'created job types VAT2', 'Admin Amit Amit created job types VAT2 ', 'created', '122.168.114.106', '2025-01-30 08:57:26', '2025-01-30 08:57:26'),
+(3, 2, '2025-01-30', 'task', 0, 'created task a,b,', 'Admin Amit Amit created task a,b, ', 'created', '122.168.114.106', '2025-01-30 08:57:37', '2025-01-30 08:57:37'),
+(4, 2, '2025-01-30', 'task', 0, 'created task c,d,', 'Admin Amit Amit created task c,d, ', 'created', '122.168.114.106', '2025-01-30 08:57:48', '2025-01-30 08:57:48'),
+(5, 2, '2025-01-30', 'customer', 1, 'created customer profile. customer code :', 'Admin Amit Amit created customer profile. customer code : cust_CUS_00001(CUS1)', 'created', '122.168.114.106', '2025-01-30 08:58:35', '2025-01-30 08:58:35'),
+(6, 2, '2025-01-30', 'customer', 1, ' edited the service details and added an additional service while editing the customer code :', 'Admin Amit Amit  edited the service details and added an additional service while editing the customer code : cust_CUS_00001(CUS1)', 'updated', '122.168.114.106', '2025-01-30 08:58:44', '2025-01-30 08:58:44'),
+(7, 2, '2025-01-30', 'client', 1, 'created client profile. client code :', 'Admin Amit Amit created client profile. client code : cli_CUS_Cha_00001(Charity)', 'created', '122.168.114.106', '2025-01-30 09:02:25', '2025-01-30 09:02:25'),
+(8, 2, '2025-01-30', 'checklist', 1, 'created checklist checklist1', 'Admin Amit Amit created checklist checklist1 ', 'created', '122.168.114.106', '2025-01-30 09:06:45', '2025-01-30 09:06:45'),
+(9, 2, '2025-01-30', 'client', 2, 'created client profile. client code :', 'Admin Amit Amit created client profile. client code : cli_CUS_Cli_00002(Cli2)', 'created', '122.168.114.106', '2025-01-30 09:08:41', '2025-01-30 09:08:41'),
+(10, 2, '2025-01-30', 'job', 1, 'created job code:', 'Admin Amit Amit created job code: CUS_Cli_VAT2_00001', 'created', '122.168.114.106', '2025-01-30 09:09:00', '2025-01-30 09:09:00'),
+(11, 2, '2025-01-31', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-01-31 06:55:49', '2025-01-31 06:55:49'),
+(12, 2, '2025-01-31', 'job', 1, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_VAT2_00001', 'created', '122.168.114.106', '2025-01-31 07:03:26', '2025-01-31 07:03:26'),
+(13, 2, '2025-01-31', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', NULL, '2025-01-31 09:51:43', '2025-01-31 09:51:43'),
+(14, 2, '2025-01-31', 'job', 1, 'edited the missing logs job code:', 'Admin Amit Amit edited the missing logs job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-01-31 11:43:53', '2025-01-31 11:43:53'),
+(15, 2, '2025-01-31', 'job', 1, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_VAT2_00001', 'created', '122.168.114.106', '2025-01-31 11:44:02', '2025-01-31 11:44:02'),
+(16, 2, '2025-02-01', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-01 05:01:29', '2025-02-01 05:01:29'),
+(17, 2, '2025-02-01', 'job', 1, 'edited the job information and edited the job deadline job code:', 'Admin Amit Amit edited the job information and edited the job deadline job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 06:07:22', '2025-02-01 06:07:22'),
+(18, 2, '2025-02-01', 'customer', 1, ' edited the service details and added an additional service while editing the customer code :', 'Admin Amit Amit  edited the service details and added an additional service while editing the customer code : cust_CUS_00001(CUS1)', 'updated', '122.168.114.106', '2025-02-01 06:20:02', '2025-02-01 06:20:02'),
+(19, 2, '2025-02-01', 'job', 1, 'edited the job information and edited the job deadline job code:', 'Admin Amit Amit edited the job information and edited the job deadline job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 06:21:04', '2025-02-01 06:21:04'),
+(20, 2, '2025-02-01', 'job', 1, 'updated the job status from WIP – Missing Paperwork to WIP – In Queries. job code:', 'Admin Amit Amit updated the job status from WIP – Missing Paperwork to WIP – In Queries. job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 07:11:10', '2025-02-01 07:11:10'),
+(21, 2, '2025-02-01', 'job', 1, 'updated the job status from WIP – In Queries to WIP – Processing. job code:', 'Admin Amit Amit updated the job status from WIP – In Queries to WIP – Processing. job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 07:14:58', '2025-02-01 07:14:58'),
+(22, 2, '2025-02-01', 'job', 1, 'updated the job status from WIP – Processing to WIP – Missing Paperwork. job code:', 'Admin Amit Amit updated the job status from WIP – Processing to WIP – Missing Paperwork. job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 07:15:29', '2025-02-01 07:15:29'),
+(23, 2, '2025-02-01', 'job', 1, 'edited the missing logs job code:', 'Admin Amit Amit edited the missing logs job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 07:25:24', '2025-02-01 07:25:24'),
+(24, 2, '2025-02-01', 'job', 1, 'sent the queries for job code:', 'Admin Amit Amit sent the queries for job code: CUS_Cli_VAT2_00001', 'created', '122.168.114.106', '2025-02-01 07:28:40', '2025-02-01 07:28:40'),
+(25, 2, '2025-02-01', 'job', 1, 'edited the queries job code:', 'Admin Amit Amit edited the queries job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 07:31:16', '2025-02-01 07:31:16'),
+(26, 2, '2025-02-01', 'job', 1, 'updated the job status from WIP – In Queries to WIP – Processing. job code:', 'Admin Amit Amit updated the job status from WIP – In Queries to WIP – Processing. job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 07:31:24', '2025-02-01 07:31:24'),
+(27, 2, '2025-02-01', 'job', 1, 'sent the queries for job code:', 'Admin Amit Amit sent the queries for job code: CUS_Cli_VAT2_00001', 'created', '122.168.114.106', '2025-02-01 09:08:32', '2025-02-01 09:08:32'),
+(28, 2, '2025-02-01', 'job', 1, 'edited the queries job code:', 'Admin Amit Amit edited the queries job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 09:14:39', '2025-02-01 09:14:39'),
+(29, 2, '2025-02-01', 'job', 1, 'completed the queries job code:', 'Admin Amit Amit completed the queries job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 11:19:07', '2025-02-01 11:19:07'),
+(30, 2, '2025-02-01', 'job', 1, 'completed the queries job code:', 'Admin Amit Amit completed the queries job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 11:19:12', '2025-02-01 11:19:12'),
+(31, 2, '2025-02-01', 'job', 1, 'completed the missing logs job code:', 'Admin Amit Amit completed the missing logs job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 11:19:43', '2025-02-01 11:19:43'),
+(32, 2, '2025-02-01', 'job', 1, 'completed the missing logs job code:', 'Admin Amit Amit completed the missing logs job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 11:19:47', '2025-02-01 11:19:47'),
+(33, 2, '2025-02-01', 'job', 1, 'completed the draft for job code:', 'Admin Amit Amit completed the draft for job code: CUS_Cli_VAT2_00001', 'created', '122.168.114.106', '2025-02-01 11:19:53', '2025-02-01 11:19:53'),
+(34, 2, '2025-02-01', 'job', 1, 'sent the draft for job code:', 'Admin Amit Amit sent the draft for job code: CUS_Cli_VAT2_00001', 'created', '122.168.114.106', '2025-02-01 11:20:46', '2025-02-01 11:20:46'),
+(35, 2, '2025-02-01', 'job', 1, 'sent the draft for job code:', 'Admin Amit Amit sent the draft for job code: CUS_Cli_VAT2_00001', 'created', '122.168.114.106', '2025-02-01 11:22:40', '2025-02-01 11:22:40'),
+(36, 2, '2025-02-01', 'job', 1, 'completed the draft job code:', 'Admin Amit Amit completed the draft job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 11:23:04', '2025-02-01 11:23:04'),
+(37, 2, '2025-02-01', 'job', 1, 'completed the draft job code:', 'Admin Amit Amit completed the draft job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 11:23:19', '2025-02-01 11:23:19'),
+(38, 2, '2025-02-01', 'job', 1, 'sent the draft for job code:', 'Admin Amit Amit sent the draft for job code: CUS_Cli_VAT2_00001', 'created', '122.168.114.106', '2025-02-01 12:05:49', '2025-02-01 12:05:49'),
+(39, 2, '2025-02-01', 'job', 1, 'edited the draft job code:', 'Admin Amit Amit edited the draft job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 12:23:33', '2025-02-01 12:23:33'),
+(40, 2, '2025-02-01', 'job', 1, 'completed the draft job code:', 'Admin Amit Amit completed the draft job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-01 12:24:00', '2025-02-01 12:24:00'),
+(41, 2, '2025-02-03', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-03 07:16:20', '2025-02-03 07:16:20'),
+(42, 2, '2025-02-03', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-03 08:27:43', '2025-02-03 08:27:43'),
+(43, 2, '2025-02-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-04 05:05:07', '2025-02-04 05:05:07'),
+(44, 2, '2025-02-04', 'customer', 2, 'created customer profile. customer code :', 'Admin Amit Amit created customer profile. customer code : cust_DDD_00002(DDDD)', 'created', '122.168.114.106', '2025-02-04 05:08:03', '2025-02-04 05:08:03'),
+(45, 2, '2025-02-04', 'customer', 2, ' edited the service details and added an additional service while editing the customer code :', 'Admin Amit Amit  edited the service details and added an additional service while editing the customer code : cust_DDD_00002(DDDD)', 'updated', '122.168.114.106', '2025-02-04 05:08:07', '2025-02-04 05:08:07'),
+(46, 2, '2025-02-04', 'client', 3, 'created client profile. client code :', 'Admin Amit Amit created client profile. client code : cli_DDD_Cli_00003(Cli2g)', 'created', '122.168.114.106', '2025-02-04 05:09:01', '2025-02-04 05:09:01'),
+(47, 2, '2025-02-04', 'customer', 2, ' edited the service details and added an additional service while editing the customer code :', 'Admin Amit Amit  edited the service details and added an additional service while editing the customer code : cust_DDD_00002(DDDD)', 'updated', '122.168.114.106', '2025-02-04 05:09:30', '2025-02-04 05:09:30'),
+(48, 2, '2025-02-04', 'job types', 3, 'created job types V3', 'Admin Amit Amit created job types V3 ', 'created', '122.168.114.106', '2025-02-04 05:12:37', '2025-02-04 05:12:37'),
+(49, 2, '2025-02-04', 'job types', 4, 'created job types V4', 'Admin Amit Amit created job types V4 ', 'created', '122.168.114.106', '2025-02-04 05:14:10', '2025-02-04 05:14:10'),
+(50, 2, '2025-02-04', 'job', 2, 'created job code:', 'Admin Amit Amit created job code: DDD_Cli_V4_00002', 'created', '122.168.114.106', '2025-02-04 05:14:36', '2025-02-04 05:14:36'),
+(51, 2, '2025-02-05', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-05 12:52:48', '2025-02-05 12:52:48'),
+(52, 2, '2025-02-06', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-06 05:15:05', '2025-02-06 05:15:05'),
+(53, 2, '2025-02-06', 'services', 9, 'created services demo', 'Admin Amit Amit created services demo ', 'created', '122.168.114.106', '2025-02-06 05:16:27', '2025-02-06 05:16:27'),
+(54, 2, '2025-02-06', 'role', 9, 'created role DEMO', 'Admin Amit Amit created role DEMO ', 'created', '122.168.114.106', '2025-02-06 05:19:55', '2025-02-06 05:19:55'),
+(55, 2, '2025-02-06', 'staff', 24, 'created staff SSSS ssss', 'Admin Amit Amit created staff SSSS ssss ', 'created', '122.168.114.106', '2025-02-06 05:20:27', '2025-02-06 05:20:27'),
+(56, 2, '2025-02-06', 'staff', 26, 'created staff GGGGGG ssss', 'Admin Amit Amit created staff GGGGGG ssss ', 'created', '122.168.114.106', '2025-02-06 06:56:40', '2025-02-06 06:56:40'),
+(57, 2, '2025-02-06', 'staff', 4, 'created staff Account  manager', 'Admin Amit Amit created staff Account  manager ', 'created', '122.168.114.106', '2025-02-06 07:25:43', '2025-02-06 07:25:43'),
+(58, 2, '2025-02-06', 'staff', 5, 'created staff STAFF  ONE', 'Admin Amit Amit created staff STAFF  ONE ', 'created', '122.168.114.106', '2025-02-06 07:27:58', '2025-02-06 07:27:58'),
+(59, 2, '2025-02-06', 'staff', 6, 'created staff STAFF TWO', 'Admin Amit Amit created staff STAFF TWO ', 'created', '122.168.114.106', '2025-02-06 07:28:28', '2025-02-06 07:28:28'),
+(60, 2, '2025-02-06', 'staff', 5, 'edited staff STAFF ONE', 'Admin Amit Amit edited staff STAFF ONE ', 'updated', '122.168.114.106', '2025-02-06 08:22:59', '2025-02-06 08:22:59'),
+(61, 2, '2025-02-06', 'customer', 3, 'created customer profile. customer code :', 'Admin Amit Amit created customer profile. customer code : cust_CUS_00003(CUST3)', 'created', '122.168.114.106', '2025-02-06 08:27:22', '2025-02-06 08:27:22'),
+(62, 2, '2025-02-06', 'customer', 2, 'changes the status Deactivate customer code :', 'Admin Amit Amit changes the status Deactivate customer code : cust_DDD_00002(DDDD)', 'updated', '122.168.114.106', '2025-02-06 09:12:45', '2025-02-06 09:12:45'),
+(63, 2, '2025-02-06', 'customer', 2, 'changes the status Activate customer code :', 'Admin Amit Amit changes the status Activate customer code : cust_DDD_00002(DDDD)', 'updated', '122.168.114.106', '2025-02-06 09:12:51', '2025-02-06 09:12:51'),
+(64, 2, '2025-02-06', 'customer', 2, 'changes the status Deactivate customer code :', 'Admin Amit Amit changes the status Deactivate customer code : cust_DDD_00002(DDDD)', 'updated', '122.168.114.106', '2025-02-06 09:27:07', '2025-02-06 09:27:07'),
+(65, 2, '2025-02-06', 'customer', 2, 'changes the status Activate customer code :', 'Admin Amit Amit changes the status Activate customer code : cust_DDD_00002(DDDD)', 'updated', '122.168.114.106', '2025-02-06 09:27:18', '2025-02-06 09:27:18'),
+(66, 2, '2025-02-06', 'client', 3, 'deleted customer. customer code :', 'Admin Amit Amit deleted customer. customer code : cli_DDD_Cli_00003(Cli2g)', 'deleted', '122.168.114.106', '2025-02-06 10:09:58', '2025-02-06 10:09:58'),
+(67, 2, '2025-02-06', 'customer', 4, 'created customer profile. customer code :', 'Admin Amit Amit created customer profile. customer code : cust_ada_00003(adad)', 'created', '122.168.114.106', '2025-02-06 10:12:35', '2025-02-06 10:12:35'),
+(68, 2, '2025-02-06', 'client', 4, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-02-06 10:12:41', '2025-02-06 10:12:41'),
+(69, 5, '2025-02-06', '-', 0, ' Logged In', 'Processor STAFF ONE  Logged In ', '-', NULL, '2025-02-06 10:46:12', '2025-02-06 10:46:12'),
+(70, 5, '2025-02-06', 'customer', 5, 'created customer profile. customer code :', 'Processor STAFF ONE created customer profile. customer code : cust_CUS_00003(CUST-STAFF1)', 'created', NULL, '2025-02-06 10:46:57', '2025-02-06 10:46:57'),
+(71, 5, '2025-02-06', 'customer', 5, ' edited the service details and added an additional service while editing the customer code :', 'Processor STAFF ONE  edited the service details and added an additional service while editing the customer code : cust_CUS_00003(CUST-STAFF1)', 'updated', NULL, '2025-02-06 10:47:02', '2025-02-06 10:47:02'),
+(72, 6, '2025-02-06', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', '103.103.213.217', '2025-02-06 10:48:10', '2025-02-06 10:48:10'),
+(73, 2, '2025-02-06', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-02-06 10:48:33', '2025-02-06 10:48:33'),
+(74, 6, '2025-02-06', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', '122.168.114.106', '2025-02-06 10:48:48', '2025-02-06 10:48:48'),
+(75, 6, '2025-02-06', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', NULL, '2025-02-06 10:51:10', '2025-02-06 10:51:10'),
+(76, 2, '2025-02-06', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-06 10:56:32', '2025-02-06 10:56:32'),
+(77, 5, '2025-02-06', 'client', 4, 'created client profile. client code :', 'Processor STAFF ONE created client profile. client code : cli_CUS_CLI_00004(CLI-STAFF1)', 'created', '122.168.114.106', '2025-02-06 11:20:55', '2025-02-06 11:20:55'),
+(78, 2, '2025-02-06', 'staff', 6, 'edited staff STAFF TWO', 'Admin Amit Amit edited staff STAFF TWO ', 'updated', '122.168.114.106', '2025-02-06 11:21:42', '2025-02-06 11:21:42'),
+(79, 6, '2025-02-06', '-', 0, ' Logged Out', 'Reviewer STAFF TWO  Logged Out ', '-', NULL, '2025-02-06 11:33:33', '2025-02-06 11:33:33'),
+(80, 4, '2025-02-06', '-', 0, ' Logged In', 'Manager Account  manager  Logged In ', '-', NULL, '2025-02-06 11:33:44', '2025-02-06 11:33:44'),
+(81, 4, '2025-02-06', 'customer', 6, 'created customer profile. customer code :', 'Manager Account  manager created customer profile. customer code : cust_CUS_00004(CUST-4)', 'created', NULL, '2025-02-06 11:34:48', '2025-02-06 11:34:48'),
+(82, 4, '2025-02-06', 'customer', 6, ' edited the service details and added an additional service while editing the customer code :', 'Manager Account  manager  edited the service details and added an additional service while editing the customer code : cust_CUS_00004(CUST-4)', 'updated', NULL, '2025-02-06 11:34:52', '2025-02-06 11:34:52'),
+(83, 2, '2025-02-06', 'job', 2, 'sent the draft for job code:', 'Admin Amit Amit sent the draft for job code: DDD_Cli_V4_00002', 'created', '122.168.114.106', '2025-02-06 12:17:52', '2025-02-06 12:17:52'),
+(84, 2, '2025-02-06', 'job', 2, 'edited the draft job code:', 'Admin Amit Amit edited the draft job code: DDD_Cli_V4_00002', 'updated', '122.168.114.106', '2025-02-06 12:38:38', '2025-02-06 12:38:38'),
+(85, 2, '2025-02-06', 'job', 2, 'edited the draft job code:', 'Admin Amit Amit edited the draft job code: DDD_Cli_V4_00002', 'updated', '122.168.114.106', '2025-02-06 12:38:53', '2025-02-06 12:38:53'),
+(86, 2, '2025-02-07', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-07 12:45:39', '2025-02-07 12:45:39'),
+(87, 2, '2025-02-07', 'staff', 7, 'created staff STAFF FOUR', 'Admin Amit Amit created staff STAFF FOUR ', 'created', '122.168.114.106', '2025-02-07 12:50:36', '2025-02-07 12:50:36'),
+(88, 2, '2025-02-07', 'staff', 8, 'created staff STAFF Five', 'Admin Amit Amit created staff STAFF Five ', 'created', '122.168.114.106', '2025-02-07 13:14:26', '2025-02-07 13:14:26'),
+(89, 7, '2025-02-07', '-', 0, ' Logged In', 'DEMO STAFF FOUR  Logged In ', '-', NULL, '2025-02-07 13:19:29', '2025-02-07 13:19:29'),
+(90, 7, '2025-02-07', '-', 0, ' Logged Out', 'DEMO STAFF FOUR  Logged Out ', '-', NULL, '2025-02-07 13:19:46', '2025-02-07 13:19:46'),
+(91, 8, '2025-02-07', '-', 0, ' Logged In', 'Processor STAFF Five  Logged In ', '-', NULL, '2025-02-07 13:19:54', '2025-02-07 13:19:54'),
+(92, 8, '2025-02-07', 'customer', 7, 'created customer profile. customer code :', 'Processor STAFF Five created customer profile. customer code : cust_CUS_00005(CUS-9)', 'created', NULL, '2025-02-07 13:20:42', '2025-02-07 13:20:42'),
+(93, 8, '2025-02-07', 'customer', 7, ' edited the service details and added an additional service while editing the customer code :', 'Processor STAFF Five  edited the service details and added an additional service while editing the customer code : cust_CUS_00005(CUS-9)', 'updated', NULL, '2025-02-07 13:20:46', '2025-02-07 13:20:46'),
+(94, 2, '2025-02-08', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-08 05:02:20', '2025-02-08 05:02:20'),
+(95, 2, '2025-02-08', 'job', 1, 'updated the job status from WIP - Customer Reviewed & To be Updated to Filed with HMRC. job code:', 'Admin Amit Amit updated the job status from WIP - Customer Reviewed & To be Updated to Filed with HMRC. job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-08 05:15:28', '2025-02-08 05:15:28'),
+(96, 2, '2025-02-08', 'job', 1, 'updated the job status from null to WIP – To Be Reviewed. job code:', 'Admin Amit Amit updated the job status from null to WIP – To Be Reviewed. job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-08 05:18:48', '2025-02-08 05:18:48'),
+(97, 2, '2025-02-08', 'job', 1, 'updated the job status from WIP – To Be Reviewed to Filed with Companies House. job code:', 'Admin Amit Amit updated the job status from WIP – To Be Reviewed to Filed with Companies House. job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-02-08 05:18:58', '2025-02-08 05:18:58'),
+(98, 7, '2025-02-08', '-', 0, ' Logged In', 'DEMO STAFF FOUR  Logged In ', '-', NULL, '2025-02-08 05:25:10', '2025-02-08 05:25:10'),
+(99, 2, '2025-02-08', 'permission', 9, ' updated the access for DEMO. Access Changes Add Permission (customer-insert, client-insert, job-insert, job-view, customer-view, client-view) Remove Permission (status-view)', 'Admin Amit Amit  updated the access for DEMO. Access Changes Add Permission (customer-insert, client-insert, job-insert, job-view, customer-view, client-view) Remove Permission (status-view) ', 'updated', '122.168.114.106', '2025-02-08 05:25:44', '2025-02-08 05:25:44'),
+(100, 7, '2025-02-08', 'customer', 8, 'created customer profile. customer code :', 'DEMO STAFF FOUR created customer profile. customer code : cust_f4-_00006(f4-cust)', 'created', '122.168.114.106', '2025-02-08 05:26:20', '2025-02-08 05:26:20'),
+(101, 7, '2025-02-08', 'customer', 8, ' edited the service details and added an additional service while editing the customer code :', 'DEMO STAFF FOUR  edited the service details and added an additional service while editing the customer code : cust_f4-_00006(f4-cust)', 'updated', '122.168.114.106', '2025-02-08 05:26:22', '2025-02-08 05:26:22'),
+(102, 8, '2025-02-08', '-', 0, ' Logged In', 'Processor STAFF Five  Logged In ', '-', '122.168.114.106', '2025-02-08 05:27:15', '2025-02-08 05:27:15'),
+(103, 7, '2025-02-08', 'client', 5, 'created client profile. client code :', 'DEMO STAFF FOUR created client profile. client code : cli_f4-_f4-_00005(f4-cli)', 'created', '122.168.114.106', '2025-02-08 05:27:53', '2025-02-08 05:27:53'),
+(104, 7, '2025-02-08', 'job', 3, 'created job code:', 'DEMO STAFF FOUR created job code: f4-_f4-_V3_00003', 'created', '122.168.114.106', '2025-02-08 05:28:09', '2025-02-08 05:28:09'),
+(105, 2, '2025-02-08', 'job', 3, 'updated the job status from To Be Started - Not Yet Allocated Internally to Filed with Companies House and HMRC. job code:', 'Admin Amit Amit updated the job status from To Be Started - Not Yet Allocated Internally to Filed with Companies House and HMRC. job code: f4-_f4-_V3_00003', 'updated', '122.168.114.106', '2025-02-08 05:44:23', '2025-02-08 05:44:23'),
+(106, 2, '2025-02-08', 'staff', 9, 'created staff STAFF FIVE', 'Admin Amit Amit created staff STAFF FIVE ', 'created', '122.168.114.106', '2025-02-08 06:53:36', '2025-02-08 06:53:36'),
+(107, 9, '2025-02-08', '-', 0, ' Logged In', 'Manager STAFF FIVE  Logged In ', '-', NULL, '2025-02-08 06:54:06', '2025-02-08 06:54:06'),
+(108, 2, '2025-02-08', 'staff', 10, 'created staff STAFF FIVE', 'Admin Amit Amit created staff STAFF FIVE ', 'created', '122.168.114.106', '2025-02-08 11:36:28', '2025-02-08 11:36:28'),
+(109, 2, '2025-02-08', 'staff', 11, 'created staff STAFF SIX', 'Admin Amit Amit created staff STAFF SIX ', 'created', '122.168.114.106', '2025-02-08 11:43:22', '2025-02-08 11:43:22'),
+(110, 2, '2025-02-10', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-10 07:21:49', '2025-02-10 07:21:49'),
+(111, 2, '2025-02-10', 'job', 1, 'sent the draft for job code:', 'Admin Amit Amit sent the draft for job code: CUS_Cli_VAT2_00001', 'created', '122.168.114.106', '2025-02-10 07:23:21', '2025-02-10 07:23:21'),
+(112, 2, '2025-02-10', 'job', 3, 'sent the draft for job code:', 'Admin Amit Amit sent the draft for job code: f4-_f4-_V3_00003', 'created', '122.168.114.106', '2025-02-10 09:50:12', '2025-02-10 09:50:12'),
+(113, 2, '2025-02-10', 'job', 1, 'sent the draft for job code:', 'Admin Amit Amit sent the draft for job code: CUS_Cli_VAT2_00001', 'created', '122.168.114.106', '2025-02-10 09:55:36', '2025-02-10 09:55:36'),
+(114, 2, '2025-02-10', 'job', 3, 'updated the job status from WIP - Customer Reviewed & To be Updated to Duplicate. job code:', 'Admin Amit Amit updated the job status from WIP - Customer Reviewed & To be Updated to Duplicate. job code: f4-_f4-_V3_00003', 'updated', '122.168.114.106', '2025-02-10 11:21:13', '2025-02-10 11:21:13'),
+(115, 2, '2025-02-10', 'client', 6, 'created client profile. client code :', 'Admin Amit Amit created client profile. client code : cli_f4-_AAA_00006(AAA)', 'created', '122.168.114.106', '2025-02-10 11:45:33', '2025-02-10 11:45:33'),
+(116, 2, '2025-02-10', 'client', 7, 'created client profile. client code :', 'Admin Amit Amit created client profile. client code : cli_f4-_UNA_00007(UNA)', 'created', '122.168.114.106', '2025-02-10 11:46:31', '2025-02-10 11:46:31'),
+(117, 2, '2025-02-10', 'client', 8, 'created client profile. client code :', 'Admin Amit Amit created client profile. client code : cli_f4-_TRU_00008(TRUST)', 'created', '122.168.114.106', '2025-02-10 11:47:41', '2025-02-10 11:47:41'),
+(118, 10, '2025-02-10', '-', 0, ' Logged In', 'Manager STAFF FIVE  Logged In ', '-', NULL, '2025-02-10 11:50:20', '2025-02-10 11:50:20'),
+(119, 11, '2025-02-10', '-', 0, ' Logged In', 'Manager STAFF SIX  Logged In ', '-', '122.168.114.106', '2025-02-10 11:51:00', '2025-02-10 11:51:00'),
+(120, 11, '2025-02-10', '-', 0, ' Logged Out', 'Manager STAFF SIX  Logged Out ', '-', '122.168.114.106', '2025-02-10 12:02:19', '2025-02-10 12:02:19'),
+(121, 7, '2025-02-10', '-', 0, ' Logged In', 'DEMO STAFF FOUR  Logged In ', '-', '122.168.114.106', '2025-02-10 12:02:28', '2025-02-10 12:02:29'),
+(122, 2, '2025-02-10', 'job', 4, 'created job code:', 'Admin Amit Amit created job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-10 13:14:57', '2025-02-10 13:14:57'),
+(123, 2, '2025-02-11', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-11 04:45:06', '2025-02-11 04:45:06'),
+(124, 11, '2025-02-11', '-', 0, ' Logged In', 'Manager STAFF SIX  Logged In ', '-', NULL, '2025-02-11 04:52:40', '2025-02-11 04:52:40'),
+(125, 10, '2025-02-11', '-', 0, ' Logged In', 'Manager STAFF FIVE  Logged In ', '-', '122.168.114.106', '2025-02-11 04:54:53', '2025-02-11 04:54:53'),
+(126, 11, '2025-02-11', '-', 0, ' Logged Out', 'Manager STAFF SIX  Logged Out ', '-', NULL, '2025-02-11 04:55:25', '2025-02-11 04:55:25'),
+(127, 7, '2025-02-11', '-', 0, ' Logged In', 'DEMO STAFF FOUR  Logged In ', '-', NULL, '2025-02-11 04:55:32', '2025-02-11 04:55:32'),
+(128, 7, '2025-02-11', '-', 0, ' Logged Out', 'DEMO STAFF FOUR  Logged Out ', '-', '122.168.114.106', '2025-02-11 06:37:14', '2025-02-11 06:37:14'),
+(129, 6, '2025-02-11', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', '122.168.114.106', '2025-02-11 06:37:43', '2025-02-11 06:37:43'),
+(130, 6, '2025-02-11', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', NULL, '2025-02-11 13:31:13', '2025-02-11 13:31:13'),
+(131, 2, '2025-02-12', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-12 06:06:40', '2025-02-12 06:06:40'),
+(132, 6, '2025-02-12', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', NULL, '2025-02-12 06:11:35', '2025-02-12 06:11:35'),
+(133, 2, '2025-02-12', 'job', 4, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-12 06:50:09', '2025-02-12 06:50:09'),
+(134, 6, '2025-02-12', 'timesheet', 0, 'submitted a timesheet entry. Task type:External,  Date: 2025-02-10, Hours : 01:00 Date: 2025-02-12, Hours : 02:00 ,Job code:CUS_Cli_VAT2_00001, Task name:a', 'Reviewer STAFF TWO submitted a timesheet entry. Task type:External,  Date: 2025-02-10, Hours : 01:00 Date: 2025-02-12, Hours : 02:00 ,Job code:CUS_Cli_VAT2_00001, Task name:a ', 'updated', '0.0.0.0', '2025-02-12 07:24:24', '2025-02-12 07:24:24'),
+(135, 6, '2025-02-12', 'timesheet', 0, 'submitted a timesheet entry. Task type:External,  ,Job code:CUS_Cli_VAT2_00001, Task name:a', 'Reviewer STAFF TWO submitted a timesheet entry. Task type:External,  ,Job code:CUS_Cli_VAT2_00001, Task name:a ', 'updated', '0.0.0.0', '2025-02-12 07:24:35', '2025-02-12 07:24:35'),
+(136, 6, '2025-02-12', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  Date: 2025-02-17, Hours : 01:00 ,Job code:abc, Task name:c', 'Reviewer STAFF TWO submitted a timesheet entry. Task type:Internal,  Date: 2025-02-17, Hours : 01:00 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-02-12 07:30:29', '2025-02-12 07:30:29'),
+(137, 6, '2025-02-12', 'timesheet', 0, 'submitted a timesheet entry. Task type:External,  Date: 2025-02-24, Hours : 01:00 ,Job code:CUS_Cli_VAT2_00001, Task name:a', 'Reviewer STAFF TWO submitted a timesheet entry. Task type:External,  Date: 2025-02-24, Hours : 01:00 ,Job code:CUS_Cli_VAT2_00001, Task name:a ', 'updated', '0.0.0.0', '2025-02-12 08:22:00', '2025-02-12 08:22:00'),
+(138, 7, '2025-02-12', '-', 0, ' Logged In', 'DEMO STAFF FOUR  Logged In ', '-', '122.168.114.106', '2025-02-12 09:08:11', '2025-02-12 09:08:11'),
+(139, 2, '2025-02-12', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', NULL, '2025-02-12 10:05:28', '2025-02-12 10:05:28'),
+(140, 7, '2025-02-12', '-', 0, ' Logged Out', 'DEMO STAFF FOUR  Logged Out ', '-', '122.168.114.106', '2025-02-12 10:06:16', '2025-02-12 10:06:16'),
+(141, 7, '2025-02-12', '-', 0, ' Logged In', 'DEMO STAFF FOUR  Logged In ', '-', '122.168.114.106', '2025-02-12 10:06:18', '2025-02-12 10:06:18'),
+(142, 6, '2025-02-12', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', NULL, '2025-02-12 10:07:09', '2025-02-12 10:07:09'),
+(143, 2, '2025-02-19', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-19 12:12:41', '2025-02-19 12:12:41'),
+(144, 2, '2025-02-19', 'customer', 9, 'created customer profile. customer code :', 'Admin Amit Amit created customer profile. customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'created', '122.168.114.106', '2025-02-19 12:32:09', '2025-02-19 12:32:09'),
+(145, 2, '2025-02-19', 'customer', 9, ' edited the service details and added an additional service while editing the customer code :', 'Admin Amit Amit  edited the service details and added an additional service while editing the customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'updated', '122.168.114.106', '2025-02-19 12:32:13', '2025-02-19 12:32:13'),
+(146, 2, '2025-02-19', 'customer', 9, 'edited the company information customer code :', 'Admin Amit Amit edited the company information customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'updated', '122.168.114.106', '2025-02-19 12:35:54', '2025-02-19 12:35:54'),
+(147, 2, '2025-02-19', 'customer', 9, 'edited Percentage Model (engagement model) customer code :', 'Admin Amit Amit edited Percentage Model (engagement model) customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'updated', '122.168.114.106', '2025-02-19 12:58:20', '2025-02-19 12:58:20'),
+(148, 2, '2025-02-19', 'customer', 9, 'edited Percentage Model (engagement model) customer code :', 'Admin Amit Amit edited Percentage Model (engagement model) customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'updated', '122.168.114.106', '2025-02-19 12:58:45', '2025-02-19 12:58:45'),
+(149, 2, '2025-02-19', 'customer', 9, 'edited Percentage Model (engagement model) customer code :', 'Admin Amit Amit edited Percentage Model (engagement model) customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'updated', '122.168.114.106', '2025-02-19 13:10:16', '2025-02-19 13:10:16'),
+(150, 2, '2025-02-19', 'customer', 9, 'edited Percentage Model (engagement model) customer code :', 'Admin Amit Amit edited Percentage Model (engagement model) customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'updated', '122.168.114.106', '2025-02-19 13:10:22', '2025-02-19 13:10:22'),
+(151, 2, '2025-02-19', 'customer', 9, 'edited Percentage Model (engagement model) customer code :', 'Admin Amit Amit edited Percentage Model (engagement model) customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'updated', '122.168.114.106', '2025-02-19 13:10:55', '2025-02-19 13:10:55'),
+(152, 2, '2025-02-19', 'customer', 9, 'edited Percentage Model (engagement model) customer code :', 'Admin Amit Amit edited Percentage Model (engagement model) customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'updated', '122.168.114.106', '2025-02-19 13:12:42', '2025-02-19 13:12:42'),
+(153, 2, '2025-02-19', 'customer', 9, 'edited Percentage Model (engagement model) customer code :', 'Admin Amit Amit edited Percentage Model (engagement model) customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'updated', '122.168.114.106', '2025-02-19 13:14:46', '2025-02-19 13:14:46'),
+(154, 2, '2025-02-19', 'customer', 9, 'edited Percentage Model (engagement model) customer code :', 'Admin Amit Amit edited Percentage Model (engagement model) customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'updated', '122.168.114.106', '2025-02-19 13:14:59', '2025-02-19 13:14:59'),
+(155, 2, '2025-02-19', 'customer', 9, 'edited Percentage Model (engagement model) customer code :', 'Admin Amit Amit edited Percentage Model (engagement model) customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'updated', '122.168.114.106', '2025-02-19 13:16:23', '2025-02-19 13:16:23'),
+(156, 2, '2025-02-19', 'customer', 9, 'edited Percentage Model (engagement model) customer code :', 'Admin Amit Amit edited Percentage Model (engagement model) customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'updated', '122.168.114.106', '2025-02-19 13:16:58', '2025-02-19 13:16:58'),
+(157, 2, '2025-02-19', 'customer', 9, 'edited Percentage Model (engagement model) customer code :', 'Admin Amit Amit edited Percentage Model (engagement model) customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'updated', '122.168.114.106', '2025-02-19 13:17:14', '2025-02-19 13:17:14'),
+(158, 2, '2025-02-19', 'customer', 9, 'edited Percentage Model (engagement model) customer code :', 'Admin Amit Amit edited Percentage Model (engagement model) customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'updated', '122.168.114.106', '2025-02-19 13:17:36', '2025-02-19 13:17:36'),
+(159, 2, '2025-02-19', 'customer', 9, 'edited Percentage Model (engagement model) customer code :', 'Admin Amit Amit edited Percentage Model (engagement model) customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'updated', '122.168.114.106', '2025-02-19 13:18:09', '2025-02-19 13:18:09'),
+(160, 2, '2025-02-19', 'customer', 9, 'edited Percentage Model (engagement model) customer code :', 'Admin Amit Amit edited Percentage Model (engagement model) customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'updated', '122.168.114.106', '2025-02-19 13:20:12', '2025-02-19 13:20:12'),
+(161, 2, '2025-02-19', 'customer', 9, 'edited Percentage Model (engagement model) customer code :', 'Admin Amit Amit edited Percentage Model (engagement model) customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'updated', '122.168.114.106', '2025-02-19 13:21:49', '2025-02-19 13:21:49'),
+(162, 2, '2025-02-19', 'customer', 9, 'edited Percentage Model (engagement model) customer code :', 'Admin Amit Amit edited Percentage Model (engagement model) customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'updated', '122.168.114.106', '2025-02-19 13:25:46', '2025-02-19 13:25:46'),
+(163, 2, '2025-02-19', 'customer', 9, 'edited Percentage Model (engagement model) customer code :', 'Admin Amit Amit edited Percentage Model (engagement model) customer code : cust_F A_00007(F A B AUDIO VISUAL LIMITED_00007)', 'updated', '122.168.114.106', '2025-02-19 13:26:00', '2025-02-19 13:26:00'),
+(164, 2, '2025-02-20', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-02-20 04:41:22', '2025-02-20 04:41:22'),
+(165, 2, '2025-02-20', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', NULL, '2025-02-20 05:50:00', '2025-02-20 05:50:00'),
+(166, 2, '2025-02-20', 'job', 4, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 06:19:40', '2025-02-20 06:19:40'),
+(167, 2, '2025-02-20', 'job', 4, 'edited the missing logs job code:', 'Admin Amit Amit edited the missing logs job code: CUS_Cli_V4_00004', 'updated', '122.168.114.106', '2025-02-20 06:22:33', '2025-02-20 06:22:33'),
+(168, 2, '2025-02-20', 'job', 4, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 06:35:19', '2025-02-20 06:35:19'),
+(169, 2, '2025-02-20', 'job', 4, 'edited the missing logs job code:', 'Admin Amit Amit edited the missing logs job code: CUS_Cli_V4_00004', 'updated', '122.168.114.106', '2025-02-20 06:36:40', '2025-02-20 06:36:40'),
+(170, 2, '2025-02-20', 'customer', 8, 'edited sole trader information. customer code :', 'Admin Amit Amit edited sole trader information. customer code : cust_f45_00006(f45cust)', 'updated', '122.168.114.106', '2025-02-20 06:49:02', '2025-02-20 06:49:02'),
+(171, 2, '2025-02-20', 'job', 4, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 07:06:09', '2025-02-20 07:06:09'),
+(172, 2, '2025-02-20', 'job', 4, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 07:17:53', '2025-02-20 07:17:53'),
+(173, 2, '2025-02-20', 'job', 4, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 07:29:50', '2025-02-20 07:29:50'),
+(174, 2, '2025-02-20', 'job', 4, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 07:31:31', '2025-02-20 07:31:31'),
+(175, 2, '2025-02-20', 'customer', 8, 'edited Percentage Model (engagement model) customer code :', 'Admin Amit Amit edited Percentage Model (engagement model) customer code : cust_f45_00006(f45cust)', 'updated', '122.168.114.106', '2025-02-20 08:40:59', '2025-02-20 08:40:59'),
+(176, 2, '2025-02-20', 'job', 4, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 08:45:01', '2025-02-20 08:45:01'),
+(177, 2, '2025-02-20', 'job', 4, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 08:53:27', '2025-02-20 08:53:27'),
+(178, 2, '2025-02-20', 'job', 4, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 08:53:54', '2025-02-20 08:53:54'),
+(179, 2, '2025-02-20', 'job', 4, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 09:11:22', '2025-02-20 09:11:22'),
+(180, 2, '2025-02-20', 'job', 4, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 09:14:26', '2025-02-20 09:14:26'),
+(181, 2, '2025-02-20', 'job', 4, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 09:15:58', '2025-02-20 09:15:58'),
+(182, 2, '2025-02-20', 'job', 4, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 09:17:00', '2025-02-20 09:17:00'),
+(183, 2, '2025-02-20', 'job', 4, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 09:26:25', '2025-02-20 09:26:25'),
+(184, 2, '2025-02-20', 'job', 4, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 09:27:12', '2025-02-20 09:27:12'),
+(185, 2, '2025-02-20', 'job', 4, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 09:32:34', '2025-02-20 09:32:34'),
+(186, 2, '2025-02-20', 'job', 4, 'sent the queries for job code:', 'Admin Amit Amit sent the queries for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 09:42:51', '2025-02-20 09:42:51'),
+(187, 2, '2025-02-20', 'job', 4, 'sent the queries for job code:', 'Admin Amit Amit sent the queries for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 09:46:24', '2025-02-20 09:46:24'),
+(188, 2, '2025-02-20', 'job', 4, 'sent the queries for job code:', 'Admin Amit Amit sent the queries for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 09:46:34', '2025-02-20 09:46:34'),
+(189, 2, '2025-02-20', 'job', 4, 'sent the missing logs for job code:', 'Admin Amit Amit sent the missing logs for job code: CUS_Cli_V4_00004', 'created', '122.168.114.106', '2025-02-20 10:00:56', '2025-02-20 10:00:56'),
+(190, 2, '2025-02-20', 'job', 4, 'edited the missing logs job code:', 'Admin Amit Amit edited the missing logs job code: CUS_Cli_V4_00004', 'updated', '122.168.114.106', '2025-02-20 10:37:37', '2025-02-20 10:37:37'),
+(191, 2, '2025-02-20', 'job', 4, 'edited the queries job code:', 'Admin Amit Amit edited the queries job code: CUS_Cli_V4_00004', 'updated', '122.168.114.106', '2025-02-20 11:24:54', '2025-02-20 11:24:54'),
+(192, 2, '2025-02-20', 'role', 10, 'created role DEMO1', 'Admin Amit Amit created role DEMO1 ', 'created', '122.168.114.106', '2025-02-20 11:49:19', '2025-02-20 11:49:19'),
+(193, 2, '2025-03-26', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '103.103.213.217', '2025-03-26 09:44:36', '2025-03-26 09:44:36'),
+(194, 2, '2025-03-26', 'customer', 10, 'created customer profile. customer code :', 'Admin Amit Amit created customer profile. customer code : cust_HEA_00008(HEAVEN RETAIL LIMITED_00008)', 'created', '103.103.213.217', '2025-03-26 09:55:47', '2025-03-26 09:55:47'),
+(195, 2, '2025-03-26', 'client', 9, 'created client profile. client code :', 'Admin Amit Amit created client profile. client code : cli_f45_G T_00009(G T SCARLET LIMITED_00009)', 'created', '103.103.213.217', '2025-03-26 10:10:13', '2025-03-26 10:10:13'),
+(196, 2, '2025-03-27', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '103.103.213.217', '2025-03-27 05:52:43', '2025-03-27 05:52:43'),
+(197, 2, '2025-03-27', 'client', 10, 'created client profile. client code :', 'Admin Amit Amit created client profile. client code : cli_f45_sss_000010(sss)', 'created', '103.103.213.217', '2025-03-27 06:18:25', '2025-03-27 06:18:25'),
+(198, 2, '2025-03-27', 'client', 11, 'created client profile. client code :', 'Admin Amit Amit created client profile. client code : cli_f45_ddd_000011(ddddd)', 'created', '103.103.213.217', '2025-03-27 06:55:28', '2025-03-27 06:55:28'),
+(199, 2, '2025-03-28', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '103.103.213.217', '2025-03-28 06:47:08', '2025-03-28 06:47:08'),
+(200, 2, '2025-03-29', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-03-29 05:13:34', '2025-03-29 05:13:34'),
+(201, 2, '2025-03-29', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (staff-insert, staff-update, staff-delete, staff-view) ', 'Admin Amit Amit  updated the access for ADMIN. Access Changes Add Permission (staff-insert, staff-update, staff-delete, staff-view)  ', 'updated', '122.168.114.106', '2025-03-29 05:15:44', '2025-03-29 05:15:44'),
+(202, 2, '2025-03-29', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (customer-insert, customer-update, customer-delete, customer-view, status-insert, status-update, status-delete, status-view, client-insert, client-update, client-delete, client-view, job-insert, job-update, job-delete, job-view, setting-insert, setting-update, setting-delete, setting-view, report-insert, report-update, report-delete, report-view, timesheet-insert, timesheet-update, timesheet-delete, timesheet-view) ', 'Admin Amit Amit  updated the access for ADMIN. Access Changes Add Permission (customer-insert, customer-update, customer-delete, customer-view, status-insert, status-update, status-delete, status-view, client-insert, client-update, client-delete, client-view, job-insert, job-update, job-delete, job-view, setting-insert, setting-update, setting-delete, setting-view, report-insert, report-update, report-delete, report-view, timesheet-insert, timesheet-update, timesheet-delete, timesheet-view)  ', 'updated', '122.168.114.106', '2025-03-29 05:16:19', '2025-03-29 05:16:19'),
+(203, 6, '2025-03-29', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', NULL, '2025-03-29 05:18:24', '2025-03-29 05:18:24'),
+(204, 2, '2025-04-02', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-02 05:41:53', '2025-04-02 05:41:53'),
+(205, 2, '2025-04-02', 'client', 12, 'created client profile. client code :', 'Admin Amit Amit created client profile. client code : cli_CUS_sss_000012(sssssssssss)', 'created', '122.168.114.106', '2025-04-02 06:13:37', '2025-04-02 06:13:37'),
+(206, 2, '2025-04-02', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', NULL, '2025-04-02 06:22:33', '2025-04-02 06:22:33'),
+(207, 2, '2025-04-02', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', NULL, '2025-04-02 06:22:33', '2025-04-02 06:22:33'),
+(208, 1, '2025-04-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-04-02 07:13:21', '2025-04-02 07:13:21'),
+(209, 1, '2025-04-02', 'client', 13, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_CUS_fgf_000013(fgff)', 'created', '122.168.114.106', '2025-04-02 07:13:52', '2025-04-02 07:13:52'),
+(210, 1, '2025-04-02', 'job', 5, 'created job code:', 'Super Admin System Super Super Admin created job code: DDD_Cli_V3_00005', 'created', '122.168.114.106', '2025-04-02 08:35:25', '2025-04-02 08:35:25'),
+(211, 1, '2025-04-02', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-04-02 08:50:31', '2025-04-02 08:50:31'),
+(212, 1, '2025-04-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-04-02 08:50:38', '2025-04-02 08:50:38'),
+(213, 1, '2025-04-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-04-02 11:56:48', '2025-04-02 11:56:48'),
+(214, 1, '2025-04-02', 'client', 14, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_CUS_SFD_000014(SFD)', 'created', '122.168.114.106', '2025-04-02 12:21:40', '2025-04-02 12:21:40'),
+(215, 1, '2025-04-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-04-02 12:35:17', '2025-04-02 12:35:17'),
+(216, 10, '2025-04-02', '-', 0, ' Logged In', 'Manager STAFF FIVE  Logged In ', '-', NULL, '2025-04-02 13:23:45', '2025-04-02 13:23:45'),
+(217, 1, '2025-04-03', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-04-03 04:50:09', '2025-04-03 04:50:09'),
+(218, 10, '2025-04-03', '-', 0, ' Logged In', 'Manager STAFF FIVE  Logged In ', '-', '122.168.114.106', '2025-04-03 04:50:46', '2025-04-03 04:50:46'),
+(219, 10, '2025-04-03', 'customer', 11, 'created customer profile. customer code :', 'Manager STAFF FIVE created customer profile. customer code : cust_ads_00009(ads)', 'created', '122.168.114.106', '2025-04-03 04:55:52', '2025-04-03 04:55:52'),
+(220, 10, '2025-04-03', 'customer', 11, ' edited the service details and added an additional service while editing the customer code :', 'Manager STAFF FIVE  edited the service details and added an additional service while editing the customer code : cust_ads_00009(ads)', 'updated', '122.168.114.106', '2025-04-03 04:57:07', '2025-04-03 04:57:07'),
+(221, 1, '2025-04-03', 'customer contact person role', 1, 'created customer contact person role RoleName1', 'Super Admin System Super Super Admin created customer contact person role RoleName1 ', 'created', '122.168.114.106', '2025-04-03 05:06:14', '2025-04-03 05:06:14'),
+(222, 1, '2025-04-03', 'customer contact person role', 2, 'created customer contact person role RoleName2', 'Super Admin System Super Super Admin created customer contact person role RoleName2 ', 'created', '122.168.114.106', '2025-04-03 05:06:22', '2025-04-03 05:06:22'),
+(223, 1, '2025-04-03', 'customer', 12, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_S L_000010(S LIMITED_000010)', 'created', '122.168.114.106', '2025-04-03 05:51:23', '2025-04-03 05:51:23'),
+(224, 1, '2025-04-03', 'customer', 12, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_S L_000010(S LIMITED_000010)', 'updated', '122.168.114.106', '2025-04-03 05:51:29', '2025-04-03 05:51:29');
+INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, `log_message`, `log_message_all`, `permission_type`, `ip`, `created_at`, `updated_at`) VALUES
+(225, 1, '2025-04-03', 'customer', 13, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_DDD_000011(DDDDaxaxaax)', 'created', '122.168.114.106', '2025-04-03 06:00:40', '2025-04-03 06:00:40'),
+(226, 1, '2025-04-03', 'customer', 13, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_DDD_000011(DDDDaxaxaax)', 'updated', '122.168.114.106', '2025-04-03 06:00:42', '2025-04-03 06:00:42'),
+(227, 1, '2025-04-03', 'client', 13, 'deleted customer. customer code :', 'Super Admin System Super Super Admin deleted customer. customer code : cli_CUS_fgf_000013(fgff)', 'deleted', '122.168.114.106', '2025-04-03 06:04:56', '2025-04-03 06:04:56'),
+(228, 1, '2025-04-03', 'client', 12, 'deleted customer. customer code :', 'Super Admin System Super Super Admin deleted customer. customer code : cli_CUS_sss_000012(sssssssssss)', 'deleted', '122.168.114.106', '2025-04-03 06:05:00', '2025-04-03 06:05:00'),
+(229, 1, '2025-04-03', 'client', 11, 'deleted customer. customer code :', 'Super Admin System Super Super Admin deleted customer. customer code : cli_f45_ddd_000011(ddddd)', 'deleted', '122.168.114.106', '2025-04-03 06:05:03', '2025-04-03 06:05:03'),
+(230, 1, '2025-04-03', 'client', 10, 'deleted customer. customer code :', 'Super Admin System Super Super Admin deleted customer. customer code : cli_f45_sss_000010(sss)', 'deleted', '122.168.114.106', '2025-04-03 06:05:06', '2025-04-03 06:05:06'),
+(231, 1, '2025-04-03', 'client', 9, 'deleted customer. customer code :', 'Super Admin System Super Super Admin deleted customer. customer code : cli_f45_G T_00009(G T SCARLET LIMITED_00009)', 'deleted', '122.168.114.106', '2025-04-03 06:05:09', '2025-04-03 06:05:09'),
+(232, 1, '2025-04-03', 'customer', 14, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_DFG_00007(DFGGG)', 'created', '122.168.114.106', '2025-04-03 06:06:07', '2025-04-03 06:06:07'),
+(233, 1, '2025-04-03', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_DFG_00007(DFGGG)', 'updated', '122.168.114.106', '2025-04-03 06:06:10', '2025-04-03 06:06:10'),
+(234, 1, '2025-04-03', 'client', 14, 'deleted customer. customer code :', 'Super Admin System Super Super Admin deleted customer. customer code : cli_CUS_SFD_000014(SFD)', 'deleted', '122.168.114.106', '2025-04-03 07:26:29', '2025-04-03 07:26:29'),
+(235, 1, '2025-04-03', 'customer', 15, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_Ada_00007(Adad)', 'created', '122.168.114.106', '2025-04-03 07:27:38', '2025-04-03 07:27:38'),
+(236, 1, '2025-04-03', 'customer', 15, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_Ada_00007(Adad)', 'updated', '122.168.114.106', '2025-04-03 07:27:41', '2025-04-03 07:27:41'),
+(237, 1, '2025-04-03', 'customer', 16, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_aaa_00008(aaaaaa)', 'created', '122.168.114.106', '2025-04-03 08:24:59', '2025-04-03 08:24:59'),
+(238, 1, '2025-04-03', 'customer', 16, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_aaa_00008(aaaaaa)', 'updated', '122.168.114.106', '2025-04-03 08:25:03', '2025-04-03 08:25:03'),
+(239, 1, '2025-04-03', 'customer', 17, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_sds_00009(sds)', 'created', '122.168.114.106', '2025-04-03 08:31:15', '2025-04-03 08:31:15'),
+(240, 1, '2025-04-03', 'customer', 17, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_sds_00009(sds)', 'updated', '122.168.114.106', '2025-04-03 08:31:20', '2025-04-03 08:31:20'),
+(241, 10, '2025-04-03', 'customer', 18, 'created customer profile. customer code :', 'Manager STAFF FIVE created customer profile. customer code : cust_fh_000010(fh)', 'created', '122.168.114.106', '2025-04-03 08:39:08', '2025-04-03 08:39:08'),
+(242, 10, '2025-04-03', 'customer', 18, ' edited the service details and added an additional service while editing the customer code :', 'Manager STAFF FIVE  edited the service details and added an additional service while editing the customer code : cust_fh_000010(fh)', 'updated', '122.168.114.106', '2025-04-03 08:39:11', '2025-04-03 08:39:11'),
+(243, 1, '2025-04-03', 'customer', 19, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_SHK_000011(SHKKK)', 'created', '122.168.114.106', '2025-04-03 10:29:53', '2025-04-03 10:29:53'),
+(244, 1, '2025-04-03', 'customer', 19, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_SHK_000011(SHKKK)', 'updated', '122.168.114.106', '2025-04-03 10:29:55', '2025-04-03 10:29:55'),
+(245, 1, '2025-04-03', 'client', 15, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_SHK_AA_000015(AA)', 'created', '122.168.114.106', '2025-04-03 10:30:20', '2025-04-03 10:30:20'),
+(246, 1, '2025-04-03', 'customer', 19, 'added Percentage Model and Removed FTE/Dedicated Staffing (engagement model) customer code :', 'Super Admin System Super Super Admin added Percentage Model and Removed FTE/Dedicated Staffing (engagement model) customer code : cust_SHK_000011(SHKKK)', 'updated', '122.168.114.106', '2025-04-03 10:48:40', '2025-04-03 10:48:40'),
+(247, 1, '2025-04-03', 'job', 6, 'created job code:', 'Super Admin System Super Super Admin created job code: CUS_Cli_VAT2_00006', 'created', '122.168.114.106', '2025-04-03 10:52:43', '2025-04-03 10:52:43'),
+(248, 1, '2025-04-03', 'customer', 20, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_asa_000012(asad)', 'created', '122.168.114.106', '2025-04-03 10:57:27', '2025-04-03 10:57:27'),
+(249, 1, '2025-04-03', 'customer', 20, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_asa_000012(asad)', 'updated', '122.168.114.106', '2025-04-03 10:57:30', '2025-04-03 10:57:30'),
+(250, 1, '2025-04-03', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-04-03 11:14:41', '2025-04-03 11:14:41'),
+(251, 2, '2025-04-03', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-03 11:14:57', '2025-04-03 11:14:57'),
+(252, 10, '2025-04-03', '-', 0, ' Logged Out', 'Manager STAFF FIVE  Logged Out ', '-', '122.168.114.106', '2025-04-03 11:15:18', '2025-04-03 11:15:18'),
+(253, 1, '2025-04-03', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-04-03 11:15:39', '2025-04-03 11:15:39'),
+(254, 1, '2025-04-03', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (status-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (status-view) ', 'updated', '122.168.114.106', '2025-04-03 11:17:02', '2025-04-03 11:17:02'),
+(255, 1, '2025-04-03', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (status-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (status-view)  ', 'updated', '122.168.114.106', '2025-04-03 11:17:16', '2025-04-03 11:17:16'),
+(256, 1, '2025-04-03', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (timesheet-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (timesheet-view) ', 'updated', '122.168.114.106', '2025-04-03 11:41:07', '2025-04-03 11:41:07'),
+(257, 1, '2025-04-03', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (timesheet-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (timesheet-view)  ', 'updated', '122.168.114.106', '2025-04-03 11:41:39', '2025-04-03 11:41:39'),
+(258, 1, '2025-04-03', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (All Customer-insert) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (All Customer-insert)  ', 'updated', '122.168.114.106', '2025-04-03 11:47:39', '2025-04-03 11:47:39'),
+(259, 1, '2025-04-03', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (status-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (status-view) ', 'updated', '122.168.114.106', '2025-04-03 12:58:37', '2025-04-03 12:58:37'),
+(260, 1, '2025-04-03', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (status-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (status-view)  ', 'updated', '122.168.114.106', '2025-04-03 12:59:11', '2025-04-03 12:59:11'),
+(261, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', NULL, '2025-04-04 04:55:20', '2025-04-04 04:55:21'),
+(262, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 04:55:39', '2025-04-04 04:55:39'),
+(263, 1, '2025-04-04', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-04-04 04:56:06', '2025-04-04 04:56:06'),
+(264, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', NULL, '2025-04-04 05:18:41', '2025-04-04 05:18:41'),
+(265, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (customer-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (customer-view) ', 'updated', '122.168.114.106', '2025-04-04 05:46:35', '2025-04-04 05:46:35'),
+(266, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (customer-view) Remove Permission (staff-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (customer-view) Remove Permission (staff-view) ', 'updated', '122.168.114.106', '2025-04-04 05:47:02', '2025-04-04 05:47:02'),
+(267, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (staff-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (staff-view)  ', 'updated', '122.168.114.106', '2025-04-04 05:47:16', '2025-04-04 05:47:16'),
+(268, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (report-view, customer-view, status-view, staff-view, client-view, job-view, setting-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (report-view, customer-view, status-view, staff-view, client-view, job-view, setting-view) ', 'updated', '122.168.114.106', '2025-04-04 05:47:41', '2025-04-04 05:47:41'),
+(269, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all customers-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all customers-view)  ', 'updated', '122.168.114.106', '2025-04-04 06:12:19', '2025-04-04 06:12:19'),
+(270, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:23:37', '2025-04-04 06:23:37'),
+(271, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:23:47', '2025-04-04 06:23:47'),
+(272, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:25:02', '2025-04-04 06:25:02'),
+(273, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:25:12', '2025-04-04 06:25:12'),
+(274, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:26:08', '2025-04-04 06:26:08'),
+(275, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:26:14', '2025-04-04 06:26:14'),
+(276, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:26:45', '2025-04-04 06:26:45'),
+(277, 1, '2025-04-04', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:31:32', '2025-04-04 06:31:32'),
+(278, 1, '2025-04-04', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-04-04 06:31:33', '2025-04-04 06:31:33'),
+(279, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:33:33', '2025-04-04 06:33:33'),
+(280, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:34:06', '2025-04-04 06:34:06'),
+(281, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:35:51', '2025-04-04 06:35:51'),
+(282, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:35:58', '2025-04-04 06:35:58'),
+(283, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:36:33', '2025-04-04 06:36:33'),
+(284, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:36:40', '2025-04-04 06:36:40'),
+(285, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:37:43', '2025-04-04 06:37:43'),
+(286, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:37:54', '2025-04-04 06:37:54'),
+(287, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:39:08', '2025-04-04 06:39:08'),
+(288, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:39:23', '2025-04-04 06:39:23'),
+(289, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:39:31', '2025-04-04 06:39:31'),
+(290, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:39:36', '2025-04-04 06:39:36'),
+(291, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:39:48', '2025-04-04 06:39:48'),
+(292, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:45:03', '2025-04-04 06:45:03'),
+(293, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:45:11', '2025-04-04 06:45:11'),
+(294, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:48:05', '2025-04-04 06:48:05'),
+(295, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:48:12', '2025-04-04 06:48:12'),
+(296, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:49:46', '2025-04-04 06:49:46'),
+(297, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:49:53', '2025-04-04 06:49:53'),
+(298, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:50:24', '2025-04-04 06:50:24'),
+(299, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:50:29', '2025-04-04 06:50:29'),
+(300, 2, '2025-04-04', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-04 06:58:55', '2025-04-04 06:58:55'),
+(301, 2, '2025-04-04', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-04 06:59:00', '2025-04-04 06:59:00'),
+(302, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_customers-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_customers-view) ', 'updated', '122.168.114.106', '2025-04-04 07:01:41', '2025-04-04 07:01:41'),
+(303, 1, '2025-04-04', 'permission', 3, ' updated the access for PROCESSOR. Access Changes  Remove Permission (all_jobs-view, all_customers-view, all_clients-view)', 'Super Admin System Super Super Admin  updated the access for PROCESSOR. Access Changes  Remove Permission (all_jobs-view, all_customers-view, all_clients-view) ', 'updated', '122.168.114.106', '2025-04-04 07:03:18', '2025-04-04 07:03:18'),
+(304, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-04 07:03:29', '2025-04-04 07:03:29'),
+(305, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_clients-view, all_customers-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_clients-view, all_customers-view) ', 'updated', '122.168.114.106', '2025-04-04 07:03:49', '2025-04-04 07:03:49'),
+(306, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (timesheet-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (timesheet-view) ', 'updated', '122.168.114.106', '2025-04-04 07:08:33', '2025-04-04 07:08:33'),
+(307, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (report-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (report-view)  ', 'updated', '122.168.114.106', '2025-04-04 07:08:44', '2025-04-04 07:08:44'),
+(308, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (report-view, customer-view, status-view, staff-view, client-view, job-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (report-view, customer-view, status-view, staff-view, client-view, job-view) ', 'updated', '122.168.114.106', '2025-04-04 07:09:33', '2025-04-04 07:09:33'),
+(309, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (customer-insert)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (customer-insert) ', 'updated', '122.168.114.106', '2025-04-04 09:28:32', '2025-04-04 09:28:32'),
+(310, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (customer-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (customer-view)  ', 'updated', '122.168.114.106', '2025-04-04 09:35:52', '2025-04-04 09:35:52'),
+(311, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (customer-insert) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (customer-insert)  ', 'updated', '122.168.114.106', '2025-04-04 09:36:03', '2025-04-04 09:36:03'),
+(312, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (staff-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (staff-view)  ', 'updated', '122.168.114.106', '2025-04-04 09:37:20', '2025-04-04 09:37:20'),
+(313, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (client-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (client-view)  ', 'updated', '122.168.114.106', '2025-04-04 09:43:11', '2025-04-04 09:43:11'),
+(314, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (customer-view, customer-insert)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (customer-view, customer-insert) ', 'updated', '122.168.114.106', '2025-04-04 09:43:40', '2025-04-04 09:43:40'),
+(315, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (customer-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (customer-view)  ', 'updated', '122.168.114.106', '2025-04-04 09:56:41', '2025-04-04 09:56:41'),
+(316, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (customer-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (customer-view) ', 'updated', '122.168.114.106', '2025-04-04 10:07:43', '2025-04-04 10:07:43'),
+(317, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (customer-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (customer-view)  ', 'updated', '122.168.114.106', '2025-04-04 10:09:13', '2025-04-04 10:09:13'),
+(318, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (customer-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (customer-view) ', 'updated', '122.168.114.106', '2025-04-04 10:15:44', '2025-04-04 10:15:44'),
+(319, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (customer-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (customer-view) ', 'updated', '122.168.114.106', '2025-04-04 10:15:45', '2025-04-04 10:15:45'),
+(320, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-04 10:15:59', '2025-04-04 10:15:59'),
+(321, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_jobs-view, all_clients-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_jobs-view, all_clients-view)  ', 'updated', '122.168.114.106', '2025-04-04 10:34:43', '2025-04-04 10:34:43'),
+(322, 1, '2025-04-04', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (staff-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (staff-view) ', 'updated', '122.168.114.106', '2025-04-04 10:36:29', '2025-04-04 10:36:29'),
+(323, 1, '2025-04-05', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-04-05 05:02:24', '2025-04-05 05:02:24'),
+(324, 2, '2025-04-05', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-05 05:12:00', '2025-04-05 05:12:00'),
+(325, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_customers-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_customers-view) ', 'updated', '122.168.114.106', '2025-04-05 05:15:00', '2025-04-05 05:15:00'),
+(326, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_clients-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_clients-view) ', 'updated', '122.168.114.106', '2025-04-05 05:57:09', '2025-04-05 05:57:09'),
+(327, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (staff-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (staff-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:04:34', '2025-04-05 06:04:34'),
+(328, 2, '2025-04-05', 'job', 6, 'completed the draft for job code:', 'Admin Amit Amit completed the draft for job code: CUS_Cli_VAT2_00006', 'created', '122.168.114.106', '2025-04-05 06:05:17', '2025-04-05 06:05:17'),
+(329, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (customer-view, status-view, job-view, setting-view, customer-insert, all_customers-view, all_clients-view, all_jobs-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (customer-view, status-view, job-view, setting-view, customer-insert, all_customers-view, all_clients-view, all_jobs-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:13:37', '2025-04-05 06:13:37'),
+(330, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (customer-insert)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (customer-insert) ', 'updated', '122.168.114.106', '2025-04-05 06:14:13', '2025-04-05 06:14:13'),
+(331, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (customer-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (customer-view) ', 'updated', '122.168.114.106', '2025-04-05 06:15:56', '2025-04-05 06:15:56'),
+(332, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_customers-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_customers-view) ', 'updated', '122.168.114.106', '2025-04-05 06:16:15', '2025-04-05 06:16:15'),
+(333, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:16:32', '2025-04-05 06:16:32'),
+(334, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (client-view, client-insert)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (client-view, client-insert) ', 'updated', '122.168.114.106', '2025-04-05 06:16:53', '2025-04-05 06:16:53'),
+(335, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_customers-view, all_clients-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_customers-view, all_clients-view) ', 'updated', '122.168.114.106', '2025-04-05 06:23:48', '2025-04-05 06:23:48'),
+(336, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (job-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (job-view) ', 'updated', '122.168.114.106', '2025-04-05 06:24:04', '2025-04-05 06:24:04'),
+(337, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:24:20', '2025-04-05 06:24:20'),
+(338, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_clients-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_clients-view) ', 'updated', '122.168.114.106', '2025-04-05 06:28:44', '2025-04-05 06:28:44'),
+(339, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_jobs-view, all_clients-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_jobs-view, all_clients-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:28:52', '2025-04-05 06:28:52'),
+(340, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_clients-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view, all_clients-view) ', 'updated', '122.168.114.106', '2025-04-05 06:45:51', '2025-04-05 06:45:51'),
+(341, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_clients-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_clients-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:46:16', '2025-04-05 06:46:16'),
+(342, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_jobs-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_jobs-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:46:32', '2025-04-05 06:46:32'),
+(343, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view) ', 'updated', '122.168.114.106', '2025-04-05 06:48:52', '2025-04-05 06:48:52'),
+(344, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_jobs-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_jobs-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:49:37', '2025-04-05 06:49:37'),
+(345, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (job-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (job-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:53:48', '2025-04-05 06:53:48'),
+(346, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (job-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (job-view) ', 'updated', '122.168.114.106', '2025-04-05 06:54:12', '2025-04-05 06:54:12'),
+(347, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (all_jobs-view) ', 'updated', '122.168.114.106', '2025-04-05 06:54:25', '2025-04-05 06:54:25'),
+(348, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_jobs-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_jobs-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:57:22', '2025-04-05 06:57:22'),
+(349, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (job-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (job-view)  ', 'updated', '122.168.114.106', '2025-04-05 06:58:44', '2025-04-05 06:58:44'),
+(350, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (job-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (job-view) ', 'updated', '122.168.114.106', '2025-04-05 06:59:26', '2025-04-05 06:59:26'),
+(351, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (job-insert)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (job-insert) ', 'updated', '122.168.114.106', '2025-04-05 06:59:41', '2025-04-05 06:59:41'),
+(352, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (job-insert) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (job-insert)  ', 'updated', '122.168.114.106', '2025-04-05 06:59:52', '2025-04-05 06:59:52'),
+(353, 2, '2025-04-05', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-05 07:11:52', '2025-04-05 07:11:52'),
+(354, 6, '2025-04-05', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', '122.168.114.106', '2025-04-05 07:12:31', '2025-04-05 07:12:31'),
+(355, 6, '2025-04-05', '-', 0, ' Logged Out', 'Reviewer STAFF TWO  Logged Out ', '-', '122.168.114.106', '2025-04-05 07:12:40', '2025-04-05 07:12:40'),
+(356, 6, '2025-04-05', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', '122.168.114.106', '2025-04-05 07:16:39', '2025-04-05 07:16:39'),
+(357, 6, '2025-04-05', '-', 0, ' Logged Out', 'Reviewer STAFF TWO  Logged Out ', '-', '122.168.114.106', '2025-04-05 07:26:42', '2025-04-05 07:26:42'),
+(358, 6, '2025-04-05', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', '122.168.114.106', '2025-04-05 07:26:54', '2025-04-05 07:26:54'),
+(359, 1, '2025-04-05', 'permission', 9, ' updated the access for DEMO. Access Changes Add Permission (all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for DEMO. Access Changes Add Permission (all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-05 07:30:25', '2025-04-05 07:30:25'),
+(360, 1, '2025-04-05', 'permission', 6, ' updated the access for REVIEWER. Access Changes  Remove Permission (all_customers-view)', 'Super Admin System Super Super Admin  updated the access for REVIEWER. Access Changes  Remove Permission (all_customers-view) ', 'updated', '122.168.114.106', '2025-04-05 08:40:54', '2025-04-05 08:40:54'),
+(361, 1, '2025-04-05', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-05 08:41:58', '2025-04-05 08:41:58'),
+(362, 1, '2025-04-05', 'permission', 6, ' updated the access for REVIEWER. Access Changes Add Permission (all_clients-view) ', 'Super Admin System Super Super Admin  updated the access for REVIEWER. Access Changes Add Permission (all_clients-view)  ', 'updated', '122.168.114.106', '2025-04-05 08:57:04', '2025-04-05 08:57:04'),
+(363, 1, '2025-04-05', 'permission', 6, ' updated the access for REVIEWER. Access Changes  Remove Permission (all_clients-view, all_customers-view)', 'Super Admin System Super Super Admin  updated the access for REVIEWER. Access Changes  Remove Permission (all_clients-view, all_customers-view) ', 'updated', '122.168.114.106', '2025-04-05 09:09:36', '2025-04-05 09:09:36'),
+(364, 1, '2025-04-05', 'permission', 6, ' updated the access for REVIEWER. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for REVIEWER. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-05 09:17:47', '2025-04-05 09:17:47'),
+(365, 1, '2025-04-05', 'permission', 6, ' updated the access for REVIEWER. Access Changes  Remove Permission (all_jobs-view)', 'Super Admin System Super Super Admin  updated the access for REVIEWER. Access Changes  Remove Permission (all_jobs-view) ', 'updated', '122.168.114.106', '2025-04-05 09:18:08', '2025-04-05 09:18:08'),
+(366, 1, '2025-04-05', 'permission', 6, ' updated the access for REVIEWER. Access Changes  Remove Permission (all_clients-view, all_customers-view)', 'Super Admin System Super Super Admin  updated the access for REVIEWER. Access Changes  Remove Permission (all_clients-view, all_customers-view) ', 'updated', '122.168.114.106', '2025-04-05 09:19:57', '2025-04-05 09:19:57'),
+(367, 7, '2025-04-05', '-', 0, ' Logged In', 'DEMO STAFF FOUR  Logged In ', '-', NULL, '2025-04-05 09:21:54', '2025-04-05 09:21:54'),
+(368, 1, '2025-04-05', 'staff', 7, 'edited staff STAFF FOUR', 'Super Admin System Super Super Admin edited staff STAFF FOUR ', 'updated', '122.168.114.106', '2025-04-05 09:26:10', '2025-04-05 09:26:10'),
+(369, 1, '2025-04-05', 'staff', 7, 'changes the staff status Deactivate STAFF FOUR', 'Super Admin System Super Super Admin changes the staff status Deactivate STAFF FOUR ', 'updated', '122.168.114.106', '2025-04-05 09:33:50', '2025-04-05 09:33:50'),
+(370, 1, '2025-04-05', 'staff', 7, 'changes the staff status Activate STAFF FOUR', 'Super Admin System Super Super Admin changes the staff status Activate STAFF FOUR ', 'updated', '122.168.114.106', '2025-04-05 09:34:11', '2025-04-05 09:34:11'),
+(371, 1, '2025-04-05', 'permission', 9, ' updated the access for DEMO. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for DEMO. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-05 10:16:59', '2025-04-05 10:16:59'),
+(372, 1, '2025-04-05', 'permission', 6, ' updated the access for REVIEWER. Access Changes  Remove Permission (all_jobs-view, all_clients-view, all_customers-view)', 'Super Admin System Super Super Admin  updated the access for REVIEWER. Access Changes  Remove Permission (all_jobs-view, all_clients-view, all_customers-view) ', 'updated', '122.168.114.106', '2025-04-05 10:19:40', '2025-04-05 10:19:40'),
+(373, 1, '2025-04-05', 'permission', 9, ' updated the access for DEMO. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for DEMO. Access Changes Add Permission (all_jobs-view, all_clients-view, all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-05 10:20:07', '2025-04-05 10:20:07'),
+(374, 1, '2025-04-05', 'permission', 6, ' updated the access for REVIEWER. Access Changes  Remove Permission (all_customers-view)', 'Super Admin System Super Super Admin  updated the access for REVIEWER. Access Changes  Remove Permission (all_customers-view) ', 'updated', '122.168.114.106', '2025-04-05 10:50:19', '2025-04-05 10:50:19'),
+(375, 1, '2025-04-05', 'permission', 9, ' updated the access for DEMO. Access Changes Add Permission (all_customers-view) ', 'Super Admin System Super Super Admin  updated the access for DEMO. Access Changes Add Permission (all_customers-view)  ', 'updated', '122.168.114.106', '2025-04-05 11:24:53', '2025-04-05 11:24:53'),
+(376, 1, '2025-04-05', 'permission', 9, ' updated the access for DEMO. Access Changes  Remove Permission (all_jobs-view, all_clients-view, all_customers-view)', 'Super Admin System Super Super Admin  updated the access for DEMO. Access Changes  Remove Permission (all_jobs-view, all_clients-view, all_customers-view) ', 'updated', '122.168.114.106', '2025-04-05 11:25:19', '2025-04-05 11:25:19'),
+(377, 6, '2025-04-05', '-', 0, ' Logged Out', 'Reviewer STAFF TWO  Logged Out ', '-', '122.168.114.106', '2025-04-05 12:02:39', '2025-04-05 12:02:39'),
+(378, 2, '2025-04-14', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-14 05:55:05', '2025-04-14 05:55:05'),
+(379, 2, '2025-04-14', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-14 05:55:09', '2025-04-14 05:55:10'),
+(380, 1, '2025-04-14', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-04-14 05:55:34', '2025-04-14 05:55:34'),
+(381, 2, '2025-04-17', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-17 05:52:24', '2025-04-17 05:52:24'),
+(382, 2, '2025-04-17', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-04-17 05:53:08', '2025-04-17 05:53:08'),
+(383, 2, '2025-04-17', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-04-17 05:53:13', '2025-04-17 05:53:13'),
+(384, 2, '2025-04-17', 'staff', 12, 'created staff STAFF 7 hv', 'Admin Amit Amit created staff STAFF 7 hv ', 'created', '122.168.114.106', '2025-04-17 05:56:18', '2025-04-17 05:56:18'),
+(385, 2, '2025-04-17', 'staff', 12, 'edited staff STAFF 7 hv', 'Admin Amit Amit edited staff STAFF 7 hv ', 'updated', '122.168.114.106', '2025-04-17 06:00:08', '2025-04-17 06:00:08'),
+(386, 2, '2025-04-17', 'staff', 12, 'edited staff STAFF 7 hv', 'Admin Amit Amit edited staff STAFF 7 hv ', 'updated', '122.168.114.106', '2025-04-17 06:00:20', '2025-04-17 06:00:20'),
+(387, 2, '2025-04-17', 'staff', 12, 'edited staff STAFF 7 hv', 'Admin Amit Amit edited staff STAFF 7 hv ', 'updated', '122.168.114.106', '2025-04-17 06:00:46', '2025-04-17 06:00:46'),
+(388, 2, '2025-04-17', 'staff', 12, 'edited staff STAFF 7 hv', 'Admin Amit Amit edited staff STAFF 7 hv ', 'updated', '122.168.114.106', '2025-04-17 06:02:37', '2025-04-17 06:02:37'),
+(389, 12, '2025-04-17', '-', 0, ' Logged In', 'Processor STAFF 7 hv  Logged In ', '-', NULL, '2025-04-17 06:03:09', '2025-04-17 06:03:09'),
+(390, 12, '2025-04-17', 'customer', 21, 'created customer profile. customer code :', 'Processor STAFF 7 hv created customer profile. customer code : cust_7 -_000013(7 -CUST)', 'created', '122.168.114.106', '2025-04-17 06:03:56', '2025-04-17 06:03:56'),
+(391, 12, '2025-04-17', 'customer', 21, ' edited the service details and added an additional service while editing the customer code :', 'Processor STAFF 7 hv  edited the service details and added an additional service while editing the customer code : cust_7 -_000013(7 -CUST)', 'updated', '122.168.114.106', '2025-04-17 06:03:59', '2025-04-17 06:03:59'),
+(392, 12, '2025-04-17', 'customer', 22, 'created customer profile. customer code :', 'Processor STAFF 7 hv created customer profile. customer code : cust_F L_000014(F LIMITED_000014)', 'created', '122.168.114.106', '2025-04-17 06:04:42', '2025-04-17 06:04:42'),
+(393, 12, '2025-04-17', 'customer', 22, ' edited the service details and added an additional service while editing the customer code :', 'Processor STAFF 7 hv  edited the service details and added an additional service while editing the customer code : cust_F L_000014(F LIMITED_000014)', 'updated', '122.168.114.106', '2025-04-17 06:04:55', '2025-04-17 06:04:55'),
+(394, 12, '2025-04-17', 'client', 16, 'created client profile. client code :', 'Processor STAFF 7 hv created client profile. client code : cli_F L_PPP_000016(PPPP)', 'created', '122.168.114.106', '2025-04-17 06:05:27', '2025-04-17 06:05:27'),
+(395, 2, '2025-04-17', 'staff', 12, 'edited staff STAFF 7 hv', 'Admin Amit Amit edited staff STAFF 7 hv ', 'updated', '122.168.114.106', '2025-04-17 06:05:48', '2025-04-17 06:05:48'),
+(396, 12, '2025-04-17', '-', 0, ' Logged Out', 'Manager STAFF 7 hv  Logged Out ', '-', '122.168.114.106', '2025-04-17 06:05:59', '2025-04-17 06:05:59'),
+(397, 12, '2025-04-17', '-', 0, ' Logged In', 'Manager STAFF 7 hv  Logged In ', '-', '122.168.114.106', '2025-04-17 06:06:10', '2025-04-17 06:06:10'),
+(398, 2, '2025-04-17', 'staff', 12, 'edited staff STAFF 7 hv', 'Admin Amit Amit edited staff STAFF 7 hv ', 'updated', '122.168.114.106', '2025-04-17 06:07:38', '2025-04-17 06:07:38'),
+(399, 12, '2025-04-17', '-', 0, ' Logged Out', 'DEMO STAFF 7 hv  Logged Out ', '-', '122.168.114.106', '2025-04-17 06:07:49', '2025-04-17 06:07:49'),
+(400, 12, '2025-04-17', '-', 0, ' Logged In', 'DEMO STAFF 7 hv  Logged In ', '-', '122.168.114.106', '2025-04-17 06:08:02', '2025-04-17 06:08:02'),
+(401, 2, '2025-05-23', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-05-23 05:57:40', '2025-05-23 05:57:40'),
+(402, 2, '2025-05-23', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '188.240.58.56', '2025-05-23 05:59:51', '2025-05-23 05:59:51'),
+(403, 1, '2025-05-23', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '188.240.58.56', '2025-05-23 06:00:30', '2025-05-23 06:00:30'),
+(404, 1, '2025-05-23', 'customer', 23, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_STE_000015(STEVENSON DRAKE LTD)', 'created', '188.240.58.56', '2025-05-23 06:00:58', '2025-05-23 06:00:58'),
+(405, 1, '2025-05-23', 'customer', 23, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_STE_000015(STEVENSON DRAKE LTD)', 'updated', '188.240.58.56', '2025-05-23 06:01:01', '2025-05-23 06:01:01'),
+(406, 1, '2025-05-23', 'customer', 24, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_STE_000016(STEVENSON DRAKE LTD1)', 'created', '188.240.58.56', '2025-05-23 06:04:03', '2025-05-23 06:04:03'),
+(407, 1, '2025-05-23', 'customer', 24, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_STE_000016(STEVENSON DRAKE LTD1)', 'updated', '188.240.58.56', '2025-05-23 06:04:26', '2025-05-23 06:04:26'),
+(408, 1, '2025-05-23', 'customer', 25, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_MAR_000017(MARIAN TRANSPORT LTD223 LIMITED)', 'created', '188.240.58.56', '2025-05-23 06:07:10', '2025-05-23 06:07:10'),
+(409, 1, '2025-05-23', 'customer', 25, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_MAR_000017(MARIAN TRANSPORT LTD223 LIMITED)', 'updated', '188.240.58.56', '2025-05-23 06:07:19', '2025-05-23 06:07:19'),
+(410, 1, '2025-05-23', 'customer', 26, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_STE_000018(STEVENSON DRAKE LTD55)', 'created', '188.240.58.56', '2025-05-23 06:09:13', '2025-05-23 06:09:13'),
+(411, 1, '2025-05-23', 'customer', 26, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_STE_000018(STEVENSON DRAKE LTD55)', 'updated', '188.240.58.56', '2025-05-23 06:09:16', '2025-05-23 06:09:16'),
+(412, 1, '2025-05-23', 'customer', 27, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_WEB_000019(WEBER AND WEBER INTERNATIONAL LTD11)', 'created', '188.240.58.56', '2025-05-23 06:11:24', '2025-05-23 06:11:24'),
+(413, 1, '2025-05-23', 'customer', 27, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_WEB_000019(WEBER AND WEBER INTERNATIONAL LTD11)', 'updated', '188.240.58.56', '2025-05-23 06:11:27', '2025-05-23 06:11:27'),
+(414, 1, '2025-05-23', 'customer', 28, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_H. _000020(H. CAMPBELL LLC)', 'created', '188.240.58.56', '2025-05-23 06:19:13', '2025-05-23 06:19:13'),
+(415, 1, '2025-05-23', 'customer', 28, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_H. _000020(H. CAMPBELL LLC)', 'updated', '188.240.58.56', '2025-05-23 06:19:16', '2025-05-23 06:19:16');
+INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, `log_message`, `log_message_all`, `permission_type`, `ip`, `created_at`, `updated_at`) VALUES
+(416, 1, '2025-05-23', 'client', 17, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_H. _D G_000017(D GULF REAL ESTATE LIMITED)', 'created', '188.240.58.56', '2025-05-23 06:20:55', '2025-05-23 06:20:55'),
+(417, 1, '2025-05-23', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '188.240.58.56', '2025-05-23 06:27:39', '2025-05-23 06:27:39'),
+(418, 1, '2025-05-31', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '188.240.58.56', '2025-05-31 10:41:32', '2025-05-31 10:41:32'),
+(419, 1, '2025-05-31', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-05-31 13:29:53', '2025-05-31 13:29:53'),
+(420, 1, '2025-06-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-06-02 06:09:05', '2025-06-02 06:09:05'),
+(421, 1, '2025-06-02', 'timesheet', 0, 'created a timesheet entry. Task type:External,  Date: 2025-06-02, Hours : 2:00 ,Job code:CUS_Cli_VAT2_00006, Task name:a', 'Super Admin System Super Super Admin created a timesheet entry. Task type:External,  Date: 2025-06-02, Hours : 2:00 ,Job code:CUS_Cli_VAT2_00006, Task name:a ', 'updated', '0.0.0.0', '2025-06-02 06:35:37', '2025-06-02 06:35:37'),
+(422, 1, '2025-06-02', 'timesheet', 0, 'edited a timesheet entry. Task type:External,  Date: 2025-06-05, Updated hours : 3:01 ,Job code:CUS_Cli_VAT2_00006, Task name:a', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:External,  Date: 2025-06-05, Updated hours : 3:01 ,Job code:CUS_Cli_VAT2_00006, Task name:a ', 'updated', '0.0.0.0', '2025-06-02 06:36:14', '2025-06-02 06:36:14'),
+(423, 1, '2025-06-02', 'timesheet', 0, 'edited a timesheet entry. Task type:External,  Date: 2025-06-04, Updated hours : 2:59 ,Job code:CUS_Cli_VAT2_00006, Task name:a', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:External,  Date: 2025-06-04, Updated hours : 2:59 ,Job code:CUS_Cli_VAT2_00006, Task name:a ', 'updated', '0.0.0.0', '2025-06-02 13:29:18', '2025-06-02 13:29:18'),
+(424, 1, '2025-06-02', 'timesheet', 0, 'edited a timesheet entry. Task type:External,  Date: 2025-06-03, Updated hours : 1:59 ,Job code:CUS_Cli_VAT2_00006, Task name:a', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:External,  Date: 2025-06-03, Updated hours : 1:59 ,Job code:CUS_Cli_VAT2_00006, Task name:a ', 'updated', '0.0.0.0', '2025-06-02 13:29:50', '2025-06-02 13:29:50'),
+(425, 1, '2025-06-02', 'timesheet', 0, 'edited a timesheet entry. Task type:External,  Date: 2025-06-06, Updated hours : 4:00 ,Job code:CUS_Cli_VAT2_00006, Task name:a', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:External,  Date: 2025-06-06, Updated hours : 4:00 ,Job code:CUS_Cli_VAT2_00006, Task name:a ', 'updated', '0.0.0.0', '2025-06-02 13:30:30', '2025-06-02 13:30:30'),
+(426, 1, '2025-06-02', 'timesheet', 0, 'edited a timesheet entry. Task type:External,  Date: 2025-06-03, Updated hours : 2:00 ,Job code:CUS_Cli_VAT2_00006, Task name:a', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:External,  Date: 2025-06-03, Updated hours : 2:00 ,Job code:CUS_Cli_VAT2_00006, Task name:a ', 'updated', '0.0.0.0', '2025-06-02 13:30:55', '2025-06-02 13:30:55'),
+(427, 1, '2025-06-02', 'timesheet', 0, 'edited a timesheet entry. Task type:External,  Date: 2025-06-03, Updated hours : 2:56 ,Job code:CUS_Cli_VAT2_00006, Task name:a', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:External,  Date: 2025-06-03, Updated hours : 2:56 ,Job code:CUS_Cli_VAT2_00006, Task name:a ', 'updated', '0.0.0.0', '2025-06-02 13:31:05', '2025-06-02 13:31:05'),
+(428, 1, '2025-06-03', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-06-03 04:36:54', '2025-06-03 04:36:54'),
+(429, 1, '2025-06-04', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-06-04 05:56:48', '2025-06-04 05:56:48'),
+(430, 1, '2025-06-04', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-06-04 06:02:43', '2025-06-04 06:02:43'),
+(431, 2, '2025-06-05', '-', 0, ' Logged In', 'Admin Amit Amit  Logged In ', '-', '122.168.114.106', '2025-06-05 10:27:47', '2025-06-05 10:27:47'),
+(432, 2, '2025-06-05', '-', 0, ' Logged Out', 'Admin Amit Amit  Logged Out ', '-', '122.168.114.106', '2025-06-05 10:27:52', '2025-06-05 10:27:52'),
+(433, 1, '2025-06-05', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-06-05 10:30:59', '2025-06-05 10:30:59'),
+(434, 1, '2025-06-05', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-06-05 10:55:26', '2025-06-05 10:55:26'),
+(435, 1, '2025-06-10', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-06-10 07:18:11', '2025-06-10 07:18:11'),
+(436, 1, '2025-06-10', 'customer', 29, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_SSS_000021(SSSSSS)', 'created', '122.168.114.106', '2025-06-10 07:19:59', '2025-06-10 07:19:59'),
+(437, 1, '2025-06-10', 'customer', 29, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_SSS_000021(SSSSSS)', 'updated', '122.168.114.106', '2025-06-10 07:20:09', '2025-06-10 07:20:09'),
+(438, 11, '2025-06-10', '-', 0, ' Logged In', 'Manager STAFF SIX  Logged In ', '-', NULL, '2025-06-10 07:21:33', '2025-06-10 07:21:33'),
+(439, 10, '2025-06-10', '-', 0, ' Logged In', 'Manager STAFF FIVE  Logged In ', '-', NULL, '2025-06-10 07:22:50', '2025-06-10 07:22:50'),
+(440, 11, '2025-06-10', 'client', 18, 'created client profile. client code :', 'Manager STAFF SIX created client profile. client code : cli_SSS_dvd_000018(dvd)', 'created', '122.168.114.106', '2025-06-10 10:12:18', '2025-06-10 10:12:18'),
+(441, 1, '2025-06-11', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-06-11 09:15:12', '2025-06-11 09:15:12'),
+(442, 1, '2025-06-11', 'staff', 13, 'created staff shk sss', 'Super Admin System Super Super Admin created staff shk sss ', 'created', '122.168.114.106', '2025-06-11 09:18:34', '2025-06-11 09:18:34'),
+(443, 13, '2025-06-11', '-', 0, ' Logged In', 'Management shk sss  Logged In ', '-', NULL, '2025-06-11 09:33:06', '2025-06-11 09:33:06'),
+(444, 13, '2025-06-11', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2025-06-02, Hours : 5:05 ,Job code:abc, Task name:c', 'Management shk sss created a timesheet entry. Task type:Internal,  Date: 2025-06-02, Hours : 5:05 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-06-11 09:40:48', '2025-06-11 09:40:48'),
+(445, 13, '2025-06-11', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:07 ,Job code:abc, Task name:c', 'Management shk sss edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:07 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-06-11 09:45:02', '2025-06-11 09:45:02'),
+(446, 13, '2025-06-11', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:05 ,Job code:abc, Task name:c', 'Management shk sss edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:05 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-06-11 10:04:56', '2025-06-11 10:04:56'),
+(447, 13, '2025-06-11', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:50 ,Job code:abc, Task name:c', 'Management shk sss edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:50 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-06-11 10:12:20', '2025-06-11 10:12:20'),
+(448, 13, '2025-06-11', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:59 ,Job code:abc, Task name:c', 'Management shk sss edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:59 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-06-11 10:12:33', '2025-06-11 10:12:33'),
+(449, 13, '2025-06-11', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5: ,Job code:abc, Task name:c', 'Management shk sss edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5: ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-06-11 10:12:43', '2025-06-11 10:12:43'),
+(450, 13, '2025-06-11', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:59 ,Job code:abc, Task name:c', 'Management shk sss edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:59 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-06-11 10:13:23', '2025-06-11 10:13:23'),
+(451, 13, '2025-06-11', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:00 ,Job code:abc, Task name:c', 'Management shk sss edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:00 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-06-11 10:13:31', '2025-06-11 10:13:31'),
+(452, 13, '2025-06-11', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5: ,Job code:abc, Task name:c', 'Management shk sss edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5: ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-06-11 10:15:26', '2025-06-11 10:15:26'),
+(453, 13, '2025-06-11', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:59 ,Job code:abc, Task name:c', 'Management shk sss edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:59 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-06-11 10:16:42', '2025-06-11 10:16:42'),
+(454, 13, '2025-06-11', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:00 ,Job code:abc, Task name:c', 'Management shk sss edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:00 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-06-11 10:16:46', '2025-06-11 10:16:46'),
+(455, 13, '2025-06-11', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:01 ,Job code:abc, Task name:c', 'Management shk sss edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:01 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-06-11 10:17:51', '2025-06-11 10:17:51'),
+(456, 13, '2025-06-11', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:45 ,Job code:abc, Task name:c', 'Management shk sss edited a timesheet entry. Task type:Internal,  Date: 2025-06-02, Updated hours : 5:45 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-06-11 10:18:02', '2025-06-11 10:18:02'),
+(457, 1, '2025-06-12', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-06-12 04:44:46', '2025-06-12 04:44:46'),
+(458, 1, '2025-06-12', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-06-12 04:45:23', '2025-06-12 04:45:23'),
+(459, 1, '2025-06-12', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-06-12 04:45:27', '2025-06-12 04:45:27'),
+(460, 1, '2025-06-17', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-06-17 09:52:40', '2025-06-17 09:52:40'),
+(461, 1, '2025-06-23', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-06-23 07:13:38', '2025-06-23 07:13:38'),
+(462, 10, '2025-06-23', '-', 0, ' Logged In', 'Manager STAFF FIVE  Logged In ', '-', NULL, '2025-06-23 09:12:07', '2025-06-23 09:12:07'),
+(463, 10, '2025-06-23', 'timesheet', 0, 'submitted a timesheet entry. Task type:External,  Date: 2025-06-23, Hours : 8:00 Date: 2025-06-25, Hours : 8:00 ,Job code:CUS_Cli_V4_00004, Task name:b', 'Manager STAFF FIVE submitted a timesheet entry. Task type:External,  Date: 2025-06-23, Hours : 8:00 Date: 2025-06-25, Hours : 8:00 ,Job code:CUS_Cli_V4_00004, Task name:b ', 'updated', '0.0.0.0', '2025-06-23 09:14:41', '2025-06-23 09:14:41'),
+(464, 1, '2025-06-23', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-06-23 09:29:03', '2025-06-23 09:29:03'),
+(465, 1, '2025-06-23', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-06-23 11:42:13', '2025-06-23 11:42:13'),
+(466, 1, '2025-06-23', 'customer', 30, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_SHK_000022(SHK)', 'created', '122.168.114.106', '2025-06-23 11:43:47', '2025-06-23 11:43:47'),
+(467, 1, '2025-06-23', 'customer', 31, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_SHK_000023(SHK1)', 'created', '122.168.114.106', '2025-06-23 11:44:18', '2025-06-23 11:44:18'),
+(468, 1, '2025-06-23', 'customer', 31, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_SHK_000023(SHK1)', 'updated', '122.168.114.106', '2025-06-23 11:44:23', '2025-06-23 11:44:23'),
+(469, 1, '2025-06-23', 'permission', 4, ' updated the access for MANAGER. Access Changes Add Permission (customer-delete) ', 'Super Admin System Super Super Admin  updated the access for MANAGER. Access Changes Add Permission (customer-delete)  ', 'updated', '122.168.114.106', '2025-06-23 12:19:16', '2025-06-23 12:19:16'),
+(470, 1, '2025-06-23', 'permission', 4, ' updated the access for MANAGER. Access Changes  Remove Permission (customer-delete)', 'Super Admin System Super Super Admin  updated the access for MANAGER. Access Changes  Remove Permission (customer-delete) ', 'updated', '122.168.114.106', '2025-06-23 12:19:34', '2025-06-23 12:19:34'),
+(471, 1, '2025-06-23', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  Date: 2025-06-23, Hours : 5:00 ,Job code:abc, Task name:c, Task type:External,  Date: 2025-06-23, Hours : 6:00 ,Job code:CUS_Cli_VAT2_00006, Task name:a, Task type:Internal,  Date: 2025-06-24, Hours : 10:00 Date: 2025-06-25, Hours : 6:00 Date: 2025-06-26, Hours : 6:00 ,Job code:ddddd, Task name:mmmm and Task type:External,  Date: 2025-06-23, Hours : 5:00 Date: 2025-06-24, Hours : 2:00 Date: 2025-06-26, Hours : 5:00 ,Job code:CUS_Cli_VAT2_00006, Task name:a', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,  Date: 2025-06-23, Hours : 5:00 ,Job code:abc, Task name:c, Task type:External,  Date: 2025-06-23, Hours : 6:00 ,Job code:CUS_Cli_VAT2_00006, Task name:a, Task type:Internal,  Date: 2025-06-24, Hours : 10:00 Date: 2025-06-25, Hours : 6:00 Date: 2025-06-26, Hours : 6:00 ,Job code:ddddd, Task name:mmmm and Task type:External,  Date: 2025-06-23, Hours : 5:00 Date: 2025-06-24, Hours : 2:00 Date: 2025-06-26, Hours : 5:00 ,Job code:CUS_Cli_VAT2_00006, Task name:a ', 'updated', '0.0.0.0', '2025-06-23 13:03:54', '2025-06-23 13:03:54'),
+(472, 1, '2025-06-23', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a, Task type:Internal,  ,Job code:ddddd, Task name:mmmm and Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a, Task type:Internal,  ,Job code:ddddd, Task name:mmmm and Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a ', 'updated', '0.0.0.0', '2025-06-23 13:05:29', '2025-06-23 13:05:29'),
+(473, 1, '2025-06-23', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a, Task type:Internal,  ,Job code:ddddd, Task name:mmmm and Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a, Task type:Internal,  ,Job code:ddddd, Task name:mmmm and Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a ', 'updated', '0.0.0.0', '2025-06-23 13:11:18', '2025-06-23 13:11:18'),
+(474, 1, '2025-06-24', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-06-24 04:48:01', '2025-06-24 04:48:01'),
+(475, 1, '2025-06-24', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a, Task type:Internal,  ,Job code:ddddd, Task name:mmmm and Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a, Task type:Internal,  ,Job code:ddddd, Task name:mmmm and Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a ', 'updated', '0.0.0.0', '2025-06-24 05:55:28', '2025-06-24 05:55:28'),
+(476, 1, '2025-06-24', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a, Task type:Internal,  ,Job code:ddddd, Task name:mmmm and Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a, Task type:Internal,  ,Job code:ddddd, Task name:mmmm and Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a ', 'updated', '0.0.0.0', '2025-06-24 05:56:47', '2025-06-24 05:56:47'),
+(477, 1, '2025-06-24', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a, Task type:Internal,  ,Job code:ddddd, Task name:mmmm, Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a and Task type:Internal,  Date: 2025-06-23, Hours : 6:00 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a, Task type:Internal,  ,Job code:ddddd, Task name:mmmm, Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a and Task type:Internal,  Date: 2025-06-23, Hours : 6:00 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-06-24 05:57:44', '2025-06-24 05:57:44'),
+(478, 1, '2025-06-24', 'timesheet', 0, 'edited a timesheet entry. Task type:External,  Date: 2025-06-23, Updated hours : 6:00 ,Job code:CUS_Cli_VAT2_00006, Task name:a', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:External,  Date: 2025-06-23, Updated hours : 6:00 ,Job code:CUS_Cli_VAT2_00006, Task name:a ', 'updated', '0.0.0.0', '2025-06-24 06:50:31', '2025-06-24 06:50:31'),
+(479, 1, '2025-06-24', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2025-06-23, Hours : :36 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,  Date: 2025-06-23, Hours : :36 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-06-24 07:31:28', '2025-06-24 07:31:28'),
+(480, 1, '2025-06-26', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-06-26 11:06:02', '2025-06-26 11:06:02'),
+(481, 1, '2025-06-26', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a, Task type:Internal,  ,Job code:ddddd, Task name:mmmm, Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a, Task type:Internal,  ,Job code:abc, Task name:c and Task type:Internal,  ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a, Task type:Internal,  ,Job code:ddddd, Task name:mmmm, Task type:External,  ,Job code:CUS_Cli_VAT2_00006, Task name:a, Task type:Internal,  ,Job code:abc, Task name:c and Task type:Internal,  ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-06-26 11:06:51', '2025-06-26 11:06:51'),
+(482, 1, '2025-06-28', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-06-28 04:52:57', '2025-06-28 04:52:57'),
+(483, 1, '2025-06-28', 'staff', 6, 'edited staff STAFF TWO', 'Super Admin System Super Super Admin edited staff STAFF TWO ', 'updated', '122.168.114.106', '2025-06-28 06:58:02', '2025-06-28 06:58:02'),
+(484, 1, '2025-07-05', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-07-05 12:09:59', '2025-07-05 12:09:59'),
+(485, 1, '2025-07-05', 'job', 1, 'updated the job status from Draft Sent to WIP – To Be Reviewed. job code:', 'Super Admin System Super Super Admin updated the job status from Draft Sent to WIP – To Be Reviewed. job code: CUS_Cli_VAT2_00001', 'updated', '122.168.114.106', '2025-07-05 12:12:07', '2025-07-05 12:12:07'),
+(486, 1, '2025-07-05', 'job', 5, 'deletes job code:', 'Super Admin System Super Super Admin deletes job code: DDD_Cli_V3_00005', 'deleted', '122.168.114.106', '2025-07-05 12:15:36', '2025-07-05 12:15:36'),
+(487, 1, '2025-07-05', 'job', 3, 'deletes job code:', 'Super Admin System Super Super Admin deletes job code: f45_f4-_V3_00003', 'deleted', '122.168.114.106', '2025-07-05 12:15:47', '2025-07-05 12:15:47'),
+(488, 1, '2025-07-05', 'job', 2, 'deletes job code:', 'Super Admin System Super Super Admin deletes job code: DDD_Cli_V4_00002', 'deleted', '122.168.114.106', '2025-07-05 12:15:56', '2025-07-05 12:15:56'),
+(489, 1, '2025-07-05', 'client', 9, 'deleted client profile. client code :', 'Super Admin System Super Super Admin deleted client profile. client code : cli_f45_G T_00009(G T SCARLET LIMITED_00009)', 'deleted', '122.168.114.106', '2025-07-05 12:16:03', '2025-07-05 12:16:03'),
+(490, 1, '2025-07-05', 'client', 8, 'deleted client profile. client code :', 'Super Admin System Super Super Admin deleted client profile. client code : cli_f45_TRU_00008(TRUST)', 'deleted', '122.168.114.106', '2025-07-05 12:16:06', '2025-07-05 12:16:06'),
+(491, 1, '2025-07-05', 'client', 7, 'deleted client profile. client code :', 'Super Admin System Super Super Admin deleted client profile. client code : cli_f45_UNA_00007(UNA)', 'deleted', '122.168.114.106', '2025-07-05 12:16:09', '2025-07-05 12:16:09'),
+(492, 1, '2025-07-05', 'client', 6, 'deleted client profile. client code :', 'Super Admin System Super Super Admin deleted client profile. client code : cli_f45_AAA_00006(AAA)', 'deleted', '122.168.114.106', '2025-07-05 12:16:12', '2025-07-05 12:16:12'),
+(493, 1, '2025-07-05', 'client', 5, 'deleted client profile. client code :', 'Super Admin System Super Super Admin deleted client profile. client code : cli_f45_f4-_00005(f4-cli)', 'deleted', '122.168.114.106', '2025-07-05 12:16:16', '2025-07-05 12:16:16'),
+(494, 1, '2025-07-05', 'client', 4, 'deleted client profile. client code :', 'Super Admin System Super Super Admin deleted client profile. client code : cli_CUS_CLI_00004(CLI-STAFF1)', 'deleted', '122.168.114.106', '2025-07-05 12:16:19', '2025-07-05 12:16:19'),
+(495, 1, '2025-07-05', 'client', 3, 'deleted client profile. client code :', 'Super Admin System Super Super Admin deleted client profile. client code : cli_DDD_Cli_00003(Cli2g)', 'deleted', '122.168.114.106', '2025-07-05 12:16:22', '2025-07-05 12:16:22'),
+(496, 1, '2025-07-05', 'client', 10, 'deleted client profile. client code :', 'Super Admin System Super Super Admin deleted client profile. client code : cli_f45_sss_000010(sss)', 'deleted', '122.168.114.106', '2025-07-05 12:16:25', '2025-07-05 12:16:25'),
+(497, 1, '2025-07-05', 'client', 1, 'deleted client profile. client code :', 'Super Admin System Super Super Admin deleted client profile. client code : cli_CUS_Cha_00001(Charity)', 'deleted', '122.168.114.106', '2025-07-05 12:16:28', '2025-07-05 12:16:28'),
+(498, 1, '2025-07-05', 'client', 11, 'deleted client profile. client code :', 'Super Admin System Super Super Admin deleted client profile. client code : cli_f45_ddd_000011(ddddd)', 'deleted', '122.168.114.106', '2025-07-05 12:16:31', '2025-07-05 12:16:31'),
+(499, 1, '2025-07-05', 'client', 12, 'deleted client profile. client code :', 'Super Admin System Super Super Admin deleted client profile. client code : cli_CUS_sss_000012(sssssssssss)', 'deleted', '122.168.114.106', '2025-07-05 12:16:35', '2025-07-05 12:16:35'),
+(500, 1, '2025-07-05', 'client', 13, 'deleted client profile. client code :', 'Super Admin System Super Super Admin deleted client profile. client code : cli_CUS_fgf_000013(fgff)', 'deleted', '122.168.114.106', '2025-07-05 12:16:39', '2025-07-05 12:16:39'),
+(501, 1, '2025-07-05', 'client', 14, 'deleted client profile. client code :', 'Super Admin System Super Super Admin deleted client profile. client code : cli_CUS_SFD_000014(SFD)', 'deleted', '122.168.114.106', '2025-07-05 12:16:42', '2025-07-05 12:16:42'),
+(502, 1, '2025-07-05', 'client', 15, 'deleted client profile. client code :', 'Super Admin System Super Super Admin deleted client profile. client code : cli_SHK_AA_000015(AA)', 'deleted', '122.168.114.106', '2025-07-05 12:16:44', '2025-07-05 12:16:44'),
+(503, 1, '2025-07-05', 'client', 16, 'deleted client profile. client code :', 'Super Admin System Super Super Admin deleted client profile. client code : cli_F L_PPP_000016(PPPP)', 'deleted', '122.168.114.106', '2025-07-05 12:16:47', '2025-07-05 12:16:47'),
+(504, 1, '2025-07-05', 'client', 17, 'deleted client profile. client code :', 'Super Admin System Super Super Admin deleted client profile. client code : cli_H. _D G_000017(D GULF REAL ESTATE LIMITED)', 'deleted', '122.168.114.106', '2025-07-05 12:16:50', '2025-07-05 12:16:50'),
+(505, 1, '2025-07-05', 'client', 18, 'deleted client profile. client code :', 'Super Admin System Super Super Admin deleted client profile. client code : cli_SSS_dvd_000018(dvd)', 'deleted', '122.168.114.106', '2025-07-05 12:16:53', '2025-07-05 12:16:53'),
+(506, 1, '2025-07-05', 'client', 6, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:17:14', '2025-07-05 12:17:14'),
+(507, 1, '2025-07-05', 'client', 22, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:17:17', '2025-07-05 12:17:17'),
+(508, 1, '2025-07-05', 'client', 31, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:17:22', '2025-07-05 12:17:22'),
+(509, 1, '2025-07-05', 'client', 30, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:17:24', '2025-07-05 12:17:24'),
+(510, 1, '2025-07-05', 'client', 29, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:17:27', '2025-07-05 12:17:27'),
+(511, 1, '2025-07-05', 'client', 28, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:17:29', '2025-07-05 12:17:29'),
+(512, 1, '2025-07-05', 'client', 27, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:17:32', '2025-07-05 12:17:32'),
+(513, 1, '2025-07-05', 'client', 26, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:17:34', '2025-07-05 12:17:34'),
+(514, 1, '2025-07-05', 'client', 25, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:17:37', '2025-07-05 12:17:37'),
+(515, 1, '2025-07-05', 'client', 24, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:17:40', '2025-07-05 12:17:40'),
+(516, 1, '2025-07-05', 'client', 23, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:17:43', '2025-07-05 12:17:43'),
+(517, 1, '2025-07-05', 'client', 21, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:17:46', '2025-07-05 12:17:46'),
+(518, 1, '2025-07-05', 'client', 20, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:17:48', '2025-07-05 12:17:48'),
+(519, 1, '2025-07-05', 'client', 19, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:17:51', '2025-07-05 12:17:51'),
+(520, 1, '2025-07-05', 'client', 18, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:17:53', '2025-07-05 12:17:53'),
+(521, 1, '2025-07-05', 'client', 17, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:17:56', '2025-07-05 12:17:56'),
+(522, 1, '2025-07-05', 'client', 16, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:17:59', '2025-07-05 12:17:59'),
+(523, 1, '2025-07-05', 'client', 15, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:18:01', '2025-07-05 12:18:01'),
+(524, 1, '2025-07-05', 'client', 8, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:18:04', '2025-07-05 12:18:04'),
+(525, 1, '2025-07-05', 'client', 7, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:18:06', '2025-07-05 12:18:06'),
+(526, 1, '2025-07-05', 'client', 5, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:18:08', '2025-07-05 12:18:08'),
+(527, 1, '2025-07-05', 'client', 2, 'deleted customer. customer code :', 'Super Admin System Super Super Admin deleted customer. customer code : cli_CUS_Cli_00002(Cli2)', 'deleted', '122.168.114.106', '2025-07-05 12:18:11', '2025-07-05 12:18:11'),
+(528, 1, '2025-07-05', 'client', 2, 'deleted client profile. client code :', 'Super Admin System Super Super Admin deleted client profile. client code : cli_CUS_Cli_00002(Cli2)', 'deleted', '122.168.114.106', '2025-07-05 12:24:43', '2025-07-05 12:24:43'),
+(529, 1, '2025-07-05', 'client', 1, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:24:48', '2025-07-05 12:24:48'),
+(530, 1, '2025-07-05', 'customer', 32, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_SHK_00001(SHK)', 'created', '122.168.114.106', '2025-07-05 12:32:36', '2025-07-05 12:32:36'),
+(531, 1, '2025-07-05', 'customer', 32, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_SHK_00001(SHK)', 'updated', '122.168.114.106', '2025-07-05 12:32:52', '2025-07-05 12:32:52'),
+(532, 1, '2025-07-05', 'client', 32, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-05 12:33:24', '2025-07-05 12:33:24'),
+(533, 1, '2025-07-05', 'customer', 1, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_SHK_00001(SHK)', 'created', '122.168.114.106', '2025-07-05 12:34:12', '2025-07-05 12:34:12'),
+(534, 1, '2025-07-05', 'customer', 1, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_SHK_00001(SHK)', 'updated', '122.168.114.106', '2025-07-05 12:34:19', '2025-07-05 12:34:19'),
+(535, 1, '2025-07-05', 'client', 1, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_SHK_SSH_00001(SSHH11)', 'created', '122.168.114.106', '2025-07-05 12:38:21', '2025-07-05 12:38:21'),
+(536, 1, '2025-07-05', 'job', 1, 'created job code:', 'Super Admin System Super Super Admin created job code: SHK_SSH_V3_00001', 'created', '122.168.114.106', '2025-07-05 12:39:14', '2025-07-05 12:39:14'),
+(537, 1, '2025-07-05', 'job', 1, 'edited the job information and has assigned the job to the processor, STAFF ONE job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, STAFF ONE job code: SHK_SSH_V3_00001', 'updated', '122.168.114.106', '2025-07-05 12:39:45', '2025-07-05 12:39:45'),
+(538, 1, '2025-07-05', 'job', 1, 'edited the job information and has assigned the job to the reviewer, STAFF TWO job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the reviewer, STAFF TWO job code: SHK_SSH_V3_00001', 'updated', '122.168.114.106', '2025-07-05 12:40:24', '2025-07-05 12:40:24'),
+(539, 6, '2025-07-05', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', NULL, '2025-07-05 13:01:56', '2025-07-05 13:01:56'),
+(540, 1, '2025-07-07', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-07-07 05:08:00', '2025-07-07 05:08:00'),
+(541, 10, '2025-07-07', '-', 0, ' Logged In', 'Manager STAFF FIVE  Logged In ', '-', NULL, '2025-07-07 05:29:20', '2025-07-07 05:29:20'),
+(542, 10, '2025-07-07', '-', 0, ' Logged Out', 'Manager STAFF FIVE  Logged Out ', '-', '122.168.114.106', '2025-07-07 05:34:22', '2025-07-07 05:34:22'),
+(543, 13, '2025-07-07', '-', 0, ' Logged In', 'Management shk sss  Logged In ', '-', '122.168.114.106', '2025-07-07 05:34:30', '2025-07-07 05:34:30'),
+(544, 1, '2025-07-08', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-07-08 07:09:52', '2025-07-08 07:09:52'),
+(545, 1, '2025-07-08', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  Date: 2025-07-07, Hours : 5:00 Date: 2025-07-08, Hours : 6:00 Date: 2025-07-09, Hours : 5:00 Date: 2025-07-10, Hours : 5:00 Date: 2025-07-11, Hours : 5:00 Date: 2025-07-12, Hours : 6:00 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,  Date: 2025-07-07, Hours : 5:00 Date: 2025-07-08, Hours : 6:00 Date: 2025-07-09, Hours : 5:00 Date: 2025-07-10, Hours : 5:00 Date: 2025-07-11, Hours : 5:00 Date: 2025-07-12, Hours : 6:00 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-07-08 07:10:53', '2025-07-08 07:10:53'),
+(546, 1, '2025-07-08', 'customer', 1, 'edited sole trader information. customer code :', 'Super Admin System Super Super Admin edited sole trader information. customer code : cust_SHK_00001(SHK)', 'updated', '122.168.114.106', '2025-07-08 10:15:04', '2025-07-08 10:15:04'),
+(547, 1, '2025-07-08', 'customer', 1, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_SHK_00001(SHK)', 'updated', '122.168.114.106', '2025-07-08 10:15:05', '2025-07-08 10:15:05'),
+(548, 1, '2025-07-08', 'customer', 2, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_F L_00002(F LIMITED)', 'created', '122.168.114.106', '2025-07-08 11:59:15', '2025-07-08 11:59:15'),
+(549, 1, '2025-07-08', 'customer', 2, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_F L_00002(F LIMITED)', 'updated', '122.168.114.106', '2025-07-08 11:59:20', '2025-07-08 11:59:20'),
+(550, 1, '2025-07-08', 'customer', 2, 'edited the company information customer code :', 'Super Admin System Super Super Admin edited the company information customer code : cust_F L_00002(F LIMITED)', 'updated', '122.168.114.106', '2025-07-08 12:41:20', '2025-07-08 12:41:20'),
+(551, 1, '2025-07-08', 'customer', 2, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_F L_00002(F LIMITED)', 'updated', '122.168.114.106', '2025-07-08 12:41:28', '2025-07-08 12:41:28'),
+(552, 1, '2025-07-08', 'customer', 2, 'edited the company information customer code :', 'Super Admin System Super Super Admin edited the company information customer code : cust_F L_00002(F LIMITED)', 'updated', '122.168.114.106', '2025-07-08 12:41:50', '2025-07-08 12:41:50'),
+(553, 1, '2025-07-08', 'customer', 2, 'edited the company information customer code :', 'Super Admin System Super Super Admin edited the company information customer code : cust_F L_00002(F LIMITED)', 'updated', '122.168.114.106', '2025-07-08 12:42:36', '2025-07-08 12:42:36'),
+(554, 1, '2025-07-08', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2025-07-14, Hours : 4:00 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,  Date: 2025-07-14, Hours : 4:00 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-07-08 12:53:06', '2025-07-08 12:53:06'),
+(555, 1, '2025-07-09', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-07-09 05:36:09', '2025-07-09 05:36:09'),
+(556, 1, '2025-07-09', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2025-07-07, Hours : 4:00 Date: 2025-07-08, Hours : 04:00 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,  Date: 2025-07-07, Hours : 4:00 Date: 2025-07-08, Hours : 04:00 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-07-09 07:26:51', '2025-07-09 07:26:51'),
+(557, 1, '2025-07-09', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  Date: 2025-07-07, Hours : 8:50 Date: 2025-07-08, Hours : 8:50 Date: 2025-07-09, Hours : 8:50 Date: 2025-07-10, Hours : 8:50 Date: 2025-07-11, Hours : 8:50 Date: 2025-07-12, Hours : 8:50 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,  Date: 2025-07-07, Hours : 8:50 Date: 2025-07-08, Hours : 8:50 Date: 2025-07-09, Hours : 8:50 Date: 2025-07-10, Hours : 8:50 Date: 2025-07-11, Hours : 8:50 Date: 2025-07-12, Hours : 8:50 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-07-09 07:28:44', '2025-07-09 07:28:44'),
+(558, 1, '2025-07-09', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  Date: 2025-07-07, Hours : 5:90 Date: 2025-07-10, Hours : 5:90 ,Job code:abc, Task name:c, Task type:Internal,  Date: 2025-07-07, Hours : 5:90 Date: 2025-07-08, Hours : 5:90 Date: 2025-07-10, Hours : 5:90 ,Job code:abc, Task name:c and Task type:Internal,  Date: 2025-07-08, Hours : 6:60 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,  Date: 2025-07-07, Hours : 5:90 Date: 2025-07-10, Hours : 5:90 ,Job code:abc, Task name:c, Task type:Internal,  Date: 2025-07-07, Hours : 5:90 Date: 2025-07-08, Hours : 5:90 Date: 2025-07-10, Hours : 5:90 ,Job code:abc, Task name:c and Task type:Internal,  Date: 2025-07-08, Hours : 6:60 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-07-09 10:33:40', '2025-07-09 10:33:40'),
+(559, 1, '2025-07-09', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2025-07-07, Hours : 5:50 Date: 2025-07-10, Hours : 5:50 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,  Date: 2025-07-07, Hours : 5:50 Date: 2025-07-10, Hours : 5:50 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-07-09 10:41:30', '2025-07-09 10:41:30'),
+(560, 1, '2025-07-09', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2025-07-07, Hours : 3:23 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,  Date: 2025-07-07, Hours : 3:23 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-07-09 10:49:05', '2025-07-09 10:49:05'),
+(561, 1, '2025-07-09', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  Date: 2025-07-07, Hours : 5:90 Date: 2025-07-09, Hours : 2:50 ,Job code:abc, Task name:c and Task type:Internal,  Date: 2025-07-07, Hours : 5:50 Date: 2025-07-08, Hours : 11:80 Date: 2025-07-09, Hours : 6:30 Date: 2025-07-10, Hours : 5:60 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,  Date: 2025-07-07, Hours : 5:90 Date: 2025-07-09, Hours : 2:50 ,Job code:abc, Task name:c and Task type:Internal,  Date: 2025-07-07, Hours : 5:50 Date: 2025-07-08, Hours : 11:80 Date: 2025-07-09, Hours : 6:30 Date: 2025-07-10, Hours : 5:60 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-07-09 10:51:45', '2025-07-09 10:51:45'),
+(562, 1, '2025-07-09', 'job', 2, 'created job code:', 'Super Admin System Super Super Admin created job code: SHK_SSH_V3_00002', 'created', '122.168.114.106', '2025-07-09 12:10:36', '2025-07-09 12:10:36'),
+(563, 1, '2025-07-09', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2025-07-07, Hours : 2:20 Date: 2025-07-09, Hours : 3:50 ,Job code:abc, Task name:c, Task type:External,  Date: 2025-07-08, Hours : 5:50 ,Job code:SHK_SSH_V3_00002, Task name:b and Task type:Internal,  Date: 2025-07-08, Hours : 6:00 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,  Date: 2025-07-07, Hours : 2:20 Date: 2025-07-09, Hours : 3:50 ,Job code:abc, Task name:c, Task type:External,  Date: 2025-07-08, Hours : 5:50 ,Job code:SHK_SSH_V3_00002, Task name:b and Task type:Internal,  Date: 2025-07-08, Hours : 6:00 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-07-09 12:11:46', '2025-07-09 12:11:46'),
+(564, 1, '2025-07-09', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-07-09 13:02:32', '2025-07-09 13:02:32'),
+(565, 1, '2025-07-09', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-07-09 13:03:04', '2025-07-09 13:03:04'),
+(566, 1, '2025-07-09', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  Date: 2025-07-07, Updated hours : 5:50 Date: 2025-07-09, Updated hours : 5:60 Date: 2025-07-10, Updated hours : 5:40 ,Job code:SHK_SSH_V3_00002, Task name:b and Task type:Internal,  ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  Date: 2025-07-07, Updated hours : 5:50 Date: 2025-07-09, Updated hours : 5:60 Date: 2025-07-10, Updated hours : 5:40 ,Job code:SHK_SSH_V3_00002, Task name:b and Task type:Internal,  ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-07-09 13:05:10', '2025-07-09 13:05:10'),
+(567, 1, '2025-07-10', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-07-10 10:50:43', '2025-07-10 10:50:43'),
+(568, 1, '2025-07-10', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-07-10 10:50:44', '2025-07-10 10:50:44'),
+(569, 1, '2025-07-10', 'customer', 3, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_SHK_00003(SHK11)', 'created', '122.168.114.106', '2025-07-10 11:42:50', '2025-07-10 11:42:50'),
+(570, 1, '2025-07-10', 'customer', 3, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_SHK_00003(SHK11)', 'updated', '122.168.114.106', '2025-07-10 11:42:53', '2025-07-10 11:42:53'),
+(571, 1, '2025-07-10', 'client', 2, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_SHK_SSS_00002(SSSHK22)', 'created', '122.168.114.106', '2025-07-10 11:43:36', '2025-07-10 11:43:36'),
+(572, 1, '2025-07-10', 'job', 3, 'created job code:', 'Super Admin System Super Super Admin created job code: SHK_SSS_V4_00003', 'created', '122.168.114.106', '2025-07-10 11:44:28', '2025-07-10 11:44:28'),
+(573, 11, '2025-07-10', '-', 0, ' Logged In', 'Manager STAFF SIX  Logged In ', '-', NULL, '2025-07-10 11:45:16', '2025-07-10 11:45:16'),
+(574, 1, '2025-07-11', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-07-11 06:31:58', '2025-07-11 06:31:58'),
+(575, 11, '2025-07-11', '-', 0, ' Logged In', 'Manager STAFF SIX  Logged In ', '-', NULL, '2025-07-11 06:33:29', '2025-07-11 06:33:29'),
+(576, 1, '2025-07-11', 'staff', 12, 'edited staff STAFF 7 hv', 'Super Admin System Super Super Admin edited staff STAFF 7 hv ', 'updated', '122.168.114.106', '2025-07-11 06:49:32', '2025-07-11 06:49:32'),
+(577, 1, '2025-07-11', 'job', 4, 'created job code:', 'Super Admin System Super Super Admin created job code: SHK_SSS_V4_00004', 'created', '122.168.114.106', '2025-07-11 06:49:52', '2025-07-11 06:49:52'),
+(578, 12, '2025-07-11', '-', 0, ' Logged In', 'Manager STAFF 7 hv  Logged In ', '-', '122.168.114.106', '2025-07-11 06:56:43', '2025-07-11 06:56:43'),
+(579, 1, '2025-07-11', 'customer', 1, 'edited sole trader information. customer code :', 'Super Admin System Super Super Admin edited sole trader information. customer code : cust_SHK_00001(SHK)', 'updated', '122.168.114.106', '2025-07-11 09:58:07', '2025-07-11 09:58:07'),
+(580, 1, '2025-07-11', 'job', 5, 'created job code:', 'Super Admin System Super Super Admin created job code: SHK_SSH_V4_00005', 'created', '122.168.114.106', '2025-07-11 09:58:58', '2025-07-11 09:58:58'),
+(581, 1, '2025-07-11', 'job', 5, 'edited the job information and has assigned the job to the processor, STAFF 7 hv job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, STAFF 7 hv job code: SHK_SSH_V4_00005', 'updated', '122.168.114.106', '2025-07-11 10:00:01', '2025-07-11 10:00:01'),
+(582, 11, '2025-07-11', '-', 0, ' Logged Out', 'Manager STAFF SIX  Logged Out ', '-', '122.168.114.106', '2025-07-11 10:20:26', '2025-07-11 10:20:26'),
+(583, 13, '2025-07-11', '-', 0, ' Logged In', 'Management shk sss  Logged In ', '-', '122.168.114.106', '2025-07-11 10:20:32', '2025-07-11 10:20:32'),
+(584, 1, '2025-07-11', 'staff', 13, 'edited staff shk sss', 'Super Admin System Super Super Admin edited staff shk sss ', 'updated', '122.168.114.106', '2025-07-11 10:21:15', '2025-07-11 10:21:15'),
+(585, 1, '2025-07-11', 'job', 2, 'edited the job information and has assigned the job to the reviewer, shk sss job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the reviewer, shk sss job code: SHK_SSH_V3_00002', 'updated', '122.168.114.106', '2025-07-11 10:21:59', '2025-07-11 10:21:59'),
+(586, 1, '2025-07-11', 'job', 2, 'edited the job information and has assigned the job to the processor, shk sss job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, shk sss job code: SHK_SSH_V3_00002', 'updated', '122.168.114.106', '2025-07-11 10:22:43', '2025-07-11 10:22:43'),
+(587, 1, '2025-07-11', 'job', 2, 'edited the job information and has assigned the job to the reviewer, shk sss job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the reviewer, shk sss job code: SHK_SSH_V3_00002', 'updated', '122.168.114.106', '2025-07-11 10:23:00', '2025-07-11 10:23:00'),
+(588, 1, '2025-07-11', 'staff', 13, 'edited staff shk sss', 'Super Admin System Super Super Admin edited staff shk sss ', 'updated', '122.168.114.106', '2025-07-11 10:37:48', '2025-07-11 10:37:48'),
+(589, 1, '2025-07-11', 'staff', 13, 'edited staff shk sss', 'Super Admin System Super Super Admin edited staff shk sss ', 'updated', '122.168.114.106', '2025-07-11 10:40:20', '2025-07-11 10:40:20'),
+(590, 1, '2025-07-11', 'staff', 14, 'created staff STAFF EIGHT', 'Super Admin System Super Super Admin created staff STAFF EIGHT ', 'created', '122.168.114.106', '2025-07-11 10:42:49', '2025-07-11 10:42:49'),
+(591, 13, '2025-07-11', '-', 0, ' Logged Out', 'Manager shk sss  Logged Out ', '-', '122.168.114.106', '2025-07-11 10:43:20', '2025-07-11 10:43:20'),
+(592, 14, '2025-07-11', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-07-11 10:43:33', '2025-07-11 10:43:33'),
+(593, 1, '2025-07-11', 'job', 3, 'edited the job information and has assigned the job to the reviewer, STAFF EIGHT job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the reviewer, STAFF EIGHT job code: SHK_SSS_V4_00003', 'updated', '122.168.114.106', '2025-07-11 10:44:42', '2025-07-11 10:44:42'),
+(594, 1, '2025-07-11', 'staff', 14, 'edited staff STAFF EIGHT', 'Super Admin System Super Super Admin edited staff STAFF EIGHT ', 'updated', '122.168.114.106', '2025-07-11 10:45:28', '2025-07-11 10:45:28');
+INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, `log_message`, `log_message_all`, `permission_type`, `ip`, `created_at`, `updated_at`) VALUES
+(595, 1, '2025-07-11', 'staff', 15, 'created staff STAFF NINE', 'Super Admin System Super Super Admin created staff STAFF NINE ', 'created', '122.168.114.106', '2025-07-11 10:48:30', '2025-07-11 10:48:30'),
+(596, 12, '2025-07-11', '-', 0, ' Logged Out', 'Manager STAFF 7 hv  Logged Out ', '-', '122.168.114.106', '2025-07-11 10:49:14', '2025-07-11 10:49:14'),
+(597, 15, '2025-07-11', '-', 0, ' Logged In', 'Manager STAFF NINE  Logged In ', '-', '122.168.114.106', '2025-07-11 10:49:26', '2025-07-11 10:49:26'),
+(598, 15, '2025-07-11', 'customer', 4, 'created customer profile. customer code :', 'Manager STAFF NINE created customer profile. customer code : cust_NIN_00004(NINIE 999)', 'created', '122.168.114.106', '2025-07-11 10:50:11', '2025-07-11 10:50:11'),
+(599, 15, '2025-07-11', 'customer', 4, ' edited the service details and added an additional service while editing the customer code :', 'Manager STAFF NINE  edited the service details and added an additional service while editing the customer code : cust_NIN_00004(NINIE 999)', 'updated', '122.168.114.106', '2025-07-11 10:50:14', '2025-07-11 10:50:14'),
+(600, 1, '2025-07-11', 'staff', 15, 'edited staff STAFF NINE', 'Super Admin System Super Super Admin edited staff STAFF NINE ', 'updated', '122.168.114.106', '2025-07-11 11:03:13', '2025-07-11 11:03:13'),
+(601, 1, '2025-07-11', 'checklist', 2, 'created checklist DDD', 'Super Admin System Super Super Admin created checklist DDD ', 'created', '122.168.114.106', '2025-07-11 12:07:21', '2025-07-11 12:07:21'),
+(602, 1, '2025-07-12', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-07-12 05:59:30', '2025-07-12 05:59:30'),
+(603, 1, '2025-07-12', 'client', 4, 'deleted customer. customer code :', NULL, 'deleted', '122.168.114.106', '2025-07-12 07:03:57', '2025-07-12 07:03:57'),
+(604, 15, '2025-07-12', '-', 0, ' Logged In', 'Manager STAFF NINE  Logged In ', '-', '122.168.114.106', '2025-07-12 07:04:16', '2025-07-12 07:04:16'),
+(605, 15, '2025-07-12', 'customer', 5, 'created customer profile. customer code :', 'Manager STAFF NINE created customer profile. customer code : cust_SFF_00004(SFFFF)', 'created', '122.168.114.106', '2025-07-12 09:07:12', '2025-07-12 09:07:12'),
+(606, 15, '2025-07-12', 'customer', 5, ' edited the service details and added an additional service while editing the customer code :', 'Manager STAFF NINE  edited the service details and added an additional service while editing the customer code : cust_SFF_00004(SFFFF)', 'updated', '122.168.114.106', '2025-07-12 09:07:21', '2025-07-12 09:07:21'),
+(607, 1, '2025-07-12', 'client', 3, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_SFF_GGG_00003(GGG)', 'created', '122.168.114.106', '2025-07-12 10:08:37', '2025-07-12 10:08:37'),
+(608, 1, '2025-07-12', 'customer', 5, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_SFF_00004(SFFFF)', 'updated', '122.168.114.106', '2025-07-12 10:10:40', '2025-07-12 10:10:40'),
+(609, 1, '2025-07-12', 'checklist', 3, 'created checklist DDD', 'Super Admin System Super Super Admin created checklist DDD ', 'created', '122.168.114.106', '2025-07-12 10:13:23', '2025-07-12 10:13:23'),
+(610, 1, '2025-07-12', 'job types', 5, 'created job types V4_4', 'Super Admin System Super Super Admin created job types V4_4 ', 'created', '122.168.114.106', '2025-07-12 10:39:40', '2025-07-12 10:39:40'),
+(611, 1, '2025-07-12', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:SHK_SSH_V3_00002, Task name:b and Task type:Internal,  ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:SHK_SSH_V3_00002, Task name:b and Task type:Internal,  ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-07-12 11:47:56', '2025-07-12 11:47:57'),
+(612, 1, '2025-07-12', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:SHK_SSH_V3_00002, Task name:b and Task type:Internal,  ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:SHK_SSH_V3_00002, Task name:b and Task type:Internal,  ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-07-12 11:50:17', '2025-07-12 11:50:17'),
+(613, 1, '2025-07-12', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:SHK_SSH_V3_00002, Task name:b and Task type:Internal,  ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:SHK_SSH_V3_00002, Task name:b and Task type:Internal,  ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-07-12 11:52:37', '2025-07-12 11:52:37'),
+(614, 1, '2025-07-12', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:SHK_SSH_V3_00002, Task name:b and Task type:Internal,  ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:SHK_SSH_V3_00002, Task name:b and Task type:Internal,  ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-07-12 11:52:58', '2025-07-12 11:52:58'),
+(615, 1, '2025-07-12', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:SHK_SSH_V3_00002, Task name:b and Task type:Internal,  ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c, Task type:External,  ,Job code:SHK_SSH_V3_00002, Task name:b and Task type:Internal,  ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-07-12 11:53:59', '2025-07-12 11:53:59'),
+(616, 1, '2025-07-12', 'customer', 6, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_DDD_00005(DDDDDDEEEE)', 'created', '122.168.114.106', '2025-07-12 12:11:26', '2025-07-12 12:11:26'),
+(617, 1, '2025-07-12', 'customer', 6, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_DDD_00005(DDDDDDEEEE)', 'updated', '122.168.114.106', '2025-07-12 12:11:36', '2025-07-12 12:11:36'),
+(618, 1, '2025-07-12', 'customer', 6, 'edited sole trader information. customer code :', 'Super Admin System Super Super Admin edited sole trader information. customer code : cust_DDD_00005(DDDDDDEEEE)', 'updated', '122.168.114.106', '2025-07-12 12:15:32', '2025-07-12 12:15:32'),
+(619, 1, '2025-07-12', 'customer', 6, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_DDD_00005(DDDDDDEEEE)', 'updated', '122.168.114.106', '2025-07-12 12:15:33', '2025-07-12 12:15:33'),
+(620, 1, '2025-07-14', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-07-14 05:38:55', '2025-07-14 05:38:55'),
+(621, 1, '2025-07-14', 'job', 4, 'edited the job information and changed the job to the reviewer, STAFF TWO job code:', 'Super Admin System Super Super Admin edited the job information and changed the job to the reviewer, STAFF TWO job code: SHK_SSS_V4_00004', 'updated', '122.168.114.106', '2025-07-14 05:43:12', '2025-07-14 05:43:12'),
+(622, 1, '2025-07-14', 'job', 4, 'edited the job information and has assigned the job to the processor, STAFF ONE job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, STAFF ONE job code: SHK_SSS_V4_00004', 'updated', '122.168.114.106', '2025-07-14 05:43:27', '2025-07-14 05:43:27'),
+(623, 1, '2025-07-14', 'customer', 7, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_FGF_00006(FGF)', 'created', '122.168.114.106', '2025-07-14 09:13:29', '2025-07-14 09:13:29'),
+(624, 1, '2025-07-14', 'customer', 7, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_FGF_00006(FGF)', 'updated', '122.168.114.106', '2025-07-14 09:13:34', '2025-07-14 09:13:34'),
+(625, 1, '2025-07-14', 'customer', 7, 'edited sole trader information. customer code :', 'Super Admin System Super Super Admin edited sole trader information. customer code : cust_FGF_00006(FGF)', 'updated', '122.168.114.106', '2025-07-14 09:20:52', '2025-07-14 09:20:52'),
+(626, 1, '2025-07-14', 'customer', 7, 'edited sole trader information. customer code :', 'Super Admin System Super Super Admin edited sole trader information. customer code : cust_FGF_00006(FGF)', 'updated', '122.168.114.106', '2025-07-14 09:22:24', '2025-07-14 09:22:24'),
+(627, 1, '2025-07-14', 'customer', 7, 'edited sole trader information. customer code :', 'Super Admin System Super Super Admin edited sole trader information. customer code : cust_FGF_00006(FGF)', 'updated', '122.168.114.106', '2025-07-14 09:23:15', '2025-07-14 09:23:15'),
+(628, 1, '2025-07-14', 'customer', 7, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_FGF_00006(FGF)', 'updated', '122.168.114.106', '2025-07-14 09:23:21', '2025-07-14 09:23:21'),
+(629, 1, '2025-07-14', 'customer', 8, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_ERE_00007(ERER)', 'created', '122.168.114.106', '2025-07-14 09:41:02', '2025-07-14 09:41:02'),
+(630, 1, '2025-07-14', 'customer', 8, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_ERE_00007(ERER)', 'updated', '122.168.114.106', '2025-07-14 09:41:06', '2025-07-14 09:41:06'),
+(631, 1, '2025-07-14', 'customer', 8, 'edited sole trader information. customer code :', 'Super Admin System Super Super Admin edited sole trader information. customer code : cust_ERE_00007(ERER)', 'updated', '122.168.114.106', '2025-07-14 10:17:17', '2025-07-14 10:17:17'),
+(632, 1, '2025-07-14', 'customer', 8, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_ERE_00007(ERER)', 'updated', '122.168.114.106', '2025-07-14 10:20:44', '2025-07-14 10:20:44'),
+(633, 1, '2025-07-14', 'customer', 8, 'edited sole trader information. customer code :', 'Super Admin System Super Super Admin edited sole trader information. customer code : cust_ERE_00007(ERER)', 'updated', '122.168.114.106', '2025-07-14 10:21:17', '2025-07-14 10:21:17'),
+(634, 1, '2025-07-14', 'customer', 8, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_ERE_00007(ERER)', 'updated', '122.168.114.106', '2025-07-14 10:21:23', '2025-07-14 10:21:23'),
+(635, 1, '2025-07-14', 'customer', 8, 'edited sole trader information. customer code :', 'Super Admin System Super Super Admin edited sole trader information. customer code : cust_ERE_00007(ERER)', 'updated', '122.168.114.106', '2025-07-14 10:21:41', '2025-07-14 10:21:41'),
+(636, 1, '2025-07-14', 'customer', 8, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_ERE_00007(ERER)', 'updated', '122.168.114.106', '2025-07-14 10:21:45', '2025-07-14 10:21:45'),
+(637, 1, '2025-07-14', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  Date: 2025-07-14, Hours : 9:60 Date: 2025-07-15, Hours : 9:60 Date: 2025-07-16, Hours : 9:60 Date: 2025-07-17, Hours : 9:60 Date: 2025-07-18, Hours : 9:60 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,  Date: 2025-07-14, Hours : 9:60 Date: 2025-07-15, Hours : 9:60 Date: 2025-07-16, Hours : 9:60 Date: 2025-07-17, Hours : 9:60 Date: 2025-07-18, Hours : 9:60 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-07-14 10:55:57', '2025-07-14 10:55:57'),
+(638, 1, '2025-07-14', 'customer', 8, 'edited sole trader information. customer code :', 'Super Admin System Super Super Admin edited sole trader information. customer code : cust_ERE_00007(ERER)', 'updated', '122.168.114.106', '2025-07-14 11:07:03', '2025-07-14 11:07:03'),
+(639, 1, '2025-07-14', 'customer', 8, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_ERE_00007(ERER)', 'updated', '122.168.114.106', '2025-07-14 11:07:04', '2025-07-14 11:07:04'),
+(640, 1, '2025-07-17', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-07-17 05:12:21', '2025-07-17 05:12:21'),
+(641, 1, '2025-07-17', 'checklist', 4, 'created checklist FFFFFFF', 'Super Admin System Super Super Admin created checklist FFFFFFF ', 'created', '122.168.114.106', '2025-07-17 06:00:49', '2025-07-17 06:00:49'),
+(642, 1, '2025-07-17', 'checklist', 4, 'edited checklist FFFFFFF', 'Super Admin System Super Super Admin edited checklist FFFFFFF ', 'updated', '122.168.114.106', '2025-07-17 06:08:13', '2025-07-17 06:08:13'),
+(643, 1, '2025-07-17', 'checklist', 1, 'edited checklist checklist1', 'Super Admin System Super Super Admin edited checklist checklist1 ', 'updated', '122.168.114.106', '2025-07-17 06:20:39', '2025-07-17 06:20:39'),
+(644, 1, '2025-07-17', 'checklist', 4, 'edited checklist FFFFFFF', 'Super Admin System Super Super Admin edited checklist FFFFFFF ', 'updated', '122.168.114.106', '2025-07-17 06:22:17', '2025-07-17 06:22:17'),
+(645, 1, '2025-07-17', 'checklist', 4, 'edited checklist FFFFFFF', 'Super Admin System Super Super Admin edited checklist FFFFFFF ', 'updated', '122.168.114.106', '2025-07-17 06:23:08', '2025-07-17 06:23:08'),
+(646, 1, '2025-07-17', 'client', 4, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_ERE_RTR_00004(RTRT)', 'created', '122.168.114.106', '2025-07-17 06:27:39', '2025-07-17 06:27:39'),
+(647, 1, '2025-07-17', 'client', 5, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_ERE_GGG_00005(GGGGGGGGG)', 'created', '122.168.114.106', '2025-07-17 06:39:05', '2025-07-17 06:39:05'),
+(648, 1, '2025-07-17', 'checklist', 4, 'edited checklist FFFFFFF', 'Super Admin System Super Super Admin edited checklist FFFFFFF ', 'updated', '122.168.114.106', '2025-07-17 09:00:46', '2025-07-17 09:00:46'),
+(649, 1, '2025-07-24', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-07-24 11:19:52', '2025-07-24 11:19:53'),
+(650, 1, '2025-07-24', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-07-24 11:27:22', '2025-07-24 11:27:22'),
+(651, 1, '2025-07-24', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-07-24 11:27:24', '2025-07-24 11:27:24'),
+(652, 5, '2025-07-24', '-', 0, ' Logged In', 'Processor STAFF ONE  Logged In ', '-', NULL, '2025-07-24 11:28:04', '2025-07-24 11:28:04'),
+(653, 5, '2025-07-24', '-', 0, ' Logged Out', 'Processor STAFF ONE  Logged Out ', '-', '122.168.114.106', '2025-07-24 11:32:34', '2025-07-24 11:32:34'),
+(654, 15, '2025-07-24', '-', 0, ' Logged In', 'Manager STAFF NINE  Logged In ', '-', '122.168.114.106', '2025-07-24 11:32:42', '2025-07-24 11:32:42'),
+(655, 1, '2025-07-24', 'permission', 4, ' updated the access for MANAGER. Access Changes Add Permission (customer-update, customer-delete, client-delete) ', 'Super Admin System Super Super Admin  updated the access for MANAGER. Access Changes Add Permission (customer-update, customer-delete, client-delete)  ', 'updated', '122.168.114.106', '2025-07-24 11:33:24', '2025-07-24 11:33:24'),
+(656, 15, '2025-07-24', 'customer', 9, 'created customer profile. customer code :', 'Manager STAFF NINE created customer profile. customer code : cust_F &_00008(F & HELLMAN ASIA PACIFIC INVESTMENT INC)', 'created', '122.168.114.106', '2025-07-24 11:34:09', '2025-07-24 11:34:09'),
+(657, 15, '2025-07-24', 'customer', 9, ' edited the service details and added an additional service while editing the customer code :', 'Manager STAFF NINE  edited the service details and added an additional service while editing the customer code : cust_F &_00008(F & HELLMAN ASIA PACIFIC INVESTMENT INC)', 'updated', '122.168.114.106', '2025-07-24 11:34:21', '2025-07-24 11:34:21'),
+(658, 15, '2025-07-24', 'client', 6, 'created client profile. client code :', 'Manager STAFF NINE created client profile. client code : cli_F &_CLI_00006(CLI---11)', 'created', '122.168.114.106', '2025-07-24 11:35:02', '2025-07-24 11:35:02'),
+(659, 15, '2025-07-24', 'client', 7, 'created client profile. client code :', 'Manager STAFF NINE created client profile. client code : cli_F &_CLI_00007(CLI--2)', 'created', '122.168.114.106', '2025-07-24 11:35:21', '2025-07-24 11:35:21'),
+(660, 15, '2025-07-24', 'client', 6, 'edited sole trader information. client code :', 'Manager STAFF NINE edited sole trader information. client code : cli_F &_CLI_00006(CLI---1)', 'updated', '122.168.114.106', '2025-07-24 11:35:29', '2025-07-24 11:35:29'),
+(661, 15, '2025-07-24', 'job', 6, 'created job code:', 'Manager STAFF NINE created job code: F &_CLI_V3_00006', 'created', '122.168.114.106', '2025-07-24 11:35:52', '2025-07-24 11:35:52'),
+(662, 14, '2025-07-24', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-07-24 11:37:32', '2025-07-24 11:37:32'),
+(663, 15, '2025-07-24', 'job', 6, 'edited the job information and has assigned the job to the processor, STAFF EIGHT job code:', 'Manager STAFF NINE edited the job information and has assigned the job to the processor, STAFF EIGHT job code: F &_CLI_V3_00006', 'updated', '122.168.114.106', '2025-07-24 11:42:52', '2025-07-24 11:42:52'),
+(664, 1, '2025-07-31', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-07-31 11:24:38', '2025-07-31 11:24:38'),
+(665, 1, '2025-08-01', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-01 12:09:20', '2025-08-01 12:09:20'),
+(666, 1, '2025-08-01', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-08-01 13:05:23', '2025-08-01 13:05:23'),
+(667, 1, '2025-08-01', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-08-01 13:05:36', '2025-08-01 13:05:36'),
+(668, 7, '2025-08-01', '-', 0, ' Logged In', 'DEMO STAFF FOUR  Logged In ', '-', '122.168.114.106', '2025-08-01 13:06:06', '2025-08-01 13:06:06'),
+(669, 1, '2025-08-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-02 04:48:41', '2025-08-02 04:48:41'),
+(670, 7, '2025-08-02', '-', 0, ' Logged In', 'DEMO STAFF FOUR  Logged In ', '-', NULL, '2025-08-02 04:51:01', '2025-08-02 04:51:01'),
+(671, 7, '2025-08-02', '-', 0, ' Logged In', 'DEMO STAFF FOUR  Logged In ', '-', NULL, '2025-08-02 06:59:38', '2025-08-02 06:59:38'),
+(672, 1, '2025-08-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-08-02 09:23:54', '2025-08-02 09:23:54'),
+(673, 7, '2025-08-02', '-', 0, ' Logged In', 'DEMO STAFF FOUR  Logged In ', '-', '122.168.114.106', '2025-08-02 09:24:37', '2025-08-02 09:24:37'),
+(674, 1, '2025-08-02', 'job', 7, 'created job code:', 'Super Admin System Super Super Admin created job code: F &_CLI_V3_00007', 'created', '122.168.114.106', '2025-08-02 09:59:35', '2025-08-02 09:59:35'),
+(675, 1, '2025-08-04', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-04 08:37:02', '2025-08-04 08:37:02'),
+(676, 7, '2025-08-04', '-', 0, ' Logged In', 'DEMO STAFF FOUR  Logged In ', '-', NULL, '2025-08-04 08:40:59', '2025-08-04 08:40:59'),
+(677, 1, '2025-08-04', 'permission', 9, ' updated the access for DEMO. Access Changes Add Permission (job-update) ', 'Super Admin System Super Super Admin  updated the access for DEMO. Access Changes Add Permission (job-update)  ', 'updated', '122.168.114.106', '2025-08-04 09:06:42', '2025-08-04 09:06:42'),
+(678, 7, '2025-08-04', '-', 0, ' Logged Out', 'DEMO STAFF FOUR  Logged Out ', '-', '122.168.114.106', '2025-08-04 09:30:09', '2025-08-04 09:30:09'),
+(679, 5, '2025-08-04', '-', 0, ' Logged In', 'Processor STAFF ONE  Logged In ', '-', '122.168.114.106', '2025-08-04 09:30:49', '2025-08-04 09:30:49'),
+(680, 11, '2025-08-04', '-', 0, ' Logged In', 'Manager STAFF SIX  Logged In ', '-', '122.168.114.106', '2025-08-04 09:49:43', '2025-08-04 09:49:43'),
+(681, 1, '2025-08-04', 'staff', 12, 'edited staff STAFF 7 hv', 'Super Admin System Super Super Admin edited staff STAFF 7 hv ', 'updated', '122.168.114.106', '2025-08-04 10:56:18', '2025-08-04 10:56:18'),
+(682, 1, '2025-08-04', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-08-04 10:56:27', '2025-08-04 10:56:27'),
+(683, 12, '2025-08-04', '-', 0, ' Logged In', 'Reviewer STAFF 7 hv  Logged In ', '-', '122.168.114.106', '2025-08-04 10:56:36', '2025-08-04 10:56:36'),
+(684, 12, '2025-08-04', '-', 0, ' Logged Out', 'Reviewer STAFF 7 hv  Logged Out ', '-', '122.168.114.106', '2025-08-04 13:02:14', '2025-08-04 13:02:14'),
+(685, 1, '2025-08-04', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-04 13:02:16', '2025-08-04 13:02:16'),
+(686, 1, '2025-08-04', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-08-04 13:02:29', '2025-08-04 13:02:29'),
+(687, 7, '2025-08-04', '-', 0, ' Logged In', 'DEMO STAFF FOUR  Logged In ', '-', '122.168.114.106', '2025-08-04 13:02:36', '2025-08-04 13:02:36'),
+(688, 7, '2025-08-05', '-', 0, ' Logged Out', 'DEMO STAFF FOUR  Logged Out ', '-', '122.168.114.106', '2025-08-05 09:49:25', '2025-08-05 09:49:25'),
+(689, 1, '2025-08-05', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-05 09:49:27', '2025-08-05 09:49:27'),
+(690, 1, '2025-08-05', 'job', 8, 'created job code:', 'Super Admin System Super Super Admin created job code: F &_CLI_V3_00008', 'created', '122.168.114.106', '2025-08-05 13:20:47', '2025-08-05 13:20:47'),
+(691, 1, '2025-08-05', 'job', 9, 'created job code:', 'Super Admin System Super Super Admin created job code: F &_CLI_V3_00009', 'created', '122.168.114.106', '2025-08-05 13:22:42', '2025-08-05 13:22:42'),
+(692, 1, '2025-08-11', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-11 09:02:14', '2025-08-11 09:02:14'),
+(693, 1, '2025-08-11', 'job', 9, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: F &_CLI_V3_00009', 'updated', '122.168.114.106', '2025-08-11 09:49:32', '2025-08-11 09:49:32'),
+(694, 7, '2025-08-11', '-', 0, ' Logged In', 'DEMO STAFF FOUR  Logged In ', '-', NULL, '2025-08-11 10:03:21', '2025-08-11 10:03:21'),
+(695, 1, '2025-08-12', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-12 11:17:59', '2025-08-12 11:17:59'),
+(696, 13, '2025-08-12', '-', 0, ' Logged In', 'Manager shk sss  Logged In ', '-', '122.168.114.106', '2025-08-12 11:18:46', '2025-08-12 11:18:46'),
+(697, 5, '2025-08-12', '-', 0, ' Logged In', 'Processor STAFF ONE  Logged In ', '-', '122.168.114.106', '2025-08-12 11:24:53', '2025-08-12 11:24:53'),
+(698, 1, '2025-08-12', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-08-12 11:36:49', '2025-08-12 11:36:49'),
+(699, 6, '2025-08-12', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', '122.168.114.106', '2025-08-12 11:37:04', '2025-08-12 11:37:04'),
+(700, 1, '2025-08-13', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-13 05:42:13', '2025-08-13 05:42:13'),
+(701, 5, '2025-08-13', '-', 0, ' Logged In', 'Processor STAFF ONE  Logged In ', '-', '122.168.114.106', '2025-08-13 05:43:55', '2025-08-13 05:43:55'),
+(702, 13, '2025-08-13', '-', 0, ' Logged In', 'Manager shk sss  Logged In ', '-', NULL, '2025-08-13 05:44:58', '2025-08-13 05:44:58'),
+(703, 1, '2025-08-13', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-08-13 05:47:52', '2025-08-13 05:47:52'),
+(704, 6, '2025-08-13', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', '122.168.114.106', '2025-08-13 05:48:06', '2025-08-13 05:48:06'),
+(705, 6, '2025-08-13', '-', 0, ' Logged Out', 'Reviewer STAFF TWO  Logged Out ', '-', '122.168.114.106', '2025-08-13 06:02:17', '2025-08-13 06:02:17'),
+(706, 1, '2025-08-13', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-13 06:02:20', '2025-08-13 06:02:20'),
+(707, 13, '2025-08-13', 'customer', 10, 'created customer profile. customer code :', 'Manager shk sss created customer profile. customer code : cust_NEW_00009(NEW_A_CUS)', 'created', '122.168.114.106', '2025-08-13 06:03:47', '2025-08-13 06:03:47'),
+(708, 13, '2025-08-13', 'customer', 10, ' edited the service details and added an additional service while editing the customer code :', 'Manager shk sss  edited the service details and added an additional service while editing the customer code : cust_NEW_00009(NEW_A_CUS)', 'updated', '122.168.114.106', '2025-08-13 06:03:59', '2025-08-13 06:03:59'),
+(709, 13, '2025-08-13', 'client', 8, 'created client profile. client code :', 'Manager shk sss created client profile. client code : cli_NEW_NEW_00008(NEW_A_CLI)', 'created', '122.168.114.106', '2025-08-13 06:04:47', '2025-08-13 06:04:47'),
+(710, 5, '2025-08-13', '-', 0, ' Logged Out', 'Processor STAFF ONE  Logged Out ', '-', '122.168.114.106', '2025-08-13 06:05:56', '2025-08-13 06:05:56'),
+(711, 14, '2025-08-13', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-08-13 06:06:03', '2025-08-13 06:06:03'),
+(712, 13, '2025-08-13', 'job', 10, 'created job code:', 'Manager shk sss created job code: NEW_NEW_VAT2_000010', 'created', '122.168.114.106', '2025-08-13 06:07:06', '2025-08-13 06:07:06'),
+(713, 13, '2025-08-13', '-', 0, ' Logged Out', 'Manager shk sss  Logged Out ', '-', '122.168.114.106', '2025-08-13 09:32:40', '2025-08-13 09:32:40'),
+(714, 6, '2025-08-13', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', '122.168.114.106', '2025-08-13 09:32:51', '2025-08-13 09:32:51'),
+(715, 14, '2025-08-13', '-', 0, ' Logged Out', 'Manager STAFF EIGHT  Logged Out ', '-', '122.168.114.106', '2025-08-13 09:33:08', '2025-08-13 09:33:08'),
+(716, 12, '2025-08-13', '-', 0, ' Logged In', 'Reviewer STAFF 7 hv  Logged In ', '-', '122.168.114.106', '2025-08-13 09:34:03', '2025-08-13 09:34:03'),
+(717, 1, '2025-08-13', 'permission', 6, ' updated the access for REVIEWER. Access Changes Add Permission (client-update) ', 'Super Admin System Super Super Admin  updated the access for REVIEWER. Access Changes Add Permission (client-update)  ', 'updated', '122.168.114.106', '2025-08-13 09:41:50', '2025-08-13 09:41:50'),
+(718, 1, '2025-08-13', 'staff', 10, 'edited staff STAFF FIVE', 'Super Admin System Super Super Admin edited staff STAFF FIVE ', 'updated', '122.168.114.106', '2025-08-13 11:02:59', '2025-08-13 11:02:59'),
+(719, 6, '2025-08-13', '-', 0, ' Logged Out', 'Reviewer STAFF TWO  Logged Out ', '-', '122.168.114.106', '2025-08-13 11:03:34', '2025-08-13 11:03:34'),
+(720, 5, '2025-08-13', '-', 0, ' Logged In', 'Processor STAFF ONE  Logged In ', '-', '122.168.114.106', '2025-08-13 11:03:43', '2025-08-13 11:03:43'),
+(721, 12, '2025-08-13', '-', 0, ' Logged Out', 'Reviewer STAFF 7 hv  Logged Out ', '-', '122.168.114.106', '2025-08-13 11:03:51', '2025-08-13 11:03:51'),
+(722, 10, '2025-08-13', '-', 0, ' Logged In', 'Processor STAFF FIVE  Logged In ', '-', '122.168.114.106', '2025-08-13 11:04:15', '2025-08-13 11:04:15'),
+(723, 10, '2025-08-13', '-', 0, ' Logged Out', 'Manager STAFF FIVE  Logged Out ', '-', '122.168.114.106', '2025-08-13 11:13:44', '2025-08-13 11:13:44'),
+(724, 1, '2025-08-13', 'staff', 16, 'created staff STAFF TEN', 'Super Admin System Super Super Admin created staff STAFF TEN ', 'created', '122.168.114.106', '2025-08-13 11:32:32', '2025-08-13 11:32:32'),
+(725, 16, '2025-08-13', '-', 0, ' Logged In', 'Processor STAFF TEN  Logged In ', '-', '122.168.114.106', '2025-08-13 11:33:04', '2025-08-13 11:33:04'),
+(726, 1, '2025-08-13', 'permission', 3, ' updated the access for PROCESSOR. Access Changes Add Permission (job-update, client-update) ', 'Super Admin System Super Super Admin  updated the access for PROCESSOR. Access Changes Add Permission (job-update, client-update)  ', 'updated', '122.168.114.106', '2025-08-13 11:33:33', '2025-08-13 11:33:33'),
+(727, 5, '2025-08-13', 'job', 11, 'created job code:', 'Processor STAFF ONE created job code: SHK_SSH_V3_000011', 'created', '122.168.114.106', '2025-08-13 11:57:45', '2025-08-13 11:57:45'),
+(728, 5, '2025-08-14', '-', 0, ' Logged Out', 'Processor STAFF ONE  Logged Out ', '-', '122.168.114.106', '2025-08-14 05:03:54', '2025-08-14 05:03:54'),
+(729, 1, '2025-08-16', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-16 10:06:41', '2025-08-16 10:06:41'),
+(730, 1, '2025-08-16', 'client', 9, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_SHK_SHK_00009(SHK333)', 'created', '122.168.114.106', '2025-08-16 11:31:39', '2025-08-16 11:31:39'),
+(731, 1, '2025-08-16', 'job', 4, 'edited the job information and changed the job to the reviewer, STAFF EIGHT job code:', 'Super Admin System Super Super Admin edited the job information and changed the job to the reviewer, STAFF EIGHT job code: SHK_SSS_V4_00004', 'updated', '122.168.114.106', '2025-08-16 11:34:41', '2025-08-16 11:34:41'),
+(732, 14, '2025-08-16', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-08-16 12:06:42', '2025-08-16 12:06:42'),
+(733, 16, '2025-08-16', '-', 0, ' Logged In', 'Processor STAFF TEN  Logged In ', '-', '122.168.114.106', '2025-08-16 12:18:04', '2025-08-16 12:18:04'),
+(734, 14, '2025-08-16', '-', 0, ' Logged Out', 'Manager STAFF EIGHT  Logged Out ', '-', '122.168.114.106', '2025-08-16 13:17:09', '2025-08-16 13:17:09'),
+(735, 15, '2025-08-16', '-', 0, ' Logged In', 'Manager STAFF NINE  Logged In ', '-', '122.168.114.106', '2025-08-16 13:17:21', '2025-08-16 13:17:21'),
+(736, 16, '2025-08-18', '-', 0, ' Logged In', 'Processor STAFF TEN  Logged In ', '-', '122.168.114.106', '2025-08-18 05:14:23', '2025-08-18 05:14:23'),
+(737, 1, '2025-08-18', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-18 05:52:10', '2025-08-18 05:52:10'),
+(738, 14, '2025-08-18', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-08-18 06:12:04', '2025-08-18 06:12:04'),
+(739, 1, '2025-08-18', 'staff', 17, 'created staff STAFF ELEVEN', 'Super Admin System Super Super Admin created staff STAFF ELEVEN ', 'created', '122.168.114.106', '2025-08-18 08:20:15', '2025-08-18 08:20:15'),
+(740, 1, '2025-08-18', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-08-18 08:20:26', '2025-08-18 08:20:26'),
+(741, 17, '2025-08-18', '-', 0, ' Logged In', 'Processor STAFF ELEVEN  Logged In ', '-', '122.168.114.106', '2025-08-18 08:20:35', '2025-08-18 08:20:35'),
+(742, 1, '2025-08-19', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-19 09:48:56', '2025-08-19 09:48:56'),
+(743, 17, '2025-08-19', '-', 0, ' Logged In', 'Processor STAFF ELEVEN  Logged In ', '-', '122.168.114.106', '2025-08-19 09:49:32', '2025-08-19 09:49:32'),
+(744, 14, '2025-08-19', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-08-19 10:08:33', '2025-08-19 10:08:33'),
+(745, 14, '2025-08-19', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-08-19 11:24:14', '2025-08-19 11:24:14'),
+(746, 14, '2025-08-19', '-', 0, ' Logged Out', 'Manager STAFF EIGHT  Logged Out ', '-', '122.168.114.106', '2025-08-19 11:27:16', '2025-08-19 11:27:16'),
+(747, 16, '2025-08-19', '-', 0, ' Logged In', 'Processor STAFF TEN  Logged In ', '-', '122.168.114.106', '2025-08-19 11:27:23', '2025-08-19 11:27:23'),
+(748, 16, '2025-08-19', '-', 0, ' Logged In', 'Processor STAFF TEN  Logged In ', '-', NULL, '2025-08-19 08:27:32', '2025-08-19 08:27:32'),
+(749, 1, '2025-08-20', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-20 04:44:00', '2025-08-20 04:44:00'),
+(750, 17, '2025-08-20', '-', 0, ' Logged In', 'Processor STAFF ELEVEN  Logged In ', '-', '122.168.114.106', '2025-08-20 04:44:10', '2025-08-20 04:44:10'),
+(751, 16, '2025-08-20', '-', 0, ' Logged In', 'Processor STAFF TEN  Logged In ', '-', NULL, '2025-08-20 04:45:15', '2025-08-20 04:45:15'),
+(752, 1, '2025-08-20', 'permission', 3, ' updated the access for PROCESSOR. Access Changes Add Permission (report-view) ', 'Super Admin System Super Super Admin  updated the access for PROCESSOR. Access Changes Add Permission (report-view)  ', 'updated', '122.168.114.106', '2025-08-20 08:23:29', '2025-08-20 08:23:29'),
+(753, 16, '2025-08-20', '-', 0, ' Logged In', 'Processor STAFF TEN  Logged In ', '-', NULL, '2025-08-20 08:21:42', '2025-08-20 08:21:42'),
+(754, 1, '2025-08-20', 'job', 6, 'edited the job information and changed the job to the processor, STAFF TEN job code:', 'Super Admin System Super Super Admin edited the job information and changed the job to the processor, STAFF TEN job code: F &_CLI_V3_00006', 'updated', '122.168.114.106', '2025-08-20 09:55:58', '2025-08-20 09:55:58'),
+(755, 1, '2025-08-20', 'job', 6, 'edited the job information and changed the job to the processor, STAFF ELEVEN job code:', 'Super Admin System Super Super Admin edited the job information and changed the job to the processor, STAFF ELEVEN job code: F &_CLI_V3_00006', 'updated', '122.168.114.106', '2025-08-20 09:56:49', '2025-08-20 09:56:49'),
+(756, 1, '2025-08-20', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-08-20 10:37:27', '2025-08-20 10:37:27'),
+(757, 1, '2025-08-22', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-22 06:38:24', '2025-08-22 06:38:24'),
+(758, 14, '2025-08-22', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-08-22 06:49:39', '2025-08-22 06:49:39'),
+(759, 17, '2025-08-22', '-', 0, ' Logged In', 'Processor STAFF ELEVEN  Logged In ', '-', '122.168.114.106', '2025-08-22 06:50:36', '2025-08-22 06:50:36'),
+(760, 17, '2025-08-22', '-', 0, ' Logged Out', 'Processor STAFF ELEVEN  Logged Out ', '-', '122.168.114.106', '2025-08-22 06:54:37', '2025-08-22 06:54:37'),
+(761, 17, '2025-08-22', '-', 0, ' Logged In', 'Processor STAFF ELEVEN  Logged In ', '-', '122.168.114.106', '2025-08-22 06:54:51', '2025-08-22 06:54:51'),
+(762, 1, '2025-08-22', 'customer', 2, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_F L_00002(F LIMITED)', 'updated', '122.168.114.106', '2025-08-22 06:56:13', '2025-08-22 06:56:13'),
+(763, 1, '2025-08-22', 'customer', 5, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_SFF_00004(SFFFF)', 'updated', '122.168.114.106', '2025-08-22 06:57:22', '2025-08-22 06:57:22'),
+(764, 1, '2025-08-22', 'job', 12, 'created job code:', 'Super Admin System Super Super Admin created job code: SFF_GGG_V4_000012', 'created', '122.168.114.106', '2025-08-22 06:57:43', '2025-08-22 06:57:43'),
+(765, 1, '2025-08-22', 'job', 13, 'created job code:', 'Super Admin System Super Super Admin created job code: SFF_GGG_V4_000013', 'created', '122.168.114.106', '2025-08-22 06:58:15', '2025-08-22 06:58:15'),
+(766, 1, '2025-08-22', 'customer', 5, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_SFF_00004(SFFFF)', 'updated', '122.168.114.106', '2025-08-22 06:58:38', '2025-08-22 06:58:38'),
+(767, 14, '2025-08-22', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-08-22 09:23:23', '2025-08-22 09:23:23'),
+(768, 1, '2025-08-22', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-08-22 10:43:32', '2025-08-22 10:43:32'),
+(769, 14, '2025-08-22', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-08-22 10:44:56', '2025-08-22 10:44:56'),
+(770, 1, '2025-08-22', 'job', 13, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: SFF_GGG_VAT2_000013', 'updated', '122.168.114.106', '2025-08-22 11:37:40', '2025-08-22 11:37:40'),
+(771, 1, '2025-08-23', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-08-23 05:08:47', '2025-08-23 05:08:47'),
+(772, 1, '2025-08-23', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-23 05:08:48', '2025-08-23 05:08:48'),
+(773, 14, '2025-08-23', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-08-23 05:15:30', '2025-08-23 05:15:30'),
+(774, 17, '2025-08-23', '-', 0, ' Logged In', 'Processor STAFF ELEVEN  Logged In ', '-', '122.168.114.106', '2025-08-23 05:27:07', '2025-08-23 05:27:07'),
+(775, 1, '2025-08-23', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-08-23 06:36:41', '2025-08-23 06:36:41'),
+(776, 1, '2025-08-23', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-23 07:42:00', '2025-08-23 07:42:00'),
+(777, 14, '2025-08-23', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-08-23 07:43:05', '2025-08-23 07:43:05'),
+(778, 1, '2025-08-23', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-08-23 07:48:28', '2025-08-23 07:48:28'),
+(779, 1, '2025-08-23', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-23 08:42:06', '2025-08-23 08:42:06'),
+(780, 1, '2025-08-23', 'client', 10, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_F L_FFF_000010(FFFFFFF)', 'created', '122.168.114.106', '2025-08-23 08:42:30', '2025-08-23 08:42:30'),
+(781, 1, '2025-08-23', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-08-23 10:35:52', '2025-08-23 10:35:52'),
+(782, 1, '2025-08-23', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-23 10:36:22', '2025-08-23 10:36:22'),
+(783, 1, '2025-08-23', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-08-23 11:37:10', '2025-08-23 11:37:10'),
+(784, 1, '2025-08-25', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-25 06:03:11', '2025-08-25 06:03:11'),
+(785, 14, '2025-08-25', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-08-25 06:08:50', '2025-08-25 06:08:50'),
+(786, 1, '2025-08-25', 'job', 10, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_VAT2_000010', 'updated', '122.168.114.106', '2025-08-25 06:26:31', '2025-08-25 06:26:31'),
+(787, 1, '2025-08-25', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-08-25 08:48:52', '2025-08-25 08:48:52'),
+(788, 1, '2025-08-25', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-25 09:08:58', '2025-08-25 09:08:58'),
+(789, 1, '2025-08-26', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-08-26 12:25:06', '2025-08-26 12:25:06'),
+(790, 1, '2025-08-26', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-26 12:25:17', '2025-08-26 12:25:17'),
+(791, 1, '2025-08-27', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-27 10:12:16', '2025-08-27 10:12:16'),
+(792, 1, '2025-08-28', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-28 10:40:23', '2025-08-28 10:40:24'),
+(793, 14, '2025-08-28', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-08-28 12:10:33', '2025-08-28 12:10:35'),
+(794, 14, '2025-08-28', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-08-28 12:10:36', '2025-08-28 12:10:38'),
+(795, 14, '2025-08-28', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-08-28 12:10:36', '2025-08-28 12:10:37'),
+(796, 1, '2025-08-29', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-08-29 04:49:43', '2025-08-29 04:49:43'),
+(797, 14, '2025-08-29', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-08-29 05:04:50', '2025-08-29 05:04:50'),
+(798, 14, '2025-08-29', 'timesheet', 0, 'created a timesheet entry. Task type:External,  Date: 2025-08-25, Hours : 2:00 ,Job code:NEW_NEW_VAT2_000010, Task name:FFF', 'Manager STAFF EIGHT created a timesheet entry. Task type:External,  Date: 2025-08-25, Hours : 2:00 ,Job code:NEW_NEW_VAT2_000010, Task name:FFF ', 'updated', '0.0.0.0', '2025-08-29 12:17:35', '2025-08-29 12:17:35'),
+(799, 1, '2025-09-01', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-01 09:07:18', '2025-09-01 09:07:18'),
+(800, 1, '2025-09-01', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-01 09:07:18', '2025-09-01 09:07:18'),
+(801, 14, '2025-09-01', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-09-01 09:08:26', '2025-09-01 09:08:26'),
+(802, 14, '2025-09-01', '-', 0, ' Logged Out', 'Manager STAFF EIGHT  Logged Out ', '-', '122.168.114.106', '2025-09-01 13:31:12', '2025-09-01 13:31:12'),
+(803, 1, '2025-09-01', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-09-01 13:31:17', '2025-09-01 13:31:17'),
+(804, 1, '2025-09-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-02 06:45:09', '2025-09-02 06:45:10'),
+(805, 14, '2025-09-02', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-09-02 09:24:10', '2025-09-02 09:24:10'),
+(806, 1, '2025-09-02', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2025-09-01, Hours : 2:30 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,  Date: 2025-09-01, Hours : 2:30 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-09-02 10:19:22', '2025-09-02 10:19:22'),
+(807, 1, '2025-09-02', 'timesheet', 0, 'created a timesheet entry. Task type:External,  Date: 2025-09-01, Hours : 5:60 Date: 2025-09-02, Hours : 6:30 ,Job code:SHK_SSH_V4_00005, Task name:a', 'Super Admin System Super Super Admin created a timesheet entry. Task type:External,  Date: 2025-09-01, Hours : 5:60 Date: 2025-09-02, Hours : 6:30 ,Job code:SHK_SSH_V4_00005, Task name:a ', 'updated', '0.0.0.0', '2025-09-02 10:20:10', '2025-09-02 10:20:10'),
+(808, 1, '2025-09-02', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,  Date: 2025-09-01, Updated hours : 2:40 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:Internal,  Date: 2025-09-01, Updated hours : 2:40 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-09-02 10:34:19', '2025-09-02 10:34:19'),
+(809, 1, '2025-09-02', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-09-02 10:52:18', '2025-09-02 10:52:18'),
+(810, 1, '2025-09-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-02 10:52:30', '2025-09-02 10:52:30'),
+(811, 14, '2025-09-02', '-', 0, ' Logged Out', 'Manager STAFF EIGHT  Logged Out ', '-', '122.168.114.106', '2025-09-02 10:54:52', '2025-09-02 10:54:52'),
+(812, 14, '2025-09-02', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-09-02 10:55:16', '2025-09-02 10:55:16'),
+(813, 1, '2025-09-08', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-09-08 05:59:42', '2025-09-08 05:59:42'),
+(814, 1, '2025-09-08', 'staff', 18, 'created staff FDGFDD sf', 'Super Admin System Super Super Admin created staff FDGFDD sf ', 'created', '122.168.114.106', '2025-09-08 06:05:09', '2025-09-08 06:05:09'),
+(815, 1, '2025-09-08', 'staff', 19, 'created staff DEGWSEFg dff', 'Super Admin System Super Super Admin created staff DEGWSEFg dff ', 'created', '122.168.114.106', '2025-09-08 07:26:11', '2025-09-08 07:26:11'),
+(816, 1, '2025-09-08', 'role', 11, 'created role TEST', 'Super Admin System Super Super Admin created role TEST ', 'created', '122.168.114.106', '2025-09-08 07:28:38', '2025-09-08 07:28:38'),
+(817, 1, '2025-09-08', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-09-08 12:44:31', '2025-09-08 12:44:31'),
+(818, 1, '2025-09-08', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-08 12:44:38', '2025-09-08 12:44:38'),
+(819, 1, '2025-09-09', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-09 06:22:44', '2025-09-09 06:22:44'),
+(820, 1, '2025-09-09', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-09-09 06:22:52', '2025-09-09 06:22:52'),
+(821, 1, '2025-09-09', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-09 06:23:13', '2025-09-09 06:23:13'),
+(822, 1, '2025-09-09', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2025-09-08, Hours : 5:30 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,  Date: 2025-09-08, Hours : 5:30 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-09-09 13:03:37', '2025-09-09 13:03:37'),
+(823, 1, '2025-09-10', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-10 06:09:16', '2025-09-10 06:09:16'),
+(824, 17, '2025-09-10', '-', 0, ' Logged In', 'Processor STAFF ELEVEN  Logged In ', '-', NULL, '2025-09-10 07:07:25', '2025-09-10 07:07:25'),
+(825, 17, '2025-09-10', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2025-09-08, Hours : 3:00 ,Job code:abc, Task name:b', 'Processor STAFF ELEVEN created a timesheet entry. Task type:Internal,  Date: 2025-09-08, Hours : 3:00 ,Job code:abc, Task name:b ', 'updated', '0.0.0.0', '2025-09-10 07:08:01', '2025-09-10 07:08:01'),
+(826, 17, '2025-09-10', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2025-09-08, Hours : 3:00 ,Job code:ddddd, Task name:bb', 'Processor STAFF ELEVEN created a timesheet entry. Task type:Internal,  Date: 2025-09-08, Hours : 3:00 ,Job code:ddddd, Task name:bb ', 'updated', '0.0.0.0', '2025-09-10 07:08:22', '2025-09-10 07:08:22'),
+(827, 17, '2025-09-10', '-', 0, ' Logged Out', 'Processor STAFF ELEVEN  Logged Out ', '-', '122.168.114.106', '2025-09-10 07:08:25', '2025-09-10 07:08:25'),
+(828, 16, '2025-09-10', '-', 0, ' Logged In', 'Processor STAFF TEN  Logged In ', '-', '122.168.114.106', '2025-09-10 07:08:53', '2025-09-10 07:08:53'),
+(829, 16, '2025-09-10', 'timesheet', 0, 'created a timesheet entry. Task type:External,  Date: 2025-09-08, Hours : 9:00 ,Job code:NEW_NEW_VAT2_000010, Task name:FFF, Task type:External,  Date: 2025-09-08, Hours : 6:00 ,Job code:NEW_NEW_VAT2_000010, Task name:FFF and Task type:Internal,  Date: 2025-09-08, Hours : 3:00 ,Job code:abc, Task name:a', 'Processor STAFF TEN created a timesheet entry. Task type:External,  Date: 2025-09-08, Hours : 9:00 ,Job code:NEW_NEW_VAT2_000010, Task name:FFF, Task type:External,  Date: 2025-09-08, Hours : 6:00 ,Job code:NEW_NEW_VAT2_000010, Task name:FFF and Task type:Internal,  Date: 2025-09-08, Hours : 3:00 ,Job code:abc, Task name:a ', 'updated', '0.0.0.0', '2025-09-10 07:09:48', '2025-09-10 07:09:48'),
+(830, 1, '2025-09-11', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-11 04:52:52', '2025-09-11 04:52:52');
+INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, `log_message`, `log_message_all`, `permission_type`, `ip`, `created_at`, `updated_at`) VALUES
+(831, 1, '2025-09-11', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,  Date: 2025-09-08, Updated hours : 6:50 ,Job code:abc, Task name:c and created a timesheet entry. Task type:External,  Date: 2025-09-08, Hours : 9:30 ,Job code:SFF_GGG_VAT2_000013, Task name:A', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:Internal,  Date: 2025-09-08, Updated hours : 6:50 ,Job code:abc, Task name:c and created a timesheet entry. Task type:External,  Date: 2025-09-08, Hours : 9:30 ,Job code:SFF_GGG_VAT2_000013, Task name:A ', 'updated', '0.0.0.0', '2025-09-11 09:57:38', '2025-09-11 09:57:38'),
+(832, 1, '2025-09-11', 'timesheet', 0, 'edited a timesheet entry. Task type:External,  Date: 2025-09-10, Updated hours : 5:60 ,Job code:SFF_GGG_VAT2_000013, Task name:A', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:External,  Date: 2025-09-10, Updated hours : 5:60 ,Job code:SFF_GGG_VAT2_000013, Task name:A ', 'updated', '0.0.0.0', '2025-09-11 09:58:15', '2025-09-11 09:58:15'),
+(833, 1, '2025-09-11', 'timesheet', 0, 'edited a timesheet entry. Task type:External,  Date: 2025-09-09, Updated hours : 4:20 ,Job code:SFF_GGG_VAT2_000013, Task name:A', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:External,  Date: 2025-09-09, Updated hours : 4:20 ,Job code:SFF_GGG_VAT2_000013, Task name:A ', 'updated', '0.0.0.0', '2025-09-11 10:01:03', '2025-09-11 10:01:03'),
+(834, 1, '2025-09-12', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-12 05:10:31', '2025-09-12 05:10:31'),
+(835, 17, '2025-09-12', '-', 0, ' Logged In', 'Processor STAFF ELEVEN  Logged In ', '-', NULL, '2025-09-12 12:49:04', '2025-09-12 12:49:04'),
+(836, 1, '2025-09-13', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-13 05:00:39', '2025-09-13 05:00:39'),
+(837, 1, '2025-09-15', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-15 11:58:52', '2025-09-15 11:58:52'),
+(838, 1, '2025-09-16', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-16 05:45:05', '2025-09-16 05:45:05'),
+(839, 1, '2025-09-17', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-17 05:57:43', '2025-09-17 05:57:43'),
+(840, 1, '2025-09-17', 'customer', 10, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_NEW_00009(NEW_A_CUS)', 'updated', '122.168.114.106', '2025-09-17 06:51:43', '2025-09-17 06:51:43'),
+(841, 1, '2025-09-17', 'job', 14, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_NEW_V4_4_000014', 'created', '122.168.114.106', '2025-09-17 11:33:45', '2025-09-17 11:33:45'),
+(842, 1, '2025-09-17', 'job', 14, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: NEW_NEW_V4_4_000014', 'updated', '122.168.114.106', '2025-09-17 11:53:02', '2025-09-17 11:53:02'),
+(843, 1, '2025-09-17', 'job', 14, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_V4_4_000014', 'updated', '122.168.114.106', '2025-09-17 11:57:13', '2025-09-17 11:57:13'),
+(844, 1, '2025-09-18', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-18 05:08:32', '2025-09-18 05:08:32'),
+(845, 1, '2025-09-18', 'job types', 6, 'created job types Aus_book_VAT1', 'Super Admin System Super Super Admin created job types Aus_book_VAT1 ', 'created', '122.168.114.106', '2025-09-18 05:49:18', '2025-09-18 05:49:18'),
+(846, 1, '2025-09-18', 'job', 15, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_NEW_Aus__000015', 'created', '122.168.114.106', '2025-09-18 05:58:29', '2025-09-18 05:58:29'),
+(847, 1, '2025-09-18', 'job', 15, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_Aus__000015', 'updated', '122.168.114.106', '2025-09-18 06:08:42', '2025-09-18 06:08:42'),
+(848, 1, '2025-09-19', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-19 04:59:30', '2025-09-19 04:59:30'),
+(849, 1, '2025-09-19', 'job', 15, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_Aus__000015', 'updated', '122.168.114.106', '2025-09-19 09:28:27', '2025-09-19 09:28:27'),
+(850, 1, '2025-09-19', 'job', 10, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_VAT2_000010', 'updated', '122.168.114.106', '2025-09-19 10:09:49', '2025-09-19 10:09:49'),
+(851, 1, '2025-09-22', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-22 04:53:16', '2025-09-22 04:53:16'),
+(852, 15, '2025-09-22', '-', 0, ' Logged In', 'Manager STAFF NINE  Logged In ', '-', NULL, '2025-09-22 08:59:47', '2025-09-22 08:59:47'),
+(853, 15, '2025-09-22', '-', 0, ' Logged Out', 'Manager STAFF NINE  Logged Out ', '-', '122.168.114.106', '2025-09-22 09:00:24', '2025-09-22 09:00:24'),
+(854, 14, '2025-09-22', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-09-22 09:00:37', '2025-09-22 09:00:37'),
+(855, 15, '2025-09-22', '-', 0, ' Logged In', 'Manager STAFF NINE  Logged In ', '-', '122.168.114.106', '2025-09-22 09:02:47', '2025-09-22 09:02:47'),
+(856, 5, '2025-09-22', '-', 0, ' Logged In', 'Processor STAFF ONE  Logged In ', '-', '122.168.114.106', '2025-09-22 09:36:04', '2025-09-22 09:36:04'),
+(857, 5, '2025-09-22', '-', 0, ' Logged Out', 'Processor STAFF ONE  Logged Out ', '-', '122.168.114.106', '2025-09-22 11:07:56', '2025-09-22 11:07:56'),
+(858, 14, '2025-09-22', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-09-22 11:08:23', '2025-09-22 11:08:23'),
+(859, 1, '2025-09-23', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-23 05:41:30', '2025-09-23 05:41:30'),
+(860, 1, '2025-09-23', 'staff', 20, 'created staff SAHAKI-MANAGE ddddd', 'Super Admin System Super Super Admin created staff SAHAKI-MANAGE ddddd ', 'created', '122.168.114.106', '2025-09-23 06:27:54', '2025-09-23 06:27:54'),
+(861, 1, '2025-09-24', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-24 04:55:18', '2025-09-24 04:55:18'),
+(862, 1, '2025-09-24', 'job', 16, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_NEW_Aus__000016', 'created', '122.168.114.106', '2025-09-24 05:21:05', '2025-09-24 05:21:05'),
+(863, 1, '2025-09-24', 'job', 16, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_Aus__000016', 'updated', '122.168.114.106', '2025-09-24 05:36:22', '2025-09-24 05:36:22'),
+(864, 1, '2025-09-24', 'job', 17, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_NEW_Aus__000017', 'created', '122.168.114.106', '2025-09-24 05:46:12', '2025-09-24 05:46:12'),
+(865, 1, '2025-09-24', 'job', 17, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_Aus__000017', 'updated', '122.168.114.106', '2025-09-24 05:47:18', '2025-09-24 05:47:18'),
+(866, 1, '2025-09-25', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-25 07:13:47', '2025-09-25 07:13:47'),
+(867, 11, '2025-09-25', '-', 0, ' Logged In', 'Manager STAFF SIX  Logged In ', '-', '122.168.114.106', '2025-09-25 09:29:08', '2025-09-25 09:29:08'),
+(868, 15, '2025-09-25', '-', 0, ' Logged In', 'Manager STAFF NINE  Logged In ', '-', '122.168.114.106', '2025-09-25 09:29:54', '2025-09-25 09:29:54'),
+(869, 1, '2025-09-25', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-09-25 10:23:12', '2025-09-25 10:23:12'),
+(870, 1, '2025-09-26', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-26 10:21:31', '2025-09-26 10:21:31'),
+(871, 1, '2025-09-27', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-09-27 11:13:38', '2025-09-27 11:13:38'),
+(872, 1, '2025-09-27', 'job types', 7, 'created job types KKK', 'Super Admin System Super Super Admin created job types KKK ', 'created', '122.168.114.106', '2025-09-27 11:37:06', '2025-09-27 11:37:06'),
+(873, 1, '2025-09-27', 'job types', 8, 'created job types FFFFF', 'Super Admin System Super Super Admin created job types FFFFF ', 'created', '122.168.114.106', '2025-09-27 11:38:43', '2025-09-27 11:38:43'),
+(874, 1, '2025-09-27', 'task', 0, 'created task SGGGGGG,SWADSFC,', 'Super Admin System Super Super Admin created task SGGGGGG,SWADSFC, ', 'created', '122.168.114.106', '2025-09-27 12:07:41', '2025-09-27 12:07:41'),
+(875, 1, '2025-10-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-02 05:16:58', '2025-10-02 05:16:58'),
+(876, 1, '2025-10-02', 'task', 0, 'created task ABC,FF,', 'Super Admin System Super Super Admin created task ABC,FF, ', 'created', '122.168.114.106', '2025-10-02 05:30:19', '2025-10-02 05:30:19'),
+(877, 1, '2025-10-02', 'task', 0, 'created task sfgdg,dgdg,', 'Super Admin System Super Super Admin created task sfgdg,dgdg, ', 'created', '122.168.114.106', '2025-10-02 05:32:43', '2025-10-02 05:32:43'),
+(878, 1, '2025-10-02', 'task', 0, 'created task hhhhhhhhhhhhhhhhhhhhh,hhhhhhhhhhhh,', 'Super Admin System Super Super Admin created task hhhhhhhhhhhhhhhhhhhhh,hhhhhhhhhhhh, ', 'created', '122.168.114.106', '2025-10-02 05:34:55', '2025-10-02 05:34:55'),
+(879, 1, '2025-10-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-02 06:26:47', '2025-10-02 06:26:47'),
+(880, 1, '2025-10-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-02 06:26:47', '2025-10-02 06:26:47'),
+(881, 1, '2025-10-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-02 06:35:32', '2025-10-02 06:35:32'),
+(882, 1, '2025-10-02', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-10-02 06:52:06', '2025-10-02 06:52:06'),
+(883, 1, '2025-10-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-02 06:52:11', '2025-10-02 06:52:11'),
+(884, 1, '2025-10-02', '-', 0, ' Logged In', NULL, '-', '122.168.114.106', '2025-10-02 06:52:14', '2025-10-02 06:52:14'),
+(885, 1, '2025-10-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-02 06:53:12', '2025-10-02 06:53:12'),
+(886, 1, '2025-10-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-02 06:53:27', '2025-10-02 06:53:27'),
+(887, 1, '2025-10-02', 'task', 13, 'edited task ABChhhhh', 'Super Admin System Super Super Admin edited task ABChhhhh ', 'updated', '122.168.114.106', '2025-10-02 07:15:09', '2025-10-02 07:15:09'),
+(888, 1, '2025-10-02', 'task', 13, 'edited task ABC', 'Super Admin System Super Super Admin edited task ABC ', 'updated', '122.168.114.106', '2025-10-02 07:15:48', '2025-10-02 07:15:48'),
+(889, 1, '2025-10-02', 'task', 14, 'edited task ABC1', 'Super Admin System Super Super Admin edited task ABC1 ', 'updated', '122.168.114.106', '2025-10-02 07:15:57', '2025-10-02 07:15:57'),
+(890, 1, '2025-10-02', 'task', 13, 'edited task ABC11', 'Super Admin System Super Super Admin edited task ABC11 ', 'updated', '122.168.114.106', '2025-10-02 07:16:07', '2025-10-02 07:16:07'),
+(891, 1, '2025-10-02', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-10-02 09:28:26', '2025-10-02 09:28:26'),
+(892, 1, '2025-10-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-02 09:28:34', '2025-10-02 09:28:34'),
+(893, 1, '2025-10-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-02 09:28:34', '2025-10-02 09:28:35'),
+(894, 1, '2025-10-02', 'task', 0, 'created task qsqs,sqsqs,', 'Super Admin System Super Super Admin created task qsqs,sqsqs, ', 'created', '122.168.114.106', '2025-10-02 09:34:57', '2025-10-02 09:34:57'),
+(895, 1, '2025-10-02', 'task', 17, 'edited task undefined to hhhhhh-------sfcsafasf', 'Super Admin System Super Super Admin edited task undefined to hhhhhh-------sfcsafasf ', 'updated', '122.168.114.106', '2025-10-02 09:52:10', '2025-10-02 09:52:10'),
+(896, 1, '2025-10-02', 'task', 15, 'edited task undefined to sfgdgsvcsvsv', 'Super Admin System Super Super Admin edited task undefined to sfgdgsvcsvsv ', 'updated', '122.168.114.106', '2025-10-02 09:52:30', '2025-10-02 09:52:30'),
+(897, 1, '2025-10-02', 'task', 17, 'deleted task hhhhhh-------sfcsafasf', 'Super Admin System Super Super Admin deleted task hhhhhh-------sfcsafasf ', 'deleted', '122.168.114.106', '2025-10-02 09:55:48', '2025-10-02 09:55:48'),
+(898, 1, '2025-10-02', 'task', 9, 'edited task undefined to fpppp', 'Super Admin System Super Super Admin edited task undefined to fpppp ', 'updated', '122.168.114.106', '2025-10-02 10:02:47', '2025-10-02 10:02:47'),
+(899, 1, '2025-10-02', 'task', 0, 'created task KKKKK-1,KK-2,', 'Super Admin System Super Super Admin created task KKKKK-1,KK-2, ', 'created', '122.168.114.106', '2025-10-02 10:24:13', '2025-10-02 10:24:13'),
+(900, 1, '2025-10-04', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-04 05:08:43', '2025-10-04 05:08:43'),
+(901, 1, '2025-10-04', 'job', 18, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_NEW_Aus__000018', 'created', '122.168.114.106', '2025-10-04 06:49:02', '2025-10-04 06:49:02'),
+(902, 1, '2025-10-04', 'job', 19, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_NEW_Aus__000019', 'created', '122.168.114.106', '2025-10-04 06:58:30', '2025-10-04 06:58:30'),
+(903, 1, '2025-10-04', 'job', 19, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_Aus__000019', 'updated', '122.168.114.106', '2025-10-04 09:08:43', '2025-10-04 09:08:43'),
+(904, 1, '2025-10-04', 'job', 19, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_Aus__000019', 'updated', '122.168.114.106', '2025-10-04 09:23:01', '2025-10-04 09:23:01'),
+(905, 1, '2025-10-04', 'job', 19, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_Aus__000019', 'updated', '122.168.114.106', '2025-10-04 09:38:42', '2025-10-04 09:38:42'),
+(906, 1, '2025-10-04', 'job', 19, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_Aus__000019', 'updated', '122.168.114.106', '2025-10-04 09:43:38', '2025-10-04 09:43:38'),
+(907, 1, '2025-10-04', 'job', 19, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_KKK_000019', 'updated', '122.168.114.106', '2025-10-04 10:13:21', '2025-10-04 10:13:21'),
+(908, 1, '2025-10-04', 'job', 19, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_Aus__000019', 'updated', '122.168.114.106', '2025-10-04 10:16:00', '2025-10-04 10:16:00'),
+(909, 1, '2025-10-04', 'job types', 9, 'created job types compilence- job type', 'Super Admin System Super Super Admin created job types compilence- job type ', 'created', '122.168.114.106', '2025-10-04 10:42:38', '2025-10-04 10:42:38'),
+(910, 1, '2025-10-04', 'job types', 10, 'created job types compileince job type 2', 'Super Admin System Super Super Admin created job types compileince job type 2 ', 'created', '122.168.114.106', '2025-10-04 10:43:05', '2025-10-04 10:43:05'),
+(911, 1, '2025-10-04', 'task', 0, 'created task ABCCC,BCCCC,', 'Super Admin System Super Super Admin created task ABCCC,BCCCC, ', 'created', '122.168.114.106', '2025-10-04 10:43:53', '2025-10-04 10:43:53'),
+(912, 1, '2025-10-04', 'task', 0, 'created task DDDD,FFFF,', 'Super Admin System Super Super Admin created task DDDD,FFFF, ', 'created', '122.168.114.106', '2025-10-04 10:44:19', '2025-10-04 10:44:19'),
+(913, 1, '2025-10-04', 'job', 20, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_NEW_comp_000020', 'created', '122.168.114.106', '2025-10-04 10:45:30', '2025-10-04 10:45:30'),
+(914, 1, '2025-10-04', 'job', 20, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_comp_000020', 'updated', '122.168.114.106', '2025-10-04 10:45:52', '2025-10-04 10:45:52'),
+(915, 1, '2025-10-06', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-06 04:44:25', '2025-10-06 04:44:25'),
+(916, 1, '2025-10-06', 'task', 0, 'created task kkkk,', 'Super Admin System Super Super Admin created task kkkk, ', 'created', '122.168.114.106', '2025-10-06 04:45:08', '2025-10-06 04:45:08'),
+(917, 1, '2025-10-06', 'job', 21, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_NEW_comp_000021', 'created', '122.168.114.106', '2025-10-06 05:06:35', '2025-10-06 05:06:35'),
+(918, 1, '2025-10-06', 'task', 27, 'edited task undefined to kkkk', 'Super Admin System Super Super Admin edited task undefined to kkkk ', 'updated', '116.72.201.106', '2025-10-06 05:39:20', '2025-10-06 05:39:20'),
+(919, 1, '2025-10-06', 'task', 27, 'edited task undefined to kkkk', 'Super Admin System Super Super Admin edited task undefined to kkkk ', 'updated', '116.72.201.106', '2025-10-06 05:42:25', '2025-10-06 05:42:25'),
+(920, 1, '2025-10-06', 'task', 27, 'edited task undefined to kkkk111', 'Super Admin System Super Super Admin edited task undefined to kkkk111 ', 'updated', '116.72.201.106', '2025-10-06 05:43:20', '2025-10-06 05:43:20'),
+(921, 1, '2025-10-06', 'task', 27, 'edited task undefined to kkkk111-444', 'Super Admin System Super Super Admin edited task undefined to kkkk111-444 ', 'updated', '116.72.201.106', '2025-10-06 05:43:31', '2025-10-06 05:43:31'),
+(922, 1, '2025-10-06', 'task', 27, 'edited task undefined to kkkk111-444', 'Super Admin System Super Super Admin edited task undefined to kkkk111-444 ', 'updated', '116.72.201.106', '2025-10-06 05:49:56', '2025-10-06 05:49:56'),
+(923, 1, '2025-10-06', 'job', 22, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_NEW_FFFF_000022', 'created', '116.72.201.106', '2025-10-06 05:56:07', '2025-10-06 05:56:07'),
+(924, 1, '2025-10-06', 'job', 21, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_FFFF_000021', 'updated', '116.72.201.106', '2025-10-06 05:59:46', '2025-10-06 05:59:46'),
+(925, 1, '2025-10-06', 'job', 21, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_FFFF_000021', 'updated', '116.72.201.106', '2025-10-06 06:01:28', '2025-10-06 06:01:28'),
+(926, 1, '2025-10-06', 'job', 22, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_FFFF_000022', 'updated', '116.72.201.106', '2025-10-06 06:09:52', '2025-10-06 06:09:52'),
+(927, 1, '2025-10-06', 'job', 21, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_FFFF_000021', 'updated', '116.72.201.106', '2025-10-06 06:10:08', '2025-10-06 06:10:08'),
+(928, 1, '2025-10-06', 'job', 22, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_FFFF_000022', 'updated', '116.72.201.106', '2025-10-06 06:13:08', '2025-10-06 06:13:08'),
+(929, 1, '2025-10-06', 'job', 21, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_FFFF_000021', 'updated', '116.72.201.106', '2025-10-06 06:13:41', '2025-10-06 06:13:41'),
+(930, 1, '2025-10-06', 'job', 21, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_NEW_FFFF_000021', 'updated', '116.72.201.106', '2025-10-06 06:14:20', '2025-10-06 06:14:20'),
+(931, 15, '2025-10-06', '-', 0, ' Logged In', 'Manager STAFF NINE  Logged In ', '-', NULL, '2025-10-06 06:26:29', '2025-10-06 06:26:29'),
+(932, 12, '2025-10-06', '-', 0, ' Logged In', 'Reviewer STAFF 7 hv  Logged In ', '-', '122.168.114.106', '2025-10-06 07:09:22', '2025-10-06 07:09:22'),
+(933, 12, '2025-10-06', '-', 0, ' Logged Out', 'Reviewer STAFF 7 hv  Logged Out ', '-', '116.72.201.106', '2025-10-06 07:09:45', '2025-10-06 07:09:45'),
+(934, 17, '2025-10-06', '-', 0, ' Logged In', 'Processor STAFF ELEVEN  Logged In ', '-', '116.72.201.106', '2025-10-06 07:09:54', '2025-10-06 07:09:54'),
+(935, 15, '2025-10-06', '-', 0, ' Logged Out', 'Manager STAFF NINE  Logged Out ', '-', '122.168.114.106', '2025-10-06 07:11:57', '2025-10-06 07:11:57'),
+(936, 10, '2025-10-06', '-', 0, ' Logged In', 'Manager STAFF FIVE  Logged In ', '-', '122.168.114.106', '2025-10-06 07:12:17', '2025-10-06 07:12:17'),
+(937, 17, '2025-10-06', '-', 0, ' Logged Out', 'Processor STAFF ELEVEN  Logged Out ', '-', '116.72.201.106', '2025-10-06 07:13:05', '2025-10-06 07:13:05'),
+(938, 16, '2025-10-06', '-', 0, ' Logged In', 'Processor STAFF TEN  Logged In ', '-', '116.72.201.106', '2025-10-06 07:13:13', '2025-10-06 07:13:13'),
+(939, 10, '2025-10-06', '-', 0, ' Logged Out', 'Manager STAFF FIVE  Logged Out ', '-', '122.168.114.106', '2025-10-06 09:24:20', '2025-10-06 09:24:20'),
+(940, 15, '2025-10-06', '-', 0, ' Logged In', 'Manager STAFF NINE  Logged In ', '-', '122.168.114.106', '2025-10-06 09:24:43', '2025-10-06 09:24:43'),
+(941, 1, '2025-10-06', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '116.72.201.106', '2025-10-06 10:28:27', '2025-10-06 10:28:27'),
+(942, 1, '2025-10-06', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-10-06 11:40:48', '2025-10-06 11:40:48'),
+(943, 1, '2025-10-09', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-10-09 04:53:25', '2025-10-09 04:53:25'),
+(944, 1, '2025-10-13', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-10-13 12:12:50', '2025-10-13 12:12:50'),
+(945, 1, '2025-10-22', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-10-22 05:34:26', '2025-10-22 05:34:26'),
+(946, 1, '2025-10-23', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-23 05:48:58', '2025-10-23 05:48:58'),
+(947, 1, '2025-10-23', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-10-23 06:07:41', '2025-10-23 06:07:41'),
+(948, 1, '2025-10-23', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-10-23 06:09:28', '2025-10-23 06:09:28'),
+(949, 1, '2025-10-23', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-23 06:09:46', '2025-10-23 06:09:46'),
+(950, 1, '2025-10-24', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-24 04:55:42', '2025-10-24 04:55:42'),
+(951, 1, '2025-10-24', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-10-24 05:27:18', '2025-10-24 05:27:18'),
+(952, 1, '2025-10-24', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-24 11:50:12', '2025-10-24 11:50:12'),
+(953, 1, '2025-10-25', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-25 06:16:41', '2025-10-25 06:16:41'),
+(954, 1, '2025-10-25', 'job', 23, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_NEW_comp_000023', 'created', '122.168.114.106', '2025-10-25 06:34:23', '2025-10-25 06:34:23'),
+(955, 1, '2025-10-25', 'client', 11, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_DDD_DDD_000011(DDDDDDDD)', 'created', '122.168.114.106', '2025-10-25 06:53:31', '2025-10-25 06:53:31'),
+(956, 1, '2025-10-25', 'job', 24, 'created job code:', 'Super Admin System Super Super Admin created job code: DDD_DDD_V4_000024', 'created', '122.168.114.106', '2025-10-25 06:53:57', '2025-10-25 06:53:57'),
+(957, 1, '2025-10-25', 'job', 25, 'created job code:', 'Super Admin System Super Super Admin created job code: DDD_DDD_V4_000025', 'created', '122.168.114.106', '2025-10-25 10:48:13', '2025-10-25 10:48:13'),
+(958, 1, '2025-10-25', 'job', 25, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-10-25 10:49:11', '2025-10-25 10:49:11'),
+(959, 1, '2025-10-25', 'job', 25, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-10-25 10:49:31', '2025-10-25 10:49:31'),
+(960, 1, '2025-10-25', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-10-25 11:46:28', '2025-10-25 11:46:28'),
+(961, 1, '2025-10-25', 'staff', 20, 'edited staff AAAAAAA ddddd', 'Super Admin System Super Super Admin edited staff AAAAAAA ddddd ', 'updated', '122.168.114.106', '2025-10-25 11:47:15', '2025-10-25 11:47:15'),
+(962, 1, '2025-10-25', 'staff', 12, 'edited staff BBBBBB 7 hv', 'Super Admin System Super Super Admin edited staff BBBBBB 7 hv ', 'updated', '122.168.114.106', '2025-10-25 11:47:33', '2025-10-25 11:47:33'),
+(963, 1, '2025-10-27', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-27 04:46:06', '2025-10-27 04:46:06'),
+(964, 1, '2025-10-27', 'job', 24, 'completed the draft for job code:', 'Super Admin System Super Super Admin completed the draft for job code: DDD_DDD_V4_000024', 'created', '122.168.114.106', '2025-10-27 05:32:51', '2025-10-27 05:32:51'),
+(965, 1, '2025-10-27', 'job', 24, 'sent the draft for job code:', 'Super Admin System Super Super Admin sent the draft for job code: DDD_DDD_V4_000024', 'created', '122.168.114.106', '2025-10-27 05:37:30', '2025-10-27 05:37:30'),
+(966, 1, '2025-10-27', 'job', 24, 'sent the draft for job code:', 'Super Admin System Super Super Admin sent the draft for job code: DDD_DDD_V4_000024', 'created', '122.168.114.106', '2025-10-27 05:45:29', '2025-10-27 05:45:29'),
+(967, 1, '2025-10-27', 'job', 26, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_NEW_comp_000026', 'created', '122.168.114.106', '2025-10-27 08:26:38', '2025-10-27 08:26:38'),
+(968, 1, '2025-10-28', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-28 04:46:59', '2025-10-28 04:46:59'),
+(969, 1, '2025-10-28', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-10-28 04:49:55', '2025-10-28 04:49:55'),
+(970, 3, '2025-10-28', '-', 0, ' Logged In', 'Admin Ajit Ajit  Logged In ', '-', NULL, '2025-10-28 04:51:33', '2025-10-28 04:51:33'),
+(971, 1, '2025-10-28', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-28 04:51:48', '2025-10-28 04:51:48'),
+(972, 1, '2025-10-28', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (staff-insert, staff-update, staff-delete, staff-view)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (staff-insert, staff-update, staff-delete, staff-view) ', 'updated', '122.168.114.106', '2025-10-28 04:51:59', '2025-10-28 04:51:59'),
+(973, 1, '2025-10-28', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (staff-view) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (staff-view)  ', 'updated', '122.168.114.106', '2025-10-28 04:52:13', '2025-10-28 04:52:13'),
+(974, 1, '2025-10-28', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (staff-insert) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (staff-insert)  ', 'updated', '122.168.114.106', '2025-10-28 04:52:46', '2025-10-28 04:52:46'),
+(975, 1, '2025-10-28', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (staff-insert)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (staff-insert) ', 'updated', '122.168.114.106', '2025-10-28 04:52:56', '2025-10-28 04:52:56'),
+(976, 1, '2025-10-28', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (staff-update) Remove Permission (staff-insert)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (staff-update) Remove Permission (staff-insert) ', 'updated', '122.168.114.106', '2025-10-28 05:00:52', '2025-10-28 05:00:52'),
+(977, 1, '2025-10-28', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (staff-update)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (staff-update) ', 'updated', '122.168.114.106', '2025-10-28 05:01:05', '2025-10-28 05:01:05'),
+(978, 1, '2025-10-28', 'permission', 2, ' updated the access for ADMIN. Access Changes Add Permission (staff-insert, staff-delete) ', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes Add Permission (staff-insert, staff-delete)  ', 'updated', '122.168.114.106', '2025-10-28 05:02:53', '2025-10-28 05:02:53'),
+(979, 1, '2025-10-28', 'permission', 2, ' updated the access for ADMIN. Access Changes  Remove Permission (staff-insert, staff-delete)', 'Super Admin System Super Super Admin  updated the access for ADMIN. Access Changes  Remove Permission (staff-insert, staff-delete) ', 'updated', '122.168.114.106', '2025-10-28 05:03:05', '2025-10-28 05:03:05'),
+(980, 1, '2025-10-29', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-29 06:20:27', '2025-10-29 06:20:27'),
+(981, 1, '2025-10-30', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-30 12:00:30', '2025-10-30 12:00:30'),
+(982, 1, '2025-10-31', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-10-31 04:58:45', '2025-10-31 04:58:45'),
+(983, 1, '2025-10-31', 'job', 27, 'created job code:', 'Super Admin System Super Super Admin created job code: F L_FFF_V4_000027', 'created', '116.74.32.83', '2025-10-31 06:12:22', '2025-10-31 06:12:22'),
+(984, 1, '2025-10-31', 'job', 28, 'created job code:', 'Super Admin System Super Super Admin created job code: F L_FFF_V4_000028', 'created', '116.74.32.83', '2025-10-31 06:12:38', '2025-10-31 06:12:38'),
+(985, 1, '2025-10-31', 'job', 29, 'created job code:', 'Super Admin System Super Super Admin created job code: F L_FFF_V4_000029', 'created', '116.74.32.83', '2025-10-31 06:15:24', '2025-10-31 06:15:24'),
+(986, 1, '2025-10-31', 'customer', 3, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_SHK_00003(SHK11)', 'updated', '103.103.213.217', '2025-10-31 06:31:51', '2025-10-31 06:31:51'),
+(987, 1, '2025-10-31', 'job', 30, 'created job code:', 'Super Admin System Super Super Admin created job code: SHK_SHK_comp_000030', 'created', '103.103.213.217', '2025-10-31 06:32:06', '2025-10-31 06:32:06'),
+(988, 1, '2025-11-01', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-01 06:27:03', '2025-11-01 06:27:03'),
+(989, 1, '2025-11-01', 'staff', 11, 'edited staff STAFF SIX', 'Super Admin System Super Super Admin edited staff STAFF SIX ', 'updated', '122.168.114.106', '2025-11-01 06:30:36', '2025-11-01 06:30:36'),
+(990, 1, '2025-11-03', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-03 09:59:27', '2025-11-03 09:59:27'),
+(991, 1, '2025-11-03', 'client', 12, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_NEW_FFF_000012(FFFFF)', 'created', '122.168.114.106', '2025-11-03 10:04:18', '2025-11-03 10:04:18'),
+(992, 1, '2025-11-03', 'client', 13, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_NEW_HHH_000013(HHH)', 'created', '122.168.114.106', '2025-11-03 10:05:18', '2025-11-03 10:05:18'),
+(993, 1, '2025-11-03', 'client', 14, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_NEW_   _000014(    JJJJJJJJJ)', 'created', '122.168.114.106', '2025-11-03 10:06:06', '2025-11-03 10:06:06'),
+(994, 1, '2025-11-03', 'staff', 21, 'created staff fvedgv gvddvd', 'Super Admin System Super Super Admin created staff fvedgv gvddvd ', 'created', '122.168.114.106', '2025-11-03 10:12:49', '2025-11-03 10:12:49'),
+(995, 1, '2025-11-03', 'staff', 22, 'created staff    GGGG wff', 'Super Admin System Super Super Admin created staff    GGGG wff ', 'created', '122.168.114.106', '2025-11-03 10:13:49', '2025-11-03 10:13:49'),
+(996, 1, '2025-11-04', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-04 08:58:40', '2025-11-04 08:58:40'),
+(997, 1, '2025-11-05', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-05 10:07:52', '2025-11-05 10:07:52'),
+(998, 1, '2025-11-06', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-06 05:28:59', '2025-11-06 05:28:59'),
+(999, 22, '2025-11-06', '-', 0, ' Logged In', 'Processor GGGG wff  Logged In ', '-', '122.168.114.106', '2025-11-06 06:06:08', '2025-11-06 06:06:08'),
+(1000, 22, '2025-11-06', '-', 0, ' Logged Out', 'Processor GGGG wff  Logged Out ', '-', '122.168.114.106', '2025-11-06 06:06:22', '2025-11-06 06:06:22'),
+(1001, 14, '2025-11-06', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-11-06 06:06:43', '2025-11-06 06:06:43'),
+(1002, 1, '2025-11-06', 'customer', 10, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_NEW_00009(NEW_A_CUS)', 'updated', '122.168.114.106', '2025-11-06 08:31:07', '2025-11-06 08:31:07'),
+(1003, 1, '2025-11-06', 'customer', 10, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_NEW_00009(NEW_A_CUS)', 'updated', '122.168.114.106', '2025-11-06 09:06:22', '2025-11-06 09:06:22'),
+(1004, 1, '2025-11-06', 'customer', 1, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_SHK_00001(SHK)', 'updated', '122.168.114.106', '2025-11-06 09:30:13', '2025-11-06 09:30:13'),
+(1005, 1, '2025-11-06', 'job', 31, 'created job code:', 'Super Admin System Super Super Admin created job code: ERE_GGG_V4_000031', 'created', '122.168.114.106', '2025-11-06 09:52:32', '2025-11-06 09:52:32'),
+(1006, 14, '2025-11-06', '-', 0, ' Logged Out', 'Manager STAFF EIGHT  Logged Out ', '-', '122.168.114.106', '2025-11-06 09:52:58', '2025-11-06 09:52:58'),
+(1007, 11, '2025-11-06', '-', 0, ' Logged In', 'Manager STAFF SIX  Logged In ', '-', '122.168.114.106', '2025-11-06 09:53:12', '2025-11-06 09:53:12'),
+(1008, 14, '2025-11-06', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-11-06 10:19:54', '2025-11-06 10:19:54'),
+(1009, 1, '2025-11-06', 'job', 31, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: ERE_GGG_V4_000031', 'updated', '122.168.114.106', '2025-11-06 10:20:55', '2025-11-06 10:20:55'),
+(1010, 1, '2025-11-07', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-07 05:25:01', '2025-11-07 05:25:01'),
+(1011, 1, '2025-11-11', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-11 06:45:07', '2025-11-11 06:45:09'),
+(1012, 1, '2025-11-11', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-11 06:45:14', '2025-11-11 06:45:14'),
+(1013, 1, '2025-11-11', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-11-11 06:46:10', '2025-11-11 06:46:10'),
+(1014, 1, '2025-11-11', 'job', 6, 'sent the draft for job code:', 'Super Admin System Super Super Admin sent the draft for job code: F &_CLI_V3_00006', 'created', '122.168.114.106', '2025-11-11 07:24:22', '2025-11-11 07:24:22'),
+(1015, 1, '2025-11-11', 'staff', 5, 'changes the staff status Deactivate STAFF ONE', 'Super Admin System Super Super Admin changes the staff status Deactivate STAFF ONE ', 'updated', '122.168.114.106', '2025-11-11 10:19:44', '2025-11-11 10:19:44'),
+(1016, 1, '2025-11-11', 'staff', 5, 'changes the staff status Activate STAFF ONE', 'Super Admin System Super Super Admin changes the staff status Activate STAFF ONE ', 'updated', '122.168.114.106', '2025-11-11 10:20:49', '2025-11-11 10:20:49'),
+(1017, 1, '2025-11-11', 'job', 32, 'created job code:', 'Super Admin System Super Super Admin created job code: F &_CLI_V3_000032', 'created', '122.168.114.106', '2025-11-11 15:03:20', '2025-11-11 15:03:20'),
+(1018, 1, '2025-11-11', 'job', 32, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: F &_CLI_V3_000032', 'updated', '122.168.114.106', '2025-11-11 15:03:58', '2025-11-11 15:03:58'),
+(1019, 1, '2025-11-11', 'job', 33, 'created job code:', 'Super Admin System Super Super Admin created job code: F &_CLI_V3_000033', 'created', '122.168.114.106', '2025-11-11 15:07:13', '2025-11-11 15:07:13'),
+(1020, 1, '2025-11-11', 'job', 33, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: F &_CLI_V3_000033', 'updated', '122.168.114.106', '2025-11-11 15:16:09', '2025-11-11 15:16:09'),
+(1021, 1, '2025-11-11', 'job', 32, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: F &_CLI_V3_000032', 'updated', '122.168.114.106', '2025-11-11 15:16:49', '2025-11-11 15:16:49'),
+(1022, 1, '2025-11-11', 'job', 32, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: F &_CLI_V3_000032', 'updated', '122.168.114.106', '2025-11-11 15:17:32', '2025-11-11 15:17:32'),
+(1023, 1, '2025-11-11', 'job', 32, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: F &_CLI_V3_000032', 'updated', '122.168.114.106', '2025-11-11 15:17:58', '2025-11-11 15:17:58'),
+(1024, 1, '2025-11-11', 'job', 33, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: F &_CLI_V3_000033', 'updated', '122.168.114.106', '2025-11-11 15:19:04', '2025-11-11 15:19:04'),
+(1025, 1, '2025-11-11', 'job', 33, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: F &_CLI_V3_000033', 'updated', '122.168.114.106', '2025-11-11 15:19:30', '2025-11-11 15:19:30'),
+(1026, 1, '2025-11-11', 'job', 33, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: F &_CLI_V3_000033', 'updated', '122.168.114.106', '2025-11-11 15:19:46', '2025-11-11 15:19:46'),
+(1027, 1, '2025-11-11', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-11 16:52:55', '2025-11-11 16:52:55'),
+(1028, 1, '2025-11-11', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-11 16:53:00', '2025-11-11 16:53:00'),
+(1029, 1, '2025-11-11', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-11-11 16:53:18', '2025-11-11 16:53:18'),
+(1030, 1, '2025-11-11', 'job', 31, 'sent the missing logs for job code:', 'Super Admin System Super Super Admin sent the missing logs for job code: ERE_GGG_V4_000031', 'created', '122.168.114.106', '2025-11-11 16:53:39', '2025-11-11 16:53:39'),
+(1031, 1, '2025-11-11', 'job', 24, 'updated the job status from WIP - Customer Reviewed & To be Updated to Completed - Draft Sent. job code:', 'Super Admin System Super Super Admin updated the job status from WIP - Customer Reviewed & To be Updated to Completed - Draft Sent. job code: DDD_DDD_V4_000024', 'updated', '122.168.114.106', '2025-11-11 20:05:13', '2025-11-11 20:05:13'),
+(1032, 1, '2025-11-11', 'job', 24, 'updated the job status from Completed - Draft Sent to Not Progressing - Customer Processing. job code:', 'Super Admin System Super Super Admin updated the job status from Completed - Draft Sent to Not Progressing - Customer Processing. job code: DDD_DDD_V4_000024', 'updated', '122.168.114.106', '2025-11-11 20:07:11', '2025-11-11 20:07:11'),
+(1033, 1, '2025-11-11', 'job', 24, 'updated the job status from Not Progressing - Customer Processing to Completed - Filed with HMRC. job code:', 'Super Admin System Super Super Admin updated the job status from Not Progressing - Customer Processing to Completed - Filed with HMRC. job code: DDD_DDD_V4_000024', 'updated', '122.168.114.106', '2025-11-11 20:07:52', '2025-11-11 20:07:52'),
+(1034, 1, '2025-11-11', 'job', 24, 'updated the job status from Completed - Filed with HMRC to Completed - Draft Sent. job code:', 'Super Admin System Super Super Admin updated the job status from Completed - Filed with HMRC to Completed - Draft Sent. job code: DDD_DDD_V4_000024', 'updated', '122.168.114.106', '2025-11-11 20:12:48', '2025-11-11 20:12:48'),
+(1035, 1, '2025-11-11', 'job', 24, 'updated the job status from Completed - Draft Sent to Completed - Filed with HMRC. job code:', 'Super Admin System Super Super Admin updated the job status from Completed - Draft Sent to Completed - Filed with HMRC. job code: DDD_DDD_V4_000024', 'updated', '122.168.114.106', '2025-11-11 20:12:58', '2025-11-11 20:12:58'),
+(1036, 1, '2025-11-11', 'job', 24, 'updated the job status from Completed - Filed with HMRC to Completed - Update Sent. job code:', 'Super Admin System Super Super Admin updated the job status from Completed - Filed with HMRC to Completed - Update Sent. job code: DDD_DDD_V4_000024', 'updated', '122.168.114.106', '2025-11-11 20:13:32', '2025-11-11 20:13:32'),
+(1037, 1, '2025-11-11', 'job', 24, 'updated the job status from Completed - Update Sent to Completed - Draft Sent. job code:', 'Super Admin System Super Super Admin updated the job status from Completed - Update Sent to Completed - Draft Sent. job code: DDD_DDD_V4_000024', 'updated', '122.168.114.106', '2025-11-11 20:13:43', '2025-11-11 20:13:43'),
+(1038, 1, '2025-11-11', 'job', 33, 'updated the job status from To Be Started - Not Yet Allocated Internally to Completed - Filed with HMRC. job code:', 'Super Admin System Super Super Admin updated the job status from To Be Started - Not Yet Allocated Internally to Completed - Filed with HMRC. job code: F &_CLI_V3_000033', 'updated', '122.168.114.106', '2025-11-11 20:14:06', '2025-11-11 20:14:06'),
+(1039, 1, '2025-11-11', 'job', 33, 'updated the job status from Completed - Filed with HMRC to WIP - Customer Reviewed & To be Updated. job code:', 'Super Admin System Super Super Admin updated the job status from Completed - Filed with HMRC to WIP - Customer Reviewed & To be Updated. job code: F &_CLI_V3_000033', 'updated', '122.168.114.106', '2025-11-11 20:59:46', '2025-11-11 20:59:46'),
+(1040, 1, '2025-11-11', 'job', 33, 'sent the draft for job code:', 'Super Admin System Super Super Admin sent the draft for job code: F &_CLI_V3_000033', 'created', '122.168.114.106', '2025-11-11 21:18:02', '2025-11-11 21:18:02'),
+(1041, 1, '2025-11-11', 'job', 33, 'completed the draft job code:', 'Super Admin System Super Super Admin completed the draft job code: F &_CLI_V3_000033', 'updated', '122.168.114.106', '2025-11-11 21:21:27', '2025-11-11 21:21:27'),
+(1042, 1, '2025-11-11', 'job', 33, 'edited the job information and has assigned the job to the reviewer, shk sss job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the reviewer, shk sss job code: F &_CLI_V3_000033', 'updated', '122.168.114.106', '2025-11-11 21:27:23', '2025-11-11 21:27:23'),
+(1043, 1, '2025-11-11', 'job', 33, 'updated the job status from WIP – To Be Reviewed to Completed - Filed with HMRC. job code:', 'Super Admin System Super Super Admin updated the job status from WIP – To Be Reviewed to Completed - Filed with HMRC. job code: F &_CLI_V3_000033', 'updated', '122.168.114.106', '2025-11-11 21:32:08', '2025-11-11 21:32:08'),
+(1044, 1, '2025-11-12', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-12 15:06:02', '2025-11-12 15:06:02'),
+(1045, 1, '2025-11-12', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-12 15:06:16', '2025-11-12 15:06:16'),
+(1046, 1, '2025-11-12', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-11-12 15:07:36', '2025-11-12 15:07:36'),
+(1047, 1, '2025-11-12', 'job', 24, 'completed the draft job code:', 'Super Admin System Super Super Admin completed the draft job code: DDD_DDD_V4_000024', 'updated', '122.168.114.106', '2025-11-12 15:08:59', '2025-11-12 15:08:59'),
+(1048, 1, '2025-11-12', 'job', 24, 'completed the draft job code:', 'Super Admin System Super Super Admin completed the draft job code: DDD_DDD_V4_000024', 'updated', '122.168.114.106', '2025-11-12 15:09:27', '2025-11-12 15:09:27'),
+(1049, 1, '2025-11-12', 'job', 24, 'updated the job status from WIP - Customer Reviewed & To be Updated to Completed - Filed with Companies House. job code:', 'Super Admin System Super Super Admin updated the job status from WIP - Customer Reviewed & To be Updated to Completed - Filed with Companies House. job code: DDD_DDD_V4_000024', 'updated', '122.168.114.106', '2025-11-12 15:09:54', '2025-11-12 15:09:54'),
+(1050, 1, '2025-11-13', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-13 05:00:42', '2025-11-13 05:00:42'),
+(1051, 1, '2025-11-13', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-13 05:00:54', '2025-11-13 05:00:54'),
+(1052, 1, '2025-11-13', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-13 05:02:56', '2025-11-13 05:02:56'),
+(1053, 1, '2025-11-13', 'job', 6, 'edited the job information and has assigned the job to the reviewer, STAFF TWO job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the reviewer, STAFF TWO job code: F &_CLI_V3_00006', 'updated', '122.168.114.106', '2025-11-13 05:04:04', '2025-11-13 05:04:04'),
+(1054, 1, '2025-11-13', 'job', 6, 'completed the draft job code:', 'Super Admin System Super Super Admin completed the draft job code: F &_CLI_V3_00006', 'updated', '122.168.114.106', '2025-11-13 05:04:26', '2025-11-13 05:04:26'),
+(1055, 1, '2025-11-13', 'job', 6, 'updated the job status from Completed - Completed to Completed - Filed with Companies House and HMRC. job code:', 'Super Admin System Super Super Admin updated the job status from Completed - Completed to Completed - Filed with Companies House and HMRC. job code: F &_CLI_V3_00006', 'updated', '122.168.114.106', '2025-11-13 05:04:55', '2025-11-13 05:04:55'),
+(1056, 1, '2025-11-13', 'job', 7, 'edited the job information and has assigned the job to the reviewer, STAFF SIX job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the reviewer, STAFF SIX job code: F &_CLI_V3_00007', 'updated', '122.168.114.106', '2025-11-13 05:23:55', '2025-11-13 05:23:55'),
+(1057, 1, '2025-11-13', 'job', 27, 'edited the job information and has assigned the job to the reviewer, STAFF EIGHT job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the reviewer, STAFF EIGHT job code: F L_FFF_V4_000027', 'updated', '122.168.114.106', '2025-11-13 05:40:14', '2025-11-13 05:40:14');
+INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, `log_message`, `log_message_all`, `permission_type`, `ip`, `created_at`, `updated_at`) VALUES
+(1058, 1, '2025-11-13', 'job', 27, 'edited the job information and has assigned the job to the processor, shk sss job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, shk sss job code: F L_FFF_V4_000027', 'updated', '122.168.114.106', '2025-11-13 05:40:31', '2025-11-13 05:40:31'),
+(1059, 1, '2025-11-13', 'job', 27, 'sent the draft for job code:', 'Super Admin System Super Super Admin sent the draft for job code: F L_FFF_V4_000027', 'created', '122.168.114.106', '2025-11-13 05:40:49', '2025-11-13 05:40:49'),
+(1060, 1, '2025-11-13', 'job', 27, 'updated the job status from WIP - Customer Reviewed & To be Updated to Completed - Draft Sent. job code:', 'Super Admin System Super Super Admin updated the job status from WIP - Customer Reviewed & To be Updated to Completed - Draft Sent. job code: F L_FFF_V4_000027', 'updated', '122.168.114.106', '2025-11-13 05:41:04', '2025-11-13 05:41:04'),
+(1061, 1, '2025-11-13', 'job', 8, 'edited the job information and has assigned the job to the processor, STAFF NINE job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, STAFF NINE job code: F &_CLI_V3_00008', 'updated', '122.168.114.106', '2025-11-13 05:53:55', '2025-11-13 05:53:55'),
+(1062, 1, '2025-11-13', 'job', 8, 'sent the queries for job code:', 'Super Admin System Super Super Admin sent the queries for job code: F &_CLI_V3_00008', 'created', '122.168.114.106', '2025-11-13 05:54:11', '2025-11-13 05:54:11'),
+(1063, 1, '2025-11-13', 'job', 27, 'sent the queries for job code:', 'Super Admin System Super Super Admin sent the queries for job code: F L_FFF_V4_000027', 'created', '122.168.114.106', '2025-11-13 05:55:20', '2025-11-13 05:55:20'),
+(1064, 1, '2025-11-13', 'job', 27, 'completed the queries job code:', 'Super Admin System Super Super Admin completed the queries job code: F L_FFF_V4_000027', 'updated', '122.168.114.106', '2025-11-13 05:57:40', '2025-11-13 05:57:40'),
+(1065, 1, '2025-11-13', 'job', 27, 'updated the job status from On Hold – In Queries to Completed - Draft Sent. job code:', 'Super Admin System Super Super Admin updated the job status from On Hold – In Queries to Completed - Draft Sent. job code: F L_FFF_V4_000027', 'updated', '122.168.114.106', '2025-11-13 05:57:48', '2025-11-13 05:57:48'),
+(1066, 1, '2025-11-13', 'job', 9, 'sent the missing logs for job code:', 'Super Admin System Super Super Admin sent the missing logs for job code: F &_CLI_V3_00009', 'created', '122.168.114.106', '2025-11-13 06:04:16', '2025-11-13 06:04:16'),
+(1067, 1, '2025-11-13', 'staff', 22, 'edited staff GGGG wff', 'Super Admin System Super Super Admin edited staff GGGG wff ', 'updated', '122.168.114.106', '2025-11-13 07:19:56', '2025-11-13 07:19:56'),
+(1068, 22, '2025-11-13', '-', 0, ' Logged In', 'Processor GGGG wff  Logged In ', '-', '122.168.114.106', '2025-11-13 07:21:09', '2025-11-13 07:21:09'),
+(1069, 22, '2025-11-13', '-', 0, ' Logged In', 'Processor GGGG wff  Logged In ', '-', '122.168.114.106', '2025-11-13 07:21:13', '2025-11-13 07:21:13'),
+(1070, 22, '2025-11-13', '-', 0, ' Logged In', 'Processor GGGG wff  Logged In ', '-', '122.168.114.106', '2025-11-13 07:21:28', '2025-11-13 07:21:28'),
+(1071, 22, '2025-11-13', '-', 0, ' Logged In', 'Processor GGGG wff  Logged In ', '-', NULL, '2025-11-13 07:22:14', '2025-11-13 07:22:14'),
+(1072, 22, '2025-11-13', '-', 0, ' Logged In', 'Processor GGGG wff  Logged In ', '-', NULL, '2025-11-13 07:22:33', '2025-11-13 07:22:33'),
+(1073, 22, '2025-11-13', '-', 0, ' Logged In', 'Processor GGGG wff  Logged In ', '-', NULL, '2025-11-13 07:23:46', '2025-11-13 07:23:46'),
+(1074, 13, '2025-11-13', '-', 0, ' Logged In', 'Manager shk sss  Logged In ', '-', '122.168.114.106', '2025-11-13 07:25:29', '2025-11-13 07:25:29'),
+(1075, 13, '2025-11-13', '-', 0, ' Logged In', 'Manager shk sss  Logged In ', '-', '122.168.114.106', '2025-11-13 07:25:39', '2025-11-13 07:25:39'),
+(1076, 13, '2025-11-13', '-', 0, ' Logged In', 'Manager shk sss  Logged In ', '-', NULL, '2025-11-13 07:29:05', '2025-11-13 07:29:05'),
+(1077, 13, '2025-11-13', '-', 0, ' Logged In', 'Manager shk sss  Logged In ', '-', NULL, '2025-11-13 07:29:14', '2025-11-13 07:29:14'),
+(1078, 13, '2025-11-13', '-', 0, ' Logged In', 'Manager shk sss  Logged In ', '-', NULL, '2025-11-13 07:30:37', '2025-11-13 07:30:37'),
+(1079, 13, '2025-11-13', '-', 0, ' Logged In', 'Manager shk sss  Logged In ', '-', NULL, '2025-11-13 08:22:51', '2025-11-13 08:22:51'),
+(1080, 13, '2025-11-13', '-', 0, ' Logged Out', 'Manager shk sss  Logged Out ', '-', '122.168.114.106', '2025-11-13 09:14:15', '2025-11-13 09:14:15'),
+(1081, 13, '2025-11-13', '-', 0, ' Logged In', 'Manager shk sss  Logged In ', '-', '122.168.114.106', '2025-11-13 09:14:59', '2025-11-13 09:14:59'),
+(1082, 13, '2025-11-13', '-', 0, ' Logged In', 'Manager shk sss  Logged In ', '-', '122.168.114.106', '2025-11-13 09:15:20', '2025-11-13 09:15:20'),
+(1083, 13, '2025-11-13', '-', 0, ' Logged In', 'Manager shk sss  Logged In ', '-', NULL, '2025-11-13 09:22:28', '2025-11-13 09:22:28'),
+(1084, 1, '2025-11-13', 'job', 25, 'edited the job information and has assigned the job to the reviewer, STAFF SIX job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the reviewer, STAFF SIX job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-13 11:35:43', '2025-11-13 11:35:43'),
+(1085, 1, '2025-11-13', 'job', 25, 'edited the job information and has assigned the job to the processor, STAFF ONE job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, STAFF ONE job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-13 11:36:08', '2025-11-13 11:36:08'),
+(1086, 1, '2025-11-13', 'job', 25, 'sent the draft for job code:', 'Super Admin System Super Super Admin sent the draft for job code: DDD_DDD_V4_000025', 'created', '122.168.114.106', '2025-11-13 11:37:25', '2025-11-13 11:37:25'),
+(1087, 1, '2025-11-13', 'job', 25, 'updated the job status from WIP - Customer Reviewed & To be Updated to Completed - Update Sent. job code:', 'Super Admin System Super Super Admin updated the job status from WIP - Customer Reviewed & To be Updated to Completed - Update Sent. job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-13 11:40:19', '2025-11-13 11:40:19'),
+(1088, 1, '2025-11-13', 'job', 25, 'edited the draft job code:', 'Super Admin System Super Super Admin edited the draft job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-13 11:42:12', '2025-11-13 11:42:12'),
+(1089, 1, '2025-11-13', 'job', 25, 'updated the job status from WIP - Customer Reviewed & To be Updated to WIP – Processing. job code:', 'Super Admin System Super Super Admin updated the job status from WIP - Customer Reviewed & To be Updated to WIP – Processing. job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-13 11:51:46', '2025-11-13 11:51:46'),
+(1090, 1, '2025-11-13', 'job', 25, 'updated the job status from WIP – Processing to WIP - Customer Reviewed & To be Updated. job code:', 'Super Admin System Super Super Admin updated the job status from WIP – Processing to WIP - Customer Reviewed & To be Updated. job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-13 11:51:54', '2025-11-13 11:51:54'),
+(1091, 1, '2025-11-13', 'job', 25, 'edited the draft job code:', 'Super Admin System Super Super Admin edited the draft job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-13 11:52:05', '2025-11-13 11:52:05'),
+(1092, 1, '2025-11-13', 'job', 25, 'updated the job status from WIP - Customer Reviewed & To be Updated to Completed - Update Sent. job code:', 'Super Admin System Super Super Admin updated the job status from WIP - Customer Reviewed & To be Updated to Completed - Update Sent. job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-13 11:52:15', '2025-11-13 11:52:15'),
+(1093, 1, '2025-11-13', 'job', 25, 'updated the job status from Completed - Update Sent to WIP - Customer Reviewed & To be Updated. job code:', 'Super Admin System Super Super Admin updated the job status from Completed - Update Sent to WIP - Customer Reviewed & To be Updated. job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-13 11:52:53', '2025-11-13 11:52:53'),
+(1094, 1, '2025-11-13', 'job', 25, 'updated the job status from WIP - Customer Reviewed & To be Updated to Completed - Update Sent. job code:', 'Super Admin System Super Super Admin updated the job status from WIP - Customer Reviewed & To be Updated to Completed - Update Sent. job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-13 11:53:07', '2025-11-13 11:53:07'),
+(1095, 1, '2025-11-13', 'job', 25, 'updated the job status from Completed - Update Sent to WIP - Customer Reviewed & To be Updated. job code:', 'Super Admin System Super Super Admin updated the job status from Completed - Update Sent to WIP - Customer Reviewed & To be Updated. job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-13 11:53:45', '2025-11-13 11:53:45'),
+(1096, 1, '2025-11-13', 'job', 25, 'updated the job status from WIP - Customer Reviewed & To be Updated to Completed - Update Sent. job code:', 'Super Admin System Super Super Admin updated the job status from WIP - Customer Reviewed & To be Updated to Completed - Update Sent. job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-13 11:53:53', '2025-11-13 11:53:53'),
+(1097, 1, '2025-11-13', 'job', 25, 'updated the job status from Completed - Update Sent to WIP - Customer Reviewed & To be Updated. job code:', 'Super Admin System Super Super Admin updated the job status from Completed - Update Sent to WIP - Customer Reviewed & To be Updated. job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-13 11:54:50', '2025-11-13 11:54:50'),
+(1098, 1, '2025-11-13', 'job', 25, 'sent the draft for job code:', 'Super Admin System Super Super Admin sent the draft for job code: DDD_DDD_V4_000025', 'created', '122.168.114.106', '2025-11-13 11:55:07', '2025-11-13 11:55:07'),
+(1099, 1, '2025-11-13', 'job', 25, 'updated the job status from WIP - Customer Reviewed & To be Updated to Completed - Update Sent. job code:', 'Super Admin System Super Super Admin updated the job status from WIP - Customer Reviewed & To be Updated to Completed - Update Sent. job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-13 11:55:17', '2025-11-13 11:55:17'),
+(1100, 1, '2025-11-13', 'job', 34, 'created job code:', 'Super Admin System Super Super Admin created job code: F &_CLI_V3_000034', 'created', '122.168.114.106', '2025-11-13 12:43:31', '2025-11-13 12:43:32'),
+(1101, 1, '2025-11-13', 'job', 34, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: F &_CLI_V3_000034', 'updated', '122.168.114.106', '2025-11-13 12:53:14', '2025-11-13 12:53:14'),
+(1102, 1, '2025-11-13', 'job', 34, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: F &_CLI_V3_000034', 'updated', '122.168.114.106', '2025-11-13 12:56:24', '2025-11-13 12:56:24'),
+(1103, 1, '2025-11-14', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-14 04:53:14', '2025-11-14 04:53:14'),
+(1104, 1, '2025-11-14', 'job', 34, 'edited the job information and has assigned the job to the processor, GGGG wff job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, GGGG wff job code: F &_CLI_V3_000034', 'updated', '122.168.114.106', '2025-11-14 06:41:52', '2025-11-14 06:41:52'),
+(1105, 1, '2025-11-14', 'job', 34, 'edited the job information and has assigned the job to the reviewer, STAFF TWO job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the reviewer, STAFF TWO job code: F &_CLI_V3_000034', 'updated', '122.168.114.106', '2025-11-14 06:42:16', '2025-11-14 06:42:16'),
+(1106, 1, '2025-11-14', 'job', 34, 'sent the draft for job code:', 'Super Admin System Super Super Admin sent the draft for job code: F &_CLI_V3_000034', 'created', '122.168.114.106', '2025-11-14 06:42:38', '2025-11-14 06:42:38'),
+(1107, 1, '2025-11-14', 'job', 34, 'updated the job status from WIP - Customer Reviewed & To be Updated to Completed - Draft Sent. job code:', 'Super Admin System Super Super Admin updated the job status from WIP - Customer Reviewed & To be Updated to Completed - Draft Sent. job code: F &_CLI_V3_000034', 'updated', '122.168.114.106', '2025-11-14 06:42:47', '2025-11-14 06:42:47'),
+(1108, 1, '2025-11-14', 'job', 35, 'created job code:', 'Super Admin System Super Super Admin created job code: F &_CLI_V3_000035', 'created', '122.168.114.106', '2025-11-14 06:53:06', '2025-11-14 06:53:06'),
+(1109, 1, '2025-11-14', 'job', 36, 'created job code:', 'Super Admin System Super Super Admin created job code: F &_CLI_V3_000036', 'created', '122.168.114.106', '2025-11-14 06:54:36', '2025-11-14 06:54:36'),
+(1110, 1, '2025-11-14', 'job', 36, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: F &_CLI_V3_000036', 'updated', '122.168.114.106', '2025-11-14 07:00:04', '2025-11-14 07:00:04'),
+(1111, 1, '2025-11-14', 'job', 36, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: F &_CLI_V3_000036', 'updated', '122.168.114.106', '2025-11-14 07:00:17', '2025-11-14 07:00:17'),
+(1112, 1, '2025-11-14', 'job', 36, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: F &_CLI_V3_000036', 'updated', '122.168.114.106', '2025-11-14 07:01:28', '2025-11-14 07:01:28'),
+(1113, 1, '2025-11-14', 'job', 36, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: F &_CLI_V3_000036', 'updated', '122.168.114.106', '2025-11-14 07:07:39', '2025-11-14 07:07:39'),
+(1114, 1, '2025-11-14', 'job', 36, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: F &_CLI_V3_000036', 'updated', '122.168.114.106', '2025-11-14 07:16:24', '2025-11-14 07:16:24'),
+(1115, 1, '2025-11-14', 'job', 36, 'edited the job information and has assigned the job to the processor, STAFF EIGHT job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, STAFF EIGHT job code: F &_CLI_V3_000036', 'updated', '122.168.114.106', '2025-11-14 07:16:57', '2025-11-14 07:16:57'),
+(1116, 1, '2025-11-14', 'staff', 23, 'created staff DDDDDD DD', 'Super Admin System Super Super Admin created staff DDDDDD DD ', 'created', '122.168.114.106', '2025-11-14 13:10:31', '2025-11-14 13:10:31'),
+(1117, 1, '2025-11-14', 'staff', 23, 'edited staff DDDDDD DD', 'Super Admin System Super Super Admin edited staff DDDDDD DD ', 'updated', '122.168.114.106', '2025-11-14 13:10:54', '2025-11-14 13:10:54'),
+(1118, 1, '2025-11-17', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-17 05:20:05', '2025-11-17 05:20:05'),
+(1119, 1, '2025-11-17', 'staff', 20, 'edited staff AAAAAAA ddddd', 'Super Admin System Super Super Admin edited staff AAAAAAA ddddd ', 'updated', '122.168.114.106', '2025-11-17 05:22:46', '2025-11-17 05:22:46'),
+(1120, 1, '2025-11-17', 'staff', 12, 'edited staff BBBBBB 7 hv', 'Super Admin System Super Super Admin edited staff BBBBBB 7 hv ', 'updated', '122.168.114.106', '2025-11-17 05:27:51', '2025-11-17 05:27:51'),
+(1121, 1, '2025-11-17', 'staff', 24, 'created staff FFFFFFFF hhhhh', 'Super Admin System Super Super Admin created staff FFFFFFFF hhhhh ', 'created', '122.168.114.106', '2025-11-17 05:29:30', '2025-11-17 05:29:30'),
+(1122, 1, '2025-11-18', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-18 05:14:13', '2025-11-18 05:14:13'),
+(1123, 1, '2025-11-19', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-19 05:17:20', '2025-11-19 05:17:20'),
+(1124, 1, '2025-11-19', 'job', 25, 'sent the missing logs for job code:', 'Super Admin System Super Super Admin sent the missing logs for job code: DDD_DDD_V4_000025', 'created', '122.168.114.106', '2025-11-19 06:09:49', '2025-11-19 06:09:49'),
+(1125, 1, '2025-11-19', 'job', 25, 'completed the missing logs job code:', 'Super Admin System Super Super Admin completed the missing logs job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-19 06:11:09', '2025-11-19 06:11:09'),
+(1126, 1, '2025-11-19', 'job', 25, 'updated the job status from On Hold - Missing Paperwork to Completed - Update Sent. job code:', 'Super Admin System Super Super Admin updated the job status from On Hold - Missing Paperwork to Completed - Update Sent. job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-19 06:11:20', '2025-11-19 06:11:20'),
+(1127, 1, '2025-11-19', 'job', 25, 'sent the missing logs for job code:', 'Super Admin System Super Super Admin sent the missing logs for job code: DDD_DDD_V4_000025', 'created', '122.168.114.106', '2025-11-19 08:32:31', '2025-11-19 08:32:31'),
+(1128, 1, '2025-11-19', 'job', 25, 'edited the missing logs job code:', 'Super Admin System Super Super Admin edited the missing logs job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-19 08:32:50', '2025-11-19 08:32:50'),
+(1129, 1, '2025-11-19', 'job', 25, 'completed the missing logs job code:', 'Super Admin System Super Super Admin completed the missing logs job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-19 08:32:57', '2025-11-19 08:32:57'),
+(1130, 1, '2025-11-19', 'job', 25, 'completed the draft job code:', 'Super Admin System Super Super Admin completed the draft job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-19 08:47:45', '2025-11-19 08:47:45'),
+(1131, 1, '2025-11-19', 'job', 25, 'completed the draft job code:', 'Super Admin System Super Super Admin completed the draft job code: DDD_DDD_V4_000025', 'updated', '122.168.114.106', '2025-11-19 08:48:24', '2025-11-19 08:48:24'),
+(1132, 1, '2025-11-19', 'customer', 10, 'edited sole trader information. customer code :', 'Super Admin System Super Super Admin edited sole trader information. customer code : cust_NEW_00009(NEW_A_CUS)', 'updated', '122.168.114.106', '2025-11-19 10:04:13', '2025-11-19 10:04:13'),
+(1133, 1, '2025-11-19', 'client', 15, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_NEW_bfb_000015(bfb)', 'created', '122.168.114.106', '2025-11-19 10:11:39', '2025-11-19 10:11:39'),
+(1134, 1, '2025-11-19', 'client', 15, 'edited sole trader information. client code :', 'Super Admin System Super Super Admin edited sole trader information. client code : cli_NEW_bfb_000015(bfb)', 'updated', '122.168.114.106', '2025-11-19 10:36:04', '2025-11-19 10:36:04'),
+(1135, 1, '2025-11-19', 'client', 12, 'edited sole trader information. client code :', 'Super Admin System Super Super Admin edited sole trader information. client code : cli_NEW_FFF_000012(FFFFF)', 'updated', '122.168.114.106', '2025-11-19 10:36:24', '2025-11-19 10:36:24'),
+(1136, 1, '2025-11-19', 'client', 15, 'edited sole trader information. client code :', 'Super Admin System Super Super Admin edited sole trader information. client code : cli_NEW_bfb_000015(bfb)', 'updated', '122.168.114.106', '2025-11-19 10:37:02', '2025-11-19 10:37:02'),
+(1137, 1, '2025-11-19', 'client', 15, 'edited sole trader Officer information. client code :', 'Super Admin System Super Super Admin edited sole trader Officer information. client code : cli_NEW_bfb_000015(bfb)', 'updated', '122.168.114.106', '2025-11-19 10:56:54', '2025-11-19 10:56:54'),
+(1138, 1, '2025-11-19', 'client', 15, 'edited sole trader information. client code :', 'Super Admin System Super Super Admin edited sole trader information. client code : cli_NEW_bfb_000015(bfb)', 'updated', '122.168.114.106', '2025-11-19 10:59:09', '2025-11-19 10:59:09'),
+(1139, 1, '2025-11-19', 'client', 15, 'edited sole trader information. client code :', 'Super Admin System Super Super Admin edited sole trader information. client code : cli_NEW_bfb_000015(bfb)', 'updated', '122.168.114.106', '2025-11-19 10:59:19', '2025-11-19 10:59:19'),
+(1140, 1, '2025-11-19', 'client', 6, 'edited sole trader information. client code :', 'Super Admin System Super Super Admin edited sole trader information. client code : cli_F &_CLI_00006(CLI---1)', 'updated', '122.168.114.106', '2025-11-19 10:59:39', '2025-11-19 10:59:39'),
+(1141, 1, '2025-11-19', 'client', 6, 'edited sole trader information. client code :', 'Super Admin System Super Super Admin edited sole trader information. client code : cli_F &_CLI_00006(CLI---1)', 'updated', '122.168.114.106', '2025-11-19 10:59:48', '2025-11-19 10:59:48'),
+(1142, 1, '2025-11-19', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-19 11:42:40', '2025-11-19 11:42:40'),
+(1143, 1, '2025-11-19', 'customer', 2, 'edited the company information customer code :', 'Super Admin System Super Super Admin edited the company information customer code : cust_F L_00002(F LIMITED)', 'updated', '122.168.114.106', '2025-11-19 12:08:28', '2025-11-19 12:08:28'),
+(1144, 1, '2025-11-19', 'customer', 2, 'edited the company information customer code :', 'Super Admin System Super Super Admin edited the company information customer code : cust_F L_00002(F LIMITED)', 'updated', '122.168.114.106', '2025-11-19 12:08:40', '2025-11-19 12:08:40'),
+(1145, 1, '2025-11-20', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-20 04:57:59', '2025-11-20 04:57:59'),
+(1146, 1, '2025-11-20', 'job', 37, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_bfb_comp_000037', 'created', '122.168.114.106', '2025-11-20 05:07:09', '2025-11-20 05:07:09'),
+(1147, 1, '2025-11-20', 'job', 37, 'updated the job status from To Be Started - Not Yet Allocated Internally to WIP - Processing. job code:', 'Super Admin System Super Super Admin updated the job status from To Be Started - Not Yet Allocated Internally to WIP - Processing. job code: NEW_bfb_comp_000037', 'updated', '122.168.114.106', '2025-11-20 05:07:51', '2025-11-20 05:07:51'),
+(1148, 1, '2025-11-20', 'job', 36, 'updated the job status from WIP - Processing to To Be Started - Not Yet Allocated Internally. job code:', 'Super Admin System Super Super Admin updated the job status from WIP - Processing to To Be Started - Not Yet Allocated Internally. job code: F &_CLI_V3_000036', 'updated', '122.168.114.106', '2025-11-20 05:08:26', '2025-11-20 05:08:26'),
+(1149, 1, '2025-11-20', 'job', 36, 'updated the job status from To Be Started - Not Yet Allocated Internally to WIP - Processing. job code:', 'Super Admin System Super Super Admin updated the job status from To Be Started - Not Yet Allocated Internally to WIP - Processing. job code: F &_CLI_V3_000036', 'updated', '122.168.114.106', '2025-11-20 05:08:49', '2025-11-20 05:08:49'),
+(1150, 1, '2025-11-20', 'job', 36, 'updated the job status from WIP - Processing to To Be Started - Not Yet Allocated Internally. job code:', 'Super Admin System Super Super Admin updated the job status from WIP - Processing to To Be Started - Not Yet Allocated Internally. job code: F &_CLI_V3_000036', 'updated', '122.168.114.106', '2025-11-20 05:09:10', '2025-11-20 05:09:10'),
+(1151, 1, '2025-11-20', 'job', 38, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_bfb_comp_000038', 'created', '122.168.114.106', '2025-11-20 05:09:43', '2025-11-20 05:09:43'),
+(1152, 1, '2025-11-20', 'job', 38, 'updated the job status from To Be Started - Not Yet Allocated Internally to WIP - Processing. job code:', 'Super Admin System Super Super Admin updated the job status from To Be Started - Not Yet Allocated Internally to WIP - Processing. job code: NEW_bfb_comp_000038', 'updated', '122.168.114.106', '2025-11-20 05:09:54', '2025-11-20 05:09:54'),
+(1153, 1, '2025-11-20', 'job', 38, 'updated the job status from WIP - Processing to To Be Started - Not Yet Allocated Internally. job code:', 'Super Admin System Super Super Admin updated the job status from WIP - Processing to To Be Started - Not Yet Allocated Internally. job code: NEW_bfb_comp_000038', 'updated', '122.168.114.106', '2025-11-20 05:21:34', '2025-11-20 05:21:34'),
+(1154, 1, '2025-11-20', 'job', 38, 'edited the job information and has assigned the job to the processor, STAFF FIVE job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, STAFF FIVE job code: NEW_bfb_comp_000038', 'updated', '122.168.114.106', '2025-11-20 05:23:37', '2025-11-20 05:23:37'),
+(1155, 6, '2025-11-20', '-', 0, ' Logged In', 'Reviewer STAFF TWO  Logged In ', '-', '122.168.114.106', '2025-11-20 05:53:17', '2025-11-20 05:53:17'),
+(1156, 6, '2025-11-20', '-', 0, ' Logged Out', 'Reviewer STAFF TWO  Logged Out ', '-', '122.168.114.106', '2025-11-20 05:55:32', '2025-11-20 05:55:32'),
+(1157, 16, '2025-11-20', '-', 0, ' Logged In', 'Processor STAFF TEN  Logged In ', '-', '122.168.114.106', '2025-11-20 05:55:42', '2025-11-20 05:55:42'),
+(1158, 1, '2025-11-20', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2025-11-17, Hours : 3:00 ,Job code:abc, Task name:c and Task type:Internal,  Date: 2025-11-17, Hours : 6:00 Date: 2025-11-18, Hours : 6:00 Date: 2025-11-19, Hours : 6:00 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,  Date: 2025-11-17, Hours : 3:00 ,Job code:abc, Task name:c and Task type:Internal,  Date: 2025-11-17, Hours : 6:00 Date: 2025-11-18, Hours : 6:00 Date: 2025-11-19, Hours : 6:00 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-11-20 09:37:40', '2025-11-20 09:37:40'),
+(1159, 16, '2025-11-20', '-', 0, ' Logged Out', 'Processor STAFF TEN  Logged Out ', '-', '122.168.114.106', '2025-11-20 12:03:19', '2025-11-20 12:03:19'),
+(1160, 14, '2025-11-20', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-11-20 12:03:31', '2025-11-20 12:03:31'),
+(1161, 1, '2025-11-20', 'timesheet', 0, 'submitted a timesheet entry. Task type:External,  Date: 2025-10-27, Hours : 9:00 Date: 2025-10-28, Hours : 8:00 Date: 2025-10-29, Hours : 6:00 Date: 2025-10-30, Hours : 6:00 ,Job code:NEW_bfb_comp_000038, Task name:DDDD and Task type:Internal,  Date: 2025-10-27, Hours : 6:00 Date: 2025-10-28, Hours : 4:00 Date: 2025-10-29, Hours : 8:00 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:External,  Date: 2025-10-27, Hours : 9:00 Date: 2025-10-28, Hours : 8:00 Date: 2025-10-29, Hours : 6:00 Date: 2025-10-30, Hours : 6:00 ,Job code:NEW_bfb_comp_000038, Task name:DDDD and Task type:Internal,  Date: 2025-10-27, Hours : 6:00 Date: 2025-10-28, Hours : 4:00 Date: 2025-10-29, Hours : 8:00 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-11-20 12:46:44', '2025-11-20 12:46:44'),
+(1162, 1, '2025-11-20', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,  Date: 2025-11-17, Updated hours : 3:01 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:Internal,  Date: 2025-11-17, Updated hours : 3:01 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-11-20 12:58:09', '2025-11-20 12:58:09'),
+(1163, 1, '2025-11-20', 'timesheet', 0, 'created a timesheet entry. Task type:External,  Date: 2025-10-27, Hours : 9:00 Date: 2025-10-28, Hours : 8:00 Date: 2025-10-29, Hours : 6:00 Date: 2025-10-30, Hours : 6:00 Date: undefined, Hours : undefined ,Job code:NEW_bfb_comp_000038, Task name:DDDD and Task type:Internal,  Date: 2025-10-27, Hours : 6:00 Date: 2025-10-28, Hours : 4:00 Date: 2025-10-29, Hours : 8:00 Date: undefined, Hours : undefined ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin created a timesheet entry. Task type:External,  Date: 2025-10-27, Hours : 9:00 Date: 2025-10-28, Hours : 8:00 Date: 2025-10-29, Hours : 6:00 Date: 2025-10-30, Hours : 6:00 Date: undefined, Hours : undefined ,Job code:NEW_bfb_comp_000038, Task name:DDDD and Task type:Internal,  Date: 2025-10-27, Hours : 6:00 Date: 2025-10-28, Hours : 4:00 Date: 2025-10-29, Hours : 8:00 Date: undefined, Hours : undefined ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-11-20 13:02:36', '2025-11-20 13:02:36'),
+(1164, 1, '2025-11-21', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-21 06:25:19', '2025-11-21 06:25:19'),
+(1165, 14, '2025-11-21', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-11-21 06:26:15', '2025-11-21 06:26:15'),
+(1166, 14, '2025-11-21', 'timesheet', 0, 'created a timesheet entry. Task type:External,  Date: 2025-11-17, Hours : 2:00 Date: 2025-11-18, Hours : 3:60 Date: 2025-11-19, Hours : undefined Date: 2025-11-20, Hours : undefined Date: 2025-11-21, Hours : undefined Date: 2025-11-22, Hours : undefined Date: 2025-11-23, Hours : undefined ,Job code:NEW_NEW_VAT2_000010, Task name:FFF and Task type:External,  Date: 2025-11-17, Hours : 2:00 Date: 2025-11-18, Hours : 3:60 Date: 2025-11-19, Hours : undefined Date: 2025-11-20, Hours : undefined Date: 2025-11-21, Hours : undefined Date: 2025-11-22, Hours : undefined Date: 2025-11-23, Hours : undefined ,Job code:NEW_NEW_VAT2_000010, Task name:FFF', 'Manager STAFF EIGHT created a timesheet entry. Task type:External,  Date: 2025-11-17, Hours : 2:00 Date: 2025-11-18, Hours : 3:60 Date: 2025-11-19, Hours : undefined Date: 2025-11-20, Hours : undefined Date: 2025-11-21, Hours : undefined Date: 2025-11-22, Hours : undefined Date: 2025-11-23, Hours : undefined ,Job code:NEW_NEW_VAT2_000010, Task name:FFF and Task type:External,  Date: 2025-11-17, Hours : 2:00 Date: 2025-11-18, Hours : 3:60 Date: 2025-11-19, Hours : undefined Date: 2025-11-20, Hours : undefined Date: 2025-11-21, Hours : undefined Date: 2025-11-22, Hours : undefined Date: 2025-11-23, Hours : undefined ,Job code:NEW_NEW_VAT2_000010, Task name:FFF ', 'updated', '0.0.0.0', '2025-11-21 06:26:41', '2025-11-21 06:26:41'),
+(1167, 1, '2025-11-21', 'timesheet', 0, 'created a timesheet entry. Task type:External,  Date: 2025-11-17, Hours : 9:00 Date: 2025-11-18, Hours : 8:00 Date: 2025-11-19, Hours : 6:00 Date: 2025-11-20, Hours : 6:00 Date: 2025-11-21, Hours : undefined Date: 2025-11-22, Hours : undefined Date: 2025-11-23, Hours : undefined ,Job code:NEW_bfb_comp_000038, Task name:DDDD and Task type:Internal,  Date: 2025-11-17, Hours : 6:00 Date: 2025-11-18, Hours : 4:00 Date: 2025-11-19, Hours : 8:00 Date: 2025-11-20, Hours : undefined Date: 2025-11-21, Hours : undefined Date: 2025-11-22, Hours : undefined Date: 2025-11-23, Hours : undefined ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin created a timesheet entry. Task type:External,  Date: 2025-11-17, Hours : 9:00 Date: 2025-11-18, Hours : 8:00 Date: 2025-11-19, Hours : 6:00 Date: 2025-11-20, Hours : 6:00 Date: 2025-11-21, Hours : undefined Date: 2025-11-22, Hours : undefined Date: 2025-11-23, Hours : undefined ,Job code:NEW_bfb_comp_000038, Task name:DDDD and Task type:Internal,  Date: 2025-11-17, Hours : 6:00 Date: 2025-11-18, Hours : 4:00 Date: 2025-11-19, Hours : 8:00 Date: 2025-11-20, Hours : undefined Date: 2025-11-21, Hours : undefined Date: 2025-11-22, Hours : undefined Date: 2025-11-23, Hours : undefined ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-11-21 06:28:55', '2025-11-21 06:28:55'),
+(1168, 1, '2025-11-21', 'client', 16, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_NEW_D L_000016(D LIMITED)', 'created', '122.168.114.106', '2025-11-21 09:48:49', '2025-11-21 09:48:49'),
+(1169, 1, '2025-11-21', 'job', 39, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_D L_comp_000039', 'created', '122.168.114.106', '2025-11-21 11:25:10', '2025-11-21 11:25:10'),
+(1170, 1, '2025-11-21', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-11-21 15:13:51', '2025-11-21 15:13:51'),
+(1171, 1, '2025-11-21', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-21 15:17:03', '2025-11-21 15:17:03'),
+(1172, 1, '2025-11-22', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-22 05:48:57', '2025-11-22 05:48:57'),
+(1173, 1, '2025-11-22', 'customer', 11, 'created customer profile. customer code :', 'Super Admin System Super Super Admin created customer profile. customer code : cust_adf_000010(adfsf)', 'created', '122.168.114.106', '2025-11-22 05:58:27', '2025-11-22 05:58:27'),
+(1174, 1, '2025-11-22', 'customer', 11, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_adf_000010(adfsf)', 'updated', '122.168.114.106', '2025-11-22 05:59:14', '2025-11-22 05:59:14'),
+(1175, 1, '2025-11-22', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-11-22 06:03:20', '2025-11-22 06:03:20'),
+(1176, 1, '2025-11-22', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-22 06:03:50', '2025-11-22 06:03:50'),
+(1177, 1, '2025-11-22', 'client', 11, 'deleted customer. customer code :', 'Super Admin System Super Super Admin deleted customer. customer code : cli_DDD_DDD_000011(DDDDDDDD)', 'deleted', '122.168.114.106', '2025-11-22 06:11:29', '2025-11-22 06:11:29'),
+(1178, 1, '2025-11-22', 'job', 32, 'edited the job information and has assigned the job to the processor, shk sss job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, shk sss job code: F &_CLI_V3_000032', 'updated', '122.168.114.106', '2025-11-22 06:14:38', '2025-11-22 06:14:38'),
+(1179, 1, '2025-11-22', 'job', 32, 'edited the job information and has assigned the job to the reviewer, STAFF TWO job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the reviewer, STAFF TWO job code: F &_CLI_V3_000032', 'updated', '122.168.114.106', '2025-11-22 06:15:00', '2025-11-22 06:15:00'),
+(1180, 1, '2025-11-22', 'job', 32, 'updated the job status from WIP - Processing to WIP - To Be Reviewed. job code:', 'Super Admin System Super Super Admin updated the job status from WIP - Processing to WIP - To Be Reviewed. job code: F &_CLI_V3_000032', 'updated', '122.168.114.106', '2025-11-22 06:15:12', '2025-11-22 06:15:12'),
+(1181, 14, '2025-11-22', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-11-22 06:53:00', '2025-11-22 06:53:00'),
+(1182, 14, '2025-11-22', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  Date: 2025-11-10, Hours : 05:00 Date: 2025-11-11, Hours : 9:00 Date: 2025-11-12, Hours : 9:00 Date: 2025-11-13, Hours : 4:00 ,Job code:abc, Task name:c and Task type:Internal,  Date: 2025-11-10, Hours : 04:00 Date: 2025-11-11, Hours : 9:00 Date: 2025-11-12, Hours : 9:00 ,Job code:abc, Task name:c', 'Manager STAFF EIGHT submitted a timesheet entry. Task type:Internal,  Date: 2025-11-10, Hours : 05:00 Date: 2025-11-11, Hours : 9:00 Date: 2025-11-12, Hours : 9:00 Date: 2025-11-13, Hours : 4:00 ,Job code:abc, Task name:c and Task type:Internal,  Date: 2025-11-10, Hours : 04:00 Date: 2025-11-11, Hours : 9:00 Date: 2025-11-12, Hours : 9:00 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-11-22 06:59:49', '2025-11-22 06:59:49'),
+(1183, 14, '2025-11-22', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  Date: 2025-11-03, Hours : 9:00 Date: 2025-11-04, Hours : 9:00 Date: 2025-11-05, Hours : 9:00 ,Job code:abc, Task name:c and Task type:Internal,  Date: 2025-11-03, Hours : 9:00 Date: 2025-11-04, Hours : 9:00 ,Job code:abc, Task name:c', 'Manager STAFF EIGHT submitted a timesheet entry. Task type:Internal,  Date: 2025-11-03, Hours : 9:00 Date: 2025-11-04, Hours : 9:00 Date: 2025-11-05, Hours : 9:00 ,Job code:abc, Task name:c and Task type:Internal,  Date: 2025-11-03, Hours : 9:00 Date: 2025-11-04, Hours : 9:00 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-11-22 07:02:41', '2025-11-22 07:02:41'),
+(1184, 14, '2025-11-22', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2025-11-24, Hours : 5:00 Date: 2025-11-26, Hours : 05:00 ,Job code:abc, Task name:c', 'Manager STAFF EIGHT created a timesheet entry. Task type:Internal,  Date: 2025-11-24, Hours : 5:00 Date: 2025-11-26, Hours : 05:00 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-11-22 07:04:35', '2025-11-22 07:04:35'),
+(1185, 1, '2025-11-24', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-24 05:07:00', '2025-11-24 05:07:00'),
+(1186, 1, '2025-11-24', 'timesheet', 0, 'submitted a timesheet entry. Task type:External,  Date: 2025-11-24, Hours : 23:00 Date: 2025-11-25, Hours : 20:00 ,Job code:NEW_D L_comp_000039, Task name:BCCCC', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:External,  Date: 2025-11-24, Hours : 23:00 Date: 2025-11-25, Hours : 20:00 ,Job code:NEW_D L_comp_000039, Task name:BCCCC ', 'updated', '0.0.0.0', '2025-11-24 05:33:11', '2025-11-24 05:33:11'),
+(1187, 1, '2025-11-24', 'timesheet', 0, 'submitted a timesheet entry. Task type:External,  Date: 2025-12-01, Hours : 9:00 Date: 2025-12-02, Hours : 8:00 Date: 2025-12-03, Hours : 6:00 Date: 2025-12-04, Hours : 6:00 Date: 2025-12-05, Hours : undefined Date: 2025-12-06, Hours : undefined Date: 2025-12-07, Hours : undefined ,Job code:NEW_bfb_comp_000038, Task name:DDDD and Task type:Internal,  Date: 2025-12-01, Hours : 6:00 Date: 2025-12-02, Hours : 4:00 Date: 2025-12-03, Hours : 8:00 Date: 2025-12-04, Hours : undefined Date: 2025-12-05, Hours : undefined Date: 2025-12-06, Hours : undefined Date: 2025-12-07, Hours : undefined ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:External,  Date: 2025-12-01, Hours : 9:00 Date: 2025-12-02, Hours : 8:00 Date: 2025-12-03, Hours : 6:00 Date: 2025-12-04, Hours : 6:00 Date: 2025-12-05, Hours : undefined Date: 2025-12-06, Hours : undefined Date: 2025-12-07, Hours : undefined ,Job code:NEW_bfb_comp_000038, Task name:DDDD and Task type:Internal,  Date: 2025-12-01, Hours : 6:00 Date: 2025-12-02, Hours : 4:00 Date: 2025-12-03, Hours : 8:00 Date: 2025-12-04, Hours : undefined Date: 2025-12-05, Hours : undefined Date: 2025-12-06, Hours : undefined Date: 2025-12-07, Hours : undefined ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-11-24 05:37:10', '2025-11-24 05:37:10'),
+(1188, 1, '2025-11-24', 'job', 24, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: DDD_DDD_V4_000024', 'updated', '122.168.114.106', '2025-11-24 06:30:47', '2025-11-24 06:30:47'),
+(1189, 1, '2025-11-24', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2025-12-01, Hours : 5:00 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,  Date: 2025-12-01, Hours : 5:00 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-11-24 06:33:26', '2025-11-24 06:33:26'),
+(1190, 1, '2025-11-24', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c and Task type:Internal,  Date: 2025-12-01, Hours : 20:00 Date: 2025-12-02, Hours : 20:00 ,Job code:abc, Task name:c', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,  ,Job code:abc, Task name:c and Task type:Internal,  Date: 2025-12-01, Hours : 20:00 Date: 2025-12-02, Hours : 20:00 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-11-24 06:34:01', '2025-11-24 06:34:01'),
+(1191, 14, '2025-11-24', '-', 0, ' Logged Out', 'Manager STAFF EIGHT  Logged Out ', '-', '122.168.114.106', '2025-11-24 09:34:56', '2025-11-24 09:34:56'),
+(1192, 22, '2025-11-24', '-', 0, ' Logged In', 'Processor GGGG wff  Logged In ', '-', '122.168.114.106', '2025-11-24 09:35:14', '2025-11-24 09:35:14'),
+(1193, 22, '2025-11-24', 'customer', 12, 'created customer profile. customer code :', 'Processor GGGG wff created customer profile. customer code : cust_IGA_000010(IGAAH)', 'created', '122.168.114.106', '2025-11-24 09:36:14', '2025-11-24 09:36:14'),
+(1194, 22, '2025-11-24', 'customer', 12, ' edited the service details and added an additional service while editing the customer code :', 'Processor GGGG wff  edited the service details and added an additional service while editing the customer code : cust_IGA_000010(IGAAH)', 'updated', '122.168.114.106', '2025-11-24 09:36:20', '2025-11-24 09:36:20'),
+(1195, 11, '2025-11-24', '-', 0, ' Logged In', 'Manager STAFF SIX  Logged In ', '-', '122.168.114.106', '2025-11-24 09:37:39', '2025-11-24 09:37:39'),
+(1196, 22, '2025-11-24', '-', 0, ' Logged Out', 'Processor GGGG wff  Logged Out ', '-', '122.168.114.106', '2025-11-24 10:23:30', '2025-11-24 10:23:31'),
+(1197, 14, '2025-11-24', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', '122.168.114.106', '2025-11-24 10:23:52', '2025-11-24 10:23:52'),
+(1198, 11, '2025-11-24', '-', 0, ' Logged Out', 'Manager STAFF SIX  Logged Out ', '-', '122.168.114.106', '2025-11-24 10:45:21', '2025-11-24 10:45:21'),
+(1199, 22, '2025-11-24', '-', 0, ' Logged In', 'Processor GGGG wff  Logged In ', '-', '122.168.114.106', '2025-11-24 10:45:51', '2025-11-24 10:45:51'),
+(1200, 1, '2025-11-24', 'staff', 22, 'edited staff GGGG wff', 'Super Admin System Super Super Admin edited staff GGGG wff ', 'updated', '122.168.114.106', '2025-11-24 11:36:33', '2025-11-24 11:36:33'),
+(1201, 22, '2025-11-24', '-', 0, ' Logged Out', 'Processor GGGG wff  Logged Out ', '-', '122.168.114.106', '2025-11-24 11:44:11', '2025-11-24 11:44:11'),
+(1202, 15, '2025-11-24', '-', 0, ' Logged In', 'Manager STAFF NINE  Logged In ', '-', '122.168.114.106', '2025-11-24 11:44:36', '2025-11-24 11:44:36'),
+(1203, 15, '2025-11-24', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  Date: 2025-11-17, Hours : 20:00 Date: 2025-11-18, Hours : 2:00 Date: 2025-11-19, Hours : 02:00 ,Job code:abc, Task name:c', 'Manager STAFF NINE submitted a timesheet entry. Task type:Internal,  Date: 2025-11-17, Hours : 20:00 Date: 2025-11-18, Hours : 2:00 Date: 2025-11-19, Hours : 02:00 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-11-24 11:45:06', '2025-11-24 11:45:06'),
+(1204, 1, '2025-11-24', 'client', 17, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_DDD_AFR_000017(AFROFRING ENTERTAINMENT LIMITED)', 'created', '122.168.114.106', '2025-11-24 13:40:15', '2025-11-24 13:40:15'),
+(1205, 1, '2025-11-25', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-25 04:49:35', '2025-11-25 04:49:35'),
+(1206, 14, '2025-11-25', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-11-25 04:57:12', '2025-11-25 04:57:12'),
+(1207, 22, '2025-11-25', '-', 0, ' Logged In', 'Processor GGGG wff  Logged In ', '-', '122.168.114.106', '2025-11-25 04:59:20', '2025-11-25 04:59:20'),
+(1208, 1, '2025-11-25', 'staff', 22, 'edited staff GGGG wff', 'Super Admin System Super Super Admin edited staff GGGG wff ', 'updated', '122.168.114.106', '2025-11-25 05:01:16', '2025-11-25 05:01:16'),
+(1209, 22, '2025-11-25', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  Date: 2025-11-17, Hours : 10:00 ,Job code:abc, Task name:c, Task type:Internal,  Date: 2025-11-18, Hours : 10:00 ,Job code:abc, Task name:c and Task type:Internal,  Date: 2025-11-17, Hours : 10:00 Date: 2025-11-18, Hours : 10:00 Date: 2025-11-19, Hours : 10:00 ,Job code:abc, Task name:c', 'Processor GGGG wff submitted a timesheet entry. Task type:Internal,  Date: 2025-11-17, Hours : 10:00 ,Job code:abc, Task name:c, Task type:Internal,  Date: 2025-11-18, Hours : 10:00 ,Job code:abc, Task name:c and Task type:Internal,  Date: 2025-11-17, Hours : 10:00 Date: 2025-11-18, Hours : 10:00 Date: 2025-11-19, Hours : 10:00 ,Job code:abc, Task name:c ', 'updated', '0.0.0.0', '2025-11-25 05:02:18', '2025-11-25 05:02:18'),
+(1210, 1, '2025-11-25', 'job types', 11, 'created job types JAP', 'Super Admin System Super Super Admin created job types JAP ', 'created', '122.168.114.106', '2025-11-25 05:18:10', '2025-11-25 05:18:10'),
+(1211, 1, '2025-11-25', 'task', 0, 'created task ja_1,Ja_2,', 'Super Admin System Super Super Admin created task ja_1,Ja_2, ', 'created', '122.168.114.106', '2025-11-25 05:18:36', '2025-11-25 05:18:36'),
+(1212, 1, '2025-11-25', 'job', 40, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_D L_JAP_000040', 'created', '122.168.114.106', '2025-11-25 05:19:01', '2025-11-25 05:19:01'),
+(1213, 1, '2025-11-25', 'job', 40, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_D L_JAP_000040', 'updated', '122.168.114.106', '2025-11-25 06:34:30', '2025-11-25 06:34:30'),
+(1214, 1, '2025-11-25', 'client', 18, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_IGA_DFD_000018(DFD)', 'created', '122.168.114.106', '2025-11-25 10:55:15', '2025-11-25 10:55:16'),
+(1215, 1, '2025-11-25', 'client', 18, 'edited Charity Incorporated Organisation information. client code :', 'Super Admin System Super Super Admin edited Charity Incorporated Organisation information. client code : cli_IGA_DFD_000018(DFD)', 'updated', '122.168.114.106', '2025-11-25 11:13:16', '2025-11-25 11:13:16'),
+(1216, 1, '2025-11-25', 'client', 18, 'edited Charity Incorporated Organisation information. client code :', 'Super Admin System Super Super Admin edited Charity Incorporated Organisation information. client code : cli_IGA_DFD_000018(DFD)', 'updated', '122.168.114.106', '2025-11-25 11:13:16', '2025-11-25 11:13:16'),
+(1217, 1, '2025-11-25', 'client', 18, 'edited Charity Incorporated Organisation information. client code :', 'Super Admin System Super Super Admin edited Charity Incorporated Organisation information. client code : cli_IGA_DFD_000018(DFD)', 'updated', '122.168.114.106', '2025-11-25 11:31:29', '2025-11-25 11:31:29'),
+(1218, 1, '2025-11-25', 'client', 18, 'edited Charity Incorporated Organisation information. client code :', 'Super Admin System Super Super Admin edited Charity Incorporated Organisation information. client code : cli_IGA_DFD_000018(DFD)', 'updated', '122.168.114.106', '2025-11-25 11:31:29', '2025-11-25 11:31:29'),
+(1219, 1, '2025-11-26', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-26 06:11:57', '2025-11-26 06:11:57'),
+(1220, 14, '2025-11-26', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-11-26 06:12:57', '2025-11-26 06:12:57'),
+(1221, 1, '2025-11-27', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-27 08:12:32', '2025-11-27 08:12:32'),
+(1222, 1, '2025-11-27', 'job types', 12, 'created job types DDD', 'Super Admin System Super Super Admin created job types DDD ', 'created', '122.168.114.106', '2025-11-27 08:24:07', '2025-11-27 08:24:07'),
+(1223, 1, '2025-11-27', 'task', 0, 'created task DFDDD,DGGGF,', 'Super Admin System Super Super Admin created task DFDDD,DGGGF, ', 'created', '122.168.114.106', '2025-11-27 08:24:25', '2025-11-27 08:24:25'),
+(1224, 1, '2025-11-27', 'job', 41, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_bfb_DDD_000041', 'created', '122.168.114.106', '2025-11-27 08:53:40', '2025-11-27 08:53:40'),
+(1225, 14, '2025-11-27', '-', 0, ' Logged In', 'Manager STAFF EIGHT  Logged In ', '-', NULL, '2025-11-27 09:57:54', '2025-11-27 09:57:54'),
+(1226, 14, '2025-11-27', '-', 0, ' Logged Out', 'Manager STAFF EIGHT  Logged Out ', '-', '122.168.114.106', '2025-11-27 11:11:01', '2025-11-27 11:11:01'),
+(1227, 11, '2025-11-27', '-', 0, ' Logged In', 'Manager STAFF SIX  Logged In ', '-', '122.168.114.106', '2025-11-27 11:11:12', '2025-11-27 11:11:12'),
+(1228, 11, '2025-11-27', '-', 0, ' Logged Out', 'Manager STAFF SIX  Logged Out ', '-', '122.168.114.106', '2025-11-27 11:12:22', '2025-11-27 11:12:22'),
+(1229, 16, '2025-11-27', '-', 0, ' Logged In', 'Processor STAFF TEN  Logged In ', '-', '122.168.114.106', '2025-11-27 11:12:38', '2025-11-27 11:12:38'),
+(1230, 16, '2025-11-27', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  Date: 2025-11-24, Hours : 15:00 Date: 2025-11-27, Hours : 15:00 ,Job code:abc, Task name:c and Task type:External,  Date: 2025-11-24, Hours : 3:00 Date: 2025-11-26, Hours : 15:00 ,Job code:F L_FFF_V4_000029, Task name:D', 'Processor STAFF TEN submitted a timesheet entry. Task type:Internal,  Date: 2025-11-24, Hours : 15:00 Date: 2025-11-27, Hours : 15:00 ,Job code:abc, Task name:c and Task type:External,  Date: 2025-11-24, Hours : 3:00 Date: 2025-11-26, Hours : 15:00 ,Job code:F L_FFF_V4_000029, Task name:D ', 'updated', '0.0.0.0', '2025-11-27 12:22:40', '2025-11-27 12:22:40'),
+(1231, 1, '2025-11-27', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-27 13:05:41', '2025-11-27 13:05:41');
+INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, `log_message`, `log_message_all`, `permission_type`, `ip`, `created_at`, `updated_at`) VALUES
+(1232, 1, '2025-11-28', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-28 05:30:40', '2025-11-28 05:30:40'),
+(1233, 1, '2025-11-28', 'customer', 12, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_IGA_000010(IGAAH)', 'updated', '122.168.114.106', '2025-11-28 05:31:25', '2025-11-28 05:31:25'),
+(1234, 1, '2025-11-28', 'job types', 13, 'created job types aa', 'Super Admin System Super Super Admin created job types aa ', 'created', '122.168.114.106', '2025-11-28 05:34:57', '2025-11-28 05:34:57'),
+(1235, 1, '2025-11-28', 'task', 0, 'created task ddddddddd,fffffffff,', 'Super Admin System Super Super Admin created task ddddddddd,fffffffff, ', 'created', '122.168.114.106', '2025-11-28 05:35:20', '2025-11-28 05:35:20'),
+(1236, 1, '2025-11-28', 'job', 42, 'created job code:', 'Super Admin System Super Super Admin created job code: IGA_DFD_aa_000042', 'created', '122.168.114.106', '2025-11-28 06:09:38', '2025-11-28 06:09:38'),
+(1237, 1, '2025-11-28', 'job', 42, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: IGA_DFD_aa_000042', 'updated', '122.168.114.106', '2025-11-28 06:09:51', '2025-11-28 06:09:51'),
+(1238, 1, '2025-11-28', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-11-28 11:28:46', '2025-11-28 11:28:46'),
+(1239, 1, '2025-11-29', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-29 05:13:10', '2025-11-29 05:13:10'),
+(1240, 1, '2025-11-29', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-11-29 08:31:19', '2025-11-29 08:31:19'),
+(1241, 1, '2025-11-29', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-11-29 11:35:41', '2025-11-29 11:35:41'),
+(1242, 1, '2025-12-01', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-12-01 04:54:51', '2025-12-01 04:54:51'),
+(1243, 1, '2025-12-01', 'job', 43, 'created job code:', 'Super Admin System Super Super Admin created job code: DDD_AFR_JAP_000043', 'created', '122.168.114.106', '2025-12-01 04:55:19', '2025-12-01 04:55:19'),
+(1244, 1, '2025-12-01', 'job', 43, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: DDD_AFR_JAP_000043', 'updated', '122.168.114.106', '2025-12-01 04:55:38', '2025-12-01 04:55:38'),
+(1245, 1, '2025-12-01', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-12-01 05:20:14', '2025-12-01 05:20:14'),
+(1246, 1, '2025-12-01', 'job', 44, 'created job code:', 'Super Admin System Super Super Admin created job code: IGA_DFD_aa_000044', 'created', '122.168.114.106', '2025-12-01 05:30:20', '2025-12-01 05:30:20'),
+(1247, 1, '2025-12-01', 'job', 44, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: IGA_DFD_aa_000044', 'updated', '122.168.114.106', '2025-12-01 05:31:07', '2025-12-01 05:31:07'),
+(1248, 1, '2025-12-01', 'job', 45, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_HHH_comp_000045', 'created', '122.168.114.106', '2025-12-01 05:32:11', '2025-12-01 05:32:11'),
+(1249, 1, '2025-12-01', 'job', 45, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_HHH_comp_000045', 'updated', '122.168.114.106', '2025-12-01 05:32:24', '2025-12-01 05:32:24'),
+(1250, 1, '2025-12-01', 'job', 46, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_JJJ_JAP_000046', 'created', '122.168.114.106', '2025-12-01 05:42:41', '2025-12-01 05:42:41'),
+(1251, 24, '2025-12-01', '-', 0, ' Logged In', 'Processor FFFFFFFF hhhhh  Logged In ', '-', NULL, '2025-12-01 08:49:00', '2025-12-01 08:49:00'),
+(1252, 1, '2025-12-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-12-02 05:13:30', '2025-12-02 05:13:30'),
+(1253, 1, '2025-12-03', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-12-03 04:50:46', '2025-12-03 04:50:46'),
+(1254, 1, '2025-12-09', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-12-09 12:30:15', '2025-12-09 12:30:15'),
+(1255, 1, '2025-12-10', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-12-10 09:36:26', '2025-12-10 09:36:26'),
+(1256, 1, '2025-12-10', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-12-10 10:44:53', '2025-12-10 10:44:53'),
+(1257, 1, '2025-12-11', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-12-11 09:05:41', '2025-12-11 09:05:41'),
+(1258, 1, '2025-12-17', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-12-17 06:56:21', '2025-12-17 06:56:21'),
+(1259, 1, '2025-12-19', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-12-19 09:03:28', '2025-12-19 09:03:28'),
+(1260, 1, '2025-12-25', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-12-25 11:55:42', '2025-12-25 11:55:42'),
+(1261, 1, '2025-12-26', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-12-26 04:46:36', '2025-12-26 04:46:36'),
+(1262, 1, '2025-12-26', 'client', 7, 'deleted customer. customer code :', 'Super Admin System Super Super Admin deleted customer. customer code : cli_F &_CLI_00007(CLI--2)', 'deleted', '122.168.114.106', '2025-12-26 05:21:35', '2025-12-26 05:21:35'),
+(1263, 1, '2025-12-26', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-12-26 07:13:42', '2025-12-26 07:13:42'),
+(1264, 1, '2025-12-26', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2025-12-26 07:16:41', '2025-12-26 07:16:41'),
+(1265, 1, '2025-12-26', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-12-26 07:16:45', '2025-12-26 07:16:45'),
+(1266, 1, '2025-12-26', 'job', 13, 'edited the job information and has assigned the job to the reviewer, STAFF SIX job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the reviewer, STAFF SIX job code: SFF_GGG_VAT2_000013', 'updated', '122.168.114.106', '2025-12-26 10:53:24', '2025-12-26 10:53:24'),
+(1267, 1, '2025-12-31', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2025-12-31 10:24:19', '2025-12-31 10:24:19'),
+(1268, 1, '2025-12-31', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2025-12-31 10:44:06', '2025-12-31 10:44:06'),
+(1269, 1, '2026-01-01', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-01-01 10:58:35', '2026-01-01 10:58:35'),
+(1270, 11, '2026-01-01', '-', 0, ' Logged In', 'Manager STAFF SIX  Logged In ', '-', NULL, '2026-01-01 10:59:10', '2026-01-01 10:59:10'),
+(1271, 11, '2026-01-01', 'customer', 13, 'created customer profile. customer code :', 'Manager STAFF SIX created customer profile. customer code : cust_HGH_000011(HGHGHG)', 'created', '122.168.114.106', '2026-01-01 12:16:45', '2026-01-01 12:16:45'),
+(1272, 11, '2026-01-01', 'customer', 13, ' edited the service details and added an additional service while editing the customer code :', 'Manager STAFF SIX  edited the service details and added an additional service while editing the customer code : cust_HGH_000011(HGHGHG)', 'updated', '122.168.114.106', '2026-01-01 12:16:51', '2026-01-01 12:16:51'),
+(1273, 1, '2026-01-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-01-02 10:01:54', '2026-01-02 10:01:54'),
+(1274, 11, '2026-01-02', '-', 0, ' Logged In', 'Manager STAFF SIX  Logged In ', '-', NULL, '2026-01-02 10:42:41', '2026-01-02 10:42:41'),
+(1275, 1, '2026-01-02', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2026-01-02 11:14:54', '2026-01-02 11:14:54'),
+(1276, 1, '2026-01-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2026-01-02 11:51:35', '2026-01-02 11:51:35'),
+(1277, 1, '2026-01-03', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2026-01-03 09:14:17', '2026-01-03 09:14:17'),
+(1278, 11, '2026-01-03', '-', 0, ' Logged In', 'Manager STAFF SIX  Logged In ', '-', NULL, '2026-01-03 12:50:04', '2026-01-03 12:50:04'),
+(1279, 1, '2026-01-05', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-01-05 07:27:59', '2026-01-05 07:27:59'),
+(1280, 11, '2026-01-05', '-', 0, ' Logged In', 'Manager STAFF SIX  Logged In ', '-', NULL, '2026-01-05 07:29:54', '2026-01-05 07:29:54'),
+(1281, 11, '2026-01-05', '-', 0, ' Logged In', 'Manager STAFF SIX  Logged In ', '-', NULL, '2026-01-05 08:42:18', '2026-01-05 08:42:18'),
+(1282, 11, '2026-01-05', '-', 0, ' Logged Out', 'Manager STAFF SIX  Logged Out ', '-', '122.168.114.106', '2026-01-05 10:26:46', '2026-01-05 10:26:46'),
+(1283, 11, '2026-01-05', '-', 0, ' Logged In', 'Manager STAFF SIX  Logged In ', '-', '122.168.114.106', '2026-01-05 10:28:21', '2026-01-05 10:28:21'),
+(1284, 1, '2026-01-05', 'staff', 11, 'edited staff STAFF SIX', 'Super Admin System Super Super Admin edited staff STAFF SIX ', 'updated', '122.168.114.106', '2026-01-05 10:45:39', '2026-01-05 10:45:39'),
+(1285, 11, '2026-01-05', '-', 0, ' Logged Out', 'Manager STAFF SIX  Logged Out ', '-', '122.168.114.106', '2026-01-05 10:45:58', '2026-01-05 10:45:58'),
+(1286, 11, '2026-01-05', '-', 0, ' Logged In', 'Manager STAFF SIX  Logged In ', '-', '122.168.114.106', '2026-01-05 10:46:14', '2026-01-05 10:46:14'),
+(1287, 11, '2026-01-05', 'timesheet', 0, 'created a timesheet entry. Task type:External,  Date: 2026-01-05, Hours : 2:00 ,Job code:DDD_DDD_V4_000024, Task name:D', 'Manager STAFF SIX created a timesheet entry. Task type:External,  Date: 2026-01-05, Hours : 2:00 ,Job code:DDD_DDD_V4_000024, Task name:D ', 'updated', '0.0.0.0', '2026-01-05 12:20:36', '2026-01-05 12:20:36'),
+(1288, 11, '2026-01-05', 'job', 11, 'edited the job information job code:', 'Manager STAFF SIX edited the job information job code: SHK_SSH_V3_000011', 'updated', '122.168.114.106', '2026-01-05 12:23:15', '2026-01-05 12:23:15'),
+(1289, 1, '2026-01-08', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-01-08 09:39:41', '2026-01-08 09:39:41'),
+(1290, 1, '2026-01-16', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-01-16 12:28:24', '2026-01-16 12:28:24'),
+(1291, 1, '2026-01-21', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-01-21 09:23:49', '2026-01-21 09:23:49'),
+(1292, 1, '2026-01-22', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-01-22 06:46:13', '2026-01-22 06:46:13'),
+(1293, 1, '2026-01-28', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-01-28 05:13:06', '2026-01-28 05:13:06'),
+(1294, 1, '2026-01-29', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2026-01-29 04:47:58', '2026-01-29 04:47:58'),
+(1295, 1, '2026-01-29', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-01-29 04:48:03', '2026-01-29 04:48:03'),
+(1296, 1, '2026-01-29', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2026-01-29 06:00:58', '2026-01-29 06:00:58'),
+(1297, 1, '2026-01-29', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-01-29 06:01:03', '2026-01-29 06:01:03'),
+(1298, 1, '2026-01-29', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-01-29 09:45:24', '2026-01-29 09:45:24'),
+(1299, 1, '2026-01-29', 'job', 47, 'created job code:', 'Super Admin System Super Super Admin created job code: DDD_AFR_V4_000047', 'created', '122.168.114.106', '2026-01-29 09:47:45', '2026-01-29 09:47:45'),
+(1300, 1, '2026-01-30', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-01-30 04:44:09', '2026-01-30 04:44:09'),
+(1301, 1, '2026-01-31', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-01-31 06:28:04', '2026-01-31 06:28:04'),
+(1302, 1, '2026-02-03', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-02-03 04:59:13', '2026-02-03 04:59:13'),
+(1303, 1, '2026-02-03', 'job', 1, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: SHK_SSH_V3_00001', 'updated', '122.168.114.106', '2026-02-03 05:10:01', '2026-02-03 05:10:01'),
+(1304, 17, '2026-02-03', '-', 0, ' Logged In', 'Processor STAFF ELEVEN  Logged In ', '-', NULL, '2026-02-03 05:48:48', '2026-02-03 05:48:48'),
+(1305, 17, '2026-02-05', '-', 0, ' Logged Out', 'Processor STAFF ELEVEN  Logged Out ', '-', '122.168.114.106', '2026-02-05 08:38:08', '2026-02-05 08:38:09'),
+(1306, 1, '2026-02-05', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-02-05 08:38:24', '2026-02-05 08:38:24'),
+(1307, 1, '2026-02-06', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-02-06 04:46:25', '2026-02-06 04:46:25'),
+(1308, 1, '2026-02-07', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-02-07 05:46:35', '2026-02-07 05:46:35'),
+(1309, 1, '2026-02-10', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-02-10 06:08:51', '2026-02-10 06:08:51'),
+(1310, 1, '2026-02-10', 'staff', 23, 'edited staff DDDDDD DD', 'Super Admin System Super Super Admin edited staff DDDDDD DD ', 'updated', '122.168.114.106', '2026-02-10 06:09:16', '2026-02-10 06:09:16'),
+(1311, 23, '2026-02-10', '-', 0, ' Logged In', 'Processor DDDDDD DD  Logged In ', '-', NULL, '2026-02-10 06:10:03', '2026-02-10 06:10:03'),
+(1312, 23, '2026-02-10', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2026-02-09, Hours : 10:00 Date: 2026-02-10, Hours : 10:00 Date: 2026-02-11, Hours : 10:00 ,Job code:abc, Task name:a', 'Processor DDDDDD DD created a timesheet entry. Task type:Internal,  Date: 2026-02-09, Hours : 10:00 Date: 2026-02-10, Hours : 10:00 Date: 2026-02-11, Hours : 10:00 ,Job code:abc, Task name:a ', 'updated', '122.168.114.106', '2026-02-10 06:10:31', '2026-02-10 06:10:31'),
+(1313, 23, '2026-02-10', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,  Date: 2026-02-12, Updated hours : 10:00 Date: 2026-02-13, Updated hours : 3:00 ,Job code:abc, Task name:a', 'Processor DDDDDD DD submitted a timesheet entry. Task type:Internal,  Date: 2026-02-12, Updated hours : 10:00 Date: 2026-02-13, Updated hours : 3:00 ,Job code:abc, Task name:a ', 'updated', '122.168.114.106', '2026-02-10 06:11:14', '2026-02-10 06:11:14'),
+(1314, 1, '2026-02-10', 'staff', 23, 'edited staff DDDDDD55 DD', 'Super Admin System Super Super Admin edited staff DDDDDD55 DD ', 'updated', '122.168.114.106', '2026-02-10 06:40:26', '2026-02-10 06:40:26'),
+(1315, 1, '2026-02-10', 'staff', 23, 'edited staff DDDDDD55 DD', 'Super Admin System Super Super Admin edited staff DDDDDD55 DD ', 'updated', '122.168.114.106', '2026-02-10 06:40:59', '2026-02-10 06:40:59'),
+(1316, 1, '2026-02-10', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,  Date: 2026-02-09, Hours : 12:00 ,Job code:abc, Task name:a', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,  Date: 2026-02-09, Hours : 12:00 ,Job code:abc, Task name:a ', 'updated', '122.168.114.106', '2026-02-10 07:15:18', '2026-02-10 07:15:18'),
+(1317, 1, '2026-02-10', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2026-02-10 08:23:58', '2026-02-10 08:23:58'),
+(1318, 1, '2026-02-12', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-02-12 06:08:34', '2026-02-12 06:08:34'),
+(1319, 1, '2026-02-12', 'job', 47, 'updated the job status from To Be Started - Not Yet Allocated Internally to Not Progressing - Duplicate. job code:', 'Super Admin System Super Super Admin updated the job status from To Be Started - Not Yet Allocated Internally to Not Progressing - Duplicate. job code: DDD_AFR_V4_000047', 'updated', '122.168.114.106', '2026-02-12 07:37:12', '2026-02-12 07:37:12'),
+(1320, 1, '2026-02-20', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '116.75.243.107', '2026-02-20 04:32:47', '2026-02-20 04:32:47'),
+(1321, 1, '2026-02-20', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2026-02-20 04:45:32', '2026-02-20 04:45:32'),
+(1322, 1, '2026-02-26', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-02-26 04:56:04', '2026-02-26 04:56:04'),
+(1323, 12, '2026-02-26', '-', 0, ' Logged In', 'Reviewer BBBBBB 7 hv  Logged In ', '-', NULL, '2026-02-26 04:56:49', '2026-02-26 04:56:49'),
+(1324, 12, '2026-02-26', '-', 0, ' Logged Out', 'Reviewer BBBBBB 7 hv  Logged Out ', '-', '122.168.114.106', '2026-02-26 04:57:22', '2026-02-26 04:57:22'),
+(1325, 1, '2026-03-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-02 11:35:53', '2026-03-02 11:35:53'),
+(1326, 1, '2026-03-03', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-03 04:50:20', '2026-03-03 04:50:20'),
+(1327, 1, '2026-03-03', 'job', 47, 'updated the job status from Not Progressing - Duplicate to To Be Started - Not Yet Allocated Internally. job code:', 'Super Admin System Super Super Admin updated the job status from Not Progressing - Duplicate to To Be Started - Not Yet Allocated Internally. job code: DDD_AFR_V4_000047', 'updated', '122.168.114.106', '2026-03-03 09:15:06', '2026-03-03 09:15:06'),
+(1328, 1, '2026-03-03', 'job', 47, 'updated the job status from To Be Started - Not Yet Allocated Internally to Not Progressing - Customer Processing. job code:', 'Super Admin System Super Super Admin updated the job status from To Be Started - Not Yet Allocated Internally to Not Progressing - Customer Processing. job code: DDD_AFR_V4_000047', 'updated', '122.168.114.106', '2026-03-03 09:15:58', '2026-03-03 09:15:58'),
+(1329, 1, '2026-03-05', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-05 08:35:08', '2026-03-05 08:35:08'),
+(1330, 1, '2026-03-06', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-06 04:38:04', '2026-03-06 04:38:04'),
+(1331, 1, '2026-03-06', 'status types', 5, 'deleted status types To Be Started', 'Super Admin System Super Super Admin deleted status types To Be Started ', 'deleted', '122.168.114.106', '2026-03-06 05:04:14', '2026-03-06 05:04:14'),
+(1332, 1, '2026-03-07', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-07 09:37:27', '2026-03-07 09:37:27'),
+(1333, 1, '2026-03-09', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-09 08:33:13', '2026-03-09 08:33:13'),
+(1334, 1, '2026-03-09', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2026-03-09 12:33:36', '2026-03-09 12:33:36'),
+(1335, 1, '2026-03-10', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-10 06:05:13', '2026-03-10 06:05:13'),
+(1336, 22, '2026-03-10', '-', 0, ' Logged In', 'Processor GGGG wff  Logged In ', '-', NULL, '2026-03-10 08:44:06', '2026-03-10 08:44:06'),
+(1337, 22, '2026-03-10', 'job', 48, 'created job code:', 'Processor GGGG wff created job code: NEW_bfb_comp_000048', 'created', '122.168.114.106', '2026-03-10 08:44:34', '2026-03-10 08:44:34'),
+(1338, 1, '2026-03-10', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2026-03-10 10:23:58', '2026-03-10 10:23:58'),
+(1339, 1, '2026-03-10', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-10 10:30:31', '2026-03-10 10:30:31'),
+(1340, 1, '2026-03-11', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-11 09:13:54', '2026-03-11 09:13:54'),
+(1341, 1, '2026-03-11', 'customer', 12, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_IGA_000010(IGAAH)', 'updated', '122.168.114.106', '2026-03-11 09:19:51', '2026-03-11 09:19:51'),
+(1342, 1, '2026-03-12', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-12 04:55:05', '2026-03-12 04:55:05'),
+(1343, 1, '2026-03-12', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2026-03-12 06:55:20', '2026-03-12 06:55:20'),
+(1344, 1, '2026-03-12', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-12 10:49:16', '2026-03-12 10:49:16'),
+(1345, 1, '2026-03-13', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-13 08:43:42', '2026-03-13 08:43:42'),
+(1346, 1, '2026-03-14', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-14 04:38:40', '2026-03-14 04:38:40'),
+(1347, 1, '2026-03-14', 'timesheet', 0, 'created a timesheet entry. Task type:External,  Date: 2026-03-09, Hours : 4:00 ,Job code:IGA_DFD_aa_000044, Task name:fffffffff', 'Super Admin System Super Super Admin created a timesheet entry. Task type:External,  Date: 2026-03-09, Hours : 4:00 ,Job code:IGA_DFD_aa_000044, Task name:fffffffff ', 'updated', '122.168.114.106', '2026-03-14 07:00:37', '2026-03-14 07:00:37'),
+(1348, 1, '2026-03-16', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-16 09:05:42', '2026-03-16 09:05:42'),
+(1349, 1, '2026-03-16', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-16 09:24:40', '2026-03-16 09:24:40'),
+(1350, 1, '2026-03-16', 'job', 51, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: DDD_AFR_V4_000051', 'updated', '122.168.114.106', '2026-03-16 11:48:08', '2026-03-16 11:48:08'),
+(1351, 1, '2026-03-16', 'job', 56, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: DDD_AFR_V4_000056', 'copied', '122.168.114.106', '2026-03-16 11:55:48', '2026-03-16 11:55:48'),
+(1352, 1, '2026-03-17', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-17 09:07:05', '2026-03-17 09:07:05'),
+(1353, 1, '2026-03-18', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-18 09:06:35', '2026-03-18 09:06:35'),
+(1354, 1, '2026-03-18', 'checklist', 5, 'created checklist yjjj', 'Super Admin System Super Super Admin created checklist yjjj ', 'created', '122.168.114.106', '2026-03-18 10:17:25', '2026-03-18 10:17:25'),
+(1355, 1, '2026-03-19', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-19 09:21:50', '2026-03-19 09:21:50'),
+(1356, 1, '2026-03-20', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-20 12:01:21', '2026-03-20 12:01:21'),
+(1357, 1, '2026-03-24', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-24 06:01:14', '2026-03-24 06:01:14'),
+(1358, 1, '2026-03-24', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2026-03-24 06:16:22', '2026-03-24 06:16:22'),
+(1359, 1, '2026-03-24', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-24 07:19:26', '2026-03-24 07:19:26'),
+(1360, 1, '2026-03-24', 'checklist', 1, 'created checklist Che1', 'Super Admin System Super Super Admin created checklist Che1 ', 'created', '122.168.114.106', '2026-03-24 13:21:05', '2026-03-24 13:21:05'),
+(1361, 1, '2026-03-25', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-25 09:52:06', '2026-03-25 09:52:06'),
+(1362, 1, '2026-03-25', 'checklist', 2, 'created checklist dgvdsvbdbdfbfbnfbhdfgbdbd', 'Super Admin System Super Super Admin created checklist dgvdsvbdbdfbfbnfbhdfgbdbd ', 'created', '122.168.114.106', '2026-03-25 12:04:47', '2026-03-25 12:04:47'),
+(1363, 1, '2026-03-25', 'checklist', 3, 'created checklist yyyy', 'Super Admin System Super Super Admin created checklist yyyy ', 'created', '122.168.114.106', '2026-03-25 12:05:22', '2026-03-25 12:05:22'),
+(1364, 1, '2026-03-25', 'checklist', 4, 'created checklist llllll', 'Super Admin System Super Super Admin created checklist llllll ', 'created', '122.168.114.106', '2026-03-25 12:08:04', '2026-03-25 12:08:04'),
+(1365, 1, '2026-03-25', 'checklist', 5, 'created checklist pppp', 'Super Admin System Super Super Admin created checklist pppp ', 'created', '122.168.114.106', '2026-03-25 12:17:41', '2026-03-25 12:17:41'),
+(1366, 1, '2026-03-26', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-26 08:18:49', '2026-03-26 08:18:49'),
+(1367, 1, '2026-03-26', 'checklist', 6, 'created checklist Vikas 111', 'Super Admin System Super Super Admin created checklist Vikas 111 ', 'created', '122.168.114.106', '2026-03-26 08:58:12', '2026-03-26 08:58:12'),
+(1368, 1, '2026-03-26', 'checklist', 1, 'created checklist test 1 p', 'Super Admin System Super Super Admin created checklist test 1 p ', 'created', '122.168.114.106', '2026-03-26 10:22:10', '2026-03-26 10:22:10'),
+(1369, 1, '2026-03-26', 'checklist', 2, 'created checklist tets2 ', 'Super Admin System Super Super Admin created checklist tets2  ', 'created', '122.168.114.106', '2026-03-26 10:22:24', '2026-03-26 10:22:24'),
+(1370, 1, '2026-03-26', 'checklist', 3, 'created checklist test', 'Super Admin System Super Super Admin created checklist test ', 'created', '122.168.114.106', '2026-03-26 10:22:39', '2026-03-26 10:22:39'),
+(1371, 1, '2026-03-26', 'checklist', 4, 'created checklist test4 ', 'Super Admin System Super Super Admin created checklist test4  ', 'created', '122.168.114.106', '2026-03-26 10:22:52', '2026-03-26 10:22:52'),
+(1372, 1, '2026-03-26', 'checklist', 4, 'edited checklist test4 ', 'Super Admin System Super Super Admin edited checklist test4  ', 'updated', '122.168.114.106', '2026-03-26 10:44:26', '2026-03-26 10:44:26'),
+(1373, 1, '2026-03-26', 'checklist', 4, 'edited checklist test4 ', 'Super Admin System Super Super Admin edited checklist test4  ', 'updated', '122.168.114.106', '2026-03-26 10:50:23', '2026-03-26 10:50:23'),
+(1374, 1, '2026-03-26', 'checklist', 5, 'created checklist tessss5', 'Super Admin System Super Super Admin created checklist tessss5 ', 'created', '122.168.114.106', '2026-03-26 11:16:15', '2026-03-26 11:16:15'),
+(1375, 1, '2026-03-27', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-27 05:26:37', '2026-03-27 05:26:37'),
+(1376, 1, '2026-03-27', 'job', 4, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: SHK_SSS_JAP_00004', 'updated', '122.168.114.106', '2026-03-27 05:34:56', '2026-03-27 05:34:56'),
+(1377, 1, '2026-03-27', 'job', 4, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: SHK_SSS_aa_00004', 'updated', '122.168.114.106', '2026-03-27 05:36:37', '2026-03-27 05:36:37'),
+(1378, 1, '2026-03-27', 'job', 4, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: SHK_SSS_aa_00004', 'updated', '122.168.114.106', '2026-03-27 05:39:26', '2026-03-27 05:39:26'),
+(1379, 1, '2026-03-27', 'job', 4, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: SHK_SSS_JAP_00004', 'updated', '122.168.114.106', '2026-03-27 05:39:49', '2026-03-27 05:39:49'),
+(1380, 1, '2026-03-27', 'client', 19, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_IGA_AQU_000019(AQUATECH SURFACING LTD)', 'created', '122.168.114.106', '2026-03-27 06:26:24', '2026-03-27 06:26:24'),
+(1381, 1, '2026-03-27', 'customer', 12, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_IGA_000010(IGAAH)', 'updated', '122.168.114.106', '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
+(1382, 1, '2026-03-27', 'job', 57, 'created job code:', 'Super Admin System Super Super Admin created job code: IGA_AQU_JAP_000057', 'created', '122.168.114.106', '2026-03-27 06:40:59', '2026-03-27 06:40:59'),
+(1383, 1, '2026-03-27', 'job', 58, 'created job code:', 'Super Admin System Super Super Admin created job code: IGA_AQU_V4_000058', 'created', '122.168.114.106', '2026-03-27 08:49:39', '2026-03-27 08:49:39'),
+(1384, 1, '2026-03-27', 'job', 58, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: IGA_AQU_V4_000058', 'updated', '122.168.114.106', '2026-03-27 08:50:09', '2026-03-27 08:50:09'),
+(1385, 1, '2026-03-27', 'job', 59, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: IGA_AQU_JAP_000059', 'copied', '122.168.114.106', '2026-03-27 08:56:34', '2026-03-27 08:56:34'),
+(1386, 1, '2026-03-27', 'checklist', 6, 'created checklist WE', 'Super Admin System Super Super Admin created checklist WE ', 'created', '122.168.114.106', '2026-03-27 10:16:54', '2026-03-27 10:16:54'),
+(1387, 1, '2026-03-27', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,  Date: 2026-03-23, Updated hours : 20:00 ,Job code:abc, Task name:a', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:Internal,  Date: 2026-03-23, Updated hours : 20:00 ,Job code:abc, Task name:a ', 'updated', '122.168.114.106', '2026-03-27 12:01:59', '2026-03-27 12:01:59'),
+(1388, 1, '2026-03-27', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,\n                 Date:2026-03-23, Updated hours:21:00, Job code:abc,\n                Task name:a', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:Internal,\n                 Date:2026-03-23, Updated hours:21:00, Job code:abc,\n                Task name:a ', 'updated', '122.168.114.106', '2026-03-27 12:25:10', '2026-03-27 12:25:10'),
+(1389, 1, '2026-03-27', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,\n                 Date:2026-03-23, Updated hours:23:00, Job code:abc,\n                Task name:a', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:Internal,\n                 Date:2026-03-23, Updated hours:23:00, Job code:abc,\n                Task name:a ', 'updated', '122.168.114.106', '2026-03-27 12:31:34', '2026-03-27 12:31:34'),
+(1390, 1, '2026-03-27', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,\n                 Date: 2026-03-30, Hours : 12:00 Date: 2026-03-31, Hours : 21:00 ,Job code:abc,\n                Task name:a', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,\n                 Date: 2026-03-30, Hours : 12:00 Date: 2026-03-31, Hours : 21:00 ,Job code:abc,\n                Task name:a ', 'updated', '122.168.114.106', '2026-03-27 12:31:52', '2026-03-27 12:31:52'),
+(1391, 1, '2026-03-27', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,\n                 Date: 2026-03-23, Hours : 2:00 Date: 2026-03-24, Hours : 12:00 Date: 2026-03-25, Hours : 12:00 ,Job code:ddddd,\n                Task name:bb', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,\n                 Date: 2026-03-23, Hours : 2:00 Date: 2026-03-24, Hours : 12:00 Date: 2026-03-25, Hours : 12:00 ,Job code:ddddd,\n                Task name:bb ', 'updated', '122.168.114.106', '2026-03-27 12:33:17', '2026-03-27 12:33:17'),
+(1392, 1, '2026-03-28', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-28 05:05:22', '2026-03-28 05:05:22'),
+(1393, 1, '2026-03-28', 'job', 47, 'edited the job information, edited the job deadline and edited the job other tasks job code:', 'Super Admin System Super Super Admin edited the job information, edited the job deadline and edited the job other tasks job code: DDD_AFR_JAP_000047', 'updated', '122.168.114.106', '2026-03-28 05:11:48', '2026-03-28 05:11:48'),
+(1394, 1, '2026-03-28', 'job', 60, 'created job code:', 'Super Admin System Super Super Admin created job code: NEW_bfb_V4_4_000060', 'created', '122.168.114.106', '2026-03-28 05:20:37', '2026-03-28 05:20:37'),
+(1395, 1, '2026-03-28', 'job', 60, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: NEW_bfb_JAP_000060', 'updated', '122.168.114.106', '2026-03-28 06:11:20', '2026-03-28 06:11:20'),
+(1396, 23, '2026-03-28', '-', 0, ' Logged In', 'Processor DDDDDD55 DD  Logged In ', '-', NULL, '2026-03-28 06:30:30', '2026-03-28 06:30:30'),
+(1397, 23, '2026-03-28', '-', 0, ' Logged Out', 'Processor DDDDDD55 DD  Logged Out ', '-', '122.168.114.106', '2026-03-28 06:30:42', '2026-03-28 06:30:42'),
+(1398, 22, '2026-03-28', '-', 0, ' Logged In', 'Processor GGGG wff  Logged In ', '-', '122.168.114.106', '2026-03-28 06:31:09', '2026-03-28 06:31:09'),
+(1399, 22, '2026-03-28', 'job', 56, 'edited the job information and edited the job deadline job code:', 'Processor GGGG wff edited the job information and edited the job deadline job code: DDD_AFR_JAP_000056', 'updated', '122.168.114.106', '2026-03-28 06:32:08', '2026-03-28 06:32:08'),
+(1400, 22, '2026-03-28', 'job', 61, 'created job code:', 'Processor GGGG wff created job code: DDD_AFR_JAP_000061', 'created', '122.168.114.106', '2026-03-28 06:32:57', '2026-03-28 06:32:57'),
+(1401, 22, '2026-03-28', 'job', 62, 'Copied job code:', 'Processor GGGG wff Copied job code: DDD_AFR_JAP_000062', 'copied', '122.168.114.106', '2026-03-28 06:33:15', '2026-03-28 06:33:15'),
+(1402, 1, '2026-03-28', 'customer', 13, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_HGH_000011(HGHGHG)', 'updated', '122.168.114.106', '2026-03-28 06:46:21', '2026-03-28 06:46:21'),
+(1403, 1, '2026-03-28', 'customer', 13, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_HGH_000011(HGHGHG)', 'updated', '122.168.114.106', '2026-03-28 06:46:31', '2026-03-28 06:46:31'),
+(1404, 22, '2026-03-28', 'customer', 14, 'created customer profile. customer code :', 'Processor GGGG wff created customer profile. customer code : cust_wrw_000012(wrwr)', 'created', '122.168.114.106', '2026-03-28 06:56:03', '2026-03-28 06:56:03'),
+(1405, 22, '2026-03-28', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Processor GGGG wff  edited the service details and added an additional service while editing the customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-03-28 06:56:14', '2026-03-28 06:56:14'),
+(1406, 1, '2026-03-28', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-03-28 10:16:06', '2026-03-28 10:16:06'),
+(1407, 1, '2026-03-28', 'customer', 14, 'added FTE/Dedicated Staffing (engagement model) customer code :', 'Super Admin System Super Super Admin added FTE/Dedicated Staffing (engagement model) customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-03-28 10:16:22', '2026-03-28 10:16:22'),
+(1408, 1, '2026-03-28', 'client', 20, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_wrw_WWW_000020(WWWWW)', 'created', '122.168.114.106', '2026-03-28 10:16:39', '2026-03-28 10:16:39'),
+(1409, 1, '2026-03-28', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-03-28 10:17:16', '2026-03-28 10:17:16'),
+(1410, 1, '2026-03-28', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-03-28 10:34:46', '2026-03-28 10:34:46'),
+(1411, 1, '2026-03-28', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-03-28 10:35:07', '2026-03-28 10:35:07'),
+(1412, 1, '2026-03-28', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-03-28 10:35:28', '2026-03-28 10:35:28'),
+(1413, 1, '2026-03-28', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-03-28 11:44:33', '2026-03-28 11:44:33'),
+(1414, 1, '2026-03-28', 'checklist', 7, 'created checklist FRF', 'Super Admin System Super Super Admin created checklist FRF ', 'created', '122.168.114.106', '2026-03-28 11:57:07', '2026-03-28 11:57:07'),
+(1415, 1, '2026-03-28', 'checklist', 8, 'created checklist DDD', 'Super Admin System Super Super Admin created checklist DDD ', 'created', '\"122.168.114.106\"', '2026-03-28 13:13:51', '2026-03-28 13:13:51'),
+(1416, 1, '2026-03-30', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-30 06:13:13', '2026-03-30 06:13:13'),
+(1417, 1, '2026-03-30', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-03-30 06:22:08', '2026-03-30 06:22:08'),
+(1418, 1, '2026-03-30', 'job', 63, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_V4_000063', 'created', '122.168.114.106', '2026-03-30 07:00:04', '2026-03-30 07:00:04'),
+(1419, 1, '2026-03-30', 'job', 64, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: wrw_WWW_V4_000064', 'copied', '122.168.114.106', '2026-03-30 07:00:23', '2026-03-30 07:00:23'),
+(1420, 1, '2026-03-30', 'job', 65, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: wrw_WWW_V4_000065', 'copied', '122.168.114.106', '2026-03-30 07:16:13', '2026-03-30 07:16:13'),
+(1421, 1, '2026-03-30', 'job', 66, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: wrw_WWW_V4_000066', 'copied', '122.168.114.106', '2026-03-30 08:19:45', '2026-03-30 08:19:45'),
+(1422, 1, '2026-03-30', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-30 09:41:56', '2026-03-30 09:41:56'),
+(1423, 1, '2026-03-30', 'checklist', 8, 'deleted checklist DDD', 'Super Admin System Super Super Admin deleted checklist DDD ', 'deleted', '122.168.114.106', '2026-03-30 09:43:14', '2026-03-30 09:43:14'),
+(1424, 1, '2026-03-30', 'checklist', 7, 'deleted checklist FRF', 'Super Admin System Super Super Admin deleted checklist FRF ', 'deleted', '122.168.114.106', '2026-03-30 09:43:17', '2026-03-30 09:43:17'),
+(1425, 1, '2026-03-30', 'checklist', 6, 'deleted checklist WE', 'Super Admin System Super Super Admin deleted checklist WE ', 'deleted', '122.168.114.106', '2026-03-30 09:43:19', '2026-03-30 09:43:19'),
+(1426, 1, '2026-03-30', 'checklist', 5, 'deleted checklist tessss5', 'Super Admin System Super Super Admin deleted checklist tessss5 ', 'deleted', '122.168.114.106', '2026-03-30 09:43:22', '2026-03-30 09:43:22'),
+(1427, 1, '2026-03-30', 'checklist', 4, 'deleted checklist test4 ', 'Super Admin System Super Super Admin deleted checklist test4  ', 'deleted', '122.168.114.106', '2026-03-30 09:43:25', '2026-03-30 09:43:25'),
+(1428, 1, '2026-03-30', 'checklist', 3, 'deleted checklist test', 'Super Admin System Super Super Admin deleted checklist test ', 'deleted', '122.168.114.106', '2026-03-30 09:43:27', '2026-03-30 09:43:27'),
+(1429, 1, '2026-03-30', 'checklist', 1, 'deleted checklist test 1 p', 'Super Admin System Super Super Admin deleted checklist test 1 p ', 'deleted', '122.168.114.106', '2026-03-30 09:43:35', '2026-03-30 09:43:35'),
+(1430, 1, '2026-03-30', 'checklist', 2, 'deleted checklist tets2 ', 'Super Admin System Super Super Admin deleted checklist tets2  ', 'deleted', '122.168.114.106', '2026-03-30 09:43:38', '2026-03-30 09:43:38'),
+(1431, 1, '2026-03-30', 'checklist', 9, 'created checklist CH1', 'Super Admin System Super Super Admin created checklist CH1 ', 'created', '\"122.168.114.106\"', '2026-03-30 09:44:13', '2026-03-30 09:44:13'),
+(1432, 1, '2026-03-30', 'checklist', 9, 'edited checklist CH1', 'Super Admin System Super Super Admin edited checklist CH1 ', 'updated', '\"122.168.114.106\"', '2026-03-30 11:36:52', '2026-03-30 11:36:52'),
+(1433, 1, '2026-03-30', 'checklist', 10, 'created checklist dbdgvd', 'Super Admin System Super Super Admin created checklist dbdgvd ', 'created', '\"122.168.114.106\"', '2026-03-30 11:38:13', '2026-03-30 11:38:13'),
+(1434, 1, '2026-03-30', 'checklist', 10, 'edited checklist dbdgvd', 'Super Admin System Super Super Admin edited checklist dbdgvd ', 'updated', '\"122.168.114.106\"', '2026-03-30 11:38:17', '2026-03-30 11:38:17'),
+(1435, 1, '2026-03-30', 'checklist', 10, 'edited checklist dbdgvd', 'Super Admin System Super Super Admin edited checklist dbdgvd ', 'updated', '\"122.168.114.106\"', '2026-03-30 11:38:31', '2026-03-30 11:38:31'),
+(1436, 1, '2026-03-30', 'checklist', 10, 'edited checklist dbdgvd', 'Super Admin System Super Super Admin edited checklist dbdgvd ', 'updated', '\"122.168.114.106\"', '2026-03-30 11:38:36', '2026-03-30 11:38:36'),
+(1437, 1, '2026-03-30', 'checklist', 10, 'edited checklist dbdgvd', 'Super Admin System Super Super Admin edited checklist dbdgvd ', 'updated', '\"122.168.114.106\"', '2026-03-30 11:38:42', '2026-03-30 11:38:42'),
+(1438, 1, '2026-03-30', 'checklist', 11, 'created checklist RE-CHI', 'Super Admin System Super Super Admin created checklist RE-CHI ', 'created', '\"122.168.114.106\"', '2026-03-30 11:50:16', '2026-03-30 11:50:16'),
+(1439, 1, '2026-03-30', 'job', 67, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_V3_000067', 'created', '122.168.114.106', '2026-03-30 13:17:50', '2026-03-30 13:17:50'),
+(1440, 1, '2026-03-31', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-03-31 04:56:34', '2026-03-31 04:56:34'),
+(1441, 13, '2026-03-31', '-', 0, ' Logged In', 'Manager shk sss  Logged In ', '-', NULL, '2026-03-31 05:09:20', '2026-03-31 05:09:20'),
+(1442, 1, '2026-03-31', 'customer', 14, 'edited sole trader information. customer code :', 'Super Admin System Super Super Admin edited sole trader information. customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-03-31 05:09:49', '2026-03-31 05:09:49'),
+(1443, 1, '2026-03-31', 'customer', 14, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-03-31 05:09:52', '2026-03-31 05:09:52'),
+(1444, 1, '2026-03-31', 'customer', 14, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-03-31 05:10:56', '2026-03-31 05:10:56'),
+(1445, 1, '2026-03-31', 'job', 68, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_aa_000068', 'created', '122.168.114.106', '2026-03-31 05:13:34', '2026-03-31 05:13:34'),
+(1446, 1, '2026-03-31', 'job', 69, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_V4_000069', 'created', '122.168.114.106', '2026-03-31 06:45:47', '2026-03-31 06:45:47'),
+(1447, 1, '2026-03-31', 'job', 70, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_aa_000070', 'created', '122.168.114.106', '2026-03-31 06:54:37', '2026-03-31 06:54:37'),
+(1448, 1, '2026-03-31', 'job', 71, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_aa_000071', 'created', '122.168.114.106', '2026-03-31 09:04:35', '2026-03-31 09:04:35'),
+(1449, 1, '2026-03-31', 'job', 72, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_DDD_000072', 'created', '122.168.114.106', '2026-03-31 09:27:37', '2026-03-31 09:27:37'),
+(1450, 1, '2026-03-31', 'job', 72, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_DDD_000072', 'updated', '122.168.114.106', '2026-03-31 09:49:15', '2026-03-31 09:49:15'),
+(1451, 1, '2026-03-31', 'job', 72, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_DDD_000072', 'updated', '122.168.114.106', '2026-03-31 10:16:12', '2026-03-31 10:16:12'),
+(1452, 1, '2026-03-31', 'job', 72, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_DDD_000072', 'updated', '122.168.114.106', '2026-03-31 10:22:11', '2026-03-31 10:22:11'),
+(1453, 1, '2026-03-31', 'job', 72, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_DDD_000072', 'updated', '122.168.114.106', '2026-03-31 10:50:50', '2026-03-31 10:50:50'),
+(1454, 1, '2026-03-31', 'job', 73, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_aa_000073', 'created', '122.168.114.106', '2026-03-31 11:56:51', '2026-03-31 11:56:51'),
+(1455, 1, '2026-03-31', 'job', 72, 'edited the job information and has assigned the job to the processor, fvedgv gvddvd job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, fvedgv gvddvd job code: wrw_WWW_DDD_000072', 'updated', '122.168.114.106', '2026-03-31 12:04:37', '2026-03-31 12:04:37'),
+(1456, 1, '2026-03-31', 'job', 72, 'edited the job information and has assigned the job to the reviewer, shk sss job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the reviewer, shk sss job code: wrw_WWW_DDD_000072', 'updated', '122.168.114.106', '2026-03-31 12:19:13', '2026-03-31 12:19:13'),
+(1457, 1, '2026-03-31', 'job', 65, 'edited the job information and has assigned the job to the processor, FFFFFFFF hhhhh job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, FFFFFFFF hhhhh job code: wrw_WWW_V4_000065', 'updated', '122.168.114.106', '2026-03-31 12:19:37', '2026-03-31 12:19:37'),
+(1458, 1, '2026-03-31', 'job', 73, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000073', 'updated', '122.168.114.106', '2026-03-31 12:38:52', '2026-03-31 12:38:52');
+INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, `log_message`, `log_message_all`, `permission_type`, `ip`, `created_at`, `updated_at`) VALUES
+(1459, 1, '2026-03-31', 'job', 73, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000073', 'updated', '122.168.114.106', '2026-03-31 12:39:21', '2026-03-31 12:39:21'),
+(1460, 1, '2026-04-01', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-01 04:56:55', '2026-04-01 04:56:55'),
+(1461, 1, '2026-04-01', 'job', 73, 'completed the draft for job code:', 'Super Admin System Super Super Admin completed the draft for job code: wrw_WWW_aa_000073', 'created', '122.168.114.106', '2026-04-01 06:15:45', '2026-04-01 06:15:45'),
+(1462, 1, '2026-04-01', 'job', 73, 'updated the job status from Completed - Completed to Completed - Filed with Companies House and HMRC. job code:', 'Super Admin System Super Super Admin updated the job status from Completed - Completed to Completed - Filed with Companies House and HMRC. job code: wrw_WWW_aa_000073', 'updated', '122.168.114.106', '2026-04-01 06:17:11', '2026-04-01 06:17:11'),
+(1463, 1, '2026-04-01', 'master status', 22, 'created master status shsikd', 'Super Admin System Super Super Admin created master status shsikd ', 'created', '122.168.114.106', '2026-04-01 06:26:52', '2026-04-01 06:26:52'),
+(1464, 1, '2026-04-01', 'master status', 18, 'edited master status Completed - Filed with Companies House and HMRC', 'Super Admin System Super Super Admin edited master status Completed - Filed with Companies House and HMRC ', 'updated', '122.168.114.106', '2026-04-01 07:03:15', '2026-04-01 07:03:15'),
+(1465, 1, '2026-04-01', 'master status', 18, 'edited master status Completed - Filed with Companies House and HMRC', 'Super Admin System Super Super Admin edited master status Completed - Filed with Companies House and HMRC ', 'updated', '122.168.114.106', '2026-04-01 07:03:44', '2026-04-01 07:03:44'),
+(1466, 1, '2026-04-01', 'job', 62, 'edited the job information, has assigned the job to the reviewer, shk sss and has assigned the job to the processor, shk sss job code:', 'Super Admin System Super Super Admin edited the job information, has assigned the job to the reviewer, shk sss and has assigned the job to the processor, shk sss job code: DDD_AFR_JAP_000062', 'updated', '122.168.114.106', '2026-04-01 07:21:21', '2026-04-01 07:21:21'),
+(1467, 1, '2026-04-01', 'job', 62, 'completed the draft for job code:', 'Super Admin System Super Super Admin completed the draft for job code: DDD_AFR_JAP_000062', 'created', '122.168.114.106', '2026-04-01 07:21:45', '2026-04-01 07:21:45'),
+(1468, 1, '2026-04-01', 'job', 62, 'updated the job status from Completed - Completed to Completed - Filed with Companies House and HMRC. job code:', 'Super Admin System Super Super Admin updated the job status from Completed - Completed to Completed - Filed with Companies House and HMRC. job code: DDD_AFR_JAP_000062', 'updated', '122.168.114.106', '2026-04-01 07:21:57', '2026-04-01 07:21:57'),
+(1469, 1, '2026-04-01', 'master status', 18, 'edited master status Completed - Filed with Companies House and HMRC', 'Super Admin System Super Super Admin edited master status Completed - Filed with Companies House and HMRC ', 'updated', '122.168.114.106', '2026-04-01 07:23:12', '2026-04-01 07:23:12'),
+(1470, 1, '2026-04-01', 'master status', 18, 'edited master status Completed - Filed with Companies House and HMRC', 'Super Admin System Super Super Admin edited master status Completed - Filed with Companies House and HMRC ', 'updated', '122.168.114.106', '2026-04-01 07:23:27', '2026-04-01 07:23:27'),
+(1471, 1, '2026-04-01', 'master status', 18, 'edited master status Completed - Filed with Companies House and HMRC', 'Super Admin System Super Super Admin edited master status Completed - Filed with Companies House and HMRC ', 'updated', '122.168.114.106', '2026-04-01 07:23:40', '2026-04-01 07:23:40'),
+(1472, 1, '2026-04-01', 'master status', 18, 'edited master status Completed - Filed with Companies House and HMRC', 'Super Admin System Super Super Admin edited master status Completed - Filed with Companies House and HMRC ', 'updated', '122.168.114.106', '2026-04-01 07:28:06', '2026-04-01 07:28:06'),
+(1473, 1, '2026-04-01', 'master status', 18, 'edited master status Completed - Filed with Companies House and HMRC', 'Super Admin System Super Super Admin edited master status Completed - Filed with Companies House and HMRC ', 'updated', '122.168.114.106', '2026-04-01 07:28:45', '2026-04-01 07:28:45'),
+(1474, 1, '2026-04-01', 'master status', 18, 'edited master status Completed - Filed with Companies House and HMRC', 'Super Admin System Super Super Admin edited master status Completed - Filed with Companies House and HMRC ', 'updated', '122.168.114.106', '2026-04-01 07:29:38', '2026-04-01 07:29:38'),
+(1475, 1, '2026-04-01', 'master status', 19, 'edited master status Completed - Filed with Companies House', 'Super Admin System Super Super Admin edited master status Completed - Filed with Companies House ', 'updated', '122.168.114.106', '2026-04-01 07:29:47', '2026-04-01 07:29:47'),
+(1476, 1, '2026-04-01', 'job', 61, 'edited the job information, has assigned the job to the reviewer, BBBBBB 7 hv and has assigned the job to the processor, fvedgv gvddvd job code:', 'Super Admin System Super Super Admin edited the job information, has assigned the job to the reviewer, BBBBBB 7 hv and has assigned the job to the processor, fvedgv gvddvd job code: DDD_AFR_JAP_000061', 'updated', '122.168.114.106', '2026-04-01 07:30:24', '2026-04-01 07:30:24'),
+(1477, 1, '2026-04-01', 'job', 61, 'completed the draft for job code:', 'Super Admin System Super Super Admin completed the draft for job code: DDD_AFR_JAP_000061', 'created', '122.168.114.106', '2026-04-01 07:30:41', '2026-04-01 07:30:41'),
+(1478, 1, '2026-04-01', 'job', 61, 'updated the job status from Completed - Completed to Completed - Filed with Companies House. job code:', 'Super Admin System Super Super Admin updated the job status from Completed - Completed to Completed - Filed with Companies House. job code: DDD_AFR_JAP_000061', 'updated', '122.168.114.106', '2026-04-01 07:30:53', '2026-04-01 07:30:53'),
+(1479, 1, '2026-04-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-02 04:41:10', '2026-04-02 04:41:10'),
+(1480, 1, '2026-04-02', 'job', 73, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: wrw_WWW_aa_000073', 'updated', '122.168.114.106', '2026-04-02 10:35:32', '2026-04-02 10:35:32'),
+(1481, 13, '2026-04-02', '-', 0, ' Logged In', 'Manager shk sss  Logged In ', '-', '122.168.114.106', '2026-04-02 12:28:41', '2026-04-02 12:28:41'),
+(1482, 1, '2026-04-06', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-06 04:41:44', '2026-04-06 04:41:44'),
+(1483, 1, '2026-04-06', 'job', 73, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: wrw_WWW_JAP_000073', 'updated', '122.168.114.106', '2026-04-06 06:12:17', '2026-04-06 06:12:17'),
+(1484, 1, '2026-04-06', 'job types', 14, 'created job types DDD', 'Super Admin System Super Super Admin created job types DDD ', 'created', '122.168.114.106', '2026-04-06 06:15:18', '2026-04-06 06:15:18'),
+(1485, 1, '2026-04-06', 'task', 0, 'created task ghg,', 'Super Admin System Super Super Admin created task ghg, ', 'created', '122.168.114.106', '2026-04-06 06:15:38', '2026-04-06 06:15:38'),
+(1486, 1, '2026-04-06', 'job', 73, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: wrw_WWW_DDD_000073', 'updated', '122.168.114.106', '2026-04-06 06:20:10', '2026-04-06 06:20:10'),
+(1487, 1, '2026-04-06', 'job', 73, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_DDD_000073', 'updated', '122.168.114.106', '2026-04-06 06:20:20', '2026-04-06 06:20:20'),
+(1488, 1, '2026-04-06', 'job', 72, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: wrw_WWW_DDD_000072', 'updated', '122.168.114.106', '2026-04-06 06:35:39', '2026-04-06 06:35:39'),
+(1489, 1, '2026-04-06', 'checklist', 12, 'created checklist FFFFFFF', 'Super Admin System Super Super Admin created checklist FFFFFFF ', 'created', '\"122.168.114.106\"', '2026-04-06 06:59:14', '2026-04-06 06:59:14'),
+(1490, 1, '2026-04-06', 'job', 74, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_aa_000074', 'created', '122.168.114.106', '2026-04-06 07:05:14', '2026-04-06 07:05:14'),
+(1491, 1, '2026-04-06', 'job', 75, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: wrw_WWW_aa_000075', 'copied', '122.168.114.106', '2026-04-06 07:08:03', '2026-04-06 07:08:03'),
+(1492, 1, '2026-04-06', 'job', 74, 'edited the job information and has assigned the job to the processor, FFFFFFFF hhhhh job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, FFFFFFFF hhhhh job code: wrw_WWW_aa_000074', 'updated', '122.168.114.106', '2026-04-06 07:08:52', '2026-04-06 07:08:52'),
+(1493, 1, '2026-04-06', 'job', 76, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: wrw_WWW_aa_000076', 'copied', '122.168.114.106', '2026-04-06 07:09:02', '2026-04-06 07:09:02'),
+(1494, 1, '2026-04-06', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,\n                 Date: 2026-04-06, Hours : 14:00 ,Job code:abc,\n                Task name:a, Task type:Internal,  Date: 2026-04-06, Hours : 6:00 Date: 2026-04-07, Hours : 4:00 Date: 2026-04-08, Hours : 8:00 Date: 2026-04-09, Hours : null Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null,\n                Job code:abc,\n                Task name:c and Task type:External,  Date: 2026-04-06, Hours : 9:00 Date: 2026-04-07, Hours : 8:00 Date: 2026-04-08, Hours : 6:00 Date: 2026-04-09, Hours : 6:00 Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null,\n                Job code:NEW_bfb_comp_000038,\n                Task name:DDDD', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,\n                 Date: 2026-04-06, Hours : 14:00 ,Job code:abc,\n                Task name:a, Task type:Internal,  Date: 2026-04-06, Hours : 6:00 Date: 2026-04-07, Hours : 4:00 Date: 2026-04-08, Hours : 8:00 Date: 2026-04-09, Hours : null Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null,\n                Job code:abc,\n                Task name:c and Task type:External,  Date: 2026-04-06, Hours : 9:00 Date: 2026-04-07, Hours : 8:00 Date: 2026-04-08, Hours : 6:00 Date: 2026-04-09, Hours : 6:00 Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null,\n                Job code:NEW_bfb_comp_000038,\n                Task name:DDDD ', 'updated', '122.168.114.106', '2026-04-06 07:12:56', '2026-04-06 07:12:56'),
+(1495, 1, '2026-04-06', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,\n                 Date: 2026-04-06, Hours : 10:00 ,Job code:xyz,\n                Task name:x', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,\n                 Date: 2026-04-06, Hours : 10:00 ,Job code:xyz,\n                Task name:x ', 'updated', '122.168.114.106', '2026-04-06 07:14:18', '2026-04-06 07:14:18'),
+(1496, 1, '2026-04-06', 'job', 74, 'edited the job information and has assigned the job to the processor, shk sss job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, shk sss job code: wrw_WWW_aa_000074', 'updated', '122.168.114.106', '2026-04-06 07:27:20', '2026-04-06 07:27:20'),
+(1497, 1, '2026-04-06', 'job', 74, 'edited the job information and has removed the processor from the job job code:', 'Super Admin System Super Super Admin edited the job information and has removed the processor from the job job code: wrw_WWW_aa_000074', 'updated', '122.168.114.106', '2026-04-06 07:27:33', '2026-04-06 07:27:33'),
+(1498, 1, '2026-04-06', 'job', 74, 'edited the job information and has assigned the job to the processor, fvedgv gvddvd job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, fvedgv gvddvd job code: wrw_WWW_aa_000074', 'updated', '122.168.114.106', '2026-04-06 08:42:21', '2026-04-06 08:42:21'),
+(1499, 1, '2026-04-06', 'job', 77, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: wrw_WWW_aa_000077', 'copied', '122.168.114.106', '2026-04-06 08:49:18', '2026-04-06 08:49:18'),
+(1500, 1, '2026-04-06', 'job', 78, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: wrw_WWW_aa_000078', 'copied', '122.168.114.106', '2026-04-06 09:24:54', '2026-04-06 09:24:54'),
+(1501, 1, '2026-04-06', 'job', 78, 'deletes job code:', 'Super Admin System Super Super Admin deletes job code: wrw_WWW_aa_000078', 'deleted', '122.168.114.106', '2026-04-06 09:25:06', '2026-04-06 09:25:06'),
+(1502, 1, '2026-04-06', 'job', 77, 'deletes job code:', 'Super Admin System Super Super Admin deletes job code: wrw_WWW_aa_000077', 'deleted', '122.168.114.106', '2026-04-06 09:25:09', '2026-04-06 09:25:09'),
+(1503, 1, '2026-04-06', 'job', 76, 'deletes job code:', 'Super Admin System Super Super Admin deletes job code: wrw_WWW_aa_000076', 'deleted', '122.168.114.106', '2026-04-06 09:25:11', '2026-04-06 09:25:11'),
+(1504, 1, '2026-04-06', 'job', 75, 'deletes job code:', 'Super Admin System Super Super Admin deletes job code: wrw_WWW_aa_000075', 'deleted', '122.168.114.106', '2026-04-06 09:25:14', '2026-04-06 09:25:14'),
+(1505, 1, '2026-04-06', 'job', 79, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: wrw_WWW_aa_000075', 'copied', '122.168.114.106', '2026-04-06 09:25:22', '2026-04-06 09:25:22'),
+(1506, 1, '2026-04-06', 'job', 80, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: wrw_WWW_aa_000076', 'copied', '122.168.114.106', '2026-04-06 09:25:36', '2026-04-06 09:25:36'),
+(1507, 1, '2026-04-06', 'checklist', 13, 'created checklist HYHYHY', 'Super Admin System Super Super Admin created checklist HYHYHY ', 'created', '\"122.168.114.106\"', '2026-04-06 10:16:18', '2026-04-06 10:16:18'),
+(1508, 1, '2026-04-06', 'job', 81, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: DDD_AFR_JAP_000077', 'copied', '122.168.114.106', '2026-04-06 11:11:04', '2026-04-06 11:11:04'),
+(1509, 1, '2026-04-06', 'job', 82, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: wrw_WWW_DDD_000078', 'copied', '122.168.114.106', '2026-04-06 11:11:23', '2026-04-06 11:11:23'),
+(1510, 1, '2026-04-07', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-07 04:40:32', '2026-04-07 04:40:32'),
+(1511, 1, '2026-04-07', 'timesheet', 0, 'edited a timesheet entry. Task type:External,\n                 Date:2026-04-06, Updated hours:18:00 Date:2026-04-07, Updated hours:16:00 Date:2026-04-08, Updated hours:12:00 Date:2026-04-09, Updated hours:12:00, Job code:NEW_bfb_comp_000038,\n                Task name:DDDD', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:External,\n                 Date:2026-04-06, Updated hours:18:00 Date:2026-04-07, Updated hours:16:00 Date:2026-04-08, Updated hours:12:00 Date:2026-04-09, Updated hours:12:00, Job code:NEW_bfb_comp_000038,\n                Task name:DDDD ', 'updated', '122.168.114.106', '2026-04-07 05:06:44', '2026-04-07 05:06:44'),
+(1512, 1, '2026-04-07', 'checklist', 14, 'created checklist Short', 'Super Admin System Super Super Admin created checklist Short ', 'created', '\"122.168.114.106\"', '2026-04-07 05:37:43', '2026-04-07 05:37:43'),
+(1513, 1, '2026-04-07', 'job', 83, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_aa_000079', 'created', '122.168.114.106', '2026-04-07 05:38:14', '2026-04-07 05:38:14'),
+(1514, 1, '2026-04-07', 'job', 83, 'edited the job information and has assigned the job to the processor, FFFFFFFF hhhhh job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, FFFFFFFF hhhhh job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 05:38:37', '2026-04-07 05:38:37'),
+(1515, 1, '2026-04-07', 'job', 83, 'edited the job information and has removed the processor from the job job code:', 'Super Admin System Super Super Admin edited the job information and has removed the processor from the job job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 05:38:48', '2026-04-07 05:38:48'),
+(1516, 1, '2026-04-07', 'job', 83, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 05:39:03', '2026-04-07 05:39:03'),
+(1517, 1, '2026-04-07', 'job', 83, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 05:55:50', '2026-04-07 05:55:50'),
+(1518, 1, '2026-04-07', 'job', 83, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 06:00:24', '2026-04-07 06:00:24'),
+(1519, 1, '2026-04-07', 'job', 83, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 06:00:34', '2026-04-07 06:00:34'),
+(1520, 1, '2026-04-07', 'job', 83, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 06:01:01', '2026-04-07 06:01:01'),
+(1521, 1, '2026-04-07', 'job', 83, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 06:01:38', '2026-04-07 06:01:38'),
+(1522, 1, '2026-04-07', 'job', 83, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 06:02:16', '2026-04-07 06:02:16'),
+(1523, 1, '2026-04-07', 'job', 83, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 06:08:44', '2026-04-07 06:08:44'),
+(1524, 1, '2026-04-07', 'job', 83, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 06:09:06', '2026-04-07 06:09:06'),
+(1525, 1, '2026-04-07', 'job', 83, 'edited the job information and has assigned the job to the processor, DDDDDD55 DD job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, DDDDDD55 DD job code: wrw_WWW_aa_000079', 'updated', '122.168.114.106', '2026-04-07 06:19:33', '2026-04-07 06:19:33'),
+(1526, 1, '2026-04-08', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-08 05:24:38', '2026-04-08 05:24:38'),
+(1527, 1, '2026-04-08', 'services', 34, 'created services demo', 'Super Admin System Super Super Admin created services demo ', 'created', '122.168.114.106', '2026-04-08 06:14:41', '2026-04-08 06:14:41'),
+(1528, 1, '2026-04-08', 'job_types', 15, 'created job type demo', 'Super Admin System Super Super Admin created job type demo ', 'created', '122.168.114.106', '2026-04-08 06:14:41', '2026-04-08 06:14:41'),
+(1529, 1, '2026-04-08', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-04-08 06:18:42', '2026-04-08 06:18:42'),
+(1530, 1, '2026-04-08', 'task', 0, 'created task iii,', 'Super Admin System Super Super Admin created task iii, ', 'created', '122.168.114.106', '2026-04-08 06:19:29', '2026-04-08 06:19:29'),
+(1531, 1, '2026-04-08', 'job', 84, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_demo_000080', 'created', '122.168.114.106', '2026-04-08 06:19:47', '2026-04-08 06:19:47'),
+(1532, 1, '2026-04-08', 'services', 34, 'deleted services demo', 'Super Admin System Super Super Admin deleted services demo ', 'deleted', '122.168.114.106', '2026-04-08 06:22:28', '2026-04-08 06:22:28'),
+(1533, 1, '2026-04-08', 'customer', 14, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-04-08 06:22:40', '2026-04-08 06:22:40'),
+(1534, 1, '2026-04-08', 'job', 84, 'deletes job code:', 'Super Admin System Super Super Admin deletes job code: wrw_WWW_demo_000080', 'deleted', '122.168.114.106', '2026-04-08 06:37:54', '2026-04-08 06:37:54'),
+(1535, 1, '2026-04-08', 'services', 35, 'created services Demo', 'Super Admin System Super Super Admin created services Demo ', 'created', '122.168.114.106', '2026-04-08 06:41:04', '2026-04-08 06:41:04'),
+(1536, 1, '2026-04-08', 'job_types', 16, 'created job type Demo', 'Super Admin System Super Super Admin created job type Demo ', 'created', '122.168.114.106', '2026-04-08 06:41:04', '2026-04-08 06:41:04'),
+(1537, 1, '2026-04-08', 'services', 35, 'deleted services Demo', 'Super Admin System Super Super Admin deleted services Demo ', 'deleted', '122.168.114.106', '2026-04-08 06:52:58', '2026-04-08 06:52:58'),
+(1538, 1, '2026-04-08', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-04-08 06:54:36', '2026-04-08 06:54:36'),
+(1539, 1, '2026-04-08', 'job', 85, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_Demo_000080', 'created', '122.168.114.106', '2026-04-08 06:54:57', '2026-04-08 06:54:57'),
+(1540, 1, '2026-04-08', 'services', 36, 'created services DEEE', 'Super Admin System Super Super Admin created services DEEE ', 'created', '122.168.114.106', '2026-04-08 07:28:17', '2026-04-08 07:28:17'),
+(1541, 1, '2026-04-08', 'job_types', 17, 'created job type DEEE', 'Super Admin System Super Super Admin created job type DEEE ', 'created', '122.168.114.106', '2026-04-08 07:28:17', '2026-04-08 07:28:17'),
+(1542, 1, '2026-04-08', 'services', 36, 'deleted services DEEE', 'Super Admin System Super Super Admin deleted services DEEE ', 'deleted', '122.168.114.106', '2026-04-08 07:29:42', '2026-04-08 07:29:42'),
+(1543, 1, '2026-04-09', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-09 04:58:51', '2026-04-09 04:58:51'),
+(1544, 1, '2026-04-09', 'timesheet', 0, 'created a timesheet entry. Task type:External,\n                 Date: 2026-04-06, Hours : 5:00 ,Job code:wrw_WWW_Demo_000080,\n                Task name:jj', 'Super Admin System Super Super Admin created a timesheet entry. Task type:External,\n                 Date: 2026-04-06, Hours : 5:00 ,Job code:wrw_WWW_Demo_000080,\n                Task name:jj ', 'updated', '122.168.114.106', '2026-04-09 05:06:42', '2026-04-09 05:06:42'),
+(1545, 1, '2026-04-09', 'services', 37, 'created services demooooo', 'Super Admin System Super Super Admin created services demooooo ', 'created', '122.168.114.106', '2026-04-09 05:07:22', '2026-04-09 05:07:22'),
+(1546, 1, '2026-04-09', 'job_types', 18, 'created job type demooooo', 'Super Admin System Super Super Admin created job type demooooo ', 'created', '122.168.114.106', '2026-04-09 05:07:22', '2026-04-09 05:07:22'),
+(1547, 1, '2026-04-09', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-04-09 05:07:45', '2026-04-09 05:07:45'),
+(1548, 1, '2026-04-09', 'job', 86, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_demo_000081', 'created', '122.168.114.106', '2026-04-09 05:08:17', '2026-04-09 05:08:17'),
+(1549, 1, '2026-04-09', 'timesheet', 0, 'created a timesheet entry. Task type:External,\n                 Date: 2026-04-06, Hours : 6:00 ,Job code:wrw_WWW_demo_000081,\n                Task name:pp', 'Super Admin System Super Super Admin created a timesheet entry. Task type:External,\n                 Date: 2026-04-06, Hours : 6:00 ,Job code:wrw_WWW_demo_000081,\n                Task name:pp ', 'updated', '122.168.114.106', '2026-04-09 05:08:59', '2026-04-09 05:08:59'),
+(1550, 1, '2026-04-09', 'services', 37, 'deleted services demooooo', 'Super Admin System Super Super Admin deleted services demooooo ', 'deleted', '122.168.114.106', '2026-04-09 06:40:39', '2026-04-09 06:40:39'),
+(1551, 1, '2026-04-09', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-04-09 06:47:01', '2026-04-09 06:47:01'),
+(1552, 1, '2026-04-09', 'customer', 14, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-04-09 07:13:25', '2026-04-09 07:13:25'),
+(1553, 1, '2026-04-09', 'job', 86, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_Demo_000081', 'updated', '122.168.114.106', '2026-04-09 07:13:50', '2026-04-09 07:13:50'),
+(1554, 1, '2026-04-09', 'job', 85, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_DEEE_000080', 'updated', '122.168.114.106', '2026-04-09 07:14:15', '2026-04-09 07:14:15'),
+(1555, 1, '2026-04-09', 'customer', 14, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-04-09 07:22:52', '2026-04-09 07:22:52'),
+(1556, 1, '2026-04-09', 'timesheet', 0, 'created a timesheet entry. Task type:External,\n                 Date: 2026-04-06, Hours : 6:00 ,Job code:wrw_WWW_Demo_000081,\n                Task name:jj', 'Super Admin System Super Super Admin created a timesheet entry. Task type:External,\n                 Date: 2026-04-06, Hours : 6:00 ,Job code:wrw_WWW_Demo_000081,\n                Task name:jj ', 'updated', '122.168.114.106', '2026-04-09 07:29:17', '2026-04-09 07:29:17'),
+(1557, 1, '2026-04-09', 'customer', 13, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_HGH_000011(HGHGHG)', 'updated', '122.168.114.106', '2026-04-09 11:16:53', '2026-04-09 11:16:54'),
+(1558, 1, '2026-04-09', 'client', 21, 'created client profile. client code :', 'Super Admin System Super Super Admin created client profile. client code : cli_HGH_ooo_000021(oooooooooooooo)', 'created', '122.168.114.106', '2026-04-09 11:17:26', '2026-04-09 11:17:26'),
+(1559, 1, '2026-04-09', 'customer', 13, ' edited the service details and added an additional service while editing the customer code :', 'Super Admin System Super Super Admin  edited the service details and added an additional service while editing the customer code : cust_HGH_000011(HGHGHG)', 'updated', '122.168.114.106', '2026-04-09 11:18:07', '2026-04-09 11:18:07'),
+(1560, 1, '2026-04-09', 'job', 87, 'created job code:', 'Super Admin System Super Super Admin created job code: HGH_ooo_DEEE_000082', 'created', '122.168.114.106', '2026-04-09 11:18:23', '2026-04-09 11:18:23'),
+(1561, 1, '2026-04-10', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-10 04:40:18', '2026-04-10 04:40:18'),
+(1562, 1, '2026-04-10', 'job', 86, 'Sent and completed the missing logs for job code:', 'Super Admin System Super Super Admin Sent and completed the missing logs for job code: wrw_WWW_Demo_000081', 'created', '122.168.114.106', '2026-04-10 05:14:28', '2026-04-10 05:14:28'),
+(1563, 1, '2026-04-10', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-10 05:52:10', '2026-04-10 05:52:10'),
+(1564, 1, '2026-04-10', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2026-04-10 05:59:16', '2026-04-10 05:59:16'),
+(1565, 1, '2026-04-10', 'job', 80, 'edited the job information and edited the job deadline job code:', 'Super Admin System Super Super Admin edited the job information and edited the job deadline job code: wrw_WWW_V4_4_000076', 'updated', '122.168.114.106', '2026-04-10 06:27:31', '2026-04-10 06:27:31'),
+(1566, 1, '2026-04-10', 'checklist', 12, 'edited checklist FFFFFFF', 'Super Admin System Super Super Admin edited checklist FFFFFFF ', 'updated', '\"122.168.114.106\"', '2026-04-10 06:49:57', '2026-04-10 06:49:57'),
+(1567, 1, '2026-04-10', 'checklist', 12, 'edited checklist FFFFFFF', 'Super Admin System Super Super Admin edited checklist FFFFFFF ', 'updated', '\"122.168.114.106\"', '2026-04-10 06:50:18', '2026-04-10 06:50:18'),
+(1568, 1, '2026-04-10', 'checklist', 12, 'edited checklist FFFFFFF', 'Super Admin System Super Super Admin edited checklist FFFFFFF ', 'updated', '\"122.168.114.106\"', '2026-04-10 06:58:40', '2026-04-10 06:58:40'),
+(1569, 1, '2026-04-10', 'job', 43, 'Sent and completed the missing logs for job code:', 'Super Admin System Super Super Admin Sent and completed the missing logs for job code: DDD_AFR_JAP_000043', 'created', '122.168.114.106', '2026-04-10 07:02:10', '2026-04-10 07:02:10'),
+(1570, 1, '2026-04-10', 'job', 43, 'Sent and completed the queries for the job code:', 'Super Admin System Super Super Admin Sent and completed the queries for the job code: DDD_AFR_JAP_000043', 'created', '122.168.114.106', '2026-04-10 07:08:15', '2026-04-10 07:08:15'),
+(1571, 1, '2026-04-10', 'job', 88, 'created job code:', 'Super Admin System Super Super Admin created job code: IGA_AQU_V3_000083', 'created', '122.168.114.106', '2026-04-10 09:09:04', '2026-04-10 09:09:04'),
+(1572, 1, '2026-04-10', 'job', 86, 'edited the job information and has assigned the job to the processor, FFFFFFFF hhhhh job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, FFFFFFFF hhhhh job code: wrw_WWW_Demo_000081', 'updated', '122.168.114.106', '2026-04-10 10:06:22', '2026-04-10 10:06:22'),
+(1573, 24, '2026-04-10', '-', 0, ' Logged In', 'Processor FFFFFFFF hhhhh  Logged In ', '-', NULL, '2026-04-10 10:07:09', '2026-04-10 10:07:09'),
+(1574, 1, '2026-04-10', 'checklist', 11, 'edited checklist RE-CHI', 'Super Admin System Super Super Admin edited checklist RE-CHI ', 'updated', '\"122.168.114.106\"', '2026-04-10 11:19:30', '2026-04-10 11:19:30'),
+(1575, 1, '2026-04-10', 'job', 89, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_DEEE_000084', 'created', '122.168.114.106', '2026-04-10 11:20:44', '2026-04-10 11:20:44'),
+(1576, 1, '2026-04-10', 'job', 89, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_DEEE_000084', 'updated', '122.168.114.106', '2026-04-10 11:23:16', '2026-04-10 11:23:16'),
+(1577, 1, '2026-04-11', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-11 06:50:46', '2026-04-11 06:50:46'),
+(1578, 1, '2026-04-11', 'job', 56, 'edited the job information and has assigned the job to the processor, FFFFFFFF hhhhh job code:', 'Super Admin System Super Super Admin edited the job information and has assigned the job to the processor, FFFFFFFF hhhhh job code: DDD_AFR_JAP_000056', 'updated', '122.168.114.106', '2026-04-11 07:27:30', '2026-04-11 07:27:30'),
+(1579, 1, '2026-04-11', 'job', 56, 'updated the job status from WIP - Processing to To Be Started - Not Yet Allocated Internally. job code:', 'Super Admin System Super Super Admin updated the job status from WIP - Processing to To Be Started - Not Yet Allocated Internally. job code: DDD_AFR_JAP_000056', 'updated', '122.168.114.106', '2026-04-11 07:28:29', '2026-04-11 07:28:29'),
+(1580, 1, '2026-04-11', 'job', 56, 'updated the job status from To Be Started - Not Yet Allocated Internally to Not Progressing - Duplicate. job code:', 'Super Admin System Super Super Admin updated the job status from To Be Started - Not Yet Allocated Internally to Not Progressing - Duplicate. job code: DDD_AFR_JAP_000056', 'updated', '122.168.114.106', '2026-04-11 07:28:40', '2026-04-11 07:28:40'),
+(1581, 1, '2026-04-11', 'job', 47, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: DDD_AFR_JAP_000047', 'updated', '122.168.114.106', '2026-04-11 08:36:20', '2026-04-11 08:36:20'),
+(1582, 1, '2026-04-11', 'job', 90, 'Copied job code:', 'Super Admin System Super Super Admin Copied job code: DDD_AFR_JAP_000085', 'copied', '122.168.114.106', '2026-04-11 08:48:33', '2026-04-11 08:48:33'),
+(1583, 1, '2026-04-11', 'job', 92, 'Copied job code: From DDD_AFR_JAP_000047', 'Super Admin System Super Super Admin Copied job code: From DDD_AFR_JAP_000047 DDD_AFR_JAP_000087', 'copied', '122.168.114.106', '2026-04-11 09:08:59', '2026-04-11 09:08:59'),
+(1584, 1, '2026-04-11', 'job', 93, 'Copied job code: From DDD_AFR_JAP_000056 To ', 'Super Admin System Super Super Admin Copied job code: From DDD_AFR_JAP_000056 To  DDD_AFR_JAP_000088', 'copied', '122.168.114.106', '2026-04-11 09:09:48', '2026-04-11 09:09:48'),
+(1585, 1, '2026-04-11', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,\n                 Date: 2026-04-06, Hours : 10:00 ,Job code:abc,\n                Task name:a and deleted a timesheet entry. Task type:Internal,\n              Job code:xyz,\n              Task name:x', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,\n                 Date: 2026-04-06, Hours : 10:00 ,Job code:abc,\n                Task name:a and deleted a timesheet entry. Task type:Internal,\n              Job code:xyz,\n              Task name:x ', 'updated', '122.168.114.106', '2026-04-11 11:44:51', '2026-04-11 11:44:51'),
+(1586, 1, '2026-04-11', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,\n                 Date: 2026-04-06, Hours : 12:00 Date: 2026-04-07, Hours : 8:00 Date: 2026-04-08, Hours : 16:00 Date: 2026-04-09, Hours : null Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null ,Job code:abc,\n                Task name:c and Task type:External,  Date: 2026-04-06, Hours : 18:00 Date: 2026-04-07, Hours : 16:00 Date: 2026-04-08, Hours : 12:00 Date: 2026-04-09, Hours : 12:00 Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null,\n                Job code:NEW_bfb_comp_000038,\n                Task name:DDDD', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,\n                 Date: 2026-04-06, Hours : 12:00 Date: 2026-04-07, Hours : 8:00 Date: 2026-04-08, Hours : 16:00 Date: 2026-04-09, Hours : null Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null ,Job code:abc,\n                Task name:c and Task type:External,  Date: 2026-04-06, Hours : 18:00 Date: 2026-04-07, Hours : 16:00 Date: 2026-04-08, Hours : 12:00 Date: 2026-04-09, Hours : 12:00 Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null,\n                Job code:NEW_bfb_comp_000038,\n                Task name:DDDD ', 'updated', '122.168.114.106', '2026-04-11 11:45:21', '2026-04-11 11:45:21'),
+(1587, 1, '2026-04-11', 'timesheet', 0, 'created a timesheet entry. Task type:External,\n                 Date: 2026-04-06, Hours : 27:00 Date: 2026-04-07, Hours : 24:00 Date: 2026-04-08, Hours : 18:00 Date: 2026-04-09, Hours : 18:00 Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null ,Job code:NEW_bfb_comp_000038,\n                Task name:DDDD and Task type:Internal,  Date: 2026-04-06, Hours : 18:00 Date: 2026-04-07, Hours : 12:00 Date: 2026-04-08, Hours : 24:00 Date: 2026-04-09, Hours : null Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null,\n                Job code:abc,\n                Task name:c', 'Super Admin System Super Super Admin created a timesheet entry. Task type:External,\n                 Date: 2026-04-06, Hours : 27:00 Date: 2026-04-07, Hours : 24:00 Date: 2026-04-08, Hours : 18:00 Date: 2026-04-09, Hours : 18:00 Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null ,Job code:NEW_bfb_comp_000038,\n                Task name:DDDD and Task type:Internal,  Date: 2026-04-06, Hours : 18:00 Date: 2026-04-07, Hours : 12:00 Date: 2026-04-08, Hours : 24:00 Date: 2026-04-09, Hours : null Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null,\n                Job code:abc,\n                Task name:c ', 'updated', '122.168.114.106', '2026-04-11 11:48:47', '2026-04-11 11:48:47'),
+(1588, 1, '2026-04-11', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,\n                 Date: 2026-04-06, Hours : 10:00 ,Job code:abc,\n                Task name:a', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,\n                 Date: 2026-04-06, Hours : 10:00 ,Job code:abc,\n                Task name:a ', 'updated', '122.168.114.106', '2026-04-11 11:52:56', '2026-04-11 11:52:56'),
+(1589, 1, '2026-04-11', 'timesheet', 0, 'edited a timesheet entry. Task type:External,\n                 Date:2026-04-06, Updated hours:36:00 Date:2026-04-07, Updated hours:32:00 Date:2026-04-08, Updated hours:24:00 Date:2026-04-09, Updated hours:24:00, Job code:NEW_bfb_comp_000038,\n                Task name:DDDD', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:External,\n                 Date:2026-04-06, Updated hours:36:00 Date:2026-04-07, Updated hours:32:00 Date:2026-04-08, Updated hours:24:00 Date:2026-04-09, Updated hours:24:00, Job code:NEW_bfb_comp_000038,\n                Task name:DDDD ', 'updated', '122.168.114.106', '2026-04-11 12:37:47', '2026-04-11 12:37:47'),
+(1590, 1, '2026-04-11', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,\n                 Date:2026-04-07, Updated hours:2:00, Job code:abc,\n                Task name:a', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:Internal,\n                 Date:2026-04-07, Updated hours:2:00, Job code:abc,\n                Task name:a ', 'updated', '122.168.114.106', '2026-04-11 12:52:04', '2026-04-11 12:52:04'),
+(1591, 1, '2026-04-11', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,\n                 Date:2026-04-08, Updated hours:5:00, Job code:abc,\n                Task name:a', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:Internal,\n                 Date:2026-04-08, Updated hours:5:00, Job code:abc,\n                Task name:a ', 'updated', '122.168.114.106', '2026-04-11 12:53:44', '2026-04-11 12:53:44'),
+(1592, 1, '2026-04-11', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,\n                 Date:2026-04-09, Updated hours:01:00, Job code:abc,\n                Task name:a', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:Internal,\n                 Date:2026-04-09, Updated hours:01:00, Job code:abc,\n                Task name:a ', 'updated', '122.168.114.106', '2026-04-11 12:57:52', '2026-04-11 12:57:52'),
+(1593, 1, '2026-04-11', 'timesheet', 0, 'created a timesheet entry. Task type:Internal,\n                 Date: 2026-04-06, Hours : 1:00 ,Job code:abc,\n                Task name:a, Task type:Internal,  Date: 2026-04-06, Hours : 18:00 Date: 2026-04-07, Hours : 12:00 Date: 2026-04-08, Hours : 24:00 Date: 2026-04-09, Hours : null Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null,\n                Job code:abc,\n                Task name:c and Task type:External,  Date: 2026-04-06, Hours : 27:00 Date: 2026-04-07, Hours : 24:00 Date: 2026-04-08, Hours : 18:00 Date: 2026-04-09, Hours : 18:00 Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null,\n                Job code:NEW_bfb_comp_000038,\n                Task name:DDDD', 'Super Admin System Super Super Admin created a timesheet entry. Task type:Internal,\n                 Date: 2026-04-06, Hours : 1:00 ,Job code:abc,\n                Task name:a, Task type:Internal,  Date: 2026-04-06, Hours : 18:00 Date: 2026-04-07, Hours : 12:00 Date: 2026-04-08, Hours : 24:00 Date: 2026-04-09, Hours : null Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null,\n                Job code:abc,\n                Task name:c and Task type:External,  Date: 2026-04-06, Hours : 27:00 Date: 2026-04-07, Hours : 24:00 Date: 2026-04-08, Hours : 18:00 Date: 2026-04-09, Hours : 18:00 Date: 2026-04-10, Hours : null Date: 2026-04-11, Hours : null Date: 2026-04-12, Hours : null,\n                Job code:NEW_bfb_comp_000038,\n                Task name:DDDD ', 'updated', '122.168.114.106', '2026-04-11 13:00:09', '2026-04-11 13:00:09'),
+(1594, 1, '2026-04-14', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-14 06:14:42', '2026-04-14 06:14:42'),
+(1595, 1, '2026-04-15', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-15 06:18:56', '2026-04-15 06:18:56'),
+(1596, 1, '2026-04-16', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-16 04:45:16', '2026-04-16 04:45:16'),
+(1597, 1, '2026-04-16', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2026-04-16 07:09:17', '2026-04-16 07:09:17'),
+(1598, 1, '2026-04-16', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-16 12:43:33', '2026-04-16 12:43:33'),
+(1599, 1, '2026-04-17', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-17 11:33:50', '2026-04-17 11:33:50'),
+(1600, 1, '2026-04-17', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-17 13:17:21', '2026-04-17 13:17:21'),
+(1601, 1, '2026-04-23', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-23 04:51:35', '2026-04-23 04:51:35'),
+(1602, 1, '2026-04-24', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-24 05:15:23', '2026-04-24 05:15:23'),
+(1603, 1, '2026-04-24', 'services', 36, 'deleted services DEEE', 'Super Admin System Super Super Admin deleted services DEEE ', 'deleted', '122.168.114.106', '2026-04-24 07:10:04', '2026-04-24 07:10:04'),
+(1604, 1, '2026-04-24', 'customer', 14, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-04-24 07:10:53', '2026-04-24 07:10:53'),
+(1605, 1, '2026-04-24', 'services', 35, 'deleted services Demo', 'Super Admin System Super Super Admin deleted services Demo ', 'deleted', '122.168.114.106', '2026-04-24 10:34:56', '2026-04-24 10:34:56'),
+(1606, 1, '2026-04-24', 'services', 38, 'created services Demo', 'Super Admin System Super Super Admin created services Demo ', 'created', '122.168.114.106', '2026-04-24 10:40:50', '2026-04-24 10:40:50'),
+(1607, 1, '2026-04-24', 'job_types', 19, 'created job type Demo', 'Super Admin System Super Super Admin created job type Demo ', 'created', '122.168.114.106', '2026-04-24 10:40:50', '2026-04-24 10:40:50'),
+(1608, 1, '2026-04-24', 'services', 34, 'created services Demo', 'Super Admin System Super Super Admin created services Demo ', 'created', '122.168.114.106', '2026-04-24 10:43:21', '2026-04-24 10:43:21'),
+(1609, 1, '2026-04-24', 'job_types', 20, 'created job type Demo', 'Super Admin System Super Super Admin created job type Demo ', 'created', '122.168.114.106', '2026-04-24 10:43:21', '2026-04-24 10:43:21'),
+(1610, 1, '2026-04-24', 'job', 94, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_Demo_000089', 'created', '122.168.114.106', '2026-04-24 10:50:59', '2026-04-24 10:50:59'),
+(1611, 1, '2026-04-24', 'customer', 14, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-04-24 11:07:13', '2026-04-24 11:07:13'),
+(1612, 1, '2026-04-25', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2026-04-25 10:08:59', '2026-04-25 10:08:59'),
+(1613, 1, '2026-04-25', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2026-04-25 13:29:34', '2026-04-25 13:29:34'),
+(1614, 1, '2026-04-28', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-28 04:39:56', '2026-04-28 04:39:56'),
+(1615, 1, '2026-04-28', '-', 0, ' Logged Out', 'Super Admin System Super Super Admin  Logged Out ', '-', '122.168.114.106', '2026-04-28 09:50:48', '2026-04-28 09:50:48'),
+(1616, 1, '2026-04-28', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', NULL, '2026-04-28 11:21:27', '2026-04-28 11:21:27'),
+(1617, 1, '2026-04-30', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-04-30 06:33:05', '2026-04-30 06:33:05'),
+(1618, 1, '2026-04-30', 'timesheet', 0, 'save a timesheet entry. Task type:External,\n                 Date: 2026-04-27, Hours : 10:00 ,Job code:wrw_WWW_V4_000089,\n                Task name:C and Task type:External,  Date: 2026-04-27, Hours : 20:00,\n                Job code:wrw_WWW_V4_000089,\n                Task name:A', 'Super Admin System Super Super Admin save a timesheet entry. Task type:External,\n                 Date: 2026-04-27, Hours : 10:00 ,Job code:wrw_WWW_V4_000089,\n                Task name:C and Task type:External,  Date: 2026-04-27, Hours : 20:00,\n                Job code:wrw_WWW_V4_000089,\n                Task name:A ', 'updated', '122.168.114.106', '2026-04-30 10:39:35', '2026-04-30 10:39:35'),
+(1619, 1, '2026-04-30', 'services', 35, 'created services SDDD', 'Super Admin System Super Super Admin created services SDDD ', 'created', '122.168.114.106', '2026-04-30 10:40:02', '2026-04-30 10:40:02'),
+(1620, 1, '2026-04-30', 'job_types', 21, 'created job type SDDD', 'Super Admin System Super Super Admin created job type SDDD ', 'created', '122.168.114.106', '2026-04-30 10:40:02', '2026-04-30 10:40:02'),
+(1621, 1, '2026-04-30', 'timesheet', 0, 'deleted a timesheet entry. Task type:External,\n              Job code:wrw_WWW_V4_000089,\n              Task name:A', 'Super Admin System Super Super Admin deleted a timesheet entry. Task type:External,\n              Job code:wrw_WWW_V4_000089,\n              Task name:A ', 'updated', '122.168.114.106', '2026-04-30 10:40:22', '2026-04-30 10:40:22'),
+(1622, 1, '2026-04-30', 'customer', 14, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-04-30 10:42:16', '2026-04-30 10:42:16'),
+(1623, 1, '2026-04-30', 'job', 95, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_SDDD_000090', 'created', '122.168.114.106', '2026-04-30 10:42:46', '2026-04-30 10:42:46'),
+(1624, 1, '2026-04-30', 'timesheet', 0, 'save a timesheet entry. Task type:External,\n                 Date: 2026-04-27, Hours : 10:00 ,Job code:wrw_WWW_SDDD_000090,\n                Task name:ff', 'Super Admin System Super Super Admin save a timesheet entry. Task type:External,\n                 Date: 2026-04-27, Hours : 10:00 ,Job code:wrw_WWW_SDDD_000090,\n                Task name:ff ', 'updated', '122.168.114.106', '2026-04-30 10:43:08', '2026-04-30 10:43:08'),
+(1625, 1, '2026-05-01', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-05-01 09:17:26', '2026-05-01 09:17:26');
+INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, `log_message`, `log_message_all`, `permission_type`, `ip`, `created_at`, `updated_at`) VALUES
+(1626, 1, '2026-05-02', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-05-02 04:54:37', '2026-05-02 04:54:37'),
+(1627, 1, '2026-05-02', 'job', 47, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: DDD_AFR_JAP_000047', 'updated', '122.168.114.106', '2026-05-02 10:04:17', '2026-05-02 10:04:17'),
+(1628, 1, '2026-05-02', 'job', 56, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: DDD_AFR_JAP_000056', 'updated', '122.168.114.106', '2026-05-02 10:07:35', '2026-05-02 10:07:35'),
+(1629, 1, '2026-05-02', 'job', 61, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: DDD_AFR_JAP_000061', 'updated', '122.168.114.106', '2026-05-02 10:12:34', '2026-05-02 10:12:34'),
+(1630, 1, '2026-05-02', 'job', 81, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: DDD_AFR_JAP_000077', 'updated', '122.168.114.106', '2026-05-02 10:14:57', '2026-05-02 10:14:57'),
+(1631, 1, '2026-05-02', 'job', 56, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: DDD_AFR_JAP_000056', 'updated', '122.168.114.106', '2026-05-02 10:16:53', '2026-05-02 10:16:53'),
+(1632, 1, '2026-05-02', 'job', 43, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: DDD_AFR_JAP_000043', 'updated', '122.168.114.106', '2026-05-02 10:28:13', '2026-05-02 10:28:13'),
+(1633, 1, '2026-05-02', 'job', 96, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_V4_000091', 'created', '122.168.114.106', '2026-05-02 10:29:35', '2026-05-02 10:29:35'),
+(1634, 1, '2026-05-02', 'timesheet', 0, 'save a timesheet entry. Task type:External,\n                 Date: 2026-04-27, Hours : 10:00 ,Job code:wrw_WWW_V4_000091,\n                Task name:B', 'Super Admin System Super Super Admin save a timesheet entry. Task type:External,\n                 Date: 2026-04-27, Hours : 10:00 ,Job code:wrw_WWW_V4_000091,\n                Task name:B ', 'updated', '122.168.114.106', '2026-05-02 10:30:49', '2026-05-02 10:30:49'),
+(1635, 1, '2026-05-02', 'job', 96, 'edited the job information job code:', 'Super Admin System Super Super Admin edited the job information job code: wrw_WWW_V4_000091', 'updated', '122.168.114.106', '2026-05-02 10:47:52', '2026-05-02 10:47:52'),
+(1636, 1, '2026-05-02', 'services', 36, 'created services DD', 'Super Admin System Super Super Admin created services DD ', 'created', '122.168.114.106', '2026-05-02 10:55:00', '2026-05-02 10:55:00'),
+(1637, 1, '2026-05-02', 'job_types', 22, 'created job type DD', 'Super Admin System Super Super Admin created job type DD ', 'created', '122.168.114.106', '2026-05-02 10:55:00', '2026-05-02 10:55:00'),
+(1638, 1, '2026-05-02', 'customer', 14, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-05-02 10:55:24', '2026-05-02 10:55:24'),
+(1639, 1, '2026-05-02', 'services', 37, 'created services GGGGGGG', 'Super Admin System Super Super Admin created services GGGGGGG ', 'created', '122.168.114.106', '2026-05-02 10:56:35', '2026-05-02 10:56:35'),
+(1640, 1, '2026-05-02', 'job_types', 23, 'created job type GGGGGGG', 'Super Admin System Super Super Admin created job type GGGGGGG ', 'created', '122.168.114.106', '2026-05-02 10:56:35', '2026-05-02 10:56:35'),
+(1641, 1, '2026-05-02', 'timesheet', 0, 'save a timesheet entry. Task type:External,\n                 Date: 2026-04-27, Hours : 9:00 Date: 2026-04-28, Hours : 8:00 Date: 2026-04-29, Hours : 6:00 Date: 2026-04-30, Hours : 6:00 Date: 2026-05-01, Hours : null Date: 2026-05-02, Hours : null Date: 2026-05-03, Hours : null ,Job code:NEW_bfb_comp_000038,\n                Task name:DDDD and Task type:Internal,  Date: 2026-04-27, Hours : 15:00 Date: 2026-04-28, Hours : 4:00 Date: 2026-04-29, Hours : 8:00 Date: 2026-04-30, Hours : null Date: 2026-05-01, Hours : null Date: 2026-05-02, Hours : null Date: 2026-05-03, Hours : null,\n                Job code:abc,\n                Task name:c', 'Super Admin System Super Super Admin save a timesheet entry. Task type:External,\n                 Date: 2026-04-27, Hours : 9:00 Date: 2026-04-28, Hours : 8:00 Date: 2026-04-29, Hours : 6:00 Date: 2026-04-30, Hours : 6:00 Date: 2026-05-01, Hours : null Date: 2026-05-02, Hours : null Date: 2026-05-03, Hours : null ,Job code:NEW_bfb_comp_000038,\n                Task name:DDDD and Task type:Internal,  Date: 2026-04-27, Hours : 15:00 Date: 2026-04-28, Hours : 4:00 Date: 2026-04-29, Hours : 8:00 Date: 2026-04-30, Hours : null Date: 2026-05-01, Hours : null Date: 2026-05-02, Hours : null Date: 2026-05-03, Hours : null,\n                Job code:abc,\n                Task name:c ', 'updated', '122.168.114.106', '2026-05-02 10:58:10', '2026-05-02 10:58:10'),
+(1642, 1, '2026-05-02', 'staff', 25, 'created customer user profile for Shk h.', 'Super Admin System Super Super Admin created customer user profile for Shk h. ', 'created', '122.168.114.106', '2026-05-02 12:52:32', '2026-05-02 12:52:32'),
+(1643, 1, '2026-05-02', 'customer contact person permission', 14, ' updated the access for Technical Contact. Access Changes Add Permission (dashboard-view) ', 'Super Admin System Super Super Admin  updated the access for Technical Contact. Access Changes Add Permission (dashboard-view)  ', 'updated', '122.168.114.106', '2026-05-02 12:55:37', '2026-05-02 12:55:37'),
+(1644, 1, '2026-05-02', 'customer contact person permission', 14, ' updated the access for Technical Contact. Access Changes Add Permission (client-view, job-view) Remove Permission (document-view)', 'Super Admin System Super Super Admin  updated the access for Technical Contact. Access Changes Add Permission (client-view, job-view) Remove Permission (document-view) ', 'updated', '122.168.114.106', '2026-05-02 12:56:07', '2026-05-02 12:56:07'),
+(1645, 1, '2026-05-05', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-05-05 12:14:10', '2026-05-05 12:14:10'),
+(1646, 1, '2026-05-05', 'timesheet', 0, 'save a timesheet entry. Task type:External,\n                 Date: 2026-05-04, Hours : 9:00 Date: 2026-05-05, Hours : 8:00 Date: 2026-05-06, Hours : 6:00 Date: 2026-05-07, Hours : 6:00 Date: 2026-05-08, Hours : 0:00 Date: 2026-05-09, Hours : 0:00 Date: 2026-05-10, Hours : 0:00 ,Job code:NEW_bfb_comp_000038,\n                Task name:DDDD, Task type:Internal,  Date: 2026-05-04, Hours : 6:00 Date: 2026-05-05, Hours : 4:00 Date: 2026-05-06, Hours : 8:00 Date: 2026-05-07, Hours : 0:00 Date: 2026-05-08, Hours : 0:00 Date: 2026-05-09, Hours : 0:00 Date: 2026-05-10, Hours : 0:00,\n                Job code:abc,\n                Task name:c, Task type:External,  Date: 2026-05-04, Hours : 9:00 Date: 2026-05-05, Hours : 8:00 Date: 2026-05-06, Hours : 6:00 Date: 2026-05-07, Hours : 6:00 Date: 2026-05-08, Hours : 0:00 Date: 2026-05-09, Hours : 0:00 Date: 2026-05-10, Hours : 0:00,\n                Job code:NEW_bfb_comp_000038,\n                Task name:DDDD and Task type:Internal,  Date: 2026-05-04, Hours : 6:00 Date: 2026-05-05, Hours : 4:00 Date: 2026-05-06, Hours : 8:00 Date: 2026-05-07, Hours : 0:00 Date: 2026-05-08, Hours : 0:00 Date: 2026-05-09, Hours : 0:00 Date: 2026-05-10, Hours : 0:00,\n                Job code:abc,\n                Task name:c', 'Super Admin System Super Super Admin save a timesheet entry. Task type:External,\n                 Date: 2026-05-04, Hours : 9:00 Date: 2026-05-05, Hours : 8:00 Date: 2026-05-06, Hours : 6:00 Date: 2026-05-07, Hours : 6:00 Date: 2026-05-08, Hours : 0:00 Date: 2026-05-09, Hours : 0:00 Date: 2026-05-10, Hours : 0:00 ,Job code:NEW_bfb_comp_000038,\n                Task name:DDDD, Task type:Internal,  Date: 2026-05-04, Hours : 6:00 Date: 2026-05-05, Hours : 4:00 Date: 2026-05-06, Hours : 8:00 Date: 2026-05-07, Hours : 0:00 Date: 2026-05-08, Hours : 0:00 Date: 2026-05-09, Hours : 0:00 Date: 2026-05-10, Hours : 0:00,\n                Job code:abc,\n                Task name:c, Task type:External,  Date: 2026-05-04, Hours : 9:00 Date: 2026-05-05, Hours : 8:00 Date: 2026-05-06, Hours : 6:00 Date: 2026-05-07, Hours : 6:00 Date: 2026-05-08, Hours : 0:00 Date: 2026-05-09, Hours : 0:00 Date: 2026-05-10, Hours : 0:00,\n                Job code:NEW_bfb_comp_000038,\n                Task name:DDDD and Task type:Internal,  Date: 2026-05-04, Hours : 6:00 Date: 2026-05-05, Hours : 4:00 Date: 2026-05-06, Hours : 8:00 Date: 2026-05-07, Hours : 0:00 Date: 2026-05-08, Hours : 0:00 Date: 2026-05-09, Hours : 0:00 Date: 2026-05-10, Hours : 0:00,\n                Job code:abc,\n                Task name:c ', 'updated', '122.168.114.106', '2026-05-05 12:14:24', '2026-05-05 12:14:24'),
+(1647, 1, '2026-05-06', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-05-06 05:38:06', '2026-05-06 05:38:06'),
+(1648, 1, '2026-05-07', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-05-07 12:06:55', '2026-05-07 12:06:55'),
+<<<<<<<< HEAD:outbook (2).sql
+(1649, 1, '2026-05-07', 'staff', 25, 'updated customer user profile for Shk h.', 'Super Admin System Super Super Admin updated customer user profile for Shk h. ', 'updated', '122.168.114.106', '2026-05-07 12:22:50', '2026-05-07 12:22:50');
+========
+(1649, 1, '2026-05-07', 'staff', 25, 'updated customer user profile for Shk h.', 'Super Admin System Super Super Admin updated customer user profile for Shk h. ', 'updated', '122.168.114.106', '2026-05-07 12:22:50', '2026-05-07 12:22:50'),
+(1650, 1, '2026-05-11', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-05-11 12:05:32', '2026-05-11 12:05:32'),
+(1651, 1, '2026-05-11', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,\n                 Date: 2026-05-11, Hours : 20:00 Date: 2026-05-12, Hours : 4:00 ,Job code:abc,\n                Task name:a, Task type:Internal,  Date: 2026-05-11, Hours : 10:00 Date: 2026-05-12, Hours : 1:00,\n                Job code:abc,\n                Task name:b and Task type:Internal,  Date: 2026-05-11, Hours : 15:00,\n                Job code:abc,\n                Task name:a', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,\n                 Date: 2026-05-11, Hours : 20:00 Date: 2026-05-12, Hours : 4:00 ,Job code:abc,\n                Task name:a, Task type:Internal,  Date: 2026-05-11, Hours : 10:00 Date: 2026-05-12, Hours : 1:00,\n                Job code:abc,\n                Task name:b and Task type:Internal,  Date: 2026-05-11, Hours : 15:00,\n                Job code:abc,\n                Task name:a ', 'updated', '122.168.114.106', '2026-05-11 12:07:08', '2026-05-11 12:07:08'),
+(1652, 1, '2026-05-11', 'timesheet', 0, 'save a timesheet entry. Task type:Internal,\n                 Date: 2026-05-11, Hours : 21:00 Date: 2026-05-12, Hours : 21:00 Date: 2026-05-13, Hours : 2:00 ,Job code:abc,\n                Task name:a', 'Super Admin System Super Super Admin save a timesheet entry. Task type:Internal,\n                 Date: 2026-05-11, Hours : 21:00 Date: 2026-05-12, Hours : 21:00 Date: 2026-05-13, Hours : 2:00 ,Job code:abc,\n                Task name:a ', 'updated', '122.168.114.106', '2026-05-11 12:22:04', '2026-05-11 12:22:04'),
+(1653, 1, '2026-05-11', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,\n                 Date:2026-05-12, Updated hours:15:00, Job code:abc,\n                Task name:a', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:Internal,\n                 Date:2026-05-12, Updated hours:15:00, Job code:abc,\n                Task name:a ', 'updated', '122.168.114.106', '2026-05-11 12:23:24', '2026-05-11 12:23:24'),
+(1654, 1, '2026-05-12', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-05-12 04:41:26', '2026-05-12 04:41:26'),
+(1655, 1, '2026-05-12', 'customer', 14, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(1656, 1, '2026-05-12', 'job', 97, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_GGGG_000092', 'created', '122.168.114.106', '2026-05-12 04:42:26', '2026-05-12 04:42:26'),
+(1657, 1, '2026-05-12', 'timesheet', 0, 'save a timesheet entry. Task type:External,\n                 Date: 2026-05-11, Hours : 9:00 Date: 2026-05-12, Hours : 8:00 Date: 2026-05-13, Hours : 6:00 Date: 2026-05-14, Hours : 6:00 Date: 2026-05-15, Hours : null Date: 2026-05-16, Hours : null Date: 2026-05-17, Hours : null ,Job code:NEW_bfb_comp_000038,\n                Task name:DDDD and Task type:Internal,  Date: 2026-05-11, Hours : 6:00 Date: 2026-05-12, Hours : 4:00 Date: 2026-05-13, Hours : 8:00 Date: 2026-05-14, Hours : null Date: 2026-05-15, Hours : null Date: 2026-05-16, Hours : null Date: 2026-05-17, Hours : null,\n                Job code:abc,\n                Task name:c', 'Super Admin System Super Super Admin save a timesheet entry. Task type:External,\n                 Date: 2026-05-11, Hours : 9:00 Date: 2026-05-12, Hours : 8:00 Date: 2026-05-13, Hours : 6:00 Date: 2026-05-14, Hours : 6:00 Date: 2026-05-15, Hours : null Date: 2026-05-16, Hours : null Date: 2026-05-17, Hours : null ,Job code:NEW_bfb_comp_000038,\n                Task name:DDDD and Task type:Internal,  Date: 2026-05-11, Hours : 6:00 Date: 2026-05-12, Hours : 4:00 Date: 2026-05-13, Hours : 8:00 Date: 2026-05-14, Hours : null Date: 2026-05-15, Hours : null Date: 2026-05-16, Hours : null Date: 2026-05-17, Hours : null,\n                Job code:abc,\n                Task name:c ', 'updated', '122.168.114.106', '2026-05-12 04:44:03', '2026-05-12 04:44:03');
+>>>>>>>> ae168fb62f845281ce298b9596b249377f3a2be7:outbook_copy.sql
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `staff_portfolio`
+--
+
+DROP TABLE IF EXISTS `staff_portfolio`;
+CREATE TABLE IF NOT EXISTS `staff_portfolio` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `staff_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `createdAt` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `staff_portfolio`
+--
+
+INSERT INTO `staff_portfolio` (`id`, `staff_id`, `customer_id`, `createdAt`) VALUES
+(11, 16, 2, '2025-11-20 11:26:56'),
+(12, 3, 10, '2025-11-24 12:31:38');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `statuses`
+--
+
+DROP TABLE IF EXISTS `statuses`;
+CREATE TABLE IF NOT EXISTS `statuses` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `master_status_id` int(11) NOT NULL,
+  `status_name` varchar(100) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `master_status_id` (`master_status_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `status_types`
+--
+
+DROP TABLE IF EXISTS `status_types`;
+CREATE TABLE IF NOT EXISTS `status_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` varchar(100) NOT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `type` (`type`)
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `status_types`
+--
+
+INSERT INTO `status_types` (`id`, `type`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'WIP', '1', '2024-06-28 12:52:45', '2024-10-22 22:01:38'),
+(2, 'Completed', '1', '2024-06-28 12:53:10', '2024-10-22 22:01:31'),
+(3, 'Not Progressing', '1', '2024-06-28 12:53:26', '2024-10-22 22:01:14'),
+(4, 'On Hold', '1', '2025-01-30 08:52:20', '2025-01-30 08:52:20'),
+(5, 'To Be Started', '1', '2025-01-30 08:52:20', '2025-01-30 08:52:20');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `status_types1`
+--
+
+DROP TABLE IF EXISTS `status_types1`;
+CREATE TABLE IF NOT EXISTS `status_types1` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` varchar(100) NOT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `type` (`type`)
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `status_types1`
+--
+
+INSERT INTO `status_types1` (`id`, `type`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'WIP', '1', '2024-06-28 12:52:45', '2024-10-22 22:01:38'),
+(2, 'Completed', '1', '2024-06-28 12:53:10', '2024-10-22 22:01:31'),
+(3, 'Not Progressing', '1', '2024-06-28 12:53:26', '2024-10-22 22:01:14'),
+(4, 'On Hold', '1', '2025-01-30 08:52:20', '2025-01-30 08:52:20');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sub_internal`
+--
+
+DROP TABLE IF EXISTS `sub_internal`;
+CREATE TABLE IF NOT EXISTS `sub_internal` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `internal_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `name_copy` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `internal_id` (`internal_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `sub_internal`
+--
+
+INSERT INTO `sub_internal` (`id`, `internal_id`, `name`, `status`, `created_at`, `updated_at`, `name_copy`) VALUES
+(1, 1, 'a', '1', '2024-10-05 12:13:02', '2024-10-05 12:13:02', NULL),
+(2, 1, 'b', '1', '2024-10-05 12:13:07', '2024-10-05 12:13:07', NULL),
+(3, 1, 'c', '1', '2024-10-05 12:13:12', '2024-10-05 12:13:12', NULL),
+(4, 2, 'x', '1', '2024-10-05 12:13:23', '2024-10-05 12:13:23', NULL),
+(5, 2, 'y', '1', '2024-10-05 12:13:28', '2024-10-05 12:13:28', NULL),
+(6, 6, 'S1', '1', '2024-10-14 07:14:13', '2024-10-14 07:15:12', NULL),
+(8, 6, 'SS', '1', '2024-10-22 10:21:51', '2024-10-22 10:21:51', NULL),
+(9, 7, 'aa', '0', '2024-11-18 10:16:18', '2024-11-18 10:16:30', NULL),
+(10, 7, 'bb', '1', '2024-11-18 10:16:38', '2024-11-18 10:16:38', NULL),
+(11, 7, 'mmmm', '1', '2024-11-18 10:25:47', '2024-11-18 10:25:47', NULL),
+(13, 10, 'DDDDD11111', '1', '2024-11-26 05:26:07', '2024-11-26 05:43:39', NULL),
+(14, 10, 'a', '1', '2025-01-08 07:08:34', '2025-01-08 07:08:34', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `task`
+--
+
+DROP TABLE IF EXISTS `task`;
+CREATE TABLE IF NOT EXISTS `task` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `service_id` int(11) NOT NULL,
+  `job_type_id` int(11) NOT NULL,
+  `budgeted_hour` varchar(100) DEFAULT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`,`service_id`,`job_type_id`),
+  KEY `service_id` (`service_id`),
+  KEY `job_type_id` (`job_type_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=47 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `task`
+--
+
+INSERT INTO `task` (`id`, `name`, `service_id`, `job_type_id`, `budgeted_hour`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'a', 7, 2, NULL, '1', '2025-01-30 08:57:37', '2025-01-30 08:57:37'),
+(2, 'b', 7, 2, NULL, '1', '2025-01-30 08:57:37', '2025-01-30 08:57:37'),
+(3, 'c', 7, 1, NULL, '1', '2025-01-30 08:57:48', '2025-01-30 08:57:48'),
+(4, 'd', 7, 1, NULL, '1', '2025-01-30 08:57:48', '2025-01-30 08:57:48'),
+(5, 'A', 2, 4, NULL, '1', '2025-07-11 12:07:21', '2025-07-11 12:07:21'),
+(6, 'B', 2, 4, NULL, '1', '2025-07-11 12:07:21', '2025-07-11 12:07:21'),
+(7, 'C', 2, 4, NULL, '1', '2025-07-11 12:26:33', '2025-07-11 12:26:33'),
+(8, 'D', 2, 4, NULL, '1', '2025-07-11 13:15:20', '2025-07-11 13:15:20'),
+(9, 'fpppp', 32, 6, NULL, '1', '2025-08-13 11:57:45', '2025-10-02 10:02:47'),
+(10, 'FFF', 7, 2, NULL, '1', '2025-08-25 06:26:31', '2025-08-25 06:26:31'),
+(11, 'SGGGGGG', 32, 6, NULL, '1', '2025-09-27 12:07:41', '2025-09-27 12:07:41'),
+(12, 'SWADSFC', 32, 6, NULL, '1', '2025-09-27 12:07:41', '2025-09-27 12:07:41'),
+(13, 'ABC11', 32, 6, '256:11', '1', '2025-10-02 05:30:19', '2025-10-02 07:16:07'),
+(14, 'ABC1', 32, 6, '256:11', '1', '2025-10-02 05:30:19', '2025-10-02 07:15:57'),
+(15, 'sfgdgsvcsvsv', 32, 6, '00:00', '1', '2025-10-02 05:32:43', '2025-10-02 09:52:30'),
+(16, 'dgdg', 32, 6, '00:00', '1', '2025-10-02 05:32:43', '2025-10-02 05:32:43'),
+(18, 'hhhhhhhhhhhh', 32, 6, '00:00', '1', '2025-10-02 05:34:55', '2025-10-02 05:34:55'),
+(19, 'qsqs', 32, 6, '00:00', '1', '2025-10-02 09:34:57', '2025-10-02 09:34:57'),
+(20, 'sqsqs', 32, 6, '34535:45', '1', '2025-10-02 09:34:57', '2025-10-02 09:34:57'),
+(21, 'KKKKK-1', 32, 7, '25:25', '1', '2025-10-02 10:24:13', '2025-10-02 10:24:13'),
+(22, 'KK-2', 32, 7, '25:25', '1', '2025-10-02 10:24:13', '2025-10-02 10:24:13'),
+(23, 'ABCCC', 33, 10, '25:10', '1', '2025-10-04 10:43:53', '2025-10-04 10:43:53'),
+(24, 'BCCCC', 33, 10, '00:55', '1', '2025-10-04 10:43:53', '2025-10-04 10:43:53'),
+(25, 'DDDD', 33, 9, '00:00', '1', '2025-10-04 10:44:19', '2025-10-04 10:44:19'),
+(26, 'FFFF', 33, 9, '1:1', '1', '2025-10-04 10:44:19', '2025-10-04 10:44:19'),
+(27, 'kkkk111-444', 32, 8, NULL, '1', '2025-10-06 04:45:08', '2025-10-06 05:50:09'),
+(28, 'dd', 3, 3, NULL, '1', '2025-11-11 15:03:20', '2025-11-11 15:03:20'),
+(29, 'ja_1', 1, 11, '1:10', '1', '2025-11-25 05:18:36', '2025-11-25 05:18:36'),
+(30, 'Ja_2', 1, 11, '2:10', '1', '2025-11-25 05:18:36', '2025-11-25 05:18:36'),
+(31, 'DFDDD', 4, 12, '1:10', '1', '2025-11-27 08:24:25', '2025-11-27 08:24:25'),
+(32, 'DGGGF', 4, 12, '1:10', '1', '2025-11-27 08:24:25', '2025-11-27 08:24:25'),
+(33, 'ddddddddd', 8, 13, '1:10', '1', '2025-11-28 05:35:20', '2025-11-28 05:35:20'),
+(34, 'fffffffff', 8, 13, '1:10', '1', '2025-11-28 05:35:20', '2025-11-28 05:35:20'),
+(35, 'yy', 2, 5, NULL, '1', '2026-03-28 05:20:37', '2026-03-28 05:20:37'),
+(36, 'ghg', 5, 14, '10:10', '1', '2026-04-06 06:15:38', '2026-04-06 06:15:38'),
+(37, 'iii', 34, 15, '10:00', '1', '2026-04-08 06:19:29', '2026-04-08 06:19:29'),
+(38, 'jj', 35, 16, NULL, '1', '2026-04-08 06:54:57', '2026-04-08 06:54:57'),
+(39, 'pp', 37, 18, NULL, '1', '2026-04-09 05:08:17', '2026-04-09 05:08:17'),
+(40, 'ppp', 36, 17, NULL, '1', '2026-04-09 07:14:15', '2026-04-09 07:14:15'),
+(41, 's', 34, 20, NULL, '1', '2026-04-24 10:50:59', '2026-04-24 10:50:59'),
+(42, 'ff', 35, 21, NULL, '1', '2026-04-30 10:42:46', '2026-04-30 10:42:46'),
+(43, 'testt', 1, 11, NULL, '1', '2026-05-02 10:07:35', '2026-05-02 10:07:35'),
+(44, 'PP TEST', 1, 11, NULL, '1', '2026-05-02 10:16:53', '2026-05-02 10:16:53'),
+(45, 'TST NEW', 2, 4, NULL, '1', '2026-05-02 10:47:52', '2026-05-02 10:47:52'),
+(46, 'kk', 37, 23, NULL, '1', '2026-05-12 04:42:26', '2026-05-12 04:42:26');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `task_timesheet`
+--
+
+DROP TABLE IF EXISTS `task_timesheet`;
+CREATE TABLE IF NOT EXISTS `task_timesheet` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `checklist_task_id` int(11) NOT NULL,
+  `job_id` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `checklist_task_id` (`checklist_task_id`),
+  KEY `job_id` (`job_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `timesheet`
+--
+
+DROP TABLE IF EXISTS `timesheet`;
+CREATE TABLE IF NOT EXISTS `timesheet` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `staff_id` int(11) NOT NULL,
+  `task_type` enum('1','2') NOT NULL DEFAULT '1' COMMENT '1: Internal, 2: External',
+  `customer_id` int(11) NOT NULL DEFAULT '0',
+  `client_id` int(11) NOT NULL DEFAULT '0',
+  `job_id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  `monday_date` date DEFAULT NULL,
+  `monday_note` text,
+  `monday_hours` varchar(100) DEFAULT NULL,
+  `tuesday_date` date DEFAULT NULL,
+  `tuesday_hours` varchar(100) DEFAULT NULL,
+  `tuesday_note` text,
+  `wednesday_date` date DEFAULT NULL,
+  `wednesday_hours` varchar(100) DEFAULT NULL,
+  `wednesday_note` text,
+  `thursday_date` date DEFAULT NULL,
+  `thursday_hours` varchar(100) DEFAULT NULL,
+  `thursday_note` text,
+  `friday_date` date DEFAULT NULL,
+  `friday_hours` varchar(100) DEFAULT NULL,
+  `friday_note` text,
+  `saturday_date` date DEFAULT NULL,
+  `saturday_hours` varchar(100) DEFAULT NULL,
+  `saturday_note` text,
+  `sunday_date` date DEFAULT NULL,
+  `sunday_hours` varchar(100) DEFAULT NULL,
+  `sunday_note` text,
+  `remark` longtext,
+  `final_remark` longtext,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `submit_status` enum('0','1') NOT NULL DEFAULT '0',
+  `save_date` datetime DEFAULT NULL,
+  `submit_date` datetime DEFAULT NULL,
+  `duplicate_entry` longtext,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `staff_id` (`staff_id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `client_id` (`client_id`),
+  KEY `job_id` (`job_id`),
+  KEY `task_id` (`task_id`)
+<<<<<<<< HEAD:outbook (2).sql
+) ENGINE=MyISAM AUTO_INCREMENT=80 DEFAULT CHARSET=latin1;
+========
+) ENGINE=MyISAM AUTO_INCREMENT=86 DEFAULT CHARSET=latin1;
+>>>>>>>> ae168fb62f845281ce298b9596b249377f3a2be7:outbook_copy.sql
+
+--
+-- Dumping data for table `timesheet`
+--
+
+INSERT INTO `timesheet` (`id`, `staff_id`, `task_type`, `customer_id`, `client_id`, `job_id`, `task_id`, `monday_date`, `monday_note`, `monday_hours`, `tuesday_date`, `tuesday_hours`, `tuesday_note`, `wednesday_date`, `wednesday_hours`, `wednesday_note`, `thursday_date`, `thursday_hours`, `thursday_note`, `friday_date`, `friday_hours`, `friday_note`, `saturday_date`, `saturday_hours`, `saturday_note`, `sunday_date`, `sunday_hours`, `sunday_note`, `remark`, `final_remark`, `status`, `submit_status`, `save_date`, `submit_date`, `duplicate_entry`, `created_at`, `updated_at`) VALUES
+(1, 1, '1', 0, 0, 1, 3, '2025-07-07', NULL, '2:20', NULL, NULL, NULL, '2025-07-09', '3:50', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '5ertyr', '1', '0', NULL, NULL, NULL, '2025-07-09 12:11:46', '2025-09-23 06:32:02'),
+(2, 1, '2', 1, 1, 2, 2, '2025-07-07', NULL, '5:50', '2025-07-08', '5:50', NULL, '2025-07-09', '5:60', NULL, '2025-07-10', '5:40', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '5ertyr', '1', '0', NULL, NULL, NULL, '2025-07-09 12:11:46', '2025-09-23 06:31:59'),
+(3, 1, '1', 0, 0, 1, 3, NULL, NULL, NULL, '2025-07-08', '6:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '5ertyr', '1', '0', NULL, NULL, NULL, '2025-07-09 12:11:46', '2025-09-23 06:31:56'),
+(4, 1, '1', 0, 0, 1, 3, '2025-07-14', NULL, '9:60', '2025-07-15', '9:60', NULL, '2025-07-16', '9:60', NULL, '2025-07-17', '9:60', NULL, '2025-07-18', '9:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2025-07-14 10:55:57', '2025-09-23 06:31:53'),
+(5, 14, '2', 10, 8, 10, 10, '2025-08-25', NULL, '2:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2025-08-21 12:17:35', '2025-09-16 06:32:45'),
+(6, 1, '1', 0, 0, 1, 3, '2025-09-01', NULL, '2:40', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2025-09-02 10:19:22', '2025-09-02 10:34:19'),
+(7, 1, '2', 1, 1, 5, 1, '2025-09-01', NULL, '5:60', '2025-09-02', '6:30', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2025-09-02 10:20:10', '2025-09-02 10:20:10'),
+(8, 1, '1', 0, 0, 1, 3, '2025-09-08', NULL, '6:50', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2025-09-09 13:03:37', '2025-09-11 09:57:37'),
+(9, 17, '1', 0, 0, 1, 2, '2025-09-08', NULL, '3:00', '2025-09-09', '3:50', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2025-09-10 07:08:01', '2025-09-10 13:25:21'),
+(10, 17, '1', 0, 0, 7, 10, '2025-09-08', NULL, '3:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2025-09-10 07:08:22', '2025-09-11 09:55:33'),
+(11, 16, '2', 10, 8, 10, 10, '2025-09-08', NULL, '9:85', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2025-09-10 07:09:48', '2025-09-11 05:19:50'),
+(12, 16, '2', 10, 8, 10, 10, '2025-09-08', NULL, '6:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2025-09-10 07:09:48', '2025-09-10 07:09:48'),
+(13, 16, '1', 0, 0, 1, 1, '2025-09-08', NULL, '3:35', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2025-09-10 07:09:48', '2025-09-11 09:55:45'),
+(14, 1, '2', 5, 3, 13, 5, '2025-09-08', NULL, '9:30', '2025-09-09', '4:20', NULL, '2025-09-10', '5:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2025-09-11 09:57:37', '2025-09-11 10:01:03'),
+(15, 14, '2', 10, 8, 10, 10, '2025-09-15', NULL, '2:00', '2025-09-09', '3:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '1', NULL, NULL, NULL, '2025-08-21 12:17:35', '2025-09-23 06:03:39'),
+(16, 15, '2', 5, 3, 13, 5, '2025-09-15', NULL, '9:30', '2025-09-16', '4:20', NULL, '2025-09-17', '5:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2025-09-19 09:57:37', '2025-09-22 07:21:25'),
+(17, 14, '2', 10, 8, 10, 10, '2025-09-15', NULL, '2:00', '2025-09-16', '3:60', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2025-09-18 12:17:35', '2025-09-22 09:03:47'),
+(18, 1, '1', 0, 0, 1, 3, '2025-11-17', 'monday first hhhhh', '3:01', NULL, NULL, NULL, NULL, NULL, 'budhhhhhhhhhhh firstttttt', NULL, NULL, 'sfvsfvsvsvsvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2025-11-20 09:37:40', '2025-11-20 12:58:09'),
+(19, 1, '1', 0, 0, 1, 3, '2025-11-17', NULL, '6:00', '2025-11-18', '6:00', NULL, '2025-11-19', '6:00', NULL, NULL, NULL, 'thursday second', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2025-11-20 09:37:40', '2025-11-20 09:37:40'),
+(20, 1, '2', 10, 15, 38, 25, '2025-10-27', 'FFFFFFFFFFF', '9:00', '2025-10-28', '8:00', NULL, '2025-10-29', '6:00', 'WEEEDDDDDFIRSTTTT', '2025-10-30', '6:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'dcsc', '1', '1', NULL, NULL, NULL, '2025-11-20 12:46:44', '2025-11-20 12:46:44'),
+(21, 1, '1', 0, 0, 1, 3, '2025-10-27', NULL, '6:00', '2025-10-28', '4:00', NULL, '2025-10-29', '8:00', 'WEDDDDDDD', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'dcsc', '1', '1', NULL, NULL, NULL, '2025-11-20 12:46:44', '2025-11-20 12:46:44'),
+(25, 14, '2', 10, 8, 10, 10, '2025-11-17', NULL, '2:00', '2025-11-18', '3:60', NULL, '2025-11-19', NULL, NULL, '2025-11-20', NULL, NULL, '2025-11-21', NULL, NULL, '2025-11-22', NULL, NULL, '2025-11-23', NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2025-11-21 06:26:41', '2025-11-21 06:26:41'),
+(24, 14, '2', 10, 8, 10, 10, '2025-11-17', NULL, '2:00', '2025-11-18', '3:60', NULL, '2025-11-19', NULL, NULL, '2025-11-20', NULL, NULL, '2025-11-21', NULL, NULL, '2025-11-22', NULL, NULL, '2025-11-23', NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2025-11-21 06:26:41', '2025-11-21 06:26:41'),
+(26, 1, '2', 10, 15, 38, 25, '2025-11-17', 'FFFFFFFFFFF', '9:00', '2025-11-18', '8:00', NULL, '2025-11-19', '6:00', 'WEEEDDDDDFIRSTTTT', '2025-11-20', '6:00', NULL, '2025-11-21', NULL, NULL, '2025-11-22', NULL, NULL, '2025-11-23', NULL, NULL, NULL, 'dcsc', '1', '0', NULL, NULL, NULL, '2025-11-21 06:28:55', '2025-11-21 06:28:55'),
+(27, 1, '1', 0, 0, 1, 3, '2025-11-17', NULL, '6:00', '2025-11-18', '4:00', NULL, '2025-11-19', '8:00', 'WEDDDDDDD', '2025-11-20', NULL, NULL, '2025-11-21', NULL, NULL, '2025-11-22', NULL, NULL, '2025-11-23', NULL, NULL, NULL, 'dcsc', '1', '0', NULL, NULL, NULL, '2025-11-21 06:28:55', '2025-11-21 06:28:55'),
+(28, 14, '1', 0, 0, 1, 3, '2025-11-10', '8olioio', '05:00', '2025-11-11', '9:00', NULL, '2025-11-12', '9:00', NULL, '2025-11-13', '4:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'ilil', '1', '1', NULL, NULL, NULL, '2025-11-22 06:59:49', '2025-11-22 06:59:49'),
+(29, 14, '1', 0, 0, 1, 3, '2025-11-10', NULL, '04:00', '2025-11-11', '9:00', NULL, '2025-11-12', '9:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'ilil', '1', '1', NULL, NULL, NULL, '2025-11-22 06:59:49', '2025-11-22 06:59:49'),
+(30, 14, '1', 0, 0, 1, 3, '2025-11-03', NULL, '9:00', '2025-11-04', '9:00', NULL, '2025-11-05', '9:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'jjy', '1', '1', NULL, NULL, NULL, '2025-11-22 07:02:41', '2025-11-22 07:02:41'),
+(31, 14, '1', 0, 0, 1, 3, '2025-11-03', NULL, '9:00', '2025-11-04', '9:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'jjy', '1', '1', NULL, NULL, NULL, '2025-11-22 07:02:41', '2025-11-22 07:02:41'),
+(32, 14, '1', 0, 0, 1, 3, '2025-11-24', NULL, '5:00', NULL, NULL, NULL, '2025-11-26', '05:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2025-11-22 07:04:35', '2025-11-22 07:04:35'),
+(33, 1, '2', 10, 16, 39, 24, '2025-11-24', NULL, '23:00', '2025-11-25', '20:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '1', NULL, NULL, NULL, '2025-11-24 05:33:11', '2025-11-24 05:33:11'),
+(34, 1, '1', 0, 0, 1, 3, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '1', NULL, NULL, NULL, '2025-11-24 05:37:10', '2025-11-24 05:37:10'),
+(38, 1, '1', 0, 0, 1, 3, '2025-12-01', NULL, '20:00', '2025-12-02', '20:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '1', NULL, NULL, NULL, '2025-11-24 06:34:01', '2025-11-24 06:34:01'),
+(39, 15, '1', 0, 0, 1, 3, '2025-11-17', NULL, '20:00', '2025-11-18', '2:00', NULL, '2025-11-19', '02:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '1', NULL, NULL, NULL, '2025-11-24 11:45:06', '2025-11-24 11:45:06'),
+(37, 1, '1', 0, 0, 1, 3, '2025-12-01', NULL, '5:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '1', NULL, NULL, NULL, '2025-11-24 06:33:26', '2025-11-24 06:34:01'),
+(40, 22, '1', 0, 0, 1, 3, '2025-11-17', NULL, '10:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'kk', '1', '1', NULL, NULL, NULL, '2025-11-25 05:02:18', '2025-11-25 05:02:18'),
+(41, 22, '1', 0, 0, 1, 3, NULL, NULL, NULL, '2025-11-18', '10:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'kk', '1', '1', NULL, NULL, NULL, '2025-11-25 05:02:18', '2025-11-25 05:02:18'),
+(42, 22, '1', 0, 0, 1, 3, '2025-11-17', NULL, '10:00', '2025-11-18', '10:00', NULL, '2025-11-19', '10:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'kk', '1', '1', NULL, NULL, NULL, '2025-11-25 05:02:18', '2025-11-25 05:02:18'),
+(43, 16, '1', 0, 0, 1, 3, '2025-11-24', 'egedg', '15:00', NULL, NULL, NULL, NULL, NULL, NULL, '2025-11-27', '15:00', 'rgtgrgr', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'ef', '1', '1', NULL, NULL, NULL, '2025-11-27 12:22:40', '2025-11-27 12:22:40'),
+(44, 16, '2', 2, 10, 29, 8, '2025-11-24', 'errrrrrrrr', '3:00', NULL, NULL, NULL, '2025-11-26', '15:00', 'erfefg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'ef', '1', '1', NULL, NULL, NULL, '2025-11-27 12:22:40', '2025-11-27 12:22:40'),
+(45, 11, '2', 6, 11, 24, 8, '2026-01-05', NULL, '2:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2026-01-05 12:20:36', '2026-01-05 12:20:36'),
+(46, 23, '1', 0, 0, 1, 1, '2026-02-09', NULL, '10:00', '2026-02-10', '10:00', NULL, '2026-02-11', '10:00', NULL, '2026-02-12', '10:00', NULL, '2026-02-13', '3:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '1', NULL, NULL, NULL, '2026-02-10 06:10:31', '2026-02-10 06:11:14'),
+(47, 1, '1', 0, 0, 1, 1, '2026-02-09', NULL, '12:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2026-02-10 07:15:18', '2026-02-10 07:15:18'),
+(48, 1, '2', 12, 18, 44, 34, '2026-03-09', NULL, '4:01', '2026-03-10', '2:01', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2026-03-14 07:00:37', '2026-03-14 09:38:42'),
+(49, 1, '2', 6, 17, 43, 30, '2026-03-09', NULL, '6:00', NULL, NULL, NULL, '2026-03-11', '3:33', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2026-03-14 09:37:55', '2026-03-14 09:38:20'),
+(50, 1, '1', 0, 0, 1, 1, '2026-03-09', NULL, '6:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2026-03-14 10:58:45', '2026-03-14 10:58:45'),
+(51, 1, '1', 0, 0, 1, 1, '2026-03-23', NULL, '23:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'kljhl', '1', '1', NULL, NULL, NULL, '2026-03-27 11:57:57', '2026-03-27 12:33:17'),
+(52, 1, '1', 0, 0, 1, 1, '2026-03-30', NULL, '12:00', '2026-03-31', '21:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', NULL, NULL, NULL, '2026-03-27 12:31:52', '2026-03-27 12:31:52'),
+(53, 1, '1', 0, 0, 7, 10, '2026-03-23', NULL, '2:00', '2026-03-24', '12:00', NULL, '2026-03-25', '12:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'kljhl', '1', '1', NULL, NULL, NULL, '2026-03-27 12:33:17', '2026-03-27 12:33:17'),
+(69, 1, '2', 10, 15, 38, 25, '2026-04-06', 'FFFFFFFFFFF', '27:00', '2026-04-07', '24:00', NULL, '2026-04-08', '18:00', 'WEEEDDDDDFIRSTTTT', '2026-04-09', '18:00', NULL, '2026-04-10', NULL, NULL, '2026-04-11', NULL, NULL, NULL, NULL, NULL, NULL, 'hkjhk', '1', '1', '2026-04-11 18:30:10', '2026-04-11 18:30:31', '[{\"id\":null,\"staff_id\":1,\"task_type\":\"2\",\"customer_id\":10,\"client_id\":15,\"job_id\":38,\"task_id\":25,\"monday_date\":\"2026-04-06\",\"monday_hours\":\"9.00\",\"monday_note\":\"FFFFFFFFFFF\",\"tuesday_date\":\"2026-04-07\",\"tuesday_hours\":\"8.00\",\"tuesday_note\":null,\"wednesday_date\":\"2026-04-08\",\"wednesday_hours\":\"6.00\",\"wednesday_note\":\"WEEEDDDDDFIRSTTTT\",\"thursday_date\":\"2026-04-09\",\"thursday_hours\":\"6.00\",\"thursday_note\":null,\"friday_date\":\"2026-04-10\",\"friday_hours\":null,\"friday_note\":null,\"saturday_date\":\"2026-04-11\",\"saturday_hours\":null,\"saturday_note\":null,\"remark\":null,\"final_remark\":\"dcsc\",\"status\":\"1\",\"submit_status\":\"0\",\"save_date\":null,\"submit_date\":null,\"duplicate_entry\":null,\"created_at\":\"2025-11-20T12:46:44.000Z\",\"updated_at\":\"2025-11-20T12:46:44.000Z\",\"internal_name\":null,\"internal_id\":null,\"sub_internal_name\":null,\"sub_internal_id\":null,\"customer_name\":\"NEW\",\"client_name\":\"bfb\",\"job_type_name\":\"compilence- job type\",\"job_type_id\":9,\"job_name\":\"NEW_bfb_comp_000038\",\"task_name\":\"DDDD\",\"job_total_time\":\"00:00\",\"staffs_hourminute\":\"42:00\",\"total_hours\":\"29.00\",\"tempId\":1775912402184.4365,\"sunday_date\":\"2026-04-12\",\"merge_date_time\":\"4/11/2026, 6:30:06 PM\"},{\"id\":null,\"staff_id\":1,\"task_type\":\"2\",\"customer_id\":10,\"client_id\":15,\"job_id\":38,\"task_id\":25,\"monday_date\":\"2026-04-06\",\"monday_hours\":\"9.00\",\"monday_note\":\"FFFFFFFFFFF\",\"tuesday_date\":\"2026-04-07\",\"tuesday_hours\":\"8.00\",\"tuesday_note\":null,\"wednesday_date\":\"2026-04-08\",\"wednesday_hours\":\"6.00\",\"wednesday_note\":\"WEEEDDDDDFIRSTTTT\",\"thursday_date\":\"2026-04-09\",\"thursday_hours\":\"6.00\",\"thursday_note\":null,\"friday_date\":\"2026-04-10\",\"friday_hours\":null,\"friday_note\":null,\"saturday_date\":\"2026-04-11\",\"saturday_hours\":null,\"saturday_note\":null,\"remark\":null,\"final_remark\":\"dcsc\",\"status\":\"1\",\"submit_status\":\"0\",\"save_date\":null,\"submit_date\":null,\"duplicate_entry\":null,\"created_at\":\"2025-11-20T12:46:44.000Z\",\"updated_at\":\"2025-11-20T12:46:44.000Z\",\"internal_name\":null,\"internal_id\":null,\"sub_internal_name\":null,\"sub_internal_id\":null,\"customer_name\":\"NEW\",\"client_name\":\"bfb\",\"job_type_name\":\"compilence- job type\",\"job_type_id\":9,\"job_name\":\"NEW_bfb_comp_000038\",\"task_name\":\"DDDD\",\"job_total_time\":\"00:00\",\"staffs_hourminute\":\"42:00\",\"total_hours\":\"29.00\",\"tempId\":1775912405263.7607,\"sunday_date\":\"2026-04-12\",\"merge_date_time\":\"4/11/2026, 6:30:06 PM\"}]', '2026-04-11 13:00:09', '2026-04-11 13:00:31'),
+(72, 1, '2', 14, 20, 95, 42, '2026-04-27', NULL, '10:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2026-05-02 16:28:11', NULL, '\"[]\"', '2026-04-30 10:43:08', '2026-05-02 10:58:10'),
+(73, 1, '2', 14, 20, 96, 6, '2026-04-27', NULL, '10:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2026-05-02 16:28:11', NULL, '\"[]\"', '2026-05-02 10:30:49', '2026-05-02 10:58:10'),
+(74, 1, '2', 10, 15, 38, 25, '2026-04-27', 'FFFFFFFFFFF', '9:00', '2026-04-28', '8:00', NULL, '2026-04-29', '6:00', 'WEEEDDDDDFIRSTTTT', '2026-04-30', '6:00', NULL, '2026-05-01', NULL, NULL, '2026-05-02', NULL, NULL, '2026-05-03', NULL, NULL, NULL, 'dcsc', '1', '0', '2026-05-02 16:28:11', NULL, '[]', '2026-05-02 10:58:10', '2026-05-02 10:58:10'),
+(75, 1, '1', 0, 0, 1, 3, '2026-04-27', NULL, '15:00', '2026-04-28', '4:00', NULL, '2026-04-29', '8:00', 'WEDDDDDDD', '2026-04-30', NULL, NULL, '2026-05-01', NULL, NULL, '2026-05-02', NULL, NULL, '2026-05-03', NULL, NULL, NULL, 'dcsc', '1', '0', '2026-05-02 16:28:11', NULL, '[]', '2026-05-02 10:58:10', '2026-05-02 10:58:10'),
+(76, 1, '2', 10, 15, 38, 25, '2026-05-04', 'FFFFFFFFFFF', '9:00', '2026-05-05', '8:00', NULL, '2026-05-06', '6:00', 'WEEEDDDDDFIRSTTTT', '2026-05-07', '6:00', NULL, '2026-05-08', '0:00', NULL, '2026-05-09', '0:00', NULL, '2026-05-10', '0:00', NULL, NULL, 'dcsc', '1', '0', '2026-05-05 17:44:25', NULL, '[]', '2026-05-05 12:14:24', '2026-05-05 12:14:24'),
+(77, 1, '1', 0, 0, 1, 3, '2026-05-04', NULL, '6:00', '2026-05-05', '4:00', NULL, '2026-05-06', '8:00', 'WEDDDDDDD', '2026-05-07', '0:00', NULL, '2026-05-08', '0:00', NULL, '2026-05-09', '0:00', NULL, '2026-05-10', '0:00', NULL, NULL, 'dcsc', '1', '0', '2026-05-05 17:44:25', NULL, '[]', '2026-05-05 12:14:24', '2026-05-05 12:14:24'),
+(78, 1, '1', 0, 0, 1, 3, '2026-05-04', NULL, '6:00', '2026-05-05', '4:00', NULL, '2026-05-06', '8:00', 'WEDDDDDDD', '2026-05-07', '0:00', NULL, '2026-05-08', '0:00', NULL, '2026-05-09', '0:00', NULL, '2026-05-10', '0:00', NULL, NULL, 'dcsc', '1', '0', '2026-05-05 17:44:25', NULL, '[]', '2026-05-05 12:14:24', '2026-05-05 12:14:24'),
+(79, 1, '2', 10, 15, 38, 25, '2026-05-04', 'FFFFFFFFFFF', '9:00', '2026-05-05', '8:00', NULL, '2026-05-06', '6:00', 'WEEEDDDDDFIRSTTTT', '2026-05-07', '6:00', NULL, '2026-05-08', '0:00', NULL, '2026-05-09', '0:00', NULL, '2026-05-10', '0:00', NULL, NULL, 'dcsc', '1', '0', '2026-05-05 17:44:25', NULL, '[]', '2026-05-05 12:14:24', '2026-05-05 12:14:24'),
+<<<<<<<< HEAD:outbook (2).sql
+========
+(83, 1, '1', 0, 0, 1, 1, '2026-05-11', NULL, '21:00', '2026-05-12', '15:00', NULL, '2026-05-13', '2:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2026-05-12 10:14:04', NULL, '\"\\\"[]\\\"\"', '2026-05-11 12:22:04', '2026-05-12 04:44:03'),
+(84, 1, '2', 10, 15, 38, 25, '2026-05-11', 'FFFFFFFFFFF', '9:00', '2026-05-12', '8:00', NULL, '2026-05-13', '6:00', 'WEEEDDDDDFIRSTTTT', '2026-05-14', '6:00', NULL, '2026-05-15', NULL, NULL, '2026-05-16', NULL, NULL, '2026-05-17', NULL, NULL, NULL, 'dcsc', '1', '0', '2026-05-12 10:14:04', NULL, '[]', '2026-05-12 04:44:03', '2026-05-12 04:44:03'),
+(85, 1, '1', 0, 0, 1, 3, '2026-05-11', NULL, '6:00', '2026-05-12', '4:00', NULL, '2026-05-13', '8:00', 'WEDDDDDDD', '2026-05-14', NULL, NULL, '2026-05-15', NULL, NULL, '2026-05-16', NULL, NULL, '2026-05-17', NULL, NULL, NULL, 'dcsc', '1', '0', '2026-05-12 10:14:04', NULL, '[]', '2026-05-12 04:44:03', '2026-05-12 04:44:03'),
+>>>>>>>> ae168fb62f845281ce298b9596b249377f3a2be7:outbook_copy.sql
+(68, 1, '1', 0, 0, 1, 3, '2026-04-06', NULL, '18:00', '2026-04-07', '12:00', NULL, '2026-04-08', '24:00', 'WEDDDDDDD', '2026-04-09', NULL, NULL, '2026-04-10', NULL, NULL, '2026-04-11', NULL, NULL, NULL, NULL, NULL, NULL, 'hkjhk', '1', '1', '2026-04-11 18:30:10', '2026-04-11 18:30:31', '[{\"id\":null,\"staff_id\":1,\"task_type\":\"1\",\"customer_id\":null,\"client_id\":null,\"job_id\":1,\"task_id\":3,\"monday_date\":\"2026-04-06\",\"monday_hours\":\"6.00\",\"monday_note\":null,\"tuesday_date\":\"2026-04-07\",\"tuesday_hours\":\"4.00\",\"tuesday_note\":null,\"wednesday_date\":\"2026-04-08\",\"wednesday_hours\":\"8.00\",\"wednesday_note\":\"WEDDDDDDD\",\"thursday_date\":\"2026-04-09\",\"thursday_hours\":null,\"thursday_note\":null,\"friday_date\":\"2026-04-10\",\"friday_hours\":null,\"friday_note\":null,\"saturday_date\":\"2026-04-11\",\"saturday_hours\":null,\"saturday_note\":null,\"remark\":null,\"final_remark\":\"dcsc\",\"status\":\"1\",\"submit_status\":\"0\",\"save_date\":null,\"submit_date\":null,\"duplicate_entry\":null,\"created_at\":\"2025-11-20T12:46:44.000Z\",\"updated_at\":\"2025-11-20T12:46:44.000Z\",\"internal_name\":\"abc\",\"internal_id\":1,\"sub_internal_name\":\"c\",\"sub_internal_id\":3,\"customer_name\":null,\"client_name\":null,\"job_type_name\":null,\"job_type_id\":null,\"job_name\":null,\"task_name\":null,\"job_total_time\":null,\"staffs_hourminute\":\"42:00\",\"total_hours\":\"18.00\",\"tempId\":1775912402183.7825,\"sunday_date\":\"2026-04-12\",\"merge_date_time\":\"4/11/2026, 6:30:06 PM\"},{\"id\":null,\"staff_id\":1,\"task_type\":\"1\",\"customer_id\":null,\"client_id\":null,\"job_id\":1,\"task_id\":3,\"monday_date\":\"2026-04-06\",\"monday_hours\":\"6.00\",\"monday_note\":null,\"tuesday_date\":\"2026-04-07\",\"tuesday_hours\":\"4.00\",\"tuesday_note\":null,\"wednesday_date\":\"2026-04-08\",\"wednesday_hours\":\"8.00\",\"wednesday_note\":\"WEDDDDDDD\",\"thursday_date\":\"2026-04-09\",\"thursday_hours\":null,\"thursday_note\":null,\"friday_date\":\"2026-04-10\",\"friday_hours\":null,\"friday_note\":null,\"saturday_date\":\"2026-04-11\",\"saturday_hours\":null,\"saturday_note\":null,\"remark\":null,\"final_remark\":\"dcsc\",\"status\":\"1\",\"submit_status\":\"0\",\"save_date\":null,\"submit_date\":null,\"duplicate_entry\":null,\"created_at\":\"2025-11-20T12:46:44.000Z\",\"updated_at\":\"2025-11-20T12:46:44.000Z\",\"internal_name\":\"abc\",\"internal_id\":1,\"sub_internal_name\":\"c\",\"sub_internal_id\":3,\"customer_name\":null,\"client_name\":null,\"job_type_name\":null,\"job_type_id\":null,\"job_name\":null,\"task_name\":null,\"job_total_time\":null,\"staffs_hourminute\":\"42:00\",\"total_hours\":\"18.00\",\"tempId\":1775912405263.8992,\"sunday_date\":\"2026-04-12\",\"merge_date_time\":\"4/11/2026, 6:30:06 PM\"}]', '2026-04-11 13:00:09', '2026-04-11 13:00:31'),
+(67, 1, '1', 0, 0, 1, 1, '2026-04-06', NULL, '1:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'hkjhk', '1', '1', '2026-04-11 18:30:10', '2026-04-11 18:30:31', '[]', '2026-04-11 13:00:09', '2026-04-11 13:00:31');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `timesheet_filter`
+--
+
+DROP TABLE IF EXISTS `timesheet_filter`;
+CREATE TABLE IF NOT EXISTS `timesheet_filter` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` varchar(100) NOT NULL,
+  `staff_id` int(11) NOT NULL,
+  `filter_record` longtext NOT NULL,
+  `status` enum('0','1') NOT NULL DEFAULT '1' COMMENT '0: deactive, 1: active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `staff_id` (`staff_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `timesheet_filter`
+--
+
+INSERT INTO `timesheet_filter` (`id`, `type`, `staff_id`, `filter_record`, `status`, `created_at`, `updated_at`) VALUES
+(5, 'timesheet_report', 1, '{\"groupBy\":[\"staff_id\",\"customer_id\"],\"internal_external\":\"0\",\"fieldsToDisplay\":null,\"fieldsToDisplayId\":null,\"staff_id\":null,\"customer_id\":null,\"client_id\":null,\"job_id\":null,\"task_id\":null,\"internal_job_id\":null,\"internal_task_id\":null,\"timePeriod\":\"this_month\",\"displayBy\":\"Weekly\",\"fromDate\":null,\"toDate\":null}', '1', '2025-09-25 07:19:34', '2025-09-25 07:19:34'),
+(2, 'timesheet_report', 1, '{\"groupBy\":[\"staff_id\",\"customer_id\"],\"internal_external\":\"0\",\"fieldsToDisplay\":null,\"fieldsToDisplayId\":null,\"staff_id\":16,\"customer_id\":10,\"client_id\":null,\"job_id\":null,\"task_id\":null,\"internal_job_id\":null,\"internal_task_id\":null,\"timePeriod\":\"this_month\",\"displayBy\":\"Weekly\",\"fromDate\":null,\"toDate\":null}', '1', '2025-09-18 13:01:37', '2025-09-18 13:09:20'),
+(3, 'timesheet_report', 1, '{\"groupBy\":[\"staff_id\"],\"internal_external\":\"0\",\"fieldsToDisplay\":null,\"fieldsToDisplayId\":null,\"staff_id\":null,\"customer_id\":null,\"client_id\":null,\"job_id\":null,\"task_id\":null,\"internal_job_id\":null,\"internal_task_id\":null,\"timePeriod\":\"this_month\",\"displayBy\":\"Weekly\",\"fromDate\":null,\"toDate\":null}', '1', '2025-09-18 13:23:10', '2025-09-18 13:23:10'),
+(4, 'timesheet_report', 1, '{\"groupBy\":[\"staff_id\",\"customer_id\",\"client_id\",\"job_id\",\"task_id\"],\"internal_external\":\"0\",\"fieldsToDisplay\":null,\"fieldsToDisplayId\":null,\"staff_id\":14,\"customer_id\":10,\"client_id\":8,\"job_id\":10,\"task_id\":10,\"internal_job_id\":null,\"internal_task_id\":null,\"timePeriod\":\"this_month\",\"displayBy\":\"Weekly\",\"fromDate\":null,\"toDate\":null}', '1', '2025-09-19 06:11:23', '2025-09-19 06:11:23'),
+(6, 'timesheet_report', 1, '{\"groupBy\":[\"staff_id\"],\"internal_external\":\"0\",\"fieldsToDisplay\":null,\"fieldsToDisplayId\":null,\"staff_id\":null,\"customer_id\":null,\"client_id\":null,\"job_id\":null,\"task_id\":null,\"internal_job_id\":null,\"internal_task_id\":null,\"timePeriod\":\"custom\",\"displayBy\":\"Weekly\",\"fromDate\":\"2025-10-09\",\"toDate\":\"2025-10-11\"}', '1', '2025-10-06 12:05:40', '2025-10-06 12:05:40'),
+(8, 'job_custom_report', 1, '{\"groupBy\":[\"job_id\",\"account_manager_id\"],\"internal_external\":\"2\",\"fieldsToDisplay\":null,\"fieldsToDisplayId\":null,\"staff_id\":null,\"customer_id\":null,\"client_id\":null,\"job_id\":null,\"task_id\":null,\"internal_job_id\":null,\"internal_task_id\":null,\"timePeriod\":\"\",\"displayBy\":\"\",\"fromDate\":null,\"toDate\":null}', '1', '2025-10-28 10:00:57', '2025-10-28 10:00:57'),
+(9, 'job_custom_report', 1, '{\"groupBy\":[\"client_id\",\"account_manager_id\"],\"internal_external\":\"0\",\"fieldsToDisplay\":null,\"fieldsToDisplayId\":null,\"staff_id\":null,\"customer_id\":null,\"client_id\":5,\"job_id\":null,\"task_id\":null,\"internal_job_id\":null,\"internal_task_id\":null,\"timePeriod\":\"this_month\",\"displayBy\":\"Weekly\",\"fromDate\":null,\"toDate\":null,\"account_manager_id\":13}', '1', '2025-10-28 10:03:36', '2025-10-28 10:10:14'),
+(17, 'job_custom_report', 1, '{\"groupBy\":[\"job_id\",\"sla_deadline_date\"],\"additionalField\":[],\"job_id\":null,\"customer_id\":null,\"client_id\":null,\"account_manager_id\":null,\"allocated_to_id\":null,\"reviewer_id\":null,\"allocated_to_other_id\":null,\"service_id\":null,\"job_type_id\":null,\"status_type_id\":null,\"line_manager_id\":null,\"timePeriod\":\"this_week\",\"displayBy\":\"Weekly\",\"fromDate\":null,\"toDate\":null}', '1', '2025-11-14 11:15:54', '2025-11-14 11:15:54'),
+(11, 'timesheet_report', 1, '{\"groupBy\":[\"staff_id\",\"client_id\"],\"internal_external\":\"0\",\"fieldsToDisplay\":null,\"fieldsToDisplayId\":null,\"staff_id\":3,\"customer_id\":null,\"client_id\":7,\"job_id\":null,\"task_id\":null,\"internal_job_id\":null,\"internal_task_id\":null,\"timePeriod\":\"this_month\",\"displayBy\":\"Weekly\",\"fromDate\":null,\"toDate\":null}', '1', '2025-10-28 10:40:31', '2025-10-28 10:40:31'),
+(12, 'job_custom_report', 1, '{\"groupBy\":[\"job_id\",\"account_manager_id\"],\"job_id\":null,\"customer_id\":null,\"client_id\":null,\"account_manager_id\":null,\"allocated_to_id\":null,\"reviewer_id\":null,\"allocated_to_other_id\":null,\"service_id\":null,\"job_type_id\":null,\"status_type_id\":null,\"line_manager_id\":null,\"timePeriod\":\"this_month\",\"displayBy\":\"Weekly\",\"fromDate\":null,\"toDate\":null}', '1', '2025-10-28 11:32:03', '2025-10-28 11:32:03'),
+(13, 'job_custom_report', 1, '{\"groupBy\":[\"job_id\",\"account_manager_id\"],\"job_id\":9,\"customer_id\":null,\"client_id\":null,\"account_manager_id\":10,\"allocated_to_id\":null,\"reviewer_id\":null,\"allocated_to_other_id\":null,\"service_id\":null,\"job_type_id\":null,\"status_type_id\":null,\"line_manager_id\":null,\"timePeriod\":\"this_month\",\"displayBy\":\"Weekly\",\"fromDate\":null,\"toDate\":null}', '1', '2025-10-28 11:32:58', '2025-10-28 11:32:58'),
+(16, 'job_custom_report', 1, '{\"groupBy\":[\"job_id\",\"customer_id\"],\"job_id\":null,\"customer_id\":null,\"client_id\":null,\"account_manager_id\":null,\"allocated_to_id\":null,\"reviewer_id\":null,\"allocated_to_other_id\":null,\"service_id\":null,\"job_type_id\":null,\"status_type_id\":null,\"line_manager_id\":null,\"timePeriod\":\"this_month\",\"displayBy\":\"Weekly\",\"fromDate\":null,\"toDate\":null}', '1', '2025-10-29 10:27:07', '2025-10-29 10:27:07'),
+(15, 'job_custom_report', 1, '{\"groupBy\":[\"job_id\",\"customer_id\",\"account_manager_id\",\"reviewer_id\"],\"job_id\":null,\"customer_id\":6,\"client_id\":null,\"account_manager_id\":null,\"allocated_to_id\":null,\"reviewer_id\":14,\"allocated_to_other_id\":null,\"service_id\":null,\"job_type_id\":null,\"status_type_id\":null,\"line_manager_id\":null,\"timePeriod\":\"this_year\",\"displayBy\":\"Daily\",\"fromDate\":null,\"toDate\":null}', '1', '2025-10-29 10:18:18', '2025-10-29 10:18:18'),
+(18, 'job_custom_report', 1, '{\"groupBy\":[\"job_id\",\"customer_id\",\"client_id\",\"account_manager_id\",\"allocated_to_id\",\"reviewer_id\",\"allocated_to_other_id\",\"service_id\",\"job_type_id\",\"status_type_id\",\"employee_number\",\"allocated_on\",\"job_priority\",\"engagement_model\",\"customer_account_manager_officer\",\"status_updation_date\",\"Transactions_Posting_id_2\",\"Number_of_Bank_Transactions_id_2\",\"Number_of_Journal_Entries_id_2\",\"Number_of_Other_Transactions_id_2\",\"Number_of_Petty_Cash_Transactions_id_2\",\"Number_of_Purchase_Invoices_id_2\",\"Number_of_Sales_Invoices_id_2\",\"Number_of_Total_Transactions_id_2\",\"submission_deadline\",\"Tax_Year_id_4\",\"If_Sole_Trader_Who_is_doing_Bookkeeping_id_4\",\"Whose_Tax_Return_is_it_id_4\",\"Type_of_Payslip_id_3\",\"Year_Ending_id_1\",\"Bookkeeping_Frequency_id_2\",\"CIS_Frequency_id_3\",\"Filing_Frequency_id_8\",\"Management_Accounts_Frequency_id_6\",\"Payroll_Frequency_id_3\",\"budgeted_hours\",\"feedback_incorporation_time\",\"review_time\",\"total_preparation_time\",\"total_time\",\"due_on\",\"customer_deadline_date\",\"date_received_on\",\"expected_delivery_date\",\"internal_deadline_date\",\"sla_deadline_date\",\"Management_Accounts_FromDate_id_6\",\"Management_Accounts_ToDate_id_6\",\"staff_full_name\",\"role\",\"staff_email\",\"line_manager\",\"staff_status\"],\"additionalField\":[],\"job_id\":null,\"customer_id\":null,\"client_id\":null,\"account_manager_id\":null,\"allocated_to_id\":null,\"reviewer_id\":null,\"allocated_to_other_id\":null,\"service_id\":null,\"job_type_id\":10,\"status_type_id\":null,\"employee_number\":null,\"line_manager_id\":null,\"timePeriod\":\"this_year\",\"displayBy\":\"\",\"fromDate\":null,\"toDate\":null}', '1', '2025-11-18 05:57:10', '2025-11-18 05:57:36');
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `assigned_jobs_staff_view`
+--
+DROP TABLE IF EXISTS `assigned_jobs_staff_view`;
+
+DROP VIEW IF EXISTS `assigned_jobs_staff_view`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `assigned_jobs_staff_view`  AS SELECT `outbook`.`customers`.`id` AS `customer_id`, `outbook`.`clients`.`id` AS `client_id`, `outbook`.`jobs`.`id` AS `job_id`, `outbook`.`staffs`.`id` AS `staff_id`, 'assign_customer_portfolio' AS `source`, NULL AS `service_id_assign` FROM ((((`outbook`.`customers` join `outbook`.`staff_portfolio` on((`outbook`.`staff_portfolio`.`customer_id` = `outbook`.`customers`.`id`))) join `outbook`.`staffs` on((`outbook`.`staffs`.`id` = `outbook`.`staff_portfolio`.`staff_id`))) left join `outbook`.`clients` on((`outbook`.`clients`.`customer_id` = `outbook`.`customers`.`id`))) left join `outbook`.`jobs` on((`outbook`.`jobs`.`client_id` = `outbook`.`clients`.`id`))) ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `dashboard_data_view`
+--
+DROP TABLE IF EXISTS `dashboard_data_view`;
+
+DROP VIEW IF EXISTS `dashboard_data_view`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `dashboard_data_view`  AS SELECT `outbook`.`customers`.`id` AS `customer_id`, `outbook`.`customers`.`customer_type` AS `customer_type`, `outbook`.`customers`.`staff_id` AS `staff_id`, `outbook`.`customers`.`account_manager_id` AS `account_manager_id`, `outbook`.`customer_service_account_managers`.`account_manager_id` AS `a_account_manager_id`, `outbook`.`jobs`.`allocated_to` AS `allocated_to`, `outbook`.`jobs`.`reviewer` AS `reviewer`, `outbook`.`jobs`.`id` AS `job_id`, `outbook`.`jobs`.`status_type` AS `status_type`, `outbook`.`clients`.`id` AS `client_id`, `outbook`.`clients`.`created_at` AS `client_created_at`, `outbook`.`jobs`.`created_at` AS `job_created_at`, `outbook`.`customers`.`created_at` AS `customer_created_at`, `sp_customers`.`id` AS `sp_customer_id` FROM (((((((((`outbook`.`customers` left join `outbook`.`clients` on((`outbook`.`clients`.`customer_id` = `outbook`.`customers`.`id`))) left join `outbook`.`jobs` on((`outbook`.`jobs`.`client_id` = `outbook`.`clients`.`id`))) join `outbook`.`staffs` `staff1` on((`outbook`.`customers`.`staff_id` = `staff1`.`id`))) join `outbook`.`staffs` `staff2` on((`outbook`.`customers`.`account_manager_id` = `staff2`.`id`))) left join `outbook`.`customer_services` on((`outbook`.`customer_services`.`customer_id` = `outbook`.`customers`.`id`))) left join `outbook`.`customer_service_account_managers` on((`outbook`.`customer_service_account_managers`.`customer_service_id` = `outbook`.`customer_services`.`id`))) left join `outbook`.`customer_company_information` on((`outbook`.`customers`.`id` = `outbook`.`customer_company_information`.`customer_id`))) left join `outbook`.`staff_portfolio` on((`outbook`.`staff_portfolio`.`customer_id` = `outbook`.`customers`.`id`))) left join `outbook`.`customers` `sp_customers` on(((`sp_customers`.`id` = `outbook`.`staff_portfolio`.`customer_id`) or (`sp_customers`.`staff_id` = `outbook`.`staff_portfolio`.`staff_id`)))) ;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

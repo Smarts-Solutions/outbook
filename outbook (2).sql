@@ -3,7 +3,11 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
+<<<<<<<< HEAD:outbook (2).sql
 -- Generation Time: May 07, 2026 at 12:23 PM
+========
+-- Generation Time: May 15, 2026 at 11:47 AM
+>>>>>>>> ae168fb62f845281ce298b9596b249377f3a2be7:outbook_copy.sql
 -- Server version: 5.7.36
 -- PHP Version: 7.4.26
 
@@ -18,7 +22,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `outbook`
+-- Database: `outbook_copy`
 --
 
 DELIMITER $$
@@ -314,12 +318,6 @@ DELIMITER ;
 --
 DROP VIEW IF EXISTS `assigned_jobs_staff_view`;
 CREATE TABLE IF NOT EXISTS `assigned_jobs_staff_view` (
-`customer_id` int(11)
-,`client_id` int(11)
-,`job_id` int(11)
-,`staff_id` int(11)
-,`source` varchar(25)
-,`service_id_assign` binary(0)
 );
 
 -- --------------------------------------------------------
@@ -625,7 +623,7 @@ CREATE TABLE IF NOT EXISTS `client_job_task` (
   UNIQUE KEY `job_id` (`job_id`,`client_id`,`task_id`),
   KEY `client_id` (`client_id`),
   KEY `task_id` (`task_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=123 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=124 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `client_job_task`
@@ -722,7 +720,8 @@ INSERT INTO `client_job_task` (`id`, `job_id`, `client_id`, `task_id`, `task_sta
 (119, 43, 17, 43, NULL, '10:10', '2026-05-02 10:28:13', '2026-05-02 10:28:13'),
 (120, 96, 20, 8, NULL, '10:10', '2026-05-02 10:29:35', '2026-05-02 10:29:35'),
 (121, 96, 20, 6, NULL, '10:10', '2026-05-02 10:29:35', '2026-05-02 10:29:35'),
-(122, 96, 20, 45, NULL, '10:08', '2026-05-02 10:47:52', '2026-05-02 10:47:52');
+(122, 96, 20, 45, NULL, '10:08', '2026-05-02 10:47:52', '2026-05-02 10:47:52'),
+(123, 97, 20, 46, NULL, '1:1', '2026-05-12 04:42:26', '2026-05-12 04:42:26');
 
 -- --------------------------------------------------------
 
@@ -1479,22 +1478,22 @@ INSERT INTO `customer_service_account_managers` (`customer_service_id`, `account
 (108, 15, '2026-03-27 06:27:11', '2026-03-27 06:27:11'),
 (111, 11, '2026-04-09 11:18:07', '2026-04-09 11:18:07'),
 (112, 11, '2026-04-09 11:18:07', '2026-04-09 11:18:07'),
-(126, 14, '2026-05-02 10:55:24', '2026-05-02 10:55:24'),
-(125, 14, '2026-05-02 10:55:24', '2026-05-02 10:55:24'),
-(124, 15, '2026-05-02 10:55:24', '2026-05-02 10:55:24'),
-(123, 14, '2026-05-02 10:55:24', '2026-05-02 10:55:24'),
-(122, 14, '2026-05-02 10:55:24', '2026-05-02 10:55:24'),
-(121, 14, '2026-05-02 10:55:24', '2026-05-02 10:55:24'),
-(120, 14, '2026-05-02 10:55:24', '2026-05-02 10:55:24'),
-(119, 14, '2026-05-02 10:55:24', '2026-05-02 10:55:24'),
-(118, 15, '2026-05-02 10:55:24', '2026-05-02 10:55:24'),
-(118, 14, '2026-05-02 10:55:24', '2026-05-02 10:55:24'),
-(124, 14, '2026-05-02 10:55:24', '2026-05-02 10:55:24'),
-(127, 14, '2026-05-02 10:55:24', '2026-05-02 10:55:24'),
-(128, 14, '2026-05-02 10:55:24', '2026-05-02 10:55:24'),
-(129, 14, '2026-05-02 10:55:24', '2026-05-02 10:55:24'),
+(126, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(125, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(124, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(123, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(122, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(121, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(120, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(119, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(118, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(118, 15, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(124, 15, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(127, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(128, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(129, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
 (132, 11, '2026-04-09 11:18:07', '2026-04-09 11:18:07'),
-(131, 14, '2026-05-02 10:55:24', '2026-05-02 10:55:24');
+(131, 14, '2026-05-12 04:42:03', '2026-05-12 04:42:03');
 
 -- --------------------------------------------------------
 
@@ -1650,20 +1649,6 @@ CREATE TABLE IF NOT EXISTS `customer_users` (
 --
 DROP VIEW IF EXISTS `dashboard_data_view`;
 CREATE TABLE IF NOT EXISTS `dashboard_data_view` (
-`customer_id` int(11)
-,`customer_type` enum('1','2','3')
-,`staff_id` int(11)
-,`account_manager_id` int(11)
-,`a_account_manager_id` int(11)
-,`allocated_to` varchar(255)
-,`reviewer` int(11)
-,`job_id` int(11)
-,`status_type` int(11)
-,`client_id` int(11)
-,`client_created_at` timestamp
-,`job_created_at` timestamp
-,`customer_created_at` timestamp
-,`sp_customer_id` int(11)
 );
 
 -- --------------------------------------------------------
@@ -1938,7 +1923,7 @@ CREATE TABLE IF NOT EXISTS `jobs` (
   KEY `service_id` (`service_id`),
   KEY `job_type_id` (`job_type_id`),
   KEY `currency` (`currency`)
-) ENGINE=MyISAM AUTO_INCREMENT=97 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=98 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `jobs`
@@ -2037,7 +2022,8 @@ INSERT INTO `jobs` (`id`, `staff_created_id`, `job_id`, `account_manager_id`, `c
 (93, 1, '000088', 13, 6, 17, '', 40, 1, 11, '02:10', 0, '24', '2026-04-11', '2026-04-11', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, '2026-07-31', NULL, '2026-01-31', '2026-05-09', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, '', '', 0, '', '', '', '', '', '2025-10-31', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', 0, '0', '0', '0', '', NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-11 14:39:47', 0, 0, '0', '0', NULL, '2026-04-11 09:09:47', '2026-04-11 09:09:47'),
 (94, 1, '000089', 14, 14, 20, '', 48, 2, 4, '01:01', 0, '0', '2026-04-24', '2026-04-24', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-24 16:20:59', 0, 0, '0', '0', NULL, '2026-04-24 10:50:59', '2026-04-30 10:36:49'),
 (95, 1, '000090', 14, 14, 20, '', 48, 2, 4, '10:10', 0, '0', '2026-04-30', '2026-04-30', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-04-30 16:12:46', 0, 0, '0', '0', NULL, '2026-04-30 10:42:46', '2026-04-30 10:44:03'),
-(96, 1, '000091', 14, 14, 20, '', 48, 2, 4, '30:28', 0, '0', '2026-05-02', '2026-05-02', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-05-03', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-05-02 15:59:35', 0, 0, '0', '0', NULL, '2026-05-02 10:29:35', '2026-05-02 10:47:52');
+(96, 1, '000091', 14, 14, 20, '', 48, 2, 4, '30:28', 0, '0', '2026-05-02', '2026-05-02', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, '2026-05-03', NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', NULL, 1, NULL, '1', NULL, 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-05-02 15:59:35', 0, 0, '0', '0', NULL, '2026-05-02 10:29:35', '2026-05-02 10:47:52'),
+(97, 1, '000092', 14, 14, 20, '', 48, 37, 23, '01:01', 0, '0', '2026-05-12', '2026-05-12', '', '00:00', '00:00', '00:00', '00:00', 'fte_dedicated_staffing', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', NULL, '0', NULL, '0', NULL, '0.00', 0, '0.00', 0, '0', '0', '0', '0', 0, '0.00', NULL, '00:00', '', 1, NULL, '1', '', 'Monthly', 'GBP', 0, 'No', 'Quarterly', 'Outbooks', 'No', '1 to 5', NULL, 'Daily', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 'Manual', 'Bad', '1', 'No', 'Yes', 'No', 'No', 'Provider Deducts Commission Only', '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Wages Only', '0%', 'No', 'Weekly', 0, 'Director', '1', '1', 'Outbooks', NULL, 'Quarterly', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'normal', '2026-05-12 10:12:26', 0, 0, '0', '0', NULL, '2026-05-12 04:42:26', '2026-05-12 04:42:26');
 
 -- --------------------------------------------------------
 
@@ -2122,7 +2108,7 @@ CREATE TABLE IF NOT EXISTS `job_status_updation` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `job_status_updation`
@@ -2142,7 +2128,8 @@ INSERT INTO `job_status_updation` (`id`, `job_id`, `status_type`, `status_update
 (11, 61, 19, '2026-05-02 15:42:34', '2026-05-02 10:12:34', '2026-05-02 10:12:34'),
 (12, 81, 1, '2026-05-02 15:44:57', '2026-05-02 10:14:57', '2026-05-02 10:14:57'),
 (13, 43, 4, '2026-05-02 15:58:13', '2026-05-02 10:28:13', '2026-05-02 10:28:13'),
-(14, 96, 1, '2026-05-02 15:59:35', '2026-05-02 10:29:35', '2026-05-02 10:29:35');
+(14, 96, 1, '2026-05-02 15:59:35', '2026-05-02 10:29:35', '2026-05-02 10:29:35'),
+(15, 97, 1, '2026-05-12 10:12:26', '2026-05-12 04:42:26', '2026-05-12 04:42:26');
 
 -- --------------------------------------------------------
 
@@ -2718,7 +2705,11 @@ CREATE TABLE IF NOT EXISTS `staffs` (
 --
 
 INSERT INTO `staffs` (`id`, `role_id`, `first_name`, `last_name`, `email`, `phone_code`, `phone`, `password`, `hourminute`, `status`, `is_disable`, `created_by`, `employee_number`, `created_at`, `updated_at`, `login_auth_token`, `customer_contact_person_role_id`, `is_first_login`) VALUES
+<<<<<<<< HEAD:outbook (2).sql
 (1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2026-05-07 12:06:55', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3ODE1NTYxNSwiZXhwIjoxNzc4MTkxNjE1fQ.mSWAVLrd_yvbS7T27gNcbdDeEN42na3bgHDRge6738I', NULL, 0),
+========
+(1, 1, 'System Super', 'Super Admin', 'superadmin@gmail.com', NULL, '1234567891', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '42:00', '1', '1', 2, NULL, '2024-06-28 12:02:41', '2026-05-12 04:41:26', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3ODU2MDg4NiwiZXhwIjoxNzc4NTk2ODg2fQ.kLTE8pbHbq8E2dq_lPJ25USFk3YMrP34mQ8KLj03Sq0', NULL, 0),
+>>>>>>>> ae168fb62f845281ce298b9596b249377f3a2be7:outbook_copy.sql
 (2, 2, 'Amit', 'Amit', 'amit@outbooks.com', NULL, '5777777777', '$2a$10$SIJMFK5k/woLfwqfEJGMruiO6.f5oZwnCBb5S9zhmoPR/MiVI5c6K', '300:85', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-06-05 10:27:47', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc0OTExOTI2NywiZXhwIjoxNzQ5MTU1MjY3fQ.ZxuPUUXxmWB0_uzOhJlJ4mMcyC8t82zKxWmJFmySHzk', NULL, 0),
 (3, 2, 'Ajit', 'Ajit', 'ajit@outbooks.com', NULL, '5777777777', '$2a$10$j07X1j33uRnImSqWD108IO9w15nAsQxsb7bb5wQsugxrwZ62msJbS', '659:00', '1', '1', 2, NULL, '2024-07-08 07:25:41', '2025-10-28 04:51:33', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc2MTYyNzA5MywiZXhwIjoxNzYxNjYzMDkzfQ.JierzQ_u_26zHmk4B7Bdn8OQklN0PLDvDg7YuU4fVrs', NULL, 0),
 (5, 3, 'STAFF', 'ONE', 'staff1@gmail.com', '+44', '2777777777', '$2a$10$naFNFC8Lw.Rcu/Bt518RyOFPYntjk30TrdsfAif2jBgd8lYw4HD7i', '232:59', '1', '0', 1, NULL, '2025-02-06 07:27:58', '2025-11-11 10:20:49', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsImlhdCI6MTc1ODUzMzc2NCwiZXhwIjoxNzU4NTY5NzY0fQ.yc71lU2HgHpoUe4kSQN2JlxsBT6TUdDZvQoXQonoRos', NULL, 0),
@@ -2776,7 +2767,11 @@ CREATE TABLE IF NOT EXISTS `staff_logs` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `staff_id` (`staff_id`)
+<<<<<<<< HEAD:outbook (2).sql
 ) ENGINE=MyISAM AUTO_INCREMENT=1650 DEFAULT CHARSET=latin1;
+========
+) ENGINE=MyISAM AUTO_INCREMENT=1658 DEFAULT CHARSET=latin1;
+>>>>>>>> ae168fb62f845281ce298b9596b249377f3a2be7:outbook_copy.sql
 
 --
 -- Dumping data for table `staff_logs`
@@ -4439,7 +4434,19 @@ INSERT INTO `staff_logs` (`id`, `staff_id`, `date`, `module_name`, `module_id`, 
 (1646, 1, '2026-05-05', 'timesheet', 0, 'save a timesheet entry. Task type:External,\n                 Date: 2026-05-04, Hours : 9:00 Date: 2026-05-05, Hours : 8:00 Date: 2026-05-06, Hours : 6:00 Date: 2026-05-07, Hours : 6:00 Date: 2026-05-08, Hours : 0:00 Date: 2026-05-09, Hours : 0:00 Date: 2026-05-10, Hours : 0:00 ,Job code:NEW_bfb_comp_000038,\n                Task name:DDDD, Task type:Internal,  Date: 2026-05-04, Hours : 6:00 Date: 2026-05-05, Hours : 4:00 Date: 2026-05-06, Hours : 8:00 Date: 2026-05-07, Hours : 0:00 Date: 2026-05-08, Hours : 0:00 Date: 2026-05-09, Hours : 0:00 Date: 2026-05-10, Hours : 0:00,\n                Job code:abc,\n                Task name:c, Task type:External,  Date: 2026-05-04, Hours : 9:00 Date: 2026-05-05, Hours : 8:00 Date: 2026-05-06, Hours : 6:00 Date: 2026-05-07, Hours : 6:00 Date: 2026-05-08, Hours : 0:00 Date: 2026-05-09, Hours : 0:00 Date: 2026-05-10, Hours : 0:00,\n                Job code:NEW_bfb_comp_000038,\n                Task name:DDDD and Task type:Internal,  Date: 2026-05-04, Hours : 6:00 Date: 2026-05-05, Hours : 4:00 Date: 2026-05-06, Hours : 8:00 Date: 2026-05-07, Hours : 0:00 Date: 2026-05-08, Hours : 0:00 Date: 2026-05-09, Hours : 0:00 Date: 2026-05-10, Hours : 0:00,\n                Job code:abc,\n                Task name:c', 'Super Admin System Super Super Admin save a timesheet entry. Task type:External,\n                 Date: 2026-05-04, Hours : 9:00 Date: 2026-05-05, Hours : 8:00 Date: 2026-05-06, Hours : 6:00 Date: 2026-05-07, Hours : 6:00 Date: 2026-05-08, Hours : 0:00 Date: 2026-05-09, Hours : 0:00 Date: 2026-05-10, Hours : 0:00 ,Job code:NEW_bfb_comp_000038,\n                Task name:DDDD, Task type:Internal,  Date: 2026-05-04, Hours : 6:00 Date: 2026-05-05, Hours : 4:00 Date: 2026-05-06, Hours : 8:00 Date: 2026-05-07, Hours : 0:00 Date: 2026-05-08, Hours : 0:00 Date: 2026-05-09, Hours : 0:00 Date: 2026-05-10, Hours : 0:00,\n                Job code:abc,\n                Task name:c, Task type:External,  Date: 2026-05-04, Hours : 9:00 Date: 2026-05-05, Hours : 8:00 Date: 2026-05-06, Hours : 6:00 Date: 2026-05-07, Hours : 6:00 Date: 2026-05-08, Hours : 0:00 Date: 2026-05-09, Hours : 0:00 Date: 2026-05-10, Hours : 0:00,\n                Job code:NEW_bfb_comp_000038,\n                Task name:DDDD and Task type:Internal,  Date: 2026-05-04, Hours : 6:00 Date: 2026-05-05, Hours : 4:00 Date: 2026-05-06, Hours : 8:00 Date: 2026-05-07, Hours : 0:00 Date: 2026-05-08, Hours : 0:00 Date: 2026-05-09, Hours : 0:00 Date: 2026-05-10, Hours : 0:00,\n                Job code:abc,\n                Task name:c ', 'updated', '122.168.114.106', '2026-05-05 12:14:24', '2026-05-05 12:14:24'),
 (1647, 1, '2026-05-06', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-05-06 05:38:06', '2026-05-06 05:38:06'),
 (1648, 1, '2026-05-07', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-05-07 12:06:55', '2026-05-07 12:06:55'),
+<<<<<<<< HEAD:outbook (2).sql
 (1649, 1, '2026-05-07', 'staff', 25, 'updated customer user profile for Shk h.', 'Super Admin System Super Super Admin updated customer user profile for Shk h. ', 'updated', '122.168.114.106', '2026-05-07 12:22:50', '2026-05-07 12:22:50');
+========
+(1649, 1, '2026-05-07', 'staff', 25, 'updated customer user profile for Shk h.', 'Super Admin System Super Super Admin updated customer user profile for Shk h. ', 'updated', '122.168.114.106', '2026-05-07 12:22:50', '2026-05-07 12:22:50'),
+(1650, 1, '2026-05-11', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-05-11 12:05:32', '2026-05-11 12:05:32'),
+(1651, 1, '2026-05-11', 'timesheet', 0, 'submitted a timesheet entry. Task type:Internal,\n                 Date: 2026-05-11, Hours : 20:00 Date: 2026-05-12, Hours : 4:00 ,Job code:abc,\n                Task name:a, Task type:Internal,  Date: 2026-05-11, Hours : 10:00 Date: 2026-05-12, Hours : 1:00,\n                Job code:abc,\n                Task name:b and Task type:Internal,  Date: 2026-05-11, Hours : 15:00,\n                Job code:abc,\n                Task name:a', 'Super Admin System Super Super Admin submitted a timesheet entry. Task type:Internal,\n                 Date: 2026-05-11, Hours : 20:00 Date: 2026-05-12, Hours : 4:00 ,Job code:abc,\n                Task name:a, Task type:Internal,  Date: 2026-05-11, Hours : 10:00 Date: 2026-05-12, Hours : 1:00,\n                Job code:abc,\n                Task name:b and Task type:Internal,  Date: 2026-05-11, Hours : 15:00,\n                Job code:abc,\n                Task name:a ', 'updated', '122.168.114.106', '2026-05-11 12:07:08', '2026-05-11 12:07:08'),
+(1652, 1, '2026-05-11', 'timesheet', 0, 'save a timesheet entry. Task type:Internal,\n                 Date: 2026-05-11, Hours : 21:00 Date: 2026-05-12, Hours : 21:00 Date: 2026-05-13, Hours : 2:00 ,Job code:abc,\n                Task name:a', 'Super Admin System Super Super Admin save a timesheet entry. Task type:Internal,\n                 Date: 2026-05-11, Hours : 21:00 Date: 2026-05-12, Hours : 21:00 Date: 2026-05-13, Hours : 2:00 ,Job code:abc,\n                Task name:a ', 'updated', '122.168.114.106', '2026-05-11 12:22:04', '2026-05-11 12:22:04'),
+(1653, 1, '2026-05-11', 'timesheet', 0, 'edited a timesheet entry. Task type:Internal,\n                 Date:2026-05-12, Updated hours:15:00, Job code:abc,\n                Task name:a', 'Super Admin System Super Super Admin edited a timesheet entry. Task type:Internal,\n                 Date:2026-05-12, Updated hours:15:00, Job code:abc,\n                Task name:a ', 'updated', '122.168.114.106', '2026-05-11 12:23:24', '2026-05-11 12:23:24'),
+(1654, 1, '2026-05-12', '-', 0, ' Logged In', 'Super Admin System Super Super Admin  Logged In ', '-', '122.168.114.106', '2026-05-12 04:41:26', '2026-05-12 04:41:26'),
+(1655, 1, '2026-05-12', 'customer', 14, 'edited the service details customer code :', 'Super Admin System Super Super Admin edited the service details customer code : cust_wrw_000012(wrwr)', 'updated', '122.168.114.106', '2026-05-12 04:42:03', '2026-05-12 04:42:03'),
+(1656, 1, '2026-05-12', 'job', 97, 'created job code:', 'Super Admin System Super Super Admin created job code: wrw_WWW_GGGG_000092', 'created', '122.168.114.106', '2026-05-12 04:42:26', '2026-05-12 04:42:26'),
+(1657, 1, '2026-05-12', 'timesheet', 0, 'save a timesheet entry. Task type:External,\n                 Date: 2026-05-11, Hours : 9:00 Date: 2026-05-12, Hours : 8:00 Date: 2026-05-13, Hours : 6:00 Date: 2026-05-14, Hours : 6:00 Date: 2026-05-15, Hours : null Date: 2026-05-16, Hours : null Date: 2026-05-17, Hours : null ,Job code:NEW_bfb_comp_000038,\n                Task name:DDDD and Task type:Internal,  Date: 2026-05-11, Hours : 6:00 Date: 2026-05-12, Hours : 4:00 Date: 2026-05-13, Hours : 8:00 Date: 2026-05-14, Hours : null Date: 2026-05-15, Hours : null Date: 2026-05-16, Hours : null Date: 2026-05-17, Hours : null,\n                Job code:abc,\n                Task name:c', 'Super Admin System Super Super Admin save a timesheet entry. Task type:External,\n                 Date: 2026-05-11, Hours : 9:00 Date: 2026-05-12, Hours : 8:00 Date: 2026-05-13, Hours : 6:00 Date: 2026-05-14, Hours : 6:00 Date: 2026-05-15, Hours : null Date: 2026-05-16, Hours : null Date: 2026-05-17, Hours : null ,Job code:NEW_bfb_comp_000038,\n                Task name:DDDD and Task type:Internal,  Date: 2026-05-11, Hours : 6:00 Date: 2026-05-12, Hours : 4:00 Date: 2026-05-13, Hours : 8:00 Date: 2026-05-14, Hours : null Date: 2026-05-15, Hours : null Date: 2026-05-16, Hours : null Date: 2026-05-17, Hours : null,\n                Job code:abc,\n                Task name:c ', 'updated', '122.168.114.106', '2026-05-12 04:44:03', '2026-05-12 04:44:03');
+>>>>>>>> ae168fb62f845281ce298b9596b249377f3a2be7:outbook_copy.sql
 
 -- --------------------------------------------------------
 
@@ -4593,7 +4600,7 @@ CREATE TABLE IF NOT EXISTS `task` (
   UNIQUE KEY `name` (`name`,`service_id`,`job_type_id`),
   KEY `service_id` (`service_id`),
   KEY `job_type_id` (`job_type_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=46 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=47 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `task`
@@ -4643,7 +4650,8 @@ INSERT INTO `task` (`id`, `name`, `service_id`, `job_type_id`, `budgeted_hour`, 
 (42, 'ff', 35, 21, NULL, '1', '2026-04-30 10:42:46', '2026-04-30 10:42:46'),
 (43, 'testt', 1, 11, NULL, '1', '2026-05-02 10:07:35', '2026-05-02 10:07:35'),
 (44, 'PP TEST', 1, 11, NULL, '1', '2026-05-02 10:16:53', '2026-05-02 10:16:53'),
-(45, 'TST NEW', 2, 4, NULL, '1', '2026-05-02 10:47:52', '2026-05-02 10:47:52');
+(45, 'TST NEW', 2, 4, NULL, '1', '2026-05-02 10:47:52', '2026-05-02 10:47:52'),
+(46, 'kk', 37, 23, NULL, '1', '2026-05-12 04:42:26', '2026-05-12 04:42:26');
 
 -- --------------------------------------------------------
 
@@ -4714,7 +4722,11 @@ CREATE TABLE IF NOT EXISTS `timesheet` (
   KEY `client_id` (`client_id`),
   KEY `job_id` (`job_id`),
   KEY `task_id` (`task_id`)
+<<<<<<<< HEAD:outbook (2).sql
 ) ENGINE=MyISAM AUTO_INCREMENT=80 DEFAULT CHARSET=latin1;
+========
+) ENGINE=MyISAM AUTO_INCREMENT=86 DEFAULT CHARSET=latin1;
+>>>>>>>> ae168fb62f845281ce298b9596b249377f3a2be7:outbook_copy.sql
 
 --
 -- Dumping data for table `timesheet`
@@ -4779,6 +4791,12 @@ INSERT INTO `timesheet` (`id`, `staff_id`, `task_type`, `customer_id`, `client_i
 (77, 1, '1', 0, 0, 1, 3, '2026-05-04', NULL, '6:00', '2026-05-05', '4:00', NULL, '2026-05-06', '8:00', 'WEDDDDDDD', '2026-05-07', '0:00', NULL, '2026-05-08', '0:00', NULL, '2026-05-09', '0:00', NULL, '2026-05-10', '0:00', NULL, NULL, 'dcsc', '1', '0', '2026-05-05 17:44:25', NULL, '[]', '2026-05-05 12:14:24', '2026-05-05 12:14:24'),
 (78, 1, '1', 0, 0, 1, 3, '2026-05-04', NULL, '6:00', '2026-05-05', '4:00', NULL, '2026-05-06', '8:00', 'WEDDDDDDD', '2026-05-07', '0:00', NULL, '2026-05-08', '0:00', NULL, '2026-05-09', '0:00', NULL, '2026-05-10', '0:00', NULL, NULL, 'dcsc', '1', '0', '2026-05-05 17:44:25', NULL, '[]', '2026-05-05 12:14:24', '2026-05-05 12:14:24'),
 (79, 1, '2', 10, 15, 38, 25, '2026-05-04', 'FFFFFFFFFFF', '9:00', '2026-05-05', '8:00', NULL, '2026-05-06', '6:00', 'WEEEDDDDDFIRSTTTT', '2026-05-07', '6:00', NULL, '2026-05-08', '0:00', NULL, '2026-05-09', '0:00', NULL, '2026-05-10', '0:00', NULL, NULL, 'dcsc', '1', '0', '2026-05-05 17:44:25', NULL, '[]', '2026-05-05 12:14:24', '2026-05-05 12:14:24'),
+<<<<<<<< HEAD:outbook (2).sql
+========
+(83, 1, '1', 0, 0, 1, 1, '2026-05-11', NULL, '21:00', '2026-05-12', '15:00', NULL, '2026-05-13', '2:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', '2026-05-12 10:14:04', NULL, '\"\\\"[]\\\"\"', '2026-05-11 12:22:04', '2026-05-12 04:44:03'),
+(84, 1, '2', 10, 15, 38, 25, '2026-05-11', 'FFFFFFFFFFF', '9:00', '2026-05-12', '8:00', NULL, '2026-05-13', '6:00', 'WEEEDDDDDFIRSTTTT', '2026-05-14', '6:00', NULL, '2026-05-15', NULL, NULL, '2026-05-16', NULL, NULL, '2026-05-17', NULL, NULL, NULL, 'dcsc', '1', '0', '2026-05-12 10:14:04', NULL, '[]', '2026-05-12 04:44:03', '2026-05-12 04:44:03'),
+(85, 1, '1', 0, 0, 1, 3, '2026-05-11', NULL, '6:00', '2026-05-12', '4:00', NULL, '2026-05-13', '8:00', 'WEDDDDDDD', '2026-05-14', NULL, NULL, '2026-05-15', NULL, NULL, '2026-05-16', NULL, NULL, '2026-05-17', NULL, NULL, NULL, 'dcsc', '1', '0', '2026-05-12 10:14:04', NULL, '[]', '2026-05-12 04:44:03', '2026-05-12 04:44:03'),
+>>>>>>>> ae168fb62f845281ce298b9596b249377f3a2be7:outbook_copy.sql
 (68, 1, '1', 0, 0, 1, 3, '2026-04-06', NULL, '18:00', '2026-04-07', '12:00', NULL, '2026-04-08', '24:00', 'WEDDDDDDD', '2026-04-09', NULL, NULL, '2026-04-10', NULL, NULL, '2026-04-11', NULL, NULL, NULL, NULL, NULL, NULL, 'hkjhk', '1', '1', '2026-04-11 18:30:10', '2026-04-11 18:30:31', '[{\"id\":null,\"staff_id\":1,\"task_type\":\"1\",\"customer_id\":null,\"client_id\":null,\"job_id\":1,\"task_id\":3,\"monday_date\":\"2026-04-06\",\"monday_hours\":\"6.00\",\"monday_note\":null,\"tuesday_date\":\"2026-04-07\",\"tuesday_hours\":\"4.00\",\"tuesday_note\":null,\"wednesday_date\":\"2026-04-08\",\"wednesday_hours\":\"8.00\",\"wednesday_note\":\"WEDDDDDDD\",\"thursday_date\":\"2026-04-09\",\"thursday_hours\":null,\"thursday_note\":null,\"friday_date\":\"2026-04-10\",\"friday_hours\":null,\"friday_note\":null,\"saturday_date\":\"2026-04-11\",\"saturday_hours\":null,\"saturday_note\":null,\"remark\":null,\"final_remark\":\"dcsc\",\"status\":\"1\",\"submit_status\":\"0\",\"save_date\":null,\"submit_date\":null,\"duplicate_entry\":null,\"created_at\":\"2025-11-20T12:46:44.000Z\",\"updated_at\":\"2025-11-20T12:46:44.000Z\",\"internal_name\":\"abc\",\"internal_id\":1,\"sub_internal_name\":\"c\",\"sub_internal_id\":3,\"customer_name\":null,\"client_name\":null,\"job_type_name\":null,\"job_type_id\":null,\"job_name\":null,\"task_name\":null,\"job_total_time\":null,\"staffs_hourminute\":\"42:00\",\"total_hours\":\"18.00\",\"tempId\":1775912402183.7825,\"sunday_date\":\"2026-04-12\",\"merge_date_time\":\"4/11/2026, 6:30:06 PM\"},{\"id\":null,\"staff_id\":1,\"task_type\":\"1\",\"customer_id\":null,\"client_id\":null,\"job_id\":1,\"task_id\":3,\"monday_date\":\"2026-04-06\",\"monday_hours\":\"6.00\",\"monday_note\":null,\"tuesday_date\":\"2026-04-07\",\"tuesday_hours\":\"4.00\",\"tuesday_note\":null,\"wednesday_date\":\"2026-04-08\",\"wednesday_hours\":\"8.00\",\"wednesday_note\":\"WEDDDDDDD\",\"thursday_date\":\"2026-04-09\",\"thursday_hours\":null,\"thursday_note\":null,\"friday_date\":\"2026-04-10\",\"friday_hours\":null,\"friday_note\":null,\"saturday_date\":\"2026-04-11\",\"saturday_hours\":null,\"saturday_note\":null,\"remark\":null,\"final_remark\":\"dcsc\",\"status\":\"1\",\"submit_status\":\"0\",\"save_date\":null,\"submit_date\":null,\"duplicate_entry\":null,\"created_at\":\"2025-11-20T12:46:44.000Z\",\"updated_at\":\"2025-11-20T12:46:44.000Z\",\"internal_name\":\"abc\",\"internal_id\":1,\"sub_internal_name\":\"c\",\"sub_internal_id\":3,\"customer_name\":null,\"client_name\":null,\"job_type_name\":null,\"job_type_id\":null,\"job_name\":null,\"task_name\":null,\"job_total_time\":null,\"staffs_hourminute\":\"42:00\",\"total_hours\":\"18.00\",\"tempId\":1775912405263.8992,\"sunday_date\":\"2026-04-12\",\"merge_date_time\":\"4/11/2026, 6:30:06 PM\"}]', '2026-04-11 13:00:09', '2026-04-11 13:00:31'),
 (67, 1, '1', 0, 0, 1, 1, '2026-04-06', NULL, '1:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'hkjhk', '1', '1', '2026-04-11 18:30:10', '2026-04-11 18:30:31', '[]', '2026-04-11 13:00:09', '2026-04-11 13:00:31');
 
@@ -4829,7 +4847,7 @@ INSERT INTO `timesheet_filter` (`id`, `type`, `staff_id`, `filter_record`, `stat
 DROP TABLE IF EXISTS `assigned_jobs_staff_view`;
 
 DROP VIEW IF EXISTS `assigned_jobs_staff_view`;
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `assigned_jobs_staff_view`  AS SELECT `customers`.`id` AS `customer_id`, `clients`.`id` AS `client_id`, `jobs`.`id` AS `job_id`, `staffs`.`id` AS `staff_id`, 'assign_customer_portfolio' AS `source`, NULL AS `service_id_assign` FROM ((((`customers` join `staff_portfolio` on((`staff_portfolio`.`customer_id` = `customers`.`id`))) join `staffs` on((`staffs`.`id` = `staff_portfolio`.`staff_id`))) left join `clients` on((`clients`.`customer_id` = `customers`.`id`))) left join `jobs` on((`jobs`.`client_id` = `clients`.`id`))) ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `assigned_jobs_staff_view`  AS SELECT `outbook`.`customers`.`id` AS `customer_id`, `outbook`.`clients`.`id` AS `client_id`, `outbook`.`jobs`.`id` AS `job_id`, `outbook`.`staffs`.`id` AS `staff_id`, 'assign_customer_portfolio' AS `source`, NULL AS `service_id_assign` FROM ((((`outbook`.`customers` join `outbook`.`staff_portfolio` on((`outbook`.`staff_portfolio`.`customer_id` = `outbook`.`customers`.`id`))) join `outbook`.`staffs` on((`outbook`.`staffs`.`id` = `outbook`.`staff_portfolio`.`staff_id`))) left join `outbook`.`clients` on((`outbook`.`clients`.`customer_id` = `outbook`.`customers`.`id`))) left join `outbook`.`jobs` on((`outbook`.`jobs`.`client_id` = `outbook`.`clients`.`id`))) ;
 
 -- --------------------------------------------------------
 
@@ -4839,7 +4857,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 DROP TABLE IF EXISTS `dashboard_data_view`;
 
 DROP VIEW IF EXISTS `dashboard_data_view`;
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `dashboard_data_view`  AS SELECT `customers`.`id` AS `customer_id`, `customers`.`customer_type` AS `customer_type`, `customers`.`staff_id` AS `staff_id`, `customers`.`account_manager_id` AS `account_manager_id`, `customer_service_account_managers`.`account_manager_id` AS `a_account_manager_id`, `jobs`.`allocated_to` AS `allocated_to`, `jobs`.`reviewer` AS `reviewer`, `jobs`.`id` AS `job_id`, `jobs`.`status_type` AS `status_type`, `clients`.`id` AS `client_id`, `clients`.`created_at` AS `client_created_at`, `jobs`.`created_at` AS `job_created_at`, `customers`.`created_at` AS `customer_created_at`, `sp_customers`.`id` AS `sp_customer_id` FROM (((((((((`customers` left join `clients` on((`clients`.`customer_id` = `customers`.`id`))) left join `jobs` on((`jobs`.`client_id` = `clients`.`id`))) join `staffs` `staff1` on((`customers`.`staff_id` = `staff1`.`id`))) join `staffs` `staff2` on((`customers`.`account_manager_id` = `staff2`.`id`))) left join `customer_services` on((`customer_services`.`customer_id` = `customers`.`id`))) left join `customer_service_account_managers` on((`customer_service_account_managers`.`customer_service_id` = `customer_services`.`id`))) left join `customer_company_information` on((`customers`.`id` = `customer_company_information`.`customer_id`))) left join `staff_portfolio` on((`staff_portfolio`.`customer_id` = `customers`.`id`))) left join `customers` `sp_customers` on(((`sp_customers`.`id` = `staff_portfolio`.`customer_id`) or (`sp_customers`.`staff_id` = `staff_portfolio`.`staff_id`)))) ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `dashboard_data_view`  AS SELECT `outbook`.`customers`.`id` AS `customer_id`, `outbook`.`customers`.`customer_type` AS `customer_type`, `outbook`.`customers`.`staff_id` AS `staff_id`, `outbook`.`customers`.`account_manager_id` AS `account_manager_id`, `outbook`.`customer_service_account_managers`.`account_manager_id` AS `a_account_manager_id`, `outbook`.`jobs`.`allocated_to` AS `allocated_to`, `outbook`.`jobs`.`reviewer` AS `reviewer`, `outbook`.`jobs`.`id` AS `job_id`, `outbook`.`jobs`.`status_type` AS `status_type`, `outbook`.`clients`.`id` AS `client_id`, `outbook`.`clients`.`created_at` AS `client_created_at`, `outbook`.`jobs`.`created_at` AS `job_created_at`, `outbook`.`customers`.`created_at` AS `customer_created_at`, `sp_customers`.`id` AS `sp_customer_id` FROM (((((((((`outbook`.`customers` left join `outbook`.`clients` on((`outbook`.`clients`.`customer_id` = `outbook`.`customers`.`id`))) left join `outbook`.`jobs` on((`outbook`.`jobs`.`client_id` = `outbook`.`clients`.`id`))) join `outbook`.`staffs` `staff1` on((`outbook`.`customers`.`staff_id` = `staff1`.`id`))) join `outbook`.`staffs` `staff2` on((`outbook`.`customers`.`account_manager_id` = `staff2`.`id`))) left join `outbook`.`customer_services` on((`outbook`.`customer_services`.`customer_id` = `outbook`.`customers`.`id`))) left join `outbook`.`customer_service_account_managers` on((`outbook`.`customer_service_account_managers`.`customer_service_id` = `outbook`.`customer_services`.`id`))) left join `outbook`.`customer_company_information` on((`outbook`.`customers`.`id` = `outbook`.`customer_company_information`.`customer_id`))) left join `outbook`.`staff_portfolio` on((`outbook`.`staff_portfolio`.`customer_id` = `outbook`.`customers`.`id`))) left join `outbook`.`customers` `sp_customers` on(((`sp_customers`.`id` = `outbook`.`staff_portfolio`.`customer_id`) or (`sp_customers`.`staff_id` = `outbook`.`staff_portfolio`.`staff_id`)))) ;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
