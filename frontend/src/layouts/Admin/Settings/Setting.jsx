@@ -2155,19 +2155,47 @@ const Setting = () => {
         tabStatus: tabStatus,
       });
     } else if (tabStatus === "2") {
-      setModalData({
-        ...modalData,
-        fields: [
-          {
-            type: "text",
-            name: "name",
-            label: "Role Name",
-            placeholder: "Enter Contact Person Role",
-          },
-        ],
-        title: " Contact Person Role",
-        tabStatus: tabStatus,
-      });
+      setIsEdit(false);
+      setPersonRoleModalData({ name: "", status: "1" });
+      setPersonRoleCheckboxState([]);
+      setPersonRoleStructure([]);
+      setLoadingPersonRolePerms(true);
+      setIsPersonRoleModalOpen(true);
+      setIsAccordionOpen(true);
+
+      const req = { action: "get", role_id: 0 };
+      const apiData = { req, authToken: token };
+
+      dispatch(CustomerContactPersonAccess(apiData))
+        .unwrap()
+        .then((response) => {
+          if (response.status) {
+            const filteredData = response.data.filter(item => item.permission_name !== "customer");
+            setPersonRoleStructure(filteredData);
+            
+            const initialCheckboxes = [];
+            filteredData.forEach((item) => {
+              item.items.forEach((perm) => {
+                if (perm.is_assigned === 1) {
+                  initialCheckboxes.push({
+                    permission_id: perm.id,
+                    role_id: "",
+                    is_assigned: true,
+                    permission_name: item.permission_name,
+                  });
+                }
+              });
+            });
+            setPersonRoleCheckboxState(initialCheckboxes);
+          }
+        })
+        .catch((error) => {
+          console.error("Error loading permissions:", error);
+        })
+        .finally(() => {
+          setLoadingPersonRolePerms(false);
+        });
+      return;
     } else if (tabStatus === "3") {
       setModalData({
         ...modalData,
@@ -2658,10 +2686,11 @@ const Setting = () => {
     setLoading(true);
     try {
       // 1. Update the role name & status
+      const actionType = personRoleModalData.id ? "update" : "add";
       const roleUpdateRes = await dispatch(
         PersonRole({
           req: {
-            action: "update",
+            action: actionType,
             id: personRoleModalData.id,
             name: personRoleModalData.name,
             status: personRoleModalData.status || "1",
@@ -2672,19 +2701,27 @@ const Setting = () => {
 
       if (!roleUpdateRes.status) {
         sweatalert.fire({
-          title: roleUpdateRes.message || "Failed to update role details",
+          title: roleUpdateRes.message || "Failed to save role details",
           icon: "error",
           timer: 2000,
         });
         return;
       }
 
+      const roleId = actionType === "add" ? roleUpdateRes.userId : personRoleModalData.id;
+
+      // Ensure all permissions have the correct role_id
+      const updatedPermissions = personRoleCheckboxState.map(p => ({
+         ...p,
+         role_id: roleId
+      }));
+
       // 2. Update the permissions
       const permsUpdateRes = await dispatch(
         CustomerContactPersonAccess({
           req: {
             action: "update",
-            permissions: personRoleCheckboxState,
+            permissions: updatedPermissions,
           },
           authToken: token,
         })
@@ -3556,7 +3593,7 @@ const Setting = () => {
               isOpen={isPersonRoleModalOpen}
               backdrop="static"
               size="xl"
-              title="Edit Customer Contact Person Role & Permissions"
+              title={personRoleModalData.id ? "Edit Customer Contact Person Role & Permissions" : "Add Customer Contact Person Role & Permissions"}
               hideBtn={true}
               handleClose={() => {
                 setIsPersonRoleModalOpen(false);
