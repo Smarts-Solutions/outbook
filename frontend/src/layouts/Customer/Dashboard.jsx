@@ -613,7 +613,7 @@ const Dashboard = () => {
                         className="col-md-12 col-lg-4"
                         style={{
                           cursor:
-                            parseInt(dashboard.customer.count) > 0
+                            parseInt(dashboard?.customer?.count) > 0
                               ? "pointer"
                               : "default",
                         }}

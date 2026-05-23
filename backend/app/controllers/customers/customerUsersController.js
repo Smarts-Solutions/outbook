@@ -79,7 +79,7 @@ const getAllCustomerUsers = async (req, res) => {
       return res.status(200).json({ status: true, message: "Success..", data: result });
     }
     else if (action === 'addCustomerUsers') {
-
+console.log("customerUsers--",customerUsers)
 
       let customer_contact_person_role_id = customerUsers.customer_contact_person_role_id || 1;
       let first_name = customerUsers.first_name;
@@ -537,6 +537,7 @@ const getAllCustomerUsers = async (req, res) => {
     }
 
   } catch (error) {
+    console.error("Error in getAllCustomerUsers:", error); 
     res.status(500).json({ status: false, message: error.message });
   }
 }

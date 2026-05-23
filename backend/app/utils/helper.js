@@ -467,4 +467,108 @@ async function buildAssignedJobsTempTable(connection, staffIds) {
   }
 }
 
-module.exports = { SatffLogUpdateOperation, generateNextUniqueCode, generateNextUniqueCodeJobLogTitle, getDateRange, JobTaskNameWithId, getAllCustomerIds, LineManageStaffIdHelperFunction, QueryRoleHelperFunction, JobStatusUpdate,buildAssignedJobsTempTable};
+
+const getStaffAccessFilters = async (staff_id) => {
+  const [accessRows] = await pool.execute(
+    `SELECT ca.customer_id, ca.client_id, ca.job_id, s.role_id 
+     FROM customer_access ca
+     JOIN staffs s ON s.id = ca.staff_id
+     WHERE ca.staff_id = ?`,
+    [staff_id]
+  );
+
+  const queryAllAssigned = `
+      SELECT customer_id FROM customer_access WHERE staff_id = ?
+      UNION
+      SELECT customer_id FROM staff_portfolio WHERE staff_id = ?
+      UNION
+      SELECT id as customer_id FROM customers WHERE staff_id = ? OR account_manager_id = ?
+      UNION
+      SELECT customer_id FROM assigned_jobs_staff_view WHERE staff_id = ?
+  `;
+  const [assignedCustomers] = await pool.execute(queryAllAssigned, [staff_id, staff_id, staff_id, staff_id, staff_id]);
+  const assignedCustomerIds = assignedCustomers.map(c => c.customer_id).filter(id => id);
+
+  if (assignedCustomerIds.length === 0) {
+    return { customerCondition: "1=0", clientCondition: "1=0", jobCondition: "1=0", assignedCustomerIds: [] };
+  }
+
+  let customerCondition = `customer_id IN (${assignedCustomerIds.join(',')})`;
+  let clientCondition = "id IS NOT NULL";
+  let jobClientCondition = "client_id IS NOT NULL";
+  let jobCondition = "id IS NOT NULL";
+
+  // If it's a Customer User (Role 12), apply strict filtering from customer_access
+  if (accessRows.length > 0 && accessRows[0].role_id === 12) {
+    let allClientIds = [];
+    let allJobIds = [];
+    accessRows.forEach(row => {
+      if (row.client_id && row.client_id.trim() !== '') {
+        allClientIds.push(...row.client_id.split(',').map(s => s.trim()).filter(s => s));
+      }
+      if (row.job_id && row.job_id.trim() !== '') {
+        allJobIds.push(...row.job_id.split(',').map(s => s.trim()).filter(s => s));
+      }
+    });
+
+    if (allClientIds.length > 0) {
+      clientCondition = `id IN (${allClientIds.join(',')})`;
+      jobClientCondition = `client_id IN (${allClientIds.join(',')})`;
+    } else {
+      clientCondition = "id IS NULL";
+      jobClientCondition = "client_id IS NULL";
+    }
+
+    if (allJobIds.length > 0) {
+      jobCondition = `id IN (${allJobIds.join(',')})`;
+    } else {
+      jobCondition = "id IS NULL";
+    }
+  }
+
+  return { customerCondition, clientCondition, jobClientCondition, jobCondition, assignedCustomerIds };
+};
+
+
+const grantStaffAccess = async (staff_id, customer_id, entity_type, entity_id) => {
+  try {
+    const [rows] = await pool.execute(
+      `SELECT id, client_id, job_id FROM customer_access WHERE staff_id = ? AND customer_id = ?`,
+      [staff_id, customer_id]
+    );
+
+    if (rows.length === 0) {
+      const client_id_str = entity_type === 'client' ? entity_id.toString() : '';
+      const job_id_str = entity_type === 'job' ? entity_id.toString() : '';
+      await pool.execute(
+        `INSERT INTO customer_access (staff_id, customer_id, client_id, job_id) VALUES (?, ?, ?, ?)`,
+        [staff_id, customer_id, client_id_str, job_id_str]
+      );
+    } else {
+      let client_ids = rows[0].client_id ? rows[0].client_id.split(',').map(s => s.trim()).filter(s => s) : [];
+      let job_ids = rows[0].job_id ? rows[0].job_id.split(',').map(s => s.trim()).filter(s => s) : [];
+
+      if (entity_type === 'client') {
+        if (!client_ids.includes(entity_id.toString())) {
+          client_ids.push(entity_id.toString());
+          await pool.execute(
+            `UPDATE customer_access SET client_id = ? WHERE id = ?`,
+            [client_ids.join(','), rows[0].id]
+          );
+        }
+      } else if (entity_type === 'job') {
+        if (!job_ids.includes(entity_id.toString())) {
+          job_ids.push(entity_id.toString());
+          await pool.execute(
+            `UPDATE customer_access SET job_id = ? WHERE id = ?`,
+            [job_ids.join(','), rows[0].id]
+          );
+        }
+      }
+    }
+  } catch (error) {
+    console.error('grantStaffAccess error', error);
+  }
+};
+
+module.exports = { SatffLogUpdateOperation, generateNextUniqueCode, generateNextUniqueCodeJobLogTitle, getDateRange, JobTaskNameWithId, getAllCustomerIds, LineManageStaffIdHelperFunction, QueryRoleHelperFunction, JobStatusUpdate,buildAssignedJobsTempTable, getStaffAccessFilters, grantStaffAccess };
