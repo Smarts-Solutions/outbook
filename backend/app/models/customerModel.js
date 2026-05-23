@@ -1105,8 +1105,10 @@ const getCustomer = async (customer) => {
 
         const [result] = await connection.execute(query, params);
 
+        
+
         return {
-            status: true,
+            status: true, 
             message: "Success",
             data: {
                 data: result,
