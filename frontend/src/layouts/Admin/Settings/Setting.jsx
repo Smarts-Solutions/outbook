@@ -1037,7 +1037,7 @@ const Setting = () => {
             className={` ${row.status === "1" ? "text-success" : "text-danger"
               }`}
           >
-            {row.status === "1" ? "Active" : "Deactive"}
+            {row.status === "1" ? "Active" : "Inactive"}
           </span>
         </div>
       ),
@@ -1095,7 +1095,7 @@ const Setting = () => {
             className={` ${row.status === "1" ? "text-success" : "text-danger"
               }`}
           >
-            {row.status === "1" ? "Active" : "Deactive"}
+            {row.status === "1" ? "Active" : "Inactive"}
           </span>
         </div>
       ),
@@ -1192,7 +1192,7 @@ const Setting = () => {
             className={` ${row.status === "1" ? "text-success" : "text-danger"
               }`}
           >
-            {row.status === "1" ? "Active" : "Deactive"}
+            {row.status === "1" ? "Active" : "Inactive"}
           </span>
         </div>
       ),
@@ -1301,7 +1301,7 @@ const Setting = () => {
             className={` ${row.status === "1" ? "text-success" : "text-danger"
               }`}
           >
-            {row.status === "1" ? "Active" : "Deactive"}
+            {row.status === "1" ? "Active" : "Inactive"}
           </span>
         </div>
       ),
@@ -1396,7 +1396,7 @@ const Setting = () => {
             className={` ${row.status === "1" ? "text-success" : "text-danger"
               }`}
           >
-            {row.status === "1" ? "Active" : "Deactive"}
+            {row.status === "1" ? "Active" : "Inactive"}
           </span>
         </div>
       ),
@@ -1490,7 +1490,7 @@ const Setting = () => {
             className={` ${row.status === "1" ? "text-success" : "text-danger"
               }`}
           >
-            {row.status === "1" ? "Active" : "Deactive"}
+            {row.status === "1" ? "Active" : "Inactive"}
           </span>
         </div>
       ),
@@ -1586,7 +1586,7 @@ const Setting = () => {
             className={` ${row.status === "1" ? "text-success" : "text-danger"
               }`}
           >
-            {row.status === "1" ? "Active" : "Deactive"}
+            {row.status === "1" ? "Active" : "Inactive"}
           </span>
         </div>
       ),
@@ -1676,7 +1676,7 @@ const Setting = () => {
             className={` ${row.status === "1" ? "text-success" : "text-danger"
               }`}
           >
-            {row.status === "1" ? "Active" : "Deactive"}
+            {row.status === "1" ? "Active" : "Inactive"}
           </span>
         </div>
       ),
@@ -1936,7 +1936,7 @@ const Setting = () => {
             className={` ${row.status === "1" ? "text-success" : "text-danger"
               }`}
           >
-            {row.status === "1" ? "Active" : "Deactive"}
+            {row.status === "1" ? "Active" : "Inactive"}
           </span>
         </div>
       ),
@@ -2311,7 +2311,7 @@ const Setting = () => {
             value: data.status === "1" ? "1" : "0",
             options: [
               { label: "Active", value: "1" },
-              { label: "Deactive", value: "0" },
+              { label: "Inactive", value: "0" },
             ],
           },
         ],
@@ -2379,7 +2379,7 @@ const Setting = () => {
             value: data.status === "1" ? "1" : "0",
             options: [
               { label: "Active", value: "1" },
-              { label: "Deactive", value: "0" },
+              { label: "Inactive", value: "0" },
             ],
           },
         ],
@@ -2406,7 +2406,7 @@ const Setting = () => {
             value: data.status === "1" ? "1" : "0",
             options: [
               { label: "Active", value: "1" },
-              { label: "Deactive", value: "0" },
+              { label: "Inactive", value: "0" },
             ],
           },
         ],
@@ -2433,7 +2433,7 @@ const Setting = () => {
             value: data.status === "1" ? "1" : "0",
             options: [
               { label: "Active", value: "1" },
-              { label: "Deactive", value: "0" },
+              { label: "Inactive", value: "0" },
             ],
           },
         ],
@@ -2473,7 +2473,7 @@ const Setting = () => {
           //   placeholder: "Enter Currency Status",
           //   options: [
           //     { label: "Active", value: "1" },
-          //     { label: "Deactive", value: "0" },
+          //     { label: "Inactive", value: "0" },
           //   ],
           //   value: data.status === "1" ? "1" : "0",
           // },
@@ -2485,7 +2485,7 @@ const Setting = () => {
             value: data.status === "1" ? "1" : "0",
             options: [
               { label: "Active", value: "1" },
-              { label: "Deactive", value: "0" },
+              { label: "Inactive", value: "0" },
             ],
           },
         ],
@@ -2512,7 +2512,7 @@ const Setting = () => {
             value: data.status === "1" ? "1" : "0",
             options: [
               { label: "Active", value: "1" },
-              { label: "Deactive", value: "0" },
+              { label: "Inactive", value: "0" },
             ],
           },
         ],
@@ -2539,7 +2539,7 @@ const Setting = () => {
             value: data.status === "1" ? "1" : "0",
             options: [
               { label: "Active", value: "1" },
-              { label: "Deactive", value: "0" },
+              { label: "Inactive", value: "0" },
             ],
           },
         ],
@@ -2566,7 +2566,7 @@ const Setting = () => {
             value: data.status === "1" ? "1" : "0",
             options: [
               { label: "Active", value: "1" },
-              { label: "Deactive", value: "0" },
+              { label: "Inactive", value: "0" },
             ],
           },
         ],
@@ -3058,7 +3058,7 @@ const Setting = () => {
                         "Role Name": data.role_name,
                         "Hours": data.hourminute?.split(":")[0] || "0",
                         "Minutes": data.hourminute?.split(":")[1] || "0",
-                        "Status": data.status == "1" ? "Active" : "Deactive",
+                        "Status": data.status == "1" ? "Active" : "Inactive",
                       }))}
                       fileName={`Role Data`}
                     />
@@ -3104,7 +3104,7 @@ const Setting = () => {
                         apiData={personRoleDataAll?.data?.map((data) => {
                           return {
                             "Role Name": data.name,
-                            "Status": data.status == "1" ? "Active" : "Deactive",
+                            "Status": data.status == "1" ? "Active" : "Inactive",
                           };
                         })}
                         fileName={`Customer Contact Person Role Data`}
@@ -3148,7 +3148,7 @@ const Setting = () => {
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={statusTypeDataAll.data.map((data) => ({
                         "Status Name": data.type,
-                        "Status": data.status == "1" ? "Active" : "Deactive",
+                        "Status": data.status == "1" ? "Active" : "Inactive",
                       }))}
                       fileName="Status Data"
                     />
@@ -3191,7 +3191,7 @@ const Setting = () => {
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={serviceDataAll.data.map((data) => ({
                         "Service Name": data.name,
-                        "Status": data.status == "1" ? "Active" : "Deactive",
+                        "Status": data.status == "1" ? "Active" : "Inactive",
                       }))}
                       fileName="Service Data"
                     />
@@ -3234,7 +3234,7 @@ const Setting = () => {
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={clientIndustryDataAll.data.map((data) => ({
                         "Client Industry Name": data.business_type,
-                        "Status": data.status == "1" ? "Active" : "Deactive",
+                        "Status": data.status == "1" ? "Active" : "Inactive",
                       }))}
                       fileName="Client Industry Data"
                     />
@@ -3279,7 +3279,7 @@ const Setting = () => {
                         "Country Code": data.code,
                         "Country Name": data.name,
                         "Currency": data.currency,
-                        "Status": data.status == "1" ? "Active" : "Deactive",
+                        "Status": data.status == "1" ? "Active" : "Inactive",
                       }))}
                       fileName="Country Data"
                     />
@@ -3322,7 +3322,7 @@ const Setting = () => {
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={incorporationDataAll.map((data) => ({
                         "Incorporation Name": data.name,
-                        "Status": data.status == "1" ? "Active" : "Deactive",
+                        "Status": data.status == "1" ? "Active" : "Inactive",
                       }))}
                       fileName="Incorporation Data"
                     />
@@ -3365,7 +3365,7 @@ const Setting = () => {
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={customerSourceDataDataAll.map((data) => ({
                         "Source Name": data.name,
-                        "Status": data.status == "1" ? "Active" : "Deactive",
+                        "Status": data.status == "1" ? "Active" : "Inactive",
                       }))}
                       fileName="Customer Source Data"
                     />
@@ -3456,7 +3456,7 @@ const Setting = () => {
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={InternalAllData.map((data) => ({
                         "Internal Job/Project Name": data.name,
-                        "Status": data.status == "1" ? "Active" : "Deactive",
+                        "Status": data.status == "1" ? "Active" : "Inactive",
                       }))}
                       fileName="Internal Job/Project Data"
                     />
@@ -3595,7 +3595,7 @@ const Setting = () => {
                       }
                     >
                       <option value="1">Active</option>
-                      <option value="0">Deactive</option>
+                      <option value="0">Inactive</option>
                     </select>
                   </div>
                 </div>
