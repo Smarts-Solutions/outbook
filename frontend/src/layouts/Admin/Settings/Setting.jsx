@@ -159,7 +159,7 @@ const Setting = () => {
   const [personRoleCheckboxState, setPersonRoleCheckboxState] = useState([]);
   const [personRoleStructure, setPersonRoleStructure] = useState([]);
   const [loadingPersonRolePerms, setLoadingPersonRolePerms] = useState(false);
-  const [isAccordionOpen, setIsAccordionOpen] = useState(true);
+  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
 
   const [getAccessDataSetting, setAccessDataSetting] = useState({
     insert: 0,
@@ -2161,7 +2161,7 @@ const Setting = () => {
       setPersonRoleStructure([]);
       setLoadingPersonRolePerms(true);
       setIsPersonRoleModalOpen(true);
-      setIsAccordionOpen(true);
+      setIsAccordionOpen(false);
 
       const req = { action: "get", role_id: 0 };
       const apiData = { req, authToken: token };
@@ -2353,7 +2353,7 @@ const Setting = () => {
       setPersonRoleStructure([]);
       setLoadingPersonRolePerms(true);
       setIsPersonRoleModalOpen(true);
-      setIsAccordionOpen(true);
+      setIsAccordionOpen(false);
 
       const req = { action: "get", role_id: data.id };
       const apiData = { req, authToken: token };
@@ -3649,7 +3649,7 @@ const Setting = () => {
                             className={`accordion-button ${isAccordionOpen ? "" : "collapsed"}`}
                             type="button"
                           >
-                            {personRoleModalData?.name || ""}
+                            {personRoleModalData?.name || "\u00A0"}
                           </button>
                         </h2>
                         <div className={`accordion-collapse collapse ${isAccordionOpen ? "show" : ""}`}>
