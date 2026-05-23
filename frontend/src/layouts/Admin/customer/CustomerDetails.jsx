@@ -178,57 +178,72 @@ const CustomerUsers = () => {
 
     /* Transfer Modal Specific Styles */
     .transfer-card {
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 1.5rem;
-      background: #ffffff;
-      margin-bottom: 1.5rem;
+      padding: 1rem 0;
+      background: transparent;
+      margin-bottom: 0.5rem;
     }
     .transfer-icon-wrapper {
-      width: 48px;
-      height: 48px;
+      width: 55px;
+      height: 55px;
       border-radius: 50%;
-      background: #fef2f2;
+      background: #fff0f0;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 1rem;
-    }
-    .transfer-alert {
-      background: #fffbeb;
-      border: 1px solid #fef3c7;
-      border-radius: 8px;
-      padding: 1rem;
-      display: flex;
-      align-items: flex-start;
-      margin-bottom: 1.5rem;
-    }
-    .transfer-alert i {
-      color: #d97706;
-      margin-right: 0.75rem;
-      margin-top: 0.25rem;
+      margin-right: 1.25rem;
     }
     .user-info-box {
-      background: #f8fafc;
-      border-radius: 8px;
-      padding: 0.75rem 1rem;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 1rem;
       border: 1px solid #f1f5f9;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+      margin-bottom: 1.5rem;
     }
     .assignment-badge {
       display: inline-flex;
       align-items: center;
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
       font-weight: 600;
-      margin-right: 0.5rem;
-      margin-top: 0.5rem;
+      margin-right: 0.75rem;
     }
-    .badge-jobs { background: #eff6ff; color: #1d4ed8; }
-    .badge-clients { background: #f0fdf4; color: #15803d; }
+    .badge-customers { background: #00cce6; color: #ffffff; }
+    .badge-clients { background: #eafff0; color: #008035; }
+    .badge-jobs { background: #f0f5ff; color: #1a49c4; }
+
+    .btn-custom-cyan {
+      border: 2px solid #00b4d8;
+      color: #00b4d8;
+      background: #ffffff;
+      border-radius: 50px;
+      padding: 8px 24px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-custom-cyan:hover:not(:disabled) {
+      background: #00b4d8;
+      color: #ffffff;
+    }
+    .btn-custom-cyan:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .btn-custom-red {
+      border: 2px solid #f94144;
+      color: #f94144;
+      background: #ffffff;
+      border-radius: 50px;
+      padding: 8px 24px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-custom-red:hover:not(:disabled) {
+      background: #f94144;
+      color: #ffffff;
+    }
   `;
-
-
 
   const convertDate = (date) => {
     if ([null, undefined, ''].includes(date)) {
@@ -254,8 +269,7 @@ const CustomerUsers = () => {
 
   const [type, setType] = useState("add")
   const [updatedata, setUpdatedata] = useState("")
-
-
+  const [loading, setLoading] = useState(false);
 
   const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
 
@@ -723,6 +737,7 @@ const CustomerUsers = () => {
 
 
   const GetAllCustomerData = async (page = 1, limit = 10, term) => {
+    setLoading(true);
     const req = { action: 'getCustomerUsers', staff_id: staffDetails.id, page, limit, search: term };
     const data = { req, authToken: token };
 
@@ -735,9 +750,13 @@ const CustomerUsers = () => {
 
       } else {
         setFilteredData([]);
+        setTotalRecords(0);
       }
     } catch (error) {
-      console.error('Error fetching customer data:', error);
+      setFilteredData([]);
+      setTotalRecords(0);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -892,7 +911,7 @@ const CustomerUsers = () => {
     {
       type: "select",
       name: "customer_contact_person_role_id",
-      label: "Customer Role",
+      label: "Customer contact person role",
       label_size: 12,
       col_size: 6,
       disable: false,
@@ -1000,6 +1019,7 @@ const CustomerUsers = () => {
         confirmButtonText: `Yes, ${type === "edit" ? "update" : "add"} it!`,
       }).then(async (result) => {
         if (result.isConfirmed) {
+          setLoading(true);
           try {
             const data = { req, authToken: token };
             const response = await dispatch(getAllCustomerUsers(data)).unwrap();
@@ -1033,6 +1053,8 @@ const CustomerUsers = () => {
                 "An error occurred while processing request",
               icon: "error",
             });
+          } finally {
+            setLoading(false);
           }
         }
       });
@@ -1287,44 +1309,34 @@ const CustomerUsers = () => {
         }}
       >
         <div className="p-2">
-          <div className="transfer-alert">
-            <AlertCircle size={20} className="me-2 text-warning" />
-            <div>
-              <p className="mb-1 fw-bold text-dark" style={{ fontSize: '0.95rem' }}>Important Action Required</p>
-              <p className="mb-0 text-muted small">
-                This user has active Customer, Job, and Client assignments. You must transfer these to another customer user before deletion.
-              </p>
+          <div className="transfer-card">
+            <div className="d-flex align-items-center">
+              <div className="transfer-icon-wrapper">
+                <Trash2 size={26} className="text-danger" strokeWidth={2.5} />
+              </div>
+              <div>
+                <h5 className="mb-1 fw-bold text-dark" style={{ color: '#1e293b' }}>User For Deletion</h5>
+                <p className="text-muted mb-0" style={{ fontSize: '0.9rem' }}>{selectedUserForDeletion?.first_name} {selectedUserForDeletion?.last_name}</p>
+              </div>
             </div>
           </div>
 
-          <div className="transfer-card shadow-sm border-0 bg-light">
-            <div className="d-flex align-items-center mb-3">
-              <div className="transfer-icon-wrapper me-3">
-                <Trash2 size={22} className="text-danger" />
-              </div>
-              <div>
-                <h6 className="mb-0 fw-bold">User for Deletion</h6>
-                <p className="text-muted small mb-0">{selectedUserForDeletion?.first_name} {selectedUserForDeletion?.last_name}</p>
-              </div>
-            </div>
-
-            <div className="user-info-box mb-2">
-              <div className="d-flex flex-wrap">
-                <span className="assignment-badge bg-info text-white">
-                  <User size={12} className="me-1" /> {selectedUserForDeletion?.customerCount || 0} Customers
-                </span>
-                <span className="assignment-badge badge-clients">
-                  <User size={12} className="me-1" /> {selectedUserForDeletion?.clientCount || 0} Clients
-                </span>
-                <span className="assignment-badge badge-jobs">
-                  <Clock size={12} className="me-1" /> {selectedUserForDeletion?.jobCount || 0} Jobs
-                </span>
-              </div>
+          <div className="user-info-box mb-4">
+            <div className="d-flex align-items-center flex-wrap">
+              <span className="assignment-badge badge-customers">
+                <User size={14} className="me-2" /> {selectedUserForDeletion?.customerCount || 0} Customers
+              </span>
+              <span className="assignment-badge badge-clients">
+                <User size={14} className="me-2" /> {selectedUserForDeletion?.clientCount || 0} Clients
+              </span>
+              <span className="assignment-badge badge-jobs">
+                <Clock size={14} className="me-2" /> {selectedUserForDeletion?.jobCount || 0} Jobs
+              </span>
             </div>
           </div>
 
           <div className="mb-4">
-            <label className="form-label d-flex align-items-center mb-2">
+            <label className="form-label d-flex align-items-center mb-2 fw-semibold text-dark">
               <ArrowRightLeft size={16} className="me-2 text-primary" />
               Transfer all assignments to:
             </label>
@@ -1338,9 +1350,9 @@ const CustomerUsers = () => {
             />
           </div>
 
-          <div className="d-flex gap-3 mt-4 pt-3 border-top">
+          <div className="d-flex justify-content-center gap-3 mt-4 pt-2 flex-wrap">
             <button
-              className="btn btn-danger w-100 py-2 fw-bold"
+              className="btn btn-custom-cyan"
               onClick={handleTransferAndDelete}
               disabled={isTransferring || !transferUserId}
             >
@@ -1354,7 +1366,29 @@ const CustomerUsers = () => {
               )}
             </button>
             <button
-              className="btn btn-outline-secondary w-100 py-2 fw-bold"
+              className="btn btn-custom-cyan"
+              onClick={() => {
+                Swal.fire({
+                  title: "Delete Without Transfer?",
+                  text: "This will permanently delete the user without reassigning their customers, clients, or jobs. Proceed?",
+                  icon: "warning",
+                  showCancelButton: true,
+                  confirmButtonColor: "#00b4d8",
+                  cancelButtonColor: "#f94144",
+                  confirmButtonText: "Yes, delete it!",
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    performDelete(selectedUserForDeletion.id);
+                    setShowTransferModal(false);
+                  }
+                });
+              }}
+              disabled={isTransferring}
+            >
+              Delete Without Transfer
+            </button>
+            <button
+              className="btn btn-custom-red"
               onClick={() => setShowTransferModal(false)}
             >
               Cancel
@@ -1401,7 +1435,12 @@ const CustomerUsers = () => {
 
                   <div className="tab-content mt-minus-60" id="pills-tabContent">
                     <div className="card-datatable">
-                      <div className="card-datatable">
+                        <div className="card-datatable position-relative">
+                          {loading && (
+                            <div className="overlay">
+                              <div className="loader"></div>
+                            </div>
+                          )}
 
                         <div className="row mb-3">
                           <div className="col-md-4">

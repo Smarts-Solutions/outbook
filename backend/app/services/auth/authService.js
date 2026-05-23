@@ -92,6 +92,10 @@ const login = async (credentials) => {
     return { status: false, message: "Please enter a valid Email" };
   }
 
+  if (Number(user.role_id) === 12 || user.role === "CUSTOMER") {
+    return { status: false, message: "Staff not found." };
+  }
+
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
     return { status: false, message: "Please enter a valid password" };
@@ -135,6 +139,10 @@ const loginWithAzure = async (credentials) => {
 
   if (!user) {
     return { status: false, message: "User not exist." };
+  }
+
+  if (Number(user.role_id) === 12 || user.role === "CUSTOMER") {
+    return { status: false, message: "Staff not found." };
   }
 
   if (user.status == "0") {

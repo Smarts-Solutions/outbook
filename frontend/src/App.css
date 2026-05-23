@@ -36,3 +36,13 @@
     transform: rotate(360deg);
   }
 }
+
+/* Global Validation Error Text Styling */
+.error-text {
+  text-transform: none !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: #dc3545 !important;
+  margin-top: 4px;
+}
+
