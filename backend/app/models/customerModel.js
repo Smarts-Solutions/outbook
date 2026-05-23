@@ -1,6 +1,6 @@
 const pool = require('../config/database');
 const deleteUploadFile = require('../../app/middlewares/deleteUploadFile');
-const { SatffLogUpdateOperation, generateNextUniqueCode, LineManageStaffIdHelperFunction, QueryRoleHelperFunction ,buildAssignedJobsTempTable } = require('../../app/utils/helper');
+const { SatffLogUpdateOperation, generateNextUniqueCode, LineManageStaffIdHelperFunction, QueryRoleHelperFunction, buildAssignedJobsTempTable } = require('../../app/utils/helper');
 
 
 
@@ -652,43 +652,43 @@ const createCustomer = async (customer) => {
 // };
 
 const getCustomer = async (customer) => {
-  const { staff_id } = customer;
+    const { staff_id } = customer;
 
 
-  // console time milesecond
-  
- 
+    // console time milesecond
 
 
-  const page = parseInt(customer.page) || 1;
-  const limit = parseInt(customer.limit) || 10;
-  const offset = (page - 1) * limit;
 
-  const search = customer.search ? customer.search.trim() : "";
-  const pattern = `%${search}%`;
 
-  let LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id);
-  const rows = await QueryRoleHelperFunction(staff_id);
+    const page = parseInt(customer.page) || 1;
+    const limit = parseInt(customer.limit) || 10;
+    const offset = (page - 1) * limit;
 
-  const RoleAccessQuery = `
+    const search = customer.search ? customer.search.trim() : "";
+    const pattern = `%${search}%`;
+
+    let LineManageStaffId = await LineManageStaffIdHelperFunction(staff_id);
+    const rows = await QueryRoleHelperFunction(staff_id);
+
+    const RoleAccessQuery = `
     SELECT * FROM role_permissions 
     WHERE role_id = ? AND permission_id = ?
   `;
 
-  const [RoleAccess] = await pool.execute(RoleAccessQuery, [
-    rows[0].role_id,
-    33,
-  ]);
+    const [RoleAccess] = await pool.execute(RoleAccessQuery, [
+        rows[0].role_id,
+        33,
+    ]);
 
-  // ===============================
-  // ✅ SUPERADMIN (UNCHANGED - already fast)
-  // ===============================
-  if (
-    rows.length > 0 &&
-    (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)
-  ) {
-    try {
-      const countQuery = `
+    // ===============================
+    // ✅ SUPERADMIN (UNCHANGED - already fast)
+    // ===============================
+    if (
+        rows.length > 0 &&
+        (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)
+    ) {
+        try {
+            const countQuery = `
         SELECT COUNT(*) AS total
         FROM customers
         LEFT JOIN staffs ON customers.staff_id = staffs.id
@@ -701,15 +701,15 @@ const getCustomer = async (customer) => {
           OR CONCAT('cust_', SUBSTRING(customers.trading_name,1,3),'_',SUBSTRING(customers.customer_code,1,15)) LIKE ?
       `;
 
-      const [[{ total }]] = await pool.execute(countQuery, [
-        pattern,
-        pattern,
-        pattern,
-        pattern,
-        pattern,
-      ]);
+            const [[{ total }]] = await pool.execute(countQuery, [
+                pattern,
+                pattern,
+                pattern,
+                pattern,
+                pattern,
+            ]);
 
-      const query = `
+            const query = `
         SELECT  
           customers.id,
           customers.customer_type,
@@ -751,221 +751,221 @@ const getCustomer = async (customer) => {
         LIMIT ? OFFSET ?
       `;
 
-      const [result] = await pool.execute(query, [
-        pattern,
-        pattern,
-        pattern,
-        pattern,
-        pattern,
-        limit,
-        offset,
-      ]);
+            const [result] = await pool.execute(query, [
+                pattern,
+                pattern,
+                pattern,
+                pattern,
+                pattern,
+                limit,
+                offset,
+            ]);
 
-      return {
-        status: true,
-        message: "Success",
-        data: {
-          data: result,
-          pagination: {
-            totalItems: total,
-            totalPages: Math.ceil(total / limit),
-            currentPage: page,
-            limit,
-          },
-        },
-      };
-    } catch (error) {
-      return { status: false, message: error.message };
+            return {
+                status: true,
+                message: "Success",
+                data: {
+                    data: result,
+                    pagination: {
+                        totalItems: total,
+                        totalPages: Math.ceil(total / limit),
+                        currentPage: page,
+                        limit,
+                    },
+                },
+            };
+        } catch (error) {
+            return { status: false, message: error.message };
+        }
     }
-  }
 
-  // ===============================
-  // 🚀 NON SUPERADMIN (OPTIMIZED)
-  // ===============================
+    // ===============================
+    // 🚀 NON SUPERADMIN (OPTIMIZED)
+    // ===============================
 
-//   try {
-//     // 🔥 UNION BASE FILTER
-//     const unionFilter = `
-//       SELECT id FROM customers WHERE staff_id = ?
+    //   try {
+    //     // 🔥 UNION BASE FILTER
+    //     const unionFilter = `
+    //       SELECT id FROM customers WHERE staff_id = ?
 
-//       UNION
+    //       UNION
 
-//       SELECT c.id
-//       FROM customers c
-//       JOIN assigned_jobs_staff_view ajsv 
-//         ON ajsv.customer_id = c.id
-//       WHERE ajsv.staff_id = ?
+    //       SELECT c.id
+    //       FROM customers c
+    //       JOIN assigned_jobs_staff_view ajsv 
+    //         ON ajsv.customer_id = c.id
+    //       WHERE ajsv.staff_id = ?
 
-//       UNION
+    //       UNION
 
-//       SELECT id FROM customers 
-//       WHERE staff_id IN (${LineManageStaffId})
+    //       SELECT id FROM customers 
+    //       WHERE staff_id IN (${LineManageStaffId})
 
-//       UNION
+    //       UNION
 
-//       SELECT c.id
-//       FROM customers c
-//       JOIN assigned_jobs_staff_view ajsv 
-//         ON ajsv.customer_id = c.id
-//       WHERE ajsv.staff_id IN (${LineManageStaffId})
-//     `;
+    //       SELECT c.id
+    //       FROM customers c
+    //       JOIN assigned_jobs_staff_view ajsv 
+    //         ON ajsv.customer_id = c.id
+    //       WHERE ajsv.staff_id IN (${LineManageStaffId})
+    //     `;
 
-//     // =====================
-//     // ✅ COUNT QUERY
-//     // =====================
-//     let countQuery = `
-//       SELECT COUNT(*) as total FROM (
-//         ${unionFilter}
-//       ) AS filtered_ids
-//     `;
+    //     // =====================
+    //     // ✅ COUNT QUERY
+    //     // =====================
+    //     let countQuery = `
+    //       SELECT COUNT(*) as total FROM (
+    //         ${unionFilter}
+    //       ) AS filtered_ids
+    //     `;
 
-//     let countParams = [staff_id, staff_id];
+    //     let countParams = [staff_id, staff_id];
 
-//     if (search) {
-//       countQuery = `
-//         SELECT COUNT(*) as total
-//         FROM (
-//           ${unionFilter}
-//         ) ids
-//         JOIN customers c ON c.id = ids.id
-//         JOIN staffs s1 ON c.staff_id = s1.id
-//         JOIN staffs s2 ON c.account_manager_id = s2.id
-//         WHERE
-//           c.trading_name LIKE ?
-//           OR s2.first_name LIKE ?
-//           OR s2.last_name LIKE ?
-//           OR CONCAT(s1.first_name,' ',s1.last_name) LIKE ?
-//           OR CONCAT('cust_',SUBSTRING(c.trading_name,1,3),'_',SUBSTRING(c.customer_code,1,15)) LIKE ?
-//       `;
+    //     if (search) {
+    //       countQuery = `
+    //         SELECT COUNT(*) as total
+    //         FROM (
+    //           ${unionFilter}
+    //         ) ids
+    //         JOIN customers c ON c.id = ids.id
+    //         JOIN staffs s1 ON c.staff_id = s1.id
+    //         JOIN staffs s2 ON c.account_manager_id = s2.id
+    //         WHERE
+    //           c.trading_name LIKE ?
+    //           OR s2.first_name LIKE ?
+    //           OR s2.last_name LIKE ?
+    //           OR CONCAT(s1.first_name,' ',s1.last_name) LIKE ?
+    //           OR CONCAT('cust_',SUBSTRING(c.trading_name,1,3),'_',SUBSTRING(c.customer_code,1,15)) LIKE ?
+    //       `;
 
-//       countParams.push(
-//         pattern,
-//         pattern,
-//         pattern,
-//         pattern,
-//         pattern
-//       );
-//     }
+    //       countParams.push(
+    //         pattern,
+    //         pattern,
+    //         pattern,
+    //         pattern,
+    //         pattern
+    //       );
+    //     }
 
-//     const [[{ total }]] = await pool.execute(countQuery, countParams);
+    //     const [[{ total }]] = await pool.execute(countQuery, countParams);
 
-//     // =====================
-//     // ✅ MAIN DATA QUERY
-//     // =====================
-//     let query = `
-//       SELECT
-//         c.id,
-//         c.customer_type,
-//         c.staff_id,
-//         c.account_manager_id,
-//         c.trading_name,
-//         c.trading_address,
-//         c.vat_registered,
-//         c.vat_number,
-//         c.website,
-//         c.form_process,
-//         DATE_FORMAT(c.created_at,'%d/%m/%Y') AS created_at,
-//         DATE_FORMAT(c.updated_at,'%d/%m/%Y') AS updated_at,
-//         c.status,
+    //     // =====================
+    //     // ✅ MAIN DATA QUERY
+    //     // =====================
+    //     let query = `
+    //       SELECT
+    //         c.id,
+    //         c.customer_type,
+    //         c.staff_id,
+    //         c.account_manager_id,
+    //         c.trading_name,
+    //         c.trading_address,
+    //         c.vat_registered,
+    //         c.vat_number,
+    //         c.website,
+    //         c.form_process,
+    //         DATE_FORMAT(c.created_at,'%d/%m/%Y') AS created_at,
+    //         DATE_FORMAT(c.updated_at,'%d/%m/%Y') AS updated_at,
+    //         c.status,
 
-//         s1.first_name AS staff_firstname,
-//         s1.last_name AS staff_lastname,
-//         CONCAT(s1.first_name,' ',s1.last_name) AS customer_created_by,
+    //         s1.first_name AS staff_firstname,
+    //         s1.last_name AS staff_lastname,
+    //         CONCAT(s1.first_name,' ',s1.last_name) AS customer_created_by,
 
-//         s2.first_name AS account_manager_firstname,
-//         s2.last_name AS account_manager_lastname,
+    //         s2.first_name AS account_manager_firstname,
+    //         s2.last_name AS account_manager_lastname,
 
-//         cci.company_name,
-//         cci.company_number,
+    //         cci.company_name,
+    //         cci.company_number,
 
-//         CONCAT(
-//           'cust_',
-//           SUBSTRING(c.trading_name,1,3),'_',
-//           SUBSTRING(c.customer_code,1,15)
-//         ) AS customer_code,
+    //         CONCAT(
+    //           'cust_',
+    //           SUBSTRING(c.trading_name,1,3),'_',
+    //           SUBSTRING(c.customer_code,1,15)
+    //         ) AS customer_code,
 
-//         CASE WHEN cl.id IS NOT NULL THEN 1 ELSE 0 END AS is_client
+    //         CASE WHEN cl.id IS NOT NULL THEN 1 ELSE 0 END AS is_client
 
-//       FROM (
-//         ${unionFilter}
-//       ) ids
+    //       FROM (
+    //         ${unionFilter}
+    //       ) ids
 
-//       JOIN customers c ON c.id = ids.id
-//       JOIN staffs s1 ON c.staff_id = s1.id
-//       JOIN staffs s2 ON c.account_manager_id = s2.id
+    //       JOIN customers c ON c.id = ids.id
+    //       JOIN staffs s1 ON c.staff_id = s1.id
+    //       JOIN staffs s2 ON c.account_manager_id = s2.id
 
-//       LEFT JOIN clients cl ON cl.customer_id = c.id
-//       LEFT JOIN customer_company_information cci 
-//         ON c.id = cci.customer_id
-//     `;
+    //       LEFT JOIN clients cl ON cl.customer_id = c.id
+    //       LEFT JOIN customer_company_information cci 
+    //         ON c.id = cci.customer_id
+    //     `;
 
-//     let params = [staff_id, staff_id];
+    //     let params = [staff_id, staff_id];
 
-//     if (search) {
-//       query += `
-//         WHERE
-//           c.trading_name LIKE ?
-//           OR s2.first_name LIKE ?
-//           OR s2.last_name LIKE ?
-//           OR CONCAT(s1.first_name,' ',s1.last_name) LIKE ?
-//           OR CONCAT('cust_',SUBSTRING(c.trading_name,1,3),'_',SUBSTRING(c.customer_code,1,15)) LIKE ?
-//       `;
+    //     if (search) {
+    //       query += `
+    //         WHERE
+    //           c.trading_name LIKE ?
+    //           OR s2.first_name LIKE ?
+    //           OR s2.last_name LIKE ?
+    //           OR CONCAT(s1.first_name,' ',s1.last_name) LIKE ?
+    //           OR CONCAT('cust_',SUBSTRING(c.trading_name,1,3),'_',SUBSTRING(c.customer_code,1,15)) LIKE ?
+    //       `;
 
-//       params.push(
-//         pattern,
-//         pattern,
-//         pattern,
-//         pattern,
-//         pattern
-//       );
-//     }
+    //       params.push(
+    //         pattern,
+    //         pattern,
+    //         pattern,
+    //         pattern,
+    //         pattern
+    //       );
+    //     }
 
-//     query += `
-//       GROUP BY c.id
-//       ORDER BY c.id DESC
-//       LIMIT ? OFFSET ?
-//     `;
+    //     query += `
+    //       GROUP BY c.id
+    //       ORDER BY c.id DESC
+    //       LIMIT ? OFFSET ?
+    //     `;
 
-//     params.push(limit, offset);
+    //     params.push(limit, offset);
 
-//     const [result] = await pool.execute(query, params);
-    
-//     return {
-//       status: true,
-//       message: "Success",
-//       data: {
-//         data: result,
-//         pagination: {
-//           totalItems: total,
-//           totalPages: Math.ceil(total / limit),
-//           currentPage: page,
-//           limit,
-//         },
-//       },
-//     };
-//   } catch (error) {
-//     console.error(error);
-//     return {
-//       status: false,
-//       message: "Error fetching data",
-//       error: error.message,
-//     };
-//   }
+    //     const [result] = await pool.execute(query, params);
 
-  try {
+    //     return {
+    //       status: true,
+    //       message: "Success",
+    //       data: {
+    //         data: result,
+    //         pagination: {
+    //           totalItems: total,
+    //           totalPages: Math.ceil(total / limit),
+    //           currentPage: page,
+    //           limit,
+    //         },
+    //       },
+    //     };
+    //   } catch (error) {
+    //     console.error(error);
+    //     return {
+    //       status: false,
+    //       message: "Error fetching data",
+    //       error: error.message,
+    //     };
+    //   }
 
-      
-     ////////////////////////////////
-     LineManageStaffId = [
-        ...new Set(LineManageStaffId),
-      ];
-    const connection = await pool.getConnection();
-    await buildAssignedJobsTempTable(connection, LineManageStaffId);
+    try {
 
-    // 🔥 UNION BASE FILTER
-    
 
-    const unionFilter = `
+        ////////////////////////////////
+        LineManageStaffId = [
+            ...new Set(LineManageStaffId),
+        ];
+        const connection = await pool.getConnection();
+        await buildAssignedJobsTempTable(connection, LineManageStaffId);
+
+        // 🔥 UNION BASE FILTER
+
+
+        const unionFilter = `
   SELECT id FROM customers WHERE staff_id = ?
 
   UNION
@@ -985,19 +985,19 @@ const getCustomer = async (customer) => {
   )
 `;
 
-    // =====================
-    // ✅ COUNT QUERY
-    // =====================
-    let countQuery = `
+        // =====================
+        // ✅ COUNT QUERY
+        // =====================
+        let countQuery = `
       SELECT COUNT(*) as total FROM (
         ${unionFilter}
       ) AS filtered_ids
     `;
 
-    let countParams = [staff_id, staff_id];
+        let countParams = [staff_id, staff_id];
 
-    if (search) {
-      countQuery = `
+        if (search) {
+            countQuery = `
         SELECT COUNT(*) as total
         FROM (
           ${unionFilter}
@@ -1013,21 +1013,21 @@ const getCustomer = async (customer) => {
           OR CONCAT('cust_',SUBSTRING(c.trading_name,1,3),'_',SUBSTRING(c.customer_code,1,15)) LIKE ?
       `;
 
-      countParams.push(
-        pattern,
-        pattern,
-        pattern,
-        pattern,
-        pattern
-      );
-    }
+            countParams.push(
+                pattern,
+                pattern,
+                pattern,
+                pattern,
+                pattern
+            );
+        }
 
-    const [[{ total }]] = await connection.execute(countQuery, countParams);
+        const [[{ total }]] = await connection.execute(countQuery, countParams);
 
-    // =====================
-    // ✅ MAIN DATA QUERY
-    // =====================
-    let query = `
+        // =====================
+        // ✅ MAIN DATA QUERY
+        // =====================
+        let query = `
       SELECT
         c.id,
         c.customer_type,
@@ -1074,10 +1074,10 @@ const getCustomer = async (customer) => {
         ON c.id = cci.customer_id
     `;
 
-    let params = [staff_id, staff_id];
+        let params = [staff_id, staff_id];
 
-    if (search) {
-      query += `
+        if (search) {
+            query += `
         WHERE
           c.trading_name LIKE ?
           OR s2.first_name LIKE ?
@@ -1086,53 +1086,53 @@ const getCustomer = async (customer) => {
           OR CONCAT('cust_',SUBSTRING(c.trading_name,1,3),'_',SUBSTRING(c.customer_code,1,15)) LIKE ?
       `;
 
-      params.push(
-        pattern,
-        pattern,
-        pattern,
-        pattern,
-        pattern
-      );
-    }
+            params.push(
+                pattern,
+                pattern,
+                pattern,
+                pattern,
+                pattern
+            );
+        }
 
-    query += `
+        query += `
      GROUP BY c.id
       ORDER BY c.id DESC
       LIMIT ? OFFSET ?
     `;
 
-    params.push(limit, offset);
+        params.push(limit, offset);
 
-    const [result] = await connection.execute(query, params);
-    
-    return {
-      status: true,
-      message: "Success",
-      data: {
-        data: result,
-        pagination: {
-          totalItems: total,
-          totalPages: Math.ceil(total / limit),
-          currentPage: page,
-          limit,
-        },
-      },
-    };
-  } catch (error) {
-    console.error(error);
-    return {
-      status: false,
-      message: "Error fetching data",
-      error: error.message,
-    };
-  }
+        const [result] = await connection.execute(query, params);
+
+        return {
+            status: true,
+            message: "Success",
+            data: {
+                data: result,
+                pagination: {
+                    totalItems: total,
+                    totalPages: Math.ceil(total / limit),
+                    currentPage: page,
+                    limit,
+                },
+            },
+        };
+    } catch (error) {
+        console.error(error);
+        return {
+            status: false,
+            message: "Error fetching data",
+            error: error.message,
+        };
+    }
 
 }
 
 const getCustomer_dropdown = async (customer) => {
     const { StaffUserId } = customer;
     // Line Manager
-    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
+    let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
     // Get Role
     const rows = await QueryRoleHelperFunction(StaffUserId)
@@ -1162,7 +1162,19 @@ trading_name ASC;`;
         return { status: true, message: 'Success..', data: result };
     }
 
+
+
+
     // other Role Data
+
+    LineManageStaffId = [
+        ...new Set(LineManageStaffId),
+    ];
+    const connection = await pool.getConnection();
+    await buildAssignedJobsTempTable(connection, LineManageStaffId);
+
+
+
     let query = `
     SELECT  
         customers.id AS id,
@@ -1196,17 +1208,17 @@ trading_name ASC;`;
         JOIN 
             staffs AS staff2 ON customers.account_manager_id = staff2.id
         LEFT JOIN
-            assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+            temp_assigned_jobs_staff ON temp_assigned_jobs_staff.customer_id = customers.id
         LEFT JOIN
             customer_company_information ON customers.id = customer_company_information.customer_id
         WHERE
-             customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+             customers.staff_id IN (${LineManageStaffId}) OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
            GROUP BY customers.id
            ORDER BY customers.trading_name ASC
 
          `;
     try {
-        const [result] = await pool.execute(query);
+        const [result] = await connection.execute(query);
         return { status: true, message: 'Success..', data: result };
     } catch (err) {
         console.error('Error executing query getCustomer_dropdown:', err);
@@ -1744,7 +1756,7 @@ const updateProcessCustomerServices = async (customerProcessData) => {
         let account_manager_id = serVal.account_manager_id;
         let customer_service_task = serVal.customer_service_task;
 
-        
+
         try {
             // Process 1 table
             const checkQuery = `
