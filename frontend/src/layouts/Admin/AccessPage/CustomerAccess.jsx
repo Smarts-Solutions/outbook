@@ -81,41 +81,33 @@ const CustomerAccess = () => {
 
       const response = await dispatch(CustomerContactPersonAccess(data)).unwrap();
       if (response.status) {
-        // Filter out everything except 'view' for the 'customer' module
-        const filteredData = response.data.map(item => {
-          if (item.permission_name === "customer") {
-            return {
-              ...item,
-              items: item.items.filter(perm => perm.type === "view")
-            };
-          }
-          return item;
-        });
+        // Filter out the entire 'customer' module so it's hidden from the UI
+        const filteredData = response.data.filter(item => item.permission_name !== "customer");
 
         setRoleStructures(prev => ({ ...prev, [val.id]: filteredData }));
-        
+
         setCheckboxState((prevState) => {
-            // Only add permissions that are assigned on the server
-            // We don't filter out previous state because we want to preserve other roles' changes
-            let updatedState = [...prevState];
-            
-            filteredData.forEach((item) => {
-                item.items.forEach((perm) => {
-                    if (perm.is_assigned === 1) {
-                        // Check if we already have this permission in state to avoid duplicates
-                        const exists = updatedState.some(p => p.permission_id == perm.id && p.role_id == val.id);
-                        if (!exists) {
-                            updatedState.push({
-                                permission_id: perm.id,
-                                role_id: val.id,
-                                is_assigned: true,
-                                permission_name: item.permission_name,
-                            });
-                        }
-                    }
-                });
+          // Only add permissions that are assigned on the server
+          // We don't filter out previous state because we want to preserve other roles' changes
+          let updatedState = [...prevState];
+
+          filteredData.forEach((item) => {
+            item.items.forEach((perm) => {
+              if (perm.is_assigned === 1) {
+                // Check if we already have this permission in state to avoid duplicates
+                const exists = updatedState.some(p => p.permission_id == perm.id && p.role_id == val.id);
+                if (!exists) {
+                  updatedState.push({
+                    permission_id: perm.id,
+                    role_id: val.id,
+                    is_assigned: true,
+                    permission_name: item.permission_name,
+                  });
+                }
+              }
             });
-            return updatedState;
+          });
+          return updatedState;
         });
       }
     } catch (error) {
@@ -170,8 +162,8 @@ const CustomerAccess = () => {
               checked={isAllSelected}
               onChange={handleSelectAll}
             />
-            <label 
-              className="form-check-label new_checkbox mb-0" 
+            <label
+              className="form-check-label new_checkbox mb-0"
               htmlFor={`select-all-${section.permission_name}-${role_id}`}
               style={{ fontSize: '12px', fontWeight: 'bold', color: '#007bff' }}
             >
@@ -195,6 +187,8 @@ const CustomerAccess = () => {
     );
   };
 
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleSaveChanges = async () => {
     Swal.fire({
       title: "Are you sure?",
@@ -206,6 +200,7 @@ const CustomerAccess = () => {
       confirmButtonText: "Yes, save it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
+        setIsSaving(true);
         try {
           const response = await dispatch(
             CustomerContactPersonAccess({
@@ -241,6 +236,8 @@ const CustomerAccess = () => {
             icon: "error",
             confirmButtonText: "OK",
           });
+        } finally {
+          setIsSaving(false);
         }
       }
     });
@@ -251,7 +248,12 @@ const CustomerAccess = () => {
   }, []);
 
   return (
-    <div className="container-fluid">
+    <div className="container-fluid position-relative">
+      {isSaving && (
+        <div className="overlay">
+          <div className="loader"></div>
+        </div>
+      )}
       <div className="content-title">
         <div className="tab-title">
           <h3 className="mt-0">Customer Contact Person Access</h3>
@@ -304,33 +306,33 @@ const CustomerAccess = () => {
                                 type="checkbox"
                                 id={`global-select-all-${val.id}`}
                                 checked={
-                                    roleStructures[val.id].length > 0 && 
-                                    roleStructures[val.id].every(section => 
-                                        section.items.every(item => 
-                                            checkboxState.some(p => p.role_id == val.id && p.permission_id == item.id && p.is_assigned)
-                                        )
+                                  roleStructures[val.id].length > 0 &&
+                                  roleStructures[val.id].every(section =>
+                                    section.items.every(item =>
+                                      checkboxState.some(p => p.role_id == val.id && p.permission_id == item.id && p.is_assigned)
                                     )
+                                  )
                                 }
                                 onChange={(e) => {
-                                    const checked = e.target.checked;
-                                    setCheckboxState(prevState => {
-                                        let updatedState = prevState.filter(item => item.role_id != val.id);
-                                        roleStructures[val.id].forEach(section => {
-                                            section.items.forEach(item => {
-                                                updatedState.push({
-                                                    permission_id: item.id,
-                                                    role_id: val.id,
-                                                    is_assigned: checked,
-                                                    permission_name: section.permission_name,
-                                                });
-                                            });
+                                  const checked = e.target.checked;
+                                  setCheckboxState(prevState => {
+                                    let updatedState = prevState.filter(item => item.role_id != val.id);
+                                    roleStructures[val.id].forEach(section => {
+                                      section.items.forEach(item => {
+                                        updatedState.push({
+                                          permission_id: item.id,
+                                          role_id: val.id,
+                                          is_assigned: checked,
+                                          permission_name: section.permission_name,
                                         });
-                                        return updatedState;
+                                      });
                                     });
+                                    return updatedState;
+                                  });
                                 }}
                               />
-                              <label 
-                                className="form-check-label new_checkbox mb-0 ms-2 fw-bold text-primary" 
+                              <label
+                                className="form-check-label new_checkbox mb-0 ms-2 fw-bold text-primary"
                                 htmlFor={`global-select-all-${val.id}`}
                               >
                                 Select All Permissions

@@ -21,6 +21,13 @@ exports.customerLogin = async (req, res) => {
     return res.json({ status: false, message: "Please enter a valid password" });
   }
 
+  if (customer.status == "0" || customer.status == 0) {
+    return res.json({
+      status: false,
+      message: "Your account has been deactivated. Please contact the admin.",
+    });
+  }
+
   if (Number(customer.is_first_login) === 0) {
     return res.json({
       status: true,
