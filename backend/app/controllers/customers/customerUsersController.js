@@ -182,8 +182,8 @@ console.log("customerUsers--",customerUsers)
 
               <p style="margin:8px 0 0; color:rgba(255,255,255,0.85);
                 font-size:14px; line-height:22px;">
-                Your account has been successfully created.<br/>
-                Use the credentials below to login.
+               You have been invited to the Outbooks Job Portal.<br/>
+                Please use the credentials below to log in to your account.
               </p>
 
             </td>
@@ -360,8 +360,7 @@ console.log("customerUsers--",customerUsers)
                 line-height:18px;
                 color:#8b98a9;">
 
-                If you did not create this account,
-                please ignore this email or contact support.
+               If you did not create this account, please ignore this email or contact Outbooks Support.
 
               </p>
 
