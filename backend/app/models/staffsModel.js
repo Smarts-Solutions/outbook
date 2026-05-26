@@ -159,11 +159,8 @@ const getStaff = async (data) => {
         roles.role,
         lm.staff_to,
         CONCAT(manager.first_name, ' ', manager.last_name) AS line_manager_name,
-        CASE 
+        CASE
           WHEN EXISTS (
-              SELECT 1 FROM assigned_jobs_staff_view WHERE assigned_jobs_staff_view.staff_id = staffs.id
-          ) 
-          OR EXISTS (
               SELECT 1 FROM customers WHERE customers.staff_id = staffs.id OR customers.account_manager_id = staffs.id
           )
           OR EXISTS (
