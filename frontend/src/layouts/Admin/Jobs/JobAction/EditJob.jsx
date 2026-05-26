@@ -78,6 +78,28 @@ const EditJob = () => {
     minutes: "",
   });
   const [BudgetedMinuteError, setBudgetedMinuteError] = useState("");
+
+  const minDateRecivedOn = getJobDetails?.data?.date_received_on ? getJobDetails.data.date_received_on.split("T")[0] : "";
+  const minDateAllocatedOn = getJobDetails?.data?.allocated_on ? getJobDetails.data.allocated_on.split("T")[0] : "";
+
+  const minDateToday = new Date().toISOString().split("T")[0];
+
+  const handleDateBlur = (e) => {
+    const { name, value } = e.target;
+    if (name === "AllocatedOn") {
+      if (minDateAllocatedOn && (!value || new Date(value) < new Date(minDateAllocatedOn))) {
+        setJobData(prev => ({ ...prev, AllocatedOn: minDateAllocatedOn }));
+      }
+    } else if (name === "DateReceivedOn") {
+      if (minDateRecivedOn && (!value || new Date(value) < new Date(minDateRecivedOn))) {
+        setJobData(prev => ({ ...prev, DateReceivedOn: minDateRecivedOn }));
+      }
+    } else if (["ExpectedDeliveryDate", "SubmissionDeadline", "CustomerDeadlineDate", "InternalDeadlineDate"].includes(name)) {
+      if (value && new Date(value) < new Date(minDateToday)) {
+        setJobData(prev => ({ ...prev, [name]: minDateToday }));
+      }
+    }
+  };
   const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" });
   const [get_Job_Type, setJob_Type] = useState({ loading: false, data: [] });
   const [tempTaskArr, setTempTaskArr] = useState([]);
@@ -1435,7 +1457,7 @@ const EditJob = () => {
       return;
     }
 
-    if (["", null, undefined].includes(jobData.DateReceivedOn)) {
+    if (["", null, undefined].includes(jobData.DateReceivedOn) && !minDateRecivedOn) {
       sweatalert.fire({
         icon: "error",
         title: "Please select Date Received On.",
@@ -1465,11 +1487,11 @@ const EditJob = () => {
       reviewer: Number(jobData.Reviewer),
       allocated_to: Number(jobData.AllocatedTo),
       allocated_on: jobData.AllocatedOn
-        ? jobData.AllocatedOn
-        : new Date().toISOString().split("T")[0],
+        ? (minDateAllocatedOn && new Date(jobData.AllocatedOn) < new Date(minDateAllocatedOn) ? minDateAllocatedOn : jobData.AllocatedOn)
+        : (minDateAllocatedOn || new Date().toISOString().split("T")[0]),
       date_received_on: jobData.DateReceivedOn
-        ? jobData.DateReceivedOn
-        : new Date().toISOString().split("T")[0],
+        ? (minDateRecivedOn && new Date(jobData.DateReceivedOn) < new Date(minDateRecivedOn) ? minDateRecivedOn : jobData.DateReceivedOn)
+        : (minDateRecivedOn || new Date().toISOString().split("T")[0]),
       year_end: jobData.YearEnd,
       total_preparation_time: formatTime(
         PreparationTimne.hours,
@@ -1482,11 +1504,11 @@ const EditJob = () => {
       ),
       total_time: formatTime(Math.floor(totalHours / 60), totalHours % 60),
       engagement_model: jobData.EngagementModel,
-      expected_delivery_date: jobData.ExpectedDeliveryDate,
-      submission_deadline: jobData.SubmissionDeadline,
-      customer_deadline_date: jobData.CustomerDeadlineDate,
+      expected_delivery_date: jobData.ExpectedDeliveryDate ? (new Date(jobData.ExpectedDeliveryDate) < new Date(minDateToday) ? minDateToday : jobData.ExpectedDeliveryDate) : jobData.ExpectedDeliveryDate,
+      submission_deadline: jobData.SubmissionDeadline ? (new Date(jobData.SubmissionDeadline) < new Date(minDateToday) ? minDateToday : jobData.SubmissionDeadline) : jobData.SubmissionDeadline,
+      customer_deadline_date: jobData.CustomerDeadlineDate ? (new Date(jobData.CustomerDeadlineDate) < new Date(minDateToday) ? minDateToday : jobData.CustomerDeadlineDate) : jobData.CustomerDeadlineDate,
       sla_deadline_date: jobData.SLADeadlineDate,
-      internal_deadline_date: jobData.InternalDeadlineDate,
+      internal_deadline_date: jobData.InternalDeadlineDate ? (new Date(jobData.InternalDeadlineDate) < new Date(minDateToday) ? minDateToday : jobData.InternalDeadlineDate) : jobData.InternalDeadlineDate,
       filing_Companies_required: jobData.FilingWithCompaniesHouseRequired,
       filing_Companies_date: jobData.CompaniesHouseFilingDate,
       filing_hmrc_required: jobData.FilingWithHMRCRequired,
@@ -2909,8 +2931,7 @@ const EditJob = () => {
     });
   };
 
-  const minDateRecivedOn = jobData?.DateReceivedOn;
-  const minDateAllocatedOn = jobData?.AllocatedOn;
+
 
   return (
     <div>
@@ -3531,7 +3552,8 @@ const EditJob = () => {
                                       name="AllocatedOn"
                                       min={minDateAllocatedOn}
                                       onChange={HandleChange}
-                                      value={jobData.AllocatedOn}
+                                      onBlur={handleDateBlur}
+                                      value={jobData.AllocatedOn || ""}
                                     // max={
                                     //   new Date().toISOString().split("T")[0]
                                     // }
@@ -3555,7 +3577,8 @@ const EditJob = () => {
                                       name="DateReceivedOn"
                                       min={minDateRecivedOn}
                                       onChange={HandleChange}
-                                      value={jobData.DateReceivedOn}
+                                      onBlur={handleDateBlur}
+                                      value={jobData.DateReceivedOn || ""}
                                     // max={
                                     //   new Date().toISOString().split("T")[0]
                                     // }
@@ -4244,11 +4267,10 @@ const EditJob = () => {
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="ExpectedDeliveryDate"
-                                        min={new Date()
-                                          .toISOString()
-                                          .slice(0, 10)}
+                                        min={minDateToday}
                                         onChange={HandleChange}
-                                        value={jobData.ExpectedDeliveryDate}
+                                        onBlur={handleDateBlur}
+                                        value={jobData.ExpectedDeliveryDate || ""}
                                       />
                                       {errors["ExpectedDeliveryDate"] && (
                                         <div className="error-text">
@@ -4283,11 +4305,10 @@ const EditJob = () => {
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="SubmissionDeadline"
-                                        min={new Date()
-                                          .toISOString()
-                                          .slice(0, 10)}
+                                        min={minDateToday}
                                         onChange={HandleChange}
-                                        value={jobData.SubmissionDeadline}
+                                        onBlur={handleDateBlur}
+                                        value={jobData.SubmissionDeadline || ""}
                                       />
                                       {errors["SubmissionDeadline"] && (
                                         <div className="error-text">
@@ -4304,11 +4325,10 @@ const EditJob = () => {
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="CustomerDeadlineDate"
-                                        min={new Date()
-                                          .toISOString()
-                                          .slice(0, 10)}
+                                        min={minDateToday}
                                         onChange={HandleChange}
-                                        value={jobData.CustomerDeadlineDate}
+                                        onBlur={handleDateBlur}
+                                        value={jobData.CustomerDeadlineDate || ""}
                                       />
                                       {errors["CustomerDeadlineDate"] && (
                                         <div className="error-text">
@@ -4343,11 +4363,10 @@ const EditJob = () => {
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="InternalDeadlineDate"
-                                        min={new Date()
-                                          .toISOString()
-                                          .slice(0, 10)}
+                                        min={minDateToday}
                                         onChange={HandleChange}
-                                        value={jobData.InternalDeadlineDate}
+                                        onBlur={handleDateBlur}
+                                        value={jobData.InternalDeadlineDate || ""}
                                       />
                                       {errors["InternalDeadlineDate"] && (
                                         <div className="error-text">

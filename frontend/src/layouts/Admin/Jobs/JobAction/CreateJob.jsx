@@ -68,6 +68,17 @@ const CreateJob = () => {
   const [BudgetedMinuteError, setBudgetedMinuteError] = useState("");
   const [Totaltime, setTotalTime] = useState({ hours: "", minutes: "" });
 
+  const minDateToday = new Date().toISOString().split("T")[0];
+
+  const handleDateBlur = (e) => {
+    const { name, value } = e.target;
+    if (["AllocatedOn", "DateReceivedOn", "ExpectedDeliveryDate", "SubmissionDeadline", "CustomerDeadlineDate", "InternalDeadlineDate"].includes(name)) {
+      if (value && new Date(value) < new Date(minDateToday)) {
+        setJobData(prev => ({ ...prev, [name]: minDateToday }));
+      }
+    }
+  };
+
   //// Checklist Modal State
   const [checklistModal, setChecklistModal] = useState({
     show: false,
@@ -958,11 +969,11 @@ const CreateJob = () => {
       reviewer: Number(jobData.Reviewer),
       allocated_to: Number(jobData.AllocatedTo),
       allocated_on: jobData.AllocatedOn
-        ? jobData.AllocatedOn
-        : new Date().toISOString().split("T")[0],
+        ? (new Date(jobData.AllocatedOn) < new Date(minDateToday) ? minDateToday : jobData.AllocatedOn)
+        : jobData.AllocatedOn,
       date_received_on: jobData.DateReceivedOn
-        ? jobData.DateReceivedOn
-        : new Date().toISOString().split("T")[0],
+        ? (new Date(jobData.DateReceivedOn) < new Date(minDateToday) ? minDateToday : jobData.DateReceivedOn)
+        : jobData.DateReceivedOn,
       year_end: jobData.YearEnd,
       total_preparation_time: formatTime(
         PreparationTimne.hours,
@@ -975,17 +986,17 @@ const CreateJob = () => {
       ),
       total_time: formatTime(Math.floor(totalHours / 60), totalHours % 60),
       engagement_model: jobData.EngagementModel,
-      expected_delivery_date: jobData.ExpectedDeliveryDate,
+      expected_delivery_date: jobData.ExpectedDeliveryDate ? (new Date(jobData.ExpectedDeliveryDate) < new Date(minDateToday) ? minDateToday : jobData.ExpectedDeliveryDate) : jobData.ExpectedDeliveryDate,
       due_on: jobData.DueOn,
-      submission_deadline: jobData.SubmissionDeadline,
-      customer_deadline_date: jobData.CustomerDeadlineDate,
+      submission_deadline: jobData.SubmissionDeadline ? (new Date(jobData.SubmissionDeadline) < new Date(minDateToday) ? minDateToday : jobData.SubmissionDeadline) : jobData.SubmissionDeadline,
+      customer_deadline_date: jobData.CustomerDeadlineDate ? (new Date(jobData.CustomerDeadlineDate) < new Date(minDateToday) ? minDateToday : jobData.CustomerDeadlineDate) : jobData.CustomerDeadlineDate,
 
 
       // sla_deadline_date: jobData?.SLADeadlineDate
       //   ? jobData?.SLADeadlineDate
       //   : new Date().toISOString().split("T")[0],
       sla_deadline_date: jobData?.SLADeadlineDate,
-      internal_deadline_date: jobData.InternalDeadlineDate,
+      internal_deadline_date: jobData.InternalDeadlineDate ? (new Date(jobData.InternalDeadlineDate) < new Date(minDateToday) ? minDateToday : jobData.InternalDeadlineDate) : jobData.InternalDeadlineDate,
 
       filing_Companies_required: jobData.FilingWithCompaniesHouseRequired,
       filing_Companies_date: jobData.CompaniesHouseFilingDate,
@@ -3085,9 +3096,10 @@ const CreateJob = () => {
                                       }
                                       placeholder="DD-MM-YYYY"
                                       name="AllocatedOn"
-                                      min={new Date().toISOString().slice(0, 10)}
+                                      min={minDateToday}
                                       onChange={HandleChange}
-                                      value={jobData.AllocatedOn}
+                                      onBlur={handleDateBlur}
+                                      value={jobData.AllocatedOn || ""}
                                     />
                                     {errors["AllocatedOn"] && (
                                       <div className="error-text">
@@ -3111,9 +3123,10 @@ const CreateJob = () => {
                                       }
                                       placeholder="DD-MM-YYYY"
                                       name="DateReceivedOn"
-                                      min={new Date().toISOString().slice(0, 10)}
+                                      min={minDateToday}
                                       onChange={HandleChange}
-                                      value={jobData.DateReceivedOn || new Date().toISOString().slice(0, 10)}
+                                      onBlur={handleDateBlur}
+                                      value={jobData.DateReceivedOn || minDateToday}
                                     />
                                     {errors["DateReceivedOn"] && (
                                       <div className="error-text">
@@ -3801,9 +3814,10 @@ const CreateJob = () => {
                                         className="form-control"
                                         placeholder="DD-MM-YYYY"
                                         name="ExpectedDeliveryDate"
-                                        min={new Date().toISOString().slice(0, 10)}
+                                        min={minDateToday}
                                         onChange={HandleChange}
-                                        value={jobData.ExpectedDeliveryDate}
+                                        onBlur={handleDateBlur}
+                                        value={jobData.ExpectedDeliveryDate || ""}
                                       />
                                       {errors["ExpectedDeliveryDate"] && (
                                         <div className="error-text">
@@ -3838,10 +3852,10 @@ const CreateJob = () => {
                                         className="form-control"
                                         placeholder="DD-MM-YYYY"
                                         name="SubmissionDeadline"
-                                        min={new Date().toISOString().slice(0, 10)}
-
+                                        min={minDateToday}
                                         onChange={HandleChange}
-                                        value={jobData.SubmissionDeadline}
+                                        onBlur={handleDateBlur}
+                                        value={jobData.SubmissionDeadline || ""}
                                       />
                                       {errors["SubmissionDeadline"] && (
                                         <div className="error-text">
@@ -3858,10 +3872,10 @@ const CreateJob = () => {
                                         className="form-control"
                                         placeholder="DD-MM-YYYY"
                                         name="CustomerDeadlineDate"
-                                        min={new Date().toISOString().slice(0, 10)}
-
+                                        min={minDateToday}
                                         onChange={HandleChange}
-                                        value={jobData.CustomerDeadlineDate}
+                                        onBlur={handleDateBlur}
+                                        value={jobData.CustomerDeadlineDate || ""}
                                       />
                                       {errors["CustomerDeadlineDate"] && (
                                         <div className="error-text">
@@ -3896,10 +3910,10 @@ const CreateJob = () => {
                                         className="form-control"
                                         placeholder="DD-MM-YYYY"
                                         name="InternalDeadlineDate"
-                                        min={new Date().toISOString().slice(0, 10)}
-
+                                        min={minDateToday}
                                         onChange={HandleChange}
-                                        value={jobData.InternalDeadlineDate}
+                                        onBlur={handleDateBlur}
+                                        value={jobData.InternalDeadlineDate || ""}
                                       />
                                       {errors["InternalDeadlineDate"] && (
                                         <div className="error-text">
