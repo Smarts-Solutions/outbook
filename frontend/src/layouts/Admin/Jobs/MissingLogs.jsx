@@ -833,7 +833,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                   Missing Log Sent On
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className={
                     errors1["missing_log_sent_on"]
                       ? "error-field form-control"
@@ -860,7 +860,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                   Missing Log Prepared Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className={
                     errors1["missing_log_prepared_date"]
                       ? "error-field form-control"
@@ -916,7 +916,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                   Missing Log Reviewed Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className={
                     errors1["missing_log_reviewed_date"]
                       ? "error-field form-control"
@@ -971,7 +971,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                   Last Chaser
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className={
                     errors1["last_chaser"]
                       ? "error-field form-control"
@@ -1083,7 +1083,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                   Missing Log Sent On
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className={
                     errors1["missing_log_sent_on"]
                       ? "error-field form-control"
@@ -1110,7 +1110,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                   Missing Log Prepared Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className={
                     errors1["missing_log_prepared_date"]
                       ? "error-field form-control"
@@ -1165,7 +1165,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                   Missing Log Reviewed Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className={
                     errors1["missing_log_reviewed_date"]
                       ? "error-field form-control"
@@ -1220,7 +1220,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                   Last Chaser
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className={
                     errors1["last_chaser"]
                       ? "error-field form-control"

@@ -3546,7 +3546,7 @@ const EditJob = () => {
                                       Allocated On{" "}
                                     </label>
                                     <input
-                                      type="date"
+                                      type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                                       className="form-control mb-3"
                                       placeholder="DD-MM-YYYY"
                                       name="AllocatedOn"
@@ -3571,7 +3571,7 @@ const EditJob = () => {
                                     </label>
                                     <span className="text-danger">*</span>
                                     <input
-                                      type="date"
+                                      type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                                       className="form-control mb-3"
                                       placeholder="DD-MM-YYYY"
                                       name="DateReceivedOn"
@@ -4263,7 +4263,7 @@ const EditJob = () => {
                                         Expected Delivery Date
                                       </label>
                                       <input
-                                        type="date"
+                                        type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="ExpectedDeliveryDate"
@@ -4283,7 +4283,7 @@ const EditJob = () => {
                                         Due On
                                       </label>
                                       <input
-                                        type="date"
+                                        type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="DueOn"
@@ -4301,7 +4301,7 @@ const EditJob = () => {
                                         Submission Deadline
                                       </label>
                                       <input
-                                        type="date"
+                                        type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="SubmissionDeadline"
@@ -4321,7 +4321,7 @@ const EditJob = () => {
                                         Customer Deadline Date
                                       </label>
                                       <input
-                                        type="date"
+                                        type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="CustomerDeadlineDate"
@@ -4341,7 +4341,7 @@ const EditJob = () => {
                                         SLA Deadline Date
                                       </label>
                                       <input
-                                        type="date"
+                                        type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="SLADeadlineDate"
@@ -4359,7 +4359,7 @@ const EditJob = () => {
                                         Internal Deadline Date
                                       </label>
                                       <input
-                                        type="date"
+                                        type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                                         className="form-control mb-3"
                                         placeholder="DD-MM-YYYY"
                                         name="InternalDeadlineDate"
@@ -4429,7 +4429,7 @@ const EditJob = () => {
                                           Companies House Filing Date
                                         </label>
                                         <input
-                                          type="date"
+                                          type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                                           className="form-control"
                                           name="CompaniesHouseFilingDate"
                                           onChange={HandleChange}
@@ -4472,7 +4472,7 @@ const EditJob = () => {
                                           HMRC Filing Date
                                         </label>
                                         <input
-                                          type="date"
+                                          type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                                           className="form-control"
                                           name="HMRCFilingDate"
                                           onChange={HandleChange}
@@ -4524,7 +4524,7 @@ const EditJob = () => {
                                           Opening Balance Adjustment Date
                                         </label>
                                         <input
-                                          type="date"
+                                          type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                                           className="form-control"
                                           name="OpeningBalanceAdjustmentDate"
                                           onChange={HandleChange}
@@ -4771,7 +4771,7 @@ const EditJob = () => {
                                             Invoice Date{" "}
                                           </label>
                                           <input
-                                            type="date"
+                                            type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                                             className="form-control mb-3"
                                             placeholder="DD-MM-YYYY"
                                             name="InvoiceDate"
@@ -5454,7 +5454,7 @@ const EditJob = () => {
                                               </td>
                                               <td>
                                                 <input
-                                                  type="date"
+                                                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                                                   className="form-control form-control-sm"
                                                   value={row.date}
                                                   readOnly

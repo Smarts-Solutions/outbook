@@ -836,7 +836,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   Missing Queries Prepared Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="MissingQueriesPreparedDate"
@@ -859,7 +859,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   Query Sent Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="QuerySentDate"
@@ -905,7 +905,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   Final Query Response Received Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="FinalQueryResponseReceivedDate"
@@ -927,7 +927,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   Last Chaser
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="last_chaser"
@@ -1070,7 +1070,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   Missing Queries Prepared Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="MissingQueriesPreparedDate"
@@ -1093,7 +1093,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   Query Sent Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="QuerySentDate"
@@ -1139,7 +1139,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   Final Query Response Received Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="FinalQueryResponseReceivedDate"
@@ -1161,7 +1161,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   Last Chaser
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="last_chaser"

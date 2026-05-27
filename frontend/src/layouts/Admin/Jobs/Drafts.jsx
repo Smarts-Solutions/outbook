@@ -506,7 +506,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                   Draft Sent On
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   name="draft_sent_on"
@@ -639,7 +639,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                     Final Draft Sent On
                   </label>
                   <input
-                    type="date"
+                    type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                     className="form-control"
                     placeholder=""
                     name="final_draft_sent_on"
@@ -716,7 +716,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                   Draft Sent On
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   name="draft_sent_on"
@@ -876,7 +876,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                     Final Draft Sent On
                   </label>
                   <input
-                    type="date"
+                    type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                     className="form-control"
                     placeholder=""
                     name="final_draft_sent_on"
