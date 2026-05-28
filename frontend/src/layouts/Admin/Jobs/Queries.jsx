@@ -844,6 +844,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.MissingQueriesPreparedDate}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
                   onBlur={handleDateBlur}
                 />
                 {errors1["MissingQueriesPreparedDate"] && (
@@ -867,6 +868,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.QuerySentDate}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
                   onBlur={handleDateBlur}
                 />
                 {errors1["QuerySentDate"] && (
@@ -912,6 +914,9 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   name="FinalQueryResponseReceivedDate"
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.FinalQueryResponseReceivedDate}
+                  min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["FinalQueryResponseReceivedDate"] && (
                   <div className="error-text">
@@ -1078,6 +1083,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.MissingQueriesPreparedDate}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
                   onBlur={handleDateBlur}
                 />
                 {errors1["MissingQueriesPreparedDate"] && (
@@ -1101,6 +1107,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.QuerySentDate}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
                   onBlur={handleDateBlur}
                 />
                 {errors1["QuerySentDate"] && (
@@ -1146,6 +1153,9 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   name="FinalQueryResponseReceivedDate"
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.FinalQueryResponseReceivedDate}
+                  min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["FinalQueryResponseReceivedDate"] && (
                   <div className="error-text">
