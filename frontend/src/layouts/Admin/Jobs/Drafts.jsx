@@ -109,6 +109,13 @@ const Drafts = ({ getAccessDataJob, goto }) => {
     setAllDraftInputdata({ ...AllDraftInputdata, [name]: value });
   };
 
+  const handleDateBlur = (e) => {
+    const { name, value } = e.target;
+    if (minDateRecivedOn && value && new Date(value) < new Date(minDateRecivedOn)) {
+      setAllDraftInputdata((prev) => ({ ...prev, [name]: minDateRecivedOn }));
+    }
+  };
+
   const validate = (name, value) => {
     const error = { ...errors };
     if (name === "enter_feedback") {
@@ -499,7 +506,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                   Draft Sent On
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   name="draft_sent_on"
@@ -508,6 +515,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleInputChange(e)}
                   value={AllDraftInputdata.draft_sent_on}
                   min={minDateRecivedOn || ""}
+                  onBlur={handleDateBlur}
                 />
                 {errors["draft_sent_on"] && (
                   <div className="error-text">{errors["draft_sent_on"]}</div>
@@ -631,7 +639,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                     Final Draft Sent On
                   </label>
                   <input
-                    type="date"
+                    type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                     className="form-control"
                     placeholder=""
                     name="final_draft_sent_on"
@@ -639,6 +647,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                     onChange={(e) => handleInputChange(e)}
                     value={AllDraftInputdata.final_draft_sent_on}
                     min={minDateRecivedOn || ""}
+                    onBlur={handleDateBlur}
                   />
                   {errors["final_draft_sent_on"] && (
                     <div className="error-text">
@@ -707,7 +716,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                   Draft Sent On
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   name="draft_sent_on"
@@ -716,6 +725,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleInputChange(e)}
                   value={AllDraftInputdata.draft_sent_on}
                   min={minDateRecivedOn || ""}
+                  onBlur={handleDateBlur}
                 />
                 {errors["draft_sent_on"] && (
                   <div className="error-text">{errors["draft_sent_on"]}</div>
@@ -866,7 +876,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                     Final Draft Sent On
                   </label>
                   <input
-                    type="date"
+                    type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                     className="form-control"
                     placeholder=""
                     name="final_draft_sent_on"
@@ -874,6 +884,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                     onChange={(e) => handleInputChange(e)}
                     value={AllDraftInputdata.final_draft_sent_on}
                     min={minDateRecivedOn || ""}
+                    onBlur={handleDateBlur}
                   />
                   {errors["final_draft_sent_on"] && (
                     <div className="error-text">

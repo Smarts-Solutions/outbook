@@ -517,6 +517,13 @@ const Queries = ({ getAccessDataJob, goto }) => {
     }
   };
 
+  const handleDateBlur = (e) => {
+    const { name, value } = e.target;
+    if (minDateRecivedOn && value && new Date(value) < new Date(minDateRecivedOn)) {
+      setAllQueryInputdata((prev) => ({ ...prev, [name]: minDateRecivedOn }));
+    }
+  };
+
   const columns = [
     {
       name: "Query Title",
@@ -829,7 +836,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   Missing Queries Prepared Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="MissingQueriesPreparedDate"
@@ -837,6 +844,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.MissingQueriesPreparedDate}
                   min={minDateRecivedOn || ""}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["MissingQueriesPreparedDate"] && (
                   <div className="error-text">
@@ -851,15 +859,15 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   Query Sent Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="QuerySentDate"
                   name="QuerySentDate"
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.QuerySentDate}
-                  // min={new Date().toISOString().split("T")[0]}
                   min={minDateRecivedOn || ""}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["QuerySentDate"] && (
                   <div className="error-text">{errors1["QuerySentDate"]}</div>
@@ -897,7 +905,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   Final Query Response Received Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="FinalQueryResponseReceivedDate"
@@ -919,7 +927,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   Last Chaser
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="last_chaser"
@@ -927,6 +935,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.last_chaser}
                   min={minDateRecivedOn || ""}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["last_chaser"] && (
                   <div className="error-text">{errors1["last_chaser"]}</div>
@@ -1061,7 +1070,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   Missing Queries Prepared Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="MissingQueriesPreparedDate"
@@ -1069,6 +1078,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.MissingQueriesPreparedDate}
                   min={minDateRecivedOn || ""}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["MissingQueriesPreparedDate"] && (
                   <div className="error-text">
@@ -1083,7 +1093,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   Query Sent Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="QuerySentDate"
@@ -1091,6 +1101,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.QuerySentDate}
                   min={minDateRecivedOn || ""}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["QuerySentDate"] && (
                   <div className="error-text">{errors1["QuerySentDate"]}</div>
@@ -1128,7 +1139,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   Final Query Response Received Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="FinalQueryResponseReceivedDate"
@@ -1150,7 +1161,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   Last Chaser
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="last_chaser"
@@ -1158,6 +1169,7 @@ const Queries = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.last_chaser}
                   min={minDateRecivedOn || ""}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["last_chaser"] && (
                   <div className="error-text">{errors1["last_chaser"]}</div>
