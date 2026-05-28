@@ -74,6 +74,12 @@ const Drafts = ({ getAccessDataJob, goto }) => {
     fetchMissingLogsAndQueries();
   }, []);
 
+  useEffect(() => {
+    if (adddraft || showEditModal) {
+      fetchMissingLogsAndQueries();
+    }
+  }, [adddraft, showEditModal]);
+
   const fetchMissingLogsAndQueries = async () => {
     try {
       const req = { action: "get", job_id: location.state.job_id };
