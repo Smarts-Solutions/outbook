@@ -4660,6 +4660,8 @@ const EditJob = () => {
                                                     name={field.key}
                                                     min={field.min}
                                                     max={field.max}
+                                                    onKeyDown={(e) => field.type === "date" && e.preventDefault()}
+                                                    onClick={(e) => field.type === "date" && e.target.showPicker()}
                                                     onChange={(e) =>
                                                       HandleChange(e)
                                                     }
