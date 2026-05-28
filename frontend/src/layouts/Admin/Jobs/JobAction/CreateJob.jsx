@@ -3780,6 +3780,8 @@ const CreateJob = () => {
                                                   name={field.key}
                                                   min={field.min}
                                                   max={field.max}
+                                                  onKeyDown={(e) => field.type === "date" && e.preventDefault()}
+                                                  onClick={(e) => field.type === "date" && e.target.showPicker()}
                                                   onChange={(e) => HandleChange(e)}
                                                   value={jobData[field.key] || ""}
                                                 />

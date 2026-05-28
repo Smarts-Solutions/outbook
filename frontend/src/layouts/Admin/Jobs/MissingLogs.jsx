@@ -845,6 +845,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={missionLogAllInputData.missing_log_sent_on}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
                   onBlur={handleDateBlur}
                 />
                 {errors1["missing_log_sent_on"] && (
@@ -872,6 +873,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={missionLogAllInputData.missing_log_prepared_date}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
                   onBlur={handleDateBlur}
                 />
                 {errors1["missing_log_prepared_date"] && (
@@ -928,6 +930,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={missionLogAllInputData.missing_log_reviewed_date}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
                   onBlur={handleDateBlur}
                 />
                 {errors1["missing_log_reviewed_date"] && (
@@ -1095,6 +1098,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={missionLogAllInputData.missing_log_sent_on}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
                   onBlur={handleDateBlur}
                 />
                 {errors1["missing_log_sent_on"] && (
@@ -1122,6 +1126,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={missionLogAllInputData.missing_log_prepared_date}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
                   onBlur={handleDateBlur}
                 />
                 {errors1["missing_log_prepared_date"] && (
@@ -1177,6 +1182,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={missionLogAllInputData.missing_log_reviewed_date}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
                   onBlur={handleDateBlur}
                 />
                 {errors1["missing_log_reviewed_date"] && (

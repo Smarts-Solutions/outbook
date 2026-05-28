@@ -6,6 +6,8 @@ import {
   DraftAction,
   AddDraft,
   EditDraft,
+  GetMissingLog,
+  QueryAction,
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useLocation } from "react-router-dom";
 import sweatalert from "sweetalert2";
@@ -24,6 +26,8 @@ const Drafts = ({ getAccessDataJob, goto }) => {
   const [errors, setErrors] = useState({});
   const [SingleDraftData, setSingleDraftData] = useState([]);
   const [EditData, setEditData] = useState([]);
+  const [missingLogs, setMissingLogs] = useState([]);
+  const [queries, setQueries] = useState([]);
   const [AllDraftInputdata, setAllDraftInputdata] = useState({
     draft_sent_on: new Date().toISOString().substr(0, 10),
     feedback_received: "0",
@@ -67,7 +71,33 @@ const Drafts = ({ getAccessDataJob, goto }) => {
 
   useEffect(() => {
     GetAllDraftList();
+    fetchMissingLogsAndQueries();
   }, []);
+
+  useEffect(() => {
+    if (adddraft || showEditModal) {
+      fetchMissingLogsAndQueries();
+    }
+  }, [adddraft, showEditModal]);
+
+  const fetchMissingLogsAndQueries = async () => {
+    try {
+      const req = { action: "get", job_id: location.state.job_id };
+      const data = { req: req, authToken: token };
+      
+      const missingLogResponse = await dispatch(GetMissingLog(data)).unwrap();
+      if (missingLogResponse.status) {
+         setMissingLogs(missingLogResponse.data.rows || []);
+      }
+      
+      const queriesResponse = await dispatch(QueryAction(data)).unwrap();
+      if (queriesResponse.status) {
+         setQueries(queriesResponse.data.rows || []);
+      }
+    } catch (err) {
+      console.log("Error fetching logs or queries", err);
+    }
+  };
 
   const GetAllDraftList = async () => {
     const req = { action: "get", job_id: location.state.job_id };
@@ -111,8 +141,8 @@ const Drafts = ({ getAccessDataJob, goto }) => {
 
   const handleDateBlur = (e) => {
     const { name, value } = e.target;
-    if (minDateRecivedOn && value && new Date(value) < new Date(minDateRecivedOn)) {
-      setAllDraftInputdata((prev) => ({ ...prev, [name]: minDateRecivedOn }));
+    if (dynamicMinDate && value && new Date(value) < new Date(dynamicMinDate)) {
+      setAllDraftInputdata((prev) => ({ ...prev, [name]: dynamicMinDate }));
     }
   };
 
@@ -349,6 +379,33 @@ const Drafts = ({ getAccessDataJob, goto }) => {
 
   const minDateRecivedOn = location.state?.data?.job?.date_received_on;
 
+  const dynamicMinDate = (() => {
+    let latestMissingLogDate = null;
+    let latestQueryDate = null;
+
+    if (missingLogs && missingLogs.length > 0) {
+      const latestValidLog = missingLogs.find((log) => log.missing_log_reviewed_date != null && log.missing_log_reviewed_date !== "");
+      if (latestValidLog) {
+        latestMissingLogDate = latestValidLog.missing_log_reviewed_date;
+      }
+    }
+
+    if (queries && queries.length > 0) {
+      const latestValidQuery = queries.find((q) => q.final_query_response_received_date != null && q.final_query_response_received_date !== "");
+      if (latestValidQuery) {
+        latestQueryDate = latestValidQuery.final_query_response_received_date;
+      }
+    }
+
+    if (latestMissingLogDate) {
+      return latestMissingLogDate;
+    } else if (latestQueryDate) {
+      return latestQueryDate;
+    } else {
+      return minDateRecivedOn || "";
+    }
+  })();
+
   const handleExport = async () => {
     const req = {
       action: "get",
@@ -514,7 +571,8 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                   autoFocus
                   onChange={(e) => handleInputChange(e)}
                   value={AllDraftInputdata.draft_sent_on}
-                  min={minDateRecivedOn || ""}
+                  min={dynamicMinDate || ""}
+                  max={new Date().toISOString().split("T")[0]}
                   onBlur={handleDateBlur}
                 />
                 {errors["draft_sent_on"] && (
@@ -724,7 +782,8 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                   autoFocus
                   onChange={(e) => handleInputChange(e)}
                   value={AllDraftInputdata.draft_sent_on}
-                  min={minDateRecivedOn || ""}
+                  min={dynamicMinDate || ""}
+                  max={new Date().toISOString().split("T")[0]}
                   onBlur={handleDateBlur}
                 />
                 {errors["draft_sent_on"] && (
