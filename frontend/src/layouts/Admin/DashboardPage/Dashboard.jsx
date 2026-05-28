@@ -743,6 +743,8 @@ const Dashboard = () => {
                             name="fromDate"
                             onChange={(e) => selectFilterValue(e)}
                             max={selectedToDate || undefined}
+                            onKeyDown={(e) => e.preventDefault()}
+                            onClick={(e) => e.target.showPicker()}
                           />
                         </div>
 
@@ -757,6 +759,8 @@ const Dashboard = () => {
                             name="toDate"
                             onChange={(e) => selectFilterValue(e)}
                             min={selectedFromDate || undefined}
+                            onKeyDown={(e) => e.preventDefault()}
+                            onClick={(e) => e.target.showPicker()}
                           />
                         </div>
                       </div>
