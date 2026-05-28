@@ -1,6 +1,6 @@
 
 export const Email_regex = (email) => {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail|yahoo|outbooks|outbook|rediffmail|hotmail|outlook|aol|icloud|protonmail|b2s2.uk|example|dnscloudcore)\.(com|co\.in|in|net|org|edu|gov|uk|us|info|biz|io|...|co\.uk)[a-zA-Z]{0,}$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail|yahoo|outbooks|outbook|rediffmail|hotmail|outlook|aol|icloud|protonmail|b2s2.uk|example|dnscloudcore|myexperts)\.(com|co\.in|in|net|org|edu|gov|uk|us|info|biz|io|...|co\.uk|solutions)[a-zA-Z]{0,}$/;
     return emailRegex.test(email);
 }
 export const Mobile_regex = (mobile) => {
