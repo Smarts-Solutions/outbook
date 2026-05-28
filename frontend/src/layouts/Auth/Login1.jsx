@@ -451,7 +451,7 @@ const Login1 = () => {
                       className="btn d-block mx-auto btn-outline-info w-100 mt-3"
                       onClick={() => navigate("/customer/login")}
                     >
-                      Login as Customer
+                      Login as Customer <LogIn size={18} className="ms-1 mb-1" />
                     </button>
                   </div>
                 </div>

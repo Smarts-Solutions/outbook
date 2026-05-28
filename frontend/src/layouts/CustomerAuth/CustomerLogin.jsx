@@ -16,7 +16,7 @@ import {
 } from "../../Utils/Common_Message";
 import { RoleAccess } from "../../ReduxStore/Slice/Access/AccessSlice";
 import sweatalert from "sweetalert2";
-import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, LogIn } from "lucide-react";
 
 const CustomerLogin = () => {
 
@@ -446,7 +446,7 @@ const CustomerLogin = () => {
                                 type="button"
                                 onClick={() => navigate("/login")}
                               >
-                                Login as Staff
+                                Login as Staff <LogIn size={18} className="ms-1 mb-1" />
                               </button>
                             </div>
                           </div>
