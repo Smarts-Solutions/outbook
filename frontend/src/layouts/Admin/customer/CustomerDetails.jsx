@@ -993,7 +993,7 @@ const CustomerUsers = () => {
       let req = {
         first_name: values.first_name.trim(),
         last_name: values.last_name.trim(),
-        email: values.email.trim(),
+        email: values.email.trim().toLowerCase(),
         phone: values.phone,
         phone_code: values.phone_code,
         role_id: values.role,
