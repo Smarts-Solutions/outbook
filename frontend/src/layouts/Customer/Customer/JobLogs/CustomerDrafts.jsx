@@ -6,6 +6,8 @@ import {
   CustomerDraftAction,
   CustomerAddDraft,
   CustomerEditDraft,
+  CustomerMissingLogAction,
+  CustomerQueryAction,
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useLocation } from "react-router-dom";
 import sweatalert from "sweetalert2";
@@ -26,6 +28,8 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
   const [errors, setErrors] = useState({});
   const [SingleDraftData, setSingleDraftData] = useState([]);
   const [EditData, setEditData] = useState([]);
+  const [missingLogs, setMissingLogs] = useState([]);
+  const [queries, setQueries] = useState([]);
   const [AllDraftInputdata, setAllDraftInputdata] = useState({
     draft_sent_on: new Date().toISOString().substr(0, 10),
     feedback_received: "0",
@@ -69,7 +73,33 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
 
   useEffect(() => {
     GetAllDraftList();
+    fetchMissingLogsAndQueries();
   }, []);
+
+  useEffect(() => {
+    if (adddraft || showEditModal) {
+      fetchMissingLogsAndQueries();
+    }
+  }, [adddraft, showEditModal]);
+
+  const fetchMissingLogsAndQueries = async () => {
+    try {
+      const req = { action: "get", job_id: job_id || location.state?.job_id };
+      const data = { req: req, authToken: token };
+
+      const missingLogResponse = await dispatch(CustomerMissingLogAction(data)).unwrap();
+      if (missingLogResponse.status) {
+         setMissingLogs(missingLogResponse.data.rows || []);
+      }
+
+      const queriesResponse = await dispatch(CustomerQueryAction(data)).unwrap();
+      if (queriesResponse.status) {
+         setQueries(queriesResponse.data.rows || []);
+      }
+    } catch (err) {
+      console.log("Error fetching logs or queries", err);
+    }
+  };
 
   const GetAllDraftList = async () => {
     const req = { action: "get", job_id: job_id || location.state?.job_id };
@@ -110,6 +140,42 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
     validate(name, value);
     setAllDraftInputdata({ ...AllDraftInputdata, [name]: value });
   };
+
+  const handleDateBlur = (e) => {
+    const { name, value } = e.target;
+    if (dynamicMinDate && value && new Date(value) < new Date(dynamicMinDate)) {
+      setAllDraftInputdata((prev) => ({ ...prev, [name]: dynamicMinDate }));
+    }
+  };
+
+  const minDateRecivedOn = location.state?.data?.job?.date_received_on;
+
+  const dynamicMinDate = (() => {
+    let latestMissingLogDate = null;
+    let latestQueryDate = null;
+
+    if (missingLogs && missingLogs.length > 0) {
+      const latestValidLog = missingLogs.find((log) => log.missing_log_reviewed_date != null && log.missing_log_reviewed_date !== "");
+      if (latestValidLog) {
+        latestMissingLogDate = latestValidLog.missing_log_reviewed_date;
+      }
+    }
+
+    if (queries && queries.length > 0) {
+      const latestValidQuery = queries.find((q) => q.final_query_response_received_date != null && q.final_query_response_received_date !== "");
+      if (latestValidQuery) {
+        latestQueryDate = latestValidQuery.final_query_response_received_date;
+      }
+    }
+
+    if (latestMissingLogDate) {
+      return latestMissingLogDate;
+    } else if (latestQueryDate) {
+      return latestQueryDate;
+    } else {
+      return minDateRecivedOn || "";
+    }
+  })();
 
   const validate = (name, value) => {
     const error = { ...errors };
@@ -346,7 +412,6 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
     });
   }, [AllDraftInputdata.updated_amendments]);
 
-  const minDateRecivedOn = location.state?.data?.job?.date_received_on;
 
   const handleExport = async () => {
     const req = {
@@ -505,7 +570,7 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
                   Draft Sent On
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   name="draft_sent_on"
@@ -513,7 +578,9 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
                   autoFocus
                   onChange={(e) => handleInputChange(e)}
                   value={AllDraftInputdata.draft_sent_on}
-                  min={minDateRecivedOn || ""}
+                  min={dynamicMinDate || ""}
+                  max={new Date().toISOString().split("T")[0]}
+                  onBlur={handleDateBlur}
                 />
                 {errors["draft_sent_on"] && (
                   <div className="error-text">{errors["draft_sent_on"]}</div>
@@ -637,14 +704,16 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
                     Final Draft Sent On
                   </label>
                   <input
-                    type="date"
+                    type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                     className="form-control"
                     placeholder=""
                     name="final_draft_sent_on"
                     id="final_draft_sent_on"
                     onChange={(e) => handleInputChange(e)}
                     value={AllDraftInputdata.final_draft_sent_on}
-                    min={minDateRecivedOn || ""}
+                    min={dynamicMinDate || ""}
+                    max={new Date().toISOString().split("T")[0]}
+                    onBlur={handleDateBlur}
                   />
                   {errors["final_draft_sent_on"] && (
                     <div className="error-text">
@@ -713,7 +782,7 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
                   Draft Sent On
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   name="draft_sent_on"
@@ -721,7 +790,9 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
                   autoFocus
                   onChange={(e) => handleInputChange(e)}
                   value={AllDraftInputdata.draft_sent_on}
-                  min={minDateRecivedOn || ""}
+                  min={dynamicMinDate || ""}
+                  max={new Date().toISOString().split("T")[0]}
+                  onBlur={handleDateBlur}
                 />
                 {errors["draft_sent_on"] && (
                   <div className="error-text">{errors["draft_sent_on"]}</div>
@@ -872,14 +943,16 @@ const CustomerDrafts = ({ job_id, getAccessDataJob, goto }) => {
                     Final Draft Sent On
                   </label>
                   <input
-                    type="date"
+                    type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                     className="form-control"
                     placeholder=""
                     name="final_draft_sent_on"
                     id="final_draft_sent_on"
                     onChange={(e) => handleInputChange(e)}
                     value={AllDraftInputdata.final_draft_sent_on}
-                    min={minDateRecivedOn || ""}
+                    min={dynamicMinDate || ""}
+                    max={new Date().toISOString().split("T")[0]}
+                    onBlur={handleDateBlur}
                   />
                   {errors["final_draft_sent_on"] && (
                     <div className="error-text">

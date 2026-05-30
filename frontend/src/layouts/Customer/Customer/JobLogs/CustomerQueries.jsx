@@ -136,6 +136,13 @@ const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
       });
   };
 
+  const handleDateBlur = (e) => {
+    const { name, value } = e.target;
+    if (minDateRecivedOn && value && new Date(value) < new Date(minDateRecivedOn)) {
+      setAllQueryInputdata((prev) => ({ ...prev, [name]: minDateRecivedOn }));
+    }
+  };
+
   const HandleAddQuery = async () => {
     const req = {
       action: "add",
@@ -839,7 +846,7 @@ const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
                   Missing Queries Prepared Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="MissingQueriesPreparedDate"
@@ -847,6 +854,8 @@ const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.MissingQueriesPreparedDate}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["MissingQueriesPreparedDate"] && (
                   <div className="error-text">
@@ -861,7 +870,7 @@ const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
                   Query Sent Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="QuerySentDate"
@@ -870,6 +879,8 @@ const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
                   value={AllQueryInputdata.QuerySentDate}
                   // min={new Date().toISOString().split("T")[0]}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["QuerySentDate"] && (
                   <div className="error-text">{errors1["QuerySentDate"]}</div>
@@ -907,13 +918,16 @@ const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
                   Final Query Response Received Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="FinalQueryResponseReceivedDate"
                   name="FinalQueryResponseReceivedDate"
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.FinalQueryResponseReceivedDate}
+                  min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["FinalQueryResponseReceivedDate"] && (
                   <div className="error-text">
@@ -1071,7 +1085,7 @@ const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
                   Missing Queries Prepared Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="MissingQueriesPreparedDate"
@@ -1079,6 +1093,8 @@ const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.MissingQueriesPreparedDate}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["MissingQueriesPreparedDate"] && (
                   <div className="error-text">
@@ -1093,7 +1109,7 @@ const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
                   Query Sent Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="QuerySentDate"
@@ -1101,6 +1117,8 @@ const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.QuerySentDate}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["QuerySentDate"] && (
                   <div className="error-text">{errors1["QuerySentDate"]}</div>
@@ -1138,13 +1156,16 @@ const CustomerQueries = ({ job_id, getAccessDataJob, goto }) => {
                   Final Query Response Received Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className="form-control"
                   placeholder=""
                   id="FinalQueryResponseReceivedDate"
                   name="FinalQueryResponseReceivedDate"
                   onChange={(e) => handleChange(e)}
                   value={AllQueryInputdata.FinalQueryResponseReceivedDate}
+                  min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["FinalQueryResponseReceivedDate"] && (
                   <div className="error-text">

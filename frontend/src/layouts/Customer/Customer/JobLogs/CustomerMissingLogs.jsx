@@ -160,6 +160,13 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
     }
   };
 
+  const handleDateBlur = (e) => {
+    const { name, value } = e.target;
+    if (minDateRecivedOn && value && new Date(value) < new Date(minDateRecivedOn)) {
+      setMissionAllInputLogData((prev) => ({ ...prev, [name]: minDateRecivedOn }));
+    }
+  };
+
   const GetMissingLogDetails = async () => {
     const req = { action: "get", job_id: job_id || location.state?.job_id };
     const data = { req: req, authToken: token };
@@ -837,7 +844,7 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
                   Missing Log Sent On
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className={
                     errors1["missing_log_sent_on"]
                       ? "error-field form-control"
@@ -848,8 +855,9 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
                   name="missing_log_sent_on"
                   onChange={(e) => handleChange(e)}
                   value={missionLogAllInputData.missing_log_sent_on}
-                  // min={new Date().toISOString().split("T")[0]}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["missing_log_sent_on"] && (
                   <div className="error-text">
@@ -864,7 +872,7 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
                   Missing Log Prepared Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className={
                     errors1["missing_log_prepared_date"]
                       ? "error-field form-control"
@@ -876,6 +884,8 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={missionLogAllInputData.missing_log_prepared_date}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["missing_log_prepared_date"] && (
                   <div className="error-text">
@@ -919,7 +929,7 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
                   Missing Log Reviewed Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className={
                     errors1["missing_log_reviewed_date"]
                       ? "error-field form-control"
@@ -931,6 +941,8 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={missionLogAllInputData.missing_log_reviewed_date}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["missing_log_reviewed_date"] && (
                   <div className="error-text">
@@ -1084,7 +1096,7 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
                   Missing Log Sent On
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className={
                     errors1["missing_log_sent_on"]
                       ? "error-field form-control"
@@ -1096,6 +1108,8 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={missionLogAllInputData.missing_log_sent_on}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["missing_log_sent_on"] && (
                   <div className="error-text">
@@ -1110,7 +1124,7 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
                   Missing Log Prepared Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className={
                     errors1["missing_log_prepared_date"]
                       ? "error-field form-control"
@@ -1122,6 +1136,8 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={missionLogAllInputData.missing_log_prepared_date}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["missing_log_prepared_date"] && (
                   <div className="error-text">
@@ -1164,7 +1180,7 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
                   Missing Log Reviewed Date
                 </label>
                 <input
-                  type="date"
+                  type="date" onKeyDown={(e) => e.preventDefault()} onClick={(e) => e.target.showPicker && e.target.showPicker()}
                   className={
                     errors1["missing_log_reviewed_date"]
                       ? "error-field form-control"
@@ -1176,6 +1192,8 @@ const CustomerMissingLogs = ({ job_id, getAccessDataJob, goto }) => {
                   onChange={(e) => handleChange(e)}
                   value={missionLogAllInputData.missing_log_reviewed_date}
                   min={minDateRecivedOn || ""}
+                  max={new Date().toISOString().split("T")[0]}
+                  onBlur={handleDateBlur}
                 />
                 {errors1["missing_log_reviewed_date"] && (
                   <div className="error-text">
