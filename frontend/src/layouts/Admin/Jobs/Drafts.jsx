@@ -705,6 +705,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                     onChange={(e) => handleInputChange(e)}
                     value={AllDraftInputdata.final_draft_sent_on}
                     min={minDateRecivedOn || ""}
+                    max={new Date().toISOString().split("T")[0]}
                     onBlur={handleDateBlur}
                   />
                   {errors["final_draft_sent_on"] && (
@@ -943,6 +944,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
                     onChange={(e) => handleInputChange(e)}
                     value={AllDraftInputdata.final_draft_sent_on}
                     min={minDateRecivedOn || ""}
+                    max={new Date().toISOString().split("T")[0]}
                     onBlur={handleDateBlur}
                   />
                   {errors["final_draft_sent_on"] && (

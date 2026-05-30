@@ -424,7 +424,7 @@ const Login1 = () => {
                             onClick={() => handleSubmitLogin()}
                             onKeyPress={handleKeyPress}
                           >
-                            Sign In <LogIn size={18} className="ml-1" />
+                            Sign In <LogIn size={18} className="ml-1 mt-1" />
                           </button>
                         </div>
                      
@@ -451,7 +451,7 @@ const Login1 = () => {
                       className="btn d-block mx-auto btn-outline-info w-100 mt-3"
                       onClick={() => navigate("/customer/login")}
                     >
-                      Login as Customer <LogIn size={18} className="ms-1 mb-1" />
+                      Login as Customer <LogIn size={18} className="ms-1 mt-1" />
                     </button>
                   </div>
                 </div>

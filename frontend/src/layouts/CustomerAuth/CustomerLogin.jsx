@@ -446,7 +446,7 @@ const CustomerLogin = () => {
                                 type="button"
                                 onClick={() => navigate("/login")}
                               >
-                                Login as Staff <LogIn size={18} className="ms-1 mb-1" />
+                                Login as Staff <LogIn size={18} className="ms-1 mt-1" />
                               </button>
                             </div>
                           </div>
