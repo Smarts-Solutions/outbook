@@ -3853,7 +3853,7 @@ const Setting = () => {
                 </button>
                 <button
                   type="button"
-                  className="btn btn-success rounded-pill px-4"
+                  className="btn btn-outline-success"
                   onClick={handleSavePersonRoleWithPermissions}
                   disabled={loadingPersonRolePerms}
                 >
