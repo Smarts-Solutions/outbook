@@ -551,7 +551,7 @@ const CustomerUsers = () => {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      width: '200px',
+      width: '150px',
 
     },
   ];
