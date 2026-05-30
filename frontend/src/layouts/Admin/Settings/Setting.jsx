@@ -3644,16 +3644,25 @@ const Setting = () => {
                   <div className="mt-3">
                     <div className="accordion" id="customer-access-accordion-modal">
                       <div className="accordion-item mt-2">
-                        <h2 className="accordion-header" onClick={() => setIsAccordionOpen(!isAccordionOpen)} style={{ cursor: "pointer" }}>
+                        <h2 className="accordion-header" id="headingRoleAccess">
                           <button
-                            className={`accordion-button ${isAccordionOpen ? "" : "collapsed"}`}
+                            className="accordion-button collapsed"
                             type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapseRoleAccess"
+                            aria-expanded="false"
+                            aria-controls="collapseRoleAccess"
                           >
-                            {personRoleModalData?.name || "\u00A0"}
+                            {personRoleModalData?.name || "Role Permissions"}
                           </button>
                         </h2>
-                        <div className={`accordion-collapse collapse ${isAccordionOpen ? "show" : ""}`}>
-                          <div className="accordion-body bg-white">
+                        <div 
+                          id="collapseRoleAccess"
+                          className="accordion-collapse collapse"
+                          aria-labelledby="headingRoleAccess"
+                          data-bs-parent="#customer-access-accordion-modal"
+                        >
+                          <div className="accordion-body">
                             {loadingPersonRolePerms ? (
                               <div className="text-center py-5">
                                 <div className="spinner-border text-primary" role="status">
