@@ -1,5 +1,5 @@
 const pool = require("../../app/config/database");
-const { SatffLogUpdateOperation } = require("../../app/utils/helper");
+const { SatffLogUpdateOperation, LineManageStaffIdHelperFunction } = require("../../app/utils/helper");
 const axios = require("axios");
 const qs = require("qs");
 
@@ -515,6 +515,8 @@ const getLineManagerStaff = async (staff) => {
 };
 
 const getMyLineManagers = async (staff_by_id) => {
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_by_id);
+  console.log("LineManageStaffId", LineManageStaffId);
   const query = `
     SELECT 
       staffs.id, 
@@ -522,12 +524,12 @@ const getMyLineManagers = async (staff_by_id) => {
       staffs.employee_number,
       staffs.first_name,
       staffs.last_name
-    FROM line_managers 
-    JOIN staffs ON line_managers.staff_to = staffs.id
-    WHERE line_managers.staff_by = ?
+    FROM staffs
+    WHERE staffs.id IN (${LineManageStaffId})
   `;
   try {
-    const [result] = await pool.execute(query, [staff_by_id]);
+    const [result] = await pool.execute(query);
+    console.log("hhh", result);
     return result;
   } catch (err) {
     console.error("Error fetching my line managers:", err);
