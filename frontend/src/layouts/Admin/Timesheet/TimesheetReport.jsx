@@ -157,18 +157,29 @@ function TimesheetReport() {
       setLoading(false);
 
     } else {
-      let data = [
+      let dataList = [
         {
-          id: staffDetails?.id,
-          email: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})`,
-        },
+          value: staffDetails?.id,
+          label: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})`,
+        }
       ];
 
-      data = data?.map((item) => ({
-        value: item.id,
-        label: item.email,
-      }));
-      setStaffAllData(data);
+      try {
+        const req = { action: "get_my_line_managers" };
+        const response = await dispatch(Staff({ req, authToken: token })).unwrap();
+        if (response.status && response.data) {
+          response.data.forEach(manager => {
+            if (!dataList.find(item => item.value === manager.id)) {
+              dataList.push({
+                value: manager.id,
+                label: `${manager.first_name} ${manager.last_name} (${manager.email})`
+              });
+            }
+          });
+        }
+      } catch (err) {}
+
+      setStaffAllData(dataList);
     }
 
   };
@@ -219,19 +230,29 @@ function TimesheetReport() {
           return;
         });
     } else {
-      let data = [
+      let dataList = [
         {
-          id: staffDetails?.employee_number,
-          employee_number: `${staffDetails.employee_number}`,
-        },
+          value: staffDetails?.employee_number,
+          label: `${staffDetails.employee_number}`,
+        }
       ];
 
-      data = data?.map((item) => ({
-        value: item.employee_number,
-        // value: item.id,
-        label: item.employee_number,
-      }));
-      setEmployeeNumberAllData(data);
+      try {
+        const req = { action: "get_my_line_managers" };
+        const response = await dispatch(Staff({ req, authToken: token })).unwrap();
+        if (response.status && response.data) {
+          response.data.forEach(manager => {
+            if (manager.employee_number && !dataList.find(item => item.value === manager.employee_number)) {
+              dataList.push({
+                value: manager.employee_number,
+                label: `${manager.employee_number}`
+              });
+            }
+          });
+        }
+      } catch (err) {}
+
+      setEmployeeNumberAllData(dataList);
     }
   };
 

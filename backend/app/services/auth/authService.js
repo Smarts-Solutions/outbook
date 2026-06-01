@@ -51,6 +51,10 @@ const getLineManagerStaff = async (staff) => {
   return staffModel.getLineManagerStaff(staff);
 }
 
+const getMyLineManagers = async (staff) => {
+  return staffModel.getMyLineManagers(staff.StaffUserId);
+};
+
 const getManagerStaff = async () => {
   return staffModel.getManagerStaff();
 };
@@ -241,6 +245,7 @@ module.exports = {
   deleteStaff,
   GetStaffByRole,
   GetStaffAndDeleteData,
-  getLineManagerStaff
+  getLineManagerStaff,
+  getMyLineManagers
 
 };

@@ -514,6 +514,28 @@ const getLineManagerStaff = async (staff) => {
   }
 };
 
+const getMyLineManagers = async (staff_by_id) => {
+  const query = `
+    SELECT 
+      staffs.id, 
+      staffs.email,
+      staffs.employee_number,
+      staffs.first_name,
+      staffs.last_name
+    FROM line_managers 
+    JOIN staffs ON line_managers.staff_to = staffs.id
+    WHERE line_managers.staff_by = ?
+  `;
+  try {
+    const [result] = await pool.execute(query, [staff_by_id]);
+    return result;
+  } catch (err) {
+    console.error("Error fetching my line managers:", err);
+    throw err;
+  }
+};
+
+
 const status = async (id) => {
   if (id != undefined) {
     const query = `SELECT status FROM staffs WHERE id = ?`;
@@ -910,4 +932,5 @@ module.exports = {
   GetStaffByRoleId,
   GetStaffAndDelete,
   getLineManagerStaff,
+  getMyLineManagers
 };

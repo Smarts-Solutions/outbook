@@ -56,6 +56,10 @@ const handleStaff = async (req, res) => {
         result = await authService.getLineManagerStaff(staff);
         res.status(200).json({ status: true, data: result });
         break;  
+      case "get_my_line_managers":
+        result = await authService.getMyLineManagers(staff);
+        res.status(200).json({ status: true, data: result });
+        break;
       default:
         res.status(400).json({ status: false, message: "Invalid action" });
     }
