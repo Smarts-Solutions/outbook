@@ -516,7 +516,7 @@ const getLineManagerStaff = async (staff) => {
 
 const getMyLineManagers = async (staff_by_id) => {
   const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_by_id);
-  console.log("LineManageStaffId", LineManageStaffId);
+ 
   const query = `
     SELECT 
       staffs.id, 
@@ -529,7 +529,7 @@ const getMyLineManagers = async (staff_by_id) => {
   `;
   try {
     const [result] = await pool.execute(query);
-    console.log("hhh", result);
+
     return result;
   } catch (err) {
     console.error("Error fetching my line managers:", err);
