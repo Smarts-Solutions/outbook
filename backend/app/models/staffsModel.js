@@ -131,7 +131,7 @@ const getStaff = async (data) => {
       JOIN roles ON staffs.role_id = roles.id
       LEFT JOIN line_managers lm ON lm.staff_by = staffs.id
       LEFT JOIN staffs manager ON manager.id = lm.staff_to
-      WHERE 1=1
+      WHERE 1=1 AND staffs.role_id != 12
       ${searchCondition}
       `,
       searchParams
@@ -178,7 +178,7 @@ const getStaff = async (data) => {
       JOIN roles ON staffs.role_id = roles.id
       LEFT JOIN line_managers lm ON lm.staff_by = staffs.id
       LEFT JOIN staffs manager ON manager.id = lm.staff_to
-      WHERE 1=1
+      WHERE 1=1 AND staffs.role_id != 12
       ${searchCondition}
       ORDER BY staffs.first_name ASC
       LIMIT ? OFFSET ?

@@ -57,7 +57,7 @@ const createRole = async (Role) => {
 
 const getRole = async () => {
     const query = `
-    SELECT * FROM roles ORDER BY id DESC `;
+    SELECT * FROM roles WHERE id != 12 ORDER BY id DESC `;
 
     try {
         const [result] = await pool.execute(query);
@@ -70,7 +70,7 @@ const getRole = async () => {
 
 const getRoleAll = async () => {
     const query = `
-    SELECT * FROM roles ORDER BY id DESC `;
+    SELECT * FROM roles WHERE id != 12 ORDER BY id DESC `;
 
     try {
         const [result] = await pool.execute(query);
@@ -82,7 +82,7 @@ const getRoleAll = async () => {
 };
 
 const staffRole = async () => {
-    const query = `SELECT * FROM roles WHERE status = '1' AND role NOT IN ('SUPERADMIN');`;
+    const query = `SELECT * FROM roles WHERE status = '1' AND id != 12 AND role NOT IN ('SUPERADMIN');`;
 
     try {
         const [result] = await pool.execute(query);
