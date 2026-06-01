@@ -287,13 +287,7 @@ function TimesheetReport() {
   };
 
   useEffect(() => {
-    // staffData();
-    // staffData({ searchValue: "", pageNo: 1 });
-    GetAllStaff({
-      searchValue: "",
-      pageNo: 1
-    });
-    getAllFilters();
+    // Dropdown APIs have been deferred to onMenuOpen events
   }, []);
 
   // Get All Customers
@@ -1339,6 +1333,9 @@ function TimesheetReport() {
 
                 <div className="d-flex align-items-center gap-2">
                   <Select
+                    onMenuOpen={() => {
+                      if (getAllFilterData.length === 0) getAllFilters();
+                    }}
                     options={[
                       { value: "", label: "Select..." },
                       ...getAllFilterData.map((opt) => ({
@@ -1526,6 +1523,9 @@ function TimesheetReport() {
             /> */}
             <Select
               closeMenuOnSelect={false}
+              onMenuOpen={() => {
+                if (staffAllData.length === 0) GetAllStaff({ searchValue: "", pageNo: 1 });
+              }}
               // options={staffAllData}
               options={[{ value: "", label: "Select..." }, ...staffAllData]}
 
@@ -1570,6 +1570,9 @@ function TimesheetReport() {
           <div className="col-lg-4 col-md-6">
             <label className="form-label fw-medium">Employee ID</label>
             <Select
+              onMenuOpen={() => {
+                if (employeeNumberAllData.length === 0) employeeData();
+              }}
               options={[
                 { value: "", label: "Select..." },
                 ...employeeNumberAllData,
@@ -1624,6 +1627,9 @@ function TimesheetReport() {
             /> */}
             <Select
               closeMenuOnSelect={false}
+              onMenuOpen={() => {
+                if (customerAllData.length === 0) GetAllCustomer({ searchValue: "", pageNo: 1 });
+              }}
               // options={customerAllData}
               options={[{ value: "", label: "Select..." }, ...customerAllData]}
               value={
@@ -1687,6 +1693,9 @@ function TimesheetReport() {
 
             <Select
               closeMenuOnSelect={false}
+              onMenuOpen={() => {
+                if (clientAllData.length === 0) GetAllClient({ searchValue: "", pageNo: 1 });
+              }}
               // options={clientAllData}
               options={[{ value: "", label: "Select..." }, ...clientAllData]}
               value={
@@ -1750,6 +1759,9 @@ function TimesheetReport() {
               /> */}
               <Select
                 closeMenuOnSelect={false}
+                onMenuOpen={() => {
+                  if (jobOptions.length === 0) GetAllJobs({ searchValue: "", pageNo: 1 });
+                }}
                 // options={jobOptions}
                 options={[{ value: "", label: "Select..." }, ...jobOptions]}
                 value={
@@ -1790,6 +1802,9 @@ function TimesheetReport() {
             <div className="col-lg-4 col-md-6">
               <label className="form-label fw-medium">Task</label>
               <Select
+                onMenuOpen={() => {
+                  if (taskAllData.length === 0) GetAllTask(filters.internal_external);
+                }}
                 options={[{ value: "", label: "Select..." }, ...taskAllData]}
                 value={
                   taskAllData && taskAllData.length > 0
@@ -1821,6 +1836,9 @@ function TimesheetReport() {
                 Select Internal Job
               </label>
               <Select
+                onMenuOpen={() => {
+                  if (internalJobAllData.length === 0) GetAllJobs_internal(filters.internal_external);
+                }}
                 options={[
                   { value: "", label: "Select..." },
                   ...internalJobAllData,
@@ -1856,6 +1874,9 @@ function TimesheetReport() {
                 Select Internal Task
               </label>
               <Select
+                onMenuOpen={() => {
+                  if (internalTaskAllData.length === 0) GetAllTask(filters.internal_external);
+                }}
                 options={[
                   { value: "", label: "Select..." },
                   ...internalTaskAllData,
