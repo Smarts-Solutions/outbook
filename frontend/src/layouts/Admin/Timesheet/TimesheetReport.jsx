@@ -65,7 +65,7 @@ function TimesheetReport() {
 
 
   // const staffData = async () => {
-  //   if (role?.toUpperCase() === "SUPERADMIN") {
+  //   if (role?.toUpperCase() === "SUPERADMIN" || role?.toUpperCase() === "ADMIN") {
   //     await dispatch(Staff({ req: { action: "get" }, authToken: token }))
   //       .unwrap()
   //       .then(async (response) => {
@@ -106,7 +106,7 @@ function TimesheetReport() {
   const staffDebounceRef = useRef(null);
 
   const GetAllStaff = async ({ searchValue = "", pageNo = 1, append = false }) => {
-    if (role?.toUpperCase() === "SUPERADMIN") {
+    if (role?.toUpperCase() === "SUPERADMIN" || role?.toUpperCase() === "ADMIN") {
       if (loading) return;
       const cacheKey = `${searchValue}_${pageNo}`;
       if (staffCache.current[cacheKey]) {
@@ -201,7 +201,7 @@ function TimesheetReport() {
 
   // All Employee Number Data
   const employeeData = async () => {
-    if (role?.toUpperCase() === "SUPERADMIN") {
+    if (role?.toUpperCase() === "SUPERADMIN" || role?.toUpperCase() === "ADMIN") {
       var req = {
         action: "getStaffWithRole",
         role_id: "employee_number" || "",
@@ -1091,7 +1091,7 @@ function TimesheetReport() {
   };
 
   useEffect(() => {
-    //if (filters.fieldsToDisplay !== null || role?.toUpperCase() === "SUPERADMIN") {
+    //if (filters.fieldsToDisplay !== null || role?.toUpperCase() === "SUPERADMIN" || role?.toUpperCase() === "ADMIN") {
     callFilterApi();
     // }
   }, [
