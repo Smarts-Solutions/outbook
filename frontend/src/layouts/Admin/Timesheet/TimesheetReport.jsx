@@ -875,9 +875,20 @@ function TimesheetReport() {
           updated.task_id = null;
           updated.internal_job_id = null;
           updated.internal_task_id = null;
+          
           setClientAllData([]);
+          clientCache.current = {};
+          clientDebounceRef.current = null;
+          setClientPage(1);
+          setClientHasMore(true);
+
           setJobAllData([]);
           setJobOptions([]);
+          cacheRef.current = {};
+          debounceTimeout.current = null;
+          setPage(1);
+          setHasMore(true);
+
           setInternalJobAllData([]);
           setTaskAllData([]);
           setInternalTaskAllData([]);
@@ -886,8 +897,14 @@ function TimesheetReport() {
           updated.task_id = null;
           updated.internal_job_id = null;
           updated.internal_task_id = null;
+          
           setJobAllData([]);
           setJobOptions([]);
+          cacheRef.current = {};
+          debounceTimeout.current = null;
+          setPage(1);
+          setHasMore(true);
+
           setInternalJobAllData([]);
           setTaskAllData([]);
           setInternalTaskAllData([]);
