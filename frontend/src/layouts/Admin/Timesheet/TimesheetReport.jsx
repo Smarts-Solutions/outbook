@@ -838,49 +838,67 @@ function TimesheetReport() {
     ) {
       if ([null, undefined, ""].includes(value)) {
         if (key === "staff_id") {
-          setStaffPage(1)
-          setStaffHasMore(true)
-          setStaffSearch("")
-          staffCache.current = {}
-          staffDebounceRef.current = null
-          GetAllStaff({ searchValue: "", pageNo: 1 });
+          setStaffPage(1);
+          setStaffHasMore(true);
+          setStaffSearch("");
+          staffCache.current = {};
+          staffDebounceRef.current = null;
         }
         else if (key === "customer_id") {
-          setCustomerPage(1)
-          setCustomerHasMore(true)
-          setCustomerSearch("")
-          customerCache.current = {}
-          debounceRef.current = null
-          GetAllCustomer({ searchValue: "", pageNo: 1 });
+          setCustomerPage(1);
+          setCustomerHasMore(true);
+          setCustomerSearch("");
+          customerCache.current = {};
+          debounceRef.current = null;
         }
         else if (key === "client_id") {
-          setClientPage(1)
-          setClientHasMore(true)
-          setClientSearch("")
-          clientCache.current = {}
-          clientDebounceRef.current = null
-          GetAllClient({ searchValue: "", pageNo: 1 });
+          setClientPage(1);
+          setClientHasMore(true);
+          setClientSearch("");
+          clientCache.current = {};
+          clientDebounceRef.current = null;
         }
         else if (key === "job_id") {
-          setPage(1)
-          setHasMore(true)
-          setSearch("")
-          cacheRef.current = {}
-          debounceTimeout.current = null
-          GetAllJobs({ searchValue: "", pageNo: 1 });
+          setPage(1);
+          setHasMore(true);
+          setSearch("");
+          cacheRef.current = {};
+          debounceTimeout.current = null;
         }
-
-
-        setFilters((prev) => ({
-          ...prev,
-          [key]: null,
-        }));
-      } else {
-        setFilters((prev) => ({
-          ...prev,
-          [key]: value,
-        }));
       }
+
+      setFilters((prev) => {
+        let updated = { ...prev, [key]: [null, undefined, ""].includes(value) ? null : value };
+        if (key === "customer_id") {
+          updated.client_id = null;
+          updated.job_id = null;
+          updated.task_id = null;
+          updated.internal_job_id = null;
+          updated.internal_task_id = null;
+          setClientAllData([]);
+          setJobAllData([]);
+          setJobOptions([]);
+          setInternalJobAllData([]);
+          setTaskAllData([]);
+          setInternalTaskAllData([]);
+        } else if (key === "client_id") {
+          updated.job_id = null;
+          updated.task_id = null;
+          updated.internal_job_id = null;
+          updated.internal_task_id = null;
+          setJobAllData([]);
+          setJobOptions([]);
+          setInternalJobAllData([]);
+          setTaskAllData([]);
+          setInternalTaskAllData([]);
+        } else if (key === "job_id" || key === "internal_job_id") {
+          updated.task_id = null;
+          updated.internal_task_id = null;
+          setTaskAllData([]);
+          setInternalTaskAllData([]);
+        }
+        return updated;
+      });
     } else if (key === "internal_external") {
       let remainingPart = filters?.groupBy;
 
@@ -905,10 +923,6 @@ function TimesheetReport() {
           }
           // staffData();
           // staffData({ searchValue: "", pageNo: 1 });
-          GetAllStaff({
-            searchValue: "",
-            pageNo: 1
-          });
         } else {
           fieldsToDisplayId = null;
         }
@@ -930,22 +944,12 @@ function TimesheetReport() {
       let lastIndexValue = remainingPart[remainingPart.length - 1];
       if (lastIndexValue == "job_id") {
         setOptions([]);
-        GetAllJobs_internal(value);
-        GetAllJobs({ searchValue: "", pageNo: 1 });
       } else if (lastIndexValue == "task_id") {
         setOptions([]);
-        GetAllTask(value);
       } else if (lastIndexValue == "staff_id") {
         setOptions([]);
-        // staffData();
-        // staffData({ searchValue: "", pageNo: 1 });
-        GetAllStaff({
-          searchValue: "",
-          pageNo: 1
-        });
       } else if (lastIndexValue == "employee_number") {
         setOptions([]);
-        employeeData();
       }
     } else if (key == "timePeriod") {
       setFilters((prev) => ({
@@ -976,27 +980,7 @@ function TimesheetReport() {
 
   const addAndRemoveGroupBy = (value, type) => {
     if (type == "add") {
-      if (value == "staff_id") {
-        // staffData();
-        // staffData({ searchValue: "", pageNo: 1 });
-        GetAllStaff({
-          searchValue: "",
-          pageNo: 1
-        });
-      } else if (value == "customer_id") {
-        // GetAllCustomer();
-        GetAllCustomer({ searchValue: "", pageNo: 1 });
-      } else if (value == "client_id") {
-        // GetAllClient();
-        GetAllClient({ searchValue: "", pageNo: 1 });
-      } else if (value == "job_id") {
-        GetAllJobs_internal(filters.internal_external);
-        GetAllJobs({ searchValue: "", pageNo: 1 });
-      } else if (value == "task_id") {
-        GetAllTask(filters.internal_external);
-      } else if (value == "employee_number") {
-        employeeData();
-      }
+      // Do nothing, data will be fetched on dropdown open
     } else if (type == "remove") {
       if (value == "staff_id") {
         setStaffAllData([]);
