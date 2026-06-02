@@ -1048,59 +1048,21 @@ async function getAllClientsSidebar(
 }
 
 const get_clients_filter = async (client) => {
-  //  console.log("getClient client", client);
   let { StaffUserId, filters, pagination } = client;
-  let { job_id, customer_id } = filters;
 
   // Get Role
   const rows = await QueryRoleHelperFunction(StaffUserId);
   // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
-  return await getAllClientsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination);
-
-  //console.log("get_clients_filter filters", filters?.customer_id);
-
-
-  if (customer_id == undefined && job_id == undefined) {
-    return await getAllClientsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination);
-  }
-  else if (customer_id.length === 0 && job_id.length > 0) {
-    return await getAllClientByJobIdFilter(
-      StaffUserId,
-      rows,
-      job_id,
-      LineManageStaffId
-    );
-  }
-  else if (customer_id.length > 0 && job_id.length === 0) {
-    return await getAllClientByCustomerIdFilter(
-      StaffUserId,
-      rows,
-      customer_id,
-      LineManageStaffId
-    );
-  }
-  else if (customer_id.length > 0 && job_id.length > 0) {
-    return await getAllClientByCustomerIdAndJobIdFilter(
-      StaffUserId,
-      rows,
-      customer_id,
-      job_id,
-      LineManageStaffId
-    );
-  }
-
-  else {
-    return await getAllClientsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination);
-  }
-
+  return await getAllClientsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination, filters);
 };
 
 async function getAllClientsSidebarFilter(
   StaffUserId,
   LineManageStaffId,
   rows,
-  pagination
+  pagination,
+  filters
 ) {
 
   const page = Number(pagination.page) || 1;
@@ -1108,6 +1070,16 @@ async function getAllClientsSidebarFilter(
   const search = pagination.search || "";
 
   const offset = (page - 1) * limit;
+
+  let extraFilter = "";
+  if (![undefined, null, ""].includes(filters?.customer_id)) {
+    const custArr = Array.isArray(filters.customer_id) ? filters.customer_id : [filters.customer_id];
+    extraFilter += ` AND clients.customer_id IN (${custArr.join(',')}) `;
+  }
+  if (![undefined, null, ""].includes(filters?.job_id)) {
+    const jobArr = Array.isArray(filters.job_id) ? filters.job_id : [filters.job_id];
+    extraFilter += ` AND jobs.id IN (${jobArr.join(',')}) `;
+  }
 
   try {
     const [RoleAccess] = await pool.execute(
@@ -1160,6 +1132,7 @@ async function getAllClientsSidebarFilter(
         LEFT JOIN jobs ON clients.id = jobs.client_id
         WHERE 1=1 
         ${searchCondition}
+        ${extraFilter}
         GROUP BY clients.id
         ORDER BY clients.trading_name ASC
         LIMIT ? OFFSET ?` , [limit, offset]);
@@ -1223,6 +1196,7 @@ async function getAllClientsSidebarFilter(
         (clients.staff_created_id IN (${LineManageStaffId})
         OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))
       ${searchCondition}
+      ${extraFilter}
       GROUP BY clients.id
       ORDER BY clients.trading_name ASC
       LIMIT ? OFFSET ?`, [limit, offset]);
