@@ -218,7 +218,7 @@ function TimesheetReport() {
               )
               ?.map((item) => ({
                 value: item.employee_number,
-                // value: item.id,
+                staff_id: item.id,
                 label: `${item.employee_number}`,
               }));
             setEmployeeNumberAllData(data);
@@ -233,6 +233,7 @@ function TimesheetReport() {
       let dataList = [
         {
           value: staffDetails?.employee_number,
+          staff_id: staffDetails?.id,
           label: `${staffDetails.employee_number}`,
         }
       ];
@@ -245,6 +246,7 @@ function TimesheetReport() {
             if (manager.employee_number && !dataList.find(item => item.value === manager.employee_number)) {
               dataList.push({
                 value: manager.employee_number,
+                staff_id: manager.id,
                 label: `${manager.employee_number}`
               });
             }
@@ -869,7 +871,14 @@ function TimesheetReport() {
 
       setFilters((prev) => {
         let updated = { ...prev, [key]: [null, undefined, ""].includes(value) ? null : value };
-        if (key === "customer_id") {
+        if (key === "staff_id") {
+          if (updated.staff_id && updated.employee_number) {
+            const matchedEmployee = employeeNumberAllData.find(e => Number(e.staff_id) === Number(updated.staff_id));
+            if (!matchedEmployee || matchedEmployee.value !== updated.employee_number) {
+              updated.employee_number = null;
+            }
+          }
+        } else if (key === "customer_id") {
           updated.client_id = null;
           updated.job_id = null;
           updated.task_id = null;
@@ -1597,7 +1606,9 @@ function TimesheetReport() {
               }}
               options={[
                 { value: "", label: "Select..." },
-                ...employeeNumberAllData,
+                ...(filters.staff_id 
+                  ? employeeNumberAllData.filter(e => Number(e.staff_id) === Number(filters.staff_id)) 
+                  : employeeNumberAllData),
               ]}
               value={
                 employeeNumberAllData && employeeNumberAllData?.length > 0
