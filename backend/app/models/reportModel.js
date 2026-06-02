@@ -2501,7 +2501,12 @@ const getTimesheetReportData = async (Report) => {
       !["SUPERADMIN", "ADMIN"].includes(role_user) &&
       !["", null, undefined].includes(StaffUserId)
     ) {
-      where.push(`raw.staff_id = ${StaffUserId}`);
+      const allowedStaffIds = await LineManageStaffIdHelperFunction(StaffUserId);
+      if (allowedStaffIds && allowedStaffIds.length > 0) {
+        where.push(`raw.staff_id IN (${allowedStaffIds.join(',')})`);
+      } else {
+        where.push(`raw.staff_id = ${StaffUserId}`);
+      }
     }
 
     where = where.length ? `WHERE ${where.join(" AND ")}` : "";
