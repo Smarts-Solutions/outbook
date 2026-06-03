@@ -236,18 +236,7 @@ function JobCustomReport() {
   };
 
   useEffect(() => {
-    GetAllJobs({ searchValue: "", pageNo: 1 });
-    GetAllCustomer({ searchValue: "", pageNo: 1 });
-    GetAllClient({ searchValue: "", pageNo: 1 });
-
-    GetAllService("all");
-    GetAllJobType("all");
-    GetAllStatus("all");
-    staffData(4);
-    staffData(3);
-    staffData(6);
-    staffData("other");
-    staffData("employee_number");
+    // API calls deferred to onMenuOpen of their respective dropdowns to reduce initial load time
     getAllFilters();
   }, []);
 
@@ -1818,6 +1807,7 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
+              onMenuOpen={() => { if (jobOptions.length === 0) GetAllJobs({ searchValue: "", pageNo: 1 }); }}
               options={jobOptions}
               value={jobOptions.filter((opt) =>
                 filters.job_id.includes(opt.value),
@@ -1880,6 +1870,7 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
+              onMenuOpen={() => { if (customerAllData.length === 0) GetAllCustomer({ searchValue: "", pageNo: 1 }); }}
               options={customerAllData}
               value={customerAllData.filter((opt) =>
                 filters?.customer_id?.includes(opt.value),
@@ -1946,6 +1937,7 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
+              onMenuOpen={() => { if (clientAllData.length === 0) GetAllClient({ searchValue: "", pageNo: 1 }); }}
               options={clientAllData}
               value={clientAllData.filter((opt) =>
                 filters?.client_id?.includes(opt.value),
@@ -2036,6 +2028,7 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
+              onMenuOpen={() => { if (employeeNumberAllData.length === 0) staffData("employee_number"); }}
               options={employeeNumberAllData}
               value={employeeNumberAllData.filter((opt) =>
                 filters?.employee_number?.includes(opt.value),
@@ -2091,6 +2084,7 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
+              onMenuOpen={() => { if (accountManagerAllData.length === 0) staffData(4); }}
               options={accountManagerAllData}
               value={accountManagerAllData.filter((opt) =>
                 filters?.account_manager_id?.includes(opt.value),
@@ -2145,6 +2139,7 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
+              onMenuOpen={() => { if (allocatedToAllData.length === 0) staffData(3); }}
               options={allocatedToAllData}
               value={allocatedToAllData.filter((opt) =>
                 filters?.allocated_to_id?.includes(opt.value),
@@ -2196,6 +2191,7 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
+              onMenuOpen={() => { if (reviewerAllData.length === 0) staffData(6); }}
               options={reviewerAllData}
               value={reviewerAllData.filter((opt) =>
                 filters?.reviewer_id?.includes(opt.value),
@@ -2251,6 +2247,7 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
+              onMenuOpen={() => { if (otherStaffAllData.length === 0) staffData("other"); }}
               options={otherStaffAllData}
               value={otherStaffAllData.filter((opt) =>
                 filters?.allocated_to_other_id?.includes(opt.value),
@@ -2301,6 +2298,7 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
+              onMenuOpen={() => { if (serviceAllData.length === 0) GetAllService("all"); }}
               options={serviceAllData}
               value={serviceAllData.filter((opt) =>
                 filters?.service_id?.includes(opt.value),
@@ -2352,6 +2350,7 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
+              onMenuOpen={() => { if (jobTypeAllData.length === 0) GetAllJobType("all"); }}
               options={jobTypeAllData}
               value={jobTypeAllData.filter((opt) =>
                 filters?.job_type_id?.includes(opt.value),
@@ -2402,6 +2401,7 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
+              onMenuOpen={() => { if (statusAllData.length === 0) GetAllStatus("all"); }}
               options={statusAllData}
               value={statusAllData.filter((opt) =>
                 filters?.status_type_id?.includes(opt.value),
