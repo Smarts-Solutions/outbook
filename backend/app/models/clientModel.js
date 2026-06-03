@@ -1149,7 +1149,10 @@ async function getAllClientsSidebarFilter(
   }
 
   // ================= OTHER ROLES =================
+  const connection = await pool.getConnection();
   try {
+    await buildAssignedJobsTempTable(connection, LineManageStaffId);
+
     const clientCodeExpr = `
         CONCAT(
           'cli_', 
@@ -1167,7 +1170,7 @@ async function getAllClientsSidebarFilter(
         OR ${clientCodeExpr} LIKE '%${search}%'
       )` : "";
 
-    const [data] = await pool.execute(
+    const [data] = await connection.execute(
       `SELECT  
         clients.id AS id,
         clients.trading_name AS client_name,
@@ -1189,12 +1192,12 @@ async function getAllClientsSidebarFilter(
       JOIN customers ON customers.id = clients.customer_id    
       JOIN client_types ON client_types.id = clients.client_type
       LEFT JOIN jobs ON clients.id = jobs.client_id
-      LEFT JOIN assigned_jobs_staff_view 
-        ON assigned_jobs_staff_view.client_id = clients.id
-        AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+      LEFT JOIN temp_assigned_jobs_staff 
+        ON temp_assigned_jobs_staff.client_id = clients.id
+        AND temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
       WHERE 
         (clients.staff_created_id IN (${LineManageStaffId})
-        OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))
+        OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId}))
       ${searchCondition}
       ${extraFilter}
       GROUP BY clients.id
@@ -1208,6 +1211,8 @@ async function getAllClientsSidebarFilter(
     };
   } catch (err) {
     return { status: false, message: "Error in sidebar pagination" };
+  } finally {
+    connection.release();
   }
 }
 
