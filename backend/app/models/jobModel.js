@@ -2186,11 +2186,15 @@ async function getAllJobsSidebarFilter(
   let extraFilter = "";
   if (![undefined, null, ""].includes(filters?.customer_id)) {
     const custArr = Array.isArray(filters.customer_id) ? filters.customer_id : [filters.customer_id];
-    extraFilter += ` AND jobs.customer_id IN (${custArr.join(',')}) `;
+    if (custArr.length > 0) {
+      extraFilter += ` AND jobs.customer_id IN (${custArr.join(',')}) `;
+    }
   }
   if (![undefined, null, ""].includes(filters?.client_id)) {
     const clientArr = Array.isArray(filters.client_id) ? filters.client_id : [filters.client_id];
-    extraFilter += ` AND jobs.client_id IN (${clientArr.join(',')}) `;
+    if (clientArr.length > 0) {
+      extraFilter += ` AND jobs.client_id IN (${clientArr.join(',')}) `;
+    }
   }
 
   let searchCondition = "";

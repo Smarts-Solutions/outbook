@@ -1074,11 +1074,15 @@ async function getAllClientsSidebarFilter(
   let extraFilter = "";
   if (![undefined, null, ""].includes(filters?.customer_id)) {
     const custArr = Array.isArray(filters.customer_id) ? filters.customer_id : [filters.customer_id];
-    extraFilter += ` AND clients.customer_id IN (${custArr.join(',')}) `;
+    if (custArr.length > 0) {
+      extraFilter += ` AND clients.customer_id IN (${custArr.join(',')}) `;
+    }
   }
   if (![undefined, null, ""].includes(filters?.job_id)) {
     const jobArr = Array.isArray(filters.job_id) ? filters.job_id : [filters.job_id];
-    extraFilter += ` AND jobs.id IN (${jobArr.join(',')}) `;
+    if (jobArr.length > 0) {
+      extraFilter += ` AND jobs.id IN (${jobArr.join(',')}) `;
+    }
   }
 
   try {
