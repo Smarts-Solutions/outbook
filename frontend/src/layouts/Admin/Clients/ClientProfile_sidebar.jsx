@@ -1327,7 +1327,7 @@ const ClientList = () => {
                           </div>
                         )}
 
-                        {customerData && customerData.length > 0 && (
+                        {customerData && customerData.length > 0 ? (
                           <>
                             <Datatable
                               columns={columns}
@@ -1362,6 +1362,13 @@ const ClientList = () => {
                               <option value={500}>500</option>
                             </select>
                           </>
+                        ) : (
+                          <Datatable
+                              columns={columns}
+                              data={[]}
+                              filter={false}
+                              pagination={false}
+                            />
                         )}
                       </div>
                     </div>
