@@ -1780,7 +1780,7 @@ function JobCustomReport() {
             closeMenuOnSelect={false}
             options={optionGroupBy}
             value={optionGroupBy.filter((opt) =>
-              filters.groupBy.includes(opt.value),
+              filters?.groupBy?.includes(opt.value),
             )}
             onChange={(selectedOptions, actionMeta) => {
              
@@ -1810,7 +1810,7 @@ function JobCustomReport() {
               onMenuOpen={() => { if (jobOptions.length === 0) GetAllJobs({ searchValue: "", pageNo: 1 }); }}
               options={jobOptions}
               value={jobOptions.filter((opt) =>
-                filters.job_id.includes(opt.value),
+                filters?.job_id?.includes(opt.value),
               )}
           
               onChange={(selectedOptions) => {
