@@ -99,7 +99,7 @@ console.log("customerUsers--",customerUsers)
       let created_by = customerUsers.created_by;
 
       // Call the service function to add customer user
-      const checkQuery = `SELECT id FROM staffs WHERE email = ?`;
+      const checkQuery = `SELECT id FROM staffs WHERE email = ? AND role_id = 12`;
       const [checkRows] = await pool.execute(checkQuery, [email]);
       if (checkRows.length > 0) {
         return res.status(400).json({ status: false, message: "Email already exists." });
@@ -473,7 +473,7 @@ console.log("customerUsers--",customerUsers)
 
 
       // check if email already exists for other user
-      const checkQuery = `SELECT id FROM staffs WHERE email = ? AND id != ?`;
+      const checkQuery = `SELECT id FROM staffs WHERE email = ? AND role_id = 12 AND id != ?`;
       const [checkRows] = await pool.execute(checkQuery, [email, customer_user_id]);
       if (checkRows.length > 0) {
         return res.status(400).json({ status: false, message: "Email already exists for another user." });
