@@ -1229,15 +1229,21 @@ trading_name ASC;`;
 
 }
 const getCustomer_dropdown_filter = async (customer) => {
-    const { StaffUserId, pagination } = customer;
+    const { StaffUserId, pagination, filters } = customer;
 
     const page = Number(pagination.page) || 1;
     const limit = Number(pagination.limit) || 20;
     const search = pagination.search || "";
 
     const offset = (page - 1) * limit;
+    const filterStaffId = filters?.staff_id;
+
     // Line Manager
-    const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
+    let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+    
+    if (filterStaffId) {
+        LineManageStaffId = [filterStaffId];
+    }
 
     // Get Role
     const rows = await QueryRoleHelperFunction(StaffUserId)
@@ -1246,30 +1252,32 @@ const getCustomer_dropdown_filter = async (customer) => {
 
     // Condition with Admin And SuperAdmin
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
-        const query = `
-    SELECT  
-    customers.id AS id,
-    customers.status AS status,
-    customers.form_process AS form_process,
-    customers.trading_name AS trading_name,
-    CONCAT(
-    'cust_', 
-    SUBSTRING(customers.trading_name, 1, 3), '_',
-    SUBSTRING(customers.customer_code, 1, 15)
-    ) AS customer_code
-FROM 
-    customers
-WHERE customers.trading_name LIKE '%${search}%'        
-ORDER BY 
-trading_name ASC
-LIMIT ? OFFSET ?;`;
+        if (!filterStaffId) {
+            const query = `
+        SELECT  
+        customers.id AS id,
+        customers.status AS status,
+        customers.form_process AS form_process,
+        customers.trading_name AS trading_name,
+        CONCAT(
+        'cust_', 
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(customers.customer_code, 1, 15)
+        ) AS customer_code
+    FROM 
+        customers
+    WHERE customers.trading_name LIKE '%${search}%'        
+    ORDER BY 
+    trading_name ASC
+    LIMIT ? OFFSET ?;`;
 
-        const [result] = await pool.execute(query, [limit, offset]);
+            const [result] = await pool.execute(query, [limit, offset]);
 
-        return { status: true, message: 'Success..', data: result };
+            return { status: true, message: 'Success..', data: result };
+        }
     }
 
-    // other Role Data
+    // other Role Data OR Admin/Superadmin with filterStaffId
     const connection = await pool.getConnection();
     try {
         await buildAssignedJobsTempTable(connection, LineManageStaffId);
@@ -1304,14 +1312,14 @@ LIMIT ? OFFSET ?;`;
             END AS is_client
             FROM 
                 customers
-            JOIN 
+            LEFT JOIN 
                 staffs AS staff2 ON customers.account_manager_id = staff2.id
             LEFT JOIN
                 temp_assigned_jobs_staff ON temp_assigned_jobs_staff.customer_id = customers.id
             LEFT JOIN
                 customer_company_information ON customers.id = customer_company_information.customer_id
             WHERE
-                 (customers.staff_id IN (${LineManageStaffId}) OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId}))
+                 (customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId}))
                AND customers.trading_name LIKE '%${search}%'
                GROUP BY customers.id
                ORDER BY customers.trading_name ASC
@@ -1349,10 +1357,7 @@ const get_customers_filter = async (customer) => {
 
 
 
-    // if (!['', null, undefined].includes(filters?.client_id)) {
     const rows = await QueryRoleHelperFunction(StaffUserId)
-    return await getCustomer_dropdown_filter({ StaffUserId, pagination });
-
 
     if (client_id?.length > 0 && job_id?.length === 0) {
         return await getAllCustomerByClientIdFilter(client_id);
@@ -1363,7 +1368,7 @@ const get_customers_filter = async (customer) => {
     else if (client_id?.length > 0 && job_id?.length > 0) {
         return await getAllCustomerByClientIdAndJobIdFilter(rows, client_id, job_id);
     } else {
-        return await getCustomer_dropdown_filter({ StaffUserId, pagination });
+        return await getCustomer_dropdown_filter({ StaffUserId, pagination, filters });
     }
 
 

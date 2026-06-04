@@ -1071,6 +1071,10 @@ async function getAllClientsSidebarFilter(
 
   const offset = (page - 1) * limit;
 
+  if (filters?.staff_id) {
+    LineManageStaffId = [filters.staff_id];
+  }
+
   let extraFilter = "";
   if (![undefined, null, ""].includes(filters?.customer_id)) {
     const custArr = Array.isArray(filters.customer_id) ? filters.customer_id : [filters.customer_id];
@@ -1093,59 +1097,60 @@ async function getAllClientsSidebarFilter(
 
     // ================= ADMIN / SUPERADMIN =================
     if (rows.length > 0 && (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)) {
-
-      const clientCodeExpr = `
-        CONCAT(
-          'cli_', 
-          SUBSTRING(customers.trading_name, 1, 3), '_',
-          SUBSTRING(clients.trading_name, 1, 3), '_',
-          SUBSTRING(clients.client_code, 1, 15)
-        )
-      `;
-
-      const searchCondition = search.length > 0 ? `AND (
-        clients.trading_name LIKE '%${search}%'
-        OR customers.trading_name LIKE '%${search}%'
-        OR client_types.type LIKE '%${search}%'
-        OR CONCAT(staffs.first_name, ' ', staffs.last_name) LIKE '%${search}%'
-        OR ${clientCodeExpr} LIKE '%${search}%'
-      )` : "";
-
-      const [data] = await pool.execute(
-        `
-        SELECT  
-          clients.id AS id,
-          clients.trading_name AS client_name,
-          customers.trading_name AS customer_name,
-          clients.status AS status,
-          client_types.type AS client_type_name,
-          jobs.id AS Delete_Status,
-          CONCAT(staffs.first_name,' ',staffs.last_name) AS client_created_by,
-          DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at,
-          DATE_FORMAT(clients.updated_at, '%d/%m/%Y') AS updated_at,
+      if (!filters?.staff_id) {
+        const clientCodeExpr = `
           CONCAT(
             'cli_', 
             SUBSTRING(customers.trading_name, 1, 3), '_',
             SUBSTRING(clients.trading_name, 1, 3), '_',
             SUBSTRING(clients.client_code, 1, 15)
-          ) AS client_code
-        FROM clients
-        JOIN staffs ON clients.staff_created_id = staffs.id
-        JOIN customers ON customers.id = clients.customer_id    
-        JOIN client_types ON client_types.id = clients.client_type
-        LEFT JOIN jobs ON clients.id = jobs.client_id
-        WHERE 1=1 
-        ${searchCondition}
-        ${extraFilter}
-        GROUP BY clients.id
-        ORDER BY clients.trading_name ASC
-        LIMIT ? OFFSET ?` , [limit, offset]);
+          )
+        `;
 
-      return {
-        status: true,
-        message: "success",
-        data,
-      };
+        const searchCondition = search.length > 0 ? `AND (
+          clients.trading_name LIKE '%${search}%'
+          OR customers.trading_name LIKE '%${search}%'
+          OR client_types.type LIKE '%${search}%'
+          OR CONCAT(staffs.first_name, ' ', staffs.last_name) LIKE '%${search}%'
+          OR ${clientCodeExpr} LIKE '%${search}%'
+        )` : "";
+
+        const [data] = await pool.execute(
+          `
+          SELECT  
+            clients.id AS id,
+            clients.trading_name AS client_name,
+            customers.trading_name AS customer_name,
+            clients.status AS status,
+            client_types.type AS client_type_name,
+            jobs.id AS Delete_Status,
+            CONCAT(staffs.first_name,' ',staffs.last_name) AS client_created_by,
+            DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at,
+            DATE_FORMAT(clients.updated_at, '%d/%m/%Y') AS updated_at,
+            CONCAT(
+              'cli_', 
+              SUBSTRING(customers.trading_name, 1, 3), '_',
+              SUBSTRING(clients.trading_name, 1, 3), '_',
+              SUBSTRING(clients.client_code, 1, 15)
+            ) AS client_code
+          FROM clients
+          JOIN staffs ON clients.staff_created_id = staffs.id
+          JOIN customers ON customers.id = clients.customer_id    
+          JOIN client_types ON client_types.id = clients.client_type
+          LEFT JOIN jobs ON clients.id = jobs.client_id
+          WHERE 1=1 
+          ${searchCondition}
+          ${extraFilter}
+          GROUP BY clients.id
+          ORDER BY clients.trading_name ASC
+          LIMIT ? OFFSET ?` , [limit, offset]);
+
+        return {
+          status: true,
+          message: "success",
+          data,
+        };
+      }
     }
   } catch (err) {
     console.error("❌ Sidebar Client Error:", err);

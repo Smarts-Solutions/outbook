@@ -872,6 +872,41 @@ function TimesheetReport() {
       setFilters((prev) => {
         let updated = { ...prev, [key]: [null, undefined, ""].includes(value) ? null : value };
         if (key === "staff_id") {
+          if (prev.staff_id !== updated.staff_id) {
+            updated.customer_id = null;
+            updated.client_id = null;
+            updated.job_id = null;
+            updated.task_id = null;
+            updated.internal_job_id = null;
+            updated.internal_task_id = null;
+
+            setCustomerAllData([]);
+            customerCache.current = {};
+            debounceRef.current = null;
+            setCustomerPage(1);
+            setCustomerHasMore(true);
+            setCustomerSearch("");
+
+            setClientAllData([]);
+            clientCache.current = {};
+            clientDebounceRef.current = null;
+            setClientPage(1);
+            setClientHasMore(true);
+            setClientSearch("");
+
+            setJobAllData([]);
+            setJobOptions([]);
+            cacheRef.current = {};
+            debounceTimeout.current = null;
+            setPage(1);
+            setHasMore(true);
+            setSearch("");
+
+            setInternalJobAllData([]);
+            setTaskAllData([]);
+            setInternalTaskAllData([]);
+          }
+
           if (updated.staff_id && updated.employee_number) {
             const matchedEmployee = employeeNumberAllData.find(e => Number(e.staff_id) === Number(updated.staff_id));
             if (!matchedEmployee || matchedEmployee.value !== updated.employee_number) {

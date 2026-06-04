@@ -2183,6 +2183,10 @@ async function getAllJobsSidebarFilter(
   const search = pagination.search || "";
   const offset = (page - 1) * limit;
 
+  if (filters?.staff_id) {
+    LineManageStaffId = [filters.staff_id];
+  }
+
   let extraFilter = "";
   if (![undefined, null, ""].includes(filters?.customer_id)) {
     const custArr = Array.isArray(filters.customer_id) ? filters.customer_id : [filters.customer_id];
@@ -2236,10 +2240,10 @@ async function getAllJobsSidebarFilter(
       rows.length > 0 &&
       (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)
     ) {
-
-      // 🔹 DATA
-      const query = `
-         SELECT 
+      if (!filters?.staff_id) {
+        // 🔹 DATA
+        const query = `
+           SELECT 
         customers.trading_name AS customers_trading_name,
         clients.trading_name AS client_trading_name,
         job_types.type AS job_type_name,
@@ -2311,6 +2315,7 @@ async function getAllJobsSidebarFilter(
         data: result,
         hasMore: rows.length === limit
       };
+      }
     }
 
 
