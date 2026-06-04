@@ -913,6 +913,48 @@ function TimesheetReport() {
               updated.employee_number = null;
             }
           }
+        } else if (key === "employee_number") {
+          if (prev.employee_number !== updated.employee_number) {
+            updated.customer_id = null;
+            updated.client_id = null;
+            updated.job_id = null;
+            updated.task_id = null;
+            updated.internal_job_id = null;
+            updated.internal_task_id = null;
+
+            setCustomerAllData([]);
+            customerCache.current = {};
+            debounceRef.current = null;
+            setCustomerPage(1);
+            setCustomerHasMore(true);
+            setCustomerSearch("");
+
+            setClientAllData([]);
+            clientCache.current = {};
+            clientDebounceRef.current = null;
+            setClientPage(1);
+            setClientHasMore(true);
+            setClientSearch("");
+
+            setJobAllData([]);
+            setJobOptions([]);
+            cacheRef.current = {};
+            debounceTimeout.current = null;
+            setPage(1);
+            setHasMore(true);
+            setSearch("");
+
+            setInternalJobAllData([]);
+            setTaskAllData([]);
+            setInternalTaskAllData([]);
+          }
+
+          if (updated.employee_number) {
+            const matchedEmployee = employeeNumberAllData.find(e => e.value === updated.employee_number);
+            if (matchedEmployee) {
+              updated.staff_id = matchedEmployee.staff_id;
+            }
+          }
         } else if (key === "customer_id") {
           updated.client_id = null;
           updated.job_id = null;
