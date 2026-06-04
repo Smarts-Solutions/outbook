@@ -1308,35 +1308,38 @@ const CustomerUsers = () => {
           setSelectedUserForDeletion(null);
         }}
       >
-        <div className="p-2">
-          <div className="transfer-card">
+        <div className="px-2 py-1">
+          {/* User For Deletion Card */}
+          <div className="d-flex align-items-center justify-content-between p-3 mb-3 border rounded-3 bg-light">
             <div className="d-flex align-items-center">
-              <div className="transfer-icon-wrapper">
-                <Trash2 size={26} className="text-danger" strokeWidth={2.5} />
+              <div className="me-3 p-2 rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', background: '#fff0f0' }}>
+                <Trash2 size={20} className="text-danger" />
               </div>
               <div>
-                <h5 className="mb-1 fw-bold text-dark" style={{ color: '#1e293b' }}>User For Deletion</h5>
-                <p className="text-muted mb-0" style={{ fontSize: '0.9rem' }}>{selectedUserForDeletion?.first_name} {selectedUserForDeletion?.last_name}</p>
+                <div className="text-muted small fw-semibold">User For Deletion</div>
+                <div className="fw-bold text-dark" style={{ fontSize: '1rem' }}>
+                  {selectedUserForDeletion?.first_name} {selectedUserForDeletion?.last_name}
+                </div>
               </div>
             </div>
-          </div>
-
-          <div className="user-info-box mb-4">
-            <div className="d-flex align-items-center flex-wrap">
-              <span className="assignment-badge badge-customers">
-                <User size={14} className="me-2" /> {selectedUserForDeletion?.customerCount || 0} Customers
+            
+            {/* Assignments badges */}
+            <div className="d-flex gap-2">
+              <span className="badge bg-info text-white px-2 py-1.5 rounded-pill d-flex align-items-center" style={{ fontSize: '0.75rem', fontWeight: '600' }}>
+                {selectedUserForDeletion?.customerCount || 0} Customers
               </span>
-              <span className="assignment-badge badge-clients">
-                <User size={14} className="me-2" /> {selectedUserForDeletion?.clientCount || 0} Clients
+              <span className="badge bg-success text-white px-2 py-1.5 rounded-pill d-flex align-items-center" style={{ fontSize: '0.75rem', fontWeight: '600' }}>
+                {selectedUserForDeletion?.clientCount || 0} Clients
               </span>
-              <span className="assignment-badge badge-jobs">
-                <Clock size={14} className="me-2" /> {selectedUserForDeletion?.jobCount || 0} Jobs
+              <span className="badge bg-primary text-white px-2 py-1.5 rounded-pill d-flex align-items-center" style={{ fontSize: '0.75rem', fontWeight: '600' }}>
+                {selectedUserForDeletion?.jobCount || 0} Jobs
               </span>
             </div>
           </div>
 
+          {/* Transfer dropdown selection */}
           <div className="mb-4">
-            <label className="form-label d-flex align-items-center mb-2 fw-semibold text-dark">
+            <label className="form-label fw-semibold text-dark mb-1.5 d-flex align-items-center" style={{ fontSize: '0.9rem' }}>
               <ArrowRightLeft size={16} className="me-2 text-primary" />
               Transfer all assignments to:
             </label>
@@ -1345,20 +1348,32 @@ const CustomerUsers = () => {
               value={allOtherUsers.find(opt => opt.value === transferUserId)}
               onChange={(selected) => setTransferUserId(selected?.value)}
               placeholder="Select replacement customer user..."
-              className="premium-select"
               isSearchable
+              styles={{
+                control: (provided) => ({
+                  ...provided,
+                  borderRadius: '6px',
+                  borderColor: '#dee2e6',
+                  boxShadow: 'none',
+                  '&:hover': {
+                    borderColor: '#b1b5b9'
+                  }
+                })
+              }}
             />
           </div>
 
-          <div className="d-flex justify-content-center gap-3 mt-4 pt-2 flex-wrap">
+          {/* Footer Buttons aligned nicely */}
+          <div className="d-flex justify-content-center gap-2 mt-4 pt-2">
             <button
-              className="btn btn-custom-cyan"
+              className="btn btn-custom-cyan px-3"
+              style={{ fontSize: '0.85rem', whiteSpace: 'nowrap' }}
               onClick={handleTransferAndDelete}
               disabled={isTransferring || !transferUserId}
             >
               {isTransferring ? (
                 <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
                   Processing...
                 </>
               ) : (
@@ -1366,7 +1381,8 @@ const CustomerUsers = () => {
               )}
             </button>
             <button
-              className="btn btn-custom-cyan"
+              className="btn btn-custom-cyan px-3"
+              style={{ fontSize: '0.85rem', whiteSpace: 'nowrap' }}
               onClick={() => {
                 Swal.fire({
                   title: "Delete Without Transfer?",
@@ -1388,8 +1404,10 @@ const CustomerUsers = () => {
               Delete Without Transfer
             </button>
             <button
-              className="btn btn-custom-red"
+              className="btn btn-custom-red px-3"
+              style={{ fontSize: '0.85rem', whiteSpace: 'nowrap' }}
               onClick={() => setShowTransferModal(false)}
+              disabled={isTransferring}
             >
               Cancel
             </button>

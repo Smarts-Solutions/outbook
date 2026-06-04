@@ -440,7 +440,7 @@ const CustomerLogin = () => {
                                 Sign In <ArrowRight size={16} className="ms-1" />
                               </button>
                             </div>
-                            <div className="col-12 mt-3">
+                            {/* <div className="col-12 mt-3">
                               <button
                                 className="w-100 btn btn-outline-info fw-normal"
                                 type="button"
@@ -448,7 +448,7 @@ const CustomerLogin = () => {
                               >
                                 Login as Staff <LogIn size={18} className="ms-1 mt-1" />
                               </button>
-                            </div>
+                            </div> */}
                           </div>
                         </div>
 
