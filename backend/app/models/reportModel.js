@@ -3785,7 +3785,7 @@ const getJobCustomReport = async (Report) => {
 
   // console.log("data.filters: ", data.filters);
 
-  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
 
   let { page = 1, limit = 10, search = "" } = data;
 
@@ -4112,6 +4112,12 @@ const getJobCustomReport = async (Report) => {
   }
 
   try {
+
+    LineManageStaffId = [
+        ...new Set(LineManageStaffId),
+      ];
+    const connection = await pool.getConnection();
+    await buildAssignedJobsTempTable(connection, LineManageStaffId);
     // console.log("fromDate ---- ", fromDate);
     // console.log("toDate ---- ", toDate);
     // compute date range
@@ -4129,6 +4135,8 @@ const getJobCustomReport = async (Report) => {
     var { fromDate, toDate } = range;
 
     let where = [`work_date BETWEEN ? AND ?`];
+
+    
 
     //let job_id = [1, 6]
 
@@ -4396,10 +4404,10 @@ const getJobCustomReport = async (Report) => {
       !["SUPERADMIN", "ADMIN"].includes(role_user) &&
       !["", null, undefined].includes(StaffUserId)
     ) {
-      //where.push(`assigned_jobs_staff_view.staff_id = ${StaffUserId}`);
+      //where.push(`temp_assigned_jobs_staff.staff_id = ${StaffUserId}`);
       where.push(`
                 (
-                    assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+                    temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
                     OR raw.staff_created_id IN (${LineManageStaffId})
                     OR cl.staff_created_id IN (${LineManageStaffId})
                 )
@@ -4407,8 +4415,8 @@ const getJobCustomReport = async (Report) => {
     }
 
     where.push(`(
-            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
-            OR raw.service_id = assigned_jobs_staff_view.service_id_assign
+            temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR raw.service_id = temp_assigned_jobs_staff.service_id_assign
           )`);
 
     where = where.length ? `WHERE ${where.join(" AND ")}` : "";
@@ -4567,7 +4575,7 @@ const getJobCustomReport = async (Report) => {
             LEFT JOIN roles AS staffrole ON jobcreatestaff.role_id = staffrole.id
             LEFT JOIN line_managers AS lm ON lm.staff_by = jobcreatestaff.id
             LEFT JOIN staffs AS managerstaff ON lm.staff_to = managerstaff.id
-            LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = raw.job_id
+            LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = raw.job_id
             ${where}
             ${GROUPBY} ) AS count_table
         `;
@@ -4576,7 +4584,7 @@ const getJobCustomReport = async (Report) => {
     // console.log("toDate", toDate);
     //console.log("Total Count Query ---- ", unpivotSQLCount);
     // Get Total Count
-    const [countResult] = await pool.execute(unpivotSQLCount, [
+    const [countResult] = await connection.execute(unpivotSQLCount, [
       fromDate,
       toDate,
     ]);
@@ -4735,7 +4743,7 @@ const getJobCustomReport = async (Report) => {
             LEFT JOIN roles AS staffrole ON jobcreatestaff.role_id = staffrole.id
             LEFT JOIN line_managers AS lm ON lm.staff_by = jobcreatestaff.id
             LEFT JOIN staffs AS managerstaff ON lm.staff_to = managerstaff.id
-            LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = raw.job_id
+            LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = raw.job_id
             ${where}
             ${GROUPBY}
             ORDER BY raw.job_id
@@ -4747,7 +4755,7 @@ const getJobCustomReport = async (Report) => {
 
     //  console.log("GROUPBY ---->> ", GROUPBY);
 
-    const conn = await pool.getConnection();
+    const conn = await connection.getConnection();
     const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate]);
     conn.release();
 
