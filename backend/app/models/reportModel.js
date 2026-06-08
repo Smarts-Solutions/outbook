@@ -4,13 +4,14 @@ const {
   SatffLogUpdateOperation,
   LineManageStaffIdHelperFunction,
   QueryRoleHelperFunction,
+  buildAssignedJobsTempTable
 } = require("../utils/helper");
 
 const jobStatusReports = async (Report) => {
   const { StaffUserId, page = 1, limit = 10, search = "" } = Report;
   const offset = (page - 1) * limit;
 
-  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
 
   const rows = await QueryRoleHelperFunction(StaffUserId);
 
@@ -52,6 +53,15 @@ const jobStatusReports = async (Report) => {
     const isSuperAdmin =
       rows.length > 0 &&
       (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0);
+
+    ////////////////////////////////
+     LineManageStaffId = [
+        ...new Set(LineManageStaffId),
+      ];
+    const connection = await pool.getConnection();
+    await buildAssignedJobsTempTable(connection, LineManageStaffId);
+
+
 
     const baseSelect = `
       SELECT 
@@ -131,7 +141,7 @@ const jobStatusReports = async (Report) => {
             JOIN staffs s ON s.id = jas.staff_id
             GROUP BY jas.job_id
         ) staff_list ON staff_list.job_id = jobs.id
-      LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+      LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = jobs.id
       LEFT JOIN clients ON jobs.client_id = clients.id
       LEFT JOIN customers ON jobs.customer_id = customers.id
       LEFT JOIN job_types ON jobs.job_type_id = job_types.id
@@ -154,7 +164,7 @@ const jobStatusReports = async (Report) => {
         LIMIT ? OFFSET ?
       `;
 
-      let [rowsData] = await pool.execute(dataQuery, [
+      let [rowsData] = await connection.execute(dataQuery, [
         ...searchValues,
         Number(limit),
         Number(offset),
@@ -174,7 +184,7 @@ const jobStatusReports = async (Report) => {
         ${searchQuery}
       `;
 
-      const [[{ total }]] = await pool.execute(countQuery, searchValues);
+      const [[{ total }]] = await connection.execute(countQuery, searchValues);
 
       if (rowsData && rowsData.length > 0) {
         rowsData = await Promise.all(
@@ -193,7 +203,7 @@ const jobStatusReports = async (Report) => {
       AND s.id != ?
     `;
 
-            const [rowsAccountManager] = await pool.execute(
+            const [rowsAccountManager] = await connection.execute(
               Get_account_manger_id,
               [
                 element.customer_id,
@@ -221,12 +231,12 @@ const jobStatusReports = async (Report) => {
       ${baseSelect}
       WHERE(
         (   
-         assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+         temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
          OR jobs.staff_created_id IN(${LineManageStaffId})
          OR clients.staff_created_id IN(${LineManageStaffId}))
          AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
-            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+            temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
           )
        )
       AND customers.status = '1'    
@@ -236,7 +246,7 @@ const jobStatusReports = async (Report) => {
       LIMIT ? OFFSET ?
     `;
 
-        let [rowsData] = await pool.execute(dataQuery, [
+        let [rowsData] = await connection.execute(dataQuery, [
             ...searchValues,
             Number(limit),
             Number(offset),
@@ -245,7 +255,7 @@ const jobStatusReports = async (Report) => {
     const countQuery = `
       SELECT COUNT(DISTINCT jobs.id) AS total
       FROM jobs
-      LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+      LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = jobs.id
       LEFT JOIN customers ON jobs.customer_id = customers.id
       LEFT JOIN clients ON jobs.client_id = clients.id
       LEFT JOIN job_types ON jobs.job_type_id = job_types.id
@@ -253,19 +263,19 @@ const jobStatusReports = async (Report) => {
       LEFT JOIN staffs ON jobs.allocated_to = staffs.id
       WHERE(
         (   
-         assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+         temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
          OR jobs.staff_created_id IN(${LineManageStaffId})
          OR clients.staff_created_id IN(${LineManageStaffId}))
          AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
-            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+            temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
           )
        )
       AND customers.status = '1' 
       ${searchQuery}
     `;
 
-    const [[{ total }]] = await pool.execute(countQuery, searchValues);
+    const [[{ total }]] = await connection.execute(countQuery, searchValues);
 
         if (rowsData && rowsData.length > 0) {
 
@@ -287,7 +297,7 @@ const jobStatusReports = async (Report) => {
       AND s.id != ?
     `;
 
-                    const [rowsAccountManager] = await pool.execute(
+                    const [rowsAccountManager] = await connection.execute(
                         Get_account_manger_id,
                         [element.customer_id, element.service_id, element.account_manager_id]
                     );
