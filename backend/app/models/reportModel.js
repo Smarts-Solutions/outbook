@@ -55,9 +55,9 @@ const jobStatusReports = async (Report) => {
       (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0);
 
     ////////////////////////////////
-     LineManageStaffId = [
-        ...new Set(LineManageStaffId),
-      ];
+    LineManageStaffId = [
+      ...new Set(LineManageStaffId),
+    ];
     const connection = await pool.getConnection();
     await buildAssignedJobsTempTable(connection, LineManageStaffId);
 
@@ -246,11 +246,11 @@ const jobStatusReports = async (Report) => {
       LIMIT ? OFFSET ?
     `;
 
-        let [rowsData] = await connection.execute(dataQuery, [
-            ...searchValues,
-            Number(limit),
-            Number(offset),
-        ]);
+    let [rowsData] = await connection.execute(dataQuery, [
+      ...searchValues,
+      Number(limit),
+      Number(offset),
+    ]);
 
     const countQuery = `
       SELECT COUNT(DISTINCT jobs.id) AS total
@@ -277,13 +277,13 @@ const jobStatusReports = async (Report) => {
 
     const [[{ total }]] = await connection.execute(countQuery, searchValues);
 
-        if (rowsData && rowsData.length > 0) {
+    if (rowsData && rowsData.length > 0) {
 
-            rowsData = await Promise.all(
-                rowsData.map(async (element, index) => {
+      rowsData = await Promise.all(
+        rowsData.map(async (element, index) => {
 
 
-                    const Get_account_manger_id = `
+          const Get_account_manger_id = `
       SELECT s.id,
              CONCAT(s.first_name, ' ', s.last_name) AS full_name,
              s.employee_number
@@ -297,33 +297,33 @@ const jobStatusReports = async (Report) => {
       AND s.id != ?
     `;
 
-                    const [rowsAccountManager] = await connection.execute(
-                        Get_account_manger_id,
-                        [element.customer_id, element.service_id, element.account_manager_id]
-                    );
+          const [rowsAccountManager] = await connection.execute(
+            Get_account_manger_id,
+            [element.customer_id, element.service_id, element.account_manager_id]
+          );
 
-                    return {
-                        ...element,
-                        account_managers: rowsAccountManager
-                    };
+          return {
+            ...element,
+            account_managers: rowsAccountManager
+          };
 
-                })
-            );
+        })
+      );
 
-        }
-
-
-        return {
-            status: true,
-            message: "Success.",
-            data: { rows: rowsData, total },
-        };
-
-
-    } catch (error) {
-        console.log("error ", error);
-        return { status: false, message: "Error getting job status report." };
     }
+
+
+    return {
+      status: true,
+      message: "Success.",
+      data: { rows: rowsData, total },
+    };
+
+
+  } catch (error) {
+    console.log("error ", error);
+    return { status: false, message: "Error getting job status report." };
+  }
 };
 
 const getCustomWeekNumber = (day) => {
@@ -993,7 +993,7 @@ const reportCountJob = async (Report) => {
       rows.length > 0 &&
       (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0);
 
-      const baseSelect = `
+    const baseSelect = `
         SELECT 
         jobs.id AS job_id,
         jobs.service_id AS job_service_id,
@@ -1483,16 +1483,16 @@ const taxWeeklyStatusReport = async (Report) => {
         grouped[key].weeks[0][`WE_${weekNum}_${currentYear}`];
       const existingIds = existingWeek.job_ids
         ? existingWeek.job_ids
-            .split(",")
-            .map((id) => id.trim())
-            .filter((id) => id)
+          .split(",")
+          .map((id) => id.trim())
+          .filter((id) => id)
         : [];
 
       const newIds = row.job_ids
         ? row.job_ids
-            .split(",")
-            .map((id) => id.trim())
-            .filter((id) => id)
+          .split(",")
+          .map((id) => id.trim())
+          .filter((id) => id)
         : [];
 
       // Combine and keep unique job IDs
@@ -1507,9 +1507,9 @@ const taxWeeklyStatusReport = async (Report) => {
       // --- Update Grand Total (unique across all weeks) ---
       const existingTotalIds = grouped[key].Grand_Total.job_ids
         ? grouped[key].Grand_Total.job_ids
-            .split(",")
-            .map((id) => id.trim())
-            .filter((id) => id)
+          .split(",")
+          .map((id) => id.trim())
+          .filter((id) => id)
         : [];
 
       const totalUniqueIds = [...new Set([...existingTotalIds, ...newIds])];
@@ -2943,8 +2943,8 @@ const missingTimesheetReport = async (Report) => {
         
     `;
 
-    // GROUP BY st.id, st.first_name, st.last_name, st.email, ts.submit_status, week_date
-    //     ORDER BY st.first_name ASC;
+  // GROUP BY st.id, st.first_name, st.last_name, st.email, ts.submit_status, week_date
+  //     ORDER BY st.first_name ASC;
 
   const [result] = await pool.execute(query_last_week_filter);
 
@@ -3785,7 +3785,7 @@ const getJobCustomReport = async (Report) => {
 
   // console.log("data.filters: ", data.filters);
 
-  let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
 
   let { page = 1, limit = 10, search = "" } = data;
 
@@ -4112,12 +4112,6 @@ const getJobCustomReport = async (Report) => {
   }
 
   try {
-
-    LineManageStaffId = [
-        ...new Set(LineManageStaffId),
-      ];
-    const connection = await pool.getConnection();
-    await buildAssignedJobsTempTable(connection, LineManageStaffId);
     // console.log("fromDate ---- ", fromDate);
     // console.log("toDate ---- ", toDate);
     // compute date range
@@ -4135,8 +4129,6 @@ const getJobCustomReport = async (Report) => {
     var { fromDate, toDate } = range;
 
     let where = [`work_date BETWEEN ? AND ?`];
-
-    
 
     //let job_id = [1, 6]
 
@@ -4404,10 +4396,10 @@ const getJobCustomReport = async (Report) => {
       !["SUPERADMIN", "ADMIN"].includes(role_user) &&
       !["", null, undefined].includes(StaffUserId)
     ) {
-      //where.push(`temp_assigned_jobs_staff.staff_id = ${StaffUserId}`);
+      //where.push(`assigned_jobs_staff_view.staff_id = ${StaffUserId}`);
       where.push(`
                 (
-                    temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
+                    assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
                     OR raw.staff_created_id IN (${LineManageStaffId})
                     OR cl.staff_created_id IN (${LineManageStaffId})
                 )
@@ -4415,8 +4407,8 @@ const getJobCustomReport = async (Report) => {
     }
 
     where.push(`(
-            temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
-            OR raw.service_id = temp_assigned_jobs_staff.service_id_assign
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR raw.service_id = assigned_jobs_staff_view.service_id_assign
           )`);
 
     where = where.length ? `WHERE ${where.join(" AND ")}` : "";
@@ -4575,7 +4567,7 @@ const getJobCustomReport = async (Report) => {
             LEFT JOIN roles AS staffrole ON jobcreatestaff.role_id = staffrole.id
             LEFT JOIN line_managers AS lm ON lm.staff_by = jobcreatestaff.id
             LEFT JOIN staffs AS managerstaff ON lm.staff_to = managerstaff.id
-            LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = raw.job_id
+            LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = raw.job_id
             ${where}
             ${GROUPBY} ) AS count_table
         `;
@@ -4584,7 +4576,7 @@ const getJobCustomReport = async (Report) => {
     // console.log("toDate", toDate);
     //console.log("Total Count Query ---- ", unpivotSQLCount);
     // Get Total Count
-    const [countResult] = await connection.execute(unpivotSQLCount, [
+    const [countResult] = await pool.execute(unpivotSQLCount, [
       fromDate,
       toDate,
     ]);
@@ -4743,7 +4735,7 @@ const getJobCustomReport = async (Report) => {
             LEFT JOIN roles AS staffrole ON jobcreatestaff.role_id = staffrole.id
             LEFT JOIN line_managers AS lm ON lm.staff_by = jobcreatestaff.id
             LEFT JOIN staffs AS managerstaff ON lm.staff_to = managerstaff.id
-            LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = raw.job_id
+            LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = raw.job_id
             ${where}
             ${GROUPBY}
             ORDER BY raw.job_id
@@ -4755,7 +4747,7 @@ const getJobCustomReport = async (Report) => {
 
     //  console.log("GROUPBY ---->> ", GROUPBY);
 
-    const conn = await connection.getConnection();
+    const conn = await pool.getConnection();
     const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate]);
     conn.release();
 
