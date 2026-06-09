@@ -233,7 +233,7 @@ const jobStatusReports = async (Report) => {
         (   
          temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
          OR jobs.staff_created_id IN(${LineManageStaffId})
-         OR clients.staff_created_id IN(${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}))
+         OR clients.staff_created_id IN(${LineManageStaffId}))
          AND (
             temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
@@ -265,7 +265,7 @@ const jobStatusReports = async (Report) => {
         (   
          temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
          OR jobs.staff_created_id IN(${LineManageStaffId})
-         OR clients.staff_created_id IN(${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}))
+         OR clients.staff_created_id IN(${LineManageStaffId}))
          AND (
             temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
@@ -396,7 +396,7 @@ const jobReceivedSentReports = async (Report) => {
         LEFT JOIN 
             drafts ON drafts.job_id = jobs.id    
         WHERE
-            (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}))
+            (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}))
             AND YEAR(jobs.created_at) = YEAR(CURDATE())
         GROUP BY 
             month_name, DAY(jobs.created_at)
@@ -547,7 +547,7 @@ const jobSummaryReports = async (Report) => {
     //  JOIN
     //     master_status ON master_status.id = jobs.status_type
     // WHERE
-    //     assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})
+    //     assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})
     // GROUP BY
     //     master_status.name, jobs.status_type
     //  `;
@@ -588,7 +588,7 @@ const jobSummaryReports = async (Report) => {
          JOIN
             master_status ON master_status.id = jobs.status_type
         WHERE 
-            assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})
+            assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})
         GROUP BY jobs.id;
          `;
 
@@ -689,7 +689,7 @@ const jobPendingReports = async (Report) => {
     //     JOIN
     //         job_types ON jobs.job_type_id = job_types.id
     //     WHERE
-    // (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}))
+    // (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}))
     // AND jobs.status_type != 6
     //     GROUP BY
     //         master_status.name, jobs.status_type
@@ -714,7 +714,7 @@ const jobPendingReports = async (Report) => {
          JOIN
             master_status ON master_status.id = jobs.status_type
         WHERE 
-        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) 
+        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) 
         AND jobs.status_type != 6
         GROUP BY jobs.id;
          `;
@@ -809,7 +809,7 @@ const teamMonthlyReports = async (Report) => {
         LEFT JOIN 
         clients ON jobs.client_id = clients.id    
         WHERE
-        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) AND
+        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND
         MONTH(jobs.created_at) = MONTH(CURRENT_DATE)
         GROUP BY 
             staffs.id
@@ -1145,10 +1145,10 @@ const reportCountJob = async (Report) => {
         (   
          assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
          OR jobs.staff_created_id IN(${LineManageStaffId})
-         OR clients.staff_created_id IN(${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})
+         OR clients.staff_created_id IN(${LineManageStaffId})
         )
         AND (
-            (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
         )
        )
@@ -1179,10 +1179,10 @@ const reportCountJob = async (Report) => {
         (   
          assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
          OR jobs.staff_created_id IN(${LineManageStaffId})
-         OR clients.staff_created_id IN(${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})
+         OR clients.staff_created_id IN(${LineManageStaffId})
         )
         AND (
-            (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
         )
        )
@@ -1697,7 +1697,7 @@ const averageTatReport = async (Report) => {
     ) {
       where.push(`jobs.status_type = 6`);
     } else {
-      where.push(`(assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) AND
+      where.push(`(assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND
             jobs.status_type = 6`);
     }
     where = `WHERE ${where.join(" AND ")}`;
@@ -1807,7 +1807,7 @@ async function getAllJobsSidebar(StaffUserId, LineManageStaffId, rows) {
         LEFT JOIN 
         clients ON jobs.client_id = clients.id
         WHERE
-         assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})
+         assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})
         GROUP BY jobs.id 
         ORDER BY 
         jobs.id DESC;
@@ -4401,13 +4401,13 @@ const getJobCustomReport = async (Report) => {
                 (
                     assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
                     OR raw.staff_created_id IN (${LineManageStaffId})
-                    OR cl.staff_created_id IN (${LineManageStaffId}) OR c.staff_id IN (${LineManageStaffId}) OR c.account_manager_id IN (${LineManageStaffId})
+                    OR cl.staff_created_id IN (${LineManageStaffId})
                 )
                 `);
     }
 
     where.push(`(
-            (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR raw.service_id = assigned_jobs_staff_view.service_id_assign
           )`);
 
