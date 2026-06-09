@@ -1178,16 +1178,18 @@ const getJobByCustomer = async (job) => {
         WHERE (
           assigned_jobs_staff_view.staff_id IN (${placeholders})
           OR jobs.staff_created_id IN (${placeholders})
-          OR clients.staff_created_id IN (${placeholders})
+          OR clients.staff_created_id IN (${placeholders}) OR customers.staff_id IN (${placeholders}) OR customers.account_manager_id IN (${placeholders})
         )
           AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           ) 
         AND jobs.customer_id = ?
         ${searchCondition}
         `,
         [
+          ...LineManageStaffId,
+          ...LineManageStaffId,
           ...LineManageStaffId,
           ...LineManageStaffId,
           ...LineManageStaffId,
@@ -1261,10 +1263,10 @@ const getJobByCustomer = async (job) => {
         WHERE (
           assigned_jobs_staff_view.staff_id IN (${placeholders})
           OR jobs.staff_created_id IN (${placeholders})
-          OR clients.staff_created_id IN (${placeholders})
+          OR clients.staff_created_id IN (${placeholders}) OR customers.staff_id IN (${placeholders}) OR customers.account_manager_id IN (${placeholders})
         )
         AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           )  
         AND jobs.customer_id = ?
@@ -1274,6 +1276,8 @@ const getJobByCustomer = async (job) => {
         LIMIT ? OFFSET ?;
       `;
       [result] = await pool.execute(query, [
+        ...LineManageStaffId,
+        ...LineManageStaffId,
         ...LineManageStaffId,
         ...LineManageStaffId,
         ...LineManageStaffId,
@@ -1496,10 +1500,10 @@ async function getAllJobsSidebar(
     //     (
     //       assigned_jobs_staff_view.staff_id IN (${placeholders})
     //       OR jobs.staff_created_id IN (${placeholders})
-    //       OR clients.staff_created_id IN (${placeholders})
+    //       OR clients.staff_created_id IN (${placeholders}) OR customers.staff_id IN (${placeholders}) OR customers.account_manager_id IN (${placeholders})
     //     )
     //     AND (
-    //       assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+    //       (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
     //       OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
     //     )
     //   )
@@ -1687,7 +1691,7 @@ async function getAllJobsSidebar(
       (
         temp_assigned_jobs_staff.staff_id IN (${placeholders})
         OR jobs.staff_created_id IN (${placeholders})
-        OR clients.staff_created_id IN (${placeholders})
+        OR clients.staff_created_id IN (${placeholders}) OR customers.staff_id IN (${placeholders}) OR customers.account_manager_id IN (${placeholders})
       )
       AND (
         temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
@@ -1703,6 +1707,8 @@ async function getAllJobsSidebar(
       // COMMON PARAMS
       // =========================================
       const commonParams = [
+        ...allStaffIds,
+        ...allStaffIds,
         ...allStaffIds,
         ...allStaffIds,
         ...allStaffIds,
@@ -2024,9 +2030,9 @@ const getJobByClient = async (job) => {
          LEFT JOIN
          timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE
-        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND jobs.client_id = ${client_id}
+        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) AND jobs.client_id = ${client_id}
         AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           ) 
         GROUP BY 
@@ -2140,10 +2146,10 @@ const getAllJobsBYCustomerfilter = async (job) => {
         WHERE (
           assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
           OR jobs.staff_created_id IN (${LineManageStaffId})
-          OR clients.staff_created_id IN (${LineManageStaffId})
+          OR clients.staff_created_id IN (${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})
         )
         AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           )  
         AND jobs.customer_id IN (${customer_id})
@@ -2396,7 +2402,7 @@ async function getAllJobsSidebarFilter(
         WHERE (
           (temp_assigned_jobs_staff.staff_id IN (${placeholders})
           OR jobs.staff_created_id IN (${placeholders})
-          OR clients.staff_created_id IN (${placeholders})) 
+          OR clients.staff_created_id IN (${placeholders}) OR customers.staff_id IN (${placeholders}) OR customers.account_manager_id IN (${placeholders})) 
           AND (
               temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
               OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
@@ -2411,6 +2417,8 @@ async function getAllJobsSidebarFilter(
       `;
   
       let [result] = await connection.execute(query, [
+        ...LineManageStaffId,
+        ...LineManageStaffId,
         ...LineManageStaffId,
         ...LineManageStaffId,
         ...LineManageStaffId,
@@ -2613,9 +2621,9 @@ async function getJobByClientId(data) {
          LEFT JOIN
          timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE
-        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND jobs.client_id IN (${client_id})
+        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) AND jobs.client_id IN (${client_id})
         AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           ) 
         GROUP BY 
@@ -2792,10 +2800,10 @@ async function getJobByCustomerId(data) {
         WHERE (
           assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
           OR jobs.staff_created_id IN (${LineManageStaffId})
-          OR clients.staff_created_id IN (${LineManageStaffId})
+          OR clients.staff_created_id IN (${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})
         )
         AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           )  
         AND jobs.customer_id IN (${customer_id})
@@ -2999,9 +3007,9 @@ async function getJobByClientIdAndCustomerId(data) {
          LEFT JOIN
          timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE
-        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND (jobs.client_id IN (${client_id}) OR jobs.customer_id IN (${customer_id}))
+        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) AND (jobs.client_id IN (${client_id}) OR jobs.customer_id IN (${customer_id}))
         AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
           ) 
         GROUP BY 
@@ -5396,7 +5404,7 @@ module.exports = {
 //                 OR clients.staff_created_id        IN (SELECT staff_id FROM tmp_staff_ids)
 //             )
 //             AND (
-//                 assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+//                 (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
 //                 OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
 //             )
 //         )
@@ -5464,7 +5472,7 @@ module.exports = {
 //             OR clients.staff_created_id        IN (SELECT staff_id FROM tmp_staff_ids)
 //         )
 //         AND (
-//             assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+//             (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
 //             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
 //         )
 //     )

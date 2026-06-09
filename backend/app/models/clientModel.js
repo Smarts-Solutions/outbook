@@ -727,6 +727,8 @@ const getClient = async (client) => {
         AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
       WHERE 
         (clients.staff_created_id IN (${LineManageStaffId})
+        OR customers.staff_id IN (${LineManageStaffId})
+        OR customers.account_manager_id IN (${LineManageStaffId})
         OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))
         AND clients.customer_id = ?
         ${searchCondition}
@@ -761,6 +763,8 @@ const getClient = async (client) => {
         AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
       WHERE 
         (clients.staff_created_id IN (${LineManageStaffId})
+        OR customers.staff_id IN (${LineManageStaffId})
+        OR customers.account_manager_id IN (${LineManageStaffId})
         OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))
         AND clients.customer_id = ?
         ${searchCondition}
@@ -906,6 +910,8 @@ async function getAllClientsSidebar(
     //     AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
     //   WHERE 
     //     (clients.staff_created_id IN (${LineManageStaffId})
+    //     OR customers.staff_id IN (${LineManageStaffId})
+    //     OR customers.account_manager_id IN (${LineManageStaffId})
     //     OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))
     //     ${searchCondition}
     //   `,
@@ -939,6 +945,8 @@ async function getAllClientsSidebar(
     //     AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
     //   WHERE 
     //     (clients.staff_created_id IN (${LineManageStaffId})
+    //     OR customers.staff_id IN (${LineManageStaffId})
+    //     OR customers.account_manager_id IN (${LineManageStaffId})
     //     OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))
     //     ${searchCondition}
     //   GROUP BY clients.id
@@ -979,6 +987,8 @@ async function getAllClientsSidebar(
         AND temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
       WHERE 
         (clients.staff_created_id IN (${LineManageStaffId})
+        OR customers.staff_id IN (${LineManageStaffId})
+        OR customers.account_manager_id IN (${LineManageStaffId})
         OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId}))
         ${searchCondition}
   `;
@@ -1010,6 +1020,8 @@ async function getAllClientsSidebar(
         AND temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
       WHERE 
         (clients.staff_created_id IN (${LineManageStaffId})
+        OR customers.staff_id IN (${LineManageStaffId})
+        OR customers.account_manager_id IN (${LineManageStaffId})
         OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId}))
         ${searchCondition}
       GROUP BY clients.id
@@ -1206,6 +1218,8 @@ async function getAllClientsSidebarFilter(
         AND temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
       WHERE 
         (clients.staff_created_id IN (${LineManageStaffId})
+        OR customers.staff_id IN (${LineManageStaffId})
+        OR customers.account_manager_id IN (${LineManageStaffId})
         OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId}))
       ${searchCondition}
       ${extraFilter}
