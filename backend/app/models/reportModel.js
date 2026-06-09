@@ -3452,10 +3452,65 @@ const staffRoleChangeUpdate = async (Report) => {
 
 /////////////---- START JOB CUSTOM REPORTS ----//////////////////////
 const getStaffWithRole = async (Report) => {
-  const { data } = Report;
+  const { data, StaffUserId } = Report;
   const { role_id } = data;
   let job_id = data?.filters?.job_id;
   // console.log("Get Staff With Role ID: ===>", role_id);
+
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  const rows = await QueryRoleHelperFunction(StaffUserId);
+  const [RoleAccess] = await pool.execute(
+    "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+    [rows[0].role_id, 35]
+  );
+  const isSuperadmin = rows.length > 0 && (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0);
+
+  if (
+    ["", null, undefined].includes(job_id) ||
+    (Array.isArray(job_id) && job_id.length === 0)
+  ) {
+    if (!isSuperadmin) {
+      const connection = await pool.getConnection();
+      try {
+        await buildAssignedJobsTempTable(connection, LineManageStaffId);
+        const placeholders = LineManageStaffId?.map(() => '?').join(',');
+        const jobQuery = `
+          SELECT jobs.id
+          FROM jobs
+          LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = jobs.id
+          LEFT JOIN clients ON jobs.client_id = clients.id
+          LEFT JOIN customers ON jobs.customer_id = customers.id
+          WHERE (
+            (temp_assigned_jobs_staff.staff_id IN (${placeholders})
+            OR jobs.staff_created_id IN (${placeholders})
+            OR clients.staff_created_id IN (${placeholders}) OR customers.staff_id IN (${placeholders}) OR customers.account_manager_id IN (${placeholders})) 
+            AND (
+                temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+                OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
+              )
+          ) AND customers.status = '1'
+        `;
+        const [jobRows] = await connection.execute(jobQuery, [
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+        ]);
+        const visibleJobIds = jobRows.map(row => row.id);
+        if (visibleJobIds.length > 0) {
+          job_id = visibleJobIds;
+        } else {
+          return { status: true, message: "Success.", data: [] };
+        }
+      } catch (error) {
+        console.error("getStaffWithRole filter error: ", error);
+        return { status: false, message: "Error.", data: [] };
+      } finally {
+        connection.release();
+      }
+    }
+  }
 
   if (
     ["", null, undefined].includes(job_id) ||
@@ -3585,8 +3640,63 @@ const getStaffWithRole = async (Report) => {
 };
 
 const getAllService = async (Report) => {
-  let { data } = Report;
+  let { data, StaffUserId } = Report;
   let job_id = data?.filters?.job_id;
+
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  const rows = await QueryRoleHelperFunction(StaffUserId);
+  const [RoleAccess] = await pool.execute(
+    "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+    [rows[0].role_id, 35]
+  );
+  const isSuperadmin = rows.length > 0 && (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0);
+
+  if (
+    ["", null, undefined].includes(job_id) ||
+    (Array.isArray(job_id) && job_id.length === 0)
+  ) {
+    if (!isSuperadmin) {
+      const connection = await pool.getConnection();
+      try {
+        await buildAssignedJobsTempTable(connection, LineManageStaffId);
+        const placeholders = LineManageStaffId?.map(() => '?').join(',');
+        const jobQuery = `
+          SELECT jobs.id
+          FROM jobs
+          LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = jobs.id
+          LEFT JOIN clients ON jobs.client_id = clients.id
+          LEFT JOIN customers ON jobs.customer_id = customers.id
+          WHERE (
+            (temp_assigned_jobs_staff.staff_id IN (${placeholders})
+            OR jobs.staff_created_id IN (${placeholders})
+            OR clients.staff_created_id IN (${placeholders}) OR customers.staff_id IN (${placeholders}) OR customers.account_manager_id IN (${placeholders})) 
+            AND (
+                temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+                OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
+              )
+          ) AND customers.status = '1'
+        `;
+        const [jobRows] = await connection.execute(jobQuery, [
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+        ]);
+        const visibleJobIds = jobRows.map(row => row.id);
+        if (visibleJobIds.length > 0) {
+          job_id = visibleJobIds;
+        } else {
+          return { status: true, message: "Success.", data: [] };
+        }
+      } catch (error) {
+        console.error("filter error: ", error);
+        return { status: false, message: "Error.", data: [] };
+      } finally {
+        connection.release();
+      }
+    }
+  }
 
   if (
     ["", null, undefined].includes(job_id) ||
@@ -3628,8 +3738,63 @@ const getAllService = async (Report) => {
 };
 
 const getAllJobType = async (Report) => {
-  let { data } = Report;
+  let { data, StaffUserId } = Report;
   let job_id = data?.filters?.job_id;
+
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  const rows = await QueryRoleHelperFunction(StaffUserId);
+  const [RoleAccess] = await pool.execute(
+    "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+    [rows[0].role_id, 35]
+  );
+  const isSuperadmin = rows.length > 0 && (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0);
+
+  if (
+    ["", null, undefined].includes(job_id) ||
+    (Array.isArray(job_id) && job_id.length === 0)
+  ) {
+    if (!isSuperadmin) {
+      const connection = await pool.getConnection();
+      try {
+        await buildAssignedJobsTempTable(connection, LineManageStaffId);
+        const placeholders = LineManageStaffId?.map(() => '?').join(',');
+        const jobQuery = `
+          SELECT jobs.id
+          FROM jobs
+          LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = jobs.id
+          LEFT JOIN clients ON jobs.client_id = clients.id
+          LEFT JOIN customers ON jobs.customer_id = customers.id
+          WHERE (
+            (temp_assigned_jobs_staff.staff_id IN (${placeholders})
+            OR jobs.staff_created_id IN (${placeholders})
+            OR clients.staff_created_id IN (${placeholders}) OR customers.staff_id IN (${placeholders}) OR customers.account_manager_id IN (${placeholders})) 
+            AND (
+                temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+                OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
+              )
+          ) AND customers.status = '1'
+        `;
+        const [jobRows] = await connection.execute(jobQuery, [
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+        ]);
+        const visibleJobIds = jobRows.map(row => row.id);
+        if (visibleJobIds.length > 0) {
+          job_id = visibleJobIds;
+        } else {
+          return { status: true, message: "Success.", data: [] };
+        }
+      } catch (error) {
+        console.error("filter error: ", error);
+        return { status: false, message: "Error.", data: [] };
+      } finally {
+        connection.release();
+      }
+    }
+  }
 
   if (
     ["", null, undefined].includes(job_id) ||
@@ -3671,8 +3836,63 @@ const getAllJobType = async (Report) => {
 };
 
 const getAllStatus = async (Report) => {
-  let { data } = Report;
+  let { data, StaffUserId } = Report;
   let job_id = data?.filters?.job_id;
+
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+  const rows = await QueryRoleHelperFunction(StaffUserId);
+  const [RoleAccess] = await pool.execute(
+    "SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?",
+    [rows[0].role_id, 35]
+  );
+  const isSuperadmin = rows.length > 0 && (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0);
+
+  if (
+    ["", null, undefined].includes(job_id) ||
+    (Array.isArray(job_id) && job_id.length === 0)
+  ) {
+    if (!isSuperadmin) {
+      const connection = await pool.getConnection();
+      try {
+        await buildAssignedJobsTempTable(connection, LineManageStaffId);
+        const placeholders = LineManageStaffId?.map(() => '?').join(',');
+        const jobQuery = `
+          SELECT jobs.id
+          FROM jobs
+          LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = jobs.id
+          LEFT JOIN clients ON jobs.client_id = clients.id
+          LEFT JOIN customers ON jobs.customer_id = customers.id
+          WHERE (
+            (temp_assigned_jobs_staff.staff_id IN (${placeholders})
+            OR jobs.staff_created_id IN (${placeholders})
+            OR clients.staff_created_id IN (${placeholders}) OR customers.staff_id IN (${placeholders}) OR customers.account_manager_id IN (${placeholders})) 
+            AND (
+                temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+                OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
+              )
+          ) AND customers.status = '1'
+        `;
+        const [jobRows] = await connection.execute(jobQuery, [
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+        ]);
+        const visibleJobIds = jobRows.map(row => row.id);
+        if (visibleJobIds.length > 0) {
+          job_id = visibleJobIds;
+        } else {
+          return { status: true, message: "Success.", data: [] };
+        }
+      } catch (error) {
+        console.error("filter error: ", error);
+        return { status: false, message: "Error.", data: [] };
+      } finally {
+        connection.release();
+      }
+    }
+  }
 
   if (
     ["", null, undefined].includes(job_id) ||
