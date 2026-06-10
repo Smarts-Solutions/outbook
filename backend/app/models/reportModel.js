@@ -525,51 +525,7 @@ const jobSummaryReports = async (Report) => {
     }
 
     // Other Role Data
-    // const query = `
-    // SELECT
-
-    // assigned_jobs_staff_view.source AS assigned_source,
-    // assigned_jobs_staff_view.service_id_assign AS service_id_assign,
-    // jobs.service_id AS job_service_id,
-
-    // master_status.name AS job_status,
-
-    // -- COUNT(jobs.status_type) AS number_of_job
-    // COUNT(DISTINCT jobs.id) AS number_of_job,
-    // GROUP_CONCAT(DISTINCT jobs.id) AS job_ids
-    // FROM
-    //     jobs
-    //  JOIN
-    //   assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
-    //    AND COALESCE(assigned_jobs_staff_view.service_id_assign, 0) = COALESCE(jobs.service_id, 0)
-    //  JOIN
-    // clients ON jobs.client_id = clients.id
-    //  JOIN
-    //     master_status ON master_status.id = jobs.status_type
-    // WHERE
-    //     assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})
-    // GROUP BY
-    //     master_status.name, jobs.status_type
-    //  `;
-
-    //  const [result] = await pool.execute(query);
-
-    //////-----START Assign Customer Service Data START----////////
-    // let isExistAssignCustomer = result?.find(item => item?.assigned_source === 'assign_customer_service');
-    // if (isExistAssignCustomer != undefined) {
-    //     let matched = result?.filter(item =>
-    //         item?.assigned_source === 'assign_customer_service' &&
-    //         Number(item?.service_id_assign) === Number(item?.job_service_id)
-    //     )
-    //     let matched2 = result?.filter(item =>
-    //         item?.assigned_source !== 'assign_customer_service'
-    //     )
-    //     const resultAssignCustomer = [...matched, ...matched2]
-    //     return { status: true, message: "Success.", data: resultAssignCustomer };
-    // }
-    // //////-----END Assign Customer Service Data END----////////
-
-    // return { status: true, message: 'Success.', data: result };
+    
 
     const query = `
         SELECT 
