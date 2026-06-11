@@ -116,11 +116,14 @@ const getStaff = async (data) => {
   const connection = await pool.getConnection();
   await buildAssignedJobsTempTable(connection, LineManageStaffId);
   let role_name = rows[0].role_name?.toUpperCase();
+
+  let where = "";
+
   if (rows.length > 0 && (role_name === "SUPERADMIN" || role_name === "ADMIN" || role_name === "MANAGEMENT")) {
-     
-    }else{
-      // AND staffs.created_by IN (${LineManageStaffId})
-    }
+    where = "WHERE 1=1 AND staffs.role_id != 12";
+  } else {
+    where = `WHERE 1=1 AND staffs.role_id != 12 AND staffs.created_by IN (${LineManageStaffId})`;
+  }
 
   // 🔍 SEARCH CONDITION
   let searchCondition = "";
@@ -148,7 +151,7 @@ const getStaff = async (data) => {
       JOIN roles ON staffs.role_id = roles.id
       LEFT JOIN line_managers lm ON lm.staff_by = staffs.id
       LEFT JOIN staffs manager ON manager.id = lm.staff_to
-      WHERE 1=1 AND staffs.role_id != 12
+      ${where}
       ${searchCondition}
       `,
       searchParams
@@ -195,7 +198,7 @@ const getStaff = async (data) => {
       JOIN roles ON staffs.role_id = roles.id
       LEFT JOIN line_managers lm ON lm.staff_by = staffs.id
       LEFT JOIN staffs manager ON manager.id = lm.staff_to
-      WHERE 1=1 AND staffs.role_id != 12
+      ${where}
       ${searchCondition}
       ORDER BY staffs.first_name ASC
       LIMIT ? OFFSET ?
