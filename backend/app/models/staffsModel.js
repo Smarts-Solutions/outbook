@@ -103,6 +103,7 @@ const getStaff = async (data) => {
   console.log("data", data);
 
   let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
+  const rows = await QueryRoleHelperFunction(StaffUserId);
 
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 10;
@@ -114,6 +115,12 @@ const getStaff = async (data) => {
   ];
   const connection = await pool.getConnection();
   await buildAssignedJobsTempTable(connection, LineManageStaffId);
+  let role_name = rows[0].role_name?.toUpperCase();
+  if (rows.length > 0 && (role_name === "SUPERADMIN" || role_name === "ADMIN" || role_name === "MANAGEMENT")) {
+     
+    }else{
+      // AND staffs.created_by IN (${LineManageStaffId})
+    }
 
   // 🔍 SEARCH CONDITION
   let searchCondition = "";
