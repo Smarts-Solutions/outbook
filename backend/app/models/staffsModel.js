@@ -1,5 +1,10 @@
 const pool = require("../../app/config/database");
-const { SatffLogUpdateOperation, LineManageStaffIdHelperFunction, buildAssignedJobsTempTable } = require("../../app/utils/helper");
+const {
+  SatffLogUpdateOperation,
+  LineManageStaffIdHelperFunction,
+  buildAssignedJobsTempTable,
+  QueryRoleHelperFunction,
+} = require("../../app/utils/helper");
 const axios = require("axios");
 const qs = require("qs");
 
