@@ -1161,6 +1161,7 @@ function TimesheetReport() {
 
   const callFilterApi = async () => {
     // Call your filter API here
+    setLoading(true);
     const req = { action: "get", filters: filters, role: role };
     const data = { req: req, authToken: token };
     await dispatch(getTimesheetReportData(data))
@@ -1174,6 +1175,9 @@ function TimesheetReport() {
       })
       .catch((error) => {
         return;
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -2153,6 +2157,11 @@ function TimesheetReport() {
 
       {/* Filtered Data Display */}
       <div className="datatable-container">
+        {loading && (
+          <div className="overlay">
+            <div className="loader"></div>
+          </div>
+        )}
 
         {showData?.rows == undefined || showData?.rows?.length === 0 ? (
           <div className="text-center">
@@ -2191,7 +2200,7 @@ function TimesheetReport() {
                   <tr key={rowIdx}>
                     {showData?.columns?.map((col, colIdx) => (
                       <td key={colIdx} style={{ padding: "10px" }}>
-                        {row[col] !== undefined ? row[col] : ""}
+                        {[undefined, null, ""]?.includes(row[col]) ? "-" : row[col]}
                       </td>
                     ))}
                   </tr>
