@@ -2980,27 +2980,42 @@ const customerUpdate = async (customer) => {
     var account_manager_id = ExistCustomer[0].account_manager_id;
     const customer_type = ExistCustomer[0].customer_type;
     const lastCode = ExistCustomer[0].customer_code;
-
+      
+    
     // Page Status 1 
     if (pageStatus === "1") {
 
+        console.log("Page Status 1")
+
         const { customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website, contactDetails, notes } = customer;
 
-        // console.log("account_manager_id", account_manager_id)
-        // console.log("ExistCustomer[0].account_manager_id", ExistCustomer[0].account_manager_id)
+         console.log("account_manager_id", account_manager_id)
+         console.log("ExistCustomer[0].account_manager_id", ExistCustomer[0].account_manager_id)
 
         if (Number(account_manager_id) != Number(ExistCustomer[0].account_manager_id)) {
+             
+             const [exist_account_manager] = await pool.execute(`SELECT id FROM customer_services JOIN customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id WHERE customer_services.customer_id = ${Number(customer_id)} AND customer_service_account_managers.account_manager_id = ${Number(ExistCustomer[0].account_manager_id)}`);
+             
+             //console.log("exist_account_manager", exist_account_manager)
+             if(exist_account_manager.length > 0){
+                for (let index = 0; index < exist_account_manager.length; index++) {
+                    const element = exist_account_manager[index];
+                    // update customer_service_account_managers
+                    await pool.execute(`UPDATE customer_service_account_managers SET account_manager_id = ${Number(account_manager_id)} WHERE customer_service_id = ${element.id} AND account_manager_id = ${Number(ExistCustomer[0].account_manager_id)}`);
+                }
+             }
 
-            const [exist_account_manager] = await pool.execute(`SELECT id FROM customer_services JOIN customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id WHERE customer_services.customer_id = ${Number(customer_id)} AND customer_service_account_managers.account_manager_id = ${Number(ExistCustomer[0].account_manager_id)}`);
+            /////////////
+            // const [exist_account_manager] = await pool.execute(`SELECT id FROM customer_services JOIN customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id WHERE customer_services.customer_id = ${Number(customer_id)} AND customer_service_account_managers.account_manager_id = ${Number(ExistCustomer[0].account_manager_id)}`);
 
-            let customer_services_ids = exist_account_manager.map(item => item.id);
+            // let customer_services_ids = exist_account_manager.map(item => item.id);
 
-            if (customer_services_ids.length > 0) {
+            // if (customer_services_ids.length > 0) {
 
-                const placeholders = customer_services_ids.map(() => '?').join(', ');
-                const query = `DELETE FROM customer_service_account_managers WHERE customer_service_id IN (${placeholders})`;
-                await pool.execute(query, customer_services_ids);
-            }
+            //     const placeholders = customer_services_ids.map(() => '?').join(', ');
+            //     const query = `DELETE FROM customer_service_account_managers WHERE customer_service_id IN (${placeholders})`;
+            //     await pool.execute(query, customer_services_ids);
+            // }
 
         }
 
@@ -3319,7 +3334,8 @@ const customerUpdate = async (customer) => {
 
     //  Page Status 2 Service Part
     else if (pageStatus === "2") {
-
+    
+        
 
         const { services, Task } = customer;
 
