@@ -1235,26 +1235,28 @@ const StaffPage = () => {
           </div>
         </div>
         <div className="tab-content mt-minus-90" id="pills-tabContent">
-          <div className="row mb-3">
-            <div className="col-md-4">
-              <input
-                type="text"
-                placeholder="Search Staff..."
-                className="form-control"
-                value={searchTerm}
-                onChange={(e) => handleSearchChange(e.target.value)}
-              />
+          {(staffDataAll?.data?.length > 0 || searchTerm) && (
+            <div className="row mb-3">
+              <div className="col-md-4">
+                <input
+                  type="text"
+                  placeholder="Search Staff..."
+                  className="form-control"
+                  value={searchTerm}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                />
+              </div>
+              <div className="col-md-8 d-flex justify-content-end">
+                <button
+                  className="btn btn-outline-info fw-bold border-3"
+                  onClick={handleExport}
+                >
+                  <Download size={16}/>{" "}
+                  Export Excel
+                </button>
+              </div>
             </div>
-            <div className="col-md-8 d-flex justify-content-end">
-              <button
-                className="btn btn-outline-info fw-bold border-3"
-                onClick={handleExport}
-              >
-                <Download size={16}/>{" "}
-                Export Excel
-              </button>
-            </div>
-          </div>
+          )}
 
           {tabs?.map((tab) => (
             <div
