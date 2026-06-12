@@ -854,7 +854,8 @@ const StaffPage = () => {
       disable: false,
       options: managerOptions,
       onMenuOpen: () => {
-        if (managerOptions.length === 0) {
+        //  if (managerOptions.length === 0) {
+        if (!managerCacheRef.current["_1"]) {
           GetLineManagerData({ searchValue: "", pageNo: 1 });
         }
       },
@@ -947,6 +948,21 @@ const StaffPage = () => {
           hours: editStaffData.hourminute.split(":")[0],
           minutes: editStaffData.hourminute.split(":")[1],
         });
+      }
+      
+      if (editStaffData.staff_to && editStaffData.line_manager_name) {
+        let baseList = managerCacheRef.current["_1"] ? [...managerCacheRef.current["_1"]] : [];
+        const exists = baseList.find((opt) => opt.value === editStaffData.staff_to);
+        if (!exists) {
+          baseList.push({ label: editStaffData.line_manager_name, value: editStaffData.staff_to });
+        }
+        setManagerOptions(baseList);
+      } else {
+        if (managerCacheRef.current["_1"]) {
+          setManagerOptions([...managerCacheRef.current["_1"]]);
+        } else {
+          setManagerOptions([]);
+        }
       }
     }
   }, [editStaffData]);
