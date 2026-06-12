@@ -854,7 +854,8 @@ const StaffPage = () => {
       disable: false,
       options: managerOptions,
       onMenuOpen: () => {
-        if (managerOptions.length === 0) {
+        //  if (managerOptions.length === 0) {
+        if (!managerCacheRef.current["_1"]) {
           GetLineManagerData({ searchValue: "", pageNo: 1 });
         }
       },
@@ -947,6 +948,21 @@ const StaffPage = () => {
           hours: editStaffData.hourminute.split(":")[0],
           minutes: editStaffData.hourminute.split(":")[1],
         });
+      }
+      
+      if (editStaffData.staff_to && editStaffData.line_manager_name) {
+        let baseList = managerCacheRef.current["_1"] ? [...managerCacheRef.current["_1"]] : [];
+        const exists = baseList.find((opt) => opt.value === editStaffData.staff_to);
+        if (!exists) {
+          baseList.push({ label: editStaffData.line_manager_name, value: editStaffData.staff_to });
+        }
+        setManagerOptions(baseList);
+      } else {
+        if (managerCacheRef.current["_1"]) {
+          setManagerOptions([...managerCacheRef.current["_1"]]);
+        } else {
+          setManagerOptions([]);
+        }
       }
     }
   }, [editStaffData]);
@@ -1235,26 +1251,28 @@ const StaffPage = () => {
           </div>
         </div>
         <div className="tab-content mt-minus-90" id="pills-tabContent">
-          <div className="row mb-3">
-            <div className="col-md-4">
-              <input
-                type="text"
-                placeholder="Search Staff..."
-                className="form-control"
-                value={searchTerm}
-                onChange={(e) => handleSearchChange(e.target.value)}
-              />
+          {(staffDataAll?.data?.length > 0 || searchTerm) && (
+            <div className="row mb-3">
+              <div className="col-md-4">
+                <input
+                  type="text"
+                  placeholder="Search Staff..."
+                  className="form-control"
+                  value={searchTerm}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                />
+              </div>
+              <div className="col-md-8 d-flex justify-content-end">
+                <button
+                  className="btn btn-outline-info fw-bold border-3"
+                  onClick={handleExport}
+                >
+                  <Download size={16}/>{" "}
+                  Export Excel
+                </button>
+              </div>
             </div>
-            <div className="col-md-8 d-flex justify-content-end">
-              <button
-                className="btn btn-outline-info fw-bold border-3"
-                onClick={handleExport}
-              >
-                <Download size={16}/>{" "}
-                Export Excel
-              </button>
-            </div>
-          </div>
+          )}
 
           {tabs?.map((tab) => (
             <div
