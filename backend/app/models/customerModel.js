@@ -2987,8 +2987,8 @@ const customerUpdate = async (customer) => {
 
         const { customer_type, staff_id, account_manager_id, trading_name, trading_address, vat_registered, vat_number, website, contactDetails, notes } = customer;
 
-         console.log("account_manager_id", account_manager_id)
-         console.log("ExistCustomer[0].account_manager_id", ExistCustomer[0].account_manager_id)
+        //  console.log("account_manager_id", account_manager_id)
+        //  console.log("ExistCustomer[0].account_manager_id", ExistCustomer[0].account_manager_id)
 
         if (Number(account_manager_id) != Number(ExistCustomer[0].account_manager_id)) {
              
