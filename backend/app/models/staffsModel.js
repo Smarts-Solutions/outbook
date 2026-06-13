@@ -479,8 +479,6 @@ const getStaffOtherRole = async (email) => {
     [email]
   );
 
-  
-
   return rows;
 
 };
