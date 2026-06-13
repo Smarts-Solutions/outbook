@@ -85,8 +85,13 @@ const profile = async (staff) => {
 const login = async (credentials) => {
   const { email, password } = credentials;
   const user = await staffModel.getStaffByEmail(email);
+ 
+  const other_role = await staffModel.getStaffOtherRole(email);
 
-  // console.log("user,",user);
+   let other_role_id = null;
+   if (other_role.length > 0) {
+     other_role_id = other_role[0].other_role_id;
+   }
 
   const sharepoint_token = await staffModel.sharepoint_token();
 
@@ -132,12 +137,20 @@ const login = async (credentials) => {
     token: token,
     staffDetails: user,
     sharepoint_token: sharepoint_token,
+    other_role_id: other_role_id
   };
 };
 
 const loginWithAzure = async (credentials) => {
   const { email } = credentials;
   const user = await staffModel.getStaffByEmail(email);
+
+  const other_role = await staffModel.getStaffOtherRole(email);
+
+  let other_role_id = null;
+   if (other_role.length > 0) {
+     other_role_id = other_role[0].other_role_id;
+   }
 
   const sharepoint_token = await staffModel.sharepoint_token();
 
@@ -175,6 +188,7 @@ const loginWithAzure = async (credentials) => {
     token: token,
     staffDetails: user,
     sharepoint_token: sharepoint_token,
+    other_role_id: other_role_id
   };
 };
 

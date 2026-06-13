@@ -833,6 +833,21 @@ CREATE TABLE sharepoint_token (
 
 
 
+     ///////////
+
+
+     CREATE TABLE `staff_other_role` (
+    staff_id INT NOT NULL,
+    role_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (role_id) REFERENCES roles(id),
+    FOREIGN KEY (staff_id) REFERENCES staffs(id),
+    UNIQUE (staff_id,role_id)
+);
+
+
+
     
 
 

@@ -472,6 +472,19 @@ const getStaffByEmail = async (email) => {
   return rows[0];
 };
 
+const getStaffOtherRole = async (email) => {
+  
+  const [rows] = await pool.query(
+    "SELECT staff_other_role.role_id AS other_role_id  FROM staffs JOIN roles ON staffs.role_id = roles.id JOIN staff_other_role ON staffs.id = staff_other_role.staff_id WHERE staffs.email = ?",
+    [email]
+  );
+
+  
+
+  return rows;
+
+};
+
 const getStaffById = async (id) => {
   const [rows] = await pool.query(
     "SELECT id , login_auth_token FROM staffs  WHERE id = ?",
@@ -959,5 +972,6 @@ module.exports = {
   GetStaffByRoleId,
   GetStaffAndDelete,
   getLineManagerStaff,
-  getMyLineManagers
+  getMyLineManagers,
+  getStaffOtherRole
 };

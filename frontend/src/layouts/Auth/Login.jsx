@@ -59,6 +59,8 @@ const Login = () => {
             JSON.stringify(response.data.staffDetails.role)
           );
 
+          localStorage.setItem("other_role_id", JSON.stringify(response.data.other_role_id));
+
           // sweet alert
           sweatalert.fire({
             title: "Login Successfully",
@@ -128,6 +130,8 @@ const Login = () => {
               "role",
               JSON.stringify(response.data.staffDetails.role)
             );
+
+            localStorage.setItem("other_role_id", JSON.stringify(response.data.other_role_id));
 
             //Update Auth Token
             const req_auth_token = {

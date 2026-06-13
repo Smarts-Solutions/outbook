@@ -28,6 +28,7 @@ const Login1 = () => {
 
 
   const handleSubmitLogin = async () => {
+    
     if (Email == "") {
       setErrorEmail(EMPTY_EMAIL_ERROR);
       return;
@@ -58,6 +59,8 @@ const Login1 = () => {
             "role",
             JSON.stringify(response.data.staffDetails.role)
           );
+          
+          localStorage.setItem("other_role_id", JSON.stringify(response.data.other_role_id));
 
           // sweet alert
           sweatalert.fire({
@@ -128,6 +131,7 @@ const Login1 = () => {
               "role",
               JSON.stringify(response.data.staffDetails.role)
             );
+            localStorage.setItem("other_role_id", JSON.stringify(response.data.other_role_id));
 
             //Update Auth Token
             const req_auth_token = {
