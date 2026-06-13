@@ -92,6 +92,7 @@ const Login = () => {
           localStorage.removeItem("role");
           localStorage.removeItem("accessData");
           localStorage.removeItem("updatedShowTab");
+          localStorage.removeItem("other_role_id");
           sessionStorage.clear();
           sweatalert.fire({
             title: response.message,
@@ -159,6 +160,7 @@ const Login = () => {
             localStorage.removeItem("staffDetails");
             localStorage.removeItem("token");
             localStorage.removeItem("role");
+            localStorage.removeItem("other_role_id");
             sessionStorage.clear();
             
           }

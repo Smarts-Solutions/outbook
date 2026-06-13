@@ -75,6 +75,7 @@ const Header = () => {
     localStorage.removeItem("sharepoint_token");
     localStorage.removeItem("accessData");
     localStorage.removeItem("updatedShowTab");
+    localStorage.removeItem("other_role_id");
     sessionStorage.clear();
 
     const req = { id: staffDetails.id };
