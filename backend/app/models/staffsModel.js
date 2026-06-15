@@ -89,6 +89,16 @@ const createStaff = async (staff) => {
       ]);
     }
 
+    if (other_role_id != null) {
+      const other_role_query = `INSERT INTO staff_other_role (staff_id,role_id)
+      VALUES (?, ?)
+      `;
+      const [other_role_result] = await pool.execute(other_role_query, [
+        result.insertId,
+        other_role_id,
+      ]);
+    }
+
     const currentDate = new Date();
     await SatffLogUpdateOperation({
       staff_id: StaffUserId,
