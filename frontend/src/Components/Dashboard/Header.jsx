@@ -261,8 +261,10 @@ const Header = () => {
                 </svg>
               </button>
             </li>
-
-            <div className="header-select d-flex">
+           
+           {
+            other_role_id != null ?
+              <div className="header-select d-flex">
               <select
                 className="form-select"
                 id="floatingSelect"
@@ -273,8 +275,10 @@ const Header = () => {
                 <option value={staffDetails.role_id}>{staffDetails.role_name}</option>
                 <option value={other_role_id.other_role_id}>{other_role_id.role_name}</option>
               </select>
-
             </div>
+            :""
+           }
+           
 
 
             {role?.toString().toUpperCase() === "CUSTOMER" && (
