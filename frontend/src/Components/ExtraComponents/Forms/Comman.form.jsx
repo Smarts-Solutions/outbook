@@ -101,7 +101,7 @@ const ReusableForm = ({
                         <select
                           className={
                             formik.touched[field.name] &&
-                            formik.errors[field.name]
+                              formik.errors[field.name]
                               ? "default-select wide error-field form-select"
                               : " default-select wide form-select"
                           }
@@ -176,7 +176,7 @@ const ReusableForm = ({
                                 : "white",
                               borderColor:
                                 formik.touched[field.name] &&
-                                formik.errors[field.name]
+                                  formik.errors[field.name]
                                   ? "red"
                                   : provided.borderColor,
                             }),
@@ -217,7 +217,7 @@ const ReusableForm = ({
                         <select
                           className={
                             formik.touched[field.name] &&
-                            formik.errors[field.name]
+                              formik.errors[field.name]
                               ? "default-select wide error-field form-select"
                               : " default-select wide form-select"
                           }
@@ -262,7 +262,7 @@ const ReusableForm = ({
                         <select
                           className={
                             formik.touched[field.name] &&
-                            formik.errors[field.name]
+                              formik.errors[field.name]
                               ? "default-select wide error-field form-select"
                               : " default-select wide form-select"
                           }
@@ -306,7 +306,7 @@ const ReusableForm = ({
                         <select
                           className={
                             formik.touched[field.name] &&
-                            formik.errors[field.name]
+                              formik.errors[field.name]
                               ? "default-select wide error-field form-select"
                               : " default-select wide form-select"
                           }
@@ -449,7 +449,7 @@ const ReusableForm = ({
                                       // className="form-check-input"
                                       className={
                                         formik.touched[field.name] &&
-                                        formik.errors[field.name]
+                                          formik.errors[field.name]
                                           ? "error-field form-check-input"
                                           : "form-check-input"
                                       }
@@ -529,7 +529,7 @@ const ReusableForm = ({
                         // className="form-check-input"
                         className={
                           formik.touched[field.name] &&
-                          formik.errors[field.name]
+                            formik.errors[field.name]
                             ? "form-check-input error-field"
                             : " form-check-input"
                         }
@@ -552,7 +552,7 @@ const ReusableForm = ({
                         value={field.value2}
                         className={
                           formik.touched[field.name] &&
-                          formik.errors[field.name]
+                            formik.errors[field.name]
                             ? "form-check-input error-field"
                             : " form-check-input"
                         }
@@ -590,7 +590,7 @@ const ReusableForm = ({
                           {...formik.getFieldProps(field.name)}
                           className={
                             formik.touched[field.name] &&
-                            formik.errors[field.name]
+                              formik.errors[field.name]
                               ? "form-control error-field"
                               : " form-control"
                           }
@@ -660,7 +660,7 @@ const ReusableForm = ({
                             autoFocus={index === 0 ? true : false}
                             className={
                               formik.touched[field.name] &&
-                              formik.errors[field.name]
+                                formik.errors[field.name]
                                 ? "form-control error-field"
                                 : " form-control"
                             }
@@ -700,7 +700,7 @@ const ReusableForm = ({
                           }
                           className={
                             formik.touched[field.name] &&
-                            formik.errors[field.name]
+                              formik.errors[field.name]
                               ? "form-control error-field"
                               : " form-control"
                           }
@@ -740,7 +740,7 @@ const ReusableForm = ({
                           type="email"
                           className={
                             formik.touched[field.name] &&
-                            formik.errors[field.name]
+                              formik.errors[field.name]
                               ? "form-control error-field"
                               : " form-control"
                           }
@@ -782,7 +782,7 @@ const ReusableForm = ({
                           type="text"
                           className={
                             formik.touched[field.name] &&
-                            formik.errors[field.name]
+                              formik.errors[field.name]
                               ? "error-field form-control"
                               : "form-control"
                           }
@@ -824,7 +824,7 @@ const ReusableForm = ({
                           type="text"
                           className={
                             formik.touched[field.name] &&
-                            formik.errors[field.name]
+                              formik.errors[field.name]
                               ? "error-field form-control"
                               : "form-control"
                           }
@@ -908,7 +908,7 @@ const ReusableForm = ({
                         <select
                           className={
                             formik.touched[field.name] &&
-                            formik.errors[field.name]
+                              formik.errors[field.name]
                               ? "default-select wide error-field form-select"
                               : " default-select wide form-select"
                           }
@@ -950,7 +950,7 @@ const ReusableForm = ({
                           type="number"
                           className={
                             formik.touched[field.name] &&
-                            formik.errors[field.name]
+                              formik.errors[field.name]
                               ? "form-control error-field"
                               : " form-control"
                           }
@@ -991,7 +991,7 @@ const ReusableForm = ({
                           type="number"
                           className={
                             formik.touched[field.name] &&
-                            formik.errors[field.name]
+                              formik.errors[field.name]
                               ? "form-control error-field"
                               : " form-control"
                           }
@@ -1032,7 +1032,7 @@ const ReusableForm = ({
                           type="text"
                           className={
                             formik.touched[field.name] &&
-                            formik.errors[field.name]
+                              formik.errors[field.name]
                               ? "form-control error-field"
                               : " form-control"
                           }
@@ -1048,7 +1048,7 @@ const ReusableForm = ({
                         />
 
                         {field.filteredCompanies.length > 0 &&
-                        !selectSearchItem ? (
+                          !selectSearchItem ? (
                           <div className="dropdown-list">
                             {field.filteredCompanies &&
                               field.filteredCompanies.map((company, index) => (
@@ -1079,21 +1079,68 @@ const ReusableForm = ({
                     </div>
                   </div>
                 </>
-              ) : (
-                <>
-                  <div className={` col-lg-${field.col_size}`}>
-                    <div className="mb-3  mt-4 row flex-column">
+              ) :
+                field.type === "reactSelectRole" ? (
+                  <div className={`col-lg-${field.col_size}`}>
+                    <div className="row mb-3">
                       <label
                         className={`col-lg-${field.label_size}`}
                         htmlFor={field.name}
                       >
                         {field.label}
+                        <span className="text-danger">*</span>
                       </label>
-                      <div></div>
+
+                      <div className="col-lg-12">
+                        <Select
+                          isMulti
+                          options={field.options}
+                          closeMenuOnSelect={false}
+                          isSearchable
+                          value={field.options.filter((option) =>
+                            formik.values[field.name]?.includes(option.value)
+                          )}
+                          onChange={(selectedOptions) => {
+
+                            const values = selectedOptions
+                              ? selectedOptions.map((option) => option.value)
+                              : [];
+
+                            // Maximum 2 roles validation
+                            if (values.length <= 2) {
+                              formik.setFieldValue(field.name, values);
+                            }
+                          }}
+                          onBlur={() =>
+                            formik.setFieldTouched(field.name, true)
+                          }
+                        />
+
+                        {formik.touched[field.name] &&
+                          formik.errors[field.name] && (
+                            <div className="error-text">
+                              {formik.errors[field.name]}
+                            </div>
+                          )}
+                      </div>
                     </div>
                   </div>
-                </>
-              )}
+                ) :
+                  (
+                    <>
+                      <div className={` col-lg-${field.col_size}`}>
+                        <div className="mb-3  mt-4 row flex-column">
+                          <label
+                            className={`col-lg-${field.label_size}`}
+                            htmlFor={field.name}
+                          >
+                            {field.label}
+                          </label>
+                          <div></div>
+                        </div>
+                      </div>
+                    </>
+                  )}
             </>
           ))}
         </div>
@@ -1129,9 +1176,8 @@ const ReusableForm = ({
             </button>
 
             <button
-              className={`btn btn-outline-success ${
-                location.pathname === "resetpassword" ? "col-md-11" : ""
-              }`}
+              className={`btn btn-outline-success ${location.pathname === "resetpassword" ? "col-md-11" : ""
+                }`}
               type="submit"
               disabled={formik.isSubmitting}
             >

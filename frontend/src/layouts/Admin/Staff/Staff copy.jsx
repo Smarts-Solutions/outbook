@@ -415,7 +415,7 @@ const StaffPage = () => {
           }
         })
         .catch((error) => {
-
+         
         });
     } catch (error) {
       return;
@@ -517,8 +517,9 @@ const StaffPage = () => {
       cell: (row) => (
         <div>
           <span
-            className={` ${row.status === "1" ? "text-success" : "text-danger"
-              }`}
+            className={` ${
+              row.status === "1" ? "text-success" : "text-danger"
+            }`}
           >
             {row.status === "1" ? "Active" : "Inactive"}
           </span>
@@ -535,23 +536,23 @@ const StaffPage = () => {
             <div className="px-2">
               {showStaffDeleteTab == true
                 ? row?.is_disable == 0 &&
-                (row.is_customer_exist == 1 ? (
-                  <button
-                    className="delete-icon dropdown-item  w-auto mb-2"
-                    onClick={() => setDeleteStaff(row)}
-                  >
-                    {" "}
-                    <i className="ti-trash text-danger" />
-                  </button>
-                ) : (
-                  <button
-                    className="delete-icon dropdown-item  w-auto mb-2"
-                    onClick={() => handleDeleteIsNotExistCustomer(row)}
-                  >
-                    {" "}
-                    <i className="ti-trash text-danger" />
-                  </button>
-                ))
+                  (row.is_customer_exist == 1 ? (
+                    <button
+                      className="delete-icon dropdown-item  w-auto mb-2"
+                      onClick={() => setDeleteStaff(row)}
+                    >
+                      {" "}
+                      <i className="ti-trash text-danger" />
+                    </button>
+                  ) : (
+                    <button
+                      className="delete-icon dropdown-item  w-auto mb-2"
+                      onClick={() => handleDeleteIsNotExistCustomer(row)}
+                    >
+                      {" "}
+                      <i className="ti-trash text-danger" />
+                    </button>
+                  ))
                 : ""}
             </div>
 
@@ -565,7 +566,7 @@ const StaffPage = () => {
                   aria-haspopup="true"
                   aria-expanded="false"
                 >
-
+                  
                   <EllipsisVertical size={18} />
                 </button>
                 <div
@@ -679,8 +680,7 @@ const StaffPage = () => {
       email: "",
       phone: "",
       phone_code: "+44",
-      //role: "3",
-      role: [],
+      role: "3",
       status: "1",
       staff_to: "",
       employee_number: "",
@@ -696,12 +696,8 @@ const StaffPage = () => {
         .trim(Validation_Message.EmailValidation)
         .email(Validation_Message.EmailValidation)
         .required(Validation_Message.EmailIsRequire),
-      // role: Yup.string()
-      //   .trim(Validation_Message.RoleValidation)
-      //   .required(Validation_Message.RoleValidation),
-      role: Yup.array()
-        .min(1, "At least 1 role is required")
-        .max(2, "Maximum 2 roles allowed")
+      role: Yup.string()
+        .trim(Validation_Message.RoleValidation)
         .required(Validation_Message.RoleValidation),
       status: Yup.string()
         .trim(Validation_Message.StatusValidation)
@@ -723,8 +719,9 @@ const StaffPage = () => {
         employee_number: values.employee_number,
         staff_to: values.staff_to,
         created_by: StaffUserId.id,
-        hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"
-          }`,
+        hourminute: `${budgetedHours.hours || "00"}:${
+          budgetedHours.minutes || "00"
+        }`,
       };
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
@@ -820,35 +817,21 @@ const StaffPage = () => {
       disable: false,
       placeholder: "Enter Email",
     },
-    // {
-    //   type: "select1",
-    //   name: "role",
-    //   label: "Role",
-    //   label_size: 12,
-    //   col_size: 6,
-    //   options:
-    //     roleDataAll &&
-    //     roleDataAll.data.map((data) => {
-    //       if (formik.values.role_id == data.id) {
-    //         return { label: data.role_name, value: data.id, selected: true };
-    //       } else {
-    //         return { label: data.role_name, value: data.id };
-    //       }
-    //     }),
-    // },
     {
-      type: "reactSelectRole",
+      type: "select1",
       name: "role",
       label: "Role",
       label_size: 12,
       col_size: 6,
-      isMulti: true,
-      maxSelection: 2,
       options:
-        roleDataAll?.data?.map((data) => ({
-          label: data.role_name,
-          value: data.id,
-        })) || [],
+        roleDataAll &&
+        roleDataAll.data.map((data) => {
+          if (formik.values.role_id == data.id) {
+            return { label: data.role_name, value: data.id, selected: true };
+          } else {
+            return { label: data.role_name, value: data.id };
+          }
+        }),
     },
     {
       type: "select1",
@@ -947,16 +930,11 @@ const StaffPage = () => {
 
   useEffect(() => {
     if (editStaffData && editStaffData) {
-    
-      console.log("editStaffData", editStaffData);
-      const roleIds = [].concat(editStaffData?.role_id || []);
-
       formik.setFieldValue("first_name", editStaffData.first_name || "null");
       formik.setFieldValue("last_name", editStaffData.last_name || "null");
       formik.setFieldValue("email", editStaffData.email || "null");
       formik.setFieldValue("phone", editStaffData.phone || null);
-      //formik.setFieldValue("role", editStaffData.role_id || "null");
-      formik.setFieldValue("role", roleIds || []);
+      formik.setFieldValue("role", editStaffData.role_id || "null");
       formik.setFieldValue("status", editStaffData.status || "null");
       formik.setFieldValue(
         "employee_number",
@@ -971,7 +949,7 @@ const StaffPage = () => {
           minutes: editStaffData.hourminute.split(":")[1],
         });
       }
-
+      
       if (editStaffData.staff_to && editStaffData.line_manager_name) {
         let baseList = managerCacheRef.current["_1"] ? [...managerCacheRef.current["_1"]] : [];
         const exists = baseList.find((opt) => opt.value === editStaffData.staff_to);
@@ -1085,7 +1063,7 @@ const StaffPage = () => {
         .unwrap()
         .then((res) => {
           if (res.status) {
-            //  setChangedRoleStaffData(res.data);
+  //  setChangedRoleStaffData(res.data);
 
             const sortedData = [...res.data].sort((a, b) =>
               (a.staff_fullname || "").localeCompare(b.staff_fullname || ""),
@@ -1102,31 +1080,31 @@ const StaffPage = () => {
     }
   };
 
-  // useEffect(() => {
-  //   const fetchChangedRoleStaff = async () => {
-  //     if (
-  //       editStaffData.id !== undefined &&
-  //       Number(formik.values.role) !== Number(editStaffData.role_id)
-  //     ) {
-  //       if (Number(editStaffData.role_id) === 3) {
-  //         await getChangedRoleStaff(editStaffData);
-  //       } else if (Number(editStaffData.role_id) === 4) {
-  //         await getChangedRoleStaff(editStaffData);
-  //       } else if (Number(editStaffData.role_id) === 6) {
-  //         await getChangedRoleStaff(editStaffData);
-  //       }
+  useEffect(() => {
+    const fetchChangedRoleStaff = async () => {
+      if (
+        editStaffData.id !== undefined &&
+        Number(formik.values.role) !== Number(editStaffData.role_id)
+      ) {
+        if (Number(editStaffData.role_id) === 3) {
+          await getChangedRoleStaff(editStaffData);
+        } else if (Number(editStaffData.role_id) === 4) {
+          await getChangedRoleStaff(editStaffData);
+        } else if (Number(editStaffData.role_id) === 6) {
+          await getChangedRoleStaff(editStaffData);
+        }
 
-  //       setChangeRole(true);
-  //       setEditStaff(false);
-  //     }
-  //   };
-  //   if (
-  //     [3, 4, 6].includes(Number(editStaffData.role_id)) &&
-  //     editStaffData.is_customer_exist == 1
-  //   ) {
-  //     fetchChangedRoleStaff();
-  //   }
-  // }, [formik.values.role]);
+        setChangeRole(true);
+        setEditStaff(false);
+      }
+    };
+    if (
+      [3, 4, 6].includes(Number(editStaffData.role_id)) &&
+      editStaffData.is_customer_exist == 1
+    ) {
+      fetchChangedRoleStaff();
+    }
+  }, [formik.values.role]);
 
   const handleChangeRole = async () => {
     try {
@@ -1162,7 +1140,7 @@ const StaffPage = () => {
           }
         })
         .catch((err) => {
-
+         
         });
     } catch (error) {
       console.error("Error fetching staff tasks:", error);
@@ -1263,7 +1241,7 @@ const StaffPage = () => {
                           formik.resetForm();
                         }}
                       >
-                        <Plus size={16} /> Add Staff
+                        <Plus size={16}/> Add Staff
                       </button>
                     )}
                   </div>
@@ -1289,7 +1267,7 @@ const StaffPage = () => {
                   className="btn btn-outline-info fw-bold border-3"
                   onClick={handleExport}
                 >
-                  <Download size={16} />{" "}
+                  <Download size={16}/>{" "}
                   Export Excel
                 </button>
               </div>
@@ -1299,8 +1277,9 @@ const StaffPage = () => {
           {tabs?.map((tab) => (
             <div
               key={tab.id}
-              className={`tab-pane fade ${activeTab === tab.id ? "show active" : ""
-                }`}
+              className={`tab-pane fade ${
+                activeTab === tab.id ? "show active" : ""
+              }`}
               id={tab.id}
               role="tabpanel"
             >
@@ -1584,7 +1563,7 @@ const StaffPage = () => {
             color="primary"
             onClick={handleUpdate}
           >
-            <Save size={16} className="pe-1" />
+           <Save size={16} className="pe-1" />
             Update
           </Button>
         </div>
@@ -1696,9 +1675,9 @@ const StaffPage = () => {
               value={
                 selectedStaff
                   ? {
-                    value: selectedStaff.id,
-                    label: `${selectedStaff.first_name} ${selectedStaff.last_name}`,
-                  }
+                      value: selectedStaff.id,
+                      label: `${selectedStaff.first_name} ${selectedStaff.last_name}`,
+                    }
                   : null
               }
               onChange={(selectedOption) => {
@@ -1790,7 +1769,7 @@ const StaffPage = () => {
               <user size={16} /> Staff to Replace
             </label>
 
-            {/* <div className="dropdown w-100">
+             {/* <div className="dropdown w-100">
               <button
                 className="btn btn-outline-info rounded-pill dropdown-toggle w-100 text-start"
                 type="button"
@@ -1842,9 +1821,9 @@ const StaffPage = () => {
               value={
                 selectedStaff
                   ? {
-                    value: selectedStaff.id,
-                    label: selectedStaff.staff_fullname,
-                  }
+                      value: selectedStaff.id,
+                      label: selectedStaff.staff_fullname,
+                    }
                   : null
               }
               onChange={(selectedOption) => {
