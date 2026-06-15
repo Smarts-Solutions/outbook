@@ -729,7 +729,7 @@ const StaffPage = () => {
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
       }
-      
+
 
       await dispatch(
         Staff({
@@ -837,6 +837,21 @@ const StaffPage = () => {
     //       }
     //     }),
     // },
+    // {
+    //   type: "reactSelectRole",
+    //   name: "role",
+    //   label: "Role",
+    //   label_size: 12,
+    //   col_size: 6,
+    //   isMulti: true,
+    //   maxSelection: 2,
+    //   options:
+    //     roleDataAll?.data?.map((data , index) => ({
+    //       label: data.role_name,
+    //       value: data.id,
+    //       isFixed: index === 0,
+    //     })) || [],
+    // },
     {
       type: "reactSelectRole",
       name: "role",
@@ -845,6 +860,15 @@ const StaffPage = () => {
       col_size: 6,
       isMulti: true,
       maxSelection: 2,
+
+      fixedRoleId: editStaff
+        ? (Array.isArray(editStaffData?.role_id)
+          ? editStaffData.role_id[0]
+          : editStaffData?.role_id)
+        : null,
+
+      isEditMode: editStaff,
+
       options:
         roleDataAll?.data?.map((data) => ({
           label: data.role_name,
@@ -948,7 +972,7 @@ const StaffPage = () => {
 
   useEffect(() => {
     if (editStaffData && editStaffData) {
-    
+
       console.log("editStaffData", editStaffData);
       const roleIds = [].concat(editStaffData?.role_id || []);
 

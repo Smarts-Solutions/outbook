@@ -81,6 +81,7 @@ const ReusableForm = ({
       >
         <div className={`row  mb-3 `}>
           {fieldtype.map((field, index) => (
+            console.log("field", field),
             <>
               {field.type === "select" ? (
                 <>
@@ -1111,10 +1112,27 @@ const ReusableForm = ({
                               formik.setFieldValue(field.name, values);
                             }
                           }}
+                          styles={
+                            field.isEditMode
+                              ? {
+                                multiValueRemove: (base, state) =>
+                                  state.data.value === formik.values[field.name]?.[0]
+                                    ? { ...base, display: "none" }
+                                    : base,
+
+                                clearIndicator: (base) => ({
+                                  ...base,
+                                  display: "none",
+                                }),
+                              }
+                              : undefined
+                          }
                           onBlur={() =>
                             formik.setFieldTouched(field.name, true)
                           }
                         />
+
+                       
 
                         {formik.touched[field.name] &&
                           formik.errors[field.name] && (
