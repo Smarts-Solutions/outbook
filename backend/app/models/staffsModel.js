@@ -26,10 +26,10 @@ const createStaff = async (staff) => {
     staff_to,
   } = staff;
 
+  let role_ids = role_id
 
-
-  role_id = Array.isArray(role_id) ? role_id?.[0] ?? null : role_id ?? null;
-  let other_role_id = Array.isArray(role_id) ? role_id?.[1] ?? null : null
+  role_id = Array.isArray(role_ids) ? role_ids?.[0] ?? null : role_ids ?? null;
+  let other_role_id = Array.isArray(role_ids) ? role_ids?.[1] ?? null : null
 
   if (role_id == null) {
     return { status: false, message: "Role is required." };
@@ -271,10 +271,10 @@ const updateStaff = async (staff) => {
   // const { id, ...fields } = staff;
   const { id, page, limit, search, ...fields } = staff;
   let email = fields.email;
-  let role_id = fields.role_id;
+  let role_ids = fields.role_id;
 
-  role_id = Array.isArray(role_id) ? role_id?.[0] ?? null : role_id ?? null;
-  let other_role_id = Array.isArray(role_id) ? role_id?.[1] ?? null : null
+  let role_id = Array.isArray(role_ids) ? role_ids?.[0] ?? null : role_ids ?? null;
+  let other_role_id = Array.isArray(role_ids) ? role_ids?.[1] ?? null : null
 
   if (role_id == null) {
     return { status: false, message: "Role is required." };
