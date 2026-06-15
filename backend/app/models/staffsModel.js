@@ -26,14 +26,14 @@ const createStaff = async (staff) => {
     staff_to,
   } = staff;
 
-  
 
-   role_id = Array.isArray(role_id) ? role_id?.[0] ?? null: role_id ?? null;
-   let other_role_id = Array.isArray(role_id) ? role_id?.[1] ?? null : null
 
-   if(role_id == null){
-     return { status: false, message: "Role is required." };
-   }
+  role_id = Array.isArray(role_id) ? role_id?.[0] ?? null : role_id ?? null;
+  let other_role_id = Array.isArray(role_id) ? role_id?.[1] ?? null : null
+
+  if (role_id == null) {
+    return { status: false, message: "Role is required." };
+  }
 
 
   // Exist Email Check
@@ -272,6 +272,14 @@ const updateStaff = async (staff) => {
   // const { id, ...fields } = staff;
   const { id, page, limit, search, ...fields } = staff;
   let email = fields.email;
+  let role_id = fields.role_id;
+
+  role_id = Array.isArray(role_id) ? role_id?.[0] ?? null : role_id ?? null;
+  let other_role_id = Array.isArray(role_id) ? role_id?.[1] ?? null : null
+
+  if (role_id == null) {
+    return { status: false, message: "Role is required." };
+  }
 
 
 
@@ -323,7 +331,7 @@ const updateStaff = async (staff) => {
   const values = [];
   // Iterate over the fields and construct the set clauses dynamically
   for (const [key, value] of Object.entries(fields)) {
-    if (key != "ip" && key != "StaffUserId" && key != "staff_to") {
+    if (key != "ip" && key != "StaffUserId" && key != "staff_to" && key != "role_id") {
       setClauses.push(`${key} = ?`);
       values.push(value);
     }
@@ -354,6 +362,22 @@ const updateStaff = async (staff) => {
 
 
     const [rows] = await pool.execute(query, values);
+
+   // other_role_id check is exist 
+    if (other_role_id != null) {
+      const checkOtherRoleQuery = `SELECT 1 FROM staff_other_role WHERE staff_id = ? AND role_id = ?`;
+      const [checkOtherRole] = await pool.execute(checkOtherRoleQuery, [id ,other_role_id]);
+      if (checkOtherRole.length > 0) {
+        return { status: false, message: "Role Already Exists." };
+      }else{
+        const staff_other_role_query = `INSERT INTO staff_other_role (staff_id,role_id) VALUES (?, ?)`;
+        const [staff_other_role_result] = await pool.execute(staff_other_role_query, [
+          id,
+          other_role_id,
+        ]);
+      }
+    }
+
     if (rows.changedRows) {
       const currentDate = new Date();
       await SatffLogUpdateOperation({
@@ -493,7 +517,7 @@ const getStaffByEmail = async (email) => {
 };
 
 const getStaffOtherRole = async (email) => {
-  
+
   const [rows] = await pool.query(
     "SELECT staff_other_role.role_id AS other_role_id , roles.role_name FROM staffs JOIN staff_other_role ON staffs.id = staff_other_role.staff_id JOIN roles ON staff_other_role.role_id = roles.id WHERE staffs.email = ?",
     [email]
