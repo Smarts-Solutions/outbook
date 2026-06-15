@@ -198,7 +198,8 @@ const ReusableForm = ({
                     </div>
                   </div>
                 </>
-              ) : field.type === "select1" ? (
+              ) 
+              : field.type === "select1" ? (
                 <>
                   <div
                     className={`col-lg-${title === "update_theme" ? 12 : field.col_size}`}
@@ -243,7 +244,54 @@ const ReusableForm = ({
                     </div>
                   </div>
                 </>
-              ) : field.type === "select2" ? (
+              ) 
+              : field.type === "select-multi-role" ? (
+                <>
+                  <div
+                    className={`col-lg-${title === "update_theme" ? 12 : field.col_size}`}
+                  >
+                    <div className=" row mb-3">
+                      <label
+                        className={`col-lg-${field.label_size}`}
+                        htmlFor={field.name}
+                      >
+                        {field.label}
+                        <span className="text-danger">*</span>
+                      </label>
+                      <div
+                        className={`col-lg-${title === "addgroup" ? 12 : 12}`}
+                      >
+                        <select
+                          className={
+                            formik.touched[field.name] &&
+                            formik.errors[field.name]
+                              ? "default-select wide error-field form-select"
+                              : " default-select wide form-select"
+                          }
+                          id={field.name}
+                          autoFocus={index === 0 ? true : false}
+                          style={{ background: field.disable ? "#eeeeee" : "" }}
+                          {...formik.getFieldProps(field.name)}
+                          disabled={field.disable}
+                        >
+                          {field.options.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        {formik.touched[field.name] &&
+                          formik.errors[field.name] && (
+                            <div className="error-text">
+                              {formik.errors[field.name]}
+                            </div>
+                          )}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) 
+              : field.type === "select2" ? (
                 <>
                   <div
                     className={`col-lg-${title === "update_theme" ? 12 : field.col_size}`}

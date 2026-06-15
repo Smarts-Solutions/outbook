@@ -818,7 +818,7 @@ const StaffPage = () => {
       placeholder: "Enter Email",
     },
     {
-      type: "select1",
+      type: "select-multi-role",
       name: "role",
       label: "Role",
       label_size: 12,
