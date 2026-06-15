@@ -125,7 +125,6 @@ const getStaff = async (data) => {
 
   let { page, limit, search, StaffUserId } = data;
 
-  console.log("data", data);
 
   let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
   const rows = await QueryRoleHelperFunction(StaffUserId);
