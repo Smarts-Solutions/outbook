@@ -147,10 +147,11 @@ const loginWithAzure = async (credentials) => {
 
   const other_role = await staffModel.getStaffOtherRole(email);
 
+
   let other_role_id = null;
    if (other_role.length > 0) {
-     other_role_id = other_role[0].other_role_id;
-   }
+     other_role_id = { other_role_id :other_role[0].other_role_id , role_name:other_role[0].role_name };
+   } 
 
   const sharepoint_token = await staffModel.sharepoint_token();
 

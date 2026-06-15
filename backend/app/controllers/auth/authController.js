@@ -1,4 +1,6 @@
 const authService = require("../../services/auth/authService");
+const pool = require("../../config/database");
+const staffModel = require("../../models/staffsModel");
 
 const handleStaff = async (req, res) => {
   const { action, ...staff } = req.body;
@@ -264,6 +266,48 @@ const GetStaffByRole = async (req, res) => {
   }
 };
 
+const updateRole = async (req, res) => {
+  try {
+    let { current_role_id, update_role_id, staff_id , ip , StaffUserId , email} = req.body;
+
+    console.log("current_role_id", current_role_id);
+    console.log("update_role_id", update_role_id);
+    console.log("staff_id", staff_id);
+    console.log("ip", ip);
+    console.log("StaffUserId", StaffUserId);
+   
+   
+    // update role id staffs table
+    await await pool.query(
+      `UPDATE staffs SET role_id = ? WHERE id = ?`,
+      [update_role_id, staff_id]
+    );
+
+    // staff_other_role
+     await await pool.query(
+      `UPDATE staff_other_role SET role_id = ? WHERE staff_id = ?`,
+      [current_role_id, staff_id]
+    );
+
+    const user = await staffModel.getStaffByEmail(email);
+    const other_role = await staffModel.getStaffOtherRole(email);
+
+    let other_role_id = null;
+    if (other_role.length > 0) {
+      other_role_id = { other_role_id: other_role[0].other_role_id, role_name: other_role[0].role_name };
+    }
+    
+   const data = {
+    staffDetails: user,
+    other_role_id: other_role_id
+    }
+
+    return res.send({ status: true, message: "Success.." , data });
+  } catch (error) {
+    return res.send({ status: false, message: error.message });
+  }
+};
+
 module.exports = {
   GetStaffByRole,
   handleStaff,
@@ -278,4 +322,5 @@ module.exports = {
   getSharePointToken,
   HandelStaffPortfolio,
   deleteStaff,
+  updateRole
 };

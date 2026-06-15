@@ -20,6 +20,8 @@ router.post('/staff/delete',verifyToken, authController.deleteStaff);
 
 router.post('/getstaff/role', authController.GetStaffByRole);
 
+router.post('/updateRole', authController.updateRole);
+
 
 
 

@@ -6,12 +6,14 @@ import { Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import Select from "react-select";
 import { useCustomerAccess } from "../../Utils/CustomerAccessContext";
+import { UPDATE_ROLE } from "../../Services/Auth/authService";
 
 
 const Header = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+  const other_role_id = JSON.parse(localStorage.getItem("other_role_id"));
   const token = JSON.parse(localStorage.getItem("token"));
   const [isMenuEnlarged, setIsMenuEnlarged] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -19,8 +21,24 @@ const Header = () => {
     setIsMenuEnlarged((prevState) => !prevState);
   };
 
+
   const role = JSON.parse(localStorage.getItem("role"));
   const { assignedCustomers, selectedCustomer, setSelectedCustomer } = useCustomerAccess();
+
+
+
+
+  const handleRoleSwitch = async (e) => {
+    const req = { current_role_id: Number(staffDetails.role_id), update_role_id: Number(e.target.value), staff_id: staffDetails.id, email: staffDetails.email };
+    const response = await UPDATE_ROLE({ req, authToken: token });
+    
+    if(response.status){
+     localStorage.setItem("staffDetails",JSON.stringify(response.data.staffDetails));
+     localStorage.setItem("role",JSON.stringify(response.data.staffDetails.role));
+     localStorage.setItem("other_role_id", JSON.stringify(response.data.other_role_id));
+     window.location.reload();
+    }
+  };
 
 
 
@@ -243,24 +261,20 @@ const Header = () => {
                 </svg>
               </button>
             </li>
-           
-             <div className="header-select d-flex">
-          <select
-            className="form-select"
-            id="floatingSelect"
-            aria-label="Floating label select example"
-          //  onChange={(e) => { handleSelectAgent(e) }}
-           // value={selectedAgent}
-          >
-            {
-            // agentListData.map((item, index) => {
-            //   return <option key={index} value={item.Agent.id}>{item.Agent.agent_name}</option>
-            // }
-            // )
-            }
-          </select>
 
-        </div>
+            <div className="header-select d-flex">
+              <select
+                className="form-select"
+                id="floatingSelect"
+                aria-label="Floating label select example"
+                onChange={(e) => { handleRoleSwitch(e) }}
+                value={staffDetails.role_id}
+              >
+                <option value={staffDetails.role_id}>{staffDetails.role_name}</option>
+                <option value={other_role_id.other_role_id}>{other_role_id.role_name}</option>
+              </select>
+
+            </div>
 
 
             {role?.toString().toUpperCase() === "CUSTOMER" && (

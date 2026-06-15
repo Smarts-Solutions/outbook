@@ -2,6 +2,7 @@ import axios from "axios";
 
 // import Files
 import * as Config from "../../Utils/Config";
+import { header } from "../../Utils/ApiHeader";
 
 // LOGIN-USER
 export async function SIGN_IN_STAFF(data) {
@@ -97,5 +98,30 @@ export async function GET_STAFF_BY_ROLE(data) {
     return await res?.data;
   } catch (error) {
     return await error;
+  }
+}
+
+
+
+export async function UPDATE_ROLE(data) {
+  try {
+    const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
+    const token = JSON.parse(localStorage.getItem("token"));
+    var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+    const { req, authToken } = data;
+    const updatedReq = {
+      ...req,
+      ip: IP_Data,
+      StaffUserId: StaffUserId.id,
+    };
+    const res = await axios.post(`${Config.base_url}updateRole`, updatedReq, {
+      headers: header(token),
+      data: {},
+    });
+   
+    return await res?.data;
+
+  } catch (err) {
+    return await err;
   }
 }
