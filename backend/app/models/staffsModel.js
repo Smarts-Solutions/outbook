@@ -10,7 +10,7 @@ const qs = require("qs");
 
 const createStaff = async (staff) => {
   // console.log(staff);
-  const {
+  let {
     role_id,
     first_name,
     last_name,
@@ -25,6 +25,16 @@ const createStaff = async (staff) => {
     ip,
     staff_to,
   } = staff;
+
+  
+
+   role_id = Array.isArray(role_id) ? role_id?.[0] ?? null: role_id ?? null;
+   let other_role_id = Array.isArray(role_id) ? role_id?.[1] ?? null : null
+
+   if(role_id == null){
+     return { status: false, message: "Role is required." };
+   }
+
 
   // Exist Email Check
   const checkQuery = `SELECT 1 FROM staffs WHERE email = ?`;
