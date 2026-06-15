@@ -81,7 +81,7 @@ const ReusableForm = ({
       >
         <div className={`row  mb-3 `}>
           {fieldtype.map((field, index) => (
-            console.log("field", field),
+            
             <>
               {field.type === "select" ? (
                 <>
