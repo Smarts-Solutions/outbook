@@ -243,6 +243,26 @@ const Header = () => {
                 </svg>
               </button>
             </li>
+           
+             <div className="header-select d-flex">
+          <select
+            className="form-select"
+            id="floatingSelect"
+            aria-label="Floating label select example"
+          //  onChange={(e) => { handleSelectAgent(e) }}
+           // value={selectedAgent}
+          >
+            {
+            // agentListData.map((item, index) => {
+            //   return <option key={index} value={item.Agent.id}>{item.Agent.agent_name}</option>
+            // }
+            // )
+            }
+          </select>
+
+        </div>
+
+
             {role?.toString().toUpperCase() === "CUSTOMER" && (
               // <li className="hide-phone app-search">
               //   <div className="d-flex align-items-center">

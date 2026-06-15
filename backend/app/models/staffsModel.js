@@ -475,7 +475,7 @@ const getStaffByEmail = async (email) => {
 const getStaffOtherRole = async (email) => {
   
   const [rows] = await pool.query(
-    "SELECT staff_other_role.role_id AS other_role_id  FROM staffs JOIN roles ON staffs.role_id = roles.id JOIN staff_other_role ON staffs.id = staff_other_role.staff_id WHERE staffs.email = ?",
+    "SELECT staff_other_role.role_id AS other_role_id , roles.role_name FROM staffs JOIN staff_other_role ON staffs.id = staff_other_role.staff_id JOIN roles ON staff_other_role.role_id = roles.id WHERE staffs.email = ?",
     [email]
   );
 
