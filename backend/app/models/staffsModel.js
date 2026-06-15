@@ -366,9 +366,7 @@ const updateStaff = async (staff) => {
     if (other_role_id != null) {
       const checkOtherRoleQuery = `SELECT 1 FROM staff_other_role WHERE staff_id = ? AND role_id = ?`;
       const [checkOtherRole] = await pool.execute(checkOtherRoleQuery, [id ,other_role_id]);
-      if (checkOtherRole.length > 0) {
-        return { status: false, message: "Role Already Exists." };
-      }else{
+      if (checkOtherRole.length === 0) {
         const staff_other_role_query = `INSERT INTO staff_other_role (staff_id,role_id) VALUES (?, ?)`;
         const [staff_other_role_result] = await pool.execute(staff_other_role_query, [
           id,
