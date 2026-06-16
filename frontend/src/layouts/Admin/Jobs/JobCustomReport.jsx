@@ -376,7 +376,7 @@ function JobCustomReport() {
           return;
         });
     } else if (role_id == "employee_number") {
-      var req = { action: "getStaffWithRole", role_id: role_id || "" };
+      var req = { action: "getStaffWithRole", role_id: role_id || "", filters: type };
       var data = { req: req, authToken: token };
       await dispatch(getAllTaskByStaff(data))
         .unwrap()
@@ -762,50 +762,31 @@ function JobCustomReport() {
       //   }
       // }
 
+      const hasFilters = filters?.job_id?.length > 0 || filters?.client_id?.length > 0 || filters?.customer_id?.length > 0;
       if (value == "account_manager_id") {
-        if (["", null, undefined].includes(filters.job_id)) {
-          staffData(4); // role_id 4 for account manager
-        } else {
-          staffData(4, filters); // role_id 4 for account manager
-        }
+        if (!hasFilters) staffData(4, "all");
+        else staffData(4, filters);
       } else if (value == "allocated_to_id") {
-        if (["", null, undefined].includes(filters.job_id)) {
-          staffData(3); // role_id 3 for staff
-        } else {
-          staffData(3, filters); // role_id 3 for staff
-        }
+        if (!hasFilters) staffData(3, "all");
+        else staffData(3, filters);
       } else if (value == "reviewer_id") {
-        if (["", null, undefined].includes(filters.job_id)) {
-          staffData(6); // role_id 2 for reviewer
-        } else {
-          staffData(6, filters); // role_id 2 for reviewer
-        }
+        if (!hasFilters) staffData(6, "all");
+        else staffData(6, filters);
       } else if (value == "allocated_to_other_id") {
-        if (["", null, undefined].includes(filters.job_id)) {
-          staffData("other"); // role_id 5 for allocated to other
-        } else {
-          staffData("other", filters); // role_id 5 for allocated to other
-        }
+        if (!hasFilters) staffData("other", "all");
+        else staffData("other", filters);
       } else if (value == "service_id") {
-        if (["", null, undefined].includes(filters.job_id)) {
-          GetAllService("all"); // fetch all service
-        } else {
-          GetAllService(filters); // fetch filtered service
-        }
+        if (!hasFilters) GetAllService("all");
+        else GetAllService(filters);
       } else if (value == "job_type_id") {
-        if (["", null, undefined].includes(filters.job_id)) {
-          GetAllJobType("all"); // fetch all job type
-        } else {
-          GetAllJobType(filters); // fetch filtered job type
-        }
+        if (!hasFilters) GetAllJobType("all");
+        else GetAllJobType(filters);
       } else if (value == "status_type_id") {
-        if (["", null, undefined].includes(filters.job_id)) {
-          GetAllStatus("all"); // fetch all status
-        } else {
-          GetAllStatus(filters); // fetch filtered status
-        }
+        if (!hasFilters) GetAllStatus("all");
+        else GetAllStatus(filters);
       } else if (value == "employee_number") {
-        staffData("employee_number"); //fetch all employee number
+        if (!hasFilters) staffData("employee_number", "all");
+        else staffData("employee_number", filters);
       }
     } else if (type == "remove") {
       if (value == "job_id") {
@@ -1797,7 +1778,7 @@ function JobCustomReport() {
               closeMenuOnSelect={false}
               onMenuOpen={() => { if (jobOptions.length === 0) GetAllJobs({ searchValue: "", pageNo: 1 }); }}
               options={jobOptions}
-              value={(filters?.job_id || []).map((id) => 
+              value={(filters?.job_id || []).map((id) =>
                 optionCacheRef.current[id] || { value: id, label: `Loading...` }
               )}
 
@@ -1850,7 +1831,7 @@ function JobCustomReport() {
               closeMenuOnSelect={false}
               onMenuOpen={() => { if (customerAllData.length === 0) GetAllCustomer({ searchValue: "", pageNo: 1 }); }}
               options={customerAllData}
-              value={(filters?.customer_id || []).map((id) => 
+              value={(filters?.customer_id || []).map((id) =>
                 optionCacheRef.current[id] || { value: id, label: `Loading...` }
               )}
               // onChange={(selectedOptions) =>
@@ -1908,7 +1889,7 @@ function JobCustomReport() {
               closeMenuOnSelect={false}
               onMenuOpen={() => { if (clientAllData.length === 0) GetAllClient({ searchValue: "", pageNo: 1 }); }}
               options={clientAllData}
-              value={(filters?.client_id || []).map((id) => 
+              value={(filters?.client_id || []).map((id) =>
                 optionCacheRef.current[id] || { value: id, label: `Loading...` }
               )}
               // onChange={(selectedOptions) =>
@@ -1988,7 +1969,14 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (employeeNumberAllData.length === 0) staffData("employee_number"); }}
+              onMenuOpen={() => {
+                const hasFilters = filters?.job_id?.length > 0 || filters?.client_id?.length > 0 || filters?.customer_id?.length > 0;
+                if (hasFilters) {
+                  staffData("employee_number", filters);
+                } else if (employeeNumberAllData.length === 0) {
+                  staffData("employee_number", "all");
+                }
+              }}
               options={employeeNumberAllData}
               value={employeeNumberAllData.filter((opt) =>
                 filters?.employee_number?.includes(opt.value),
@@ -2044,7 +2032,14 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (accountManagerAllData.length === 0) staffData(4); }}
+              onMenuOpen={() => {
+                const hasFilters = filters?.job_id?.length > 0 || filters?.client_id?.length > 0 || filters?.customer_id?.length > 0;
+                if (hasFilters) {
+                  staffData(4, filters);
+                } else if (accountManagerAllData.length === 0) {
+                  staffData(4, "all");
+                }
+              }}
               options={accountManagerAllData}
               value={accountManagerAllData.filter((opt) =>
                 filters?.account_manager_id?.includes(opt.value),
@@ -2099,7 +2094,14 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (allocatedToAllData.length === 0) staffData(3); }}
+              onMenuOpen={() => {
+                const hasFilters = filters?.job_id?.length > 0 || filters?.client_id?.length > 0 || filters?.customer_id?.length > 0;
+                if (hasFilters) {
+                  staffData(3, filters);
+                } else if (allocatedToAllData.length === 0) {
+                  staffData(3, "all");
+                }
+              }}
               options={allocatedToAllData}
               value={allocatedToAllData.filter((opt) =>
                 filters?.allocated_to_id?.includes(opt.value),
@@ -2151,7 +2153,14 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (reviewerAllData.length === 0) staffData(6); }}
+              onMenuOpen={() => {
+                const hasFilters = filters?.job_id?.length > 0 || filters?.client_id?.length > 0 || filters?.customer_id?.length > 0;
+                if (hasFilters) {
+                  staffData(6, filters);
+                } else if (reviewerAllData.length === 0) {
+                  staffData(6, "all");
+                }
+              }}
               options={reviewerAllData}
               value={reviewerAllData.filter((opt) =>
                 filters?.reviewer_id?.includes(opt.value),
@@ -2207,7 +2216,14 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (otherStaffAllData.length === 0) staffData("other"); }}
+              onMenuOpen={() => {
+                const hasFilters = filters?.job_id?.length > 0 || filters?.client_id?.length > 0 || filters?.customer_id?.length > 0;
+                if (hasFilters) {
+                  staffData("other", filters);
+                } else if (otherStaffAllData.length === 0) {
+                  staffData("other", "all");
+                }
+              }}
               options={otherStaffAllData}
               value={otherStaffAllData.filter((opt) =>
                 filters?.allocated_to_other_id?.includes(opt.value),
@@ -2258,7 +2274,14 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (serviceAllData.length === 0) GetAllService("all"); }}
+              onMenuOpen={() => {
+                const hasFilters = filters?.job_id?.length > 0 || filters?.client_id?.length > 0 || filters?.customer_id?.length > 0;
+                if (hasFilters) {
+                  GetAllService(filters);
+                } else if (serviceAllData.length === 0) {
+                  GetAllService("all");
+                }
+              }}
               options={serviceAllData}
               value={serviceAllData.filter((opt) =>
                 filters?.service_id?.includes(opt.value),
@@ -2310,7 +2333,14 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (jobTypeAllData.length === 0) GetAllJobType("all"); }}
+              onMenuOpen={() => {
+                const hasFilters = filters?.job_id?.length > 0 || filters?.client_id?.length > 0 || filters?.customer_id?.length > 0;
+                if (hasFilters) {
+                  GetAllJobType(filters);
+                } else if (jobTypeAllData.length === 0) {
+                  GetAllJobType("all");
+                }
+              }}
               options={jobTypeAllData}
               value={jobTypeAllData.filter((opt) =>
                 filters?.job_type_id?.includes(opt.value),
@@ -2361,7 +2391,14 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (statusAllData.length === 0) GetAllStatus("all"); }}
+              onMenuOpen={() => {
+                const hasFilters = filters?.job_id?.length > 0 || filters?.client_id?.length > 0 || filters?.customer_id?.length > 0;
+                if (hasFilters) {
+                  GetAllStatus(filters);
+                } else if (statusAllData.length === 0) {
+                  GetAllStatus("all");
+                }
+              }}
               options={statusAllData}
               value={statusAllData.filter((opt) =>
                 filters?.status_type_id?.includes(opt.value),
