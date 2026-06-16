@@ -2803,6 +2803,11 @@ const getTimesheetReportData = async (Report) => {
     const dynamic = columnsWeeks.filter((col) => !fixed.includes(col));
     const columnsWeeksDecOrder = [...fixed, ...dynamic?.reverse()];
 
+    const page = Number(data.page) || 1;
+    const limit = Number(data.limit) || 100000000;
+    const totalCount = finalRows.length;
+    const paginatedRows = finalRows.slice((page - 1) * limit, page * limit);
+
     return {
       status: true,
       message: "Success.",
@@ -2810,7 +2815,13 @@ const getTimesheetReportData = async (Report) => {
         meta: { fromDate, toDate, groupBy, displayBy, timePeriod },
         //columns: columnsWeeks,
         columns: columnsWeeksDecOrder,
-        rows: finalRows,
+        rows: paginatedRows,
+        pagination: {
+          total: totalCount,
+          page: page,
+          limit: limit,
+          totalPages: Math.ceil(totalCount / limit),
+        },
       },
     };
   } catch (err) {

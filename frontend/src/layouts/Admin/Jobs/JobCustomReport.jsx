@@ -32,6 +32,12 @@ function JobCustomReport() {
   const [showData, setShowData] = useState([]);
   const navigate = useNavigate();
 
+  const clientToCustomerMap = useRef({});
+  const jobToClientMap = useRef({});
+  const jobToCustomerMap = useRef({});
+  const optionCacheRef = useRef({});
+
+
 
   /////////PAGINATION/////////
   const [currentPage, setCurrentPage] = useState(1);
@@ -276,7 +282,7 @@ function JobCustomReport() {
     if (["", null, undefined].includes(role_id)) {
       return;
     }
-    
+
     if (Number(role_id) == 4) {
       var req = {
         action: "getStaffWithRole",
@@ -370,7 +376,7 @@ function JobCustomReport() {
           return;
         });
     } else if (role_id == "employee_number") {
-      var req = { action: "getStaffWithRole", role_id: role_id || "" };
+      var req = { action: "getStaffWithRole", role_id: role_id || "", filters: type };
       var data = { req: req, authToken: token };
       await dispatch(getAllTaskByStaff(data))
         .unwrap()
@@ -657,14 +663,38 @@ function JobCustomReport() {
         fromDate: value,
       }));
     } else {
-      setFilters((prev) => ({
-        ...prev,
-        [key]: value,
-      }));
-      const newFilters = {
-        ...filters,
-        [key]: value,
-      };
+      setFilters((prev) => {
+        const newFilters = { ...prev, [key]: value };
+
+        // Downward hierarchy clearing only when completely deselected
+        if (key === "customer_id") {
+          if (!value || value.length === 0) {
+            newFilters.client_id = [];
+            newFilters.job_id = [];
+          } else {
+            newFilters.client_id = (prev.client_id || []).filter((id) => {
+              const custId = clientToCustomerMap.current[id];
+              return custId && value.map(Number).includes(Number(custId));
+            });
+            newFilters.job_id = (prev.job_id || []).filter((id) => {
+              const custId = jobToCustomerMap.current[id];
+              return custId && value.map(Number).includes(Number(custId));
+            });
+          }
+        } else if (key === "client_id") {
+          if (!value || value.length === 0) {
+            newFilters.job_id = [];
+          } else {
+            newFilters.job_id = (prev.job_id || []).filter((id) => {
+              const cliId = jobToClientMap.current[id];
+              return cliId && value.map(Number).includes(Number(cliId));
+            });
+          }
+        }
+
+        return newFilters;
+      });
+      // The rest of the commented code below can remain as is
       // if (key == "job_id") {
       //   if ([null, "", "null", undefined].includes(value)) {
       //     GetAllCustomer("all");
@@ -732,50 +762,31 @@ function JobCustomReport() {
       //   }
       // }
 
+      const hasFilters = filters?.job_id?.length > 0 || filters?.client_id?.length > 0 || filters?.customer_id?.length > 0;
       if (value == "account_manager_id") {
-        if (["", null, undefined].includes(filters.job_id)) {
-          staffData(4); // role_id 4 for account manager
-        } else {
-          staffData(4, filters); // role_id 4 for account manager
-        }
+        if (!hasFilters) staffData(4, "all");
+        else staffData(4, filters);
       } else if (value == "allocated_to_id") {
-        if (["", null, undefined].includes(filters.job_id)) {
-          staffData(3); // role_id 3 for staff
-        } else {
-          staffData(3, filters); // role_id 3 for staff
-        }
+        if (!hasFilters) staffData(3, "all");
+        else staffData(3, filters);
       } else if (value == "reviewer_id") {
-        if (["", null, undefined].includes(filters.job_id)) {
-          staffData(6); // role_id 2 for reviewer
-        } else {
-          staffData(6, filters); // role_id 2 for reviewer
-        }
+        if (!hasFilters) staffData(6, "all");
+        else staffData(6, filters);
       } else if (value == "allocated_to_other_id") {
-        if (["", null, undefined].includes(filters.job_id)) {
-          staffData("other"); // role_id 5 for allocated to other
-        } else {
-          staffData("other", filters); // role_id 5 for allocated to other
-        }
+        if (!hasFilters) staffData("other", "all");
+        else staffData("other", filters);
       } else if (value == "service_id") {
-        if (["", null, undefined].includes(filters.job_id)) {
-          GetAllService("all"); // fetch all service
-        } else {
-          GetAllService(filters); // fetch filtered service
-        }
+        if (!hasFilters) GetAllService("all");
+        else GetAllService(filters);
       } else if (value == "job_type_id") {
-        if (["", null, undefined].includes(filters.job_id)) {
-          GetAllJobType("all"); // fetch all job type
-        } else {
-          GetAllJobType(filters); // fetch filtered job type
-        }
+        if (!hasFilters) GetAllJobType("all");
+        else GetAllJobType(filters);
       } else if (value == "status_type_id") {
-        if (["", null, undefined].includes(filters.job_id)) {
-          GetAllStatus("all"); // fetch all status
-        } else {
-          GetAllStatus(filters); // fetch filtered status
-        }
+        if (!hasFilters) GetAllStatus("all");
+        else GetAllStatus(filters);
       } else if (value == "employee_number") {
-        staffData("employee_number"); //fetch all employee number
+        if (!hasFilters) staffData("employee_number", "all");
+        else staffData("employee_number", filters);
       }
     } else if (type == "remove") {
       if (value == "job_id") {
@@ -1301,14 +1312,17 @@ function JobCustomReport() {
   const cacheRef = useRef({});
   const debounceTimeout = useRef(null);
 
+  const [jobLoading, setJobLoading] = useState(false);
+
   const GetAllJobs = async ({
     searchValue = "",
     pageNo = 1,
     append = false,
   }) => {
-    if (loading) return;
+    if (jobLoading) return;
 
-    const cacheKey = `${searchValue}_${pageNo}`;
+    const filtersKey = JSON.stringify(filters?.customer_id || []) + JSON.stringify(filters?.client_id || []);
+    const cacheKey = `${searchValue}_${pageNo}_${filtersKey}`;
     // if (cacheRef.current[cacheKey]) {
     //   alert("from cache");
     //   const cached = cacheRef.current[cacheKey];
@@ -1329,7 +1343,7 @@ function JobCustomReport() {
       return;
     }
 
-    setLoading(true);
+    setJobLoading(true);
 
     const req = {
       action: "get_jobs_filter",
@@ -1345,6 +1359,14 @@ function JobCustomReport() {
     try {
       const response = await dispatch(JobAction(data)).unwrap();
       if (response.status) {
+        response.data.forEach((item) => {
+          jobToClientMap.current[item.job_id] = item.client_id;
+          jobToCustomerMap.current[item.job_id] = item.customer_id;
+          optionCacheRef.current[item.job_id] = {
+            value: item.job_id,
+            label: item.job_code_id,
+          };
+        });
         const formatted = response.data.map((item) => ({
           value: item.job_id,
           label: item.job_code_id,
@@ -1364,7 +1386,7 @@ function JobCustomReport() {
         setPage(pageNo);
       }
     } catch (err) { }
-    setLoading(false);
+    setJobLoading(false);
   };
 
   const handleSearch = (value) => {
@@ -1394,8 +1416,9 @@ function JobCustomReport() {
     pageNo = 1,
     append = false,
   }) => {
-    if (loading) return;
-    const cacheKey = `${searchValue}_${pageNo}`;
+    if (customerLoading) return;
+    const filtersKey = JSON.stringify(filters?.client_id || []);
+    const cacheKey = `${searchValue}_${pageNo}_${filtersKey}`;
     // if (customerCache.current[cacheKey]) {
     //   const cached = customerCache.current[cacheKey];
     //   setCustomerAllData(prev =>
@@ -1415,7 +1438,7 @@ function JobCustomReport() {
       return;
     }
 
-    setLoading(true);
+    setCustomerLoading(true);
     const req = {
       action: "get_customers_filter",
       filters: filters,
@@ -1430,10 +1453,14 @@ function JobCustomReport() {
     try {
       const response = await dispatch(getAllCustomerDropDown(data)).unwrap();
       if (response.status) {
-        const formatted = response.data.map((item) => ({
-          value: item.id,
-          label: item.trading_name,
-        }));
+        const formatted = response.data.map((item) => {
+          const opt = {
+            value: item.id,
+            label: item.trading_name,
+          };
+          optionCacheRef.current[item.id] = opt;
+          return opt;
+        });
 
         customerCache.current[cacheKey] = formatted;
 
@@ -1455,7 +1482,7 @@ function JobCustomReport() {
       }
     } catch (error) { }
 
-    setLoading(false);
+    setCustomerLoading(false);
   };
 
   const handleCustomerSearch = (value) => {
@@ -1483,13 +1510,35 @@ function JobCustomReport() {
   const clientCache = useRef({});
   const clientDebounceRef = useRef(null);
 
+  useEffect(() => {
+    // Clear dependent caches when customer changes
+    clientCache.current = {};
+    setClientAllData([]);
+    setClientPage(1);
+    setClientHasMore(true);
+
+    cacheRef.current = {};
+    setJobOptions([]);
+    setPage(1);
+    setHasMore(true);
+  }, [JSON.stringify(filters?.customer_id)]);
+
+  useEffect(() => {
+    // Clear dependent caches when client changes
+    cacheRef.current = {};
+    setJobOptions([]);
+    setPage(1);
+    setHasMore(true);
+  }, [JSON.stringify(filters?.client_id)]);
+
   const GetAllClient = async ({
     searchValue = "",
     pageNo = 1,
     append = false,
   }) => {
-    if (loading) return;
-    const cacheKey = `${searchValue}_${pageNo}`;
+    if (clientLoading) return;
+    const filtersKey = JSON.stringify(filters?.customer_id || []);
+    const cacheKey = `${searchValue}_${pageNo}_${filtersKey}`;
     // Cache check
     // if (clientCache.current[cacheKey]) {
     //   const cached = clientCache.current[cacheKey];
@@ -1512,7 +1561,7 @@ function JobCustomReport() {
       return;
     }
 
-    setLoading(true);
+    setClientLoading(true);
 
     const req = {
       action: "get_clients_filter",
@@ -1529,6 +1578,13 @@ function JobCustomReport() {
     try {
       const response = await dispatch(ClientAction(data)).unwrap();
       if (response.status) {
+        response.data.forEach((item) => {
+          clientToCustomerMap.current[item.id] = item.customer_id;
+          optionCacheRef.current[item.id] = {
+            value: item.id,
+            label: `${item.client_name} (${item.client_code})`,
+          };
+        });
         const formatted = response.data.map((item) => ({
           value: item.id,
           label: `${item.client_name} (${item.client_code})`,
@@ -1554,7 +1610,7 @@ function JobCustomReport() {
       }
     } catch (error) { }
 
-    setLoading(false);
+    setClientLoading(false);
   };
 
   const handleClientSearch = (value) => {
@@ -1722,8 +1778,8 @@ function JobCustomReport() {
               closeMenuOnSelect={false}
               onMenuOpen={() => { if (jobOptions.length === 0) GetAllJobs({ searchValue: "", pageNo: 1 }); }}
               options={jobOptions}
-              value={jobOptions.filter((opt) =>
-                filters?.job_id?.includes(opt.value),
+              value={(filters?.job_id || []).map((id) =>
+                optionCacheRef.current[id] || { value: id, label: `Loading...` }
               )}
 
               onChange={(selectedOptions) => {
@@ -1736,16 +1792,6 @@ function JobCustomReport() {
                     value: values,
                   },
                 });
-                // Call API only when empty
-                if (values.length === 0) {
-                  setHasMore(true);
-                  setPage(1);
-                  setSearch("");
-                  setJobOptions([]);
-                  setJobAllData([]);
-                  cacheRef.current = {};
-                  GetAllJobs({ searchValue: "", pageNo: 1 });
-                }
               }}
               onInputChange={(value) => handleSearch(value)}
               onMenuScrollToBottom={() => {
@@ -1785,8 +1831,8 @@ function JobCustomReport() {
               closeMenuOnSelect={false}
               onMenuOpen={() => { if (customerAllData.length === 0) GetAllCustomer({ searchValue: "", pageNo: 1 }); }}
               options={customerAllData}
-              value={customerAllData.filter((opt) =>
-                filters?.customer_id?.includes(opt.value),
+              value={(filters?.customer_id || []).map((id) =>
+                optionCacheRef.current[id] || { value: id, label: `Loading...` }
               )}
               // onChange={(selectedOptions) =>
               //   handleFilterChange({
@@ -1808,15 +1854,6 @@ function JobCustomReport() {
                     value: values,
                   },
                 });
-                // Call API only when empty
-                if (values.length === 0) {
-                  setCustomerHasMore(true);
-                  setCustomerPage(1);
-                  setCustomerSearch("");
-                  setCustomerAllData([]);
-                  customerCache.current = {};
-                  GetAllCustomer({ searchValue: "", pageNo: 1 });
-                }
               }}
               onInputChange={(value) => handleCustomerSearch(value)}
               onMenuScrollToBottom={() => {
@@ -1852,8 +1889,8 @@ function JobCustomReport() {
               closeMenuOnSelect={false}
               onMenuOpen={() => { if (clientAllData.length === 0) GetAllClient({ searchValue: "", pageNo: 1 }); }}
               options={clientAllData}
-              value={clientAllData.filter((opt) =>
-                filters?.client_id?.includes(opt.value),
+              value={(filters?.client_id || []).map((id) =>
+                optionCacheRef.current[id] || { value: id, label: `Loading...` }
               )}
               // onChange={(selectedOptions) =>
               //   handleFilterChange({
@@ -1875,15 +1912,6 @@ function JobCustomReport() {
                     value: values,
                   },
                 });
-                // Call API only when empty
-                if (values.length === 0) {
-                  setClientHasMore(true);
-                  setClientPage(1);
-                  setClientSearch("");
-                  setClientAllData([]);
-                  clientCache.current = {};
-                  GetAllClient({ searchValue: "", pageNo: 1 });
-                }
               }}
               onInputChange={(value) => handleClientSearch(value)}
               onMenuScrollToBottom={() => {
@@ -1941,7 +1969,14 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (employeeNumberAllData.length === 0) staffData("employee_number"); }}
+              onMenuOpen={() => {
+                const hasFilters = filters?.job_id?.length > 0 || filters?.client_id?.length > 0 || filters?.customer_id?.length > 0;
+                if (hasFilters) {
+                  staffData("employee_number", filters);
+                } else if (employeeNumberAllData.length === 0) {
+                  staffData("employee_number", "all");
+                }
+              }}
               options={employeeNumberAllData}
               value={employeeNumberAllData.filter((opt) =>
                 filters?.employee_number?.includes(opt.value),
@@ -1997,7 +2032,14 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (accountManagerAllData.length === 0) staffData(4); }}
+              onMenuOpen={() => {
+                const hasFilters = filters?.job_id?.length > 0 || filters?.client_id?.length > 0 || filters?.customer_id?.length > 0;
+                if (hasFilters) {
+                  staffData(4, filters);
+                } else if (accountManagerAllData.length === 0) {
+                  staffData(4, "all");
+                }
+              }}
               options={accountManagerAllData}
               value={accountManagerAllData.filter((opt) =>
                 filters?.account_manager_id?.includes(opt.value),
@@ -2052,7 +2094,14 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (allocatedToAllData.length === 0) staffData(3); }}
+              onMenuOpen={() => {
+                const hasFilters = filters?.job_id?.length > 0 || filters?.client_id?.length > 0 || filters?.customer_id?.length > 0;
+                if (hasFilters) {
+                  staffData(3, filters);
+                } else if (allocatedToAllData.length === 0) {
+                  staffData(3, "all");
+                }
+              }}
               options={allocatedToAllData}
               value={allocatedToAllData.filter((opt) =>
                 filters?.allocated_to_id?.includes(opt.value),
@@ -2104,7 +2153,14 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (reviewerAllData.length === 0) staffData(6); }}
+              onMenuOpen={() => {
+                const hasFilters = filters?.job_id?.length > 0 || filters?.client_id?.length > 0 || filters?.customer_id?.length > 0;
+                if (hasFilters) {
+                  staffData(6, filters);
+                } else if (reviewerAllData.length === 0) {
+                  staffData(6, "all");
+                }
+              }}
               options={reviewerAllData}
               value={reviewerAllData.filter((opt) =>
                 filters?.reviewer_id?.includes(opt.value),
@@ -2160,7 +2216,14 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (otherStaffAllData.length === 0) staffData("other"); }}
+              onMenuOpen={() => {
+                const hasFilters = filters?.job_id?.length > 0 || filters?.client_id?.length > 0 || filters?.customer_id?.length > 0;
+                if (hasFilters) {
+                  staffData("other", filters);
+                } else if (otherStaffAllData.length === 0) {
+                  staffData("other", "all");
+                }
+              }}
               options={otherStaffAllData}
               value={otherStaffAllData.filter((opt) =>
                 filters?.allocated_to_other_id?.includes(opt.value),
@@ -2211,7 +2274,14 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (serviceAllData.length === 0) GetAllService("all"); }}
+              onMenuOpen={() => {
+                const hasFilters = filters?.job_id?.length > 0 || filters?.client_id?.length > 0 || filters?.customer_id?.length > 0;
+                if (hasFilters) {
+                  GetAllService(filters);
+                } else if (serviceAllData.length === 0) {
+                  GetAllService("all");
+                }
+              }}
               options={serviceAllData}
               value={serviceAllData.filter((opt) =>
                 filters?.service_id?.includes(opt.value),
@@ -2263,7 +2333,14 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (jobTypeAllData.length === 0) GetAllJobType("all"); }}
+              onMenuOpen={() => {
+                const hasFilters = filters?.job_id?.length > 0 || filters?.client_id?.length > 0 || filters?.customer_id?.length > 0;
+                if (hasFilters) {
+                  GetAllJobType(filters);
+                } else if (jobTypeAllData.length === 0) {
+                  GetAllJobType("all");
+                }
+              }}
               options={jobTypeAllData}
               value={jobTypeAllData.filter((opt) =>
                 filters?.job_type_id?.includes(opt.value),
@@ -2314,7 +2391,14 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (statusAllData.length === 0) GetAllStatus("all"); }}
+              onMenuOpen={() => {
+                const hasFilters = filters?.job_id?.length > 0 || filters?.client_id?.length > 0 || filters?.customer_id?.length > 0;
+                if (hasFilters) {
+                  GetAllStatus(filters);
+                } else if (statusAllData.length === 0) {
+                  GetAllStatus("all");
+                }
+              }}
               options={statusAllData}
               value={statusAllData.filter((opt) =>
                 filters?.status_type_id?.includes(opt.value),

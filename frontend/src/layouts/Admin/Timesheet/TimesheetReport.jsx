@@ -10,6 +10,7 @@ import { ClientAction } from "../../../ReduxStore/Slice/Client/ClientSlice";
 import { useDispatch, useSelector } from "react-redux";
 import Select from "react-select";
 import * as XLSX from "xlsx";
+import ReactPaginate from "react-paginate";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 import dayjs from "dayjs";
 import sweatalert from "sweetalert2";
@@ -25,6 +26,22 @@ function TimesheetReport() {
   const role = staffDetails?.role;
   const [showData, setShowData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
+
+  const handlePageChange = ({ selected }) => {
+    const newPage = selected + 1;
+    setCurrentPage(newPage);
+    callFilterApi(newPage, pageSize);
+  };
+
+  const handlePageSizeChange = (e) => {
+    const newSize = Number(e.target.value);
+    setPageSize(newSize);
+    setCurrentPage(1);
+    callFilterApi(1, newSize);
+  };
 
 
   const [staffAllData, setStaffAllData] = useState([]);
@@ -1159,31 +1176,32 @@ function TimesheetReport() {
     }
   };
 
-  const callFilterApi = async () => {
+  const callFilterApi = async (page = currentPage, limit = pageSize) => {
     // Call your filter API here
     setLoading(true);
-    const req = { action: "get", filters: filters, role: role };
+    const req = { action: "get", filters: filters, role: role, page: page, limit: limit };
     const data = { req: req, authToken: token };
     await dispatch(getTimesheetReportData(data))
       .unwrap()
       .then(async (response) => {
+        setLoading(false);
         if (response.status) {
           setShowData(response.data);
+          setTotalRecords(response?.data?.pagination?.total || 0);
         } else {
           setShowData([]);
+          setTotalRecords(0);
         }
       })
       .catch((error) => {
-        return;
-      })
-      .finally(() => {
         setLoading(false);
+        return;
       });
   };
 
   useEffect(() => {
     //if (filters.fieldsToDisplay !== null || role?.toUpperCase() === "SUPERADMIN" || role?.toUpperCase() === "ADMIN") {
-    callFilterApi();
+    callFilterApi(currentPage, pageSize);
     // }
   }, [
     filters.fieldsToDisplay,
@@ -2209,6 +2227,37 @@ function TimesheetReport() {
             </table>
           </div>
         )}
+
+        {totalRecords > 0 && (
+          <div className="d-flex justify-content-between align-items-center mt-3 mb-3">
+            <ReactPaginate
+              previousLabel={"Previous"}
+              nextLabel={"Next"}
+              breakLabel={"..."}
+              pageCount={Math.ceil(totalRecords / pageSize) || 1}
+              marginPagesDisplayed={2}
+              pageRangeDisplayed={5}
+              onPageChange={handlePageChange}
+              containerClassName={"pagination"}
+              activeClassName={"active"}
+              forcePage={currentPage - 1}
+            />
+            <select
+              className="perpage-select"
+              value={pageSize}
+              onChange={handlePageSizeChange}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+              <option value={500}>500</option>
+              <option value={1000}>1000</option>
+            </select>
+          </div>
+        )}
+
       </div>
     </div>
   );

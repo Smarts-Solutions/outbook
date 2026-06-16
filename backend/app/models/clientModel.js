@@ -740,6 +740,7 @@ const getClient = async (client) => {
       `
       SELECT  
         clients.id AS id,
+        clients.customer_id AS customer_id,
         clients.trading_name AS client_name,
         customers.trading_name AS customer_name,
         clients.status AS status,
@@ -1094,12 +1095,7 @@ async function getAllClientsSidebarFilter(
       extraFilter += ` AND clients.customer_id IN (${custArr.join(',')}) `;
     }
   }
-  if (![undefined, null, ""].includes(filters?.job_id)) {
-    const jobArr = Array.isArray(filters.job_id) ? filters.job_id : [filters.job_id];
-    if (jobArr.length > 0) {
-      extraFilter += ` AND jobs.id IN (${jobArr.join(',')}) `;
-    }
-  }
+  // Removed job_id filter to avoid restricting the Client dropdown when jobs are selected
 
   try {
     const [RoleAccess] = await pool.execute(
@@ -1131,6 +1127,7 @@ async function getAllClientsSidebarFilter(
           `
           SELECT  
             clients.id AS id,
+            clients.customer_id AS customer_id,
             clients.trading_name AS client_name,
             customers.trading_name AS customer_name,
             clients.status AS status,
@@ -1194,6 +1191,7 @@ async function getAllClientsSidebarFilter(
     const [data] = await connection.execute(
       `SELECT  
         clients.id AS id,
+        clients.customer_id AS customer_id,
         clients.trading_name AS client_name,
         customers.trading_name AS customer_name,
         clients.status AS status,

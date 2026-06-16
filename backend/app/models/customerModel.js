@@ -1359,21 +1359,7 @@ const get_customers_filter = async (customer) => {
 
     const rows = await QueryRoleHelperFunction(StaffUserId)
 
-    if (client_id?.length > 0 && job_id?.length === 0) {
-        return await getAllCustomerByClientIdFilter(client_id);
-    }
-    else if (client_id?.length === 0 && job_id?.length > 0) {
-        return await getAllCustomerByJobIdFilter(rows, job_id);
-    }
-    else if (client_id?.length > 0 && job_id?.length > 0) {
-        return await getAllCustomerByClientIdAndJobIdFilter(rows, client_id, job_id);
-    } else {
-        return await getCustomer_dropdown_filter({ StaffUserId, pagination, filters });
-    }
-
-
-
-
+    return await getCustomer_dropdown_filter({ StaffUserId, pagination, filters });
 }
 
 async function getAllCustomerByClientIdFilter(client_id) {
