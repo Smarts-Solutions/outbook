@@ -2252,6 +2252,8 @@ async function getAllJobsSidebarFilter(
            SELECT 
         customers.trading_name AS customers_trading_name,
         clients.trading_name AS client_trading_name,
+        jobs.customer_id AS customer_id,
+        jobs.client_id AS client_id,
         job_types.type AS job_type_name,
         jobs.job_id AS jobs_job_id,
         ${jobCodeExpr} AS job_code_id,
@@ -2336,6 +2338,8 @@ async function getAllJobsSidebarFilter(
       const query = `
           SELECT 
           jobs.id AS job_id,
+          jobs.customer_id AS customer_id,
+          jobs.client_id AS client_id,
           timesheet.job_id AS timesheet_job_id,
           job_types.type AS job_type_name,
           jobs.status_type AS status_type,
