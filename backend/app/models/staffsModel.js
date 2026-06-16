@@ -217,7 +217,21 @@ const getStaff = async (data) => {
               SELECT 1 FROM jobs WHERE jobs.staff_created_id = staffs.id OR jobs.account_manager_id = staffs.id
           )
           THEN TRUE ELSE FALSE 
-        END AS is_customer_exist
+        END AS is_customer_exist,
+        CASE
+        WHEN EXISTS (
+            SELECT 1
+            FROM staffs
+            JOIN staff_other_role ON staff_other_role.staff_id = staffs.id
+        )
+        THEN (
+            SELECT staff_other_role.role_id
+            FROM staffs
+            JOIN staff_other_role ON staff_other_role.staff_id = staffs.id
+            LIMIT 1
+        )
+        ELSE NULL
+    END AS staff_other_role
       FROM staffs
       JOIN roles ON staffs.role_id = roles.id
       LEFT JOIN line_managers lm ON lm.staff_by = staffs.id
