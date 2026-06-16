@@ -973,9 +973,13 @@ const StaffPage = () => {
   useEffect(() => {
     if (editStaffData && editStaffData) {
 
-      console.log("editStaffData", editStaffData);
+    //  console.log("editStaffData", editStaffData);
       const roleIds = [].concat(editStaffData?.role_id || []);
+      if(editStaffData?.staff_other_role_id != null){
+       roleIds.push(editStaffData?.staff_other_role_id)
+      }
 
+     
       formik.setFieldValue("first_name", editStaffData.first_name || "null");
       formik.setFieldValue("last_name", editStaffData.last_name || "null");
       formik.setFieldValue("email", editStaffData.email || "null");

@@ -218,20 +218,13 @@ const getStaff = async (data) => {
           )
           THEN TRUE ELSE FALSE 
         END AS is_customer_exist,
-        CASE
-        WHEN EXISTS (
-            SELECT 1
-            FROM staffs
-            JOIN staff_other_role ON staff_other_role.staff_id = staffs.id
-        )
-        THEN (
-            SELECT staff_other_role.role_id
-            FROM staffs
-            JOIN staff_other_role ON staff_other_role.staff_id = staffs.id
+         
+        (
+            SELECT sor.role_id
+            FROM staff_other_role sor
+            WHERE sor.staff_id = staffs.id
             LIMIT 1
-        )
-        ELSE NULL
-    END AS staff_other_role
+        ) AS staff_other_role_id
       FROM staffs
       JOIN roles ON staffs.role_id = roles.id
       LEFT JOIN line_managers lm ON lm.staff_by = staffs.id
