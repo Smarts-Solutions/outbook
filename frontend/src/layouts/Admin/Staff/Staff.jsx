@@ -1327,7 +1327,7 @@ const StaffPage = () => {
                     </select>
                   </>
                 ) : (
-                  <div className="text-center">
+                  <div className="text-center mt-5">
                     <img
                       src="/assets/images/No-data-amico.png"
                       alt="No records available"
