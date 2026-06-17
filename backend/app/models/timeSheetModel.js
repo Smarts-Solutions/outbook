@@ -147,7 +147,7 @@ const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds, LineManag
 
 
 
-const getTimesheet = async (Timesheet) => {
+const getTimesheet1 = async (Timesheet) => {
 
   const { staff_id, weekOffset } = Timesheet;
   const currentDate = new Date();
@@ -454,6 +454,276 @@ ORDER BY valid_weekOffsets ASC;
   }
 
 }
+
+const getTimesheet = async (Timesheet) => {
+
+  const { staff_id, weekOffset } = Timesheet;
+
+
+  // ✅ FIX: Monday ko week start mano, Sunday (0) ko 7 treat karo
+  const currentDate = new Date();
+  const currentDay = currentDate.getUTCDay(); // 0=Sun, 1=Mon ... 6=Sat
+  const daysSinceMonday = currentDay === 0 ? 6 : currentDay - 1; // Monday=0, Sunday=6
+
+  const startOfWeek = new Date(currentDate);
+  startOfWeek.setUTCDate(currentDate.getUTCDate() - daysSinceMonday + weekOffset * 7);
+  startOfWeek.setUTCHours(0, 0, 0, 0);
+
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setUTCDate(startOfWeek.getUTCDate() + 6);
+  endOfWeek.setUTCHours(23, 59, 59, 999);
+
+  const startOfWeekFormatted = startOfWeek.toISOString().slice(0, 10);
+  const endOfWeekFormatted = endOfWeek.toISOString().slice(0, 10);
+
+  // ✅ Validate karo date sahi bani hai ya nahi
+  if (isNaN(startOfWeek.getTime()) || isNaN(endOfWeek.getTime())) {
+    return { status: false, message: "Invalid weekOffset value." };
+  }
+
+  console.log("weekOffset:", weekOffset, "| Range:", startOfWeekFormatted, "→", endOfWeekFormatted);
+
+  try {
+
+    const query = `
+      SELECT 
+        timesheet.id AS id,
+        timesheet.staff_id AS staff_id,
+        timesheet.task_type AS task_type,
+        timesheet.customer_id AS customer_id,
+        timesheet.client_id AS client_id,
+        timesheet.job_id AS job_id,
+        timesheet.task_id AS task_id,
+        DATE_FORMAT(timesheet.monday_date, '%Y-%m-%d') AS monday_date,
+        REPLACE(SUBSTRING_INDEX(timesheet.monday_hours, ':', 2), ':', '.') AS monday_hours,
+        timesheet.monday_note AS monday_note,
+        DATE_FORMAT(timesheet.tuesday_date, '%Y-%m-%d') AS tuesday_date,
+        REPLACE(SUBSTRING_INDEX(timesheet.tuesday_hours, ':', 2), ':', '.') AS tuesday_hours,
+        timesheet.tuesday_note AS tuesday_note,
+        DATE_FORMAT(timesheet.wednesday_date, '%Y-%m-%d') AS wednesday_date,
+        REPLACE(SUBSTRING_INDEX(timesheet.wednesday_hours, ':', 2), ':', '.') AS wednesday_hours,
+        timesheet.wednesday_note AS wednesday_note,
+        DATE_FORMAT(timesheet.thursday_date, '%Y-%m-%d') AS thursday_date,
+        REPLACE(SUBSTRING_INDEX(timesheet.thursday_hours, ':', 2), ':', '.') AS thursday_hours,
+        timesheet.thursday_note AS thursday_note,
+        DATE_FORMAT(timesheet.friday_date, '%Y-%m-%d') AS friday_date,
+        REPLACE(SUBSTRING_INDEX(timesheet.friday_hours, ':', 2), ':', '.') AS friday_hours,
+        timesheet.friday_note AS friday_note,
+        DATE_FORMAT(timesheet.saturday_date, '%Y-%m-%d') AS saturday_date,
+        REPLACE(SUBSTRING_INDEX(timesheet.saturday_hours, ':', 2), ':', '.') AS saturday_hours,
+        timesheet.saturday_note AS saturday_note,
+        timesheet.remark AS remark,
+        timesheet.final_remark AS final_remark,
+        timesheet.status AS status,
+        timesheet.submit_status AS submit_status,
+        timesheet.save_date AS save_date,
+        timesheet.submit_date AS submit_date,
+        timesheet.duplicate_entry AS duplicate_entry,
+        timesheet.created_at AS created_at,
+        timesheet.updated_at AS updated_at,
+        internal.name AS internal_name,
+        internal.id AS internal_id,
+        sub_internal.name AS sub_internal_name,
+        sub_internal.id AS sub_internal_id,
+        customers.trading_name AS customer_name,
+        customers.id AS customer_id,
+        clients.trading_name AS client_name,
+        clients.id AS client_id,
+        job_types.type AS job_type_name,
+        job_types.id AS job_type_id,
+        CONCAT(
+          SUBSTRING(customers.trading_name, 1, 3), '_',
+          SUBSTRING(clients.trading_name, 1, 3), '_',
+          SUBSTRING(job_types.type, 1, 4), '_',
+          SUBSTRING(jobs.job_id, 1, 15)
+        ) AS job_name,
+        task.name AS task_name,
+        jobs.total_time AS job_total_time,
+        staffs.hourminute AS staffs_hourminute
+      FROM 
+        timesheet 
+        JOIN staffs ON staffs.id = timesheet.staff_id
+        LEFT JOIN internal ON timesheet.job_id = internal.id AND timesheet.task_type = 1
+        LEFT JOIN sub_internal ON timesheet.task_id = sub_internal.id AND timesheet.task_type = 1
+        LEFT JOIN customers ON customers.id = timesheet.customer_id AND timesheet.task_type = 2
+        LEFT JOIN clients ON clients.id = timesheet.client_id AND timesheet.task_type = 2
+        LEFT JOIN jobs ON jobs.id = timesheet.job_id AND timesheet.task_type = 2
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id AND timesheet.task_type = 2
+        LEFT JOIN task ON task.id = timesheet.task_id AND timesheet.task_type = 2
+      WHERE 
+        timesheet.staff_id = ? AND (
+          timesheet.monday_date    BETWEEN ? AND ? OR
+          timesheet.tuesday_date   BETWEEN ? AND ? OR
+          timesheet.wednesday_date BETWEEN ? AND ? OR
+          timesheet.thursday_date  BETWEEN ? AND ? OR
+          timesheet.friday_date    BETWEEN ? AND ? OR
+          timesheet.saturday_date  BETWEEN ? AND ?
+        )
+      ORDER BY timesheet.id ASC;
+    `;
+
+    const queryParams = [
+      staff_id,
+      startOfWeekFormatted, endOfWeekFormatted,
+      startOfWeekFormatted, endOfWeekFormatted,
+      startOfWeekFormatted, endOfWeekFormatted,
+      startOfWeekFormatted, endOfWeekFormatted,
+      startOfWeekFormatted, endOfWeekFormatted,
+      startOfWeekFormatted, endOfWeekFormatted,
+    ];
+
+    let [rows] = await pool.query(query, queryParams);
+
+    // console.log("rows ----------", rows.length);
+
+    // ✅ Week filter query — MySQL WEEKDAY() use karo (Monday=0 based, consistent)
+    const query_week_filter = `
+      SELECT  
+        id,
+        staff_id,
+        submit_status,
+        DATE_FORMAT(monday_date,    '%Y-%m-%d') AS monday_date,
+        DATE_FORMAT(tuesday_date,   '%Y-%m-%d') AS tuesday_date,
+        DATE_FORMAT(wednesday_date, '%Y-%m-%d') AS wednesday_date,
+        DATE_FORMAT(thursday_date,  '%Y-%m-%d') AS thursday_date,
+        DATE_FORMAT(friday_date,    '%Y-%m-%d') AS friday_date,
+        DATE_FORMAT(saturday_date,  '%Y-%m-%d') AS saturday_date,
+        DATE_FORMAT(sunday_date,    '%Y-%m-%d') AS sunday_date,
+
+        LEAST(
+          IF(monday_date IS NOT NULL,
+            TIMESTAMPDIFF(WEEK,
+              DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY),
+              DATE_SUB(monday_date, INTERVAL WEEKDAY(monday_date) DAY)
+            ), 999),
+          IF(tuesday_date IS NOT NULL,
+            TIMESTAMPDIFF(WEEK,
+              DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY),
+              DATE_SUB(tuesday_date, INTERVAL WEEKDAY(tuesday_date) DAY)
+            ), 999),
+          IF(wednesday_date IS NOT NULL,
+            TIMESTAMPDIFF(WEEK,
+              DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY),
+              DATE_SUB(wednesday_date, INTERVAL WEEKDAY(wednesday_date) DAY)
+            ), 999),
+          IF(thursday_date IS NOT NULL,
+            TIMESTAMPDIFF(WEEK,
+              DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY),
+              DATE_SUB(thursday_date, INTERVAL WEEKDAY(thursday_date) DAY)
+            ), 999),
+          IF(friday_date IS NOT NULL,
+            TIMESTAMPDIFF(WEEK,
+              DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY),
+              DATE_SUB(friday_date, INTERVAL WEEKDAY(friday_date) DAY)
+            ), 999),
+          IF(saturday_date IS NOT NULL,
+            TIMESTAMPDIFF(WEEK,
+              DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY),
+              DATE_SUB(saturday_date, INTERVAL WEEKDAY(saturday_date) DAY)
+            ), 999),
+          IF(sunday_date IS NOT NULL,
+            TIMESTAMPDIFF(WEEK,
+              DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY),
+              DATE_SUB(sunday_date, INTERVAL WEEKDAY(sunday_date) DAY)
+            ), 999)
+        ) AS valid_weekOffsets
+
+      FROM timesheet 
+      WHERE 
+        staff_id = ? 
+        AND submit_status = '1'
+      GROUP BY valid_weekOffsets  
+      ORDER BY valid_weekOffsets ASC;
+    `;
+
+    const [rows1] = await pool.query(query_week_filter, [staff_id]);
+
+    //  console.log("rows1", rows1.length);
+    //  console.log("rows1", rows1);
+
+
+
+    // ✅ Helper function — duplicate map logic avoid karo
+    const mapFilterRows = (rows) =>
+      rows
+        .map(item => {
+          if (item.valid_weekOffsets === null || item.valid_weekOffsets === undefined) return null;
+
+          const firstDate =
+            item.monday_date ||
+            item.tuesday_date ||
+            item.wednesday_date ||
+            item.thursday_date ||
+            item.friday_date ||
+            item.saturday_date;
+
+          if (!firstDate) return null;
+
+          return {
+            id: item.id,
+            staff_id: item.staff_id,
+            valid_weekOffsets: item.valid_weekOffsets,
+            month_date: firstDate,
+          };
+        })
+        .filter(Boolean);
+
+    const filterDataWeek = mapFilterRows(rows1);
+
+    //console.log("filterDataWeek", filterDataWeek.length);
+
+    const filterDataWeekSubmitTimeSheet = mapFilterRows(
+      rows1.filter(item => item.submit_status === '1')
+    );
+
+    const dateFields = [
+      "monday_date",
+      "tuesday_date",
+      "wednesday_date",
+      "thursday_date",
+      "friday_date",
+      "saturday_date",
+    ];
+
+    const monday = new Date();
+    const day = monday.getDay();
+    monday.setDate(monday.getDate() + (day === 0 ? -6 : 1 - day));
+    monday.setHours(0, 0, 0, 0);
+    if(weekOffset === 0){
+    rows = rows.filter(
+      (row) =>
+        !dateFields.some(
+          (field) =>
+            row[field] &&
+            new Date(row[field]).setHours(0, 0, 0, 0) < monday.getTime()
+        )
+    );
+  }
+
+
+
+
+    //console.log("filterDataWeekSubmitTimeSheet--", filterDataWeekSubmitTimeSheet.length);
+   // console.log("rows--", rows);
+
+    return {
+      status: true,
+      message: "success.",
+      data: rows,
+      filterDataWeek,
+      filterDataWeekSubmitTimeSheet,
+    };
+
+  } catch (err) {
+    console.error("getTimesheet Error:", err);
+    return {
+      status: false,
+      message: "Err getTimesheet Data View Get",
+      error: err.message,
+    };
+  }
+
+};
 
 const getTimesheetTaskType = async (Timesheet) => {
   const { staff_id, task_type, StaffUserId } = Timesheet
