@@ -1200,7 +1200,6 @@ const Timesheet = () => {
         // note States reset
         setIsModalOpen(false);
         setModalText("");
-       
         return;
       } else {
         sweatalert.fire({
