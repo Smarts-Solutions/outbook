@@ -53,7 +53,7 @@ const Timesheet = () => {
     if (type === "convert") {
       now = new Date(date);
     }
-
+    
     const year = now.getFullYear();
     const month = now.getMonth() + 1; // Months are 0-indexed
     const week = Math.ceil(now.getDate() / 7); // Calculate week number of the month
