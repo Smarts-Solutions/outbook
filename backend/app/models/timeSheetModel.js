@@ -676,29 +676,63 @@ const getTimesheet = async (Timesheet) => {
       rows1.filter(item => item.submit_status === '1')
     );
 
-    const dateFields = [
-      "monday_date",
-      "tuesday_date",
-      "wednesday_date",
-      "thursday_date",
-      "friday_date",
-      "saturday_date",
-    ];
+  //   const dateFields = [
+  //     "monday_date",
+  //     "tuesday_date",
+  //     "wednesday_date",
+  //     "thursday_date",
+  //     "friday_date",
+  //     "saturday_date",
+  //   ];
 
-    const monday = new Date();
-    const day = monday.getDay();
-    monday.setDate(monday.getDate() + (day === 0 ? -6 : 1 - day));
-    monday.setHours(0, 0, 0, 0);
-    if(weekOffset === 0){
-    rows = rows.filter(
-      (row) =>
-        !dateFields.some(
-          (field) =>
-            row[field] &&
-            new Date(row[field]).setHours(0, 0, 0, 0) < monday.getTime()
-        )
-    );
-  }
+  //   const monday = new Date();
+  //   const day = monday.getDay();
+  //   monday.setDate(monday.getDate() + (day === 0 ? -6 : 1 - day));
+  //   monday.setHours(0, 0, 0, 0);
+  //   if(weekOffset === 0){
+  //   rows = rows.filter(
+  //     (row) =>
+  //       !dateFields.some(
+  //         (field) =>
+  //           row[field] &&
+  //           new Date(row[field]).setHours(0, 0, 0, 0) < monday.getTime()
+  //       )
+  //   );
+  // }
+
+
+
+const dateFields = [
+  "monday_date",
+  "tuesday_date",
+  "wednesday_date",
+  "thursday_date",
+  "friday_date",
+  "saturday_date",
+];
+
+// Current week ka Monday nikalo
+const monday = new Date();
+const day = monday.getDay();
+monday.setDate(monday.getDate() + (day === 0 ? -6 : 1 - day));
+monday.setHours(0, 0, 0, 0);
+
+// weekOffset apply karo — 7 din ka shift
+monday.setDate(monday.getDate() + weekOffset * 7);
+
+// Us week ka Saturday
+const saturday = new Date(monday);
+saturday.setDate(monday.getDate() + 5);
+saturday.setHours(23, 59, 59, 999);
+
+// Filter: sirf wahi rows jinka koi bhi dateField us week ke andar ho
+rows = rows.filter((row) =>
+  dateFields.some((field) => {
+    if (!row[field]) return false;
+    const d = new Date(row[field]).setHours(0, 0, 0, 0);
+    return d >= monday.getTime() && d <= saturday.getTime();
+  })
+);
 
 
 
