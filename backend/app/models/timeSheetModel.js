@@ -1663,6 +1663,24 @@ const saveTimesheet = async (Timesheet) => {
                 );
               }
             }
+           
+            if(Number(row?.submit_status) === 1){
+                let updateString = ""; 
+                days.forEach(({ day, date, hours }) => {
+                    if(!['',null,undefined].includes(date) && !['',null,undefined].includes(hours)){
+                    updateString += ` Date:${date}, Updated hours:${hours}`;
+                    }
+                });
+
+                timesheet_log_msg.push(
+                  `submitted a timesheet entry. Task type:${task_type_name},
+                ${updateString},
+                Job code:${JobTaskName.job_name},
+                Task name:${JobTaskName.task_name}`
+                );
+            }
+
+
           }
         })
       );
