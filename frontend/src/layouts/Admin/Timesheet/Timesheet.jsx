@@ -849,6 +849,7 @@ const Timesheet = () => {
   const handleHoursInput = async (e, index, day_name, date_value, item) => {
     let value = e.target.value;
     let name = e.target.name;
+   
 
     let final_value = value;
 
