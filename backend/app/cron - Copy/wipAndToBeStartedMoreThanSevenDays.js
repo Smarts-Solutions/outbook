@@ -1,27 +1,21 @@
-// Wip And To Be Started More Than Seven Days Report Email Worker
-const pool = require('../config/database');
+const pool = require("../config/database");
 const { parentPort } = require("worker_threads");
 const { commonEmail } = require("../utils/commonEmail");
-const convertDate = (date) => {
-  if ([null, undefined, ''].includes(date)) {
-    return "-";
-  }
-  if (date) {
-    let newDate = new Date(date);
-    let day = newDate.getDate();
-    let month = newDate.getMonth() + 1;
-    let year = newDate.getFullYear();
-    return `${day}/${month}/${year}`;
-  }
-  return "-";
-}
+const { logEmail } = require("../utils/emailLogger");
 
+/* ---------------- HELPERS ---------------- */
+
+const convertDate = (date) => {
+  if (!date) return "-";
+  const d = new Date(date);
+  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+};
 
 const formatCSV = (value) => {
-  if (!value) return ' - ';
+  if (!value) return " - ";
   value = value.toString();
 
-  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+  if (value.includes(",") || value.includes('"') || value.includes("\n")) {
     value = value.replace(/"/g, '""');
     return `"${value}"`;
   }
@@ -29,9 +23,40 @@ const formatCSV = (value) => {
   return value;
 };
 
+/* 🔥 LIMIT PARALLEL EXECUTION */
+async function processWithLimit(items, limit, handler) {
+  let index = 0;
+
+  async function worker() {
+    while (index < items.length) {
+      const currentIndex = index++;
+      await handler(items[currentIndex]);
+    }
+  }
+
+  const workers = Array(limit).fill(null).map(worker);
+  await Promise.all(workers);
+}
+
+/* ---------------- MAIN WORKER ---------------- */
 
 parentPort.on("message", async (rows) => {
-  const query = `
+  try {
+    /* ✅ STEP 1: REMOVE DUPLICATES */
+    const uniqueUsers = [];
+    const seen = new Set();
+
+    for (const r of rows) {
+      if (!seen.has(r.staff_email)) {
+        seen.add(r.staff_email);
+        uniqueUsers.push(r);
+      }
+    }
+
+    parentPort.postMessage(`Total unique users: ${uniqueUsers.length}`);
+
+    /* ✅ STEP 2: FETCH JOBS (ONLY ONCE) */
+    const query = `
         SELECT 
         jobs.id AS id,
         job_allowed_staffs.staff_id AS job_allowed_staff_id,
@@ -99,104 +124,114 @@ parentPort.on("message", async (rows) => {
         ORDER BY 
           jobs.id DESC;
         `;
-  const [result] = await pool.execute(query);
+    const [result] = await pool.execute(query);
 
-//  console.log("WIP and To Be Started More Than 7 Days - Jobs fetched:", result);
+    if (!result.length) {
+      parentPort.postMessage("No jobs found");
+      return;
+    }
 
-  let  csvContent = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
-  if (result && result.length > 0) {
-    result?.forEach(val => {
+    /* ✅ STEP 3: GENERATE CSV ONCE */
 
-      let job_received_on = convertDate(val.job_received_on);
-      let customer_trading_name = formatCSV(val.customer_trading_name) || ' - ';
-      let account_manager_name = formatCSV(val.account_manager_name) || ' - ';
-      let client_trading_name = formatCSV(val.client_trading_name) || ' - ';
-      let service_name = formatCSV(val.service_name) || ' - ';
-      let job_type_name = formatCSV(val.job_type_name) || ' - ';
-      let status = formatCSV(val.status) || ' - ';
-      let allocated_name = formatCSV(val.allocated_name) || ' - ';
-      let multiple_staff_names = formatCSV(val.multiple_staff_names) || ' - ';
-      let reviewer_name = formatCSV(val.reviewer_name) || ' - ';
-      let filing_Companies_date = convertDate(val.filing_Companies_date) || ' - ';
-      let internal_deadline_date = convertDate(val.internal_deadline_date) || ' - ';
-      let customer_deadline_date = convertDate(val.customer_deadline_date) || ' - ';
-      let query_sent_date = convertDate(val.query_sent_date) || ' - ';
-      let final_query_response_received_date = convertDate(val.final_query_response_received_date) || ' - ';
-      let draft_sent_on = convertDate(val.draft_sent_on) || ' - ';
-      let final_draft_sent_on = convertDate(val.final_draft_sent_on) || ' - ';
+    let csv =
+      "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
+    if (result && result.length > 0) {
+      result?.forEach((val) => {
+        let job_received_on = convertDate(val.job_received_on);
+        let customer_trading_name =
+          formatCSV(val.customer_trading_name) || " - ";
+        let account_manager_name = formatCSV(val.account_manager_name) || " - ";
+        let client_trading_name = formatCSV(val.client_trading_name) || " - ";
+        let service_name = formatCSV(val.service_name) || " - ";
+        let job_type_name = formatCSV(val.job_type_name) || " - ";
+        let status = formatCSV(val.status) || " - ";
+        let allocated_name = formatCSV(val.allocated_name) || " - ";
+        let multiple_staff_names = formatCSV(val.multiple_staff_names) || " - ";
+        let reviewer_name = formatCSV(val.reviewer_name) || " - ";
+        let filing_Companies_date =
+          convertDate(val.filing_Companies_date) || " - ";
+        let internal_deadline_date =
+          convertDate(val.internal_deadline_date) || " - ";
+        let customer_deadline_date =
+          convertDate(val.customer_deadline_date) || " - ";
+        let query_sent_date = convertDate(val.query_sent_date) || " - ";
+        let final_query_response_received_date =
+          convertDate(val.final_query_response_received_date) || " - ";
+        let draft_sent_on = convertDate(val.draft_sent_on) || " - ";
+        let final_draft_sent_on = convertDate(val.final_draft_sent_on) || " - ";
 
+        csv += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
+      });
+    }
 
+    /* ✅ STEP 4: SEND EMAILS WITH LIMIT */
+    await processWithLimit(uniqueUsers, 5, async (user) => {
+      try {
 
-      csvContent += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
-    });
-  }
+        
+        let finalCSV = csv;
 
- //  console.log("CSV Content Generated:-- rows", rows);
+        /* 👉 NON ADMIN USER */
+        if (![1, 2, 8].includes(user.role_id)) {
+          const res = await otherUserDataGet(user);
+          if (!res.status) return;
+          finalCSV = res.csvContent;
+        }
 
-  for (const row of rows) {
-    try {
-
-      if (result && result.length > 0) {
-        //console.log("CSV Content Generated:\n", csvContent);
-
-        if([1,2,8].includes(row.role_id)){
-
-        let toEmail = row.staff_email;
+        let toEmail = user?.staff_email;
         let subjectEmail = "Jobs (WIP / To Be Started) Not Updated in the Last 7 Days"
         let htmlEmail = "<h3>Alert: Jobs (WIP / To Be Started) Not Updated in the Last 7 Days.</h3>"
-        const dynamic_attachment = csvContent;
-       const filename = `Jobs (with status WIP and To Be Started) that haven’t been modified for more than 7 days consecutively -${new Date().toISOString().slice(0, 10)}.csv`;
+        const dynamic_attachment = finalCSV;
+        const filename = `Jobs (with status WIP and To Be Started) that haven’t been modified for more than 7 days consecutively -${new Date().toISOString().slice(0, 10)}.csv`;
 
-        //parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
+        const sent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
 
-        const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
-        if (emailSent) {
-          
-          parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
-        } else {
-        
-          parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
-        }
+         const csvToJson = (csv) => {
+          const lines = csv.trim().split("\n");
 
-      }else{
-           
-      await otherUserDataGet(row).then(async (res)=>{
-        if(res.status){
-          let toEmail = row.staff_email;
-          let subjectEmail = "Jobs (WIP / To Be Started) Not Updated in the Last 7 Days"
-          let htmlEmail = "<h3>Alert: Jobs (WIP / To Be Started) Not Updated in the Last 7 Days.</h3>"
-          const dynamic_attachment = res.csvContent;
-          const filename = `Jobs (with status WIP and To Be Started) that haven’t been modified for more than 7 days consecutively -${new Date().toISOString().slice(0, 10)}.csv`;
+          // headers
+          const headers = lines[0].split(",");
 
-          const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
-          if (emailSent) {
+          // data rows
+          const result = lines.slice(1).map((line) => {
+            const values = line.split(",");
 
-            parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
-          } else {
-            parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
-          }
-        }
-      });
+            let obj = {};
+            headers.forEach((header, index) => {
+              obj[header.trim()] = values[index]?.trim() || "";
+            });
 
+            return obj;
+          });
 
+          return result;
+        };
+        const attachmentJson = csvToJson(dynamic_attachment);
+          logEmail({
+            toEmail: toEmail,
+            filename: filename,
+            attachment: attachmentJson,
+            logFileName: "wipAndToBeStartedMoreThanSevenDays.json",
+          });
+
+        parentPort.postMessage(
+          sent ? `✅ ${user.staff_email}` : `❌ ${user.staff_email}`
+        );
+
+      } catch (err) {
+        parentPort.postMessage(`❌ ${user.staff_email}: ${err.message}`);
       }
+    });
 
-
-
-      } else {
-        parentPort.postMessage(`ℹ️ No missing timesheet report for ${row.staff_email}`);
-      }
-
-
-    } catch (err) {
-      parentPort.postMessage(`❌ Failed for ${row.id}: ${err.message}`);
-    }
+   
+    parentPort.postMessage("All emails processed ✅");
+  } catch (err) {
+    parentPort.postMessage("Worker failed: " + err.message);
   }
 });
 
-
 async function otherUserDataGet(row) {
- const query = `
+  const query = `
         SELECT 
         jobs.id AS id,
         jobs.staff_created_id AS staff_created_id,
@@ -274,38 +309,38 @@ async function otherUserDataGet(row) {
         `;
 
   const [result] = await pool.execute(query);
- // console.log("Generating CSV for other user: Length --- ", result.length);
-  let  csvContent = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
+  // console.log("Generating CSV for other user: Length --- ", result.length);
+  let csvContent =
+    "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
   if (result && result.length > 0) {
-    result?.forEach(val => {
-
+    result?.forEach((val) => {
       let job_received_on = convertDate(val.job_received_on);
-      let customer_trading_name = formatCSV(val.customer_trading_name) || ' - ';
-      let account_manager_name = formatCSV(val.account_manager_name) || ' - ';
-      let client_trading_name = formatCSV(val.client_trading_name) || ' - ';
-      let service_name = formatCSV(val.service_name) || ' - ';
-      let job_type_name = formatCSV(val.job_type_name) || ' - ';
-      let status = formatCSV(val.status) || ' - ';
-      let allocated_name = formatCSV(val.allocated_name) || ' - ';
-      let multiple_staff_names = formatCSV(val.multiple_staff_names) || ' - ';
-      let reviewer_name = formatCSV(val.reviewer_name) || ' - ';
-      let filing_Companies_date = convertDate(val.filing_Companies_date) || ' - ';
-      let internal_deadline_date = convertDate(val.internal_deadline_date) || ' - ';
-      let customer_deadline_date = convertDate(val.customer_deadline_date) || ' - ';
-      let query_sent_date = convertDate(val.query_sent_date) || ' - ';
-      let final_query_response_received_date = convertDate(val.final_query_response_received_date) || ' - ';
-      let draft_sent_on = convertDate(val.draft_sent_on) || ' - ';
-      let final_draft_sent_on = convertDate(val.final_draft_sent_on) || ' - ';
-
-
+      let customer_trading_name = formatCSV(val.customer_trading_name) || " - ";
+      let account_manager_name = formatCSV(val.account_manager_name) || " - ";
+      let client_trading_name = formatCSV(val.client_trading_name) || " - ";
+      let service_name = formatCSV(val.service_name) || " - ";
+      let job_type_name = formatCSV(val.job_type_name) || " - ";
+      let status = formatCSV(val.status) || " - ";
+      let allocated_name = formatCSV(val.allocated_name) || " - ";
+      let multiple_staff_names = formatCSV(val.multiple_staff_names) || " - ";
+      let reviewer_name = formatCSV(val.reviewer_name) || " - ";
+      let filing_Companies_date =
+        convertDate(val.filing_Companies_date) || " - ";
+      let internal_deadline_date =
+        convertDate(val.internal_deadline_date) || " - ";
+      let customer_deadline_date =
+        convertDate(val.customer_deadline_date) || " - ";
+      let query_sent_date = convertDate(val.query_sent_date) || " - ";
+      let final_query_response_received_date =
+        convertDate(val.final_query_response_received_date) || " - ";
+      let draft_sent_on = convertDate(val.draft_sent_on) || " - ";
+      let final_draft_sent_on = convertDate(val.final_draft_sent_on) || " - ";
 
       csvContent += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
     });
 
-  return {status:true, csvContent}; 
-  }else{
-   return {status:false};
+    return { status: true, csvContent };
+  } else {
+    return { status: false };
   }
-
-  
 }

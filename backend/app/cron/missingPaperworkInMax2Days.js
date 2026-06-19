@@ -124,8 +124,9 @@ parentPort.on("message", async (rows) => {
         drafts ON drafts.job_id = jobs.id
         LEFT JOIN 
         missing_logs ON jobs.id = missing_logs.job_id
-        WHERE 
-        DATE(jobs.date_received_on) < CURDATE() - INTERVAL 2 DAY
+        WHERE
+        customers.status = 1
+        AND DATE(jobs.date_received_on) < CURDATE() - INTERVAL 2 DAY
         AND jobs.status_type = 2
         AND missing_logs.job_id IS NULL
         GROUP BY jobs.id
@@ -316,8 +317,9 @@ async function otherUserDataGet(row) {
         drafts ON drafts.job_id = jobs.id
         LEFT JOIN 
         missing_logs ON jobs.id = missing_logs.job_id
-        WHERE 
-        (
+        WHERE
+        customers.status = 1
+        AND (
         DATE(jobs.date_received_on) < CURDATE() - INTERVAL 2 DAY
         AND jobs.status_type = 2
         AND missing_logs.job_id IS NULL

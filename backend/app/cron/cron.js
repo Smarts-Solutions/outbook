@@ -9,8 +9,8 @@ module.exports = (app) => {
   // Schedule tasks to be run on the server.
 
   // Missing Timesheet Report Email to Individual Staff on every Monday at 09:00 AM
-  // cron.schedule( "30 9 * * 1",async () => {
-    cron.schedule( "14 15 * * *",async () => {
+   cron.schedule( "30 9 * * 1",async () => {
+   // cron.schedule( "05 10 * * *",async () => {
       ////////-----------Missing Timesheet Report Email --------------------//////
        if (process.env.NODE_APP_INSTANCE === "0") {
       const [staffResult] = await pool.execute(`
@@ -23,7 +23,7 @@ module.exports = (app) => {
     WHERE status = '1'
     `);
       // console.log("staffResult , ",staffResult);
-    //  sendEmailInWorkerMissingTimeSheet(staffResult || []);
+     sendEmailInWorkerMissingTimeSheet(staffResult || []);
 
       ////////-----------Submit Timesheet Reminder Email --------------------//////
 
@@ -44,9 +44,9 @@ module.exports = (app) => {
        }
     },
 
-    // {
-    //   timezone: "Europe/London",
-    // },
+    {
+      timezone: "Europe/London",
+    },
   );
  
 
@@ -89,7 +89,7 @@ module.exports = (app) => {
 
 
    // 2. Expected Delivery Date Changed Report Email to Super Admin and Admin and Management Role Staffs
-  cron.schedule( "49 15 * * *",async () => {
+  cron.schedule( "35 8 * * *",async () => {
       ////////-----------Trigger Report Email --------------------//////
       if (process.env.NODE_APP_INSTANCE === "0") {
        
@@ -121,9 +121,9 @@ module.exports = (app) => {
  
     }
     , 
-    // {
-    //   timezone: "Europe/London"
-    // }
+    {
+      timezone: "Europe/London"
+    }
   );
   
 
