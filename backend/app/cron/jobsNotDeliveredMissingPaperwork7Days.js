@@ -112,7 +112,7 @@ parentPort.on("message", async (rows) => {
         LEFT JOIN queries ON queries.job_id = jobs.id
         LEFT JOIN drafts ON drafts.job_id = jobs.id
 
-      WHERE customers.status = 1
+      WHERE customers.status = '1'
         AND jobs.status_updation_date < CURDATE() - INTERVAL 7 DAY
         AND jobs.status_type = 2
 
@@ -298,7 +298,7 @@ async function otherUserDataGet(row) {
         LEFT JOIN queries ON queries.job_id = jobs.id
         LEFT JOIN drafts ON drafts.job_id = jobs.id
 
-      WHERE customers.status = 1
+      WHERE customers.status = '1'
         AND (
         jobs.status_updation_date < CURDATE() - INTERVAL 7 DAY
         AND jobs.status_type = 2

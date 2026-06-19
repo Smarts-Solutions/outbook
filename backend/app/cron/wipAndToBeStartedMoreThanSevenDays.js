@@ -119,7 +119,7 @@ parentPort.on("message", async (rows) => {
         queries ON queries.job_id = jobs.id
         LEFT JOIN
         drafts ON drafts.job_id = jobs.id
-        WHERE customers.status = 1 ANDjobs.status_type = 1 AND DATE(jobs.date_received_on) <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        WHERE customers.status = '1' ANDjobs.status_type = 1 AND DATE(jobs.date_received_on) <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
         GROUP BY jobs.id
         ORDER BY 
           jobs.id DESC;
@@ -299,7 +299,7 @@ async function otherUserDataGet(row) {
         LEFT JOIN
         drafts ON drafts.job_id = jobs.id
         WHERE 
-        customers.status = 1 AND jobs.status_type = 1 AND DATE(jobs.date_received_on) <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        customers.status = '1' AND jobs.status_type = 1 AND DATE(jobs.date_received_on) <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
         AND assigned_jobs_staff_view.staff_id = ${row?.id}  AND (
     assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
     OR jobs.service_id = assigned_jobs_staff_view.service_id_assign

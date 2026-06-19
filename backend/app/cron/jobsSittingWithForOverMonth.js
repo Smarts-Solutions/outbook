@@ -124,7 +124,7 @@ parentPort.on("message", async (rows) => {
         LEFT JOIN
         drafts ON drafts.job_id = jobs.id
         WHERE
-        customers.status = 1
+        customers.status = '1'
         AND jobs.date_received_on <= NOW() - INTERVAL 1 MONTH
         AND jobs.status_type NOT IN (6,7,17,18,19,20)
         GROUP BY jobs.id
@@ -311,7 +311,7 @@ async function otherUserDataGet(row) {
         LEFT JOIN
         drafts ON drafts.job_id = jobs.id
         WHERE
-        customers.status = 1
+        customers.status = '1'
         AND (
         jobs.date_received_on <= NOW() - INTERVAL 1 MONTH
         AND jobs.status_type NOT IN (6,7,17,18,19,20)

@@ -125,7 +125,7 @@ parentPort.on("message", async (rows) => {
         LEFT JOIN 
         missing_logs ON jobs.id = missing_logs.job_id
         WHERE
-        customers.status = 1
+        customers.status = '1'
         AND DATE(jobs.date_received_on) < CURDATE() - INTERVAL 2 DAY
         AND jobs.status_type = 2
         AND missing_logs.job_id IS NULL
@@ -318,7 +318,7 @@ async function otherUserDataGet(row) {
         LEFT JOIN 
         missing_logs ON jobs.id = missing_logs.job_id
         WHERE
-        customers.status = 1
+        customers.status = '1'
         AND (
         DATE(jobs.date_received_on) < CURDATE() - INTERVAL 2 DAY
         AND jobs.status_type = 2
