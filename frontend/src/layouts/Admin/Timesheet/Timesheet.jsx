@@ -87,7 +87,7 @@ const Timesheet = () => {
 
   useEffect(() => {
      const today = new Date();
-    //const today = new Date("2026-06-21");
+    //const today = new Date("2026-06-14");
     let dayOfWeek = today.getDay();
    
     dayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
