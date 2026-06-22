@@ -94,6 +94,7 @@ parentPort.on("message", async (rows) => {
           DATE_FORMAT(jobs.created_at, '%Y-%m-%d') AS job_received_on,
           DATE_FORMAT(jobs.expected_delivery_date, '%d/%m/%Y') AS expected_delivery_date,
           DATE_FORMAT(jobs.expected_delivery_date_old, '%d/%m/%Y') AS expected_delivery_date_old,
+          CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS created_by,
         GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR '| ') AS multiple_staff_names
         FROM 
         jobs
@@ -135,7 +136,7 @@ parentPort.on("message", async (rows) => {
       return;
     }
     let csv =
-      "Job Id,Expected Delivery Date ,Expected Delivery Date Old,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
+      "Job Id,Expected Delivery Date ,Expected Delivery Date Old,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent,Created By\n";
 
     if (result && result.length > 0) {
       result?.forEach((val) => {
@@ -166,7 +167,9 @@ parentPort.on("message", async (rows) => {
         let draft_sent_on = convertDate(val.draft_sent_on) || " - ";
         let final_draft_sent_on = convertDate(val.final_draft_sent_on) || " - ";
 
-        csv += `${val.job_code_id},${expected_delivery_date},${expected_delivery_date_old},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
+        let created_by = val.created_by || " - ";
+
+        csv += `${val.job_code_id},${expected_delivery_date},${expected_delivery_date_old},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on},${created_by}\n`;
       });
     }
 
