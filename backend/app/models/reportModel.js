@@ -99,6 +99,7 @@ const jobStatusReports = async (Report) => {
         jobs.Year_id_2 AS Year_id_2,
         jobs.Other_FromDate_id_2 AS Other_FromDate_id_2,
         jobs.Other_ToDate_id_2 AS Other_ToDate_id_2,
+        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS created_by,
         
 
 
@@ -149,6 +150,7 @@ const jobStatusReports = async (Report) => {
       LEFT JOIN staffs ON jobs.allocated_to = staffs.id
       LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
       LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+      LEFT JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
       LEFT JOIN master_status ON master_status.id = jobs.status_type
       LEFT JOIN queries ON queries.job_id = jobs.id
       LEFT JOIN drafts ON drafts.job_id = jobs.id

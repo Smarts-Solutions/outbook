@@ -475,6 +475,16 @@ const JobStatus = () => {
       reorder: false,
       sortable: true,
     },
+
+     {
+      name: "Created By",
+      cell: (row) => (
+        <div title={row?.created_by}>{row?.created_by}</div>
+      ),
+      selector: (row) => row?.created_by,
+      reorder: false,
+      sortable: true,
+    },
   ];
 
 
