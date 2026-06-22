@@ -123,7 +123,7 @@ const Timesheet = () => {
   // }, [weekOffset]);
 
   useEffect(() => {
-  //  const today = new Date("2026-06-21"); // test sunday
+  // const today = new Date("2026-06-21"); // test sunday
   const today = new Date();
 
   let dayOfWeek = today.getDay();
