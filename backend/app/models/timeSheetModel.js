@@ -1,5 +1,5 @@
 const pool = require("../config/database");
-const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds, LineManageStaffIdHelperFunction, QueryRoleHelperFunction } = require('../utils/helper');
+const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds, LineManageStaffIdHelperFunction, QueryRoleHelperFunction ,buildAssignedJobsTempTable} = require('../utils/helper');
 
 
 // SELECT 
@@ -781,7 +781,8 @@ const getTimesheetTaskType = async (Timesheet) => {
 
       try {
         // Line Manager
-        const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
+        let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
+        
 
         // Get Role
         const rows = await QueryRoleHelperFunction(StaffUserId)
@@ -841,6 +842,14 @@ const getTimesheetTaskType = async (Timesheet) => {
         //      ORDER BY customers.id DESC
         //    `;
         //   const [result] = await pool.execute(query, [staff_id, staff_id]);
+
+        LineManageStaffId = [
+          ...new Set(LineManageStaffId),
+        ];
+        const connection = await pool.getConnection();
+        await buildAssignedJobsTempTable(connection, LineManageStaffId);
+
+
         let query = `
        SELECT  
         customers.id AS id,
@@ -855,13 +864,13 @@ const getTimesheetTaskType = async (Timesheet) => {
         FROM 
             customers
         LEFT JOIN
-            assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+            temp_assigned_jobs_staff ON temp_assigned_jobs_staff.customer_id = customers.id
         WHERE
-           customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+           customers.staff_id IN (${LineManageStaffId}) OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
            GROUP BY customers.id
            ORDER BY customers.trading_name ASC
          `;
-        const [result] = await pool.execute(query);
+        const [result] = await connection.execute(query);
         return { status: true, message: 'Success..', data: result };
 
       } catch (err) {
@@ -875,7 +884,7 @@ const getTimesheetTaskType = async (Timesheet) => {
 
       try {
         // Line Manager
-        const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
+        let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
         // Get Role
         const rows = await QueryRoleHelperFunction(StaffUserId)
@@ -961,6 +970,14 @@ const getTimesheetTaskType = async (Timesheet) => {
         //               clients.id DESC;
         // `;
         // const [result] = await pool.execute(query, [StaffUserId, StaffUserId]);
+
+       LineManageStaffId = [
+          ...new Set(LineManageStaffId),
+        ];
+        const connection = await pool.getConnection();
+        await buildAssignedJobsTempTable(connection, LineManageStaffId);
+
+
         const query = `
               SELECT  
                 clients.id AS id,
@@ -974,17 +991,17 @@ const getTimesheetTaskType = async (Timesheet) => {
                   FROM 
                       clients
                   JOIN 
-                      assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id    
+                      temp_assigned_jobs_staff ON temp_assigned_jobs_staff.client_id = clients.id    
                   JOIN 
                       customers ON customers.id = clients.customer_id 
                   WHERE 
-                  (clients.staff_created_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})) AND assigned_jobs_staff_view.customer_id = ${customer_id}
+                  (clients.staff_created_id IN (${LineManageStaffId}) OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})) AND temp_assigned_jobs_staff.customer_id = ${customer_id}
                   GROUP BY
                       clients.id
                   ORDER BY 
                       clients.trading_name ASC;
         `;
-        const [result] = await pool.execute(query);
+        const [result] = await connection.execute(query);
         return { status: true, message: "success.", data: result };
 
       } catch (err) {
@@ -1000,7 +1017,7 @@ const getTimesheetTaskType = async (Timesheet) => {
 
       try {
         // Line Manager
-        const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
+        let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
 
         // Get Role
         const rows = await QueryRoleHelperFunction(StaffUserId)
@@ -1068,6 +1085,11 @@ const getTimesheetTaskType = async (Timesheet) => {
         }
 
         // Other Role Data
+          LineManageStaffId = [
+          ...new Set(LineManageStaffId),
+        ];
+        const connection = await pool.getConnection();
+        await buildAssignedJobsTempTable(connection, LineManageStaffId);
         const query = `
         SELECT 
          job_types.id AS job_type_id,
@@ -1076,8 +1098,8 @@ const getTimesheetTaskType = async (Timesheet) => {
          jobs.total_time AS job_total_time,
          jobs.staff_created_id AS staff_created_id,
 
-        assigned_jobs_staff_view.source AS assigned_source,
-        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        temp_assigned_jobs_staff.source AS assigned_source,
+        temp_assigned_jobs_staff.service_id_assign AS service_id_assign,
         jobs.service_id AS job_service_id,
 
          CONCAT(
@@ -1090,7 +1112,7 @@ const getTimesheetTaskType = async (Timesheet) => {
         FROM 
         jobs
         LEFT JOIN 
-          assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+          temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = jobs.id
         JOIN 
         services ON jobs.service_id = services.id
         JOIN
@@ -1118,10 +1140,10 @@ const getTimesheetTaskType = async (Timesheet) => {
          LEFT JOIN
          timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE
-        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND jobs.client_id = ${client_id}
+        (temp_assigned_jobs_staff.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId})) AND jobs.client_id = ${client_id}
         AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
-            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+            temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
           )
          
         AND (
@@ -1138,7 +1160,7 @@ const getTimesheetTaskType = async (Timesheet) => {
         ORDER BY 
         jobs.id DESC;
         `;
-        const [result] = await pool.execute(query);
+        const [result] = await connection.execute(query);
 
         //////-----START Assign Customer Service Data START----////////
         let isExistAssignCustomer = result?.find(item => item?.assigned_source === 'assign_customer_service');
