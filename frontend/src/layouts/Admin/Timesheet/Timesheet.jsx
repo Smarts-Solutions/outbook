@@ -114,10 +114,10 @@ const Timesheet = () => {
       saturday: formatDate(
         new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
       ),
-      sunday: formatDate(startOfWeek),
-      // sunday: formatDate(
-      //   new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
-      // ),
+     // sunday: formatDate(startOfWeek),
+      sunday: formatDate(
+        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
+      ),
     });
   }, [weekOffset]);
 
