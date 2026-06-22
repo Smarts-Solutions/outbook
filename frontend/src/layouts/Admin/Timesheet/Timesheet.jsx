@@ -53,7 +53,7 @@ const Timesheet = () => {
     if (type === "convert") {
       now = new Date(date);
     }
-    
+
     const year = now.getFullYear();
     const month = now.getMonth() + 1; // Months are 0-indexed
     const week = Math.ceil(now.getDate() / 7); // Calculate week number of the month
@@ -71,9 +71,10 @@ const Timesheet = () => {
 
   const [weekOffset, setWeekOffset] = useState(0); // 0 for current week
 
- console.log("weekOffset==>",weekOffset);
+  console.log("weekOffset==>", weekOffset);
 
   const [hasValidWeekOffsetZero, setHasValidWeekOffsetZero] = useState(false);
+
   const [weekDays, setWeekDays] = useState({
     monday: "",
     tuesday: "",
@@ -84,35 +85,70 @@ const Timesheet = () => {
     sunday: "",
   });
 
-  useEffect(() => {
-    const today = new Date();
-    const dayOfWeek = today.getDay();
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - (dayOfWeek - 1) + weekOffset * 7);
-    setWeekDays({
-      monday: formatDate(startOfWeek),
-      tuesday: formatDate(
-        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
-      ),
-      wednesday: formatDate(
-        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
-      ),
-      thursday: formatDate(
-        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
-      ),
-      friday: formatDate(
-        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
-      ),
-      saturday: formatDate(
-        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
-      ),
-      sunday: formatDate(
-        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
-      ),
-    });
-  }, [weekOffset]);
+  // useEffect(() => {
+  //   // const today = new Date();
+  //   const today = new Date("2026-06-20");
+  //   let dayOfWeek = today.getDay();
+  //   console.log("dayOfWeek==>", dayOfWeek);
+  //   // dayOfWeek = 0
+  //   //  dayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
 
-  
+  //   const startOfWeek = new Date(today);
+  //   startOfWeek.setDate(today.getDate() - (dayOfWeek - 1) + weekOffset * 7);
+
+  //   console.log("startOfWeek==>", startOfWeek);
+
+  //   setWeekDays({
+  //     monday: formatDate(startOfWeek),
+  //     tuesday: formatDate(
+  //       new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
+  //     ),
+  //     wednesday: formatDate(
+  //       new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
+  //     ),
+  //     thursday: formatDate(
+  //       new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
+  //     ),
+  //     friday: formatDate(
+  //       new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
+  //     ),
+  //     saturday: formatDate(
+  //       new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
+  //     ),
+  //     sunday: formatDate(startOfWeek),
+  //     // sunday: formatDate(
+  //     //   new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
+  //     // ),
+  //   });
+  // }, [weekOffset]);
+
+  useEffect(() => {
+  // const today = new Date("2026-06-20");
+  const today = new Date();
+
+  let dayOfWeek = today.getDay();
+  dayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
+
+  const monday = new Date(today);
+  monday.setDate(
+    today.getDate() - (dayOfWeek - 1) + weekOffset * 7
+  );
+
+  setWeekDays({
+    monday: formatDate(new Date(monday)),
+    tuesday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 1)),
+    wednesday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 2)),
+    thursday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 3)),
+    friday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 4)),
+    saturday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 5)),
+    sunday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6)),
+  });
+}, [weekOffset]);
+
+
+
+
+
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -329,7 +365,7 @@ const Timesheet = () => {
   }, []);
 
   useEffect(() => {
-    
+
     GetTimeSheet(0);
     const days = [
       "sunday",
@@ -849,7 +885,7 @@ const Timesheet = () => {
   const handleHoursInput = async (e, index, day_name, date_value, item) => {
     let value = e.target.value;
     let name = e.target.name;
-   
+
 
     let final_value = value;
 
@@ -1178,7 +1214,7 @@ const Timesheet = () => {
       setLoading(true);
       setIsDisabled(true);
 
-      
+
       const res = await SAVE_TIMESHEET({ req, authToken: token });
       if (res.status) {
 
@@ -1387,7 +1423,7 @@ const Timesheet = () => {
         setSubmitStatusAllKey(0);
         GetTimeSheet(weekOffSetValue.current);
 
-        
+
         return;
       } else {
         setLoading(false);
@@ -1500,8 +1536,8 @@ const Timesheet = () => {
 
     if (res.status) {
 
-       setLoading(false);
-       setIsDisabled(false);
+      setLoading(false);
+      setIsDisabled(false);
 
       setRemarkText(null);
       setUpdateTimeSheetRows([]);
@@ -1523,7 +1559,7 @@ const Timesheet = () => {
       setActiveIndex(null);
       setActiveField(null);
       return;
-      
+
     } else {
       sweatalert.fire({
         icon: "error",
@@ -1536,7 +1572,7 @@ const Timesheet = () => {
       setIsDisabled(false);
 
       return;
-      
+
     }
 
   };
@@ -1901,7 +1937,7 @@ const Timesheet = () => {
     { value: "2", label: "External" },
   ];
 
-  // console.log("timeSheetRows", timeSheetRows);
+  console.log("timeSheetRows", timeSheetRows);
 
   return (
 
