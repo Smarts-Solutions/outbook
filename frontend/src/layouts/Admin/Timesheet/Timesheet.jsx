@@ -71,7 +71,7 @@ const Timesheet = () => {
 
   const [weekOffset, setWeekOffset] = useState(0); // 0 for current week
 
-  console.log("weekOffset==>", weekOffset);
+  //console.log("weekOffset==>", weekOffset);
 
   const [hasValidWeekOffsetZero, setHasValidWeekOffsetZero] = useState(false);
 
