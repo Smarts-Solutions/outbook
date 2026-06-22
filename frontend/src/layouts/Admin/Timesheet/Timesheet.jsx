@@ -85,65 +85,64 @@ const Timesheet = () => {
     sunday: "",
   });
 
-  // useEffect(() => {
-  //   // const today = new Date();
-  //   const today = new Date("2026-06-20");
-  //   let dayOfWeek = today.getDay();
-  //   console.log("dayOfWeek==>", dayOfWeek);
-  //   // dayOfWeek = 0
-  //   //  dayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
-
-  //   const startOfWeek = new Date(today);
-  //   startOfWeek.setDate(today.getDate() - (dayOfWeek - 1) + weekOffset * 7);
-
-  //   console.log("startOfWeek==>", startOfWeek);
-
-  //   setWeekDays({
-  //     monday: formatDate(startOfWeek),
-  //     tuesday: formatDate(
-  //       new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
-  //     ),
-  //     wednesday: formatDate(
-  //       new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
-  //     ),
-  //     thursday: formatDate(
-  //       new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
-  //     ),
-  //     friday: formatDate(
-  //       new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
-  //     ),
-  //     saturday: formatDate(
-  //       new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
-  //     ),
-  //     sunday: formatDate(startOfWeek),
-  //     // sunday: formatDate(
-  //     //   new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
-  //     // ),
-  //   });
-  // }, [weekOffset]);
-
   useEffect(() => {
-  // const today = new Date("2026-06-21"); // test sunday
-  const today = new Date();
+     const today = new Date();
+    //const today = new Date("2026-06-21");
+    let dayOfWeek = today.getDay();
+   
+    dayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
 
-  let dayOfWeek = today.getDay();
-  dayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - (dayOfWeek - 1) + weekOffset * 7);
 
-  const monday = new Date(today);
-  monday.setDate(
-    today.getDate() - (dayOfWeek - 1) + weekOffset * 7
-  );
+    //console.log("startOfWeek==>", startOfWeek);
 
-  setWeekDays({
-    monday: formatDate(new Date(monday)),
-    tuesday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 1)),
-    wednesday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 2)),
-    thursday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 3)),
-    friday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 4)),
-    saturday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 5)),
-    sunday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6)),
-  });
-}, [weekOffset]);
+    setWeekDays({
+      monday: formatDate(startOfWeek),
+      tuesday: formatDate(
+        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
+      ),
+      wednesday: formatDate(
+        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
+      ),
+      thursday: formatDate(
+        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
+      ),
+      friday: formatDate(
+        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
+      ),
+      saturday: formatDate(
+        new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
+      ),
+      sunday: formatDate(startOfWeek),
+      // sunday: formatDate(
+      //   new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
+      // ),
+    });
+  }, [weekOffset]);
+
+//   useEffect(() => {
+//   // const today = new Date("2026-06-21"); // test sunday
+//   const today = new Date();
+
+//   let dayOfWeek = today.getDay();
+//   dayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
+
+//   const monday = new Date(today);
+//   monday.setDate(
+//     today.getDate() - (dayOfWeek - 1) + weekOffset * 7
+//   );
+
+//   setWeekDays({
+//     monday: formatDate(new Date(monday)),
+//     tuesday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 1)),
+//     wednesday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 2)),
+//     thursday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 3)),
+//     friday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 4)),
+//     saturday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 5)),
+//     sunday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6)),
+//   });
+// }, [weekOffset]);
 
 
 

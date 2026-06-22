@@ -459,8 +459,9 @@ const getTimesheet = async (Timesheet) => {
 
   const { staff_id, weekOffset } = Timesheet;
 
-  // ✅ FIX: Monday ko week start mano, Sunday (0) ko 7 treat karo
+  // ✅ FIX: Monday ko week start , Sunday (0) ko 7 treat 
   const currentDate = new Date();
+  // const currentDate = new Date("2026-06-21");
   const currentDay = currentDate.getUTCDay(); // 0=Sun, 1=Mon ... 6=Sat
   const daysSinceMonday = currentDay === 0 ? 6 : currentDay - 1; // Monday=0, Sunday=6
   const startOfWeek = new Date(currentDate);
