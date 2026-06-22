@@ -459,41 +459,21 @@ const getTimesheet = async (Timesheet) => {
 
   const { staff_id, weekOffset } = Timesheet;
 
-
   // ✅ FIX: Monday ko week start mano, Sunday (0) ko 7 treat karo
-  // const currentDate = new Date();
-  // const currentDay = currentDate.getUTCDay(); // 0=Sun, 1=Mon ... 6=Sat
-  // const daysSinceMonday = currentDay === 0 ? 6 : currentDay - 1; // Monday=0, Sunday=6
-  // const startOfWeek = new Date(currentDate);
-  // startOfWeek.setUTCDate(currentDate.getUTCDate() - daysSinceMonday + weekOffset * 7);
-  // startOfWeek.setUTCHours(0, 0, 0, 0);
-
-  // const endOfWeek = new Date(startOfWeek);
-  // endOfWeek.setUTCDate(startOfWeek.getUTCDate() + 6);
-  // endOfWeek.setUTCHours(23, 59, 59, 999);
-
-  // const startOfWeekFormatted = startOfWeek.toISOString().slice(0, 10);
-  // const endOfWeekFormatted = endOfWeek.toISOString().slice(0, 10);
-
-  // Current date OR custom date
   const currentDate = new Date();
-  // const currentDate = new Date("2026-06-21"); // Sunday test
   const currentDay = currentDate.getUTCDay(); // 0=Sun, 1=Mon ... 6=Sat
-  // Monday = start of week
-  const daysSinceMonday = currentDay === 0 ? 6 : currentDay - 1;
-
+  const daysSinceMonday = currentDay === 0 ? 6 : currentDay - 1; // Monday=0, Sunday=6
   const startOfWeek = new Date(currentDate);
-  startOfWeek.setUTCDate(
-    currentDate.getUTCDate() - daysSinceMonday + weekOffset * 7
-  );
+  startOfWeek.setUTCDate(currentDate.getUTCDate() - daysSinceMonday + weekOffset * 7);
   startOfWeek.setUTCHours(0, 0, 0, 0);
 
   const endOfWeek = new Date(startOfWeek);
   endOfWeek.setUTCDate(startOfWeek.getUTCDate() + 6);
   endOfWeek.setUTCHours(23, 59, 59, 999);
 
-  const startOfWeekFormatted = startOfWeek.toISOString().split("T")[0];
-  const endOfWeekFormatted = endOfWeek.toISOString().split("T")[0];
+  const startOfWeekFormatted = startOfWeek.toISOString().slice(0, 10);
+  const endOfWeekFormatted = endOfWeek.toISOString().slice(0, 10);
+
 
   // ✅ Validate karo date sahi bani hai ya nahi
   if (isNaN(startOfWeek.getTime()) || isNaN(endOfWeek.getTime())) {
