@@ -461,20 +461,39 @@ const getTimesheet = async (Timesheet) => {
 
 
   // ✅ FIX: Monday ko week start mano, Sunday (0) ko 7 treat karo
+  // const currentDate = new Date();
+  // const currentDay = currentDate.getUTCDay(); // 0=Sun, 1=Mon ... 6=Sat
+  // const daysSinceMonday = currentDay === 0 ? 6 : currentDay - 1; // Monday=0, Sunday=6
+  // const startOfWeek = new Date(currentDate);
+  // startOfWeek.setUTCDate(currentDate.getUTCDate() - daysSinceMonday + weekOffset * 7);
+  // startOfWeek.setUTCHours(0, 0, 0, 0);
+
+  // const endOfWeek = new Date(startOfWeek);
+  // endOfWeek.setUTCDate(startOfWeek.getUTCDate() + 6);
+  // endOfWeek.setUTCHours(23, 59, 59, 999);
+
+  // const startOfWeekFormatted = startOfWeek.toISOString().slice(0, 10);
+  // const endOfWeekFormatted = endOfWeek.toISOString().slice(0, 10);
+
+  // Current date OR custom date
   const currentDate = new Date();
+  // const currentDate = new Date("2026-06-21"); // Sunday test
   const currentDay = currentDate.getUTCDay(); // 0=Sun, 1=Mon ... 6=Sat
-  const daysSinceMonday = currentDay === 0 ? 6 : currentDay - 1; // Monday=0, Sunday=6
+  // Monday = start of week
+  const daysSinceMonday = currentDay === 0 ? 6 : currentDay - 1;
 
   const startOfWeek = new Date(currentDate);
-  startOfWeek.setUTCDate(currentDate.getUTCDate() - daysSinceMonday + weekOffset * 7);
+  startOfWeek.setUTCDate(
+    currentDate.getUTCDate() - daysSinceMonday + weekOffset * 7
+  );
   startOfWeek.setUTCHours(0, 0, 0, 0);
 
   const endOfWeek = new Date(startOfWeek);
   endOfWeek.setUTCDate(startOfWeek.getUTCDate() + 6);
   endOfWeek.setUTCHours(23, 59, 59, 999);
 
-  const startOfWeekFormatted = startOfWeek.toISOString().slice(0, 10);
-  const endOfWeekFormatted = endOfWeek.toISOString().slice(0, 10);
+  const startOfWeekFormatted = startOfWeek.toISOString().split("T")[0];
+  const endOfWeekFormatted = endOfWeek.toISOString().split("T")[0];
 
   // ✅ Validate karo date sahi bani hai ya nahi
   if (isNaN(startOfWeek.getTime()) || isNaN(endOfWeek.getTime())) {
@@ -676,69 +695,69 @@ const getTimesheet = async (Timesheet) => {
       rows1.filter(item => item.submit_status === '1')
     );
 
-  //   const dateFields = [
-  //     "monday_date",
-  //     "tuesday_date",
-  //     "wednesday_date",
-  //     "thursday_date",
-  //     "friday_date",
-  //     "saturday_date",
-  //   ];
+    //   const dateFields = [
+    //     "monday_date",
+    //     "tuesday_date",
+    //     "wednesday_date",
+    //     "thursday_date",
+    //     "friday_date",
+    //     "saturday_date",
+    //   ];
 
-  //   const monday = new Date();
-  //   const day = monday.getDay();
-  //   monday.setDate(monday.getDate() + (day === 0 ? -6 : 1 - day));
-  //   monday.setHours(0, 0, 0, 0);
-  //   if(weekOffset === 0){
-  //   rows = rows.filter(
-  //     (row) =>
-  //       !dateFields.some(
-  //         (field) =>
-  //           row[field] &&
-  //           new Date(row[field]).setHours(0, 0, 0, 0) < monday.getTime()
-  //       )
-  //   );
-  // }
+    //   const monday = new Date();
+    //   const day = monday.getDay();
+    //   monday.setDate(monday.getDate() + (day === 0 ? -6 : 1 - day));
+    //   monday.setHours(0, 0, 0, 0);
+    //   if(weekOffset === 0){
+    //   rows = rows.filter(
+    //     (row) =>
+    //       !dateFields.some(
+    //         (field) =>
+    //           row[field] &&
+    //           new Date(row[field]).setHours(0, 0, 0, 0) < monday.getTime()
+    //       )
+    //   );
+    // }
 
 
 
-const dateFields = [
-  "monday_date",
-  "tuesday_date",
-  "wednesday_date",
-  "thursday_date",
-  "friday_date",
-  "saturday_date",
-];
+    const dateFields = [
+      "monday_date",
+      "tuesday_date",
+      "wednesday_date",
+      "thursday_date",
+      "friday_date",
+      "saturday_date",
+    ];
 
-// Current week ka Monday nikalo
-const monday = new Date();
-const day = monday.getDay();
-monday.setDate(monday.getDate() + (day === 0 ? -6 : 1 - day));
-monday.setHours(0, 0, 0, 0);
+    // Current week ka Monday nikalo
+    const monday = new Date();
+    const day = monday.getDay();
+    monday.setDate(monday.getDate() + (day === 0 ? -6 : 1 - day));
+    monday.setHours(0, 0, 0, 0);
 
-// weekOffset apply karo — 7 din ka shift
-monday.setDate(monday.getDate() + weekOffset * 7);
+    // weekOffset apply karo — 7 din ka shift
+    monday.setDate(monday.getDate() + weekOffset * 7);
 
-// Us week ka Saturday
-const saturday = new Date(monday);
-saturday.setDate(monday.getDate() + 5);
-saturday.setHours(23, 59, 59, 999);
+    // Us week ka Saturday
+    const saturday = new Date(monday);
+    saturday.setDate(monday.getDate() + 5);
+    saturday.setHours(23, 59, 59, 999);
 
-// Filter: sirf wahi rows jinka koi bhi dateField us week ke andar ho
-rows = rows.filter((row) =>
-  dateFields.some((field) => {
-    if (!row[field]) return false;
-    const d = new Date(row[field]).setHours(0, 0, 0, 0);
-    return d >= monday.getTime() && d <= saturday.getTime();
-  })
-);
+    // Filter: sirf wahi rows jinka koi bhi dateField us week ke andar ho
+    rows = rows.filter((row) =>
+      dateFields.some((field) => {
+        if (!row[field]) return false;
+        const d = new Date(row[field]).setHours(0, 0, 0, 0);
+        return d >= monday.getTime() && d <= saturday.getTime();
+      })
+    );
 
 
 
 
     //console.log("filterDataWeekSubmitTimeSheet--", filterDataWeekSubmitTimeSheet.length);
-   // console.log("rows--", rows);
+    // console.log("rows--", rows);
 
     return {
       status: true,
@@ -1009,7 +1028,7 @@ const getTimesheetTaskType = async (Timesheet) => {
 
         const [RoleAccess] = await pool.execute('SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?', [rows[0].role_id, 35]);
         if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
-         
+
           const query = `
         SELECT 
          job_types.id AS job_type_id,
@@ -1062,7 +1081,7 @@ const getTimesheetTaskType = async (Timesheet) => {
          jobs.id DESC;
         `;
 
-            
+
           const [rows] = await pool.execute(query);
           return { status: true, message: "Success.", data: rows };
         }
@@ -1403,8 +1422,8 @@ const saveTimesheet2 = async (Timesheet) => {
       const msgLog =
         timesheet_log_msg.length > 1
           ? timesheet_log_msg.slice(0, -1).join(", ") +
-            " and " +
-            timesheet_log_msg.slice(-1)
+          " and " +
+          timesheet_log_msg.slice(-1)
           : timesheet_log_msg[0];
 
       const currentDate = new Date();
@@ -1443,9 +1462,9 @@ const saveTimesheet2 = async (Timesheet) => {
 
 const saveTimesheet = async (Timesheet) => {
   try {
-    const { staff_id, data, deleteRows, ip  } = Timesheet;
+    const { staff_id, data, deleteRows, ip } = Timesheet;
 
-    
+
     let timesheetLogsDuplicate = Timesheet?.timesheetLogs;
     const timesheet_log_msg = [];
     let checkStringEvent = [];
@@ -1500,15 +1519,15 @@ const saveTimesheet = async (Timesheet) => {
 
           let duplicate_entry = null;
 
-         // let save_date = row?.save_date ?? null;
-          let save_date = row?.save_date ? new Date(row?.save_date): null;
-         // let submit_date = row?.submit_date ?? null;
-          let submit_date = row?.submit_date  ? new Date(row.submit_date): null;
+          // let save_date = row?.save_date ?? null;
+          let save_date = row?.save_date ? new Date(row?.save_date) : null;
+          // let submit_date = row?.submit_date ?? null;
+          let submit_date = row?.submit_date ? new Date(row.submit_date) : null;
 
-          if(Number(row?.submit_status) === 1){
+          if (Number(row?.submit_status) === 1) {
             //current date
-            submit_date = new Date(); 
-          }else{
+            submit_date = new Date();
+          } else {
             save_date = new Date();
           }
 
@@ -1607,7 +1626,7 @@ const saveTimesheet = async (Timesheet) => {
                 );
               } else {
                 timesheet_log_msg.push(
-                `Task type:${task_type_name}, ${DateTimeString},
+                  `Task type:${task_type_name}, ${DateTimeString},
                 Job code:${JobTaskName.job_name},
                 Task name:${JobTaskName.task_name}`
                 );
@@ -1697,21 +1716,21 @@ const saveTimesheet = async (Timesheet) => {
                 );
               }
             }
-           
-            if(Number(row?.submit_status) === 1){
-                let updateString = ""; 
-                days.forEach(({ day, date, hours }) => {
-                    if(!['',null,undefined].includes(date) && !['',null,undefined].includes(hours)){
-                    updateString += ` Date:${date}, Updated hours:${hours}`;
-                    }
-                });
 
-                timesheet_log_msg.push(
-                  `submitted a timesheet entry. Task type:${task_type_name},
+            if (Number(row?.submit_status) === 1) {
+              let updateString = "";
+              days.forEach(({ day, date, hours }) => {
+                if (!['', null, undefined].includes(date) && !['', null, undefined].includes(hours)) {
+                  updateString += ` Date:${date}, Updated hours:${hours}`;
+                }
+              });
+
+              timesheet_log_msg.push(
+                `submitted a timesheet entry. Task type:${task_type_name},
                 ${updateString},
                 Job code:${JobTaskName.job_name},
                 Task name:${JobTaskName.task_name}`
-                );
+              );
             }
 
 
