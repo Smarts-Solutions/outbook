@@ -353,7 +353,9 @@ const Timesheet = () => {
   const [currentDay, setCurrentDay] = useState("");
 
   useEffect(() => {
-    staffData();
+    if(["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role)){
+      staffData();
+    }
     GetLineManagerData();
   }, []);
 
