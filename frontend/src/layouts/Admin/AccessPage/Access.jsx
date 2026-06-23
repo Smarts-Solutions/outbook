@@ -170,7 +170,8 @@ const Access = () => {
             <CheckboxItem
               key={item.id}
               id={item.id}
-              label={item.type}
+              //  label={item.type}
+              label={item.type === "add" || item.type === "Add" || item.type === "insert" || item.type === "Insert" ? "Create" : item.type}
               title={section.title}
               permission_name={section.permission_name}
               TradingName={TradingName}
