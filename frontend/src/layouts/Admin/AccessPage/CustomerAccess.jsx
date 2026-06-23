@@ -177,7 +177,8 @@ const CustomerAccess = () => {
             <CheckboxItem
               key={item.id}
               id={item.id}
-              label={item.type}
+              //  label={item.type}
+              label={item.type === "add" || item.type === "Add" || item.type === "insert" || item.type === "Insert" ? "Create" : item.type}
               permission_name={section.permission_name}
               role_id={role_id}
             />
