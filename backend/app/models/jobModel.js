@@ -527,7 +527,7 @@ const jobAdd = async (job) => {
 
   /// validation for reviewing checklist status
   if (reviewer > 0) {
-    if (Number(job?.reviewing_checklist_status) === 2) {
+    if (Number(job?.reviewing_checklist_status) === 2 && Number(job?.reviewing_checklist) > 0) {
       return {
         status: false,
         message: "Please complete the reviewing checklist first.",
@@ -537,9 +537,9 @@ const jobAdd = async (job) => {
   }
 
 
-  if (allocated_to > 0) {
+ if (allocated_to > 0) {
 
-    if (Number(job?.processing_checklist_status) === 2) {
+    if (Number(job?.processing_checklist_status) === 2 && Number(job?.processing_checklist) > 0) {
       return {
         status: false,
         message: "Please complete the processing checklist first.",
@@ -1615,29 +1615,29 @@ async function getAllJobsSidebar(
       // =========================================
       // ALL STAFF IDS
       // =========================================
-    //   await connection.execute("DROP TEMPORARY TABLE IF EXISTS temp_assigned_jobs_staff");
-    //   await connection.execute(`
-    //   CREATE TEMPORARY TABLE temp_assigned_jobs_staff (
-    //     customer_id       INT,
-    //     client_id         INT,
-    //     job_id            INT,
-    //     staff_id          INT,
-    //     source            VARCHAR(100),
-    //     service_id_assign INT
-    //   )
-    // `);
-    //   for (const sid of allStaffIds) {
-    //     await connection.execute("CALL get_assigned_jobs_staff(?)", [sid]);
-    //   }
+      //   await connection.execute("DROP TEMPORARY TABLE IF EXISTS temp_assigned_jobs_staff");
+      //   await connection.execute(`
+      //   CREATE TEMPORARY TABLE temp_assigned_jobs_staff (
+      //     customer_id       INT,
+      //     client_id         INT,
+      //     job_id            INT,
+      //     staff_id          INT,
+      //     source            VARCHAR(100),
+      //     service_id_assign INT
+      //   )
+      // `);
+      //   for (const sid of allStaffIds) {
+      //     await connection.execute("CALL get_assigned_jobs_staff(?)", [sid]);
+      //   }
 
-    //   // Index add
-    //   await connection.execute(`
-    //   ALTER TABLE temp_assigned_jobs_staff 
-    //     ADD INDEX idx_staff    (staff_id),
-    //     ADD INDEX idx_customer (customer_id),
-    //     ADD INDEX idx_client   (client_id),
-    //     ADD INDEX idx_job      (job_id)
-    // `);
+      //   // Index add
+      //   await connection.execute(`
+      //   ALTER TABLE temp_assigned_jobs_staff 
+      //     ADD INDEX idx_staff    (staff_id),
+      //     ADD INDEX idx_customer (customer_id),
+      //     ADD INDEX idx_client   (client_id),
+      //     ADD INDEX idx_job      (job_id)
+      // `);
       // =========================================
       // PLACEHOLDERS
       // =========================================
@@ -1795,7 +1795,7 @@ async function getAllJobsSidebar(
       // =========================================
       const [[countRows], [dataRows]] = await Promise.all([
 
-        connection.execute(countQuery,[...commonParams]),
+        connection.execute(countQuery, [...commonParams]),
 
         connection.execute(dataQuery, [...commonParams, limit, offset]),
 
@@ -3645,7 +3645,7 @@ const jobUpdate = async (job) => {
 
 
   if (reviewer > 0) {
-    if (Number(job?.reviewing_checklist_status) === 2) {
+    if (Number(job?.reviewing_checklist_status) === 2 && Number(job?.reviewing_checklist) > 0) {
       return {
         status: false,
         message: "Please complete the reviewing checklist first.",
@@ -3656,7 +3656,7 @@ const jobUpdate = async (job) => {
 
 
   if (allocated_to > 0) {
-    if (Number(job?.processing_checklist_status) === 2) {
+    if (Number(job?.processing_checklist_status) === 2 && Number(job?.processing_checklist) > 0) {
       return {
         status: false,
         message: "Please complete the processing checklist first.",
