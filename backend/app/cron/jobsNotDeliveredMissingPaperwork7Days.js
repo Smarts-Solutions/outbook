@@ -95,9 +95,10 @@ parentPort.on("message", async (rows) => {
         DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
         DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
         DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS job_received_on,
+        CONCAT(staffs5.first_name, ' ', staffs5.last_name) AS created_by,
         GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR '| ') AS multiple_staff_names
-
       FROM jobs
+        JOIN staffs AS staffs5 ON jobs.staff_created_id = staffs5.id
         LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
         LEFT JOIN staffs AS staffs4 ON job_allowed_staffs.staff_id = staffs4.id
         LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
@@ -126,7 +127,7 @@ parentPort.on("message", async (rows) => {
       return;
     }
 
-  let csv = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
+  let csv = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent,Created By\n";
 
   if (result && result.length > 0) {
 
@@ -150,9 +151,11 @@ parentPort.on("message", async (rows) => {
       let draft_sent_on = convertDate(val.draft_sent_on) || ' - ';
       let final_draft_sent_on = convertDate(val.final_draft_sent_on) || ' - ';
 
+      let created_by = val.created_by || ' - ';
 
 
-      csv += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
+
+      csv += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on} ,${created_by}\n`;
     });
   }
 
@@ -276,13 +279,14 @@ async function otherUserDataGet(row) {
         DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
         DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
         DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS job_received_on,
+        CONCAT(staffs5.first_name, ' ', staffs5.last_name) AS created_by,
         GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR '| ') AS multiple_staff_names,
         assigned_jobs_staff_view.source AS assigned_source,
         assigned_jobs_staff_view.service_id_assign AS service_id_assign,
         jobs.service_id AS job_service_id,
         assigned_jobs_staff_view.staff_id AS assigned_jobs_staff_view_staff_id
-
       FROM jobs
+        JOIN staffs AS staffs5 ON jobs.staff_created_id = staffs5.id
         LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
         LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
         LEFT JOIN staffs AS staffs4 ON job_allowed_staffs.staff_id = staffs4.id
@@ -314,7 +318,7 @@ async function otherUserDataGet(row) {
 
   const [result] = await pool.execute(query);
   
-  let csvContent = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent\n";
+  let csvContent = "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent ,Created By\n";
 
   if (result && result.length > 0) {
 
@@ -338,9 +342,11 @@ async function otherUserDataGet(row) {
       let draft_sent_on = convertDate(val.draft_sent_on) || ' - ';
       let final_draft_sent_on = convertDate(val.final_draft_sent_on) || ' - ';
 
+      let created_by = val.created_by || " - ";
 
 
-      csvContent += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on}\n`;
+
+      csvContent += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on},${created_by}\n`;
     });
 
 
