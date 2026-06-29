@@ -1,0 +1,1926 @@
+import React, { useState, useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Staff, Competency } from "../../../ReduxStore/Slice/Staff/staffSlice";
+import { Role } from "../../../ReduxStore/Slice/Settings/settingSlice";
+import { ActivityLog } from "../../../ReduxStore/Slice/Dashboard/DashboardSlice";
+import { FormGroup, Label, Input, Row, Col, Button } from "reactstrap";
+import Datatable from "../../../Components/ExtraComponents/Datatable";
+import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
+import sweatalert from "sweetalert2";
+import Formicform from "../../../Components/ExtraComponents/Forms/Comman.form";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import Select from "react-select";
+import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
+import Validation_Message from "../../../Utils/Validation_Message";
+import { FaBriefcase, FaPencilAlt, FaPlus, FaEye } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { staffPortfolio, DELETESTAFF } from "../../../Services/Staff/staff";
+import {
+  GET_ALL_CUSTOMERS,
+  getAllTaskByStaff,
+} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import Swal from "sweetalert2";
+import ReactPaginate from "react-paginate";
+import {
+  Download,
+  Ellipsis,
+  Plus,
+  Save,
+  Trash,
+  User,
+  User2,
+  X,
+  Circle,
+  EllipsisVertical
+} from "lucide-react";
+
+const StaffPage = () => {
+  const navigate = useNavigate();
+  const token = JSON.parse(localStorage.getItem("token"));
+  const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+  const role = JSON.parse(localStorage.getItem("role"));
+  const accessData = useSelector(
+    (state) => state && state.AccessSlice && state.AccessSlice.RoleAccess.data,
+  );
+  const [showStaffInsertTab, setShowStaffInsertTab] = useState(true);
+  const [showStaffUpdateTab, setShowStaffUpdateTab] = useState(true);
+  const [showStaffDeleteTab, setStaffDeleteTab] = useState(true);
+  const [allCustomerData, setAllCustomerData] = useState([]);
+
+  const [deleteStaff, setDeleteStaff] = useState();
+  const [deleteStaffCustomer, setDeleteStaffCustomer] = useState([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [budgetedHours, setBudgetedHours] = useState({
+    hours: "",
+    minutes: "",
+  });
+  const [selectedStaff, setSelectedStaff] = useState(null);
+  const [assignCustomerData, setAssignCustomerData] = useState([]);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const debounceRef = useRef(null);
+
+  const dispatch = useDispatch();
+  const [addStaff, setAddStaff] = useState(false);
+  const [portfolio, setPortfolio] = useState();
+  const [editStaff, setEditStaff] = useState(false);
+  const [editShowModel, setEditShowModel] = useState(false);
+  const [editStaffData, setEditStaffData] = useState({});
+  const [addCompetancy, SetCompetancy] = useState(false);
+  const [staffViewLog, SetStaffViewLog] = useState(false);
+  const [getActiviyLog, setActivityLog] = useState([]);
+  const [refresh, SetRefresh] = useState(false);
+  const [activeTab, setActiveTab] = useState("this-year");
+  const [staffDataAll, setStaffDataAll] = useState({ loading: true, data: [] });
+  const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
+  const [AddCustomer, setAddCustomer] = useState([]);
+  const [serviceDataAll, setServiceDataAll] = useState({
+    loading: true,
+    data: [],
+    staff_id: "",
+  });
+  const [changedRoleStaffData, setChangedRoleStaffData] = useState([]);
+  const [changeRole, setChangeRole] = useState(false);
+
+  const [staffDataAllRecords, setStaffDataAllRecords] = useState({ loading: true, data: [] });
+  const [managerOptions, setManagerOptions] = useState([]);
+  const [managerPage, setManagerPage] = useState(1);
+  const [managerHasMore, setManagerHasMore] = useState(true);
+  const [managerSearch, setManagerSearch] = useState("");
+  const [managerLoading, setManagerLoading] = useState(false);
+  const managerCacheRef = useRef({});
+  const managerDebounceTimeout = useRef(null);
+
+
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // GetAllStaffData(1, 10000, ""); // Removed this as we now fetch on click
+  }, []);
+
+  const GetLineManagerData = async ({
+    searchValue = "",
+    pageNo = 1,
+    append = false,
+  } = {}) => {
+    if (managerLoading) return;
+
+    const cacheKey = `${searchValue}_${pageNo}`;
+    if (managerCacheRef.current[cacheKey]) {
+      const cached = managerCacheRef.current[cacheKey];
+      setManagerOptions((prev) => {
+        const combined = append ? [...prev, ...cached] : cached;
+        const unique = Array.from(
+          new Map(combined.map((item) => [item.value, item])).values(),
+        );
+        return unique;
+      });
+      return;
+    }
+
+    setManagerLoading(true);
+    try {
+      const response = await dispatch(
+        Staff({
+          req: { action: "get", page: pageNo, limit: 20, search: searchValue },
+          authToken: token,
+        }),
+      ).unwrap();
+
+      if (response.status) {
+        const formatted = response.data.data
+          .filter(
+            (data) =>
+              data.role !== "ADMIN" &&
+              data.role !== "SUPERADMIN" &&
+              data.id !== editStaffData.id,
+          )
+          .map((data) => ({
+            label: `${data.first_name} ${data.last_name}`,
+            value: data.id,
+          }));
+
+        managerCacheRef.current[cacheKey] = formatted;
+        setManagerOptions((prev) => {
+          const combined = append ? [...prev, ...formatted] : formatted;
+          const unique = Array.from(
+            new Map(combined.map((item) => [item.value, item])).values(),
+          );
+          return unique;
+        });
+        setManagerHasMore(response.data.data.length === 20);
+        setManagerPage(pageNo);
+      } else {
+        if (!append) setManagerOptions([]);
+      }
+    } catch (error) {
+      console.error("Manager Error:", error);
+      if (!append) setManagerOptions([]);
+    } finally {
+      setManagerLoading(false);
+    }
+  };
+
+  const handleManagerSearch = (value) => {
+    if (value === "") return;
+    clearTimeout(managerDebounceTimeout.current);
+    managerDebounceTimeout.current = setTimeout(() => {
+      setManagerSearch(value);
+      setManagerPage(1);
+      GetLineManagerData({ searchValue: value, pageNo: 1 });
+    }, 500);
+  };
+
+  useEffect(() => {
+    staffData(currentPage, pageSize, searchTerm);
+    roleData();
+  }, [refresh]);
+
+  // Pagination handlers
+  const handlePageChange = (selected) => {
+    const newPage = selected.selected + 1;
+    setCurrentPage(newPage);
+    staffData(newPage, pageSize, searchTerm);
+  };
+
+  const handlePageSizeChange = (event) => {
+    const newSize = parseInt(event.target.value, 10);
+    setPageSize(newSize);
+    setCurrentPage(1);
+    staffData(1, newSize, searchTerm);
+  };
+
+  const handleSearchChange = (term) => {
+    setSearchTerm(term);
+    setCurrentPage(1);
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      staffData(1, pageSize, term);
+    }, 500);
+  };
+
+  const staffData = async (page = 1, limit = 10, search = "") => {
+    setLoading(true);
+    //  setStaffDataAll({ loading: true, data: [] });
+    await dispatch(
+      Staff({
+        req: { action: "get", page, limit, search },
+        authToken: token,
+      }),
+    )
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setStaffDataAll({ loading: false, data: response?.data?.data });
+          setTotalRecords(response?.data?.pagination?.total || 0);
+        } else {
+          setStaffDataAll({ loading: false, data: [] });
+          setTotalRecords(0);
+        }
+      })
+      .catch((error) => {
+        return;
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const handleDeleteClick = async () => {
+    let data = {
+      delete_id: deleteStaff.id,
+      update_staff: selectedStaff?.id,
+      role: deleteStaff.role,
+    };
+    const res = await DELETESTAFF(data);
+
+    if (res?.status) {
+      await dispatch(
+        Staff({
+          req: { action: "delete", id: deleteStaff.id },
+          authToken: token,
+        }),
+      )
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            sweatalert.fire({
+              icon: "success",
+              title: "Success",
+              text: response.message,
+              timer: 2000,
+            });
+            setSelectedStaff(null);
+            SetRefresh(!refresh);
+            setDeleteStaff(false);
+          } else {
+            sweatalert.fire({
+              icon: "error",
+              title: "Oops...",
+              text: response.message,
+            });
+            setDeleteStaff(false);
+          }
+        })
+        .catch((error) => {
+          return;
+        });
+    } else {
+      sweatalert.fire({
+        icon: "error",
+        title: "Oops...",
+        text: res.message,
+      });
+      setDeleteStaff("");
+    }
+  };
+
+  const handleDeleteIsNotExistCustomer = async (row) => {
+    setSelectedStaff(null);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "you want to delete this staff?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await dispatch(
+          Staff({
+            req: { action: "delete", id: row.id },
+            authToken: token,
+          }),
+        )
+          .unwrap()
+          .then(async (response) => {
+            if (response.status) {
+              sweatalert.fire({
+                icon: "success",
+                title: "Success",
+                text: response.message,
+                timer: 2000,
+              });
+              setSelectedStaff(null);
+              SetRefresh(!refresh);
+              setDeleteStaff(false);
+            } else {
+              sweatalert.fire({
+                icon: "error",
+                title: "Oops...",
+                text: response.message,
+              });
+              setDeleteStaff(false);
+            }
+          })
+          .catch((error) => {
+            return;
+          });
+      } else {
+        return;
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (accessData && accessData.length > 0 && role !== "SUPERADMIN") {
+      accessData &&
+        accessData.map((item) => {
+          if (item.permission_name === "staff") {
+            const staffInsert = item.items.find(
+              (item) => item.type === "insert",
+            );
+            setShowStaffInsertTab(staffInsert && staffInsert.is_assigned == 1);
+
+            const staffUpdate = item.items.find(
+              (item) => item.type === "update",
+            );
+            setShowStaffUpdateTab(staffUpdate && staffUpdate.is_assigned == 1);
+            const staffDelete = item.items.find(
+              (item) => item.type === "delete",
+            );
+            setStaffDeleteTab(staffDelete && staffDelete.is_assigned == 1);
+          }
+        });
+    }
+  }, [accessData]);
+
+  const GetAllCustomer = async (AssignCustomer) => {
+    await dispatch(
+      Staff({
+        req: { action: "portfolio", staff_id: StaffUserId.id },
+        authToken: token,
+      }),
+    )
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          const filteredCustomers = response.data.filter((customer) => {
+            return !AssignCustomer.some(
+              (assigned) => assigned.customer_id === customer.id,
+            );
+          });
+          setAllCustomerData(filteredCustomers);
+        } else {
+          setAllCustomerData([]);
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
+  const ServiceData = async (row) => {
+    try {
+      const response = await dispatch(
+        Competency({
+          req: { action: "get", staff_id: row.id },
+          authToken: token,
+        }),
+      ).unwrap();
+      if (response.status) {
+        var data = response.data.map((item) => {
+          return { ...item, status: item.status === 1 ? true : false };
+        });
+        setServiceDataAll({ loading: false, data: data, staff_id: row.id });
+      } else {
+        setServiceDataAll({ loading: false, data: [], staff_id: row.id });
+      }
+    } catch (error) {
+      return;
+    }
+  };
+
+  const ViewLogs = async (row) => {
+    try {
+      const req = { staff_id: row.id };
+      const data = { req: req, authToken: token };
+      await dispatch(ActivityLog(data))
+        .unwrap()
+        .then((res) => {
+          if (res.status) {
+            setActivityLog(res.data);
+          } else {
+            setActivityLog([]);
+          }
+        })
+        .catch((error) => {
+
+        });
+    } catch (error) {
+      return;
+    }
+  };
+
+  const roleData = async (req) => {
+    await dispatch(Role({ req: { action: "staffRole" }, authToken: token }))
+      .unwrap()
+      .then(async (response) => {
+        if (response.status) {
+          setRoleDataAll({ loading: false, data: response.data });
+        } else {
+          setRoleDataAll({ loading: false, data: [] });
+        }
+      })
+      .catch((error) => {
+        return;
+      });
+  };
+
+  const tabs = [
+    { id: "this-week", label: "This week" },
+    { id: "last-week", label: "Last week" },
+    { id: "this-month", label: "This month" },
+    { id: "last-month", label: "Last month" },
+    { id: "last-quarter", label: "Last quarter" },
+    { id: "this-6-months", label: "This 6 months" },
+    { id: "last-6-months", label: "Last 6 months" },
+    { id: "this-year", label: "This year" },
+    { id: "last-year", label: "Last year" },
+  ];
+
+  const columns = [
+    {
+      name: "Full Name",
+      cell: (row) => (
+        <div title={row.first_name + " " + row.last_name}>
+          {row.first_name + " " + row.last_name}
+        </div>
+      ),
+      selector: (row) => row.first_name + " " + row.last_name,
+      sortable: true,
+      width: "200px",
+      reorder: false,
+    },
+    {
+      name: "Email Address",
+      cell: (row) => <div title={row.email}>{row.email}</div>,
+      selector: (row) => row.email,
+      sortable: true,
+      idth: "300px",
+      reorder: false,
+    },
+    {
+      name: "Phone",
+      cell: (row) => (
+        <div
+          title={
+            row.phone && row.phone_code
+              ? row.phone_code + "-" + row.phone
+              : " - "
+          }
+        >
+          {row.phone && row.phone_code
+            ? row.phone_code + "-" + row.phone
+            : " - "}
+        </div>
+      ),
+      selector: (row) =>
+        row.phone && row.phone_code ? row.phone_code + "-" + row.phone : " - ",
+      sortable: true,
+      width: "150px",
+      reorder: false,
+    },
+    {
+      name: "Role",
+      selector: (row) => row.role_name,
+      sortable: true,
+      width: "150px",
+      reorder: false,
+    },
+    {
+      name: "Line Manager",
+      selector: (row) => row.line_manager_name || "-",
+      sortable: true,
+      width: "200px",
+      reorder: false,
+    },
+    {
+      name: "Employee ID",
+      selector: (row) => row.employee_number || "-",
+      sortable: true,
+      width: "200px",
+      reorder: false,
+    },
+    {
+      name: "Status",
+      cell: (row) => (
+        <div>
+          <span
+            className={` ${row.status === "1" ? "text-success" : "text-danger"
+              }`}
+          >
+            {row.status === "1" ? "Active" : "Inactive"}
+          </span>
+        </div>
+      ),
+      width: "100px",
+      reorder: false,
+    },
+    {
+      name: "Actions",
+      cell: (row) => {
+        return (
+          <>
+            <div className="px-2">
+              {showStaffDeleteTab == true
+                ? row?.is_disable == 0 &&
+                (row.is_customer_exist == 1 ? (
+                  <button
+                    className="delete-icon dropdown-item  w-auto mb-2"
+                    onClick={() => setDeleteStaff(row)}
+                  >
+                    {" "}
+                    <i className="ti-trash text-danger" />
+                  </button>
+                ) : (
+                  <button
+                    className="delete-icon dropdown-item  w-auto mb-2"
+                    onClick={() => handleDeleteIsNotExistCustomer(row)}
+                  >
+                    {" "}
+                    <i className="ti-trash text-danger" />
+                  </button>
+                ))
+                : ""}
+            </div>
+
+            {showStaffUpdateTab == true ? (
+              <div className="dropdown">
+                <button
+                  className="btn "
+                  type="button"
+                  id="dropdownMenuButton"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+
+                  <EllipsisVertical size={18} />
+                </button>
+                <div
+                  className="dropdown-menu custom-dropdown"
+                  aria-labelledby="dropdownMenuButton"
+                >
+                  <a
+                    className="dropdown-item"
+                    onClick={() => {
+                      GetAllStaffPortfolio(row);
+                    }}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <FaPencilAlt /> Portfolio
+                  </a>
+                  <a
+                    className="dropdown-item"
+                    onClick={() => {
+                      setEditShowModel(true);
+                      setEditStaff(true);
+                      setEditStaffData(row);
+                    }}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <FaBriefcase /> Edit
+                  </a>
+                  <a
+                    className="dropdown-item"
+                    onClick={() => {
+                      ServiceData(row);
+                      SetCompetancy(true);
+                    }}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <FaPlus /> Competency
+                  </a>
+                  <a
+                    className="dropdown-item"
+                    style={{ cursor: "pointer" }}
+                    onClick={() =>
+                      navigate(`/admin/staff/viewlogs`, { state: { row: row } })
+                    }
+                  >
+                    <FaEye /> Logs
+                  </a>
+                </div>
+              </div>
+            ) : (
+              ""
+            )}
+          </>
+        );
+      },
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+      reorder: false,
+    },
+  ];
+
+  const GetAllStaffPortfolio = async (row) => {
+    let AssignCustomer = [];
+    try {
+      const response = await staffPortfolio({
+        req: {
+          action: "get",
+          staff_id: row.id,
+          type: "assignCustomer",
+        },
+        authToken: token,
+      });
+      if (response?.status && Array.isArray(response.data)) {
+        setAssignCustomerData(response.data);
+        AssignCustomer = response.data;
+      } else {
+        console.warn("Invalid response format:", response);
+      }
+    } catch (error) {
+      console.error("Error fetching staff portfolio:", error);
+    }
+
+    try {
+      const response = await staffPortfolio({
+        req: {
+          action: "get",
+          staff_id: row.id,
+        },
+        authToken: token,
+      });
+      if (response?.status && Array.isArray(response.data)) {
+        setAddCustomer(
+          response.data.map((item) => ({
+            value: item.customer_id,
+            label: item.trading_name,
+          })),
+        );
+        setPortfolio(row);
+        GetAllCustomer(AssignCustomer);
+      } else {
+        console.warn("Invalid response format:", response);
+      }
+    } catch (error) {
+      console.error("Error fetching staff portfolio:", error);
+    }
+  };
+
+  const formik = useFormik({
+    initialValues: {
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone: "",
+      phone_code: "+44",
+      //role: "3",
+      role: [],
+      status: "1",
+      staff_to: "",
+      employee_number: "",
+    },
+    validationSchema: Yup.object({
+      first_name: Yup.string()
+        .trim(Validation_Message.FirstNameValidation)
+        .required(Validation_Message.FirstNameValidation),
+      last_name: Yup.string()
+        .trim(Validation_Message.LastNameValidation)
+        .required(Validation_Message.LastNameValidation),
+      email: Yup.string()
+        .trim(Validation_Message.EmailValidation)
+        .email(Validation_Message.EmailValidation)
+        .required(Validation_Message.EmailIsRequire),
+      // role: Yup.string()
+      //   .trim(Validation_Message.RoleValidation)
+      //   .required(Validation_Message.RoleValidation),
+      role: Yup.array()
+        .min(1, "At least 1 role is required")
+        .max(2, "Maximum 2 roles allowed")
+        .required(Validation_Message.RoleValidation),
+      status: Yup.string()
+        .trim(Validation_Message.StatusValidation)
+        .required(Validation_Message.StatusValidation),
+      employee_number: Yup.string()
+        .trim("Employee ID is invalid")
+        .required("Employee ID is required"),
+    }),
+
+    onSubmit: async (values) => {
+      let req = {
+        first_name: values.first_name.trim(),
+        last_name: values.last_name,
+        email: values.email,
+        phone: values.phone,
+        phone_code: values.phone_code,
+        role_id: values.role,
+        status: values.status,
+        employee_number: values.employee_number,
+        staff_to: values.staff_to,
+        created_by: StaffUserId.id,
+        hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"
+          }`,
+      };
+      if (editStaff) {
+        req.id = editStaffData && editStaffData.id;
+      }
+
+
+      await dispatch(
+        Staff({
+          req: { action: editStaff ? "update" : "add", ...req },
+          authToken: token,
+        }),
+      )
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            sweatalert.fire({
+              icon: "success",
+              title: "Success",
+              text: response.message,
+              timer: 1500,
+              timerProgressBar: true,
+            });
+            setTimeout(() => {
+              setAddStaff(false);
+              setEditStaff(false);
+              setEditStaffData({});
+              SetRefresh(!refresh);
+              formik.resetForm();
+              window.location.reload();
+            }, 1500);
+          } else {
+            sweatalert.fire({
+              icon: "error",
+              title: "Oops...",
+              text: response.message,
+            });
+          }
+        })
+
+        .catch((error) => {
+          return;
+        });
+    },
+  });
+
+  const fields = [
+    {
+      type: "text6",
+      name: "first_name",
+      label: "First Name",
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      placeholder: "Enter First Name",
+    },
+    {
+      type: "text6",
+      name: "last_name",
+      label: "Last Name",
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      placeholder: "Enter Last Name",
+    },
+
+    {
+      type: "select2",
+      name: "phone_code",
+      label: "Phone Code",
+      options: [
+        { label: "+44", value: "+44" },
+        { label: "+91", value: "+91" },
+      ],
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      placeholder: "Enter Phone Number",
+    },
+    {
+      type: "number1",
+      name: "phone",
+      label: "Phone",
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      placeholder: "Enter Phone Number",
+    },
+    {
+      type: "email",
+      name: "email",
+      label: "Email",
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      placeholder: "Enter Email",
+    },
+    // {
+    //   type: "select1",
+    //   name: "role",
+    //   label: "Role",
+    //   label_size: 12,
+    //   col_size: 6,
+    //   options:
+    //     roleDataAll &&
+    //     roleDataAll.data.map((data) => {
+    //       if (formik.values.role_id == data.id) {
+    //         return { label: data.role_name, value: data.id, selected: true };
+    //       } else {
+    //         return { label: data.role_name, value: data.id };
+    //       }
+    //     }),
+    // },
+   
+    {
+      type: "reactSelectRole",
+      name: "role",
+      label: "Role",
+      label_size: 12,
+      col_size: 6,
+      isMulti: true,
+      maxSelection: 2,
+
+      fixedRoleId: editStaff
+        ? (Array.isArray(editStaffData?.role_id)
+          ? editStaffData.role_id[0]
+          : editStaffData?.role_id)
+        : null,
+
+      isEditMode: editStaff,
+
+      options:
+        roleDataAll?.data?.map((data) => ({
+          label: data.role_name,
+          value: data.id,
+        })) || [],
+    },
+    {
+      type: "select1",
+      name: "status",
+      label: "Status",
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      options: [
+        { label: "Active", value: "1" },
+        { label: "Inactive", value: "0" },
+      ],
+    },
+    {
+      type: "selectSearch",
+      name: "staff_to",
+      label: "Line Manager",
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      options: managerOptions,
+      onMenuOpen: () => {
+        //  if (managerOptions.length === 0) {
+        if (!managerCacheRef.current["_1"]) {
+          GetLineManagerData({ searchValue: "", pageNo: 1 });
+        }
+      },
+      onInputChange: (value) => handleManagerSearch(value),
+      onMenuScrollToBottom: () => {
+        if (managerHasMore && !managerLoading) {
+          GetLineManagerData({
+            searchValue: managerSearch,
+            pageNo: managerPage + 1,
+            append: true,
+          });
+        }
+      },
+      isLoading: managerLoading,
+    },
+
+    {
+      type: "text6",
+      name: "employee_number",
+      label: "Employee ID",
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      placeholder: "Enter Employee ID",
+    },
+  ];
+
+  const handleCheckboxChange = (event, id) => {
+    const { checked } = event.target;
+
+    setServiceDataAll((prevState) => ({
+      ...prevState,
+      data: prevState.data.map((item) =>
+        item.service_id === id ? { ...item, status: checked } : item,
+      ),
+    }));
+  };
+
+  const handleUpdate = async () => {
+    try {
+      const response = await dispatch(
+        Competency({
+          req: {
+            action: "update",
+            staff_id: serviceDataAll.staff_id,
+            service: serviceDataAll.data,
+          },
+          authToken: token,
+        }),
+      ).unwrap();
+
+      if (response.status) {
+        sweatalert.fire({
+          icon: "success",
+          title: "Success",
+          text: response.message,
+          timer: 2000,
+        });
+        SetCompetancy(false);
+        SetRefresh(!refresh);
+      } else {
+        sweatalert.fire({
+          icon: "error",
+          title: "Oops...",
+          text: response.message,
+        });
+      }
+    } catch (error) {
+      return;
+    }
+  };
+
+  useEffect(() => {
+    if (editStaffData && editStaffData) {
+
+    //  console.log("editStaffData", editStaffData);
+      const roleIds = [].concat(editStaffData?.role_id || []);
+      if(editStaffData?.staff_other_role_id != null){
+       roleIds.push(editStaffData?.staff_other_role_id)
+      }
+
+     
+      formik.setFieldValue("first_name", editStaffData.first_name || "null");
+      formik.setFieldValue("last_name", editStaffData.last_name || "null");
+      formik.setFieldValue("email", editStaffData.email || "null");
+      formik.setFieldValue("phone", editStaffData.phone || null);
+      //formik.setFieldValue("role", editStaffData.role_id || "null");
+      formik.setFieldValue("role", roleIds || []);
+      formik.setFieldValue("status", editStaffData.status || "null");
+      formik.setFieldValue(
+        "employee_number",
+        editStaffData.employee_number || null,
+      );
+      formik.setFieldValue("phone_code", editStaffData.phone_code || null);
+      formik.setFieldValue("staff_to", editStaffData.staff_to || "");
+      formik.setFieldValue("id", editStaffData?.id || "");
+      if (editStaffData.hourminute) {
+        setBudgetedHours({
+          hours: editStaffData.hourminute.split(":")[0],
+          minutes: editStaffData.hourminute.split(":")[1],
+        });
+      }
+
+      if (editStaffData.staff_to && editStaffData.line_manager_name) {
+        let baseList = managerCacheRef.current["_1"] ? [...managerCacheRef.current["_1"]] : [];
+        const exists = baseList.find((opt) => opt.value === editStaffData.staff_to);
+        if (!exists) {
+          baseList.push({ label: editStaffData.line_manager_name, value: editStaffData.staff_to });
+        }
+        setManagerOptions(baseList);
+      } else {
+        if (managerCacheRef.current["_1"]) {
+          setManagerOptions([...managerCacheRef.current["_1"]]);
+        } else {
+          setManagerOptions([]);
+        }
+      }
+    }
+  }, [editStaffData]);
+
+  const formatDate = (isoString) => {
+    const date = new Date(isoString);
+    const options = { month: "short", day: "numeric" };
+    const monthDay = date.toLocaleDateString("en-US", options);
+    const timeOptions = { hour: "numeric", minute: "numeric", hour12: true };
+    const time = date.toLocaleTimeString("en-US", timeOptions);
+    return `${monthDay} (${time.toUpperCase()})`;
+  };
+
+  const exportData = staffDataAll?.data?.map((item) => ({
+    "First Name": item.first_name,
+    "Last Name": item.last_name,
+    Email: item.email,
+    Phone: item.phone,
+    Role: item.role_name,
+    "Employee ID": item.employee_number || "-",
+    "Line Manager": item.line_manager_name || "-",
+    Status: item.status === "1" ? "Active" : "Inactive",
+  }));
+
+  const handleAddCustomer = (e) => {
+    setAddCustomer(e);
+  };
+
+  const HandleChangeStaffPortfolio = async () => {
+    try {
+      const response = await staffPortfolio({
+        req: {
+          action: "update",
+          staff_id: portfolio?.id,
+          customer_id: AddCustomer.map((item) => item.value),
+        },
+        authToken: token,
+      });
+      if (response.status) {
+        sweatalert.fire({
+          icon: "success",
+          title: "Success",
+          text: response.message,
+          timer: 2000,
+        });
+        SetRefresh(!refresh);
+        setPortfolio(false);
+      }
+    } catch (error) {
+      return;
+    }
+  };
+
+  const getCustomersName = async (id) => {
+    if (!id) return;
+    try {
+      const req = { action: "get_dropdown_delete", staff_id: deleteStaff.id };
+      const data = { req, authToken: token };
+
+      const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
+      if (response.status) {
+        setDeleteStaffCustomer(response.data);
+      } else {
+        setDeleteStaffCustomer([]);
+      }
+    } catch (error) {
+      console.error("Error fetching customer names:", error);
+    }
+  };
+
+  const getCustomersNameChangeRole = async (id) => {
+    if (!id) return;
+    try {
+      const req = { action: "get_dropdown_delete", staff_id: id };
+      const data = { req, authToken: token };
+
+      const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
+      if (response.status) {
+        setDeleteStaffCustomer(response.data);
+      } else {
+        setDeleteStaffCustomer([]);
+      }
+    } catch (error) {
+      console.error("Error fetching customer names:", error);
+    }
+  };
+
+  useEffect(() => {
+    getCustomersName(deleteStaff?.id);
+  }, [deleteStaff?.id, token]);
+
+  const getChangedRoleStaff = async (staffData) => {
+    getCustomersNameChangeRole(staffData.id);
+    try {
+      const req = { action: "getChangedRoleStaff", staffData: staffData };
+      const data = { req: req, authToken: token };
+      await dispatch(getAllTaskByStaff(data))
+        .unwrap()
+        .then((res) => {
+          if (res.status) {
+            //  setChangedRoleStaffData(res.data);
+
+            const sortedData = [...res.data].sort((a, b) =>
+              (a.staff_fullname || "").localeCompare(b.staff_fullname || ""),
+            );
+            setChangedRoleStaffData(sortedData);
+          } else {
+            setChangedRoleStaffData([]);
+          }
+        })
+        .catch((err) => {
+        });
+    } catch (error) {
+      console.error("Error fetching staff tasks:", error);
+    }
+  };
+
+  // useEffect(() => {
+  //   const fetchChangedRoleStaff = async () => {
+  //     if (
+  //       editStaffData.id !== undefined &&
+  //       Number(formik.values.role) !== Number(editStaffData.role_id)
+  //     ) {
+  //       if (Number(editStaffData.role_id) === 3) {
+  //         await getChangedRoleStaff(editStaffData);
+  //       } else if (Number(editStaffData.role_id) === 4) {
+  //         await getChangedRoleStaff(editStaffData);
+  //       } else if (Number(editStaffData.role_id) === 6) {
+  //         await getChangedRoleStaff(editStaffData);
+  //       }
+
+  //       setChangeRole(true);
+  //       setEditStaff(false);
+  //     }
+  //   };
+  //   if (
+  //     [3, 4, 6].includes(Number(editStaffData.role_id)) &&
+  //     editStaffData.is_customer_exist == 1
+  //   ) {
+  //     fetchChangedRoleStaff();
+  //   }
+  // }, [formik.values.role]);
+
+  const handleChangeRole = async () => {
+    try {
+      const req = {
+        action: "staffRoleChangeUpdate",
+        editStaffData: editStaffData,
+        updateData: formik.values,
+        selectedStaff: selectedStaff,
+      };
+      const data = { req: req, authToken: token };
+      await dispatch(getAllTaskByStaff(data))
+        .unwrap()
+        .then((res) => {
+          if (res.status) {
+            setChangeRole(false);
+            setSelectedStaff(null);
+            formik.resetForm();
+            setEditStaffData({});
+            Swal.fire({
+              title: "Success!",
+              text: "Staff role updated successfully.",
+              icon: "success",
+              confirmButtonText: "OK",
+            });
+            SetRefresh(!refresh);
+          } else {
+            Swal.fire({
+              title: "Error!",
+              text: "Failed to update staff role.",
+              icon: "error",
+              confirmButtonText: "OK",
+            });
+          }
+        })
+        .catch((err) => {
+
+        });
+    } catch (error) {
+      console.error("Error fetching staff tasks:", error);
+    }
+  };
+
+  const handleExport = async () => {
+    const req = {
+      action: "get",
+      page: 1,
+      limit: 100000,
+      search: "",
+    };
+    const data = { req, authToken: token };
+    const response = await dispatch(Staff(data)).unwrap();
+
+    if (
+      !response.status ||
+      !response?.data?.data ||
+      response?.data?.data?.length === 0
+    ) {
+      alert("No data to export!");
+      return;
+    }
+
+    const exportData = response?.data?.data?.map((item) => ({
+      "Full Name":
+        item.first_name && item.last_name
+          ? item.first_name + " " + item.last_name
+          : item.first_name || item.last_name || "-",
+      Email: item.email,
+      Phone: item.phone,
+      Role: item.role_name,
+      "Employee ID": item.employee_number || "-",
+      "Line Manager": item.line_manager_name || "-",
+      Status: item.status === "1" ? "Active" : "Inactive",
+    }));
+
+    downloadCSV(exportData, "Staff Details.csv");
+  };
+
+  const downloadCSV = (data, filename) => {
+    const csvRows = [];
+    const headers = Object.keys(data[0]);
+    csvRows.push(headers.join(","));
+
+    data.forEach((row) => {
+      const values = headers.map((h) => `"${row[h] || ""}"`);
+      csvRows.push(values.join(","));
+    });
+
+    const csvString = csvRows.join("\n");
+    const blob = new Blob([csvString], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.setAttribute("href", url);
+    a.setAttribute("download", filename);
+    a.click();
+  };
+
+  const exportPortfolioData = () => {
+    if (!assignCustomerData || assignCustomerData.length === 0) {
+      Swal.fire("No Data", "No portfolio data to export", "info");
+      return;
+    }
+
+    const exportData = assignCustomerData.map((item) => ({
+      "Customer Name": item.trading_name,
+    }));
+
+    downloadCSV(exportData, "Staff_Portfolio.csv");
+  };
+
+  return (
+    <div>
+      <div className="container-fluid">
+        <div className="content-title">
+          <div className="tab-title">
+            <h3 className="mt-0">Manage Staff</h3>
+          </div>
+        </div>
+      </div>
+      <div className="report-data mt-4">
+        <div className="col-sm-12">
+          <div className="page-title-box pt-0">
+            <div className="row align-items-start">
+              <div className="col-md-6"></div>
+              <div className="col-md-4">
+                <div className="d-flex justify-content-end mb-4">
+                  <div className="">
+                    {showStaffInsertTab && (
+                      <button
+                        type="button"
+                        className="btn btn-info text-white ms-1"
+                        onClick={() => {
+                          setAddStaff(true);
+                          setEditShowModel(false);
+                          formik.resetForm();
+                        }}
+                      >
+                        <Plus size={16} /> Add Staff
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="tab-content mt-minus-90" id="pills-tabContent">
+          {(staffDataAll?.data?.length > 0 || searchTerm) && (
+            <div className="row mb-3">
+              <div className="col-md-4">
+                <input
+                  type="text"
+                  placeholder="Search Staff..."
+                  className="form-control"
+                  value={searchTerm}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                />
+              </div>
+              <div className="col-md-8 d-flex justify-content-end">
+                <button
+                  className="btn btn-outline-info fw-bold border-3"
+                  onClick={handleExport}
+                >
+                  <Download size={16} />{" "}
+                  Export Excel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {tabs?.map((tab) => (
+            <div
+              key={tab.id}
+              className={`tab-pane fade ${activeTab === tab.id ? "show active" : ""
+                }`}
+              id={tab.id}
+              role="tabpanel"
+            >
+              <div className="datatable-wrapper">
+                {loading && (
+                  <div className="overlay">
+                    <div className="loader"></div>
+                  </div>
+                )}
+
+                {staffDataAll.data && staffDataAll.data.length > 0 ? (
+                  <>
+                    <Datatable
+                      columns={columns}
+                      data={staffDataAll.data}
+                      filter={false}
+                      pagination={false}
+                    />
+
+                    <ReactPaginate
+                      previousLabel={"Previous"}
+                      nextLabel={"Next"}
+                      breakLabel={"..."}
+                      pageCount={Math.ceil(totalRecords / pageSize)}
+                      marginPagesDisplayed={2}
+                      pageRangeDisplayed={5}
+                      onPageChange={handlePageChange}
+                      containerClassName={"pagination"}
+                      activeClassName={"active"}
+                      forcePage={currentPage - 1}
+                    />
+
+                    <select
+                      className="perpage-select"
+                      value={pageSize}
+                      onChange={handlePageSizeChange}
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                      <option value={500}>500</option>
+                      {/* <option value={100000}>All</option> */}
+                    </select>
+                  </>
+                ) : (
+                  <div className="text-center mt-5">
+                    <img
+                      src="/assets/images/No-data-amico.png"
+                      alt="No records available"
+                      style={{
+                        width: "250px",
+                        height: "auto",
+                        objectFit: "contain",
+                      }}
+                    />
+                    <p>No data available.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <CommanModal
+        isOpen={addStaff}
+        backdrop="static"
+        size="ms-7"
+        title="Add Staff"
+        hideBtn={true}
+        handleClose={() => {
+          setAddStaff(false);
+          formik.resetForm();
+        }}
+      >
+        <Formicform
+          fieldtype={fields.filter(
+            (field) => !field.showWhen || field.showWhen(formik.values),
+          )}
+          formik={formik}
+          btn_name="Add"
+          closeBtn={(e) => {
+            formik.resetForm();
+            setAddStaff(false);
+          }}
+        />
+      </CommanModal>
+
+      {/* <CommanModal
+        isOpen={portfolio}
+        cancel_btn="cancel"
+        hideBtn={false}
+        btn_name="Save"
+        title="Manage Portfolio"
+        handleClose={() => setPortfolio()}
+        Submit_Function={() => {
+          HandleChangeStaffPortfolio();
+        }}
+        Submit_Cancel_Function={() => {
+          setPortfolio(false);
+        }}
+      > */}
+
+      <CommanModal
+        isOpen={portfolio}
+        cancel_btn="cancel"
+        hideBtn={false}
+        btn_name="Save"
+        title="Manage Portfolio"
+        handleClose={() => setPortfolio(false)}
+        Submit_Function={HandleChangeStaffPortfolio}
+        Submit_Cancel_Function={() => setPortfolio(false)}
+      >
+        <div className="modal-body px-0">
+          <div className="row w-100">
+            {/* Select Customers */}
+            <div className="col-12">
+              <Select
+                name="customers"
+                className="basic-multi-select"
+                classNamePrefix="select"
+                value={AddCustomer}
+                options={allCustomerData.map((item) => ({
+                  value: item.id,
+                  label: item.customer_name,
+                }))}
+                onChange={handleAddCustomer}
+                isMulti
+              />
+              <small className="text-muted">
+                Select customers to assign to this staff member.
+              </small>
+            </div>
+
+            {/* Export Button BELOW input */}
+            <div className="col-12 mt-2 d-flex justify-content-end">
+              <button
+                className="btn btn-sm btn-outline-success"
+                onClick={exportPortfolioData}
+                disabled={!assignCustomerData?.length}
+              >
+                <i className="bi bi-file-earmark-excel me-1"></i>
+                Export Portfolio
+              </button>
+            </div>
+
+            {/* Assigned Customers */}
+            <div className="col-12 mt-3">
+              {assignCustomerData && assignCustomerData.length > 0 && (
+                <>
+                  <h6>Assigned Customers:</h6>
+                  <ul className="mb-0">
+                    {assignCustomerData.map((customer) => (
+                      <li key={customer.customer_id}>
+                        {customer.trading_name}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </CommanModal>
+
+      <CommanModal
+        isOpen={editStaff}
+        backdrop="static"
+        size="ms-5"
+        title="Edit Staff"
+        hideBtn={true}
+        handleClose={() => {
+          setEditStaff(false);
+          formik.resetForm();
+          setEditStaffData({});
+        }}
+      >
+        <Formicform
+          fieldtype={fields.filter(
+            (field) => !field.showWhen || field.showWhen(formik.values),
+          )}
+          formik={formik}
+          btn_name="Update"
+          closeBtn={(e) => {
+            formik.resetForm();
+            setEditStaff(false);
+            setEditStaffData({});
+          }}
+          additional_field={
+            <div className="row mt-2 ">
+              <label className="form-label">Weekly Timesheet Hours</label>
+              <div className="input-group row">
+                <div className="hours-div col-6">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Hours"
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      if (value === "" || Number(value) >= 0) {
+                        setBudgetedHours({
+                          ...budgetedHours,
+                          hours: value,
+                        });
+                      }
+                    }}
+                    value={budgetedHours?.hours || ""}
+                  />
+                  <span className="input-group-text" id="basic-addon2">
+                    H
+                  </span>
+                </div>
+                <div className="hours-div col-6">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Minutes"
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      if (
+                        value === "" ||
+                        (Number(value) >= 0 && Number(value) <= 59)
+                      ) {
+                        setBudgetedHours({
+                          ...budgetedHours,
+                          minutes: value,
+                        });
+                      } else {
+                        setBudgetedHours({
+                          ...budgetedHours,
+                          minutes: "59",
+                        });
+                      }
+                    }}
+                    value={budgetedHours?.minutes || ""}
+                  />
+                  <span className="input-group-text" id="basic-addon2">
+                    M
+                  </span>
+                </div>
+              </div>
+            </div>
+          }
+        />
+      </CommanModal>
+
+      <CommanModal
+        isOpen={addCompetancy}
+        backdrop="static"
+        size="ms-5"
+        title="Add Competency"
+        hideBtn={true}
+        handleClose={() => SetCompetancy(false)}
+      >
+        <FormGroup>
+          <Row>
+            {serviceDataAll.data.map((item, index) => (
+              <Col key={item.id} md={index < 6 ? 6 : 6}>
+                <div className="form-check">
+                  <Label className="form-check-label">
+                    <Input
+                      type="checkbox"
+                      name={item.service_name}
+                      defaultChecked={item.status}
+                      onChange={(e) => handleCheckboxChange(e, item.service_id)}
+                      className="form-check-input new-checkbox me-2 mt-1"
+                    />
+                    {item.service_name}
+                  </Label>
+                </div>
+              </Col>
+            ))}
+          </Row>
+        </FormGroup>
+        <div className="d-flex justify-content-end">
+          <Button
+            className="btn btn-outline-success"
+            color="primary"
+            onClick={handleUpdate}
+          >
+            <Save size={16} className="pe-1" />
+            Update
+          </Button>
+        </div>
+      </CommanModal>
+
+      <CommanModal
+        isOpen={staffViewLog}
+        backdrop="static"
+        size="ms-5"
+        title="View Logs"
+        hideBtn={true}
+        handleClose={() => SetStaffViewLog(false)}
+      >
+        <FormGroup>
+          <Row>
+            <div className="card-body">
+              <div className="analytic-dash-activity" data-simplebar="init">
+                <div className="simplebar-mask1">
+                  <div className="">
+                    <div className="simplebar-content" style={{ padding: 0 }}>
+                      <div className="activity">
+                        {getActiviyLog && getActiviyLog.length > 0 ? (
+                          getActiviyLog.map((item, index) => {
+                            return (
+                              <div className="activity-info" key={index}>
+                                <div className="icon-info-activity">
+                                  <Circle size={18} />
+                                </div>
+                                <div className="activity-info-text">
+                                  <div className="">
+                                    <small className="">
+                                      {formatDate(item?.created_at)}
+                                    </small>
+                                    <p className="">{item?.log_message}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <div className="no-data-found">
+                            <p className="text-center">
+                              No Activity Logs Found
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Row>
+        </FormGroup>
+      </CommanModal>
+
+      <CommanModal
+        isOpen={deleteStaff}
+        backdrop="static"
+        size="ms-5"
+        title="Delete Staff"
+        hideBtn={true}
+        handleClose={() => {
+          setDeleteStaff(false);
+          setSelectedStaff(null);
+        }}
+      >
+        <div className="modal-body">
+          <div className="text-start mb-3">
+            <h5 className="text-danger fw-bold">
+              <i className="bi bi-trash3"></i> Delete Staff:{" "}
+              <span className="text-dark">
+                {deleteStaff?.first_name + " " + deleteStaff?.last_name}
+              </span>
+            </h5>
+          </div>
+
+          <div className="mb-4">
+            <label className="form-label fw-semibold">
+              <User size={16} /> Staff to Replace:
+            </label>
+
+            <Select
+              isSearchable
+              className="shadow-sm select-staff "
+              classNamePrefix="select"
+              placeholder="Choose Staff"
+              options={staffDataAll?.data
+                ?.filter((staff) => {
+                  if (deleteStaff?.role?.toUpperCase() === "MANAGER") {
+                    return (
+                      staff.role?.toUpperCase() === "MANAGER" &&
+                      staff.id !== deleteStaff?.id &&
+                      staff.id !== 1 &&
+                      staff.id !== 2
+                    );
+                  }
+                  return (
+                    staff.id !== deleteStaff?.id &&
+                    staff.id !== 1 &&
+                    staff.id !== 2
+                  );
+                })
+                .map((staff) => ({
+                  value: staff.id,
+                  label: `${staff.first_name} ${staff.last_name}`,
+                  staffData: staff, // 👈 pura staff object store
+                }))}
+              value={
+                selectedStaff
+                  ? {
+                    value: selectedStaff.id,
+                    label: `${selectedStaff.first_name} ${selectedStaff.last_name}`,
+                  }
+                  : null
+              }
+              onChange={(selectedOption) => {
+                setSelectedStaff(selectedOption?.staffData || null);
+              }}
+              menuPortalTarget={document.body}
+              styles={{
+                menuPortal: (base) => ({
+                  ...base,
+                  zIndex: 9999,
+                }),
+              }}
+            />
+          </div>
+
+          {/* </div> */}
+
+          <div className="d-grid gap-2">
+            {selectedStaff && (
+              <button onClick={handleDeleteClick} className="btn btn-danger">
+                <Trash size={16} /> Delete
+              </button>
+            )}
+            <button
+              onClick={() => {
+                setDeleteStaff(false);
+                setSelectedStaff(null);
+              }}
+              className="btn btn-secondary"
+            >
+              <X size={16} /> Cancel
+            </button>
+          </div>
+
+
+
+          {deleteStaffCustomer.length > 0 && (
+            <div className="mb-4">
+              <h6 className="fw-bold text-primary">
+                <User2 size={16} /> Customers Assigned:
+              </h6>
+
+              <ul className="list-group">
+                {[...deleteStaffCustomer]
+                  .sort((a, b) =>
+                    (a?.trading_name || "").localeCompare(
+                      b?.trading_name || "",
+                      "en",
+                      {
+                        sensitivity: "base",
+                      },
+                    ),
+                  )
+                  .map((customer) => (
+                    <li
+                      key={customer.id}
+                      className="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <span className="text-dark">
+                        {customer?.trading_name}
+                        <span className="badge bg-secondary ms-2">
+                          {customer?.customer_code}
+                        </span>
+                      </span>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </CommanModal>
+
+      <CommanModal
+        isOpen={changeRole}
+        backdrop="static"
+        title="Change Role - Staff"
+        hideBtn={true}
+        handleClose={() => {
+          setChangeRole(false);
+          setSelectedStaff(null);
+          formik.resetForm();
+          setEditStaffData({});
+          setChangedRoleStaffData([]);
+        }}
+      >
+        <div className="modal-body">
+          <div className="mb-4">
+            <label htmlFor="staff-select" className="form-label fw-semibold">
+              <user size={16} /> Staff to Replace
+            </label>
+
+            {/* <div className="dropdown w-100">
+              <button
+                className="btn btn-outline-info rounded-pill dropdown-toggle w-100 text-start"
+                type="button"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                {selectedStaff ? selectedStaff.staff_fullname : "Choose Staff"}
+              </button>
+
+              {dropdownOpen && (
+                <ul
+                  className="dropdown-menu show w-100 shadow-sm"
+                  style={{ maxHeight: "220px", overflowY: "auto" }}
+                >
+                  {changedRoleStaffData?.length > 0 ? (
+                    changedRoleStaffData.map((staff) => (
+                      <li key={staff.id}>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => {
+                            setSelectedStaff(staff);
+                            setDropdownOpen(false);
+                          }}
+                        >
+                          {staff.staff_fullname}
+                        </button>
+                      </li>
+                    ))
+                  ) : (
+                    <li>
+                      <span className="dropdown-item text-muted">
+                        No staff available
+                      </span>
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div> */}
+
+            <Select
+              isSearchable
+              className="shadow-sm select-staff"
+              classNamePrefix="select"
+              placeholder="Choose Staff"
+              options={changedRoleStaffData?.map((staff) => ({
+                value: staff.id,
+                label: staff.staff_fullname,
+                staffData: staff,
+              }))}
+              value={
+                selectedStaff
+                  ? {
+                    value: selectedStaff.id,
+                    label: selectedStaff.staff_fullname,
+                  }
+                  : null
+              }
+              onChange={(selectedOption) => {
+                setSelectedStaff(selectedOption?.staffData || null);
+              }}
+              menuPortalTarget={document.body}
+              styles={{
+                menuPortal: (base) => ({
+                  ...base,
+                  zIndex: 9999,
+                }),
+              }}
+            />
+          </div>
+
+          <div className="d-flex justify-content-end gap-2">
+            {selectedStaff && (
+              <button onClick={handleChangeRole} className="btn btn-info">
+                <i className="bi bi-arrow-repeat me-1"></i> Change Role
+              </button>
+            )}
+            <button
+              onClick={() => {
+                setChangeRole(false);
+                setSelectedStaff(null);
+                formik.resetForm();
+                setEditStaffData({});
+                setChangedRoleStaffData([]);
+              }}
+              className="btn btn-secondary"
+            >
+              <X size={16} /> Cancel
+            </button>
+          </div>
+
+          {deleteStaffCustomer.length > 0 && (
+            <div className="mb-4">
+              <h6 className="fw-bold text-primary">
+                <User2 size={16} /> Customers Assigned:
+              </h6>
+              <ul className="list-group">
+                {deleteStaffCustomer.map((customer) => (
+                  <li
+                    key={customer.id}
+                    className="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span className="text-dark">
+                      {customer?.trading_name}{" "}
+                      <span className="badge bg-secondary">
+                        {customer?.customer_code}
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </CommanModal>
+    </div>
+  );
+};
+
+export default StaffPage;
