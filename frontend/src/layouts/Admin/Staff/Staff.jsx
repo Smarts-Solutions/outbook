@@ -821,46 +821,46 @@ const StaffPage = () => {
       disable: false,
       placeholder: "Enter Email",
     },
-    {
-      type: "select1",
-      name: "role",
-      label: "Role",
-      label_size: 12,
-      col_size: 6,
-      options:
-        roleDataAll &&
-        roleDataAll.data.map((data) => {
-          if (formik.values.role_id == data.id) {
-            return { label: data.role_name, value: data.id, selected: true };
-          } else {
-            return { label: data.role_name, value: data.id };
-          }
-        }),
-    },
-   
     // {
-    //   type: "reactSelectRole",
+    //   type: "select1",
     //   name: "role",
     //   label: "Role",
     //   label_size: 12,
     //   col_size: 6,
-    //   isMulti: true,
-    //   maxSelection: 2,
-
-    //   fixedRoleId: editStaff
-    //     ? (Array.isArray(editStaffData?.role_id)
-    //       ? editStaffData.role_id[0]
-    //       : editStaffData?.role_id)
-    //     : null,
-
-    //   isEditMode: editStaff,
-
     //   options:
-    //     roleDataAll?.data?.map((data) => ({
-    //       label: data.role_name,
-    //       value: data.id,
-    //     })) || [],
+    //     roleDataAll &&
+    //     roleDataAll.data.map((data) => {
+    //       if (formik.values.role_id == data.id) {
+    //         return { label: data.role_name, value: data.id, selected: true };
+    //       } else {
+    //         return { label: data.role_name, value: data.id };
+    //       }
+    //     }),
     // },
+   
+    {
+      type: "reactSelectRole",
+      name: "role",
+      label: "Role",
+      label_size: 12,
+      col_size: 6,
+      isMulti: true,
+      maxSelection: 2,
+
+      fixedRoleId: editStaff
+        ? (Array.isArray(editStaffData?.role_id)
+          ? editStaffData.role_id[0]
+          : editStaffData?.role_id)
+        : null,
+
+      isEditMode: editStaff,
+
+      options:
+        roleDataAll?.data?.map((data) => ({
+          label: data.role_name,
+          value: data.id,
+        })) || [],
+    },
     {
       type: "select1",
       name: "status",
@@ -1117,31 +1117,31 @@ const StaffPage = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchChangedRoleStaff = async () => {
-      if (
-        editStaffData.id !== undefined &&
-        Number(formik.values.role) !== Number(editStaffData.role_id)
-      ) {
-        if (Number(editStaffData.role_id) === 3) {
-          await getChangedRoleStaff(editStaffData);
-        } else if (Number(editStaffData.role_id) === 4) {
-          await getChangedRoleStaff(editStaffData);
-        } else if (Number(editStaffData.role_id) === 6) {
-          await getChangedRoleStaff(editStaffData);
-        }
+  // useEffect(() => {
+  //   const fetchChangedRoleStaff = async () => {
+  //     if (
+  //       editStaffData.id !== undefined &&
+  //       Number(formik.values.role) !== Number(editStaffData.role_id)
+  //     ) {
+  //       if (Number(editStaffData.role_id) === 3) {
+  //         await getChangedRoleStaff(editStaffData);
+  //       } else if (Number(editStaffData.role_id) === 4) {
+  //         await getChangedRoleStaff(editStaffData);
+  //       } else if (Number(editStaffData.role_id) === 6) {
+  //         await getChangedRoleStaff(editStaffData);
+  //       }
 
-        setChangeRole(true);
-        setEditStaff(false);
-      }
-    };
-    if (
-      [3, 4, 6].includes(Number(editStaffData.role_id)) &&
-      editStaffData.is_customer_exist == 1
-    ) {
-      fetchChangedRoleStaff();
-    }
-  }, [formik.values.role]);
+  //       setChangeRole(true);
+  //       setEditStaff(false);
+  //     }
+  //   };
+  //   if (
+  //     [3, 4, 6].includes(Number(editStaffData.role_id)) &&
+  //     editStaffData.is_customer_exist == 1
+  //   ) {
+  //     fetchChangedRoleStaff();
+  //   }
+  // }, [formik.values.role]);
 
   const handleChangeRole = async () => {
     try {
