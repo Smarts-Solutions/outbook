@@ -2347,14 +2347,514 @@ function getWeekEndings(fromDate, toDate, displayBy = "daily") {
 // };
 
 
+// const getTimesheetReportData = async (Report) => {
+//   const { StaffUserId, data } = Report;
+//   // console.log("Call Timesheet Report");
+//   var {
+//     groupBy = ["staff_id"],
+//     internal_external,
+//     fieldsToDisplay,
+//     fieldsToDisplayId,
+//     staff_id,
+//     employee_number,
+//     customer_id,
+//     client_id,
+//     job_id,
+//     task_id,
+//     internal_job_id,
+//     internal_task_id,
+//     timePeriod,
+//     displayBy,
+//     fromDate,
+//     toDate,
+//   } = data.filters;
+
+//   let role_user = data?.role?.toUpperCase() || "";
+
+//   //console.log("groupBy", groupBy);
+//   // console.log("fieldsToDisplayId", fieldsToDisplayId);
+//   if (
+//     groupBy.length == 0 ||
+//     ["", null, undefined].includes(timePeriod) ||
+//     ["", null, undefined].includes(displayBy)
+//   ) {
+//     return { status: false, message: `empty groupBy field`, data: [] };
+//   }
+//   //    groupBy = ['staff_id','customer_id','client_id'];
+//   // allowed fields
+//   const ALLOWED_GROUP_FIELDS = [
+//     "staff_id",
+//     "customer_id",
+//     "client_id",
+//     "job_id",
+//     "task_id",
+//     "employee_number",
+//   ];
+
+//   // validate groupBy
+//   if (!Array.isArray(groupBy)) groupBy = [groupBy];
+//   for (const g of groupBy) {
+//     if (!ALLOWED_GROUP_FIELDS.includes(g)) {
+//       return {
+//         status: false,
+//         message: `Invalid groupBy field: ${g}`,
+//         data: [],
+//       };
+//     }
+//   }
+
+//   try {
+//     // compute date range
+//     let range;
+//     try {
+//       range = await getDateRange(timePeriod, fromDate, toDate);
+//     } catch (err) {
+//       return {
+//         status: false,
+//         message: err.message || "Invalid date range",
+//         data: [],
+//       };
+//     }
+
+//     var { fromDate, toDate } = range;
+
+//     let where = [`work_date BETWEEN ? AND ?`];
+
+//     // let lastIndexValue = groupBy[groupBy.length - 1];
+//     // if (!["", null, undefined].includes(fieldsToDisplayId)) {
+//     //     if (lastIndexValue == "staff_id") {
+//     //         where.push(`raw.staff_id = ${fieldsToDisplayId}`);
+//     //     } else if (lastIndexValue == "customer_id") {
+//     //         where.push(`raw.customer_id = ${fieldsToDisplayId}`);
+//     //     } else if (lastIndexValue == "client_id") {
+//     //         where.push(`raw.client_id = ${fieldsToDisplayId}`);
+//     //     } else if (lastIndexValue == "job_id") {
+//     //         where.push(`raw.job_id = ${fieldsToDisplayId}`);
+//     //     } else if (lastIndexValue == "task_id") {
+//     //         where.push(`raw.task_id = ${fieldsToDisplayId}`);
+//     //     }
+//     // }
+
+//     if (!["", null, undefined].includes(staff_id)) {
+//       where.push(`raw.staff_id = ${staff_id}`);
+//     }
+//     if (!["", null, undefined].includes(customer_id)) {
+//       where.push(`raw.customer_id = ${customer_id}`);
+//     }
+//     if (!["", null, undefined].includes(client_id)) {
+//       where.push(`raw.client_id = ${client_id}`);
+//     }
+
+//     if (internal_external == "1" || internal_external == "2") {
+//       where.push(`raw.task_type = '${internal_external}'`);
+//     }
+
+//     if (!["", null, undefined].includes(job_id)) {
+//       where.push(`raw.job_id = ${job_id}`);
+//     }
+//     if (!["", null, undefined].includes(task_id)) {
+//       where.push(`raw.task_id = ${task_id}`);
+//     }
+
+//     if (!["", null, undefined].includes(internal_job_id)) {
+//       where.push(`(raw.task_type = '1' AND raw.job_id = ${internal_job_id})`);
+//     }
+//     if (!["", null, undefined].includes(internal_task_id)) {
+//       where.push(`(raw.task_type = '1' AND raw.task_id = ${internal_task_id})`);
+//     }
+//     if (!["", null, undefined].includes(employee_number)) {
+//       where.push(`s.employee_number = '${employee_number}'`);
+//     }
+
+//     if (
+//       !["SUPERADMIN", "ADMIN"].includes(role_user) &&
+//       !["", null, undefined].includes(StaffUserId)
+//     ) {
+//       const allowedStaffIds = await LineManageStaffIdHelperFunction(StaffUserId);
+//       if (allowedStaffIds && allowedStaffIds.length > 0) {
+//         where.push(`raw.staff_id IN (${allowedStaffIds.join(',')})`);
+//       } else {
+//         where.push(`raw.staff_id = ${StaffUserId}`);
+//       }
+//     }
+
+//     where = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+//     // Build group_value for SQL
+//     // const groupValueSQL = `CONCAT_WS('::', ${groupBy.join(", ")}) AS group_value`;
+//     const groupValueSQL = `CONCAT_WS('::', ${groupBy
+//       .map((f) => (f === "employee_number" ? "s.employee_number" : `${f}`))
+//       .join(", ")}) AS group_value`;
+
+//     // Build readable group_label
+//     const groupLabelSQL = groupBy
+//       .map((f) => {
+//         if (f === "staff_id") return "CONCAT(s.first_name,' ',s.last_name)";
+//         if (f === "customer_id") return "c.id";
+//         if (f === "client_id") return "cl.id";
+//         if (f === "job_id") {
+//           return `CASE 
+//                     WHEN raw.task_type = '1' THEN internal.name
+//                     WHEN raw.task_type = '2' THEN j.job_id
+//                 END`;
+//         }
+
+//         if (f === "task_id") {
+//           return `CASE 
+//                     WHEN raw.task_type = '1' THEN sub_internal.name
+//                     WHEN raw.task_type = '2' THEN t.name
+//                 END`;
+//         }
+//         if (f === "employee_number") return "s.employee_number";
+//         return f;
+//       })
+//       .join(", ' - ', ");
+
+//     const groupLabelFinal = `CONCAT(${groupLabelSQL}) AS group_label`;
+//     const staffName = `CONCAT(s.first_name,' ',s.last_name) AS staff_name`;
+//     const customerName = `c.trading_name AS customer_name`;
+//     const clientName = `CONCAT(
+//                             'cli_', 
+//                             SUBSTRING(c.trading_name, 1, 3), '_',
+//                             SUBSTRING(cl.trading_name, 1, 3), '_',
+//                             SUBSTRING(cl.client_code, 1, 15)
+//                         ) AS client_name`;
+//     const jobName = `
+//                  CASE 
+//                     WHEN raw.task_type = '1' THEN internal.name
+//                     WHEN raw.task_type = '2' THEN 
+
+//                     CONCAT(
+//                         SUBSTRING(c.trading_name, 1, 3), '_',
+//                         SUBSTRING(cl.trading_name, 1, 3), '_',
+//                         SUBSTRING(job_types.type, 1, 4), '_',
+//                         SUBSTRING(j.job_id, 1, 15)
+//                         )
+
+
+//                 END AS job_name`;
+//     const taskName = `
+//                  CASE 
+//                     WHEN raw.task_type = '1' THEN sub_internal.name
+//                     WHEN raw.task_type = '2' THEN t.name
+//                 END AS task_name`;
+//     const taskType = `CASE
+//                             WHEN raw.task_type = '1' THEN 'Internal'
+//                             WHEN raw.task_type = '2' THEN 'External'
+//                             ELSE 'Unknown'
+//                           END AS task_type_label`;
+//     const employeeNumber = `s.employee_number AS employee_number`;
+
+//     const page  = Math.max(Number(data.page) || 1, 1);
+//     const limit = Math.max(Number(data.limit) || 100000000, 1);
+//     const offset = (page - 1) * limit;
+
+//     const unpivotCTE = `
+//         WITH raw AS (
+//            SELECT 
+//             timesheet.id AS timesheet_id,
+//             timesheet.staff_id,
+//             timesheet.customer_id,
+//             timesheet.client_id,
+//             timesheet.job_id,
+//             timesheet.task_id,
+//             ${groupValueSQL},
+//             timesheet.monday_date AS work_date,
+//             timesheet.monday_hours AS work_hours,
+//             timesheet.task_type
+//             FROM timesheet
+//             LEFT JOIN staffs s ON timesheet.staff_id = s.id
+//             WHERE timesheet.monday_date IS NOT NULL
+
+//             UNION ALL
+//             SELECT 
+//             timesheet.id,
+//             timesheet.staff_id,
+//             timesheet.customer_id,
+//             timesheet.client_id,
+//             timesheet.job_id,
+//             timesheet.task_id,
+//             ${groupValueSQL},
+//             timesheet.tuesday_date AS work_date,
+//             timesheet.tuesday_hours AS work_hours, 
+//             timesheet.task_type
+//             FROM timesheet
+//             LEFT JOIN staffs s ON timesheet.staff_id = s.id
+//             WHERE timesheet.tuesday_date IS NOT NULL
+//             UNION ALL
+//             SELECT 
+//             timesheet.id,
+//             timesheet.staff_id,
+//             timesheet.customer_id,
+//             timesheet.client_id,
+//             timesheet.job_id,
+//             timesheet.task_id,
+//             ${groupValueSQL},
+//             timesheet.wednesday_date AS work_date, 
+//             timesheet.wednesday_hours AS work_hours, 
+//             timesheet.task_type
+//             FROM timesheet
+//             LEFT JOIN staffs s ON timesheet.staff_id = s.id
+//             WHERE
+//                 timesheet.wednesday_date IS NOT NULL
+//             UNION ALL
+//             SELECT 
+//             timesheet.id,
+//             timesheet.staff_id,
+//             timesheet.customer_id,
+//             timesheet.client_id,
+//             timesheet.job_id,
+//             timesheet.task_id,
+//             ${groupValueSQL},
+//             timesheet.thursday_date AS work_date, 
+//             timesheet.thursday_hours AS work_hours, 
+//             timesheet.task_type
+//             FROM timesheet
+//             LEFT JOIN staffs s ON timesheet.staff_id = s.id
+//             WHERE   
+//                 timesheet.thursday_date IS NOT NULL
+//             UNION ALL
+//             SELECT 
+//             timesheet.id,
+//             timesheet.staff_id,
+//             timesheet.customer_id,
+//             timesheet.client_id,
+//             timesheet.job_id,
+//             timesheet.task_id,
+//             ${groupValueSQL},
+//             timesheet.friday_date AS work_date, 
+//             timesheet.friday_hours AS work_hours, 
+//             timesheet.task_type
+//             FROM timesheet
+//             LEFT JOIN staffs s ON timesheet.staff_id = s.id
+//             WHERE
+//                 timesheet.friday_date IS NOT NULL
+//             UNION ALL
+//             SELECT 
+//             timesheet.id,
+//             timesheet.staff_id,
+//             timesheet.customer_id,
+//             timesheet.client_id,
+//             timesheet.job_id,   
+//             timesheet.task_id,
+//             ${groupValueSQL},
+//             timesheet.saturday_date AS work_date, 
+//             timesheet.saturday_hours AS work_hours, 
+//             timesheet.task_type
+//             FROM timesheet
+//             LEFT JOIN staffs s ON timesheet.staff_id = s.id
+//             WHERE
+//                 timesheet.saturday_date IS NOT NULL
+//             UNION ALL
+//             SELECT
+//             timesheet.id,
+//             timesheet.staff_id,
+//             timesheet.customer_id,
+//             timesheet.client_id,
+//             timesheet.job_id,
+//             timesheet.task_id,
+//             ${groupValueSQL},
+//             timesheet.sunday_date AS work_date,
+//             timesheet.sunday_hours AS work_hours,
+//             timesheet.task_type
+//             FROM timesheet
+//             LEFT JOIN staffs s ON timesheet.staff_id = s.id
+//             WHERE timesheet.sunday_date IS NOT NULL
+//         ),
+//         joined AS (
+//             SELECT
+//                 raw.timesheet_id,
+//                 raw.group_value,
+//                 raw.work_date,
+//                 raw.work_hours,
+//                 raw.task_type,
+//                 ${groupLabelFinal},
+//                 ${staffName},
+//                 ${customerName},
+//                 ${clientName},
+//                 ${jobName},
+//                 ${taskName},
+//                 ${taskType},
+//                 ${employeeNumber}
+//             FROM raw
+//             LEFT JOIN staffs s        ON raw.staff_id    = s.id
+//             LEFT JOIN customers c     ON raw.customer_id = c.id
+//             LEFT JOIN clients cl      ON raw.client_id   = cl.id
+//             LEFT JOIN internal        ON (raw.task_type = '1' AND raw.job_id  = internal.id)
+//             LEFT JOIN jobs j          ON (raw.task_type = '2' AND raw.job_id  = j.id)
+//             LEFT JOIN job_types       ON j.job_type_id = job_types.id
+//             LEFT JOIN sub_internal    ON (raw.task_type = '1' AND raw.task_id = sub_internal.id)
+//             LEFT JOIN task t          ON (raw.task_type = '2' AND raw.task_id = t.id)
+//             ${where}
+//         ),
+//         unique_groups AS (
+//             SELECT DISTINCT group_value, task_type
+//             FROM joined
+//             ORDER BY group_value, task_type
+//             LIMIT ${limit} OFFSET ${offset}
+//         )
+//     `;
+
+//     const countSQL = `${unpivotCTE} SELECT COUNT(*) AS total FROM (SELECT DISTINCT group_value, task_type FROM joined) t`;
+//     const dataSQL = `
+//         ${unpivotCTE}
+//         SELECT joined.* 
+//         FROM joined
+//         INNER JOIN unique_groups 
+//             ON joined.group_value = unique_groups.group_value 
+//            AND joined.task_type = unique_groups.task_type
+//         ORDER BY joined.group_value, joined.task_type, joined.work_date
+//     `;
+
+//     const conn = await pool.getConnection();
+//     const [[countRows], [rows]] = await Promise.all([
+//         conn.execute(countSQL, [fromDate, toDate]),
+//         conn.execute(dataSQL, [fromDate, toDate])
+//     ]);
+//     conn.release();
+
+//     const totalCount = Number(countRows[0]?.total ?? 0);
+
+//     // Aggregate JS
+//     const groups = {};
+//     const periodSet = new Set();
+
+//     for (const r of rows) {
+//       let workDateStr =
+//         r.work_date instanceof Date
+//           ? toYMD(r.work_date)
+//           : String(r.work_date).slice(0, 10);
+//       if (!workDateStr) continue;
+
+//       // console.log("r.work_hours --------> ", r.work_hours);
+
+//       //  const gid = r.group_value || 'NULL';
+//       const gid = r.group_value + "_" + r.task_type || "NULL";
+//       const label = r.group_label;
+//       const staffName = r.staff_name;
+//       const customerName = r.customer_name;
+//       const clientName = r.client_name;
+//       const jobName = r.job_name;
+//       const taskName = r.task_name;
+//       const taskType = r.task_type_label;
+//       const employeeNumber = r.employee_number;
+
+//       //const secs = r?.work_hours;
+//       const secs = ["", null, undefined].includes(r.work_hours)
+//         ? "0"
+//         : r.work_hours;
+//       // console.log("displayBy", displayBy, "workDateStr", workDateStr);
+//       const periodKey = getPeriodKey(displayBy, workDateStr);
+//       if (!periodKey) continue;
+
+//       periodSet.add(periodKey);
+
+//       if (!groups[gid]) {
+//         groups[gid] = {
+//           group_value: gid,
+//           group_label: label,
+//           staff_name: staffName,
+//           customer_name: customerName,
+//           client_name: clientName,
+//           job_name: jobName,
+//           task_name: taskName,
+//           task_type: taskType,
+//           employee_number: employeeNumber,
+//           totalSeconds: 0,
+//           timesheetIds: new Set(),
+//           periodSeconds: {},
+//         };
+//       }
+
+//       const g = groups[gid];
+//       g.totalSeconds += parseFloat(secs?.replace(":", "."));
+//       g.timesheetIds.add(r.timesheet_id);
+//       g.periodSeconds[periodKey] =
+//         (g.periodSeconds[periodKey] || 0) + parseFloat(secs?.replace(":", "."));
+//     }
+
+//     const periods = Array.from(periodSet).sort((a, b) => a.localeCompare(b));
+//     const outRows = [];
+//     const groupKeys = Object.keys(groups).sort((a, b) => {
+//       const na = Number(a),
+//         nb = Number(b);
+//       if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+//       return a.localeCompare(b);
+//     });
+
+//     for (const gid of groupKeys) {
+//       const g = groups[gid];
+//       const row = {};
+//       // console.log("g", g);
+
+//       row["staff_id"] = g.staff_name; // final readable label
+//       row["customer_id"] = g.customer_name;
+//       row["client_id"] = g.client_name;
+//       row["job_id"] = g.job_name;
+//       row["task_id"] = g.task_name;
+//       row["employee_number"] = g.employee_number;
+
+//       for (const p of periods) {
+//         row[p] = g.periodSeconds[p]?.toFixed(2) || 0;
+//       }
+
+//       row.total_hours = parseFloat(g.totalSeconds)?.toFixed(2);
+//       row.task_type = g.task_type;
+//       // row.total_records = g.timesheetIds.size;
+//       outRows.push(row);
+//     }
+
+//     // const columns = ['group', ...periods, 'total_hours', 'total_records'];
+//     // console.log("fromDate ,", fromDate, 'toDate ', toDate);
+
+//     const weeks = getWeekEndings(
+//       new Date(fromDate),
+//       new Date(toDate),
+//       displayBy,
+//     );
+
+//     const columnsWeeks = [...groupBy, ...weeks, "total_hours"];
+//     // const columns = [...groupBy, ...periods, 'total_hours'];
+//     // console.log("columnsWeeks", columnsWeeks);
+
+//     // console.log("Time Period", timePeriod, "fromDate, ", fromDate, " toDate ", toDate);
+//     // console.log("displayBy, ", displayBy);
+//     const finalRows = normalizeRows(columnsWeeks, outRows);
+
+//     const fixed = [...groupBy, "task_type", "total_hours"];
+//     const dynamic = columnsWeeks.filter((col) => !fixed.includes(col));
+//     const columnsWeeksDecOrder = [...fixed, ...dynamic?.reverse()];
+
+//     const paginatedRows = finalRows;
+
+//     return {
+//       status: true,
+//       message: "Success.",
+//       data: {
+//         meta: { fromDate, toDate, groupBy, displayBy, timePeriod },
+//         columns: columnsWeeksDecOrder,
+//         rows: paginatedRows,
+//         pagination: {
+//           total: totalCount,
+//           page: page,
+//           limit: limit,
+//           totalPages: Math.ceil(totalCount / limit),
+//         },
+//       },
+//     };
+//   } catch (err) {
+//     console.error(err);
+//     return { status: false, message: err.message || "server error", data: [] };
+//   }
+// };
+
+
 const getTimesheetReportData = async (Report) => {
   const { StaffUserId, data } = Report;
-  // console.log("Call Timesheet Report");
-  var {
+
+  let {
     groupBy = ["staff_id"],
     internal_external,
-    fieldsToDisplay,
-    fieldsToDisplayId,
     staff_id,
     employee_number,
     customer_id,
@@ -2369,19 +2869,17 @@ const getTimesheetReportData = async (Report) => {
     toDate,
   } = data.filters;
 
-  let role_user = data?.role?.toUpperCase() || "";
+  const role_user = data?.role?.toUpperCase() || "";
 
-  //console.log("groupBy", groupBy);
-  // console.log("fieldsToDisplayId", fieldsToDisplayId);
   if (
-    groupBy.length == 0 ||
+    !groupBy ||
+    groupBy.length === 0 ||
     ["", null, undefined].includes(timePeriod) ||
     ["", null, undefined].includes(displayBy)
   ) {
     return { status: false, message: `empty groupBy field`, data: [] };
   }
-  //    groupBy = ['staff_id','customer_id','client_id'];
-  // allowed fields
+
   const ALLOWED_GROUP_FIELDS = [
     "staff_id",
     "customer_id",
@@ -2391,375 +2889,276 @@ const getTimesheetReportData = async (Report) => {
     "employee_number",
   ];
 
-  // validate groupBy
   if (!Array.isArray(groupBy)) groupBy = [groupBy];
   for (const g of groupBy) {
     if (!ALLOWED_GROUP_FIELDS.includes(g)) {
-      return {
-        status: false,
-        message: `Invalid groupBy field: ${g}`,
-        data: [],
-      };
+      return { status: false, message: `Invalid groupBy field: ${g}`, data: [] };
     }
   }
 
+  const isSet = (v) => !["", null, undefined].includes(v);
+  const num = (v) => Number(v);
+
+  const parseHours = (v) => {
+    if (!isSet(v)) return 0;
+    const s = String(v);
+    const n = parseFloat(s.includes(":") ? s.replace(":", ".") : s);
+    return Number.isNaN(n) ? 0 : n;
+  };
+
   try {
-    // compute date range
+    // ---- date range ----
     let range;
     try {
       range = await getDateRange(timePeriod, fromDate, toDate);
     } catch (err) {
-      return {
-        status: false,
-        message: err.message || "Invalid date range",
-        data: [],
-      };
+      return { status: false, message: err.message || "Invalid date range", data: [] };
     }
+    ({ fromDate, toDate } = range);
 
-    var { fromDate, toDate } = range;
+    // ----------------------------------------------------------
+    // INNER filters (pushed down inside each day subquery) - all parameterized
+    // ----------------------------------------------------------
+    const innerConds = [];
+    const innerParams = [];
 
-    let where = [`work_date BETWEEN ? AND ?`];
-
-    // let lastIndexValue = groupBy[groupBy.length - 1];
-    // if (!["", null, undefined].includes(fieldsToDisplayId)) {
-    //     if (lastIndexValue == "staff_id") {
-    //         where.push(`raw.staff_id = ${fieldsToDisplayId}`);
-    //     } else if (lastIndexValue == "customer_id") {
-    //         where.push(`raw.customer_id = ${fieldsToDisplayId}`);
-    //     } else if (lastIndexValue == "client_id") {
-    //         where.push(`raw.client_id = ${fieldsToDisplayId}`);
-    //     } else if (lastIndexValue == "job_id") {
-    //         where.push(`raw.job_id = ${fieldsToDisplayId}`);
-    //     } else if (lastIndexValue == "task_id") {
-    //         where.push(`raw.task_id = ${fieldsToDisplayId}`);
-    //     }
-    // }
-
-    if (!["", null, undefined].includes(staff_id)) {
-      where.push(`raw.staff_id = ${staff_id}`);
+    if (isSet(staff_id)) {
+      innerConds.push(`timesheet.staff_id = ?`);
+      innerParams.push(num(staff_id));
     }
-    if (!["", null, undefined].includes(customer_id)) {
-      where.push(`raw.customer_id = ${customer_id}`);
+    if (isSet(customer_id)) {
+      innerConds.push(`timesheet.customer_id = ?`);
+      innerParams.push(num(customer_id));
     }
-    if (!["", null, undefined].includes(client_id)) {
-      where.push(`raw.client_id = ${client_id}`);
+    if (isSet(client_id)) {
+      innerConds.push(`timesheet.client_id = ?`);
+      innerParams.push(num(client_id));
     }
-
     if (internal_external == "1" || internal_external == "2") {
-      where.push(`raw.task_type = '${internal_external}'`);
+      innerConds.push(`timesheet.task_type = ?`);
+      innerParams.push(String(internal_external));
+    }
+    if (isSet(job_id)) {
+      innerConds.push(`timesheet.job_id = ?`);
+      innerParams.push(num(job_id));
+    }
+    if (isSet(task_id)) {
+      innerConds.push(`timesheet.task_id = ?`);
+      innerParams.push(num(task_id));
+    }
+    if (isSet(internal_job_id)) {
+      innerConds.push(`(timesheet.task_type = '1' AND timesheet.job_id = ?)`);
+      innerParams.push(num(internal_job_id));
+    }
+    if (isSet(internal_task_id)) {
+      innerConds.push(`(timesheet.task_type = '1' AND timesheet.task_id = ?)`);
+      innerParams.push(num(internal_task_id));
+    }
+    if (isSet(employee_number)) {
+      innerConds.push(`s.employee_number = ?`);
+      innerParams.push(String(employee_number));
     }
 
-    if (!["", null, undefined].includes(job_id)) {
-      where.push(`raw.job_id = ${job_id}`);
-    }
-    if (!["", null, undefined].includes(task_id)) {
-      where.push(`raw.task_id = ${task_id}`);
-    }
-
-    if (!["", null, undefined].includes(internal_job_id)) {
-      where.push(`(raw.task_type = '1' AND raw.job_id = ${internal_job_id})`);
-    }
-    if (!["", null, undefined].includes(internal_task_id)) {
-      where.push(`(raw.task_type = '1' AND raw.task_id = ${internal_task_id})`);
-    }
-    if (!["", null, undefined].includes(employee_number)) {
-      where.push(`s.employee_number = '${employee_number}'`);
-    }
-
-    if (
-      !["SUPERADMIN", "ADMIN"].includes(role_user) &&
-      !["", null, undefined].includes(StaffUserId)
-    ) {
+    if (!["SUPERADMIN", "ADMIN"].includes(role_user) && isSet(StaffUserId)) {
       const allowedStaffIds = await LineManageStaffIdHelperFunction(StaffUserId);
       if (allowedStaffIds && allowedStaffIds.length > 0) {
-        where.push(`raw.staff_id IN (${allowedStaffIds.join(',')})`);
+        const ids = allowedStaffIds.map(num).filter((n) => !Number.isNaN(n));
+        innerConds.push(`timesheet.staff_id IN (${ids.map(() => "?").join(",")})`);
+        innerParams.push(...ids);
       } else {
-        where.push(`raw.staff_id = ${StaffUserId}`);
+        innerConds.push(`timesheet.staff_id = ?`);
+        innerParams.push(num(StaffUserId));
       }
     }
 
-    where = where.length ? `WHERE ${where.join(" AND ")}` : "";
+    const needInnerStaffJoin =
+      groupBy.includes("employee_number") || isSet(employee_number);
 
-    // Build group_value for SQL
-    // const groupValueSQL = `CONCAT_WS('::', ${groupBy.join(", ")}) AS group_value`;
+    const innerWhereSQL = innerConds.length ? ` AND ${innerConds.join(" AND ")}` : "";
+
     const groupValueSQL = `CONCAT_WS('::', ${groupBy
-      .map((f) => (f === "employee_number" ? "s.employee_number" : `${f}`))
+      .map((f) => (f === "employee_number" ? "s.employee_number" : `timesheet.${f}`))
       .join(", ")}) AS group_value`;
 
-    // Build readable group_label
+    // ----------------------------------------------------------
+    // One subquery per weekday - date filter pushed DOWN here
+    // ----------------------------------------------------------
+    const dayParts = [
+      ["monday_date", "monday_hours"],
+      ["tuesday_date", "tuesday_hours"],
+      ["wednesday_date", "wednesday_hours"],
+      ["thursday_date", "thursday_hours"],
+      ["friday_date", "friday_hours"],
+      ["saturday_date", "saturday_hours"],
+      ["sunday_date", "sunday_hours"],
+    ];
+
+    const buildDaySubquery = (dateCol, hoursCol) => `
+      SELECT
+        timesheet.id AS timesheet_id,
+        timesheet.staff_id,
+        timesheet.customer_id,
+        timesheet.client_id,
+        timesheet.job_id,
+        timesheet.task_id,
+        ${groupValueSQL},
+        timesheet.${dateCol}  AS work_date,
+        timesheet.${hoursCol} AS work_hours,
+        timesheet.task_type
+      FROM timesheet
+      ${needInnerStaffJoin ? "LEFT JOIN staffs s ON timesheet.staff_id = s.id" : ""}
+      WHERE timesheet.${dateCol} BETWEEN ? AND ?
+      ${innerWhereSQL}
+    `;
+
+    const unionSQL = dayParts.map(([d, h]) => buildDaySubquery(d, h)).join("\nUNION ALL\n");
+
+    const dayParamsBlock = [];
+    for (let i = 0; i < dayParts.length; i++) {
+      dayParamsBlock.push(fromDate, toDate, ...innerParams);
+    }
+
+    // ----------------------------------------------------------
+    // Outer SELECT (labels/display joins on already-filtered data)
+    // NOTE: plain derived-table subquery - no WITH/CTE (CTE needs MySQL 8+,
+    // breaks on older MySQL/MariaDB servers, which is what's failing on
+    // your second system).
+    // ----------------------------------------------------------
     const groupLabelSQL = groupBy
       .map((f) => {
         if (f === "staff_id") return "CONCAT(s.first_name,' ',s.last_name)";
         if (f === "customer_id") return "c.id";
         if (f === "client_id") return "cl.id";
-        if (f === "job_id") {
-          return `CASE 
-                    WHEN raw.task_type = '1' THEN internal.name
-                    WHEN raw.task_type = '2' THEN j.job_id
-                END`;
-        }
-
-        if (f === "task_id") {
-          return `CASE 
-                    WHEN raw.task_type = '1' THEN sub_internal.name
-                    WHEN raw.task_type = '2' THEN t.name
-                END`;
-        }
+        if (f === "job_id")
+          return `CASE WHEN raw.task_type='1' THEN internal.name
+                       WHEN raw.task_type='2' THEN j.job_id END`;
+        if (f === "task_id")
+          return `CASE WHEN raw.task_type='1' THEN sub_internal.name
+                       WHEN raw.task_type='2' THEN t.name END`;
         if (f === "employee_number") return "s.employee_number";
         return f;
       })
       .join(", ' - ', ");
 
-    const groupLabelFinal = `CONCAT(${groupLabelSQL}) AS group_label`;
-    const staffName = `CONCAT(s.first_name,' ',s.last_name) AS staff_name`;
-    const customerName = `c.trading_name AS customer_name`;
-    const clientName = `CONCAT(
-                            'cli_', 
-                            SUBSTRING(c.trading_name, 1, 3), '_',
-                            SUBSTRING(cl.trading_name, 1, 3), '_',
-                            SUBSTRING(cl.client_code, 1, 15)
-                        ) AS client_name`;
-    const jobName = `
-                 CASE 
-                    WHEN raw.task_type = '1' THEN internal.name
-                    WHEN raw.task_type = '2' THEN 
+    const joinedSQL = `
+      SELECT
+        raw.timesheet_id,
+        raw.group_value,
+        raw.work_date,
+        raw.work_hours,
+        raw.task_type,
+        CONCAT(${groupLabelSQL}) AS group_label,
+        CONCAT(s.first_name,' ',s.last_name) AS staff_name,
+        c.trading_name AS customer_name,
+        CONCAT('cli_',
+               SUBSTRING(c.trading_name,1,3),'_',
+               SUBSTRING(cl.trading_name,1,3),'_',
+               SUBSTRING(cl.client_code,1,15)) AS client_name,
+        CASE
+          WHEN raw.task_type='1' THEN internal.name
+          WHEN raw.task_type='2' THEN
+            CONCAT(SUBSTRING(c.trading_name,1,3),'_',
+                   SUBSTRING(cl.trading_name,1,3),'_',
+                   SUBSTRING(job_types.type,1,4),'_',
+                   SUBSTRING(j.job_id,1,15))
+        END AS job_name,
+        CASE
+          WHEN raw.task_type='1' THEN sub_internal.name
+          WHEN raw.task_type='2' THEN t.name
+        END AS task_name,
+        CASE
+          WHEN raw.task_type='1' THEN 'Internal'
+          WHEN raw.task_type='2' THEN 'External'
+          ELSE 'Unknown'
+        END AS task_type_label,
+        s.employee_number AS employee_number
+      FROM ( ${unionSQL} ) AS raw
+      LEFT JOIN staffs       s            ON raw.staff_id    = s.id
+      LEFT JOIN customers    c            ON raw.customer_id = c.id
+      LEFT JOIN clients      cl           ON raw.client_id   = cl.id
+      LEFT JOIN internal     internal     ON (raw.task_type='1' AND raw.job_id  = internal.id)
+      LEFT JOIN jobs         j            ON (raw.task_type='2' AND raw.job_id  = j.id)
+      LEFT JOIN job_types    job_types    ON j.job_type_id = job_types.id
+      LEFT JOIN sub_internal sub_internal ON (raw.task_type='1' AND raw.task_id = sub_internal.id)
+      LEFT JOIN task         t            ON (raw.task_type='2' AND raw.task_id = t.id)
+    `;
 
-                    CONCAT(
-                        SUBSTRING(c.trading_name, 1, 3), '_',
-                        SUBSTRING(cl.trading_name, 1, 3), '_',
-                        SUBSTRING(job_types.type, 1, 4), '_',
-                        SUBSTRING(j.job_id, 1, 15)
-                        )
-
-
-                END AS job_name`;
-    const taskName = `
-                 CASE 
-                    WHEN raw.task_type = '1' THEN sub_internal.name
-                    WHEN raw.task_type = '2' THEN t.name
-                END AS task_name`;
-    const taskType = `CASE
-                            WHEN raw.task_type = '1' THEN 'Internal'
-                            WHEN raw.task_type = '2' THEN 'External'
-                            ELSE 'Unknown'
-                          END AS task_type_label`;
-    const employeeNumber = `s.employee_number AS employee_number`;
-
-    const page  = Math.max(Number(data.page) || 1, 1);
+    // ----------------------------------------------------------
+    // PAGINATION done at SQL level (group_value + task_type wise),
+    // same idea as your "new" query, but using plain derived-table
+    // subqueries + JOIN instead of WITH/CTE (CTE syntax needs MySQL 8+
+    // which is exactly what was breaking on your second server).
+    // Also no LIMIT-inside-IN-subquery (that throws error 1235 on
+    // older MySQL) - we use a JOIN instead.
+    // ----------------------------------------------------------
+    const page = Math.max(Number(data.page) || 1, 1);
     const limit = Math.max(Number(data.limit) || 100000000, 1);
     const offset = (page - 1) * limit;
 
-    const unpivotCTE = `
-        WITH raw AS (
-           SELECT 
-            timesheet.id AS timesheet_id,
-            timesheet.staff_id,
-            timesheet.customer_id,
-            timesheet.client_id,
-            timesheet.job_id,
-            timesheet.task_id,
-            ${groupValueSQL},
-            timesheet.monday_date AS work_date,
-            timesheet.monday_hours AS work_hours,
-            timesheet.task_type
-            FROM timesheet
-            LEFT JOIN staffs s ON timesheet.staff_id = s.id
-            WHERE timesheet.monday_date IS NOT NULL
-
-            UNION ALL
-            SELECT 
-            timesheet.id,
-            timesheet.staff_id,
-            timesheet.customer_id,
-            timesheet.client_id,
-            timesheet.job_id,
-            timesheet.task_id,
-            ${groupValueSQL},
-            timesheet.tuesday_date AS work_date,
-            timesheet.tuesday_hours AS work_hours, 
-            timesheet.task_type
-            FROM timesheet
-            LEFT JOIN staffs s ON timesheet.staff_id = s.id
-            WHERE timesheet.tuesday_date IS NOT NULL
-            UNION ALL
-            SELECT 
-            timesheet.id,
-            timesheet.staff_id,
-            timesheet.customer_id,
-            timesheet.client_id,
-            timesheet.job_id,
-            timesheet.task_id,
-            ${groupValueSQL},
-            timesheet.wednesday_date AS work_date, 
-            timesheet.wednesday_hours AS work_hours, 
-            timesheet.task_type
-            FROM timesheet
-            LEFT JOIN staffs s ON timesheet.staff_id = s.id
-            WHERE
-                timesheet.wednesday_date IS NOT NULL
-            UNION ALL
-            SELECT 
-            timesheet.id,
-            timesheet.staff_id,
-            timesheet.customer_id,
-            timesheet.client_id,
-            timesheet.job_id,
-            timesheet.task_id,
-            ${groupValueSQL},
-            timesheet.thursday_date AS work_date, 
-            timesheet.thursday_hours AS work_hours, 
-            timesheet.task_type
-            FROM timesheet
-            LEFT JOIN staffs s ON timesheet.staff_id = s.id
-            WHERE   
-                timesheet.thursday_date IS NOT NULL
-            UNION ALL
-            SELECT 
-            timesheet.id,
-            timesheet.staff_id,
-            timesheet.customer_id,
-            timesheet.client_id,
-            timesheet.job_id,
-            timesheet.task_id,
-            ${groupValueSQL},
-            timesheet.friday_date AS work_date, 
-            timesheet.friday_hours AS work_hours, 
-            timesheet.task_type
-            FROM timesheet
-            LEFT JOIN staffs s ON timesheet.staff_id = s.id
-            WHERE
-                timesheet.friday_date IS NOT NULL
-            UNION ALL
-            SELECT 
-            timesheet.id,
-            timesheet.staff_id,
-            timesheet.customer_id,
-            timesheet.client_id,
-            timesheet.job_id,   
-            timesheet.task_id,
-            ${groupValueSQL},
-            timesheet.saturday_date AS work_date, 
-            timesheet.saturday_hours AS work_hours, 
-            timesheet.task_type
-            FROM timesheet
-            LEFT JOIN staffs s ON timesheet.staff_id = s.id
-            WHERE
-                timesheet.saturday_date IS NOT NULL
-            UNION ALL
-            SELECT
-            timesheet.id,
-            timesheet.staff_id,
-            timesheet.customer_id,
-            timesheet.client_id,
-            timesheet.job_id,
-            timesheet.task_id,
-            ${groupValueSQL},
-            timesheet.sunday_date AS work_date,
-            timesheet.sunday_hours AS work_hours,
-            timesheet.task_type
-            FROM timesheet
-            LEFT JOIN staffs s ON timesheet.staff_id = s.id
-            WHERE timesheet.sunday_date IS NOT NULL
-        ),
-        joined AS (
-            SELECT
-                raw.timesheet_id,
-                raw.group_value,
-                raw.work_date,
-                raw.work_hours,
-                raw.task_type,
-                ${groupLabelFinal},
-                ${staffName},
-                ${customerName},
-                ${clientName},
-                ${jobName},
-                ${taskName},
-                ${taskType},
-                ${employeeNumber}
-            FROM raw
-            LEFT JOIN staffs s        ON raw.staff_id    = s.id
-            LEFT JOIN customers c     ON raw.customer_id = c.id
-            LEFT JOIN clients cl      ON raw.client_id   = cl.id
-            LEFT JOIN internal        ON (raw.task_type = '1' AND raw.job_id  = internal.id)
-            LEFT JOIN jobs j          ON (raw.task_type = '2' AND raw.job_id  = j.id)
-            LEFT JOIN job_types       ON j.job_type_id = job_types.id
-            LEFT JOIN sub_internal    ON (raw.task_type = '1' AND raw.task_id = sub_internal.id)
-            LEFT JOIN task t          ON (raw.task_type = '2' AND raw.task_id = t.id)
-            ${where}
-        ),
-        unique_groups AS (
-            SELECT DISTINCT group_value, task_type
-            FROM joined
-            ORDER BY group_value, task_type
-            LIMIT ${limit} OFFSET ${offset}
-        )
+    const countSQL = `
+      SELECT COUNT(*) AS total FROM (
+        SELECT DISTINCT group_value, task_type FROM ( ${unionSQL} ) AS raw
+      ) t
     `;
 
-    const countSQL = `${unpivotCTE} SELECT COUNT(*) AS total FROM (SELECT DISTINCT group_value, task_type FROM joined) t`;
+    const pageGroupsSQL = `
+      SELECT DISTINCT group_value, task_type
+      FROM ( ${unionSQL} ) AS raw2
+      ORDER BY group_value, task_type
+      LIMIT ? OFFSET ?
+    `;
+
     const dataSQL = `
-        ${unpivotCTE}
-        SELECT joined.* 
-        FROM joined
-        INNER JOIN unique_groups 
-            ON joined.group_value = unique_groups.group_value 
-           AND joined.task_type = unique_groups.task_type
-        ORDER BY joined.group_value, joined.task_type, joined.work_date
+      SELECT j.*
+      FROM ( ${joinedSQL} ) AS j
+      INNER JOIN ( ${pageGroupsSQL} ) AS pg
+        ON j.group_value <=> pg.group_value
+       AND j.task_type = pg.task_type
+      ORDER BY j.group_value, j.task_type, j.work_date
     `;
+
+    const dataParams = [...dayParamsBlock, ...dayParamsBlock, limit, offset];
 
     const conn = await pool.getConnection();
-    const [[countRows], [rows]] = await Promise.all([
-        conn.execute(countSQL, [fromDate, toDate]),
-        conn.execute(dataSQL, [fromDate, toDate])
-    ]);
-    conn.release();
+    let rows, countRows;
+    try {
+      [[countRows], [rows]] = await Promise.all([
+        conn.execute(countSQL, dayParamsBlock),
+        conn.execute(dataSQL, dataParams),
+      ]);
+    } finally {
+      conn.release();
+    }
 
     const totalCount = Number(countRows[0]?.total ?? 0);
 
-    // Aggregate JS
+    // ---- Aggregate in JS (only the current page's rows - fast) ----
     const groups = {};
     const periodSet = new Set();
 
     for (const r of rows) {
-      let workDateStr =
-        r.work_date instanceof Date
-          ? toYMD(r.work_date)
-          : String(r.work_date).slice(0, 10);
+      const workDateStr =
+        r.work_date instanceof Date ? toYMD(r.work_date) : String(r.work_date).slice(0, 10);
       if (!workDateStr) continue;
 
-      // console.log("r.work_hours --------> ", r.work_hours);
-
-      //  const gid = r.group_value || 'NULL';
-      const gid = r.group_value + "_" + r.task_type || "NULL";
-      const label = r.group_label;
-      const staffName = r.staff_name;
-      const customerName = r.customer_name;
-      const clientName = r.client_name;
-      const jobName = r.job_name;
-      const taskName = r.task_name;
-      const taskType = r.task_type_label;
-      const employeeNumber = r.employee_number;
-
-      //const secs = r?.work_hours;
-      const secs = ["", null, undefined].includes(r.work_hours)
-        ? "0"
-        : r.work_hours;
-      // console.log("displayBy", displayBy, "workDateStr", workDateStr);
+      const gid = `${r.group_value ?? "NULL"}_${r.task_type}`;
       const periodKey = getPeriodKey(displayBy, workDateStr);
       if (!periodKey) continue;
-
       periodSet.add(periodKey);
+
+      const hours = parseHours(r.work_hours);
 
       if (!groups[gid]) {
         groups[gid] = {
           group_value: gid,
-          group_label: label,
-          staff_name: staffName,
-          customer_name: customerName,
-          client_name: clientName,
-          job_name: jobName,
-          task_name: taskName,
-          task_type: taskType,
-          employee_number: employeeNumber,
+          group_label: r.group_label,
+          staff_name: r.staff_name,
+          customer_name: r.customer_name,
+          client_name: r.client_name,
+          job_name: r.job_name,
+          task_name: r.task_name,
+          task_type: r.task_type_label,
+          employee_number: r.employee_number,
           totalSeconds: 0,
           timesheetIds: new Set(),
           periodSeconds: {},
@@ -2767,64 +3166,45 @@ const getTimesheetReportData = async (Report) => {
       }
 
       const g = groups[gid];
-      g.totalSeconds += parseFloat(secs?.replace(":", "."));
+      g.totalSeconds += hours;
       g.timesheetIds.add(r.timesheet_id);
-      g.periodSeconds[periodKey] =
-        (g.periodSeconds[periodKey] || 0) + parseFloat(secs?.replace(":", "."));
+      g.periodSeconds[periodKey] = (g.periodSeconds[periodKey] || 0) + hours;
     }
 
     const periods = Array.from(periodSet).sort((a, b) => a.localeCompare(b));
-    const outRows = [];
     const groupKeys = Object.keys(groups).sort((a, b) => {
-      const na = Number(a),
-        nb = Number(b);
+      const na = Number(a), nb = Number(b);
       if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
       return a.localeCompare(b);
     });
 
+    const allRows = [];
     for (const gid of groupKeys) {
       const g = groups[gid];
       const row = {};
-      // console.log("g", g);
-
-      row["staff_id"] = g.staff_name; // final readable label
+      row["staff_id"] = g.staff_name;
       row["customer_id"] = g.customer_name;
       row["client_id"] = g.client_name;
       row["job_id"] = g.job_name;
       row["task_id"] = g.task_name;
       row["employee_number"] = g.employee_number;
-
       for (const p of periods) {
         row[p] = g.periodSeconds[p]?.toFixed(2) || 0;
       }
-
-      row.total_hours = parseFloat(g.totalSeconds)?.toFixed(2);
+      row.total_hours = Number(g.totalSeconds).toFixed(2);
       row.task_type = g.task_type;
-      // row.total_records = g.timesheetIds.size;
-      outRows.push(row);
+      allRows.push(row);
     }
 
-    // const columns = ['group', ...periods, 'total_hours', 'total_records'];
-    // console.log("fromDate ,", fromDate, 'toDate ', toDate);
-
-    const weeks = getWeekEndings(
-      new Date(fromDate),
-      new Date(toDate),
-      displayBy,
-    );
-
+    const weeks = getWeekEndings(new Date(fromDate), new Date(toDate), displayBy);
     const columnsWeeks = [...groupBy, ...weeks, "total_hours"];
-    // const columns = [...groupBy, ...periods, 'total_hours'];
-    // console.log("columnsWeeks", columnsWeeks);
-
-    // console.log("Time Period", timePeriod, "fromDate, ", fromDate, " toDate ", toDate);
-    // console.log("displayBy, ", displayBy);
-    const finalRows = normalizeRows(columnsWeeks, outRows);
+    const finalRows = normalizeRows(columnsWeeks, allRows);
 
     const fixed = [...groupBy, "task_type", "total_hours"];
     const dynamic = columnsWeeks.filter((col) => !fixed.includes(col));
-    const columnsWeeksDecOrder = [...fixed, ...dynamic?.reverse()];
+    const columnsWeeksDecOrder = [...fixed, ...dynamic.reverse()];
 
+    // rows already paginated at SQL level (only current page's groups fetched)
     const paginatedRows = finalRows;
 
     return {
@@ -2836,8 +3216,8 @@ const getTimesheetReportData = async (Report) => {
         rows: paginatedRows,
         pagination: {
           total: totalCount,
-          page: page,
-          limit: limit,
+          page,
+          limit,
           totalPages: Math.ceil(totalCount / limit),
         },
       },

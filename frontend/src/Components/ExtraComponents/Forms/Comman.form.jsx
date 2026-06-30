@@ -80,9 +80,9 @@ const ReusableForm = ({
         }}
       >
         <div className={`row  mb-3 `}>
-          {fieldtype.map((field, index) => (
+          {fieldtype?.map((field, index) => (
             
-            <>
+            <React.Fragment key={index}>
               {field.type === "select" ? (
                 <>
                   <div
@@ -1115,11 +1115,6 @@ const ReusableForm = ({
                           styles={
                             field.isEditMode
                               ? {
-                                multiValueRemove: (base, state) =>
-                                  state.data.value === formik.values[field.name]?.[0]
-                                    ? { ...base, display: "none" }
-                                    : base,
-
                                 clearIndicator: (base) => ({
                                   ...base,
                                   display: "none",
@@ -1159,7 +1154,7 @@ const ReusableForm = ({
                       </div>
                     </>
                   )}
-            </>
+            </React.Fragment>
           ))}
         </div>
         {additional_field}
