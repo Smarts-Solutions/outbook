@@ -2349,7 +2349,7 @@ function getWeekEndings(fromDate, toDate, displayBy = "daily") {
 
 const getTimesheetReportData = async (Report) => {
   const { StaffUserId, data } = Report;
-  // console.log("Call Timesheet Report" ,Report);
+ //  console.log("Call Timesheet Report" ,Report);
   var {
     groupBy = ["staff_id"],
     internal_external,
@@ -2871,6 +2871,10 @@ const getTimesheetReportDataOld = async (Report) => {
   } = data.filters;
 
   let role_user = data?.role?.toUpperCase() || "";
+
+  const page  = Math.max(Number(data.page) || 1, 1);
+  const limit = Math.max(Number(data.limit) || 100000000, 1);
+  const offset = (page - 1) * limit;
 
   //console.log("groupBy", groupBy);
   // console.log("fieldsToDisplayId", fieldsToDisplayId);

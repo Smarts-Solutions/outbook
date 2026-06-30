@@ -198,7 +198,6 @@ function TimesheetReport() {
 
       setStaffAllData(dataList);
     }
-
   };
 
   const handleStaffSearch = (value) => {
