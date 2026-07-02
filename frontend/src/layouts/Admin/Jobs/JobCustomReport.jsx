@@ -671,30 +671,31 @@ function JobCustomReport() {
         const newFilters = { ...prev, [key]: value };
         
         // Downward hierarchy clearing only when completely deselected
-        if (key === "customer_id") {
-          if (!value || value.length === 0) {
-            newFilters.client_id = [];
-            newFilters.job_id = [];
-          } else {
-            newFilters.client_id = (prev.client_id || []).filter((id) => {
-              const custId = clientToCustomerMap.current[id];
-              return custId && value.map(Number).includes(Number(custId));
-            });
-            newFilters.job_id = (prev.job_id || []).filter((id) => {
-              const custId = jobToCustomerMap.current[id];
-              return custId && value.map(Number).includes(Number(custId));
-            });
-          }
-        } else if (key === "client_id") {
-          if (!value || value.length === 0) {
-            newFilters.job_id = [];
-          } else {
-            newFilters.job_id = (prev.job_id || []).filter((id) => {
-              const cliId = jobToClientMap.current[id];
-              return cliId && value.map(Number).includes(Number(cliId));
-            });
-          }
-        }
+        // if (key === "customer_id") {
+        //   if (!value || value.length === 0) {
+        //     newFilters.client_id = [];
+        //     newFilters.job_id = [];
+        //   } else {
+        //     newFilters.client_id = (prev.client_id || []).filter((id) => {
+        //       const custId = clientToCustomerMap.current[id];
+        //       return custId && value.map(Number).includes(Number(custId));
+        //     });
+        //     newFilters.job_id = (prev.job_id || []).filter((id) => {
+        //       const custId = jobToCustomerMap.current[id];
+        //       return custId && value.map(Number).includes(Number(custId));
+        //     });
+        //   }
+        // } 
+        // else if (key === "client_id") {
+        //   if (!value || value.length === 0) {
+        //     newFilters.job_id = [];
+        //   } else {
+        //     newFilters.job_id = (prev.job_id || []).filter((id) => {
+        //       const cliId = jobToClientMap.current[id];
+        //       return cliId && value.map(Number).includes(Number(cliId));
+        //     });
+        //   }
+        // }
         return newFilters;
       });
     
@@ -713,9 +714,21 @@ function JobCustomReport() {
         append: true,
         job_id: value,
         customer_id: filters.customer_id,
-        });
-         
-        }
+        });  
+      }
+
+      else if (key === "customer_id") {
+
+        
+
+        GetAllClient({
+        searchValue: "",
+        pageNo: 1,
+        append: true,
+        customer_id: value,
+        job_id: filters.job_id,
+        });  
+       } 
 
       // The rest of the commented code below can remain as is
       // if (key == "job_id") {
@@ -1668,6 +1681,8 @@ function JobCustomReport() {
       GetAllClient({
         searchValue: value,
         pageNo: 1,
+        job_id: filters?.job_id || [],
+        customer_id: filters?.customer_id || [],
       });
     }, 500);
   };
@@ -1932,7 +1947,7 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (clientAllData.length === 0) GetAllClient({ searchValue: "", pageNo: 1 }); }}
+              onMenuOpen={() => { if (clientAllData.length === 0) GetAllClient({ searchValue: "", pageNo: 1 , job_id: filters?.job_id || [], customer_id: filters?.customer_id || [] }); }}
               options={clientAllData}
               value={(filters?.client_id || []).map((id) =>
                 optionCacheRef.current[id] || { value: id, label: `Loading...` }
@@ -1965,6 +1980,8 @@ function JobCustomReport() {
                     searchValue: clientSearch,
                     pageNo: clientPage + 1,
                     append: true,
+                    job_id: filters?.job_id || [],
+                    customer_id: filters?.customer_id || [],
                   });
                 }
               }}
