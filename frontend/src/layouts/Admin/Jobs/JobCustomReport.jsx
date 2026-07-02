@@ -700,7 +700,7 @@ function JobCustomReport() {
       });
     
         if(key === "job_id") {
-          setCustomerAllData([]);
+        setCustomerAllData([]);
         GetAllCustomer({
         searchValue: "",
         pageNo: 1,
