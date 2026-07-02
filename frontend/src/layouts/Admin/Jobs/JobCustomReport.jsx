@@ -277,6 +277,7 @@ function JobCustomReport() {
   // };
 
   // All Type Staff Get
+  
   const staffData = async (role_id, type) => {
     /// alert(role_id);
     if (["", null, undefined].includes(role_id)) {
@@ -1353,6 +1354,8 @@ function JobCustomReport() {
   const [search, setSearch] = useState("");
   const cacheRef = useRef({});
   const debounceTimeout = useRef(null);
+
+
 
   const [jobLoading, setJobLoading] = useState(false);
 
