@@ -1229,8 +1229,8 @@ trading_name ASC;`;
 
 }
 const getCustomer_dropdown_filter = async (customer) => {
-    const { StaffUserId, pagination, filters } = customer;
-
+    const { StaffUserId, pagination, filters, job_id, client_id } = customer;
+     console.log("job_id", job_id);
     const page = Number(pagination.page) || 1;
     const limit = Number(pagination.limit) || 20;
     const search = pagination.search || "";
@@ -1253,32 +1253,138 @@ const getCustomer_dropdown_filter = async (customer) => {
     // Condition with Admin And SuperAdmin
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
         if (!filterStaffId) {
-            const query = `
-        SELECT  
-        customers.id AS id,
-        customers.status AS status,
-        customers.form_process AS form_process,
-        customers.trading_name AS trading_name,
-        CONCAT(
-        'cust_', 
-        SUBSTRING(customers.trading_name, 1, 3), '_',
-        SUBSTRING(customers.customer_code, 1, 15)
-        ) AS customer_code
-    FROM 
-        customers
-    WHERE customers.trading_name LIKE '%${search}%'        
-    ORDER BY 
-    trading_name ASC
-    LIMIT ? OFFSET ?;`;
+   
+       try {
+        // let query = `
+        //     SELECT
+        //         customers.id AS id,
+        //         customers.status AS status,
+        //         customers.form_process AS form_process,
+        //         customers.trading_name AS trading_name,
+        //         CONCAT(
+        //             'cust_',
+        //             SUBSTRING(customers.trading_name, 1, 3), '_',
+        //             SUBSTRING(customers.customer_code, 1, 15)
+        //         ) AS customer_code
+        //     FROM customers
+        //     LEFT JOIN clients ON clients.customer_id = customers.id
+        //     LEFT JOIN jobs ON jobs.customer_id = customers.id
+        //     WHERE customers.trading_name LIKE '%${search}%'
+        //     `;
 
-            const [result] = await pool.execute(query, [limit, offset]);
+        //     if (Array.isArray(job_id) && job_id.length > 0 && Array.isArray(client_id) && client_id.length > 0) {
+        //         query += `
+        //         AND (
+        //             jobs.id IN (${job_id})
+        //             OR clients.id IN (${client_id})
+        //         )
+        //         `;
+        //     } else if (Array.isArray(job_id) && job_id.length > 0) {
+        //         query += `
+        //         AND jobs.id IN (${job_id})
+        //         `;
+        //     } else if (Array.isArray(client_id) && client_id.length > 0) {
+        //         query += `
+        //         AND clients.id IN (${client_id})
+        //         `;
+        //     }
 
-            return { status: true, message: 'Success..', data: result };
+        //     query += `
+        //     GROUP BY customers.id
+        //     ORDER BY customers.trading_name ASC
+        //     LIMIT ? OFFSET ?
+        //     `;
+
+        // const [result] = await pool.execute(query, [limit, offset]);
+
+        let query = `
+            SELECT
+                c.id,
+                c.status,
+                c.form_process,
+                c.trading_name,
+                CONCAT(
+                    'cust_',
+                    SUBSTRING(c.trading_name, 1, 3),
+                    '_',
+                    SUBSTRING(c.customer_code, 1, 15)
+                ) AS customer_code
+            FROM customers c
+            WHERE c.trading_name LIKE ?
+        `;
+
+        const params = [`%${search}%`];
+
+        if (Array.isArray(job_id) && job_id.length > 0 &&
+            Array.isArray(client_id) && client_id.length > 0) {
+
+            query += `
+                AND (
+                    EXISTS (
+                        SELECT 1
+                        FROM jobs j
+                        WHERE j.customer_id = c.id
+                        AND j.id IN (${job_id.map(() => '?').join(',')})
+                    )
+                    OR
+                    EXISTS (
+                        SELECT 1
+                        FROM clients cl
+                        WHERE cl.customer_id = c.id
+                        AND cl.id IN (${client_id.map(() => '?').join(',')})
+                    )
+                )
+            `;
+
+            params.push(...job_id);
+            params.push(...client_id);
+
+        } else if (Array.isArray(job_id) && job_id.length > 0) {
+
+            query += `
+                AND EXISTS (
+                    SELECT 1
+                    FROM jobs j
+                    WHERE j.customer_id = c.id
+                    AND j.id IN (${job_id.map(() => '?').join(',')})
+                )
+            `;
+
+            params.push(...job_id);
+
+        } else if (Array.isArray(client_id) && client_id.length > 0) {
+
+            query += `
+                AND EXISTS (
+                    SELECT 1
+                    FROM clients cl
+                    WHERE cl.customer_id = c.id
+                    AND cl.id IN (${client_id.map(() => '?').join(',')})
+                )
+            `;
+
+            params.push(...client_id);
         }
+
+        query += `
+            ORDER BY c.trading_name ASC
+            LIMIT ? OFFSET ?
+        `;
+
+        params.push(limit, offset);
+        const [result] = await pool.execute(query, params);
+        return { status: true, message: 'Success..', data: result };
+       } catch (err) {
+        console.error('Error executing query getCustomer_dropdown:', err);
+        return { status: false, message: 'Error executing query', data: err };
+        }
+
+
+      }
     }
 
     // other Role Data OR Admin/Superadmin with filterStaffId
-    const connection = await pool.getConnection();
+       const connection = await pool.getConnection();
     try {
         await buildAssignedJobsTempTable(connection, LineManageStaffId);
 
@@ -1319,12 +1425,24 @@ const getCustomer_dropdown_filter = async (customer) => {
             LEFT JOIN
                 customer_company_information ON customers.id = customer_company_information.customer_id
             WHERE
-                 (customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId}))
-               AND customers.trading_name LIKE '%${search}%'
-               GROUP BY customers.id
-               ORDER BY customers.trading_name ASC
-               LIMIT ? OFFSET ?
+              (customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId}))
+              AND customers.trading_name LIKE '%${search}%'
              `;
+        
+             if (Array.isArray(job_id) && job_id.length > 0) {
+                query += ` AND temp_assigned_jobs_staff.job_id IN (${job_id})`;
+             }
+
+            if (Array.isArray(client_id) && client_id.length > 0) {
+            query += ` AND EXISTS (SELECT 1 FROM clients WHERE clients.customer_id = customers.id AND clients.id IN (${client_id}))`;
+            }
+
+            query += `
+            GROUP BY customers.id
+            ORDER BY customers.trading_name ASC
+            LIMIT ? OFFSET ?
+            `;
+
 
         const [result] = await connection.execute(query, [limit, offset]);
         return { status: true, message: 'Success..', data: result };
@@ -1337,11 +1455,11 @@ const getCustomer_dropdown_filter = async (customer) => {
 }
 
 const get_customers_filter = async (customer) => {
-    const { StaffUserId, filters, pagination } = customer;
-    let { job_id, client_id } = filters;
+    const { StaffUserId, filters, pagination  } = customer;
+    let { job_id, client_id } = customer;
 
-    // console.log("job_id", job_id);
-    // console.log("client_id", client_id);
+  //   console.log("job_id", job_id);
+   //  console.log("client_id", client_id);
 
     if (Array.isArray(job_id)) {
         job_id = job_id;
@@ -1359,7 +1477,7 @@ const get_customers_filter = async (customer) => {
 
     const rows = await QueryRoleHelperFunction(StaffUserId)
 
-    return await getCustomer_dropdown_filter({ StaffUserId, pagination, filters });
+    return await getCustomer_dropdown_filter({ StaffUserId, pagination, filters , job_id, client_id });
 }
 
 async function getAllCustomerByClientIdFilter(client_id) {

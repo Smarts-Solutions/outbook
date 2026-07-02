@@ -604,6 +604,7 @@ function JobCustomReport() {
   };
 
   const handleFilterChange = (e, type) => {
+    
     if (type == "additionalField") {
       const values = e.map((opt) => opt.value);
       let additionalFieldArray = sortByReference(values);
@@ -615,6 +616,8 @@ function JobCustomReport() {
     }
 
     if (Array.isArray(e)) {
+
+      
       // this case is for multi-select (Group By)
       const values = e.map((opt) => opt.value);
       setOptions([]);
@@ -642,6 +645,7 @@ function JobCustomReport() {
     }
 
     const { key, value, label } = e.target;
+    
 
     if (key == "timePeriod") {
       setFilters((prev) => ({
@@ -665,7 +669,7 @@ function JobCustomReport() {
     } else {
       setFilters((prev) => {
         const newFilters = { ...prev, [key]: value };
-
+        
         // Downward hierarchy clearing only when completely deselected
         if (key === "customer_id") {
           if (!value || value.length === 0) {
@@ -690,6 +694,27 @@ function JobCustomReport() {
               return cliId && value.map(Number).includes(Number(cliId));
             });
           }
+        }
+        else if(key === "job_id") {
+        if(value.length === 0 && filters.client_id.length === 0) {
+        GetAllCustomer({
+        searchValue: "",
+        pageNo: 1,
+        append: true,
+        job_id: [],
+        client_id: [],
+        });
+ 
+        }else{
+        console.log("job_id changed", value)
+        GetAllCustomer({
+        searchValue: "",
+        pageNo: 1,
+        append: false,
+        job_id: value,
+        client_id: filters.client_id,
+         });
+         }
         }
 
         return newFilters;
@@ -1089,7 +1114,6 @@ function JobCustomReport() {
   }
 
 
-
   const saveFilterFunction = async () => {
     if (filters?.groupBy?.length == 0) {
       sweatalert.fire({
@@ -1283,7 +1307,6 @@ function JobCustomReport() {
   };
 
   const HandleJob = (jobData) => {
-
     navigate("/admin/job/logs", {
       state: {
         job_id: jobData?.id,
@@ -1320,7 +1343,6 @@ function JobCustomReport() {
     append = false,
   }) => {
     if (jobLoading) return;
-
     const filtersKey = JSON.stringify(filters?.customer_id || []) + JSON.stringify(filters?.client_id || []);
     const cacheKey = `${searchValue}_${pageNo}_${filtersKey}`;
     // if (cacheRef.current[cacheKey]) {
@@ -1415,10 +1437,18 @@ function JobCustomReport() {
     searchValue = "",
     pageNo = 1,
     append = false,
+    job_id = [],
+    client_id = [],
   }) => {
-    if (customerLoading) return;
+
+    //if (customerLoading) return;
     const filtersKey = JSON.stringify(filters?.client_id || []);
-    const cacheKey = `${searchValue}_${pageNo}_${filtersKey}`;
+    
+    console.log("client_id --", client_id)
+    console.log("job_id --", job_id)
+
+    const cacheKey = `${searchValue}_${pageNo}_${client_id}_${job_id}`;
+    //const cacheKey = `${searchValue}_${pageNo}_${filtersKey}`;
     // if (customerCache.current[cacheKey]) {
     //   const cached = customerCache.current[cacheKey];
     //   setCustomerAllData(prev =>
@@ -1442,6 +1472,8 @@ function JobCustomReport() {
     const req = {
       action: "get_customers_filter",
       filters: filters,
+      job_id: job_id,
+      client_id: client_id,
       pagination: {
         search: searchValue,
         page: pageNo,
@@ -1451,6 +1483,9 @@ function JobCustomReport() {
 
     const data = { req: req, authToken: token };
     try {
+      if (job_id.length > 0 || client_id.length > 0) {
+        setCustomerAllData([]);
+      }
       const response = await dispatch(getAllCustomerDropDown(data)).unwrap();
       if (response.status) {
         const formatted = response.data.map((item) => {
@@ -1463,6 +1498,7 @@ function JobCustomReport() {
         });
 
         customerCache.current[cacheKey] = formatted;
+        
 
         // setCustomerAllData(prev =>
         //   append ? [...prev, ...formatted] : formatted
@@ -1495,6 +1531,9 @@ function JobCustomReport() {
       GetAllCustomer({
         searchValue: value,
         pageNo: 1,
+        append: false,
+        job_id: filters?.job_id || [],
+        client_id: filters?.client_id || [],
       });
     }, 500);
   };
@@ -1829,7 +1868,7 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (customerAllData.length === 0) GetAllCustomer({ searchValue: "", pageNo: 1 }); }}
+              onMenuOpen={() => { if (customerAllData.length === 0) GetAllCustomer({ searchValue: "", pageNo: 1 , job_id: filters?.job_id || [], client_id: filters?.client_id || [] }); }}
               options={customerAllData}
               value={(filters?.customer_id || []).map((id) =>
                 optionCacheRef.current[id] || { value: id, label: `Loading...` }
@@ -1861,7 +1900,8 @@ function JobCustomReport() {
                   GetAllCustomer({
                     searchValue: customerSearch,
                     pageNo: customerPage + 1,
-                    append: true,
+                    job_id: filters?.job_id || [],
+                    client_id: filters?.client_id || [],
                   });
                 }
               }}
