@@ -695,20 +695,20 @@ function JobCustomReport() {
             });
           }
         }
-        else if(key === "job_id") {
-        console.log("job_id changed", value)
+        return newFilters;
+      });
+    
+        if(key === "job_id") {
         GetAllCustomer({
         searchValue: "",
         pageNo: 1,
         append: true,
         job_id: value,
         client_id: filters.client_id,
-         });
+        });
          
         }
 
-        return newFilters;
-      });
       // The rest of the commented code below can remain as is
       // if (key == "job_id") {
       //   if ([null, "", "null", undefined].includes(value)) {
