@@ -1061,13 +1061,13 @@ async function getAllClientsSidebar(
 }
 
 const get_clients_filter = async (client) => {
-  let { StaffUserId, filters, pagination } = client;
+  let { StaffUserId, filters, pagination ,job_id , customer_id} = client;
 
   // Get Role
   const rows = await QueryRoleHelperFunction(StaffUserId);
   // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
-  return await getAllClientsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination, filters);
+  return await getAllClientsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination, filters, job_id, customer_id);
 };
 
 async function getAllClientsSidebarFilter(
@@ -1075,7 +1075,9 @@ async function getAllClientsSidebarFilter(
   LineManageStaffId,
   rows,
   pagination,
-  filters
+  filters,
+  job_id,
+  customer_id
 ) {
 
   const page = Number(pagination.page) || 1;
@@ -1089,12 +1091,21 @@ async function getAllClientsSidebarFilter(
   }
 
   let extraFilter = "";
-  if (![undefined, null, ""].includes(filters?.customer_id)) {
-    const custArr = Array.isArray(filters.customer_id) ? filters.customer_id : [filters.customer_id];
-    if (custArr.length > 0) {
-      extraFilter += ` AND clients.customer_id IN (${custArr.join(',')}) `;
-    }
+  // if (![undefined, null, ""].includes(filters?.customer_id)) {
+  //   const custArr = Array.isArray(filters.customer_id) ? filters.customer_id : [filters.customer_id];
+  //   if (custArr.length > 0) {
+  //     extraFilter += ` AND clients.customer_id IN (${custArr.join(',')}) `;
+  //   }
+  // }
+
+  if (Array.isArray(customer_id) && customer_id.length > 0) {
+    extraFilter += ` AND clients.customer_id IN (${customer_id}) `;
   }
+
+  if (Array.isArray(job_id) && job_id.length > 0) {
+    extraFilter += ` AND jobs.id IN (${job_id}) `;
+  }
+  
   // Removed job_id filter to avoid restricting the Client dropdown when jobs are selected
 
   try {

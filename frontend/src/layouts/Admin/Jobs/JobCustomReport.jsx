@@ -706,6 +706,14 @@ function JobCustomReport() {
         job_id: value,
         client_id: filters.client_id,
         });
+
+        GetAllClient({
+        searchValue: "",
+        pageNo: 1,
+        append: true,
+        job_id: value,
+        customer_id: filters.customer_id,
+        });
          
         }
 
@@ -1564,10 +1572,12 @@ function JobCustomReport() {
     searchValue = "",
     pageNo = 1,
     append = false,
+    job_id = [],
+    customer_id = [],
   }) => {
-    if (clientLoading) return;
+   // if (clientLoading) return;
     const filtersKey = JSON.stringify(filters?.customer_id || []);
-    const cacheKey = `${searchValue}_${pageNo}_${filtersKey}`;
+    const cacheKey = `${searchValue}_${pageNo}_${job_id}_${customer_id}`;
     // Cache check
     // if (clientCache.current[cacheKey]) {
     //   const cached = clientCache.current[cacheKey];
@@ -1595,6 +1605,8 @@ function JobCustomReport() {
     const req = {
       action: "get_clients_filter",
       filters: filters,
+      job_id: job_id,
+      customer_id: customer_id,
       pagination: {
         search: searchValue,
         page: pageNo,
@@ -1605,6 +1617,9 @@ function JobCustomReport() {
     const data = { req, authToken: token };
 
     try {
+      if (job_id.length > 0 || customer_id.length > 0) {
+        setClientAllData([]);
+      }
       const response = await dispatch(ClientAction(data)).unwrap();
       if (response.status) {
         response.data.forEach((item) => {
