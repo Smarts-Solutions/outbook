@@ -696,25 +696,15 @@ function JobCustomReport() {
           }
         }
         else if(key === "job_id") {
-        if(value.length === 0 && filters.client_id.length === 0) {
-        GetAllCustomer({
-        searchValue: "",
-        pageNo: 1,
-        append: true,
-        job_id: [],
-        client_id: [],
-        });
- 
-        }else{
         console.log("job_id changed", value)
         GetAllCustomer({
         searchValue: "",
         pageNo: 1,
-        append: false,
+        append: true,
         job_id: value,
         client_id: filters.client_id,
          });
-         }
+         
         }
 
         return newFilters;
