@@ -2166,13 +2166,13 @@ const getAllJobsBYCustomerfilter = async (job) => {
 }
 
 const get_jobs_filter = async (job) => {
-  const { StaffUserId, filters, pagination } = job;
+  const { StaffUserId, filters, pagination , client_id , customer_id } = job;
 
   // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
   // Get Role
   const rows = await QueryRoleHelperFunction(StaffUserId);
-  return await getAllJobsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination, filters);
+  return await getAllJobsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination, filters, client_id, customer_id);
 }
 
 
@@ -2181,7 +2181,9 @@ async function getAllJobsSidebarFilter(
   LineManageStaffId,
   rows,
   pagination,
-  filters
+  filters,
+  client_id,
+  customer_id
 ) {
 
   const page = Number(pagination.page) || 1;
@@ -2194,18 +2196,30 @@ async function getAllJobsSidebarFilter(
   }
 
   let extraFilter = "";
-  if (![undefined, null, ""].includes(filters?.customer_id)) {
-    const custArr = Array.isArray(filters.customer_id) ? filters.customer_id : [filters.customer_id];
-    if (custArr.length > 0) {
-      extraFilter += ` AND jobs.customer_id IN (${custArr.join(',')}) `;
+
+
+  // if (![undefined, null, ""].includes(filters?.customer_id)) {
+  //   const custArr = Array.isArray(filters.customer_id) ? filters.customer_id : [filters.customer_id];
+  //   if (custArr.length > 0) {
+  //     extraFilter += ` AND jobs.customer_id IN (${custArr.join(',')}) `;
+  //   }
+  // }
+  // if (![undefined, null, ""].includes(filters?.client_id)) {
+  //   const clientArr = Array.isArray(filters.client_id) ? filters.client_id : [filters.client_id];
+  //   if (clientArr.length > 0) {
+  //     extraFilter += ` AND jobs.client_id IN (${clientArr.join(',')}) `;
+  //   }
+  // }
+
+
+    if (Array.isArray(customer_id) && customer_id.length > 0) {
+      extraFilter += ` AND jobs.customer_id IN (${customer_id}) `;
     }
-  }
-  if (![undefined, null, ""].includes(filters?.client_id)) {
-    const clientArr = Array.isArray(filters.client_id) ? filters.client_id : [filters.client_id];
-    if (clientArr.length > 0) {
-      extraFilter += ` AND jobs.client_id IN (${clientArr.join(',')}) `;
+
+    if (Array.isArray(client_id) && client_id.length > 0) {
+      extraFilter += ` AND jobs.client_id IN (${client_id}) `;
     }
-  }
+  
 
   let searchCondition = "";
   let searchParams = [];

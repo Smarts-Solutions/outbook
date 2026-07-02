@@ -700,6 +700,7 @@ function JobCustomReport() {
       });
     
         if(key === "job_id") {
+          setCustomerAllData([]);
         GetAllCustomer({
         searchValue: "",
         pageNo: 1,
@@ -718,9 +719,16 @@ function JobCustomReport() {
       }
 
       else if (key === "customer_id") {
-
+        setJobOptions([]); 
+        GetAllJobs({
+        searchValue: "",
+        pageNo: 1,
+        append: true,
+        customer_id: value,
+        client_id: filters.client_id,
+        });
         
-
+        setClientAllData([]);
         GetAllClient({
         searchValue: "",
         pageNo: 1,
@@ -1352,10 +1360,12 @@ function JobCustomReport() {
     searchValue = "",
     pageNo = 1,
     append = false,
+    client_id = [],
+    customer_id = [],
   }) => {
-    if (jobLoading) return;
+   // if (jobLoading) return;
     const filtersKey = JSON.stringify(filters?.customer_id || []) + JSON.stringify(filters?.client_id || []);
-    const cacheKey = `${searchValue}_${pageNo}_${filtersKey}`;
+    const cacheKey = `${searchValue}_${pageNo}_${client_id}_${customer_id}`;
     // if (cacheRef.current[cacheKey]) {
     //   alert("from cache");
     //   const cached = cacheRef.current[cacheKey];
@@ -1381,6 +1391,8 @@ function JobCustomReport() {
     const req = {
       action: "get_jobs_filter",
       filters: filters,
+      client_id: client_id,
+      customer_id: customer_id,
       pagination: {
         search: searchValue,
         page: pageNo,
@@ -1390,6 +1402,9 @@ function JobCustomReport() {
     const data = { req, authToken: token };
 
     try {
+      if (client_id.length > 0 || customer_id.length > 0) {
+        setJobOptions([]);
+      }
       const response = await dispatch(JobAction(data)).unwrap();
       if (response.status) {
         response.data.forEach((item) => {
@@ -1430,7 +1445,12 @@ function JobCustomReport() {
     debounceTimeout.current = setTimeout(() => {
       setSearch(value);
       setPage(1);
-      GetAllJobs({ searchValue: value, pageNo: 1 });
+      GetAllJobs({ 
+        searchValue: value, 
+        pageNo: 1 ,
+        client_id: filters?.client_id || [],
+        customer_id: filters?.customer_id || [],
+      });
     }, 500);
   };
   ///////////////---- FOR JOB SERACH  END-----//////////////
@@ -1835,7 +1855,7 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (jobOptions.length === 0) GetAllJobs({ searchValue: "", pageNo: 1 }); }}
+              onMenuOpen={() => { if (jobOptions.length === 0) GetAllJobs({ searchValue: "", pageNo: 1 , client_id: filters?.client_id || [], customer_id: filters?.customer_id || []}); }}
               options={jobOptions}
               value={(filters?.job_id || []).map((id) =>
                 optionCacheRef.current[id] || { value: id, label: `Loading...` }
@@ -1859,6 +1879,8 @@ function JobCustomReport() {
                     searchValue: search,
                     pageNo: page + 1,
                     append: true,
+                    client_id: filters?.client_id || [],
+                    customer_id: filters?.customer_id || [],
                   });
                 }
               }}
