@@ -335,11 +335,6 @@ const updateStaff = async (staff) => {
   // Create an array to hold the set clauses
   const setClauses = [];
   const values = [];
-
-  // Explicitly update the primary role_id
-  setClauses.push("role_id = ?");
-  values.push(role_id);
-
   // Iterate over the fields and construct the set clauses dynamically
   for (const [key, value] of Object.entries(fields)) {
     if (key != "ip" && key != "StaffUserId" && key != "staff_to" && key != "role_id") {
@@ -391,9 +386,6 @@ const updateStaff = async (staff) => {
           id,
         ]);
       }
-    } else {
-      const staff_other_role_query = `DELETE FROM staff_other_role WHERE staff_id = ?`;
-      await pool.execute(staff_other_role_query, [id]);
     }
 
     if (rows.changedRows) {
