@@ -710,6 +710,7 @@ function JobCustomReport() {
         client_id: filters.client_id,
         });
 
+        setClientAllData([]);
         GetAllClient({
         searchValue: "",
         pageNo: 1,
@@ -738,6 +739,29 @@ function JobCustomReport() {
         job_id: filters.job_id,
         });  
        } 
+
+       else if (key === "client_id") {
+        setJobOptions([]); 
+        GetAllJobs({
+        searchValue: "",
+        pageNo: 1,
+        append: true,
+        client_id: value,
+        customer_id: filters.customer_id,
+        });
+        
+        setCustomerAllData([]);
+        GetAllCustomer({
+        searchValue: "",
+        pageNo: 1,
+        append: true,
+        client_id: value,
+        job_id: filters.job_id,
+        });
+        
+       }
+
+
 
       // The rest of the commented code below can remain as is
       // if (key == "job_id") {
