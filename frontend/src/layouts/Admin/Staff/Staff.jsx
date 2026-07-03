@@ -114,7 +114,10 @@ const StaffPage = () => {
     if (managerCacheRef.current[cacheKey]) {
       const cached = managerCacheRef.current[cacheKey];
       setManagerOptions((prev) => {
-        const combined = append ? [...prev, ...cached] : cached;
+        let combined = append ? [...prev, ...cached] : cached;
+        if (editStaffData?.staff_to && editStaffData?.line_manager_name) {
+          combined.push({ label: editStaffData.line_manager_name, value: editStaffData.staff_to });
+        }
         const unique = Array.from(
           new Map(combined.map((item) => [item.value, item])).values(),
         );
@@ -147,7 +150,10 @@ const StaffPage = () => {
 
         managerCacheRef.current[cacheKey] = formatted;
         setManagerOptions((prev) => {
-          const combined = append ? [...prev, ...formatted] : formatted;
+          let combined = append ? [...prev, ...formatted] : formatted;
+          if (editStaffData?.staff_to && editStaffData?.line_manager_name) {
+            combined.push({ label: editStaffData.line_manager_name, value: editStaffData.staff_to });
+          }
           const unique = Array.from(
             new Map(combined.map((item) => [item.value, item])).values(),
           );
