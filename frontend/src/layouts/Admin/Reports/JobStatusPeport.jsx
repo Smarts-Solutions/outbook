@@ -735,6 +735,8 @@ const JobStatus = () => {
         ? convertDate(item.final_draft_sent_on)
         : "-";
 
+      rowData["Created By"] = item.created_by ? item.created_by : "-";
+
       return rowData;
     });
 
