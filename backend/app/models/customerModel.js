@@ -1429,9 +1429,9 @@ const getCustomer_dropdown_filter = async (customer) => {
               AND customers.trading_name LIKE '%${search}%'
              `;
         
-             if (Array.isArray(job_id) && job_id.length > 0) {
-                query += ` AND temp_assigned_jobs_staff.job_id IN (${job_id})`;
-             }
+            if (Array.isArray(job_id) && job_id.length > 0) {
+            query += ` AND temp_assigned_jobs_staff.job_id IN (${job_id})`;
+            }
 
             if (Array.isArray(client_id) && client_id.length > 0) {
             query += ` AND EXISTS (SELECT 1 FROM clients WHERE clients.customer_id = customers.id AND clients.id IN (${client_id}))`;
