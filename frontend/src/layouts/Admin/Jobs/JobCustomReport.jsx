@@ -670,33 +670,6 @@ function JobCustomReport() {
     } else {
       setFilters((prev) => {
         const newFilters = { ...prev, [key]: value };
-        
-        // Downward hierarchy clearing only when completely deselected
-        // if (key === "customer_id") {
-        //   if (!value || value.length === 0) {
-        //     newFilters.client_id = [];
-        //     newFilters.job_id = [];
-        //   } else {
-        //     newFilters.client_id = (prev.client_id || []).filter((id) => {
-        //       const custId = clientToCustomerMap.current[id];
-        //       return custId && value.map(Number).includes(Number(custId));
-        //     });
-        //     newFilters.job_id = (prev.job_id || []).filter((id) => {
-        //       const custId = jobToCustomerMap.current[id];
-        //       return custId && value.map(Number).includes(Number(custId));
-        //     });
-        //   }
-        // } 
-        // else if (key === "client_id") {
-        //   if (!value || value.length === 0) {
-        //     newFilters.job_id = [];
-        //   } else {
-        //     newFilters.job_id = (prev.job_id || []).filter((id) => {
-        //       const cliId = jobToClientMap.current[id];
-        //       return cliId && value.map(Number).includes(Number(cliId));
-        //     });
-        //   }
-        // }
         return newFilters;
       });
     
@@ -758,7 +731,7 @@ function JobCustomReport() {
         client_id: value,
         job_id: filters.job_id,
         });
-        
+
        }
 
 
@@ -1390,6 +1363,12 @@ function JobCustomReport() {
     client_id = [],
     customer_id = [],
   }) => {
+
+    // setFilters((prev) => ({
+    //       ...prev,
+    //       job_id: [],
+    // }));
+
    // if (jobLoading) return;
     const filtersKey = JSON.stringify(filters?.customer_id || []) + JSON.stringify(filters?.client_id || []);
     const cacheKey = `${searchValue}_${pageNo}_${client_id}_${customer_id}`;
@@ -1427,7 +1406,7 @@ function JobCustomReport() {
       },
     };
     const data = { req, authToken: token };
-
+    
     try {
       if (client_id.length > 0 || customer_id.length > 0) {
         setJobOptions([]);
