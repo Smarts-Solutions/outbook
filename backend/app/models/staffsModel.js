@@ -143,11 +143,13 @@ const getStaff = async (data) => {
 
   let where = "";
 
-  if (rows.length > 0 && (role_name === "SUPERADMIN" || role_name === "ADMIN" || role_name === "MANAGEMENT")) {
-    where = "WHERE 1=1 AND staffs.role_id != 12";
-  } else {
-    where = `WHERE 1=1 AND staffs.role_id != 12 AND staffs.created_by IN (${LineManageStaffId})`;
-  }
+  // if (rows.length > 0 && (role_name === "SUPERADMIN" || role_name === "ADMIN" || role_name === "MANAGEMENT")) {
+  //   where = "WHERE 1=1 AND staffs.role_id != 12";
+  // } else {
+  //   where = `WHERE 1=1 AND staffs.role_id != 12 AND staffs.created_by IN (${LineManageStaffId})`;
+  // }
+
+   where = "WHERE 1=1 AND staffs.role_id != 12";
 
   // 🔍 SEARCH CONDITION
   let searchCondition = "";
