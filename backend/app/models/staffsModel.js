@@ -274,19 +274,18 @@ const deleteStaff = async (staffId) => {
   }
 };
 
-const updateStaff = async (staff) => {
+const updateStaff1 = async (staff) => {
   // const { id, ...fields } = staff;
   const { id, page, limit, search, ...fields } = staff;
   let email = fields.email;
   let role_ids = fields.role_id;
-
+  
   let role_id = Array.isArray(role_ids) ? role_ids?.[0] ?? null : role_ids ?? null;
-  let other_role_id = Array.isArray(role_ids) ? role_ids?.[1] ?? null : null
+  let other_role_id = Array.isArray(role_ids) ? role_ids?.[1] ?? null : null;
 
   if (role_id == null) {
     return { status: false, message: "Role is required." };
   }
-
 
 
   // Line Manage Code
@@ -312,7 +311,7 @@ const updateStaff = async (staff) => {
       ]);
     }
   } else {
-    await pool.execute(`DELETE FROM line_managers WHERE staff_by = ?`, [id]);
+    //  await pool.execute(`DELETE FROM line_managers WHERE staff_by = ?`, [id]);
   }
   // End Line Manage Code
 
@@ -335,11 +334,6 @@ const updateStaff = async (staff) => {
   // Create an array to hold the set clauses
   const setClauses = [];
   const values = [];
-
-  // Explicitly update the primary role_id
-  setClauses.push("role_id = ?");
-  values.push(role_id);
-
   // Iterate over the fields and construct the set clauses dynamically
   for (const [key, value] of Object.entries(fields)) {
     if (key != "ip" && key != "StaffUserId" && key != "staff_to" && key != "role_id") {
@@ -391,11 +385,117 @@ const updateStaff = async (staff) => {
           id,
         ]);
       }
-    } else {
-      const staff_other_role_query = `DELETE FROM staff_other_role WHERE staff_id = ?`;
-      await pool.execute(staff_other_role_query, [id]);
     }
 
+    if (rows.changedRows) {
+      const currentDate = new Date();
+      await SatffLogUpdateOperation({
+        staff_id: staff.StaffUserId,
+        ip: staff.ip,
+        date: currentDate.toISOString().split("T")[0],
+        module_name: "staff",
+        log_message: log_message,
+        permission_type: "updated",
+        module_id: staff.id,
+      });
+    }
+    return {
+      status: true,
+      message: "staff updated successfully.",
+      data: rows.affectedRows,
+    };
+  } catch (err) {
+    console.log("Error updating staff:", err);
+    return { status: false, message: "Error updating staff" };
+  }
+};
+
+const updateStaff = async (staff) => {
+  // const { id, ...fields } = staff;
+  const { id, page, limit, search, ...fields } = staff;
+  let email = fields.email;
+
+  
+
+  // Line Manage Code
+  let staff_to = fields.staff_to;
+  if (staff_to != "" && staff_to != undefined) {
+    let staff_by_query = `SELECT staff_by FROM line_managers WHERE staff_by = ?`;
+    let [staff_by_result] = await pool.execute(staff_by_query, [id]);
+    if (staff_by_result.length > 0) {
+      // console.log("staff_by_result", staff_by_result);
+      // console.log("staff_to", staff_to);
+      // console.log("staff_by", id);
+
+      const staff_to_query = `UPDATE line_managers SET staff_to = ? WHERE staff_by = ?`;
+      const [staff_to_result] = await pool.execute(staff_to_query, [
+        staff_to,
+        id,
+      ]);
+    } else {
+      const staff_to_query = `INSERT INTO line_managers (staff_by,staff_to) VALUES (?, ?)`;
+      const [staff_to_result] = await pool.execute(staff_to_query, [
+        id,
+        staff_to,
+      ]);
+    }
+  } else {
+    //  await pool.execute(`DELETE FROM line_managers WHERE staff_by = ?`, [id]);
+  }
+  // End Line Manage Code
+
+  // Exist Email Check
+  const checkQuery = `SELECT 1 FROM staffs WHERE email = ? AND id != ?`;
+  const [check] = await pool.execute(checkQuery, [email, id]);
+  if (check.length > 0) {
+    return { status: false, message: "Email Already Exists." };
+  }
+
+  // Exist Employee Number Check
+  const checkEmployeeNumberQuery = `SELECT 1 FROM staffs WHERE employee_number = ? AND id != ?`;
+  const [checkEmployeeNumber] = await pool.execute(checkEmployeeNumberQuery, [
+    fields.employee_number,
+    id,
+  ]);
+  if (checkEmployeeNumber.length > 0) {
+    return { status: false, message: "Employee Number Already Exists." };
+  }
+  // Create an array to hold the set clauses
+  const setClauses = [];
+  const values = [];
+  // Iterate over the fields and construct the set clauses dynamically
+  for (const [key, value] of Object.entries(fields)) {
+    if (key != "ip" && key != "StaffUserId" && key != "staff_to") {
+      setClauses.push(`${key} = ?`);
+      values.push(value);
+    }
+  }
+  // Add the id to the values array for the WHERE clause
+  values.push(id);
+  // Construct the final SQL query
+  const query = `
+    UPDATE staffs
+    SET ${setClauses.join(", ")}
+    WHERE id = ?
+    `;
+  try {
+    const [[existStatus]] = await pool.execute(
+      `SELECT status FROM staffs WHERE id = ?`,
+      [id]
+    );
+
+    let status_change = "Deactivate";
+    if (staff.status == "1") {
+      status_change = "Activate";
+    }
+    let log_message =
+      existStatus.status === staff.status
+        ? `edited staff ${staff.first_name} ${staff.last_name}`
+        : `changes the staff status ${status_change} ${staff.first_name} ${staff.last_name}`;
+
+        
+
+    const [rows] = await pool.execute(query, values);
     if (rows.changedRows) {
       const currentDate = new Date();
       await SatffLogUpdateOperation({

@@ -114,7 +114,10 @@ const StaffPage = () => {
     if (managerCacheRef.current[cacheKey]) {
       const cached = managerCacheRef.current[cacheKey];
       setManagerOptions((prev) => {
-        const combined = append ? [...prev, ...cached] : cached;
+        let combined = append ? [...prev, ...cached] : cached;
+        if (editStaffData?.staff_to && editStaffData?.line_manager_name) {
+          combined.push({ label: editStaffData.line_manager_name, value: editStaffData.staff_to });
+        }
         const unique = Array.from(
           new Map(combined.map((item) => [item.value, item])).values(),
         );
@@ -147,7 +150,10 @@ const StaffPage = () => {
 
         managerCacheRef.current[cacheKey] = formatted;
         setManagerOptions((prev) => {
-          const combined = append ? [...prev, ...formatted] : formatted;
+          let combined = append ? [...prev, ...formatted] : formatted;
+          if (editStaffData?.staff_to && editStaffData?.line_manager_name) {
+            combined.push({ label: editStaffData.line_manager_name, value: editStaffData.staff_to });
+          }
           const unique = Array.from(
             new Map(combined.map((item) => [item.value, item])).values(),
           );
@@ -728,8 +734,25 @@ const StaffPage = () => {
       };
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
-      }
+        
+        const isMainRoleRemoved =
+          editStaffData.id !== undefined &&
+          Array.isArray(values.role) &&
+          !values.role.includes(Number(editStaffData.role_id)) &&
+          !values.role.includes(String(editStaffData.role_id));
 
+        if (
+          isMainRoleRemoved &&
+          [3, 4, 6].includes(Number(editStaffData.role_id)) &&
+          editStaffData.is_customer_exist == 1
+        ) {
+          await getChangedRoleStaff(editStaffData);
+          setChangeRole(true);
+          setEditStaff(false);
+          console.log("SENDING DATA:", editStaffData.role_id)
+          return; // Stop normal submit, wait for popup assignment
+        }
+      }
 
       await dispatch(
         Staff({
@@ -753,7 +776,7 @@ const StaffPage = () => {
               setEditStaffData({});
               SetRefresh(!refresh);
               formik.resetForm();
-              window.location.reload();
+              // window.location.reload();
             }, 1500);
           } else {
             sweatalert.fire({
@@ -837,7 +860,7 @@ const StaffPage = () => {
     //       }
     //     }),
     // },
-   
+
     {
       type: "reactSelectRole",
       name: "role",
@@ -959,13 +982,13 @@ const StaffPage = () => {
   useEffect(() => {
     if (editStaffData && editStaffData) {
 
-    //  console.log("editStaffData", editStaffData);
+      //  console.log("editStaffData", editStaffData);
       const roleIds = [].concat(editStaffData?.role_id || []);
-      if(editStaffData?.staff_other_role_id != null){
-       roleIds.push(editStaffData?.staff_other_role_id)
+      if (editStaffData?.staff_other_role_id != null) {
+        roleIds.push(editStaffData?.staff_other_role_id)
       }
 
-     
+
       formik.setFieldValue("first_name", editStaffData.first_name || "null");
       formik.setFieldValue("last_name", editStaffData.last_name || "null");
       formik.setFieldValue("email", editStaffData.email || "null");
@@ -1062,6 +1085,8 @@ const StaffPage = () => {
       const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
       if (response.status) {
         setDeleteStaffCustomer(response.data);
+        console.log("customer data", response.data);
+
       } else {
         setDeleteStaffCustomer([]);
       }
@@ -1079,6 +1104,7 @@ const StaffPage = () => {
       const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
       if (response.status) {
         setDeleteStaffCustomer(response.data);
+        console.log("customer data 2", response.data);
       } else {
         setDeleteStaffCustomer([]);
       }
@@ -1117,6 +1143,8 @@ const StaffPage = () => {
     }
   };
 
+
+
   // useEffect(() => {
   //   const fetchChangedRoleStaff = async () => {
   //     if (
@@ -1143,6 +1171,10 @@ const StaffPage = () => {
   //   }
   // }, [formik.values.role]);
 
+
+
+
+
   const handleChangeRole = async () => {
     try {
       const req = {
@@ -1151,6 +1183,24 @@ const StaffPage = () => {
         updateData: formik.values,
         selectedStaff: selectedStaff,
       };
+
+      // Also perform normal staff update
+      let updateReq = {
+        first_name: formik.values.first_name.trim(),
+        last_name: formik.values.last_name,
+        email: formik.values.email,
+        phone: formik.values.phone,
+        phone_code: formik.values.phone_code,
+        role_id: formik.values.role,
+        status: formik.values.status,
+        employee_number: formik.values.employee_number,
+        staff_to: formik.values.staff_to,
+        created_by: StaffUserId.id,
+        hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"}`,
+        id: editStaffData && editStaffData.id,
+      };
+      await dispatch(Staff({ req: { action: "update", ...updateReq }, authToken: token })).unwrap();
+
       const data = { req: req, authToken: token };
       await dispatch(getAllTaskByStaff(data))
         .unwrap()
