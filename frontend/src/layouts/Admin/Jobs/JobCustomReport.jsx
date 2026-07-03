@@ -1364,10 +1364,7 @@ function JobCustomReport() {
     customer_id = [],
   }) => {
 
-    // setFilters((prev) => ({
-    //       ...prev,
-    //       job_id: [],
-    // }));
+  
 
    // if (jobLoading) return;
     const filtersKey = JSON.stringify(filters?.customer_id || []) + JSON.stringify(filters?.client_id || []);
@@ -1402,7 +1399,7 @@ function JobCustomReport() {
       pagination: {
         search: searchValue,
         page: pageNo,
-        limit: 20,
+        limit: client_id.length > 0 || customer_id.length > 0 ? 1000 : 20,
       },
     };
     const data = { req, authToken: token };
@@ -1425,6 +1422,17 @@ function JobCustomReport() {
           value: item.job_id,
           label: item.job_code_id,
         }));
+        
+       if (client_id.length > 0 || customer_id.length > 0) {
+        const availableJobIds = new Set(response.data.map(item => item.job_id));
+        setFilters(prev => ({
+          ...prev,
+          job_id: prev.job_id.filter(id => availableJobIds.has(id)),
+        }));
+       }
+
+      
+
         cacheRef.current[cacheKey] = formatted;
         // setJobOptions(prev =>
         //   append ? [...prev, ...formatted] : formatted
@@ -1514,7 +1522,7 @@ function JobCustomReport() {
       pagination: {
         search: searchValue,
         page: pageNo,
-        limit: 20,
+        limit: job_id.length > 0 || client_id.length > 0 ? 1000 : 20,
       },
     };
 
@@ -1533,6 +1541,14 @@ function JobCustomReport() {
           optionCacheRef.current[item.id] = opt;
           return opt;
         });
+
+        if(job_id.length > 0 || client_id.length > 0) {
+          const availableCustomerIds = new Set(response.data.map(item => item.id));
+          setFilters(prev => ({
+            ...prev,
+            customer_id: prev.customer_id.filter(id => availableCustomerIds.has(id)),
+          }));
+         }
 
         customerCache.current[cacheKey] = formatted;
         
@@ -1649,7 +1665,7 @@ function JobCustomReport() {
       pagination: {
         search: searchValue,
         page: pageNo,
-        limit: 20,
+        limit: job_id.length > 0 || customer_id.length > 0 ? 1000 : 20,
       },
     };
 
@@ -1672,6 +1688,14 @@ function JobCustomReport() {
           value: item.id,
           label: `${item.client_name} (${item.client_code})`,
         }));
+
+        if(job_id.length > 0 || customer_id.length > 0) {
+          const availableClientIds = new Set(response.data.map(item => item.id));
+          setFilters(prev => ({
+            ...prev,
+            client_id: prev.client_id.filter(id => availableClientIds.has(id)),
+          }));
+         }
 
         // Cache store
         clientCache.current[cacheKey] = formatted;
