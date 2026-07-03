@@ -4428,7 +4428,7 @@ const getChangedRoleStaff = async (Report) => {
             staffs.id AS staff_id,
             CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_fullname
         FROM staffs
-        WHERE staffs.id != ? AND staffs.role_id = ? AND staffs.status = '1'
+        WHERE staffs.id != ? AND (staffs.role_id = ? OR staffs.role_id = 4) AND staffs.status = '1'
     `;
   const [result] = await pool.execute(query, [staffData.id, staffData.role_id]);
   return { status: true, message: "Success.", data: result };
