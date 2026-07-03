@@ -7953,6 +7953,1611 @@ const getJobCustomReport = async (Report) => {
     return { status: false, message: err.message || "server error", data: [] };
   }
 };
+const getJobCustomReport2 = async (Report) => {
+  const { StaffUserId, data } = Report;
+  // console.log("Call Custome Job Report",data);
+  var {
+    groupBy = ["job_id"],
+    additionalField = [],
+    job_id,
+    customer_id,
+    client_id,
+    account_manager_id,
+    allocated_to_id,
+    reviewer_id,
+    allocated_to_other_id,
+    service_id,
+    job_type_id,
+    status_type_id,
+    employee_number,
+
+    date_received_on,
+    allocated_on,
+    job_priority,
+    engagement_model,
+    customer_account_manager_officer,
+    status_updation_date,
+    Transactions_Posting_id_2,
+    Number_of_Bank_Transactions_id_2,
+    Number_of_Journal_Entries_id_2,
+    Number_of_Other_Transactions_id_2,
+    Number_of_Petty_Cash_Transactions_id_2,
+    Number_of_Purchase_Invoices_id_2,
+    Number_of_Sales_Invoices_id_2,
+    Number_of_Total_Transactions_id_2,
+    submission_deadline,
+    Tax_Year_id_4,
+    If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+    Whose_Tax_Return_is_it_id_4,
+    Type_of_Payslip_id_3,
+    Year_Ending_id_1,
+    Bookkeeping_Frequency_id_2,
+    CIS_Frequency_id_3,
+    Filing_Frequency_id_8,
+    Management_Accounts_Frequency_id_6,
+    Payroll_Frequency_id_3,
+    budgeted_hours,
+    feedback_incorporation_time,
+    review_time,
+    total_preparation_time,
+    total_time,
+    due_on,
+    customer_deadline_date,
+    expected_delivery_date,
+    internal_deadline_date,
+    sla_deadline_date,
+    Management_Accounts_FromDate_id_6,
+    Management_Accounts_ToDate_id_6,
+
+    // Staff Fields
+    staff_full_name,
+    role,
+    staff_email,
+    line_manager,
+    staff_status,
+
+    line_manager_id,
+    timePeriod,
+    displayBy,
+    fromDate,
+    toDate,
+  } = data.filters;
+
+  // console.log("data.filters: ", data.filters);
+
+  const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+
+  let { page = 1, limit = 10, search = "" } = data;
+
+  let role_user = data?.role?.toUpperCase() || "";
+
+  //  console.log("page ---- --- ", page);
+  // console.log("limit ---- --- ", limit);
+
+  const offset = (page - 1) * limit;
+
+  // console.log("additionalField ---- --- ", additionalField);
+
+  // if (groupBy.length == 0 || ["", null, undefined].includes(timePeriod) || ["", null, undefined].includes(displayBy)) {
+  //     return { status: false, message: `empty groupBy field`, data: [] };
+  // }
+
+  if (groupBy.length == 0 || ["", null, undefined].includes(timePeriod)) {
+    return { status: false, message: `empty groupBy field`, data: [] };
+  }
+  let GROUPBY = "";
+
+  //    groupBy = ['staff_id','customer_id','client_id'];
+  // allowed fields
+  const ALLOWED_GROUP_FIELDS = [
+    "job_id",
+    "customer_id",
+    "client_id",
+    "account_manager_id",
+    "allocated_to_id",
+    "reviewer_id",
+    "allocated_to_other_id",
+    "service_id",
+    "job_type_id",
+    "status_type_id",
+    "employee_number",
+
+    "date_received_on",
+    "allocated_on",
+    "job_priority",
+    "engagement_model",
+    "customer_account_manager_officer",
+    "status_updation_date",
+    "Transactions_Posting_id_2",
+    "Number_of_Bank_Transactions_id_2",
+    "Number_of_Journal_Entries_id_2",
+    "Number_of_Other_Transactions_id_2",
+    "Number_of_Petty_Cash_Transactions_id_2",
+    "Number_of_Purchase_Invoices_id_2",
+    "Number_of_Sales_Invoices_id_2",
+    "Number_of_Total_Transactions_id_2",
+    "submission_deadline",
+    "Tax_Year_id_4",
+    "If_Sole_Trader_Who_is_doing_Bookkeeping_id_4",
+    "Whose_Tax_Return_is_it_id_4",
+    "Type_of_Payslip_id_3",
+    "Year_Ending_id_1",
+    "Bookkeeping_Frequency_id_2",
+    "CIS_Frequency_id_3",
+    "Filing_Frequency_id_8",
+    "Management_Accounts_Frequency_id_6",
+    "Payroll_Frequency_id_3",
+    "budgeted_hours",
+    "feedback_incorporation_time",
+    "review_time",
+    "total_preparation_time",
+    "total_time",
+    "due_on",
+    "customer_deadline_date",
+    "expected_delivery_date",
+    "internal_deadline_date",
+    "sla_deadline_date",
+    "Management_Accounts_FromDate_id_6",
+    "Management_Accounts_ToDate_id_6",
+    // Staff Fields
+    "staff_full_name",
+    "role",
+    "staff_email",
+    "line_manager",
+    "staff_status",
+
+    //'line_manager_id'
+  ];
+
+  // validate groupBy
+  if (!Array.isArray(groupBy)) groupBy = [groupBy];
+  for (const g of groupBy) {
+    if (!ALLOWED_GROUP_FIELDS.includes(g)) {
+      return {
+        status: false,
+        message: `Invalid groupBy field: ${g}`,
+        data: [],
+      };
+    } else {
+      if (g === "job_id") {
+        GROUPBY =
+          GROUPBY != "" ? (GROUPBY += " , raw.job_id") : `GROUP BY raw.job_id`;
+      } else if (g === "customer_id") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.customer_id")
+            : `GROUP BY raw.customer_id`;
+      } else if (g === "client_id") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.client_id")
+            : `GROUP BY raw.client_id`;
+      } else if (g === "account_manager_id") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.account_manager_id")
+            : `GROUP BY raw.account_manager_id`;
+      } else if (g === "allocated_to_id") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.allocated_to_id")
+            : `GROUP BY raw.allocated_to_id`;
+      } else if (g === "reviewer_id") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.reviewer_id")
+            : `GROUP BY raw.reviewer_id`;
+      } else if (g === "service_id") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.service_id")
+            : `GROUP BY raw.service_id`;
+      } else if (g === "job_type_id") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.job_type_id")
+            : `GROUP BY raw.job_type_id`;
+      } else if (g === "status_type_id") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.status_type_id")
+            : `GROUP BY raw.status_type_id`;
+      } else if (g === "employee_number") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , sf.employee_number")
+            : `GROUP BY sf.employee_number`;
+      } else if (g === "date_received_on") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.date_received_on")
+            : `GROUP BY raw.date_received_on`;
+      } else if (g === "allocated_on") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.allocated_on")
+            : `GROUP BY raw.allocated_on`;
+      } else if (g === "job_priority") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.job_priority")
+            : `GROUP BY raw.job_priority`;
+      } else if (g === "engagement_model") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.engagement_model")
+            : `GROUP BY raw.engagement_model`;
+      } else if (g === "customer_account_manager_officer") {
+        GROUPBY = GROUPBY != "" ? (GROUPBY += " , ccd.id") : `GROUP BY ccd.id`;
+      } else if (g === "status_updation_date") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.status_updation_date")
+            : `GROUP BY raw.status_updation_date`;
+      } else if (g === "Transactions_Posting_id_2") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.Transactions_Posting_id_2")
+            : `GROUP BY raw.Transactions_Posting_id_2`;
+      } else if (g === "Number_of_Bank_Transactions_id_2") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.Number_of_Bank_Transactions_id_2")
+            : `GROUP BY raw.Number_of_Bank_Transactions_id_2`;
+      } else if (g === "Number_of_Journal_Entries_id_2") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.Number_of_Journal_Entries_id_2")
+            : `GROUP BY raw.Number_of_Journal_Entries_id_2`;
+      } else if (g === "Number_of_Other_Transactions_id_2") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.Number_of_Other_Transactions_id_2")
+            : `GROUP BY raw.Number_of_Other_Transactions_id_2`;
+      } else if (g === "Number_of_Petty_Cash_Transactions_id_2") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.Number_of_Petty_Cash_Transactions_id_2")
+            : `GROUP BY raw.Number_of_Petty_Cash_Transactions_id_2`;
+      } else if (g === "Number_of_Purchase_Invoices_id_2") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.Number_of_Purchase_Invoices_id_2")
+            : `GROUP BY raw.Number_of_Purchase_Invoices_id_2`;
+      } else if (g === "Number_of_Sales_Invoices_id_2") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.Number_of_Sales_Invoices_id_2")
+            : `GROUP BY raw.Number_of_Sales_Invoices_id_2`;
+      } else if (g === "Number_of_Total_Transactions_id_2") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.Number_of_Total_Transactions_id_2")
+            : `GROUP BY raw.Number_of_Total_Transactions_id_2`;
+      } else if (g === "submission_deadline") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.submission_deadline")
+            : `GROUP BY raw.submission_deadline`;
+      } else if (g === "Tax_Year_id_4") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.Tax_Year_id_4")
+            : `GROUP BY raw.Tax_Year_id_4`;
+      } else if (g === "If_Sole_Trader_Who_is_doing_Bookkeeping_id_4") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4")
+            : `GROUP BY raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4`;
+      } else if (g === "Whose_Tax_Return_is_it_id_4") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.Whose_Tax_Return_is_it_id_4")
+            : `GROUP BY raw.Whose_Tax_Return_is_it_id_4`;
+      } else if (g === "Type_of_Payslip_id_3") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.Type_of_Payslip_id_3")
+            : `GROUP BY raw.Type_of_Payslip_id_3`;
+      } else if (g === "Year_Ending_id_1") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.Year_Ending_id_1")
+            : `GROUP BY raw.Year_Ending_id_1`;
+      } else if (g === "Bookkeeping_Frequency_id_2") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.Bookkeeping_Frequency_id_2")
+            : `GROUP BY raw.Bookkeeping_Frequency_id_2`;
+      } else if (g === "CIS_Frequency_id_3") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.CIS_Frequency_id_3")
+            : `GROUP BY raw.CIS_Frequency_id_3`;
+      } else if (g === "Filing_Frequency_id_8") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.Filing_Frequency_id_8")
+            : `GROUP BY raw.Filing_Frequency_id_8`;
+      } else if (g === "Management_Accounts_Frequency_id_6") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.Management_Accounts_Frequency_id_6")
+            : `GROUP BY raw.Management_Accounts_Frequency_id_6`;
+      } else if (g === "Payroll_Frequency_id_3") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.Payroll_Frequency_id_3")
+            : `GROUP BY raw.Payroll_Frequency_id_3`;
+      } else if (g === "budgeted_hours") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.budgeted_hours")
+            : `GROUP BY raw.budgeted_hours`;
+      } else if (g === "feedback_incorporation_time") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.feedback_incorporation_time")
+            : `GROUP BY raw.feedback_incorporation_time`;
+      } else if (g === "review_time") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.review_time")
+            : `GROUP BY raw.review_time`;
+      } else if (g === "total_preparation_time") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.total_preparation_time")
+            : `GROUP BY raw.total_preparation_time`;
+      } else if (g === "total_time") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.total_time")
+            : `GROUP BY raw.total_time`;
+      } else if (g === "due_on") {
+        GROUPBY =
+          GROUPBY != "" ? (GROUPBY += " , raw.due_on") : `GROUP BY raw.due_on`;
+      } else if (g === "customer_deadline_date") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.customer_deadline_date")
+            : `GROUP BY raw.customer_deadline_date`;
+      } else if (g === "expected_delivery_date") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.expected_delivery_date")
+            : `GROUP BY raw.expected_delivery_date`;
+      } else if (g === "internal_deadline_date") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.internal_deadline_date")
+            : `GROUP BY raw.internal_deadline_date`;
+      } else if (g === "sla_deadline_date") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.sla_deadline_date")
+            : `GROUP BY raw.sla_deadline_date`;
+      } else if (g === "Management_Accounts_FromDate_id_6") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.Management_Accounts_FromDate_id_6")
+            : `GROUP BY raw.Management_Accounts_FromDate_id_6`;
+      } else if (g === "Management_Accounts_ToDate_id_6") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.Management_Accounts_ToDate_id_6")
+            : `GROUP BY raw.Management_Accounts_ToDate_id_6`;
+      }
+    }
+  }
+
+  try {
+    // console.log("fromDate ---- ", fromDate);
+    // console.log("toDate ---- ", toDate);
+    // compute date range
+    let range;
+    try {
+      range = await getDateRange(timePeriod, fromDate, toDate);
+    } catch (err) {
+      return {
+        status: false,
+        message: err.message || "Invalid date range",
+        data: [],
+      };
+    }
+
+    var { fromDate, toDate } = range;
+
+    let where = [`work_date BETWEEN ? AND ?`];
+
+    //let job_id = [1, 6]
+
+    let orWhere = [];
+
+    if (
+      !["", null, undefined].includes(job_id) &&
+      !(Array.isArray(job_id) && job_id.length === 0)
+    ) {
+      //where.push(`raw.job_id = ${job_id}`);
+      orWhere.push(`raw.job_id IN (${job_id.join(",")})`);
+    }
+
+    if (
+      !["", null, undefined].includes(customer_id) &&
+      !(Array.isArray(customer_id) && customer_id.length === 0)
+    ) {
+      // orWhere.push(`raw.customer_id = ${customer_id}`);
+      orWhere.push(`raw.customer_id IN (${customer_id.join(",")})`);
+    }
+
+    if (
+      !["", null, undefined].includes(client_id) &&
+      !(Array.isArray(client_id) && client_id.length === 0)
+    ) {
+      //orWhere.push(`raw.client_id = ${client_id}`);
+      orWhere.push(`raw.client_id IN (${client_id.join(",")})`);
+    }
+
+    if (
+      !["", null, undefined].includes(account_manager_id) &&
+      !(Array.isArray(account_manager_id) && account_manager_id.length === 0)
+    ) {
+      //orWhere.push(`raw.account_manager_id = ${account_manager_id}`);
+      orWhere.push(
+        `raw.account_manager_id IN (${account_manager_id.join(",")})`,
+      );
+    }
+    if (
+      !["", null, undefined].includes(allocated_to_id) &&
+      !(Array.isArray(allocated_to_id) && allocated_to_id.length === 0)
+    ) {
+      //orWhere.push(`raw.allocated_to_id = ${allocated_to_id}`);
+      orWhere.push(`raw.allocated_to_id IN (${allocated_to_id.join(",")})`);
+    }
+    if (
+      !["", null, undefined].includes(reviewer_id) &&
+      !(Array.isArray(reviewer_id) && reviewer_id.length === 0)
+    ) {
+      //orWhere.push(`raw.reviewer_id = ${reviewer_id}`);
+      orWhere.push(`raw.reviewer_id IN (${reviewer_id.join(",")})`);
+    }
+    if (
+      !["", null, undefined].includes(allocated_to_other_id) &&
+      !(
+        Array.isArray(allocated_to_other_id) &&
+        allocated_to_other_id.length === 0
+      )
+    ) {
+      //orWhere.push(`ato.id = ${allocated_to_other_id}`);
+      orWhere.push(`ato.id IN (${allocated_to_other_id.join(",")})`);
+    }
+    if (
+      !["", null, undefined].includes(service_id) &&
+      !(Array.isArray(service_id) && service_id.length === 0)
+    ) {
+      //orWhere.push(`raw.service_id = ${service_id}`);
+      orWhere.push(`raw.service_id IN (${service_id.join(",")})`);
+    }
+    if (
+      !["", null, undefined].includes(job_type_id) &&
+      !(Array.isArray(job_type_id) && job_type_id.length === 0)
+    ) {
+      //orWhere.push(`raw.job_type_id = ${job_type_id}`);
+      orWhere.push(`raw.job_type_id IN (${job_type_id.join(",")})`);
+    }
+    if (
+      !["", null, undefined].includes(status_type_id) &&
+      !(Array.isArray(status_type_id) && status_type_id.length === 0)
+    ) {
+      //orWhere.push(`raw.status_type_id = ${status_type_id}`);
+      orWhere.push(`raw.status_type_id IN (${status_type_id.join(",")})`);
+    }
+    if (
+      !["", null, undefined].includes(employee_number) &&
+      !(Array.isArray(employee_number) && employee_number.length === 0)
+    ) {
+      // orWhere.push(`sf.employee_number = '${employee_number}'`);
+      orWhere.push(`sf.employee_number IN (${employee_number.join(",")})`);
+    }
+    if (!["", null, undefined].includes(date_received_on)) {
+      orWhere.push(`raw.date_received_on = '${date_received_on}'`);
+    }
+    if (!["", null, undefined].includes(allocated_on)) {
+      orWhere.push(`raw.allocated_on = '${allocated_on}'`);
+    }
+    if (!["", null, undefined].includes(job_priority)) {
+      orWhere.push(`raw.job_priority = '${job_priority}'`);
+    }
+    if (!["", null, undefined].includes(engagement_model)) {
+      orWhere.push(`raw.engagement_model = '${engagement_model}'`);
+    }
+    if (!["", null, undefined].includes(customer_account_manager_officer)) {
+      orWhere.push(`ccd.id = ${customer_account_manager_officer}`);
+    }
+    if (!["", null, undefined].includes(status_updation_date)) {
+      orWhere.push(`raw.status_updation_date = '${status_updation_date}'`);
+    }
+    if (!["", null, undefined].includes(Transactions_Posting_id_2)) {
+      orWhere.push(
+        `raw.Transactions_Posting_id_2 = ${Transactions_Posting_id_2}`,
+      );
+    }
+    if (!["", null, undefined].includes(Number_of_Bank_Transactions_id_2)) {
+      orWhere.push(
+        `raw.Number_of_Bank_Transactions_id_2 = ${Number_of_Bank_Transactions_id_2}`,
+      );
+    }
+    if (!["", null, undefined].includes(Number_of_Journal_Entries_id_2)) {
+      orWhere.push(
+        `raw.Number_of_Journal_Entries_id_2 = ${Number_of_Journal_Entries_id_2}`,
+      );
+    }
+    if (!["", null, undefined].includes(Number_of_Other_Transactions_id_2)) {
+      orWhere.push(
+        `raw.Number_of_Other_Transactions_id_2 = ${Number_of_Other_Transactions_id_2}`,
+      );
+    }
+    if (
+      !["", null, undefined].includes(Number_of_Petty_Cash_Transactions_id_2)
+    ) {
+      orWhere.push(
+        `raw.Number_of_Petty_Cash_Transactions_id_2 = ${Number_of_Petty_Cash_Transactions_id_2}`,
+      );
+    }
+    if (!["", null, undefined].includes(Number_of_Purchase_Invoices_id_2)) {
+      orWhere.push(
+        `raw.Number_of_Purchase_Invoices_id_2 = ${Number_of_Purchase_Invoices_id_2}`,
+      );
+    }
+    if (!["", null, undefined].includes(Number_of_Sales_Invoices_id_2)) {
+      orWhere.push(
+        `raw.Number_of_Sales_Invoices_id_2 = ${Number_of_Sales_Invoices_id_2}`,
+      );
+    }
+    if (!["", null, undefined].includes(Number_of_Total_Transactions_id_2)) {
+      orWhere.push(
+        `raw.Number_of_Total_Transactions_id_2 = ${Number_of_Total_Transactions_id_2}`,
+      );
+    }
+    if (!["", null, undefined].includes(submission_deadline)) {
+      orWhere.push(`raw.submission_deadline = '${submission_deadline}'`);
+    }
+    if (!["", null, undefined].includes(Tax_Year_id_4)) {
+      orWhere.push(`raw.Tax_Year_id_4 = ${Tax_Year_id_4}`);
+    }
+    if (
+      !["", null, undefined].includes(
+        If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+      )
+    ) {
+      orWhere.push(
+        `raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4 = ${If_Sole_Trader_Who_is_doing_Bookkeeping_id_4}`,
+      );
+    }
+    if (!["", null, undefined].includes(Whose_Tax_Return_is_it_id_4)) {
+      orWhere.push(
+        `raw.Whose_Tax_Return_is_it_id_4 = ${Whose_Tax_Return_is_it_id_4}`,
+      );
+    }
+    if (!["", null, undefined].includes(Type_of_Payslip_id_3)) {
+      orWhere.push(`raw.Type_of_Payslip_id_3 = ${Type_of_Payslip_id_3}`);
+    }
+    if (!["", null, undefined].includes(Year_Ending_id_1)) {
+      orWhere.push(`raw.Year_Ending_id_1 = ${Year_Ending_id_1}`);
+    }
+    if (!["", null, undefined].includes(Bookkeeping_Frequency_id_2)) {
+      orWhere.push(
+        `raw.Bookkeeping_Frequency_id_2 = ${Bookkeeping_Frequency_id_2}`,
+      );
+    }
+    if (!["", null, undefined].includes(CIS_Frequency_id_3)) {
+      orWhere.push(`raw.CIS_Frequency_id_3 = ${CIS_Frequency_id_3}`);
+    }
+    if (!["", null, undefined].includes(Filing_Frequency_id_8)) {
+      orWhere.push(`raw.Filing_Frequency_id_8 = ${Filing_Frequency_id_8}`);
+    }
+    if (!["", null, undefined].includes(Management_Accounts_Frequency_id_6)) {
+      orWhere.push(
+        `raw.Management_Accounts_Frequency_id_6 = ${Management_Accounts_Frequency_id_6}`,
+      );
+    }
+    if (!["", null, undefined].includes(Payroll_Frequency_id_3)) {
+      orWhere.push(`raw.Payroll_Frequency_id_3 = ${Payroll_Frequency_id_3}`);
+    }
+    if (!["", null, undefined].includes(budgeted_hours)) {
+      orWhere.push(`raw.budgeted_hours = ${budgeted_hours}`);
+    }
+    if (!["", null, undefined].includes(feedback_incorporation_time)) {
+      orWhere.push(
+        `raw.feedback_incorporation_time = '${feedback_incorporation_time}'`,
+      );
+    }
+    if (!["", null, undefined].includes(review_time)) {
+      orWhere.push(`raw.review_time = '${review_time}'`);
+    }
+    if (!["", null, undefined].includes(total_preparation_time)) {
+      orWhere.push(`raw.total_preparation_time = '${total_preparation_time}'`);
+    }
+    if (!["", null, undefined].includes(total_time)) {
+      orWhere.push(`raw.total_time = '${total_time}'`);
+    }
+    if (!["", null, undefined].includes(due_on)) {
+      orWhere.push(`raw.due_on = '${due_on}'`);
+    }
+    if (!["", null, undefined].includes(customer_deadline_date)) {
+      orWhere.push(`raw.customer_deadline_date = '${customer_deadline_date}'`);
+    }
+    if (!["", null, undefined].includes(expected_delivery_date)) {
+      orWhere.push(`raw.expected_delivery_date = '${expected_delivery_date}'`);
+    }
+    if (!["", null, undefined].includes(internal_deadline_date)) {
+      orWhere.push(`raw.internal_deadline_date = '${internal_deadline_date}'`);
+    }
+    if (!["", null, undefined].includes(sla_deadline_date)) {
+      orWhere.push(`raw.sla_deadline_date = '${sla_deadline_date}'`);
+    }
+    if (!["", null, undefined].includes(Management_Accounts_FromDate_id_6)) {
+      orWhere.push(
+        `raw.Management_Accounts_FromDate_id_6 = '${Management_Accounts_FromDate_id_6}'`,
+      );
+    }
+    if (!["", null, undefined].includes(Management_Accounts_ToDate_id_6)) {
+      orWhere.push(
+        `raw.Management_Accounts_ToDate_id_6 = '${Management_Accounts_ToDate_id_6}'`,
+      );
+    }
+
+    // // Staff Fields
+    if (!["", null, undefined].includes(staff_full_name)) {
+      orWhere.push(
+        `CONCAT(jobcreatestaff.first_name, ' ', jobcreatestaff.last_name) LIKE '%${staff_full_name}%'`,
+      );
+    }
+    if (!["", null, undefined].includes(role)) {
+      orWhere.push(`staffrole.role = '${role}'`);
+    }
+    if (!["", null, undefined].includes(staff_email)) {
+      orWhere.push(`jobcreatestaff.email = '${staff_email}'`);
+    }
+    if (!["", null, undefined].includes(line_manager)) {
+      orWhere.push(
+        `CONCAT(managerstaff.first_name, ' ', managerstaff.last_name) LIKE '%${line_manager}%'`,
+      );
+    }
+    if (!["", null, undefined].includes(staff_status)) {
+      orWhere.push(`jobcreatestaff.status = '${staff_status}'`);
+    }
+
+    if (orWhere.length) {
+      where.push(`(${orWhere.join(" OR ")})`);
+    }
+
+    const conn = await pool.getConnection();
+   
+
+    let tmpTableJoin = "";
+   console.log("LineManageStaffId==>>>", LineManageStaffId);
+    if (
+      !["SUPERADMIN", "ADMIN"].includes(role_user) &&
+      !["", null, undefined].includes(StaffUserId)
+    ) {
+      
+      await buildAssignedJobsTempTable(conn, LineManageStaffId);
+      //where.push(`temp_assigned_jobs_staff.staff_id = ${StaffUserId}`);
+      where.push(`
+                (
+                    temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
+                    OR raw.staff_created_id IN (${LineManageStaffId})
+                    OR cl.staff_created_id IN (${LineManageStaffId})
+                )
+                `);
+
+      tmpTableJoin = `LEFT JOIN temp_assigned_jobs_staff
+                ON raw.job_id = temp_assigned_jobs_staff.job_id`;
+       where.push(`(
+            temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR raw.service_id = temp_assigned_jobs_staff.service_id_assign
+          )`);         
+    }
+
+    
+
+    where = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+    // console.log("where", where);
+
+    const unpivotSQLCount1 = `
+             SELECT COUNT(*) AS total_count
+                FROM (
+                    SELECT
+                raw.job_id,
+
+                DATE_FORMAT(raw.date_received_on, '%d/%m/%Y') AS date_received_on,
+                DATE_FORMAT(raw.allocated_on, '%d/%m/%Y') AS allocated_on,
+                DATE_FORMAT(raw.status_updation_date, '%d/%m/%Y') AS status_updation_date,
+                raw.job_priority,
+                raw.engagement_model,
+                raw.Transactions_Posting_id_2,
+                raw.Number_of_Bank_Transactions_id_2,
+                raw.Number_of_Journal_Entries_id_2,
+                raw.Number_of_Other_Transactions_id_2,
+                raw.Number_of_Petty_Cash_Transactions_id_2,
+                raw.Number_of_Purchase_Invoices_id_2,
+                raw.Number_of_Sales_Invoices_id_2,
+                raw.Number_of_Total_Transactions_id_2,
+                DATE_FORMAT(raw.submission_deadline, '%d/%m/%Y') AS submission_deadline,
+                raw.Tax_Year_id_4,
+                raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+                raw.Whose_Tax_Return_is_it_id_4,
+                raw.Type_of_Payslip_id_3,
+                DATE_FORMAT(raw.Year_Ending_id_1, '%d/%m/%Y') AS Year_Ending_id_1,
+                raw.Bookkeeping_Frequency_id_2,
+                raw.CIS_Frequency_id_3,
+                raw.Filing_Frequency_id_8,
+                raw.Management_Accounts_Frequency_id_6,
+                raw.Payroll_Frequency_id_3,
+                raw.budgeted_hours,
+                raw.feedback_incorporation_time,
+                raw.review_time,
+                raw.total_preparation_time,
+                raw.total_time,
+                DATE_FORMAT(raw.due_on, '%d/%m/%Y') AS due_on,
+                DATE_FORMAT(raw.customer_deadline_date, '%d/%m/%Y') AS customer_deadline_date,
+                DATE_FORMAT(raw.expected_delivery_date, '%d/%m/%Y') AS expected_delivery_date,
+                DATE_FORMAT(raw.internal_deadline_date, '%d/%m/%Y') AS internal_deadline_date,
+                DATE_FORMAT(raw.sla_deadline_date, '%d/%m/%Y') AS sla_deadline_date,
+                DATE_FORMAT(raw.Management_Accounts_FromDate_id_6, '%d/%m/%Y') AS Management_Accounts_FromDate_id_6,
+                DATE_FORMAT(raw.Management_Accounts_ToDate_id_6, '%d/%m/%Y') AS Management_Accounts_ToDate_id_6,
+
+
+
+                CONCAT(jobcreatestaff.first_name, ' ', jobcreatestaff.last_name) AS staff_full_name,
+                jobcreatestaff.email AS staff_email,
+                staffrole.role AS role,
+                jobcreatestaff.status AS staff_status,
+                CONCAT(managerstaff.first_name, ' ', managerstaff.last_name) AS line_manager,
+
+                
+
+                CONCAT_WS('::', raw.job_id) AS group_value,
+                raw.work_date,
+                
+                CONCAT(
+                    SUBSTRING(c.trading_name, 1, 3), '_',
+                    SUBSTRING(cl.trading_name, 1, 3), '_',
+                    SUBSTRING(jt.type, 1, 4), '_',
+                    SUBSTRING(raw.job_code_id, 1, 15)
+                ) AS job_name,
+                CONCAT(raw.job_id) AS group_label,
+                c.trading_name AS customer_name,
+                CONCAT(
+                    'cli_', 
+                    SUBSTRING(c.trading_name, 1, 3), '_',
+                    SUBSTRING(cl.trading_name, 1, 3), '_',
+                    SUBSTRING(cl.client_code, 1, 15)
+                ) AS client_name,
+                CONCAT(am.first_name, ' ', am.last_name) AS account_manager_name,
+                CONCAT(at.first_name, ' ', at.last_name) AS allocated_to_name,
+                CONCAT(rv.first_name, ' ', rv.last_name) AS reviewer_name,
+                CONCAT(ato.first_name, ' ', ato.last_name) AS allocated_to_other_name,
+                CONCAT(ccd.first_name, ' ', ccd.last_name) AS customer_account_manager_officer,
+                sv.name AS service_name,
+                jt.type AS job_type_name,
+                st.name AS status_type_name,
+                sf.employee_number AS employee_number
+            FROM (
+                SELECT 
+                    j.id AS job_id,
+                    j.job_id AS job_code_id,
+
+                    j.date_received_on AS date_received_on,
+                    j.allocated_on AS allocated_on,
+                    j.job_priority AS job_priority,
+                    j.engagement_model AS engagement_model,
+                    j.customer_contact_details_id,
+                    j.status_updation_date,
+                    j.Transactions_Posting_id_2,
+                    j.Number_of_Bank_Transactions_id_2,
+                    j.Number_of_Journal_Entries_id_2,
+                    j.Number_of_Other_Transactions_id_2,
+                    j.Number_of_Petty_Cash_Transactions_id_2,
+                    j.Number_of_Purchase_Invoices_id_2,
+                    j.Number_of_Sales_Invoices_id_2,
+                    j.Number_of_Total_Transactions_id_2,
+                    j.submission_deadline,
+                    j.Tax_Year_id_4,
+                    j.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+                    j.Whose_Tax_Return_is_it_id_4,
+                    j.Type_of_Payslip_id_3,
+                    j.Year_Ending_id_1,
+                    j.Bookkeeping_Frequency_id_2,
+                    j.CIS_Frequency_id_3,
+                    j.Filing_Frequency_id_8,
+                    j.Management_Accounts_Frequency_id_6,
+                    j.Payroll_Frequency_id_3,
+                    j.budgeted_hours,
+                    j.feedback_incorporation_time,
+                    j.review_time,
+                    j.total_preparation_time,
+                    j.total_time,
+                    j.due_on,
+                    j.customer_deadline_date,
+                    j.expected_delivery_date,
+                    j.internal_deadline_date,
+                    j.sla_deadline_date,
+                    j.Management_Accounts_FromDate_id_6,
+                    j.Management_Accounts_ToDate_id_6,
+
+
+
+                    j.customer_id,
+                    j.client_id,
+                    j.job_type_id,
+                    j.account_manager_id,
+                    j.allocated_to AS allocated_to_id,
+                    j.reviewer AS reviewer_id,
+                    j.service_id,
+                    j.status_type AS status_type_id,
+                    j.staff_created_id,
+                    j.created_at AS work_date
+                FROM jobs AS j
+            ) AS raw
+            LEFT JOIN customer_contact_details AS ccd ON raw.customer_contact_details_id = ccd.id
+            LEFT JOIN customers AS c ON raw.customer_id = c.id
+            LEFT JOIN clients AS cl ON raw.client_id = cl.id
+            LEFT JOIN job_types AS jt ON raw.job_type_id = jt.id
+            LEFT JOIN staffs AS am ON raw.account_manager_id = am.id
+            LEFT JOIN staffs AS at ON raw.allocated_to_id = at.id
+            LEFT JOIN staffs AS rv ON raw.reviewer_id = rv.id
+            LEFT JOIN services AS sv ON raw.service_id = sv.id
+            LEFT JOIN master_status AS st ON raw.status_type_id = st.id
+            LEFT JOIN staffs AS sf ON raw.staff_created_id = sf.id
+            LEFT JOIN job_allowed_staffs AS jas ON jas.job_id = raw.job_id
+            LEFT JOIN staffs AS ato ON jas.staff_id = ato.id
+            LEFT JOIN staffs AS jobcreatestaff ON raw.staff_created_id = jobcreatestaff.id
+            LEFT JOIN roles AS staffrole ON jobcreatestaff.role_id = staffrole.id
+            LEFT JOIN line_managers AS lm ON lm.staff_by = jobcreatestaff.id
+            LEFT JOIN staffs AS managerstaff ON lm.staff_to = managerstaff.id
+            ${tmpTableJoin}
+            ${where}
+            ${GROUPBY} ) AS count_table
+        `;
+
+
+        const unpivotSQLCount = `
+            SELECT
+                raw.job_id
+            FROM (
+                SELECT 
+                    j.id AS job_id,
+                    j.job_id AS job_code_id,
+
+                    j.date_received_on AS date_received_on,
+                    j.allocated_on AS allocated_on,
+                    j.job_priority AS job_priority,
+                    j.engagement_model AS engagement_model,
+                    j.customer_contact_details_id,
+                    j.status_updation_date,
+                    j.Transactions_Posting_id_2,
+                    j.Number_of_Bank_Transactions_id_2,
+                    j.Number_of_Journal_Entries_id_2,
+                    j.Number_of_Other_Transactions_id_2,
+                    j.Number_of_Petty_Cash_Transactions_id_2,
+                    j.Number_of_Purchase_Invoices_id_2,
+                    j.Number_of_Sales_Invoices_id_2,
+                    j.Number_of_Total_Transactions_id_2,
+                    j.submission_deadline,
+                    j.Tax_Year_id_4,
+                    j.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+                    j.Whose_Tax_Return_is_it_id_4,
+                    j.Type_of_Payslip_id_3,
+                    j.Year_Ending_id_1,
+                    j.Bookkeeping_Frequency_id_2,
+                    j.CIS_Frequency_id_3,
+                    j.Filing_Frequency_id_8,
+                    j.Management_Accounts_Frequency_id_6,
+                    j.Payroll_Frequency_id_3,
+                    j.budgeted_hours,
+                    j.feedback_incorporation_time,
+                    j.review_time,
+                    j.total_preparation_time,
+                    j.total_time,
+                    j.due_on,
+                    j.customer_deadline_date,
+                    j.expected_delivery_date,
+                    j.internal_deadline_date,
+                    j.sla_deadline_date,
+                    j.Management_Accounts_FromDate_id_6,
+                    j.Management_Accounts_ToDate_id_6,
+
+
+
+                    j.customer_id,
+                    j.client_id,
+                    j.job_type_id,
+                    j.account_manager_id,
+                    j.allocated_to AS allocated_to_id,
+                    j.reviewer AS reviewer_id,
+                    j.service_id,
+                    j.status_type AS status_type_id,
+                    j.staff_created_id,
+                    j.created_at AS work_date
+                FROM jobs AS j
+            ) AS raw
+            LEFT JOIN customer_contact_details AS ccd ON raw.customer_contact_details_id = ccd.id
+            LEFT JOIN customers AS c ON raw.customer_id = c.id
+            LEFT JOIN clients AS cl ON raw.client_id = cl.id
+            ${tmpTableJoin}
+            ${where}
+            ${GROUPBY}
+            ORDER BY raw.job_id
+            LIMIT ${100000} OFFSET ${offset}
+        `; 
+
+    //console.log("fromDate", fromDate);
+    // console.log("toDate", toDate);
+   // console.log("Total Count Query ---- ", unpivotSQLCount);
+    // Get Total Count
+    const [countResult] = await conn.execute(unpivotSQLCount,[fromDate, toDate]);
+
+  
+    const totalCount = countResult.length || 0;
+   // const totalCount = countResult[0]?.total_count || 0;
+
+    //console.log("Total Count --->>- ", totalCount);
+
+    // ===== Final Query =====
+    const unpivotSQL1 = `
+            SELECT
+                raw.job_id,
+
+                DATE_FORMAT(raw.date_received_on, '%d/%m/%Y') AS date_received_on,
+                DATE_FORMAT(raw.allocated_on, '%d/%m/%Y') AS allocated_on,
+                DATE_FORMAT(raw.status_updation_date, '%d/%m/%Y') AS status_updation_date,
+                raw.job_priority,
+                raw.engagement_model,
+                raw.Transactions_Posting_id_2,
+                raw.Number_of_Bank_Transactions_id_2,
+                raw.Number_of_Journal_Entries_id_2,
+                raw.Number_of_Other_Transactions_id_2,
+                raw.Number_of_Petty_Cash_Transactions_id_2,
+                raw.Number_of_Purchase_Invoices_id_2,
+                raw.Number_of_Sales_Invoices_id_2,
+                raw.Number_of_Total_Transactions_id_2,
+                DATE_FORMAT(raw.submission_deadline, '%d/%m/%Y') AS submission_deadline,
+                raw.Tax_Year_id_4,
+                raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+                raw.Whose_Tax_Return_is_it_id_4,
+                raw.Type_of_Payslip_id_3,
+                DATE_FORMAT(raw.Year_Ending_id_1, '%d/%m/%Y') AS Year_Ending_id_1,
+                raw.Bookkeeping_Frequency_id_2,
+                raw.CIS_Frequency_id_3,
+                raw.Filing_Frequency_id_8,
+                raw.Management_Accounts_Frequency_id_6,
+                raw.Payroll_Frequency_id_3,
+                raw.budgeted_hours,
+                raw.feedback_incorporation_time,
+                raw.review_time,
+                raw.total_preparation_time,
+                raw.total_time,
+                DATE_FORMAT(raw.due_on, '%d/%m/%Y') AS due_on,
+                DATE_FORMAT(raw.customer_deadline_date, '%d/%m/%Y') AS customer_deadline_date,
+                DATE_FORMAT(raw.expected_delivery_date, '%d/%m/%Y') AS expected_delivery_date,
+                DATE_FORMAT(raw.internal_deadline_date, '%d/%m/%Y') AS internal_deadline_date,
+                DATE_FORMAT(raw.sla_deadline_date, '%d/%m/%Y') AS sla_deadline_date,
+                DATE_FORMAT(raw.Management_Accounts_FromDate_id_6, '%d/%m/%Y') AS Management_Accounts_FromDate_id_6,
+                DATE_FORMAT(raw.Management_Accounts_ToDate_id_6, '%d/%m/%Y') AS Management_Accounts_ToDate_id_6,
+
+
+
+                CONCAT(jobcreatestaff.first_name, ' ', jobcreatestaff.last_name) AS staff_full_name,
+                jobcreatestaff.email AS staff_email,
+                staffrole.role AS role,
+                jobcreatestaff.status AS staff_status,
+                CONCAT(managerstaff.first_name, ' ', managerstaff.last_name) AS line_manager,
+
+                
+
+                CONCAT_WS('::', raw.job_id) AS group_value,
+                raw.work_date,
+                
+                CONCAT(
+                    SUBSTRING(c.trading_name, 1, 3), '_',
+                    SUBSTRING(cl.trading_name, 1, 3), '_',
+                    SUBSTRING(jt.type, 1, 4), '_',
+                    SUBSTRING(raw.job_code_id, 1, 15)
+                ) AS job_name,
+                CONCAT(raw.job_id) AS group_label,
+                c.trading_name AS customer_name,
+                CONCAT(
+                    'cli_', 
+                    SUBSTRING(c.trading_name, 1, 3), '_',
+                    SUBSTRING(cl.trading_name, 1, 3), '_',
+                    SUBSTRING(cl.client_code, 1, 15)
+                ) AS client_name,
+                CONCAT(am.first_name, ' ', am.last_name) AS account_manager_name,
+                CONCAT(at.first_name, ' ', at.last_name) AS allocated_to_name,
+                CONCAT(rv.first_name, ' ', rv.last_name) AS reviewer_name,
+                CONCAT(ato.first_name, ' ', ato.last_name) AS allocated_to_other_name,
+                CONCAT(ccd.first_name, ' ', ccd.last_name) AS customer_account_manager_officer,
+                sv.name AS service_name,
+                jt.type AS job_type_name,
+                st.name AS status_type_name,
+                sf.employee_number AS employee_number
+            FROM (
+                SELECT 
+                    j.id AS job_id,
+                    j.job_id AS job_code_id,
+
+                    j.date_received_on AS date_received_on,
+                    j.allocated_on AS allocated_on,
+                    j.job_priority AS job_priority,
+                    j.engagement_model AS engagement_model,
+                    j.customer_contact_details_id,
+                    j.status_updation_date,
+                    j.Transactions_Posting_id_2,
+                    j.Number_of_Bank_Transactions_id_2,
+                    j.Number_of_Journal_Entries_id_2,
+                    j.Number_of_Other_Transactions_id_2,
+                    j.Number_of_Petty_Cash_Transactions_id_2,
+                    j.Number_of_Purchase_Invoices_id_2,
+                    j.Number_of_Sales_Invoices_id_2,
+                    j.Number_of_Total_Transactions_id_2,
+                    j.submission_deadline,
+                    j.Tax_Year_id_4,
+                    j.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+                    j.Whose_Tax_Return_is_it_id_4,
+                    j.Type_of_Payslip_id_3,
+                    j.Year_Ending_id_1,
+                    j.Bookkeeping_Frequency_id_2,
+                    j.CIS_Frequency_id_3,
+                    j.Filing_Frequency_id_8,
+                    j.Management_Accounts_Frequency_id_6,
+                    j.Payroll_Frequency_id_3,
+                    j.budgeted_hours,
+                    j.feedback_incorporation_time,
+                    j.review_time,
+                    j.total_preparation_time,
+                    j.total_time,
+                    j.due_on,
+                    j.customer_deadline_date,
+                    j.expected_delivery_date,
+                    j.internal_deadline_date,
+                    j.sla_deadline_date,
+                    j.Management_Accounts_FromDate_id_6,
+                    j.Management_Accounts_ToDate_id_6,
+
+
+
+                    j.customer_id,
+                    j.client_id,
+                    j.job_type_id,
+                    j.account_manager_id,
+                    j.allocated_to AS allocated_to_id,
+                    j.reviewer AS reviewer_id,
+                    j.service_id,
+                    j.status_type AS status_type_id,
+                    j.staff_created_id,
+                    j.created_at AS work_date
+                FROM jobs AS j
+            ) AS raw
+            LEFT JOIN customer_contact_details AS ccd ON raw.customer_contact_details_id = ccd.id
+            LEFT JOIN customers AS c ON raw.customer_id = c.id
+            LEFT JOIN clients AS cl ON raw.client_id = cl.id
+            LEFT JOIN job_types AS jt ON raw.job_type_id = jt.id
+            LEFT JOIN staffs AS am ON raw.account_manager_id = am.id
+            LEFT JOIN staffs AS at ON raw.allocated_to_id = at.id
+            LEFT JOIN staffs AS rv ON raw.reviewer_id = rv.id
+            LEFT JOIN services AS sv ON raw.service_id = sv.id
+            LEFT JOIN master_status AS st ON raw.status_type_id = st.id
+            LEFT JOIN staffs AS sf ON raw.staff_created_id = sf.id
+            LEFT JOIN job_allowed_staffs AS jas ON jas.job_id = raw.job_id
+            LEFT JOIN staffs AS ato ON jas.staff_id = ato.id
+            LEFT JOIN staffs AS jobcreatestaff ON raw.staff_created_id = jobcreatestaff.id
+            LEFT JOIN roles AS staffrole ON jobcreatestaff.role_id = staffrole.id
+            LEFT JOIN line_managers AS lm ON lm.staff_by = jobcreatestaff.id
+            LEFT JOIN staffs AS managerstaff ON lm.staff_to = managerstaff.id
+            ${tmpTableJoin}
+            ${where}
+            ${GROUPBY}
+            ORDER BY raw.job_id
+            LIMIT ${limit} OFFSET ${offset}
+        `;
+
+     const unpivotSQL = `
+            SELECT
+                raw.job_id,
+
+                DATE_FORMAT(raw.date_received_on, '%d/%m/%Y') AS date_received_on,
+                DATE_FORMAT(raw.allocated_on, '%d/%m/%Y') AS allocated_on,
+                DATE_FORMAT(raw.status_updation_date, '%d/%m/%Y') AS status_updation_date,
+                raw.job_priority,
+                raw.engagement_model,
+                raw.Transactions_Posting_id_2,
+                raw.Number_of_Bank_Transactions_id_2,
+                raw.Number_of_Journal_Entries_id_2,
+                raw.Number_of_Other_Transactions_id_2,
+                raw.Number_of_Petty_Cash_Transactions_id_2,
+                raw.Number_of_Purchase_Invoices_id_2,
+                raw.Number_of_Sales_Invoices_id_2,
+                raw.Number_of_Total_Transactions_id_2,
+                DATE_FORMAT(raw.submission_deadline, '%d/%m/%Y') AS submission_deadline,
+                raw.Tax_Year_id_4,
+                raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+                raw.Whose_Tax_Return_is_it_id_4,
+                raw.Type_of_Payslip_id_3,
+                DATE_FORMAT(raw.Year_Ending_id_1, '%d/%m/%Y') AS Year_Ending_id_1,
+                raw.Bookkeeping_Frequency_id_2,
+                raw.CIS_Frequency_id_3,
+                raw.Filing_Frequency_id_8,
+                raw.Management_Accounts_Frequency_id_6,
+                raw.Payroll_Frequency_id_3,
+                raw.budgeted_hours,
+                raw.feedback_incorporation_time,
+                raw.review_time,
+                raw.total_preparation_time,
+                raw.total_time,
+                DATE_FORMAT(raw.due_on, '%d/%m/%Y') AS due_on,
+                DATE_FORMAT(raw.customer_deadline_date, '%d/%m/%Y') AS customer_deadline_date,
+                DATE_FORMAT(raw.expected_delivery_date, '%d/%m/%Y') AS expected_delivery_date,
+                DATE_FORMAT(raw.internal_deadline_date, '%d/%m/%Y') AS internal_deadline_date,
+                DATE_FORMAT(raw.sla_deadline_date, '%d/%m/%Y') AS sla_deadline_date,
+                DATE_FORMAT(raw.Management_Accounts_FromDate_id_6, '%d/%m/%Y') AS Management_Accounts_FromDate_id_6,
+                DATE_FORMAT(raw.Management_Accounts_ToDate_id_6, '%d/%m/%Y') AS Management_Accounts_ToDate_id_6,
+
+                CONCAT(jobcreatestaff.first_name, ' ', jobcreatestaff.last_name) AS staff_full_name,
+                jobcreatestaff.email AS staff_email,
+                staffrole.role AS role,
+                jobcreatestaff.status AS staff_status,
+                CONCAT(managerstaff.first_name, ' ', managerstaff.last_name) AS line_manager,
+
+                CONCAT_WS('::', raw.job_id) AS group_value,
+                raw.work_date,
+
+                CONCAT(
+                    SUBSTRING(c.trading_name, 1, 3), '_',
+                    SUBSTRING(cl.trading_name, 1, 3), '_',
+                    SUBSTRING(jt.type, 1, 4), '_',
+                    SUBSTRING(raw.job_code_id, 1, 15)
+                ) AS job_name,
+                CONCAT(raw.job_id) AS group_label,
+                c.trading_name AS customer_name,
+                CONCAT(
+                    'cli_',
+                    SUBSTRING(c.trading_name, 1, 3), '_',
+                    SUBSTRING(cl.trading_name, 1, 3), '_',
+                    SUBSTRING(cl.client_code, 1, 15)
+                ) AS client_name,
+                CONCAT(am.first_name, ' ', am.last_name) AS account_manager_name,
+                CONCAT(at.first_name, ' ', at.last_name) AS allocated_to_name,
+                CONCAT(rv.first_name, ' ', rv.last_name) AS reviewer_name,
+                jao.allocated_to_other_names AS allocated_to_other_name,
+                CONCAT(ccd.first_name, ' ', ccd.last_name) AS customer_account_manager_officer,
+                sv.name AS service_name,
+                jt.type AS job_type_name,
+                st.name AS status_type_name,
+                sf.employee_number AS employee_number
+            FROM (
+                SELECT 
+                    j.id AS job_id,
+                    j.job_id AS job_code_id,
+
+                    j.date_received_on AS date_received_on,
+                    j.allocated_on AS allocated_on,
+                    j.job_priority AS job_priority,
+                    j.engagement_model AS engagement_model,
+                    j.customer_contact_details_id,
+                    j.status_updation_date,
+                    j.Transactions_Posting_id_2,
+                    j.Number_of_Bank_Transactions_id_2,
+                    j.Number_of_Journal_Entries_id_2,
+                    j.Number_of_Other_Transactions_id_2,
+                    j.Number_of_Petty_Cash_Transactions_id_2,
+                    j.Number_of_Purchase_Invoices_id_2,
+                    j.Number_of_Sales_Invoices_id_2,
+                    j.Number_of_Total_Transactions_id_2,
+                    j.submission_deadline,
+                    j.Tax_Year_id_4,
+                    j.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+                    j.Whose_Tax_Return_is_it_id_4,
+                    j.Type_of_Payslip_id_3,
+                    j.Year_Ending_id_1,
+                    j.Bookkeeping_Frequency_id_2,
+                    j.CIS_Frequency_id_3,
+                    j.Filing_Frequency_id_8,
+                    j.Management_Accounts_Frequency_id_6,
+                    j.Payroll_Frequency_id_3,
+                    j.budgeted_hours,
+                    j.feedback_incorporation_time,
+                    j.review_time,
+                    j.total_preparation_time,
+                    j.total_time,
+                    j.due_on,
+                    j.customer_deadline_date,
+                    j.expected_delivery_date,
+                    j.internal_deadline_date,
+                    j.sla_deadline_date,
+                    j.Management_Accounts_FromDate_id_6,
+                    j.Management_Accounts_ToDate_id_6,
+
+                    j.customer_id,
+                    j.client_id,
+                    j.job_type_id,
+                    j.account_manager_id,
+                    j.allocated_to AS allocated_to_id,
+                    j.reviewer AS reviewer_id,
+                    j.service_id,
+                    j.status_type AS status_type_id,
+                    j.staff_created_id,
+                    j.created_at AS work_date
+                FROM jobs AS j
+            ) AS raw
+            LEFT JOIN customer_contact_details AS ccd ON raw.customer_contact_details_id = ccd.id
+            LEFT JOIN customers AS c ON raw.customer_id = c.id
+            LEFT JOIN clients AS cl ON raw.client_id = cl.id
+            LEFT JOIN job_types AS jt ON raw.job_type_id = jt.id
+            LEFT JOIN staffs AS am ON raw.account_manager_id = am.id
+            LEFT JOIN staffs AS at ON raw.allocated_to_id = at.id
+            LEFT JOIN staffs AS rv ON raw.reviewer_id = rv.id
+            LEFT JOIN services AS sv ON raw.service_id = sv.id
+            LEFT JOIN master_status AS st ON raw.status_type_id = st.id
+            LEFT JOIN staffs AS sf ON raw.staff_created_id = sf.id
+            LEFT JOIN staffs AS jobcreatestaff ON raw.staff_created_id = jobcreatestaff.id
+            LEFT JOIN roles AS staffrole ON jobcreatestaff.role_id = staffrole.id
+            LEFT JOIN line_managers AS lm ON lm.staff_by = jobcreatestaff.id
+            LEFT JOIN staffs AS managerstaff ON lm.staff_to = managerstaff.id
+            LEFT JOIN (
+                SELECT
+                    jas.job_id,
+                    GROUP_CONCAT(DISTINCT CONCAT(s.first_name, ' ', s.last_name) SEPARATOR ', ') AS allocated_to_other_names
+                FROM job_allowed_staffs AS jas
+                LEFT JOIN staffs AS s ON jas.staff_id = s.id
+                GROUP BY jas.job_id
+            ) AS jao ON jao.job_id = raw.job_id
+            ${tmpTableJoin}
+            ${where}
+             ${GROUPBY}
+            ORDER BY raw.job_id
+            LIMIT ${limit} OFFSET ${offset}
+        `;   
+
+     console.log("fromDate ---> ", fromDate, "toDate ", toDate);
+     console.log("unpivotSQL", unpivotSQL);
+
+      //console.log("GROUPBY ---->> ", GROUPBY);
+
+    
+    const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate]);
+    conn.release();
+
+    //   console.log("rows.length", rows.length);
+    // console.log("rows", rows);
+
+    // Aggregate JS
+    // console.log("----groupBy ", groupBy);
+    const groups = {};
+    const periodSet = new Set();
+
+    for (const r of rows) {
+      let workDateStr =
+        r.work_date instanceof Date
+          ? toYMD(r.work_date)
+          : String(r.work_date).slice(0, 10);
+      if (!workDateStr) continue;
+
+      // Generate dynamic group key based on multiple groupBy fields
+      // Example: customer_name|client_name|account_manager_name|...
+
+      // Map of id → name field relation
+      const idToNameMap = {
+        id: "job_id",
+        job_id: "job_name",
+        customer_id: "customer_name",
+        client_id: "client_name",
+        account_manager_id: "account_manager_name",
+        allocated_to_id: "allocated_to_name",
+        reviewer_id: "reviewer_name",
+        allocated_to_other_id: "allocated_to_other_name",
+        service_id: "service_name",
+        job_type_id: "job_type_name",
+        status_type_id: "status_type_name",
+        employee_number: "employee_number",
+
+        date_received_on: "date_received_on",
+        allocated_on: "allocated_on",
+        job_priority: "job_priority",
+        engagement_model: "engagement_model",
+        customer_account_manager_officer: "customer_account_manager_officer",
+        status_updation_date: "status_updation_date",
+        Transactions_Posting_id_2: "Transactions_Posting_id_2",
+        Number_of_Bank_Transactions_id_2: "Number_of_Bank_Transactions_id_2",
+        Number_of_Journal_Entries_id_2: "Number_of_Journal_Entries_id_2",
+        Number_of_Other_Transactions_id_2: "Number_of_Other_Transactions_id_2",
+        Number_of_Petty_Cash_Transactions_id_2:
+          "Number_of_Petty_Cash_Transactions_id_2",
+        Number_of_Purchase_Invoices_id_2: "Number_of_Purchase_Invoices_id_2",
+        Number_of_Sales_Invoices_id_2: "Number_of_Sales_Invoices_id_2",
+        Number_of_Total_Transactions_id_2: "Number_of_Total_Transactions_id_2",
+        submission_deadline: "submission_deadline",
+        Tax_Year_id_4: "Tax_Year_id_4",
+        If_Sole_Trader_Who_is_doing_Bookkeeping_id_4:
+          "If_Sole_Trader_Who_is_doing_Bookkeeping_id_4",
+        Whose_Tax_Return_is_it_id_4: "Whose_Tax_Return_is_it_id_4",
+        Type_of_Payslip_id_3: "Type_of_Payslip_id_3",
+        Year_Ending_id_1: "Year_Ending_id_1",
+        Bookkeeping_Frequency_id_2: "Bookkeeping_Frequency_id_2",
+        CIS_Frequency_id_3: "CIS_Frequency_id_3",
+        Filing_Frequency_id_8: "Filing_Frequency_id_8",
+        Management_Accounts_Frequency_id_6:
+          "Management_Accounts_Frequency_id_6",
+        Payroll_Frequency_id_3: "Payroll_Frequency_id_3",
+        budgeted_hours: "budgeted_hours",
+        feedback_incorporation_time: "feedback_incorporation_time",
+        review_time: "review_time",
+        total_preparation_time: "total_preparation_time",
+        total_time: "total_time",
+        due_on: "due_on",
+        customer_deadline_date: "customer_deadline_date",
+        expected_delivery_date: "expected_delivery_date",
+        internal_deadline_date: "internal_deadline_date",
+        sla_deadline_date: "sla_deadline_date",
+        Management_Accounts_FromDate_id_6: "Management_Accounts_FromDate_id_6",
+        Management_Accounts_ToDate_id_6: "Management_Accounts_ToDate_id_6",
+
+        // staff fields
+        staff_full_name: "staff_full_name",
+        role: "role",
+        staff_email: "staff_email",
+        line_manager: "line_manager",
+        staff_status: "staff_status",
+      };
+
+      // Now dynamically build groupKeyParts
+      const groupKeyParts = groupBy.map((idKey) => {
+        const nameKey = idToNameMap[idKey];
+        return r[nameKey] || "NULL";
+      });
+
+      // const groupKeyParts = [
+      //     r.group_value || 'NULL',
+      //     r.job_name || 'NULL',
+      //     r.customer_name || 'NULL',
+      //     r.client_name || 'NULL',
+      //     r.account_manager_name || 'NULL',
+      //     r.allocated_to_name || 'NULL',
+      //     r.reviewer_name || 'NULL',
+      //     r.allocated_to_other_name || 'NULL',
+      //     r.service_name || 'NULL',
+      //     r.job_type_name || 'NULL',
+      //     r.status_type_name || 'NULL'
+      // ];
+
+      const gid = groupKeyParts.join("|"); // unique key for this combination
+
+      const periodKey = getPeriodKey(displayBy, workDateStr);
+      if (!periodKey) continue;
+      periodSet.add(periodKey);
+      if (!groups[gid]) {
+        groups[gid] = {
+          //  group_value: gid,
+
+          id: r.job_id,
+          job_name: r.job_name,
+          customer_name: r.customer_name,
+          client_name: r.client_name,
+          account_manager_name: r.account_manager_name,
+          allocated_to_name: r.allocated_to_name,
+          reviewer_name: r.reviewer_name,
+          allocated_to_other_name: r.allocated_to_other_name,
+          service_name: r.service_name,
+          job_type_name: r.job_type_name,
+          status_type_name: r.status_type_name,
+          employee_number: r.employee_number,
+
+          // Additional Fields
+          date_received_on: r.date_received_on,
+          allocated_on: r.allocated_on,
+          job_priority: r.job_priority,
+          engagement_model: r.engagement_model,
+          customer_account_manager_officer: r.customer_account_manager_officer,
+          status_updation_date: r.status_updation_date,
+          Transactions_Posting_id_2: r.Transactions_Posting_id_2,
+          Number_of_Bank_Transactions_id_2: r.Number_of_Bank_Transactions_id_2,
+          Number_of_Journal_Entries_id_2: r.Number_of_Journal_Entries_id_2,
+          Number_of_Other_Transactions_id_2:
+            r.Number_of_Other_Transactions_id_2,
+          Number_of_Petty_Cash_Transactions_id_2:
+            r.Number_of_Petty_Cash_Transactions_id_2,
+          Number_of_Purchase_Invoices_id_2: r.Number_of_Purchase_Invoices_id_2,
+          Number_of_Sales_Invoices_id_2: r.Number_of_Sales_Invoices_id_2,
+          Number_of_Total_Transactions_id_2:
+            r.Number_of_Total_Transactions_id_2,
+          submission_deadline: r.submission_deadline,
+          Tax_Year_id_4: r.Tax_Year_id_4,
+          If_Sole_Trader_Who_is_doing_Bookkeeping_id_4:
+            r.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+          Whose_Tax_Return_is_it_id_4: r.Whose_Tax_Return_is_it_id_4,
+          Type_of_Payslip_id_3: r.Type_of_Payslip_id_3,
+          Year_Ending_id_1: r.Year_Ending_id_1,
+          Bookkeeping_Frequency_id_2: r.Bookkeeping_Frequency_id_2,
+          CIS_Frequency_id_3: r.CIS_Frequency_id_3,
+          Filing_Frequency_id_8: r.Filing_Frequency_id_8,
+          Management_Accounts_Frequency_id_6:
+            r.Management_Accounts_Frequency_id_6,
+          Payroll_Frequency_id_3: r.Payroll_Frequency_id_3,
+          budgeted_hours: r.budgeted_hours,
+          feedback_incorporation_time: r.feedback_incorporation_time,
+          review_time: r.review_time,
+          total_preparation_time: r.total_preparation_time,
+          total_time: r.total_time,
+          due_on: r.due_on,
+          customer_deadline_date: r.customer_deadline_date,
+          expected_delivery_date: r.expected_delivery_date,
+          internal_deadline_date: r.internal_deadline_date,
+          sla_deadline_date: r.sla_deadline_date,
+          Management_Accounts_FromDate_id_6:
+            r.Management_Accounts_FromDate_id_6,
+          Management_Accounts_ToDate_id_6: r.Management_Accounts_ToDate_id_6,
+
+          // Staff Fields
+          staff_full_name: r.staff_full_name,
+          staff_email: r.staff_email,
+          role: r.role,
+          staff_status: r.staff_status,
+          line_manager: r.line_manager,
+          //date: workDateStr,
+          jobIds: new Set(),
+          periodSeconds: {},
+        };
+      }
+
+      const g = groups[gid];
+      // Add job to set to prevent duplicate IDs
+      g.jobIds.add(r.job_id);
+      // Increment count for that period
+      g.periodSeconds[periodKey] = (g.periodSeconds[periodKey] || 0) + 1;
+    }
+
+    const periods = Array.from(periodSet).sort((a, b) => a.localeCompare(b));
+    const outRows = [];
+
+    for (const gid of Object.keys(groups)) {
+      const g = groups[gid];
+      const row = {};
+      // fill group fields
+
+      row["id"] = g.id;
+      row["job_id"] = g.job_name;
+      row["customer_id"] = g.customer_name;
+      row["client_id"] = g.client_name;
+      row["account_manager_id"] = g.account_manager_name;
+      row["allocated_to_id"] = g.allocated_to_name;
+      row["reviewer_id"] = g.reviewer_name;
+      row["allocated_to_other_id"] = g.allocated_to_other_name;
+      row["service_id"] = g.service_name;
+      row["job_type_id"] = g.job_type_name;
+      row["status_type_id"] = g.status_type_name;
+      row["employee_number"] = g.employee_number;
+
+      // Additional fields
+      row["date_received_on"] = g.date_received_on;
+      row["allocated_on"] = g.allocated_on;
+      row["job_priority"] = g.job_priority;
+      row["engagement_model"] = g?.engagement_model
+        ?.replace(/_/g, " ")
+        ?.replace(/\b\w/g, (c) => c?.toUpperCase());
+      row["customer_account_manager_officer"] =
+        g.customer_account_manager_officer;
+      row["status_updation_date"] = g.status_updation_date;
+      row["Transactions_Posting_id_2"] = g.Transactions_Posting_id_2;
+      row["Number_of_Bank_Transactions_id_2"] =
+        g.Number_of_Bank_Transactions_id_2;
+      row["Number_of_Journal_Entries_id_2"] = g.Number_of_Journal_Entries_id_2;
+      row["Number_of_Other_Transactions_id_2"] =
+        g.Number_of_Other_Transactions_id_2;
+      row["Number_of_Petty_Cash_Transactions_id_2"] =
+        g.Number_of_Petty_Cash_Transactions_id_2;
+      row["Number_of_Purchase_Invoices_id_2"] =
+        g.Number_of_Purchase_Invoices_id_2;
+      row["Number_of_Sales_Invoices_id_2"] = g.Number_of_Sales_Invoices_id_2;
+      row["Number_of_Total_Transactions_id_2"] =
+        g.Number_of_Total_Transactions_id_2;
+      row["submission_deadline"] = g.submission_deadline;
+      row["Tax_Year_id_4"] = g.Tax_Year_id_4;
+      row["If_Sole_Trader_Who_is_doing_Bookkeeping_id_4"] =
+        g.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4;
+      row["Whose_Tax_Return_is_it_id_4"] = g.Whose_Tax_Return_is_it_id_4;
+      row["Type_of_Payslip_id_3"] = g.Type_of_Payslip_id_3;
+      row["Year_Ending_id_1"] = g.Year_Ending_id_1;
+      row["Bookkeeping_Frequency_id_2"] = g.Bookkeeping_Frequency_id_2;
+      row["CIS_Frequency_id_3"] = g.CIS_Frequency_id_3;
+      row["Filing_Frequency_id_8"] = g.Filing_Frequency_id_8;
+      row["Management_Accounts_Frequency_id_6"] =
+        g.Management_Accounts_Frequency_id_6;
+      row["Payroll_Frequency_id_3"] = g.Payroll_Frequency_id_3;
+      row["budgeted_hours"] = g.budgeted_hours;
+      row["feedback_incorporation_time"] = g.feedback_incorporation_time;
+      row["review_time"] = g.review_time;
+      row["total_preparation_time"] = g.total_preparation_time;
+      row["total_time"] = g.total_time;
+      row["due_on"] = g.due_on;
+      row["customer_deadline_date"] = g.customer_deadline_date;
+      row["expected_delivery_date"] = g.expected_delivery_date;
+      row["internal_deadline_date"] = g.internal_deadline_date;
+      row["sla_deadline_date"] = g.sla_deadline_date;
+      row["Management_Accounts_FromDate_id_6"] =
+        g.Management_Accounts_FromDate_id_6;
+      row["Management_Accounts_ToDate_id_6"] =
+        g.Management_Accounts_ToDate_id_6;
+
+      row["staff_full_name"] = g.staff_full_name;
+      row["staff_email"] = g.staff_email;
+      row["role"] = g.role;
+      row["staff_status"] = g.staff_status == "1" ? "Active" : "Inactive";
+      row["line_manager"] = g.line_manager;
+
+      // fill counts for each period
+
+      if (!["", null, undefined].includes(displayBy)) {
+        let totalCount = 0;
+        for (const p of periods) {
+          const count = g.periodSeconds[p] || 0;
+          row[p] = count;
+          totalCount += count;
+        }
+        // total_count = total number of jobs in all periods
+        row["total_count"] = totalCount;
+      }
+
+      //row.date = g.date;
+      outRows.push(row);
+    }
+
+    //console.log("outRows --->>>", outRows.length);
+    // console.log("displayBy --->>>", displayBy);
+    let total_count = [];
+    let weeks = [];
+    if (!["", null, undefined].includes(displayBy)) {
+      total_count.push("total_count");
+      weeks = getWeekEndings(new Date(fromDate), new Date(toDate), displayBy);
+    }
+
+    // const columnsWeeks = [
+    //     ...groupBy,
+    //     ...weeks,
+    //     //'date',
+    //     ...additionalField,
+    //    'total_count'
+    // ];
+    const columnsWeeks = [...groupBy, ...weeks, ...total_count];
+    const finalRows = normalizeRows(columnsWeeks, outRows);
+
+    const fixed = [...groupBy];
+    const dynamic = columnsWeeks.filter((col) => !fixed.includes(col));
+    const columnsWeeksDecOrder = [...fixed, ...dynamic?.reverse()];
+
+    return {
+      status: true,
+      message: "Success.",
+      data: {
+        meta: { fromDate, toDate, groupBy, displayBy, timePeriod },
+        //columns: columnsWeeks,
+        columns: columnsWeeksDecOrder,
+        rows: finalRows,
+        pagination: {
+          total: totalCount,
+          page: page,
+          limit: limit,
+          totalPages: Math.ceil(totalCount / limit),
+          search,
+        },
+      },
+    };
+  } catch (err) {
+    // console.error(err);
+    return { status: false, message: err.message || "server error", data: [] };
+  }
+};
 /////////////------- END getJobCustomReports END-------//////////////////////
 
 ///////////// ---- END JOB CUSTOM REPORTS ----//////////////////////
