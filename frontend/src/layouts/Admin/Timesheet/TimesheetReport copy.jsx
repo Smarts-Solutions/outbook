@@ -14,7 +14,7 @@ import ReactPaginate from "react-paginate";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 import dayjs from "dayjs";
 import sweatalert from "sweetalert2";
-import { Trash, Download } from "lucide-react";
+import { Trash,Download } from "lucide-react";
 
 function TimesheetReport() {
   const noDataImage = "/assets/images/No-data-amico.png";
@@ -194,7 +194,7 @@ function TimesheetReport() {
             }
           });
         }
-      } catch (err) { }
+      } catch (err) {}
 
       setStaffAllData(dataList);
     }
@@ -268,7 +268,7 @@ function TimesheetReport() {
             }
           });
         }
-      } catch (err) { }
+      } catch (err) {}
 
       setEmployeeNumberAllData(dataList);
     }
@@ -360,9 +360,9 @@ function TimesheetReport() {
   const customerCache = useRef({});
   const debounceRef = useRef(null);
 
-  const GetAllCustomer = async ({ searchValue = "", pageNo = 1, append = false, job_id = null, client_id = null }) => {
+  const GetAllCustomer = async ({ searchValue = "", pageNo = 1, append = false }) => {
     if (loading) return;
-    const cacheKey = `${searchValue}_${pageNo}_${job_id}_${client_id}`;
+    const cacheKey = `${searchValue}_${pageNo}`;
     if (customerCache.current[cacheKey]) {
       const cached = customerCache.current[cacheKey];
       setCustomerAllData(prev => {
@@ -379,35 +379,21 @@ function TimesheetReport() {
     const req = {
       action: "get_customers_filter",
       filters: filters,
-      job_id: job_id ? [job_id] : [],
-      client_id: client_id ? [client_id] : [],
       pagination: {
         search: searchValue,
         page: pageNo,
-        limit: job_id || client_id ? 1000 : 20
+        limit: 20
       }
     };
 
     const data = { req: req, authToken: token };
     try {
-      if (job_id || client_id) {
-        setCustomerAllData([]);
-      }
       const response = await dispatch(getAllCustomerDropDown(data)).unwrap();
       if (response.status) {
         const formatted = response.data.map((item) => ({
           value: item.id,
           label: item.trading_name
         }));
-
-        if (job_id || client_id) {
-          const availableCustomerIds = new Set(response.data.map(item => item.id));
-          setFilters(prev => ({
-            ...prev,
-            customer_id: availableCustomerIds.has(prev.customer_id) ? prev.customer_id : null,
-          }));
-        }
-
         customerCache.current[cacheKey] = formatted;
         // setCustomerAllData(prev =>
         //   append ? [...prev, ...formatted] : formatted
@@ -439,9 +425,7 @@ function TimesheetReport() {
       setCustomerSearch(value);
       GetAllCustomer({
         searchValue: value,
-        pageNo: 1,
-        job_id: filters?.job_id,
-        client_id: filters?.client_id,
+        pageNo: 1
       });
     }, 500);
 
@@ -480,9 +464,9 @@ function TimesheetReport() {
   const clientCache = useRef({});
   const clientDebounceRef = useRef(null);
 
-  const GetAllClient = async ({ searchValue = "", pageNo = 1, append = false, job_id = null, customer_id = null }) => {
+  const GetAllClient = async ({ searchValue = "", pageNo = 1, append = false }) => {
     if (loading) return;
-    const cacheKey = `${searchValue}_${pageNo}_${job_id}_${customer_id}`;
+    const cacheKey = `${searchValue}_${pageNo}`;
     if (clientCache.current[cacheKey]) {
       const cached = clientCache.current[cacheKey];
       setClientAllData(prev => {
@@ -498,33 +482,20 @@ function TimesheetReport() {
     const req = {
       action: "get_clients_filter",
       filters: filters,
-      job_id: job_id ? [job_id] : [],
-      customer_id: customer_id ? [customer_id] : [],
       pagination: {
         search: searchValue,
         page: pageNo,
-        limit: job_id || customer_id ? 1000 : 20
+        limit: 20
       }
     };
     const data = { req, authToken: token };
     try {
-      if (job_id || customer_id) {
-        setClientAllData([]);
-      }
       const response = await dispatch(ClientAction(data)).unwrap();
       if (response.status) {
         const formatted = response.data.map((item) => ({
           value: item.id,
           label: `${item.client_name} (${item.client_code})`
         }));
-
-        if (job_id || customer_id) {
-          const availableClientIds = new Set(response.data.map(item => item.id));
-          setFilters(prev => ({
-            ...prev,
-            client_id: availableClientIds.has(prev.client_id) ? prev.client_id : null,
-          }));
-        }
 
         // Cache store
         clientCache.current[cacheKey] = formatted;
@@ -556,9 +527,7 @@ function TimesheetReport() {
       setClientSearch(value);
       GetAllClient({
         searchValue: value,
-        pageNo: 1,
-        job_id: filters?.job_id,
-        customer_id: filters?.customer_id,
+        pageNo: 1
       });
     }, 500);
   };
@@ -661,9 +630,9 @@ function TimesheetReport() {
   const cacheRef = useRef({});
   const debounceTimeout = useRef(null);
 
-  const GetAllJobs = async ({ searchValue = "", pageNo = 1, append = false, customer_id = null, client_id = null }) => {
+  const GetAllJobs = async ({ searchValue = "", pageNo = 1, append = false }) => {
     if (loading) return;
-    const cacheKey = `${searchValue}_${pageNo}_${customer_id}_${client_id}`;
+    const cacheKey = `${searchValue}_${pageNo}`;
     if (cacheRef.current[cacheKey]) {
       const cached = cacheRef.current[cacheKey];
       setJobOptions(prev => {
@@ -679,35 +648,21 @@ function TimesheetReport() {
     const req = {
       action: "get_jobs_filter",
       filters: filters,
-      customer_id: customer_id ? [customer_id] : [],
-      client_id: client_id ? [client_id] : [],
       pagination: {
         search: searchValue,
         page: pageNo,
-        limit: customer_id || client_id ? 1000 : 20
+        limit: 20
       }
     };
     const data = { req, authToken: token };
 
     try {
-      if (customer_id || client_id) {
-        setJobOptions([]);
-      }
       const response = await dispatch(JobAction(data)).unwrap();
       if (response.status) {
         const formatted = response.data.map(item => ({
           value: item.job_id,
           label: item.job_code_id
         }));
-
-        if (customer_id || client_id) {
-          const availableJobIds = new Set(response.data.map(item => item.job_id));
-          setFilters(prev => ({
-            ...prev,
-            job_id: availableJobIds.has(prev.job_id) ? prev.job_id : null,
-          }));
-        }
-
         cacheRef.current[cacheKey] = formatted;
         // setJobOptions(prev =>
         //   append ? [...prev, ...formatted] : formatted
@@ -735,12 +690,7 @@ function TimesheetReport() {
     debounceTimeout.current = setTimeout(() => {
       setSearch(value);
       setPage(1);
-      GetAllJobs({
-        searchValue: value,
-        pageNo: 1,
-        customer_id: filters?.customer_id,
-        client_id: filters?.client_id,
-      });
+      GetAllJobs({ searchValue: value, pageNo: 1 });
     }, 500);
 
   };
@@ -1022,82 +972,45 @@ function TimesheetReport() {
             }
           }
         } else if (key === "customer_id") {
+          updated.client_id = null;
+          updated.job_id = null;
           updated.task_id = null;
           updated.internal_job_id = null;
           updated.internal_task_id = null;
-
-          setJobOptions([]);
-          GetAllJobs({
-            searchValue: "",
-            pageNo: 1,
-            append: true,
-            customer_id: value,
-            client_id: filters.client_id,
-          });
-
+          
           setClientAllData([]);
-          GetAllClient({
-            searchValue: "",
-            pageNo: 1,
-            append: true,
-            customer_id: value,
-            job_id: filters.job_id,
-          });
+          clientCache.current = {};
+          clientDebounceRef.current = null;
+          setClientPage(1);
+          setClientHasMore(true);
+
+          setJobAllData([]);
+          setJobOptions([]);
+          cacheRef.current = {};
+          debounceTimeout.current = null;
+          setPage(1);
+          setHasMore(true);
 
           setInternalJobAllData([]);
           setTaskAllData([]);
           setInternalTaskAllData([]);
         } else if (key === "client_id") {
+          updated.job_id = null;
           updated.task_id = null;
           updated.internal_job_id = null;
           updated.internal_task_id = null;
-
+          
+          setJobAllData([]);
           setJobOptions([]);
-          GetAllJobs({
-            searchValue: "",
-            pageNo: 1,
-            append: true,
-            client_id: value,
-            customer_id: filters.customer_id,
-          });
-
-          setCustomerAllData([]);
-          GetAllCustomer({
-            searchValue: "",
-            pageNo: 1,
-            append: true,
-            client_id: value,
-            job_id: filters.job_id,
-          });
+          cacheRef.current = {};
+          debounceTimeout.current = null;
+          setPage(1);
+          setHasMore(true);
 
           setInternalJobAllData([]);
           setTaskAllData([]);
           setInternalTaskAllData([]);
-        } else if (key === "job_id") {
-          updated.task_id = null;
-          updated.internal_task_id = null;
-
-          setCustomerAllData([]);
-          GetAllCustomer({
-            searchValue: "",
-            pageNo: 1,
-            append: true,
-            job_id: value,
-            client_id: filters.client_id,
-          });
-
-          setClientAllData([]);
-          GetAllClient({
-            searchValue: "",
-            pageNo: 1,
-            append: true,
-            job_id: value,
-            customer_id: filters.customer_id,
-          });
-
-          setTaskAllData([]);
-          setInternalTaskAllData([]);
-        } else if (key === "internal_job_id") {
+        } else if (key === "job_id" || key === "internal_job_id") {
           updated.task_id = null;
           updated.internal_task_id = null;
           setTaskAllData([]);
@@ -1576,12 +1489,12 @@ function TimesheetReport() {
                   />
 
                   {!["", null, undefined].includes(filterId) && (
-                    <Trash
-                      size={50}
-                      title="Delete Filter"
-                      onClick={deleteFilterIdFunction}
-                      style={{ cursor: "pointer", color: "red" }}
-                    />
+                  <Trash
+   size={50}
+  title="Delete Filter"
+  onClick={deleteFilterIdFunction}
+  style={{ cursor: "pointer", color: "red" }}
+/>
                   )}
                 </div>
               </div>
@@ -1613,7 +1526,7 @@ function TimesheetReport() {
                     id="btn-export"
                     onClick={() => exportToCSV(showData)}
                   >
-                    <Download size={16} />
+                   <Download size={16}/>
                     <span>Export Data</span>
                   </button>
                 </div>
@@ -1791,8 +1704,8 @@ function TimesheetReport() {
               }}
               options={[
                 { value: "", label: "Select..." },
-                ...(filters.staff_id
-                  ? employeeNumberAllData.filter(e => Number(e.staff_id) === Number(filters.staff_id))
+                ...(filters.staff_id 
+                  ? employeeNumberAllData.filter(e => Number(e.staff_id) === Number(filters.staff_id)) 
                   : employeeNumberAllData),
               ]}
               value={
