@@ -7219,14 +7219,10 @@ const getJobCustomReport = async (Report) => {
         `;
 
 
-         const unpivotSQLCount = `
-              SELECT COUNT(*) AS total_count
-                FROM (
-                    SELECT
+        const unpivotSQLCount = `
+            SELECT
                 raw.job_id
-
-                
-             FROM (
+            FROM (
                 SELECT 
                     j.id AS job_id,
                     j.job_id AS job_code_id,
@@ -7283,23 +7279,27 @@ const getJobCustomReport = async (Report) => {
                     j.created_at AS work_date
                 FROM jobs AS j
             ) AS raw
+            LEFT JOIN customer_contact_details AS ccd ON raw.customer_contact_details_id = ccd.id
             LEFT JOIN customers AS c ON raw.customer_id = c.id
             LEFT JOIN clients AS cl ON raw.client_id = cl.id
-
-            ${tmpTableJoin}
             ${where}
-            ${GROUPBY} ) AS count_table
-        `;
+            ${GROUPBY}
+            ORDER BY raw.job_id
+            LIMIT ${limit} OFFSET ${offset}
+        `; 
 
     //console.log("fromDate", fromDate);
     // console.log("toDate", toDate);
-    //console.log("Total Count Query ---- ", unpivotSQLCount);
+    console.log("Total Count Query ---- ", unpivotSQLCount);
     // Get Total Count
     const [countResult] = await conn.execute(unpivotSQLCount, [
       fromDate,
       toDate,
     ]);
-    const totalCount = countResult[0]?.total_count || 0;
+
+  
+    const totalCount = countResult.length || 0;
+   // const totalCount = countResult[0]?.total_count || 0;
 
     console.log("Total Count ---- ", totalCount);
 
