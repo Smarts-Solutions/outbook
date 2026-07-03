@@ -7283,22 +7283,9 @@ const getJobCustomReport = async (Report) => {
                     j.created_at AS work_date
                 FROM jobs AS j
             ) AS raw
-            LEFT JOIN customer_contact_details AS ccd ON raw.customer_contact_details_id = ccd.id
             LEFT JOIN customers AS c ON raw.customer_id = c.id
             LEFT JOIN clients AS cl ON raw.client_id = cl.id
-            LEFT JOIN job_types AS jt ON raw.job_type_id = jt.id
-            LEFT JOIN staffs AS am ON raw.account_manager_id = am.id
-            LEFT JOIN staffs AS at ON raw.allocated_to_id = at.id
-            LEFT JOIN staffs AS rv ON raw.reviewer_id = rv.id
-            LEFT JOIN services AS sv ON raw.service_id = sv.id
-            LEFT JOIN master_status AS st ON raw.status_type_id = st.id
-            LEFT JOIN staffs AS sf ON raw.staff_created_id = sf.id
-            LEFT JOIN job_allowed_staffs AS jas ON jas.job_id = raw.job_id
-            LEFT JOIN staffs AS ato ON jas.staff_id = ato.id
-            LEFT JOIN staffs AS jobcreatestaff ON raw.staff_created_id = jobcreatestaff.id
-            LEFT JOIN roles AS staffrole ON jobcreatestaff.role_id = staffrole.id
-            LEFT JOIN line_managers AS lm ON lm.staff_by = jobcreatestaff.id
-            LEFT JOIN staffs AS managerstaff ON lm.staff_to = managerstaff.id
+
             ${tmpTableJoin}
             ${where}
             ${GROUPBY} ) AS count_table
