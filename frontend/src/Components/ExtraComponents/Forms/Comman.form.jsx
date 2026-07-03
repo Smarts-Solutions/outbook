@@ -151,14 +151,17 @@ const ReusableForm = ({
                         <Select
                           id={field.name}
                           name={field.name}
-                          options={field.options}
+                          options={[{ value: "", label: "Select..." }, ...(field.options || [])]}
                           isDisabled={field.disable}
                           isSearchable={true}
                           value={
-                            field.options.find(
-                              (option) =>
-                                option.value === formik.values[field.name],
-                            ) || null
+                            (formik.values[field.name] === "" || formik.values[field.name] == null)
+                              ? { value: "", label: "Select..." }
+                              : (
+                                  [{ value: "", label: "Select..." }, ...(field.options || [])].find(
+                                    (option) => String(option.value) === String(formik.values[field.name])
+                                  ) || null
+                                )
                           }
                           onChange={(selectedOption) =>
                             formik.setFieldValue(
