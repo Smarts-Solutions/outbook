@@ -7282,29 +7282,27 @@ const getJobCustomReport = async (Report) => {
             LEFT JOIN customer_contact_details AS ccd ON raw.customer_contact_details_id = ccd.id
             LEFT JOIN customers AS c ON raw.customer_id = c.id
             LEFT JOIN clients AS cl ON raw.client_id = cl.id
+            ${tmpTableJoin}
             ${where}
             ${GROUPBY}
             ORDER BY raw.job_id
-            LIMIT ${limit} OFFSET ${offset}
+            LIMIT ${100000} OFFSET ${offset}
         `; 
 
     //console.log("fromDate", fromDate);
     // console.log("toDate", toDate);
-    console.log("Total Count Query ---- ", unpivotSQLCount);
+   // console.log("Total Count Query ---- ", unpivotSQLCount);
     // Get Total Count
-    const [countResult] = await conn.execute(unpivotSQLCount, [
-      fromDate,
-      toDate,
-    ]);
+    const [countResult] = await conn.execute(unpivotSQLCount,[fromDate, toDate]);
 
   
     const totalCount = countResult.length || 0;
    // const totalCount = countResult[0]?.total_count || 0;
 
-    console.log("Total Count ---- ", totalCount);
+    //console.log("Total Count --->>- ", totalCount);
 
     // ===== Final Query =====
-    const unpivotSQL = `
+    const unpivotSQL1 = `
             SELECT
                 raw.job_id,
 
@@ -7461,10 +7459,167 @@ const getJobCustomReport = async (Report) => {
             LIMIT ${limit} OFFSET ${offset}
         `;
 
-     console.log("fromDate ---> ", fromDate, "toDate ", toDate);
-    // console.log("unpivotSQL", unpivotSQL);
+     const unpivotSQL = `
+            SELECT
+                raw.job_id,
 
-      console.log("GROUPBY ---->> ", GROUPBY);
+                DATE_FORMAT(raw.date_received_on, '%d/%m/%Y') AS date_received_on,
+                DATE_FORMAT(raw.allocated_on, '%d/%m/%Y') AS allocated_on,
+                DATE_FORMAT(raw.status_updation_date, '%d/%m/%Y') AS status_updation_date,
+                raw.job_priority,
+                raw.engagement_model,
+                raw.Transactions_Posting_id_2,
+                raw.Number_of_Bank_Transactions_id_2,
+                raw.Number_of_Journal_Entries_id_2,
+                raw.Number_of_Other_Transactions_id_2,
+                raw.Number_of_Petty_Cash_Transactions_id_2,
+                raw.Number_of_Purchase_Invoices_id_2,
+                raw.Number_of_Sales_Invoices_id_2,
+                raw.Number_of_Total_Transactions_id_2,
+                DATE_FORMAT(raw.submission_deadline, '%d/%m/%Y') AS submission_deadline,
+                raw.Tax_Year_id_4,
+                raw.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+                raw.Whose_Tax_Return_is_it_id_4,
+                raw.Type_of_Payslip_id_3,
+                DATE_FORMAT(raw.Year_Ending_id_1, '%d/%m/%Y') AS Year_Ending_id_1,
+                raw.Bookkeeping_Frequency_id_2,
+                raw.CIS_Frequency_id_3,
+                raw.Filing_Frequency_id_8,
+                raw.Management_Accounts_Frequency_id_6,
+                raw.Payroll_Frequency_id_3,
+                raw.budgeted_hours,
+                raw.feedback_incorporation_time,
+                raw.review_time,
+                raw.total_preparation_time,
+                raw.total_time,
+                DATE_FORMAT(raw.due_on, '%d/%m/%Y') AS due_on,
+                DATE_FORMAT(raw.customer_deadline_date, '%d/%m/%Y') AS customer_deadline_date,
+                DATE_FORMAT(raw.expected_delivery_date, '%d/%m/%Y') AS expected_delivery_date,
+                DATE_FORMAT(raw.internal_deadline_date, '%d/%m/%Y') AS internal_deadline_date,
+                DATE_FORMAT(raw.sla_deadline_date, '%d/%m/%Y') AS sla_deadline_date,
+                DATE_FORMAT(raw.Management_Accounts_FromDate_id_6, '%d/%m/%Y') AS Management_Accounts_FromDate_id_6,
+                DATE_FORMAT(raw.Management_Accounts_ToDate_id_6, '%d/%m/%Y') AS Management_Accounts_ToDate_id_6,
+
+                CONCAT(jobcreatestaff.first_name, ' ', jobcreatestaff.last_name) AS staff_full_name,
+                jobcreatestaff.email AS staff_email,
+                staffrole.role AS role,
+                jobcreatestaff.status AS staff_status,
+                CONCAT(managerstaff.first_name, ' ', managerstaff.last_name) AS line_manager,
+
+                CONCAT_WS('::', raw.job_id) AS group_value,
+                raw.work_date,
+
+                CONCAT(
+                    SUBSTRING(c.trading_name, 1, 3), '_',
+                    SUBSTRING(cl.trading_name, 1, 3), '_',
+                    SUBSTRING(jt.type, 1, 4), '_',
+                    SUBSTRING(raw.job_code_id, 1, 15)
+                ) AS job_name,
+                CONCAT(raw.job_id) AS group_label,
+                c.trading_name AS customer_name,
+                CONCAT(
+                    'cli_',
+                    SUBSTRING(c.trading_name, 1, 3), '_',
+                    SUBSTRING(cl.trading_name, 1, 3), '_',
+                    SUBSTRING(cl.client_code, 1, 15)
+                ) AS client_name,
+                CONCAT(am.first_name, ' ', am.last_name) AS account_manager_name,
+                CONCAT(at.first_name, ' ', at.last_name) AS allocated_to_name,
+                CONCAT(rv.first_name, ' ', rv.last_name) AS reviewer_name,
+                jao.allocated_to_other_names AS allocated_to_other_name,
+                CONCAT(ccd.first_name, ' ', ccd.last_name) AS customer_account_manager_officer,
+                sv.name AS service_name,
+                jt.type AS job_type_name,
+                st.name AS status_type_name,
+                sf.employee_number AS employee_number
+            FROM (
+                SELECT 
+                    j.id AS job_id,
+                    j.job_id AS job_code_id,
+
+                    j.date_received_on AS date_received_on,
+                    j.allocated_on AS allocated_on,
+                    j.job_priority AS job_priority,
+                    j.engagement_model AS engagement_model,
+                    j.customer_contact_details_id,
+                    j.status_updation_date,
+                    j.Transactions_Posting_id_2,
+                    j.Number_of_Bank_Transactions_id_2,
+                    j.Number_of_Journal_Entries_id_2,
+                    j.Number_of_Other_Transactions_id_2,
+                    j.Number_of_Petty_Cash_Transactions_id_2,
+                    j.Number_of_Purchase_Invoices_id_2,
+                    j.Number_of_Sales_Invoices_id_2,
+                    j.Number_of_Total_Transactions_id_2,
+                    j.submission_deadline,
+                    j.Tax_Year_id_4,
+                    j.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4,
+                    j.Whose_Tax_Return_is_it_id_4,
+                    j.Type_of_Payslip_id_3,
+                    j.Year_Ending_id_1,
+                    j.Bookkeeping_Frequency_id_2,
+                    j.CIS_Frequency_id_3,
+                    j.Filing_Frequency_id_8,
+                    j.Management_Accounts_Frequency_id_6,
+                    j.Payroll_Frequency_id_3,
+                    j.budgeted_hours,
+                    j.feedback_incorporation_time,
+                    j.review_time,
+                    j.total_preparation_time,
+                    j.total_time,
+                    j.due_on,
+                    j.customer_deadline_date,
+                    j.expected_delivery_date,
+                    j.internal_deadline_date,
+                    j.sla_deadline_date,
+                    j.Management_Accounts_FromDate_id_6,
+                    j.Management_Accounts_ToDate_id_6,
+
+                    j.customer_id,
+                    j.client_id,
+                    j.job_type_id,
+                    j.account_manager_id,
+                    j.allocated_to AS allocated_to_id,
+                    j.reviewer AS reviewer_id,
+                    j.service_id,
+                    j.status_type AS status_type_id,
+                    j.staff_created_id,
+                    j.created_at AS work_date
+                FROM jobs AS j
+            ) AS raw
+            LEFT JOIN customer_contact_details AS ccd ON raw.customer_contact_details_id = ccd.id
+            LEFT JOIN customers AS c ON raw.customer_id = c.id
+            LEFT JOIN clients AS cl ON raw.client_id = cl.id
+            LEFT JOIN job_types AS jt ON raw.job_type_id = jt.id
+            LEFT JOIN staffs AS am ON raw.account_manager_id = am.id
+            LEFT JOIN staffs AS at ON raw.allocated_to_id = at.id
+            LEFT JOIN staffs AS rv ON raw.reviewer_id = rv.id
+            LEFT JOIN services AS sv ON raw.service_id = sv.id
+            LEFT JOIN master_status AS st ON raw.status_type_id = st.id
+            LEFT JOIN staffs AS sf ON raw.staff_created_id = sf.id
+            LEFT JOIN staffs AS jobcreatestaff ON raw.staff_created_id = jobcreatestaff.id
+            LEFT JOIN roles AS staffrole ON jobcreatestaff.role_id = staffrole.id
+            LEFT JOIN line_managers AS lm ON lm.staff_by = jobcreatestaff.id
+            LEFT JOIN staffs AS managerstaff ON lm.staff_to = managerstaff.id
+            LEFT JOIN (
+                SELECT
+                    jas.job_id,
+                    GROUP_CONCAT(DISTINCT CONCAT(s.first_name, ' ', s.last_name) SEPARATOR ', ') AS allocated_to_other_names
+                FROM job_allowed_staffs AS jas
+                LEFT JOIN staffs AS s ON jas.staff_id = s.id
+                GROUP BY jas.job_id
+            ) AS jao ON jao.job_id = raw.job_id
+            ${tmpTableJoin}
+            ${where}
+             ${GROUPBY}
+            ORDER BY raw.job_id
+            LIMIT ${limit} OFFSET ${offset}
+        `;   
+
+     console.log("fromDate ---> ", fromDate, "toDate ", toDate);
+     console.log("unpivotSQL", unpivotSQL);
+
+      //console.log("GROUPBY ---->> ", GROUPBY);
 
     
     const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate]);
