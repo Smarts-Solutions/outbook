@@ -1006,51 +1006,63 @@ function TimesheetReport() {
           updated.internal_job_id = null;
           updated.internal_task_id = null;
 
-          // Refresh dependent dropdowns using upstream-only filters.
-          // customer is being set → job & client should filter based on upstream of their own order
-          // We refresh them so they reflect the new customer selection if they come after it.
-          setSelectionOrder(prev => {
-            const newOrder = [null, undefined, ""].includes(value)
-              ? prev.filter(k => k !== "customer_id")
-              : prev.includes("customer_id") ? prev : [...prev, "customer_id"];
+          const isClearing = [null, undefined, ""].includes(value);
 
-            // Refresh job & client only if customer_id comes BEFORE them in the new order
-            const customerIdx = newOrder.indexOf("customer_id");
-            const jobIdx = newOrder.indexOf("job_id");
-            const clientIdx = newOrder.indexOf("client_id");
-
-            if (jobIdx === -1 || customerIdx < jobIdx) {
-              // customer is upstream of job → re-fetch jobs filtered by new customer + existing upstream client
-              const upClientForJob = clientIdx !== -1 && clientIdx < customerIdx ? filters.client_id : null;
-              cacheRef.current = {};
-              setJobOptions([]);
-              setPage(1);
-              setHasMore(true);
-              GetAllJobs({
-                searchValue: "",
-                pageNo: 1,
-                customer_id: [null, undefined, ""].includes(value) ? null : value,
-                client_id: upClientForJob,
-              });
+          if (isClearing) {
+            // Auto-clear downstream filters (those selected after customer in selectionOrder)
+            const custIdx = selectionOrder.indexOf("customer_id");
+            if (custIdx !== -1) {
+              const downstream = selectionOrder.slice(custIdx + 1);
+              if (downstream.includes("client_id")) {
+                updated.client_id = null;
+                setClientAllData([]);
+                clientCache.current = {};
+                setClientPage(1);
+                setClientHasMore(true);
+                setClientSearch("");
+              }
+              if (downstream.includes("job_id")) {
+                updated.job_id = null;
+                setJobOptions([]);
+                cacheRef.current = {};
+                setPage(1);
+                setHasMore(true);
+                setSearch("");
+              }
+              // Remove customer and all downstream from selectionOrder
+              setSelectionOrder(selectionOrder.slice(0, custIdx));
+            } else {
+              setSelectionOrder(prev => prev.filter(k => k !== "customer_id"));
             }
+          } else {
+            // Selecting: refresh downstream dropdowns filtered by new customer
+            setSelectionOrder(prev => {
+              const newOrder = prev.includes("customer_id") ? prev : [...prev, "customer_id"];
+              const customerIdx = newOrder.indexOf("customer_id");
+              const jobIdx = newOrder.indexOf("job_id");
+              const clientIdx = newOrder.indexOf("client_id");
 
-            if (clientIdx === -1 || customerIdx < clientIdx) {
-              // customer is upstream of client → re-fetch clients filtered by new customer + existing upstream job
-              const upJobForClient = jobIdx !== -1 && jobIdx < customerIdx ? filters.job_id : null;
-              clientCache.current = {};
-              setClientAllData([]);
-              setClientPage(1);
-              setClientHasMore(true);
-              GetAllClient({
-                searchValue: "",
-                pageNo: 1,
-                customer_id: [null, undefined, ""].includes(value) ? null : value,
-                job_id: upJobForClient,
-              });
-            }
+              if (jobIdx === -1 || customerIdx < jobIdx) {
+                const upClientForJob = clientIdx !== -1 && clientIdx < customerIdx ? filters.client_id : null;
+                cacheRef.current = {};
+                setJobOptions([]);
+                setPage(1);
+                setHasMore(true);
+                GetAllJobs({ searchValue: "", pageNo: 1, customer_id: value, client_id: upClientForJob });
+              }
 
-            return newOrder;
-          });
+              if (clientIdx === -1 || customerIdx < clientIdx) {
+                const upJobForClient = jobIdx !== -1 && jobIdx < customerIdx ? filters.job_id : null;
+                clientCache.current = {};
+                setClientAllData([]);
+                setClientPage(1);
+                setClientHasMore(true);
+                GetAllClient({ searchValue: "", pageNo: 1, customer_id: value, job_id: upJobForClient });
+              }
+
+              return newOrder;
+            });
+          }
 
           setInternalJobAllData([]);
           setTaskAllData([]);
@@ -1060,45 +1072,63 @@ function TimesheetReport() {
           updated.internal_job_id = null;
           updated.internal_task_id = null;
 
-          setSelectionOrder(prev => {
-            const newOrder = [null, undefined, ""].includes(value)
-              ? prev.filter(k => k !== "client_id")
-              : prev.includes("client_id") ? prev : [...prev, "client_id"];
+          const isClearing = [null, undefined, ""].includes(value);
 
-            const clientIdx = newOrder.indexOf("client_id");
-            const jobIdx = newOrder.indexOf("job_id");
-            const customerIdx = newOrder.indexOf("customer_id");
-
-            if (jobIdx === -1 || clientIdx < jobIdx) {
-              const upCustomerForJob = customerIdx !== -1 && customerIdx < clientIdx ? filters.customer_id : null;
-              cacheRef.current = {};
-              setJobOptions([]);
-              setPage(1);
-              setHasMore(true);
-              GetAllJobs({
-                searchValue: "",
-                pageNo: 1,
-                client_id: [null, undefined, ""].includes(value) ? null : value,
-                customer_id: upCustomerForJob,
-              });
+          if (isClearing) {
+            // Auto-clear downstream filters (those selected after client in selectionOrder)
+            const clientIdx = selectionOrder.indexOf("client_id");
+            if (clientIdx !== -1) {
+              const downstream = selectionOrder.slice(clientIdx + 1);
+              if (downstream.includes("customer_id")) {
+                updated.customer_id = null;
+                setCustomerAllData([]);
+                customerCache.current = {};
+                setCustomerPage(1);
+                setCustomerHasMore(true);
+                setCustomerSearch("");
+              }
+              if (downstream.includes("job_id")) {
+                updated.job_id = null;
+                setJobOptions([]);
+                cacheRef.current = {};
+                setPage(1);
+                setHasMore(true);
+                setSearch("");
+              }
+              // Remove client and all downstream from selectionOrder
+              setSelectionOrder(selectionOrder.slice(0, clientIdx));
+            } else {
+              setSelectionOrder(prev => prev.filter(k => k !== "client_id"));
             }
+          } else {
+            // Selecting: refresh downstream dropdowns filtered by new client
+            setSelectionOrder(prev => {
+              const newOrder = prev.includes("client_id") ? prev : [...prev, "client_id"];
+              const clientIdx = newOrder.indexOf("client_id");
+              const jobIdx = newOrder.indexOf("job_id");
+              const customerIdx = newOrder.indexOf("customer_id");
 
-            if (customerIdx === -1 || clientIdx < customerIdx) {
-              const upJobForCustomer = jobIdx !== -1 && jobIdx < clientIdx ? filters.job_id : null;
-              customerCache.current = {};
-              setCustomerAllData([]);
-              setCustomerPage(1);
-              setCustomerHasMore(true);
-              GetAllCustomer({
-                searchValue: "",
-                pageNo: 1,
-                client_id: [null, undefined, ""].includes(value) ? null : value,
-                job_id: upJobForCustomer,
-              });
-            }
+              if (jobIdx === -1 || clientIdx < jobIdx) {
+                const upCustomerForJob = customerIdx !== -1 && customerIdx < clientIdx ? filters.customer_id : null;
+                cacheRef.current = {};
+                setJobOptions([]);
+                setPage(1);
+                setHasMore(true);
+                GetAllJobs({ searchValue: "", pageNo: 1, client_id: value, customer_id: upCustomerForJob });
+              }
 
-            return newOrder;
-          });
+              if (customerIdx === -1 || clientIdx < customerIdx) {
+                const upJobForCustomer = jobIdx !== -1 && jobIdx < clientIdx ? filters.job_id : null;
+                customerCache.current = {};
+                setCustomerAllData([]);
+                setCustomerPage(1);
+                setCustomerHasMore(true);
+                GetAllCustomer({ searchValue: "", pageNo: 1, client_id: value, job_id: upJobForCustomer });
+              }
+
+              return newOrder;
+            });
+          }
 
           setInternalJobAllData([]);
           setTaskAllData([]);
@@ -1107,45 +1137,63 @@ function TimesheetReport() {
           updated.task_id = null;
           updated.internal_task_id = null;
 
-          setSelectionOrder(prev => {
-            const newOrder = [null, undefined, ""].includes(value)
-              ? prev.filter(k => k !== "job_id")
-              : prev.includes("job_id") ? prev : [...prev, "job_id"];
+          const isClearing = [null, undefined, ""].includes(value);
 
-            const jobIdx = newOrder.indexOf("job_id");
-            const customerIdx = newOrder.indexOf("customer_id");
-            const clientIdx = newOrder.indexOf("client_id");
-
-            if (customerIdx === -1 || jobIdx < customerIdx) {
-              const upClientForCustomer = clientIdx !== -1 && clientIdx < jobIdx ? filters.client_id : null;
-              customerCache.current = {};
-              setCustomerAllData([]);
-              setCustomerPage(1);
-              setCustomerHasMore(true);
-              GetAllCustomer({
-                searchValue: "",
-                pageNo: 1,
-                job_id: [null, undefined, ""].includes(value) ? null : value,
-                client_id: upClientForCustomer,
-              });
+          if (isClearing) {
+            // Auto-clear downstream filters (those selected after job in selectionOrder)
+            const jobIdx = selectionOrder.indexOf("job_id");
+            if (jobIdx !== -1) {
+              const downstream = selectionOrder.slice(jobIdx + 1);
+              if (downstream.includes("customer_id")) {
+                updated.customer_id = null;
+                setCustomerAllData([]);
+                customerCache.current = {};
+                setCustomerPage(1);
+                setCustomerHasMore(true);
+                setCustomerSearch("");
+              }
+              if (downstream.includes("client_id")) {
+                updated.client_id = null;
+                setClientAllData([]);
+                clientCache.current = {};
+                setClientPage(1);
+                setClientHasMore(true);
+                setClientSearch("");
+              }
+              // Remove job and all downstream from selectionOrder
+              setSelectionOrder(selectionOrder.slice(0, jobIdx));
+            } else {
+              setSelectionOrder(prev => prev.filter(k => k !== "job_id"));
             }
+          } else {
+            // Selecting: refresh downstream dropdowns filtered by new job
+            setSelectionOrder(prev => {
+              const newOrder = prev.includes("job_id") ? prev : [...prev, "job_id"];
+              const jobIdx = newOrder.indexOf("job_id");
+              const customerIdx = newOrder.indexOf("customer_id");
+              const clientIdx = newOrder.indexOf("client_id");
 
-            if (clientIdx === -1 || jobIdx < clientIdx) {
-              const upCustomerForClient = customerIdx !== -1 && customerIdx < jobIdx ? filters.customer_id : null;
-              clientCache.current = {};
-              setClientAllData([]);
-              setClientPage(1);
-              setClientHasMore(true);
-              GetAllClient({
-                searchValue: "",
-                pageNo: 1,
-                job_id: [null, undefined, ""].includes(value) ? null : value,
-                customer_id: upCustomerForClient,
-              });
-            }
+              if (customerIdx === -1 || jobIdx < customerIdx) {
+                const upClientForCustomer = clientIdx !== -1 && clientIdx < jobIdx ? filters.client_id : null;
+                customerCache.current = {};
+                setCustomerAllData([]);
+                setCustomerPage(1);
+                setCustomerHasMore(true);
+                GetAllCustomer({ searchValue: "", pageNo: 1, job_id: value, client_id: upClientForCustomer });
+              }
 
-            return newOrder;
-          });
+              if (clientIdx === -1 || jobIdx < clientIdx) {
+                const upCustomerForClient = customerIdx !== -1 && customerIdx < jobIdx ? filters.customer_id : null;
+                clientCache.current = {};
+                setClientAllData([]);
+                setClientPage(1);
+                setClientHasMore(true);
+                GetAllClient({ searchValue: "", pageNo: 1, job_id: value, customer_id: upCustomerForClient });
+              }
+
+              return newOrder;
+            });
+          }
 
           setTaskAllData([]);
           setInternalTaskAllData([]);
