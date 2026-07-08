@@ -138,16 +138,16 @@ function TimesheetReport() {
   const staffCache = useRef({});
   const staffDebounceRef = useRef(null);
 
-  const GetAllStaff = async ({ searchValue = "", pageNo = 1, append = false }) => {
+  const GetAllStaff = async ({ searchValue = "", pageNo = 1, append = false, customer_id = null, client_id = null, job_id = null }) => {
     if (role?.toUpperCase() === "SUPERADMIN" || role?.toUpperCase() === "ADMIN") {
       // guard removed to match JobCustomReport pattern - each fetch has its own dedicated loading flag
-      const cacheKey = `${searchValue}_${pageNo}`;
+      const cacheKey = `${searchValue}_${pageNo}_${customer_id}_${client_id}_${job_id}`;
       if (staffCache.current[cacheKey]) {
 
         const cached = staffCache.current[cacheKey];
 
         setStaffAllData(prev => {
-          const combined = [...prev, ...cached];
+          const combined = append ? [...prev, ...cached] : cached;
           const unique = Array.from(
             new Map(combined.map(item => [item.value, item])).values()
           );
@@ -157,17 +157,32 @@ function TimesheetReport() {
         return;
       }
       setStaffLoading(true);
-      const req = {
-        action: "get",
-        page: pageNo,
-        limit: 20,
-        search: searchValue
-      };
+      let req = {};
+      if (customer_id || client_id || job_id) {
+        req = {
+          action: "getstaffbyfilter",
+          page: pageNo,
+          limit: (customer_id || client_id || job_id) ? 1000 : 20,
+          search: searchValue,
+          customer_id: customer_id || "",
+          client_id: client_id || "",
+          job_id: job_id || ""
+        };
+      } else {
+        req = {
+          action: "get",
+          page: pageNo,
+          limit: 20,
+          search: searchValue
+        };
+      }
       const data = { req: req, authToken: token };
       try {
         const response = await dispatch(Staff(data)).unwrap();
         if (response.status) {
-          const formatted = response.data.data.map((item) => ({
+          const staffList = response.data.data;
+
+          const formatted = staffList.map((item) => ({
             value: item.id,
             label: `${item.first_name} ${item.last_name} (${item.email})`
           }));
@@ -181,7 +196,7 @@ function TimesheetReport() {
             return unique;
           });
 
-          setStaffHasMore(response.data.data.length === 20);
+          setStaffHasMore(req.action === "getstaffbyfilter" ? false : staffList.length === 20);
           setStaffPage(pageNo);
         } else {
           if (!append) setStaffAllData([]);
@@ -222,9 +237,13 @@ function TimesheetReport() {
     clearTimeout(staffDebounceRef.current);
     staffDebounceRef.current = setTimeout(() => {
       setStaffSearch(value);
+      const up = getUpstreamFilters("staff_id", filters);
       GetAllStaff({
         searchValue: value,
-        pageNo: 1
+        pageNo: 1,
+        customer_id: up.customer_id,
+        client_id: up.client_id,
+        job_id: up.job_id,
       });
 
     }, 500);
@@ -1536,7 +1555,10 @@ function TimesheetReport() {
           // staffData({ searchValue: "", pageNo: 1 });
           GetAllStaff({
             searchValue: "",
-            pageNo: 1
+            pageNo: 1,
+            customer_id: parsedFilters?.customer_id,
+            client_id: parsedFilters?.client_id,
+            job_id: parsedFilters?.job_id
           });
         }
         if (parsedFilters?.groupBy?.includes("customer_id")) {
@@ -1856,7 +1878,10 @@ function TimesheetReport() {
             <Select
               closeMenuOnSelect={false}
               onMenuOpen={() => {
-                if (staffAllData.length === 0) GetAllStaff({ searchValue: "", pageNo: 1 });
+                if (staffAllData.length === 0) {
+                  const up = getUpstreamFilters("staff_id", filters);
+                  GetAllStaff({ searchValue: "", pageNo: 1, customer_id: up.customer_id, client_id: up.client_id, job_id: up.job_id });
+                }
               }}
               // options={staffAllData}
               options={[{ value: "", label: "Select..." }, ...staffAllData]}
@@ -1883,10 +1908,14 @@ function TimesheetReport() {
 
               onMenuScrollToBottom={() => {
                 if (staffHasMore) {
+                  const up = getUpstreamFilters("staff_id", filters);
                   GetAllStaff({
                     searchValue: staffSearch,
                     pageNo: staffPage + 1,
-                    append: true
+                    append: true,
+                    customer_id: up.customer_id,
+                    client_id: up.client_id,
+                    job_id: up.job_id
                   });
                 }
               }}
