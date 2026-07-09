@@ -1229,7 +1229,7 @@ trading_name ASC;`;
 
 }
 const getCustomer_dropdown_filter = async (customer) => {
-    const { StaffUserId, pagination, filters, job_id, client_id } = customer;
+    const { StaffUserId, pagination, filters, job_id, client_id, task_id } = customer;
      console.log("job_id", job_id);
     const page = Number(pagination.page) || 1;
     const limit = Number(pagination.limit) || 20;
@@ -1366,6 +1366,18 @@ const getCustomer_dropdown_filter = async (customer) => {
             params.push(...client_id);
         }
 
+        if (Array.isArray(task_id) && task_id.length > 0) {
+            query += `
+                AND EXISTS (
+                    SELECT 1
+                    FROM timesheet ts
+                    WHERE ts.customer_id = c.id
+                    AND ts.task_id IN (${task_id.map(() => '?').join(',')})
+                )
+            `;
+            params.push(...task_id);
+        }
+
         query += `
             ORDER BY c.trading_name ASC
             LIMIT ? OFFSET ?
@@ -1437,6 +1449,10 @@ const getCustomer_dropdown_filter = async (customer) => {
             query += ` AND EXISTS (SELECT 1 FROM clients WHERE clients.customer_id = customers.id AND clients.id IN (${client_id}))`;
             }
 
+            if (Array.isArray(task_id) && task_id.length > 0) {
+            query += ` AND EXISTS (SELECT 1 FROM timesheet ts WHERE ts.customer_id = customers.id AND ts.task_id IN (${task_id}))`;
+            }
+
             query += `
             GROUP BY customers.id
             ORDER BY customers.trading_name ASC
@@ -1456,7 +1472,7 @@ const getCustomer_dropdown_filter = async (customer) => {
 
 const get_customers_filter = async (customer) => {
     const { StaffUserId, filters, pagination  } = customer;
-    let { job_id, client_id } = customer;
+    let { job_id, client_id, task_id } = customer;
 
   //   console.log("job_id", job_id);
    //  console.log("client_id", client_id);
@@ -1475,9 +1491,15 @@ const get_customers_filter = async (customer) => {
 
 
 
+    if (Array.isArray(task_id)) {
+        task_id = task_id;
+    } else if (!["", null, undefined].includes(task_id)) {
+        task_id = [task_id];
+    }
+
     const rows = await QueryRoleHelperFunction(StaffUserId)
 
-    return await getCustomer_dropdown_filter({ StaffUserId, pagination, filters , job_id, client_id });
+    return await getCustomer_dropdown_filter({ StaffUserId, pagination, filters , job_id, client_id, task_id });
 }
 
 async function getAllCustomerByClientIdFilter(client_id) {

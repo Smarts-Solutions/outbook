@@ -92,6 +92,7 @@ function TimesheetReport() {
       customer_id: upstream.includes("customer_id") ? currentFilters?.customer_id : null,
       client_id: upstream.includes("client_id") ? currentFilters?.client_id : null,
       job_id: upstream.includes("job_id") ? currentFilters?.job_id : null,
+      task_id: upstream.includes("task_id") ? currentFilters?.task_id : null,
     };
   };
 
@@ -139,10 +140,10 @@ function TimesheetReport() {
   const staffCache = useRef({});
   const staffDebounceRef = useRef(null);
 
-  const GetAllStaff = async ({ searchValue = "", pageNo = 1, append = false, customer_id = null, client_id = null, job_id = null }) => {
+  const GetAllStaff = async ({ searchValue = "", pageNo = 1, append = false, customer_id = null, client_id = null, job_id = null, task_id = null }) => {
     if (role?.toUpperCase() === "SUPERADMIN" || role?.toUpperCase() === "ADMIN") {
       // guard removed to match JobCustomReport pattern - each fetch has its own dedicated loading flag
-      const cacheKey = `${searchValue}_${pageNo}_${customer_id}_${client_id}_${job_id}`;
+      const cacheKey = `${searchValue}_${pageNo}_${customer_id}_${client_id}_${job_id}_${task_id}`;
       if (staffCache.current[cacheKey]) {
 
         const cached = staffCache.current[cacheKey];
@@ -159,15 +160,16 @@ function TimesheetReport() {
       }
       setStaffLoading(true);
       let req = {};
-      if (customer_id || client_id || job_id) {
+      if (customer_id || client_id || job_id || task_id) {
         req = {
           action: "getstaffbyfilter",
           page: pageNo,
-          limit: (customer_id || client_id || job_id) ? 1000 : 20,
+          limit: (customer_id || client_id || job_id || task_id) ? 1000 : 20,
           search: searchValue,
           customer_id: customer_id || "",
           client_id: client_id || "",
-          job_id: job_id || ""
+          job_id: job_id || "",
+          task_id: task_id || ""
         };
       } else {
         req = {
@@ -274,6 +276,7 @@ function TimesheetReport() {
         customer_id: up.customer_id,
         client_id: up.client_id,
         job_id: up.job_id,
+        task_id: up.task_id,
       });
 
     }, 500);
@@ -425,8 +428,8 @@ function TimesheetReport() {
   const customerCache = useRef({});
   const debounceRef = useRef(null);
 
-  const GetAllCustomer = async ({ searchValue = "", pageNo = 1, append = false, job_id = null, client_id = null, staff_id = null }) => {
-    const cacheKey = `${searchValue}_${pageNo}_${job_id}_${client_id}_${staff_id}`;
+  const GetAllCustomer = async ({ searchValue = "", pageNo = 1, append = false, job_id = null, client_id = null, staff_id = null, task_id = null }) => {
+    const cacheKey = `${searchValue}_${pageNo}_${job_id}_${client_id}_${staff_id}_${task_id}`;
     if (customerCache.current[cacheKey]) {
       const cached = customerCache.current[cacheKey];
       setCustomerAllData(prev => {
@@ -445,10 +448,11 @@ function TimesheetReport() {
       filters: { ...filters, staff_id: staff_id !== null ? staff_id : filters.staff_id },
       job_id: job_id ? [job_id] : [],
       client_id: client_id ? [client_id] : [],
+      task_id: task_id ? [task_id] : [],
       pagination: {
         search: searchValue,
         page: pageNo,
-        limit: job_id || client_id || staff_id ? 1000 : 20
+        limit: job_id || client_id || staff_id || task_id ? 1000 : 20
       }
     };
 
@@ -493,6 +497,7 @@ function TimesheetReport() {
         job_id: up.job_id,
         client_id: up.client_id,
         staff_id: up.staff_id,
+        task_id: up.task_id,
       });
     }, 500);
 
@@ -531,8 +536,8 @@ function TimesheetReport() {
   const clientCache = useRef({});
   const clientDebounceRef = useRef(null);
 
-  const GetAllClient = async ({ searchValue = "", pageNo = 1, append = false, job_id = null, customer_id = null, staff_id = null }) => {
-    const cacheKey = `${searchValue}_${pageNo}_${job_id}_${customer_id}_${staff_id}`;
+  const GetAllClient = async ({ searchValue = "", pageNo = 1, append = false, job_id = null, customer_id = null, staff_id = null, task_id = null }) => {
+    const cacheKey = `${searchValue}_${pageNo}_${job_id}_${customer_id}_${staff_id}_${task_id}`;
     if (clientCache.current[cacheKey]) {
       const cached = clientCache.current[cacheKey];
       setClientAllData(prev => {
@@ -550,10 +555,11 @@ function TimesheetReport() {
       filters: { ...filters, staff_id: staff_id !== null ? staff_id : filters.staff_id },
       job_id: job_id ? [job_id] : [],
       customer_id: customer_id ? [customer_id] : [],
+      task_id: task_id ? [task_id] : [],
       pagination: {
         search: searchValue,
         page: pageNo,
-        limit: job_id || customer_id || staff_id ? 1000 : 20
+        limit: job_id || customer_id || staff_id || task_id ? 1000 : 20
       }
     };
     const data = { req, authToken: token };
@@ -597,6 +603,7 @@ function TimesheetReport() {
         job_id: up.job_id,
         customer_id: up.customer_id,
         staff_id: up.staff_id,
+        task_id: up.task_id,
       });
     }, 500);
   };
@@ -700,8 +707,8 @@ function TimesheetReport() {
   const debounceTimeout = useRef(null);
   const [jobLoading, setJobLoading] = useState(false);
 
-  const GetAllJobs = async ({ searchValue = "", pageNo = 1, append = false, customer_id = null, client_id = null, staff_id = null }) => {
-    const cacheKey = `${searchValue}_${pageNo}_${customer_id}_${client_id}_${staff_id}`;
+  const GetAllJobs = async ({ searchValue = "", pageNo = 1, append = false, customer_id = null, client_id = null, staff_id = null, task_id = null }) => {
+    const cacheKey = `${searchValue}_${pageNo}_${customer_id}_${client_id}_${staff_id}_${task_id}`;
     if (cacheRef.current[cacheKey]) {
       const cached = cacheRef.current[cacheKey];
       setJobOptions(prev => {
@@ -719,10 +726,11 @@ function TimesheetReport() {
       filters: { ...filters, staff_id: staff_id !== null ? staff_id : filters.staff_id },
       customer_id: customer_id ? [customer_id] : [],
       client_id: client_id ? [client_id] : [],
+      task_id: task_id ? [task_id] : [],
       pagination: {
         search: searchValue,
         page: pageNo,
-        limit: customer_id || client_id || staff_id ? 1000 : 20
+        limit: customer_id || client_id || staff_id || task_id ? 1000 : 20
       }
     };
     const data = { req, authToken: token };
@@ -766,6 +774,7 @@ function TimesheetReport() {
         customer_id: up.customer_id,
         client_id: up.client_id,
         staff_id: up.staff_id,
+        task_id: up.task_id,
       });
     }, 500);
 
@@ -1004,8 +1013,7 @@ function TimesheetReport() {
       setFilters((prev) => {
         let updated = { ...prev, [key]: [null, undefined, ""].includes(value) ? null : value };
         if (key === "staff_id" || key === "employee_number") {
-          updated.task_id = null;
-          updated.internal_job_id = null;
+updated.internal_job_id = null;
           updated.internal_task_id = null;
 
           let resolvedStaffId = value;
@@ -1108,16 +1116,10 @@ function TimesheetReport() {
           }
 
           setInternalJobAllData([]);
-          setTaskAllData([]);
-          taskCache.current = {};
-          setTaskPage(1);
-          setTaskHasMore(true);
-          setTaskSearch("");
           setInternalTaskAllData([]);
 
         } else if (key === "customer_id") {
-          updated.task_id = null;
-          updated.internal_job_id = null;
+updated.internal_job_id = null;
           updated.internal_task_id = null;
 
           const isClearing = [null, undefined, ""].includes(value);
@@ -1192,15 +1194,9 @@ function TimesheetReport() {
           }
 
           setInternalJobAllData([]);
-          setTaskAllData([]);
-          taskCache.current = {};
-          setTaskPage(1);
-          setTaskHasMore(true);
-          setTaskSearch("");
           setInternalTaskAllData([]);
         } else if (key === "client_id") {
-          updated.task_id = null;
-          updated.internal_job_id = null;
+updated.internal_job_id = null;
           updated.internal_task_id = null;
 
           const isClearing = [null, undefined, ""].includes(value);
@@ -1275,15 +1271,9 @@ function TimesheetReport() {
           }
 
           setInternalJobAllData([]);
-          setTaskAllData([]);
-          taskCache.current = {};
-          setTaskPage(1);
-          setTaskHasMore(true);
-          setTaskSearch("");
           setInternalTaskAllData([]);
         } else if (key === "job_id") {
-          updated.task_id = null;
-          updated.internal_task_id = null;
+updated.internal_task_id = null;
 
           const isClearing = [null, undefined, ""].includes(value);
 
@@ -1362,6 +1352,107 @@ function TimesheetReport() {
           setTaskHasMore(true);
           setTaskSearch("");
           setInternalTaskAllData([]);
+        } else if (key === "task_id") {
+          updated.internal_task_id = null;
+          
+          const isClearing = [null, undefined, ""].includes(value);
+
+          if (isClearing) {
+            const taskIdx = selectionOrder.indexOf("task_id");
+            if (taskIdx !== -1) {
+              const downstream = selectionOrder.slice(taskIdx + 1);
+              if (downstream.includes("customer_id")) {
+                updated.customer_id = null;
+                setCustomerAllData([]);
+                customerCache.current = {};
+                setCustomerPage(1);
+                setCustomerHasMore(true);
+                setCustomerSearch("");
+              }
+              if (downstream.includes("client_id")) {
+                updated.client_id = null;
+                setClientAllData([]);
+                clientCache.current = {};
+                setClientPage(1);
+                setClientHasMore(true);
+                setClientSearch("");
+              }
+              if (downstream.includes("job_id")) {
+                updated.job_id = null;
+                setJobOptions([]);
+                cacheRef.current = {};
+                setPage(1);
+                setHasMore(true);
+                setSearch("");
+              }
+              if (downstream.includes("staff_id")) {
+                updated.staff_id = null;
+                setStaffAllData([]);
+                staffCache.current = {};
+                setStaffPage(1);
+                setStaffHasMore(true);
+                setStaffSearch("");
+              }
+              setSelectionOrder(selectionOrder.slice(0, taskIdx));
+            } else {
+              setSelectionOrder(prev => prev.filter(k => k !== "task_id"));
+            }
+          } else {
+            setSelectionOrder(prev => {
+              const newOrder = prev.includes("task_id") ? prev : [...prev, "task_id"];
+              const taskIdx = newOrder.indexOf("task_id");
+              const customerIdx = newOrder.indexOf("customer_id");
+              const clientIdx = newOrder.indexOf("client_id");
+              const staffIdx = newOrder.indexOf("staff_id");
+              const jobIdx = newOrder.indexOf("job_id");
+
+              if (customerIdx === -1 || taskIdx < customerIdx) {
+                const upClientForCustomer = clientIdx !== -1 && clientIdx < taskIdx ? filters.client_id : null;
+                const upStaffForCustomer = staffIdx !== -1 && staffIdx < taskIdx ? filters.staff_id : null;
+                const upJobForCustomer = jobIdx !== -1 && jobIdx < taskIdx ? filters.job_id : null;
+                customerCache.current = {};
+                setCustomerAllData([]);
+                setCustomerPage(1);
+                setCustomerHasMore(true);
+                GetAllCustomer({ searchValue: "", pageNo: 1, task_id: value, job_id: upJobForCustomer, client_id: upClientForCustomer, staff_id: upStaffForCustomer });
+              }
+
+              if (clientIdx === -1 || taskIdx < clientIdx) {
+                const upCustomerForClient = customerIdx !== -1 && customerIdx < taskIdx ? filters.customer_id : null;
+                const upStaffForClient = staffIdx !== -1 && staffIdx < taskIdx ? filters.staff_id : null;
+                const upJobForClient = jobIdx !== -1 && jobIdx < taskIdx ? filters.job_id : null;
+                clientCache.current = {};
+                setClientAllData([]);
+                setClientPage(1);
+                setClientHasMore(true);
+                GetAllClient({ searchValue: "", pageNo: 1, task_id: value, job_id: upJobForClient, customer_id: upCustomerForClient, staff_id: upStaffForClient });
+              }
+
+              if (staffIdx === -1 || taskIdx < staffIdx) {
+                const upCustomerForStaff = customerIdx !== -1 && customerIdx < taskIdx ? filters.customer_id : null;
+                const upClientForStaff = clientIdx !== -1 && clientIdx < taskIdx ? filters.client_id : null;
+                const upJobForStaff = jobIdx !== -1 && jobIdx < taskIdx ? filters.job_id : null;
+                staffCache.current = {};
+                setStaffAllData([]);
+                setStaffPage(1);
+                setStaffHasMore(true);
+                GetAllStaff({ searchValue: "", pageNo: 1, task_id: value, job_id: upJobForStaff, customer_id: upCustomerForStaff, client_id: upClientForStaff });
+              }
+              
+              if (jobIdx === -1 || taskIdx < jobIdx) {
+                const upCustomerForJob = customerIdx !== -1 && customerIdx < taskIdx ? filters.customer_id : null;
+                const upClientForJob = clientIdx !== -1 && clientIdx < taskIdx ? filters.client_id : null;
+                const upStaffForJob = staffIdx !== -1 && staffIdx < taskIdx ? filters.staff_id : null;
+                cacheRef.current = {};
+                setJobOptions([]);
+                setPage(1);
+                setHasMore(true);
+                GetAllJobs({ searchValue: "", pageNo: 1, task_id: value, customer_id: upCustomerForJob, client_id: upClientForJob, staff_id: upStaffForJob });
+              }
+
+              return newOrder;
+            });
+          }
         } else if (key === "internal_job_id") {
           updated.task_id = null;
           updated.internal_task_id = null;

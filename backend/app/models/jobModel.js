@@ -2166,13 +2166,13 @@ const getAllJobsBYCustomerfilter = async (job) => {
 }
 
 const get_jobs_filter = async (job) => {
-  const { StaffUserId, filters, pagination , client_id , customer_id } = job;
+  const { StaffUserId, filters, pagination , client_id , customer_id, task_id } = job;
 
   // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
   // Get Role
   const rows = await QueryRoleHelperFunction(StaffUserId);
-  return await getAllJobsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination, filters, client_id, customer_id);
+  return await getAllJobsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination, filters, client_id, customer_id, task_id);
 }
 
 
@@ -2183,7 +2183,8 @@ async function getAllJobsSidebarFilter(
   pagination,
   filters,
   client_id,
-  customer_id
+  customer_id,
+  task_id
 ) {
 
   const page = Number(pagination.page) || 1;
@@ -2218,6 +2219,10 @@ async function getAllJobsSidebarFilter(
 
     if (Array.isArray(client_id) && client_id.length > 0) {
       extraFilter += ` AND jobs.client_id IN (${client_id}) `;
+    }
+
+    if (Array.isArray(task_id) && task_id.length > 0) {
+      extraFilter += ` AND EXISTS (SELECT 1 FROM timesheet ts WHERE ts.job_id = jobs.id AND ts.task_id IN (${task_id})) `;
     }
   
 

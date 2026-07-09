@@ -260,7 +260,7 @@ const getStaff = async (data) => {
 const getStaffByFilter = async (data) => {
 
 
-  let { page, limit, search, StaffUserId, customer_id, client_id, job_id } = data;
+  let { page, limit, search, StaffUserId, customer_id, client_id, job_id, task_id } = data;
   console.log(" Customer id", customer_id)
   // customer_id = 28
   let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
@@ -295,6 +295,7 @@ const getStaffByFilter = async (data) => {
     if (customer_id) timesheetWhere += ` AND timesheet.customer_id = ${connection.escape(customer_id)}`;
     if (client_id) timesheetWhere += ` AND timesheet.client_id = ${connection.escape(client_id)}`;
     if (job_id) timesheetWhere += ` AND timesheet.job_id = ${connection.escape(job_id)}`;
+    if (task_id) timesheetWhere += ` AND timesheet.task_id = ${connection.escape(task_id)}`;
 
     // 🔹 DATA
     const [rows] = await connection.query(

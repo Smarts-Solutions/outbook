@@ -1061,13 +1061,13 @@ async function getAllClientsSidebar(
 }
 
 const get_clients_filter = async (client) => {
-  let { StaffUserId, filters, pagination ,job_id , customer_id} = client;
+  let { StaffUserId, filters, pagination ,job_id , customer_id, task_id} = client;
 
   // Get Role
   const rows = await QueryRoleHelperFunction(StaffUserId);
   // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
-  return await getAllClientsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination, filters, job_id, customer_id);
+  return await getAllClientsSidebarFilter(StaffUserId, LineManageStaffId, rows, pagination, filters, job_id, customer_id, task_id);
 };
 
 async function getAllClientsSidebarFilter(
@@ -1077,7 +1077,8 @@ async function getAllClientsSidebarFilter(
   pagination,
   filters,
   job_id,
-  customer_id
+  customer_id,
+  task_id
 ) {
 
   const page = Number(pagination.page) || 1;
@@ -1104,6 +1105,10 @@ async function getAllClientsSidebarFilter(
 
   if (Array.isArray(job_id) && job_id.length > 0) {
     extraFilter += ` AND jobs.id IN (${job_id}) `;
+  }
+
+  if (Array.isArray(task_id) && task_id.length > 0) {
+    extraFilter += ` AND EXISTS (SELECT 1 FROM timesheet ts WHERE ts.client_id = clients.id AND ts.task_id IN (${task_id})) `;
   }
   
   // Removed job_id filter to avoid restricting the Client dropdown when jobs are selected
