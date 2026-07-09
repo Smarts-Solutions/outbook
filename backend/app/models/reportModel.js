@@ -4,7 +4,8 @@ const {
   SatffLogUpdateOperation,
   LineManageStaffIdHelperFunction,
   QueryRoleHelperFunction,
-  buildAssignedJobsTempTable
+  buildAssignedJobsTempTable,
+  getStaffAccessFilters
 } = require("../utils/helper");
 
 const jobStatusReports = async (Report) => {
@@ -9562,6 +9563,62 @@ const getJobCustomReport2 = async (Report) => {
 
 ///////////// ---- END JOB CUSTOM REPORTS ----//////////////////////
 
+async function getTasksFilter(Report) {
+  const { StaffUserId, data } = Report;
+  const { pagination, filters: incomingFilters, customer_id, client_id, job_id } = data;
+  const search = pagination?.search || "";
+  const userRoleRows = await QueryRoleHelperFunction(StaffUserId);
+  const userRole = userRoleRows.length > 0 ? userRoleRows[0].role_name : "";
+  const isAdmin = ["SUPERADMIN", "ADMIN"].includes(userRole);
+  const filters = isAdmin ? null : await getStaffAccessFilters(StaffUserId);
+
+  let where = ["ts.task_type = '2'"]; // External tasks
+  if (filters) {
+    const customerCondition = filters.customerCondition.replace(/\bcustomer_id\b/g, "ts.customer_id");
+    const clientCondition = filters.clientCondition.replace(/\bid\b/g, "ts.client_id");
+    const jobCondition = filters.jobCondition.replace(/\bid\b/g, "ts.job_id");
+    where.push(`(${customerCondition})`, `(${clientCondition})`, `(${jobCondition})`);
+  }
+
+  if (customer_id && customer_id.length > 0) {
+    where.push(`ts.customer_id IN (${customer_id.join(",")})`);
+  }
+  if (client_id && client_id.length > 0) {
+    where.push(`ts.client_id IN (${client_id.join(",")})`);
+  }
+  if (job_id && job_id.length > 0) {
+    where.push(`ts.job_id IN (${job_id.join(",")})`);
+  }
+  if (incomingFilters?.staff_id) {
+    where.push(`ts.staff_id = ${incomingFilters.staff_id}`);
+  }
+
+  let params = [];
+  if (search) {
+    where.push(`(t.name LIKE ?)`);
+    params.push(`%${search}%`);
+  }
+
+  let query = `
+    SELECT t.id AS task_id, t.name AS task_name
+    FROM timesheet ts
+    JOIN task t ON ts.task_id = t.id
+    WHERE ${where.join(" AND ")}
+    GROUP BY t.id
+    ORDER BY t.name ASC
+  `;
+
+  if (pagination && pagination.limit) {
+    const page = pagination.page || 1;
+    const limit = pagination.limit;
+    const offset = (page - 1) * limit;
+    query += ` LIMIT ${limit} OFFSET ${offset}`;
+  }
+
+  const [rows] = await pool.execute(query, params.length > 0 ? params : undefined);
+  return { status: true, data: rows };
+}
+
 module.exports = {
   jobStatusReports,
   jobReceivedSentReports,
@@ -9578,6 +9635,7 @@ module.exports = {
   getAllJobsSidebar,
   getInternalJobs,
   getInternalTasks,
+  getTasksFilter,
   missingTimesheetReport,
   discrepancyReport,
   discrepancyReportProcessor,

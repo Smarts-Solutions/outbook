@@ -45,6 +45,9 @@ const { data } = Report;
 if(data.action == "get"){
   return reportModel.getAllTaskByStaff(Report);
 }
+else if(data.action == "get_tasks_filter"){
+  return reportModel.getTasksFilter(Report);
+}
 else if(data.action == "getInternalJobs"){
   return reportModel.getInternalJobs(Report);
 }

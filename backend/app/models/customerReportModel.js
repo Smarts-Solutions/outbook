@@ -2440,6 +2440,8 @@ const getAllTaskByStaff = async (Report) => {
       return await getClientsFilter(Report);
     case "get_jobs_filter":
       return await getJobsFilter(Report);
+    case "get_tasks_filter":
+      return await getTasksFilter(Report);
     default:
       return { status: false, message: "Invalid action in getAllTaskByStaff" };
   }
@@ -2903,6 +2905,55 @@ async function getJobsFilter(Report) {
     FROM jobs j
     WHERE ${where.join(" AND ")}
     ORDER BY j.job_id ASC
+  `;
+
+  const [rows] = await pool.execute(query, params.length > 0 ? params : undefined);
+  return { status: true, data: rows };
+}
+
+async function getTasksFilter(Report) {
+  const { StaffUserId, data } = Report;
+  const { pagination, filters: incomingFilters } = data;
+  const search = pagination?.search || "";
+  const userRoleRows = await QueryRoleHelperFunction(StaffUserId);
+  const userRole = userRoleRows.length > 0 ? userRoleRows[0].role_name : "";
+  const isAdmin = ["SUPERADMIN", "ADMIN"].includes(userRole);
+  const filters = isAdmin ? null : await getStaffAccessFilters(StaffUserId);
+
+  let where = ["ts.task_type = '2'"]; // External tasks
+  if (filters) {
+    const customerCondition = filters.customerCondition.replace(/\bcustomer_id\b/g, "ts.customer_id");
+    const clientCondition = filters.clientCondition.replace(/\bid\b/g, "ts.client_id");
+    const jobCondition = filters.jobCondition.replace(/\bid\b/g, "ts.job_id");
+    where.push(`(${customerCondition})`, `(${clientCondition})`, `(${jobCondition})`);
+  }
+
+  if (incomingFilters?.customer_id && incomingFilters.customer_id.length > 0) {
+    where.push(`ts.customer_id IN (${incomingFilters.customer_id.join(",")})`);
+  }
+  if (incomingFilters?.client_id && incomingFilters.client_id.length > 0) {
+    where.push(`ts.client_id IN (${incomingFilters.client_id.join(",")})`);
+  }
+  if (incomingFilters?.job_id && incomingFilters.job_id.length > 0) {
+    where.push(`ts.job_id IN (${incomingFilters.job_id.join(",")})`);
+  }
+  if (incomingFilters?.staff_id) {
+    where.push(`ts.staff_id = ${incomingFilters.staff_id}`);
+  }
+
+  let params = [];
+  if (search) {
+    where.push(`(t.name LIKE ?)`);
+    params.push(`%${search}%`);
+  }
+
+  let query = `
+    SELECT t.id AS task_id, t.name AS task_name
+    FROM timesheet ts
+    JOIN task t ON ts.task_id = t.id
+    WHERE ${where.join(" AND ")}
+    GROUP BY t.id
+    ORDER BY t.name ASC
   `;
 
   const [rows] = await pool.execute(query, params.length > 0 ? params : undefined);

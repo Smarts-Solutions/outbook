@@ -776,52 +776,21 @@ function TimesheetReport() {
   // Clearing dependent dropdowns on selection of another is now handled explicitly
   // in handleFilterChange using selectionOrder, so we do NOT auto-clear here.
 
-  // Get All task
-  const GetAllTask = async (internal_external) => {
-    if (internal_external == "0") {
-      var req = { action: "getInternalTasks" };
-      var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            const data = response?.data?.map((item) => ({
-              value: item.id,
-              label: item.name,
-            }));
-            setInternalTaskAllData(data);
-          } else {
-            setInternalTaskAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
+  ///////////////---- FOR TASK SERACH  START-----//////////////
+  const [taskPage, setTaskPage] = useState(1);
+  const [taskHasMore, setTaskHasMore] = useState(true);
+  const [taskSearch, setTaskSearch] = useState("");
+  const taskCache = useRef({});
+  const taskDebounceRef = useRef(null);
+  const [taskLoading, setTaskLoading] = useState(false);
 
-      // External Task
-      var req = { action: "get" };
-      var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            const data = response?.data?.map((item) => ({
-              value: item.task_id,
-              label: item.task_name,
-            }));
-            setTaskAllData(data);
-          } else {
-            setTaskAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
-      return;
-    } else if (internal_external == "1") {
-      var req = { action: "getInternalTasks" };
-      var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
+  const GetAllTask = async (internal_external, options = {}) => {
+    const { searchValue = "", pageNo = 1, append = false, customer_id = null, client_id = null, job_id = null, staff_id = null } = options;
+
+    if (internal_external == "1") {
+      var reqInternal = { action: "getInternalTasks" };
+      var dataInternal = { req: reqInternal, authToken: token };
+      await dispatch(getAllTaskByStaff(dataInternal))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
@@ -834,33 +803,100 @@ function TimesheetReport() {
             setInternalTaskAllData([]);
           }
         })
-        .catch((error) => {
-          return;
-        });
-      return;
-    } else if (internal_external == "2") {
-      // External Task
-      const req = { action: "get" };
-      const data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then(async (response) => {
-          if (response.status) {
-            const data = response?.data?.map((item) => ({
-              value: item.task_id,
-              label: item.task_name,
-            }));
-            setTaskAllData(data);
-          } else {
-            setTaskAllData([]);
-          }
-        })
-        .catch((error) => {
-          return;
-        });
+        .catch(() => {});
       return;
     }
+
+    if (internal_external == "0") {
+      var reqInternal = { action: "getInternalTasks" };
+      var dataInternal = { req: reqInternal, authToken: token };
+      await dispatch(getAllTaskByStaff(dataInternal))
+        .unwrap()
+        .then(async (response) => {
+          if (response.status) {
+            const data = response?.data?.map((item) => ({
+              value: item.id,
+              label: item.name,
+            }));
+            setInternalTaskAllData(data);
+          } else {
+            setInternalTaskAllData([]);
+          }
+        })
+        .catch(() => {});
+    }
+
+    const cacheKey = `${searchValue}_${pageNo}_${customer_id}_${client_id}_${job_id}_${staff_id}`;
+    if (taskCache.current[cacheKey]) {
+      const cached = taskCache.current[cacheKey];
+      setTaskAllData(prev => {
+        const combined = append ? [...prev, ...cached] : cached;
+        const unique = Array.from(
+          new Map(combined.map(item => [item.value, item])).values()
+        );
+        return unique;
+      });
+      return;
+    }
+
+    setTaskLoading(true);
+    const req = {
+      action: "get_tasks_filter",
+      filters: { ...filters, staff_id: staff_id !== null ? staff_id : filters.staff_id },
+      customer_id: customer_id ? [customer_id] : [],
+      client_id: client_id ? [client_id] : [],
+      job_id: job_id ? [job_id] : [],
+      pagination: {
+        search: searchValue,
+        page: pageNo,
+        limit: customer_id || client_id || job_id || staff_id ? 1000 : 20
+      }
+    };
+    const data = { req, authToken: token };
+
+    try {
+      const response = await dispatch(getAllTaskByStaff(data)).unwrap();
+      if (response.status) {
+        const formatted = response.data.map(item => ({
+          value: item.task_id,
+          label: item.task_name
+        }));
+
+        taskCache.current[cacheKey] = formatted;
+        setTaskAllData(prev => {
+          const combined = append ? [...prev, ...formatted] : formatted;
+          const unique = Array.from(
+            new Map(combined.map(item => [item.value, item])).values()
+          );
+          return unique;
+        });
+        setTaskHasMore(response.data.length === 20);
+        setTaskPage(pageNo);
+      } else {
+        if (!append) setTaskAllData([]);
+      }
+    } catch (err) { }
+    setTaskLoading(false);
   };
+
+  const handleTaskSearch = (value) => {
+    if (value === "") return;
+    clearTimeout(taskDebounceRef.current);
+    taskDebounceRef.current = setTimeout(() => {
+      setTaskSearch(value);
+      setTaskPage(1);
+      const up = getUpstreamFilters("task_id", filters);
+      GetAllTask(filters.internal_external, {
+        searchValue: value,
+        pageNo: 1,
+        customer_id: up.customer_id,
+        client_id: up.client_id,
+        job_id: up.job_id,
+        staff_id: up.staff_id
+      });
+    }, 500);
+  };
+  ///////////////---- FOR TASK SERACH  END-----//////////////
 
   const exportToCSV = (data) => {
     if (!data || !data.rows || data.rows.length === 0) {
@@ -1073,6 +1109,10 @@ function TimesheetReport() {
 
           setInternalJobAllData([]);
           setTaskAllData([]);
+          taskCache.current = {};
+          setTaskPage(1);
+          setTaskHasMore(true);
+          setTaskSearch("");
           setInternalTaskAllData([]);
 
         } else if (key === "customer_id") {
@@ -1153,6 +1193,10 @@ function TimesheetReport() {
 
           setInternalJobAllData([]);
           setTaskAllData([]);
+          taskCache.current = {};
+          setTaskPage(1);
+          setTaskHasMore(true);
+          setTaskSearch("");
           setInternalTaskAllData([]);
         } else if (key === "client_id") {
           updated.task_id = null;
@@ -1232,6 +1276,10 @@ function TimesheetReport() {
 
           setInternalJobAllData([]);
           setTaskAllData([]);
+          taskCache.current = {};
+          setTaskPage(1);
+          setTaskHasMore(true);
+          setTaskSearch("");
           setInternalTaskAllData([]);
         } else if (key === "job_id") {
           updated.task_id = null;
@@ -1309,11 +1357,19 @@ function TimesheetReport() {
           }
 
           setTaskAllData([]);
+          taskCache.current = {};
+          setTaskPage(1);
+          setTaskHasMore(true);
+          setTaskSearch("");
           setInternalTaskAllData([]);
         } else if (key === "internal_job_id") {
           updated.task_id = null;
           updated.internal_task_id = null;
           setTaskAllData([]);
+          taskCache.current = {};
+          setTaskPage(1);
+          setTaskHasMore(true);
+          setTaskSearch("");
           setInternalTaskAllData([]);
         }
         return updated;
@@ -1446,6 +1502,10 @@ function TimesheetReport() {
       } else if (value == "task_id") {
         if (filters.internal_external == "0") {
           setTaskAllData([]);
+          taskCache.current = {};
+          setTaskPage(1);
+          setTaskHasMore(true);
+          setTaskSearch("");
           setInternalTaskAllData([]);
           setFilters((prev) => ({
             ...prev,
@@ -1460,6 +1520,10 @@ function TimesheetReport() {
           }));
         } else if (filters.internal_external == "2") {
           setTaskAllData([]);
+          taskCache.current = {};
+          setTaskPage(1);
+          setTaskHasMore(true);
+          setTaskSearch("");
           setFilters((prev) => ({
             ...prev,
             task_id: null,
@@ -1549,6 +1613,10 @@ function TimesheetReport() {
     setJobAllData([]);
     setJobOptions([]);
     setTaskAllData([]);
+    taskCache.current = {};
+    setTaskPage(1);
+    setTaskHasMore(true);
+    setTaskSearch("");
     setInternalJobAllData([]);
     setInternalTaskAllData([]);
 
@@ -2276,8 +2344,12 @@ function TimesheetReport() {
             <div className="col-lg-4 col-md-6">
               <label className="form-label fw-medium">Task</label>
               <Select
+                closeMenuOnSelect={false}
                 onMenuOpen={() => {
-                  if (taskAllData.length === 0) GetAllTask(filters.internal_external);
+                  if (taskAllData.length === 0) {
+                    const up = getUpstreamFilters("task_id", filters);
+                    GetAllTask(filters.internal_external, { searchValue: "", pageNo: 1, customer_id: up.customer_id, client_id: up.client_id, job_id: up.job_id, staff_id: up.staff_id });
+                  }
                 }}
                 options={[{ value: "", label: "Select..." }, ...taskAllData]}
                 value={
@@ -2296,6 +2368,21 @@ function TimesheetReport() {
                     },
                   })
                 }
+                onInputChange={(value) => handleTaskSearch(value)}
+                onMenuScrollToBottom={() => {
+                  if (taskHasMore) {
+                    const up = getUpstreamFilters("task_id", filters);
+                    GetAllTask(filters.internal_external, {
+                      searchValue: taskSearch,
+                      pageNo: taskPage + 1,
+                      append: true,
+                      customer_id: up.customer_id,
+                      client_id: up.client_id,
+                      job_id: up.job_id,
+                      staff_id: up.staff_id
+                    });
+                  }
+                }}
                 isSearchable
                 className="shadow-sm select-staff rounded-pill"
               />
