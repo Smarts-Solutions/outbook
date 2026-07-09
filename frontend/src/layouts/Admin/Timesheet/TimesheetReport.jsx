@@ -206,19 +206,34 @@ function TimesheetReport() {
       setStaffLoading(false);
 
     } else {
-      let dataList = [
-        {
-          value: staffDetails?.id,
-          label: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})`,
-        }
-      ];
+      let dataList = [];
 
       try {
         const req = { action: "get_my_line_managers" };
         const response = await dispatch(Staff({ req, authToken: token })).unwrap();
         if (response.status && response.data) {
           response.data.forEach(manager => {
-            if (!dataList.find(item => item.value === manager.id)) {
+            // Check if this manager matches the selected customer, client, or job
+            let keep = true;
+            
+            // manager.assigned_customers is a comma-separated string like '89,90'
+            if (customer_id) {
+              const assignedCusts = manager.assigned_customers ? manager.assigned_customers.split(',') : [];
+              const targetCusts = Array.isArray(customer_id) ? customer_id.map(String) : [String(customer_id)];
+              if (!targetCusts.some(c => assignedCusts.includes(c))) keep = false;
+            }
+            if (client_id && keep) {
+              const assignedClients = manager.assigned_clients ? manager.assigned_clients.split(',') : [];
+              const targetClients = Array.isArray(client_id) ? client_id.map(String) : [String(client_id)];
+              if (!targetClients.some(c => assignedClients.includes(c))) keep = false;
+            }
+            if (job_id && keep) {
+              const assignedJobs = manager.assigned_jobs ? manager.assigned_jobs.split(',') : [];
+              const targetJobs = Array.isArray(job_id) ? job_id.map(String) : [String(job_id)];
+              if (!targetJobs.some(j => assignedJobs.includes(j))) keep = false;
+            }
+
+            if (keep && !dataList.find(item => item.value === manager.id)) {
               dataList.push({
                 value: manager.id,
                 label: `${manager.first_name} ${manager.last_name} (${manager.email})`
@@ -227,6 +242,20 @@ function TimesheetReport() {
           });
         }
       } catch (err) { }
+
+      // Logged-in user should always be added if no filters are applied
+      if (!customer_id && !client_id && !job_id && !dataList.find(item => item.value === staffDetails?.id)) {
+        dataList.unshift({
+          value: staffDetails?.id,
+          label: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})`,
+        });
+      }
+
+      if (searchValue) {
+        dataList = dataList.filter(item => 
+          item.label.toLowerCase().includes(searchValue.toLowerCase())
+        );
+      }
 
       setStaffAllData(dataList);
     }

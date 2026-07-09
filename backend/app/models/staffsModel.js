@@ -858,24 +858,49 @@ const getLineManagerStaff = async (staff) => {
 
 const getMyLineManagers = async (staff_by_id) => {
   const LineManageStaffId = await LineManageStaffIdHelperFunction(staff_by_id);
+  const connection = await pool.getConnection();
 
-  const query = `
-    SELECT 
-      staffs.id, 
-      staffs.email,
-      staffs.employee_number,
-      staffs.first_name,
-      staffs.last_name
-    FROM staffs
-    WHERE staffs.id IN (${LineManageStaffId})
-  `;
   try {
-    const [result] = await pool.execute(query);
+    await buildAssignedJobsTempTable(connection, LineManageStaffId);
 
+    const query = `
+      SELECT 
+        staffs.id, 
+        staffs.email,
+        staffs.employee_number,
+        staffs.first_name,
+        staffs.last_name,
+        (
+          SELECT GROUP_CONCAT(DISTINCT c.id)
+          FROM customers c
+          WHERE c.staff_id = staffs.id OR c.account_manager_id = staffs.id 
+             OR c.id IN (SELECT customer_id FROM temp_assigned_jobs_staff WHERE staff_id = staffs.id)
+        ) as assigned_customers,
+        (
+          SELECT GROUP_CONCAT(DISTINCT cl.id)
+          FROM clients cl
+          JOIN customers c ON c.id = cl.customer_id
+          WHERE c.staff_id = staffs.id OR c.account_manager_id = staffs.id 
+             OR cl.id IN (SELECT client_id FROM temp_assigned_jobs_staff WHERE staff_id = staffs.id)
+        ) as assigned_clients,
+        (
+          SELECT GROUP_CONCAT(DISTINCT j.id)
+          FROM jobs j
+          JOIN customers c ON c.id = j.customer_id
+          WHERE c.staff_id = staffs.id OR c.account_manager_id = staffs.id 
+             OR j.id IN (SELECT job_id FROM temp_assigned_jobs_staff WHERE staff_id = staffs.id)
+        ) as assigned_jobs
+      FROM staffs
+      WHERE staffs.id IN (${LineManageStaffId})
+    `;
+    
+    const [result] = await connection.execute(query);
     return result;
   } catch (err) {
     console.error("Error fetching my line managers:", err);
     throw err;
+  } finally {
+    connection.release();
   }
 };
 
