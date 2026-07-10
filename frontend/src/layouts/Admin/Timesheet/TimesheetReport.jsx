@@ -1030,7 +1030,9 @@ updated.internal_job_id = null;
               resolvedStaffId = null;
             }
           } else {
-            if (updated.staff_id && updated.employee_number) {
+            if (!updated.staff_id) {
+              updated.employee_number = null;
+            } else if (updated.employee_number) {
               const matchedEmployee = employeeNumberAllData.find(e => Number(e.staff_id) === Number(updated.staff_id));
               if (!matchedEmployee || matchedEmployee.value !== updated.employee_number) {
                 updated.employee_number = null;
@@ -1145,6 +1147,15 @@ updated.internal_job_id = null;
                 setHasMore(true);
                 setSearch("");
               }
+              if (downstream.includes("staff_id")) {
+                updated.staff_id = null;
+                updated.employee_number = null;
+                setStaffAllData([]);
+                staffCache.current = {};
+                setStaffPage(1);
+                setStaffHasMore(true);
+                setStaffSearch("");
+              }
               // Remove customer and all downstream from selectionOrder
               setSelectionOrder(selectionOrder.slice(0, custIdx));
             } else {
@@ -1222,6 +1233,15 @@ updated.internal_job_id = null;
                 setHasMore(true);
                 setSearch("");
               }
+              if (downstream.includes("staff_id")) {
+                updated.staff_id = null;
+                updated.employee_number = null;
+                setStaffAllData([]);
+                staffCache.current = {};
+                setStaffPage(1);
+                setStaffHasMore(true);
+                setStaffSearch("");
+              }
               // Remove client and all downstream from selectionOrder
               setSelectionOrder(selectionOrder.slice(0, clientIdx));
             } else {
@@ -1297,6 +1317,15 @@ updated.internal_task_id = null;
                 setClientPage(1);
                 setClientHasMore(true);
                 setClientSearch("");
+              }
+              if (downstream.includes("staff_id")) {
+                updated.staff_id = null;
+                updated.employee_number = null;
+                setStaffAllData([]);
+                staffCache.current = {};
+                setStaffPage(1);
+                setStaffHasMore(true);
+                setStaffSearch("");
               }
               // Remove job and all downstream from selectionOrder
               setSelectionOrder(selectionOrder.slice(0, jobIdx));
@@ -1387,6 +1416,7 @@ updated.internal_task_id = null;
               }
               if (downstream.includes("staff_id")) {
                 updated.staff_id = null;
+                updated.employee_number = null;
                 setStaffAllData([]);
                 staffCache.current = {};
                 setStaffPage(1);
@@ -2191,15 +2221,31 @@ updated.internal_task_id = null;
               }}
               options={[
                 { value: "", label: "Select..." },
-                ...(filters.staff_id
-                  ? employeeNumberAllData.filter(e => Number(e.staff_id) === Number(filters.staff_id))
-                  : employeeNumberAllData),
+                ...employeeNumberAllData.filter(e => {
+                  // If upstream filters apply, staff must be in staffAllData
+                  if (filters.customer_id || filters.client_id || filters.job_id || filters.task_id) {
+                    if (!staffAllData.some(staff => Number(staff.value) === Number(e.staff_id))) return false;
+                  }
+                  // If staff_id is selected, restrict to it, BUT only if it's valid
+                  if (filters.staff_id) {
+                    const isStaffSelectedValid = (filters.customer_id || filters.client_id || filters.job_id || filters.task_id)
+                      ? staffAllData.some(staff => Number(staff.value) === Number(filters.staff_id))
+                      : true;
+                    if (isStaffSelectedValid && Number(e.staff_id) !== Number(filters.staff_id)) return false;
+                  }
+                  return true;
+                })
               ]}
               value={
-                employeeNumberAllData && employeeNumberAllData?.length > 0
-                  ? employeeNumberAllData?.find(
-                    (opt) => opt.value === filters.employee_number,
-                  ) || null
+                employeeNumberAllData && employeeNumberAllData.length > 0
+                  ? employeeNumberAllData.find(opt => {
+                      if (opt.value !== filters.employee_number) return false;
+                      // Must also be valid in staffAllData if upstream filters apply
+                      if (filters.customer_id || filters.client_id || filters.job_id || filters.task_id) {
+                        return staffAllData.some(staff => Number(staff.value) === Number(opt.staff_id));
+                      }
+                      return true;
+                    }) || null
                   : null
               }
               onChange={(selected) =>
