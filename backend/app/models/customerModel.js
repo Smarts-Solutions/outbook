@@ -3103,7 +3103,25 @@ const customerUpdate = async (customer) => {
                 for (let index = 0; index < exist_account_manager.length; index++) {
                     const element = exist_account_manager[index];
                     // update customer_service_account_managers
-                    await pool.execute(`UPDATE customer_service_account_managers SET account_manager_id = ${Number(account_manager_id)} WHERE customer_service_id = ${element.id} AND account_manager_id = ${Number(ExistCustomer[0].account_manager_id)}`);
+                    // await pool.execute(`UPDATE customer_service_account_managers SET account_manager_id = ${Number(account_manager_id)} WHERE customer_service_id = ${element.id} AND account_manager_id = ${Number(ExistCustomer[0].account_manager_id)}`);
+                     await pool.execute(
+                        `UPDATE customer_service_account_managers c
+                        SET c.account_manager_id = ?
+                        WHERE c.customer_service_id = ?
+                        AND c.account_manager_id = ?
+                        AND NOT EXISTS (
+                                SELECT 1
+                                FROM customer_service_account_managers c2
+                                WHERE c2.customer_service_id = c.customer_service_id
+                                AND c2.account_manager_id = ?
+                        )`,
+                        [
+                            Number(account_manager_id),
+                            element.id,
+                            Number(ExistCustomer[0].account_manager_id),
+                            Number(account_manager_id)
+                        ]
+                    );
                 }
              }
 
