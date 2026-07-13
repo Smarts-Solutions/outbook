@@ -12,17 +12,18 @@ parentPort.on("message", async (rows) => {
       const [[getStaffNameMissingReport]] = await pool.execute(`CALL GetLastWeekMissingTimesheetReport(${row.id})`);
       // console.log("getStaffNameMissingReport , ", getStaffNameMissingReport);
       if (getStaffNameMissingReport && getStaffNameMissingReport.length > 0) {
-        let csvContent = "Staff Name,Staff Email\n";
+        let csvContent = "S.No.,Staff Name,Staff Email\n";
         // getStaffNameMissingReport?.forEach(val => {
         //     csvContent += `${val.staff_fullname},${val.staff_email}\n`;
         // });
         let processedStaff = new Set();
+        let sno = 1;
         getStaffNameMissingReport?.forEach(val => {
           if (processedStaff.has(val?.staff_id)) {
             return;
           }
           processedStaff.add(val?.staff_id);
-          csvContent += `${val?.staff_fullname},${val?.staff_email}\n`;
+          csvContent += `${sno++},${val?.staff_fullname},${val?.staff_email}\n`;
         });
 
 
@@ -47,8 +48,9 @@ parentPort.on("message", async (rows) => {
             const values = line.split(",");
 
             return {
-              staff_name: values[0],
-              staff_email: values[1],
+              s_no: values[0],
+              staff_name: values[1],
+              staff_email: values[2],
             };
           });
 
