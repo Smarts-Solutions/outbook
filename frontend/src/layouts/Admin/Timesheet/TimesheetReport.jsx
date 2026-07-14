@@ -187,7 +187,8 @@ function TimesheetReport() {
 
           const formatted = staffList.map((item) => ({
             value: item.id,
-            label: `${item.first_name} ${item.last_name} (${item.email})`
+            label: `${item.first_name} ${item.last_name} (${item.email})`,
+            employee_number: item.employee_number
           }));
 
           staffCache.current[cacheKey] = formatted;
@@ -238,7 +239,8 @@ function TimesheetReport() {
             if (keep && !dataList.find(item => item.value === manager.id)) {
               dataList.push({
                 value: manager.id,
-                label: `${manager.first_name} ${manager.last_name} (${manager.email})`
+                label: `${manager.first_name} ${manager.last_name} (${manager.email})`,
+                employee_number: manager.employee_number
               });
             }
           });
@@ -250,6 +252,7 @@ function TimesheetReport() {
         dataList.unshift({
           value: staffDetails?.id,
           label: `${staffDetails.first_name} ${staffDetails?.last_name} (${staffDetails?.email})`,
+          employee_number: staffDetails?.employee_number
         });
       }
 
@@ -304,6 +307,7 @@ function TimesheetReport() {
                 value: item.employee_number,
                 staff_id: item.id,
                 label: `${item.employee_number}`,
+                staff_label: `${item.first_name || ""} ${item.last_name || ""} (${item.email || ""})`.trim(),
               }));
             setEmployeeNumberAllData(data);
           } else {
@@ -319,6 +323,7 @@ function TimesheetReport() {
           value: staffDetails?.employee_number,
           staff_id: staffDetails?.id,
           label: `${staffDetails.employee_number}`,
+          staff_label: `${staffDetails.first_name || ""} ${staffDetails.last_name || ""} (${staffDetails.email || ""})`.trim(),
         }
       ];
 
@@ -331,7 +336,8 @@ function TimesheetReport() {
               dataList.push({
                 value: manager.employee_number,
                 staff_id: manager.id,
-                label: `${manager.employee_number}`
+                label: `${manager.employee_number}`,
+                staff_label: `${manager.first_name || ""} ${manager.last_name || ""} (${manager.email || ""})`.trim()
               });
             }
           });
@@ -1024,6 +1030,12 @@ updated.internal_job_id = null;
               if (matchedEmployee) {
                 updated.staff_id = matchedEmployee.staff_id;
                 resolvedStaffId = matchedEmployee.staff_id;
+                setStaffAllData(prev => {
+                  if (prev && !prev.find(s => Number(s.value) === Number(matchedEmployee.staff_id))) {
+                    return [...prev, { value: matchedEmployee.staff_id, label: matchedEmployee.staff_label, employee_number: matchedEmployee.value }];
+                  }
+                  return prev || [];
+                });
               }
             } else {
               updated.staff_id = null;
@@ -1032,10 +1044,21 @@ updated.internal_job_id = null;
           } else {
             if (!updated.staff_id) {
               updated.employee_number = null;
-            } else if (updated.employee_number) {
-              const matchedEmployee = employeeNumberAllData.find(e => Number(e.staff_id) === Number(updated.staff_id));
-              if (!matchedEmployee || matchedEmployee.value !== updated.employee_number) {
-                updated.employee_number = null;
+            } else {
+              const matchedStaff = staffAllData.find(s => Number(s.value) === Number(updated.staff_id));
+              if (matchedStaff && matchedStaff.employee_number) {
+                updated.employee_number = matchedStaff.employee_number;
+                setEmployeeNumberAllData(prev => {
+                  if (prev && !prev.find(e => e.value === matchedStaff.employee_number)) {
+                    return [...prev, { value: matchedStaff.employee_number, staff_id: matchedStaff.value, label: `${matchedStaff.employee_number}`, staff_label: matchedStaff.label }];
+                  }
+                  return prev || [];
+                });
+              } else if (updated.employee_number) {
+                const matchedEmployee = employeeNumberAllData.find(e => Number(e.staff_id) === Number(updated.staff_id));
+                if (!matchedEmployee || matchedEmployee.value !== updated.employee_number) {
+                  updated.employee_number = null;
+                }
               }
             }
           }
@@ -2225,13 +2248,6 @@ updated.internal_task_id = null;
                   // If upstream filters apply, staff must be in staffAllData
                   if (filters.customer_id || filters.client_id || filters.job_id || filters.task_id) {
                     if (!staffAllData.some(staff => Number(staff.value) === Number(e.staff_id))) return false;
-                  }
-                  // If staff_id is selected, restrict to it, BUT only if it's valid
-                  if (filters.staff_id) {
-                    const isStaffSelectedValid = (filters.customer_id || filters.client_id || filters.job_id || filters.task_id)
-                      ? staffAllData.some(staff => Number(staff.value) === Number(filters.staff_id))
-                      : true;
-                    if (isStaffSelectedValid && Number(e.staff_id) !== Number(filters.staff_id)) return false;
                   }
                   return true;
                 })
