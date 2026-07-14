@@ -1028,7 +1028,7 @@ updated.internal_job_id = null;
             if (updated.employee_number) {
               const matchedEmployee = employeeNumberAllData.find(e => e.value === updated.employee_number);
               if (matchedEmployee) {
-                updated.staff_id = matchedEmployee.staff_id;
+                // DO NOT update updated.staff_id to prevent auto-selection in UI
                 resolvedStaffId = matchedEmployee.staff_id;
                 setStaffAllData(prev => {
                   if (prev && !prev.find(s => Number(s.value) === Number(matchedEmployee.staff_id))) {
@@ -1038,27 +1038,19 @@ updated.internal_job_id = null;
                 });
               }
             } else {
-              updated.staff_id = null;
               resolvedStaffId = null;
             }
           } else {
-            if (!updated.staff_id) {
-              updated.employee_number = null;
-            } else {
+            if (updated.staff_id) {
               const matchedStaff = staffAllData.find(s => Number(s.value) === Number(updated.staff_id));
               if (matchedStaff && matchedStaff.employee_number) {
-                updated.employee_number = matchedStaff.employee_number;
+                // DO NOT update updated.employee_number to prevent auto-selection in UI
                 setEmployeeNumberAllData(prev => {
                   if (prev && !prev.find(e => e.value === matchedStaff.employee_number)) {
                     return [...prev, { value: matchedStaff.employee_number, staff_id: matchedStaff.value, label: `${matchedStaff.employee_number}`, staff_label: matchedStaff.label }];
                   }
                   return prev || [];
                 });
-              } else if (updated.employee_number) {
-                const matchedEmployee = employeeNumberAllData.find(e => Number(e.staff_id) === Number(updated.staff_id));
-                if (!matchedEmployee || matchedEmployee.value !== updated.employee_number) {
-                  updated.employee_number = null;
-                }
               }
             }
           }
@@ -2223,9 +2215,16 @@ updated.internal_task_id = null;
                   GetAllStaff({ searchValue: "", pageNo: 1, customer_id: up.customer_id, client_id: up.client_id, job_id: up.job_id });
                 }
               }}
-              // options={staffAllData}
-              options={[{ value: "", label: "Select..." }, ...staffAllData]}
-
+              options={[
+                { value: "", label: "Select..." }, 
+                ...staffAllData.filter(staff => {
+                  if (filters.employee_number) {
+                    const matchedEmployee = employeeNumberAllData.find(e => e.value === filters.employee_number);
+                    if (matchedEmployee && Number(staff.value) !== Number(matchedEmployee.staff_id)) return false;
+                  }
+                  return true;
+                })
+              ]}
               value={
                 staffAllData && staffAllData.length > 0
                   ? staffAllData.find(
@@ -2277,6 +2276,7 @@ updated.internal_task_id = null;
               options={[
                 { value: "", label: "Select..." },
                 ...employeeNumberAllData.filter(e => {
+                  if (filters.staff_id && Number(e.staff_id) !== Number(filters.staff_id)) return false;
                   // If upstream filters apply, staff must be in staffAllData
                   if (filters.customer_id || filters.client_id || filters.job_id || filters.task_id) {
                     if (!staffAllData.some(staff => Number(staff.value) === Number(e.staff_id))) return false;
