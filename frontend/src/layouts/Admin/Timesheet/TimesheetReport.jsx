@@ -1068,8 +1068,8 @@ updated.internal_job_id = null;
             // Auto-clear downstream filters
             const staffIdx = selectionOrder.indexOf("staff_id");
             if (staffIdx !== -1) {
-              const downstream = selectionOrder.slice(staffIdx + 1);
-              if (downstream.includes("customer_id")) {
+              const upstream = selectionOrder.slice(0, staffIdx);
+              if (!upstream.includes("customer_id")) {
                 updated.customer_id = null;
                 setCustomerAllData([]);
                 customerCache.current = {};
@@ -1077,7 +1077,7 @@ updated.internal_job_id = null;
                 setCustomerHasMore(true);
                 setCustomerSearch("");
               }
-              if (downstream.includes("client_id")) {
+              if (!upstream.includes("client_id")) {
                 updated.client_id = null;
                 setClientAllData([]);
                 clientCache.current = {};
@@ -1085,7 +1085,7 @@ updated.internal_job_id = null;
                 setClientHasMore(true);
                 setClientSearch("");
               }
-              if (downstream.includes("job_id")) {
+              if (!upstream.includes("job_id")) {
                 updated.job_id = null;
                 setJobOptions([]);
                 cacheRef.current = {};
@@ -1093,7 +1093,15 @@ updated.internal_job_id = null;
                 setHasMore(true);
                 setSearch("");
               }
-              setSelectionOrder(selectionOrder.slice(0, staffIdx));
+              if (!upstream.includes("task_id")) {
+                updated.task_id = null;
+                setTaskAllData([]);
+                taskCache.current = {};
+                setTaskPage(1);
+                setTaskHasMore(true);
+                setTaskSearch("");
+              }
+              setSelectionOrder(upstream);
             } else {
               setSelectionOrder(prev => prev.filter(k => k !== "staff_id"));
             }
@@ -1153,8 +1161,8 @@ updated.internal_job_id = null;
             // Auto-clear downstream filters (those selected after customer in selectionOrder)
             const custIdx = selectionOrder.indexOf("customer_id");
             if (custIdx !== -1) {
-              const downstream = selectionOrder.slice(custIdx + 1);
-              if (downstream.includes("client_id")) {
+              const upstream = selectionOrder.slice(0, custIdx);
+              if (!upstream.includes("client_id")) {
                 updated.client_id = null;
                 setClientAllData([]);
                 clientCache.current = {};
@@ -1162,7 +1170,7 @@ updated.internal_job_id = null;
                 setClientHasMore(true);
                 setClientSearch("");
               }
-              if (downstream.includes("job_id")) {
+              if (!upstream.includes("job_id")) {
                 updated.job_id = null;
                 setJobOptions([]);
                 cacheRef.current = {};
@@ -1170,7 +1178,7 @@ updated.internal_job_id = null;
                 setHasMore(true);
                 setSearch("");
               }
-              if (downstream.includes("staff_id")) {
+              if (!upstream.includes("staff_id")) {
                 updated.staff_id = null;
                 updated.employee_number = null;
                 setStaffAllData([]);
@@ -1179,8 +1187,16 @@ updated.internal_job_id = null;
                 setStaffHasMore(true);
                 setStaffSearch("");
               }
+              if (!upstream.includes("task_id")) {
+                updated.task_id = null;
+                setTaskAllData([]);
+                taskCache.current = {};
+                setTaskPage(1);
+                setTaskHasMore(true);
+                setTaskSearch("");
+              }
               // Remove customer and all downstream from selectionOrder
-              setSelectionOrder(selectionOrder.slice(0, custIdx));
+              setSelectionOrder(upstream);
             } else {
               setSelectionOrder(prev => prev.filter(k => k !== "customer_id"));
             }
@@ -1239,8 +1255,8 @@ updated.internal_job_id = null;
             // Auto-clear downstream filters (those selected after client in selectionOrder)
             const clientIdx = selectionOrder.indexOf("client_id");
             if (clientIdx !== -1) {
-              const downstream = selectionOrder.slice(clientIdx + 1);
-              if (downstream.includes("customer_id")) {
+              const upstream = selectionOrder.slice(0, clientIdx);
+              if (!upstream.includes("customer_id")) {
                 updated.customer_id = null;
                 setCustomerAllData([]);
                 customerCache.current = {};
@@ -1248,7 +1264,7 @@ updated.internal_job_id = null;
                 setCustomerHasMore(true);
                 setCustomerSearch("");
               }
-              if (downstream.includes("job_id")) {
+              if (!upstream.includes("job_id")) {
                 updated.job_id = null;
                 setJobOptions([]);
                 cacheRef.current = {};
@@ -1256,7 +1272,7 @@ updated.internal_job_id = null;
                 setHasMore(true);
                 setSearch("");
               }
-              if (downstream.includes("staff_id")) {
+              if (!upstream.includes("staff_id")) {
                 updated.staff_id = null;
                 updated.employee_number = null;
                 setStaffAllData([]);
@@ -1265,8 +1281,16 @@ updated.internal_job_id = null;
                 setStaffHasMore(true);
                 setStaffSearch("");
               }
+              if (!upstream.includes("task_id")) {
+                updated.task_id = null;
+                setTaskAllData([]);
+                taskCache.current = {};
+                setTaskPage(1);
+                setTaskHasMore(true);
+                setTaskSearch("");
+              }
               // Remove client and all downstream from selectionOrder
-              setSelectionOrder(selectionOrder.slice(0, clientIdx));
+              setSelectionOrder(upstream);
             } else {
               setSelectionOrder(prev => prev.filter(k => k !== "client_id"));
             }
@@ -1324,8 +1348,8 @@ updated.internal_task_id = null;
             // Auto-clear downstream filters (those selected after job in selectionOrder)
             const jobIdx = selectionOrder.indexOf("job_id");
             if (jobIdx !== -1) {
-              const downstream = selectionOrder.slice(jobIdx + 1);
-              if (downstream.includes("customer_id")) {
+              const upstream = selectionOrder.slice(0, jobIdx);
+              if (!upstream.includes("customer_id")) {
                 updated.customer_id = null;
                 setCustomerAllData([]);
                 customerCache.current = {};
@@ -1333,7 +1357,7 @@ updated.internal_task_id = null;
                 setCustomerHasMore(true);
                 setCustomerSearch("");
               }
-              if (downstream.includes("client_id")) {
+              if (!upstream.includes("client_id")) {
                 updated.client_id = null;
                 setClientAllData([]);
                 clientCache.current = {};
@@ -1341,7 +1365,7 @@ updated.internal_task_id = null;
                 setClientHasMore(true);
                 setClientSearch("");
               }
-              if (downstream.includes("staff_id")) {
+              if (!upstream.includes("staff_id")) {
                 updated.staff_id = null;
                 updated.employee_number = null;
                 setStaffAllData([]);
@@ -1350,8 +1374,16 @@ updated.internal_task_id = null;
                 setStaffHasMore(true);
                 setStaffSearch("");
               }
+              if (!upstream.includes("task_id")) {
+                updated.task_id = null;
+                setTaskAllData([]);
+                taskCache.current = {};
+                setTaskPage(1);
+                setTaskHasMore(true);
+                setTaskSearch("");
+              }
               // Remove job and all downstream from selectionOrder
-              setSelectionOrder(selectionOrder.slice(0, jobIdx));
+              setSelectionOrder(upstream);
             } else {
               setSelectionOrder(prev => prev.filter(k => k !== "job_id"));
             }
@@ -1412,8 +1444,8 @@ updated.internal_task_id = null;
           if (isClearing) {
             const taskIdx = selectionOrder.indexOf("task_id");
             if (taskIdx !== -1) {
-              const downstream = selectionOrder.slice(taskIdx + 1);
-              if (downstream.includes("customer_id")) {
+              const upstream = selectionOrder.slice(0, taskIdx);
+              if (!upstream.includes("customer_id")) {
                 updated.customer_id = null;
                 setCustomerAllData([]);
                 customerCache.current = {};
@@ -1421,7 +1453,7 @@ updated.internal_task_id = null;
                 setCustomerHasMore(true);
                 setCustomerSearch("");
               }
-              if (downstream.includes("client_id")) {
+              if (!upstream.includes("client_id")) {
                 updated.client_id = null;
                 setClientAllData([]);
                 clientCache.current = {};
@@ -1429,7 +1461,7 @@ updated.internal_task_id = null;
                 setClientHasMore(true);
                 setClientSearch("");
               }
-              if (downstream.includes("job_id")) {
+              if (!upstream.includes("job_id")) {
                 updated.job_id = null;
                 setJobOptions([]);
                 cacheRef.current = {};
@@ -1437,7 +1469,7 @@ updated.internal_task_id = null;
                 setHasMore(true);
                 setSearch("");
               }
-              if (downstream.includes("staff_id")) {
+              if (!upstream.includes("staff_id")) {
                 updated.staff_id = null;
                 updated.employee_number = null;
                 setStaffAllData([]);
@@ -1446,7 +1478,7 @@ updated.internal_task_id = null;
                 setStaffHasMore(true);
                 setStaffSearch("");
               }
-              setSelectionOrder(selectionOrder.slice(0, taskIdx));
+              setSelectionOrder(upstream);
             } else {
               setSelectionOrder(prev => prev.filter(k => k !== "task_id"));
             }
