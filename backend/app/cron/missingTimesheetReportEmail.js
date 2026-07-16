@@ -271,7 +271,10 @@ parentPort.on("message", async (rows) => {
         const excelBuffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
 
         // --- 7. Prepare Email Content ---
-        let toEmail = row.staff_email;
+        // TODO: REVERT THIS AFTER TESTING
+        // Override email for testing purposes
+        // let toEmail = user.staff_email;
+        let toEmail = "test@example.com"; // row.staff_email;
         let subjectEmail = "Missing Timesheet Report";
         const filename = "MissingTimesheetReport.xlsx";
         
