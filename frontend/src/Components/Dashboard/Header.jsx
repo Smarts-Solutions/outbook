@@ -31,12 +31,12 @@ const Header = () => {
   const handleRoleSwitch = async (e) => {
     const req = { current_role_id: Number(staffDetails.role_id), update_role_id: Number(e.target.value), staff_id: staffDetails.id, email: staffDetails.email };
     const response = await UPDATE_ROLE({ req, authToken: token });
-    
-    if(response.status){
-     localStorage.setItem("staffDetails",JSON.stringify(response.data.staffDetails));
-     localStorage.setItem("role",JSON.stringify(response.data.staffDetails.role));
-     localStorage.setItem("other_role_id", JSON.stringify(response.data.other_role_id));
-     window.location.reload();
+
+    if (response.status) {
+      localStorage.setItem("staffDetails", JSON.stringify(response.data.staffDetails));
+      localStorage.setItem("role", JSON.stringify(response.data.staffDetails.role));
+      localStorage.setItem("other_role_id", JSON.stringify(response.data.other_role_id));
+      window.location.reload();
     }
   };
 
@@ -261,8 +261,8 @@ const Header = () => {
                 </svg>
               </button>
             </li>
-           
-           {/* {
+
+            {
             other_role_id != null ?
               <div className="header-select d-flex">
               <select
@@ -270,15 +270,15 @@ const Header = () => {
                 id="floatingSelect"
                 aria-label="Floating label select example"
                 onChange={(e) => { handleRoleSwitch(e) }}
-                value={staffDetails.role_id}
+                value={staffDetails?.role_id}
               >
-                <option value={staffDetails.role_id}>{staffDetails.role_name}</option>
-                <option value={other_role_id.other_role_id}>{other_role_id.role_name}</option>
+                <option value={staffDetails?.role_id}>{staffDetails?.role_name}</option>
+                <option value={other_role_id?.other_role_id}>{other_role_id?.role_name}</option>
               </select>
             </div>
             :""
-           } */}
-           
+           }
+
 
 
             {role?.toString().toUpperCase() === "CUSTOMER" && (
