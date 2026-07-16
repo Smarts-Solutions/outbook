@@ -86,6 +86,7 @@ const StaffPage = () => {
   });
   const [changedRoleStaffData, setChangedRoleStaffData] = useState([]);
   const [changeRole, setChangeRole] = useState(false);
+  const [isRoleChangeConfirmed, setIsRoleChangeConfirmed] = useState(false);
 
   const [staffDataAllRecords, setStaffDataAllRecords] = useState({ loading: true, data: [] });
   const [managerOptions, setManagerOptions] = useState([]);
@@ -746,11 +747,54 @@ const StaffPage = () => {
           [3, 4, 6].includes(Number(editStaffData.role_id)) &&
           editStaffData.is_customer_exist == 1
         ) {
-          await getChangedRoleStaff(editStaffData);
-          setChangeRole(true);
-          setEditStaff(false);
-          console.log("SENDING DATA:", editStaffData.role_id)
-          return; // Stop normal submit, wait for popup assignment
+          if (!isRoleChangeConfirmed || !selectedStaff) {
+             sweatalert.fire({
+                icon: "error",
+                title: "Validation Error",
+                text: "Please confirm the replacement staff for role change before updating.",
+             });
+             return;
+          }
+
+          try {
+             const updateRes = await dispatch(Staff({ req: { action: "update", ...req }, authToken: token })).unwrap();
+             
+             if (updateRes.status) {
+                const roleChangeReq = {
+                   action: "staffRoleChangeUpdate",
+                   editStaffData: editStaffData,
+                   updateData: values,
+                   selectedStaff: selectedStaff,
+                };
+                const roleChangeRes = await dispatch(getAllTaskByStaff({ req: roleChangeReq, authToken: token })).unwrap();
+
+                if (roleChangeRes.status) {
+                   sweatalert.fire({
+                     icon: "success",
+                     title: "Success",
+                     text: "Staff updated and role changed successfully",
+                     timer: 1500,
+                     timerProgressBar: true,
+                   });
+                   setTimeout(() => {
+                     setAddStaff(false);
+                     setEditStaff(false);
+                     setEditStaffData({});
+                     setSelectedStaff(null);
+                     setIsRoleChangeConfirmed(false);
+                     SetRefresh(!refresh);
+                     formik.resetForm();
+                   }, 1500);
+                } else {
+                   sweatalert.fire({ icon: "error", title: "Oops...", text: roleChangeRes.message });
+                }
+             } else {
+                sweatalert.fire({ icon: "error", title: "Oops...", text: updateRes.message });
+             }
+          } catch(err) {
+             console.error("Error updating staff and changing role:", err);
+          }
+          return; // Stop normal submit because we already handled it
         }
       }
 
@@ -1150,22 +1194,25 @@ const StaffPage = () => {
       const isMainRoleRemoved =
         editStaffData.id !== undefined &&
         Array.isArray(formik.values.role) &&
-        !formik.values.role.includes(Number(editStaffData.role_id));
+        !formik.values.role.includes(Number(editStaffData.role_id)) &&
+        !formik.values.role.includes(String(editStaffData.role_id));
 
       if (isMainRoleRemoved) {
-        if (Number(editStaffData.role_id) === 3) {
-          await getChangedRoleStaff(editStaffData);
-        } else if (Number(editStaffData.role_id) === 4) {
-          await getChangedRoleStaff(editStaffData);
-        } else if (Number(editStaffData.role_id) === 6) {
-          await getChangedRoleStaff(editStaffData);
+        if (!isRoleChangeConfirmed) {
+          if ([3, 4, 6].includes(Number(editStaffData.role_id))) {
+            await getChangedRoleStaff(editStaffData);
+          }
+          setChangeRole(true);
+          setEditStaff(false);
         }
-
-        setChangeRole(true);
-        setEditStaff(false);
+      } else {
+        setIsRoleChangeConfirmed(false);
+        setSelectedStaff(null);
       }
     };
     if (
+      editStaffData &&
+      editStaffData.id &&
       [3, 4, 6].includes(Number(editStaffData.role_id)) &&
       editStaffData.is_customer_exist == 1
     ) {
@@ -1177,63 +1224,32 @@ const StaffPage = () => {
 
 
 
-  const handleChangeRole = async () => {
-    try {
-      const req = {
-        action: "staffRoleChangeUpdate",
-        editStaffData: editStaffData,
-        updateData: formik.values,
-        selectedStaff: selectedStaff,
-      };
-
-      // Also perform normal staff update
-      let updateReq = {
-        first_name: formik.values.first_name.trim(),
-        last_name: formik.values.last_name,
-        email: formik.values.email,
-        phone: formik.values.phone,
-        phone_code: formik.values.phone_code,
-        role_id: formik.values.role,
-        status: formik.values.status,
-        employee_number: formik.values.employee_number,
-        staff_to: formik.values.staff_to,
-        created_by: StaffUserId.id,
-        hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"}`,
-        id: editStaffData && editStaffData.id,
-      };
-      await dispatch(Staff({ req: { action: "update", ...updateReq }, authToken: token })).unwrap();
-
-      const data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then((res) => {
-          if (res.status) {
-            setChangeRole(false);
-            setSelectedStaff(null);
-            formik.resetForm();
-            setEditStaffData({});
-            Swal.fire({
-              title: "Success!",
-              text: "Staff role updated successfully.",
-              icon: "success",
-              confirmButtonText: "OK",
-            });
-            SetRefresh(!refresh);
-          } else {
-            Swal.fire({
-              title: "Error!",
-              text: "Failed to update staff role.",
-              icon: "error",
-              confirmButtonText: "OK",
-            });
-          }
-        })
-        .catch((err) => {
-
-        });
-    } catch (error) {
-      console.error("Error fetching staff tasks:", error);
+  const handleConfirmRoleChange = () => {
+    if (!selectedStaff) {
+      Swal.fire({
+        title: "Validation Error",
+        text: "Please select a replacement staff first.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      return;
     }
+    setIsRoleChangeConfirmed(true);
+    setChangeRole(false);
+    setEditStaff(true); // Re-open the main edit popup
+  };
+
+  const handleCancelRoleChange = () => {
+    setChangeRole(false);
+    setEditStaff(true);
+    // Reset role back to original to avoid triggering the modal again
+    const originalRoles = [].concat(editStaffData?.role_id || []);
+    if (editStaffData?.staff_other_role_id != null) {
+      originalRoles.push(editStaffData?.staff_other_role_id);
+    }
+    formik.setFieldValue("role", originalRoles);
+    setSelectedStaff(null);
+    setIsRoleChangeConfirmed(false);
   };
 
   const handleExport = async () => {
@@ -1843,13 +1859,7 @@ const StaffPage = () => {
         backdrop="static"
         title="Change Role - Staff"
         hideBtn={true}
-        handleClose={() => {
-          setChangeRole(false);
-          setSelectedStaff(null);
-          formik.resetForm();
-          setEditStaffData({});
-          setChangedRoleStaffData([]);
-        }}
+        handleClose={handleCancelRoleChange}
       >
         <div className="modal-body">
           <div className="mb-4">
@@ -1928,19 +1938,11 @@ const StaffPage = () => {
           </div>
 
           <div className="d-flex justify-content-end gap-2">
-            {selectedStaff && (
-              <button onClick={handleChangeRole} className="btn btn-info">
-                <i className="bi bi-arrow-repeat me-1"></i> Change Role
-              </button>
-            )}
+            <button onClick={handleConfirmRoleChange} className="btn btn-info">
+              <i className="bi bi-check-circle me-1"></i> Confirm
+            </button>
             <button
-              onClick={() => {
-                setChangeRole(false);
-                setSelectedStaff(null);
-                formik.resetForm();
-                setEditStaffData({});
-                setChangedRoleStaffData([]);
-              }}
+              onClick={handleCancelRoleChange}
               className="btn btn-secondary"
             >
               <X size={16} /> Cancel
