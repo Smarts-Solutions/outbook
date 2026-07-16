@@ -114,10 +114,7 @@ const StaffPage = () => {
     if (managerCacheRef.current[cacheKey]) {
       const cached = managerCacheRef.current[cacheKey];
       setManagerOptions((prev) => {
-        let combined = append ? [...prev, ...cached] : cached;
-        if (editStaffData?.staff_to && editStaffData?.line_manager_name) {
-          combined.push({ label: editStaffData.line_manager_name, value: editStaffData.staff_to });
-        }
+        const combined = append ? [...prev, ...cached] : cached;
         const unique = Array.from(
           new Map(combined.map((item) => [item.value, item])).values(),
         );
@@ -150,10 +147,7 @@ const StaffPage = () => {
 
         managerCacheRef.current[cacheKey] = formatted;
         setManagerOptions((prev) => {
-          let combined = append ? [...prev, ...formatted] : formatted;
-          if (editStaffData?.staff_to && editStaffData?.line_manager_name) {
-            combined.push({ label: editStaffData.line_manager_name, value: editStaffData.staff_to });
-          }
+          const combined = append ? [...prev, ...formatted] : formatted;
           const unique = Array.from(
             new Map(combined.map((item) => [item.value, item])).values(),
           );
@@ -702,13 +696,13 @@ const StaffPage = () => {
         .trim(Validation_Message.EmailValidation)
         .email(Validation_Message.EmailValidation)
         .required(Validation_Message.EmailIsRequire),
-      // role: Yup.string()
-      //   .trim(Validation_Message.RoleValidation)
-      //   .required(Validation_Message.RoleValidation),
-      role: Yup.array()
-        .min(1, "At least 1 role is required")
-        .max(2, "Maximum 2 roles allowed")
+      role: Yup.string()
+        .trim(Validation_Message.RoleValidation)
         .required(Validation_Message.RoleValidation),
+      // role: Yup.array()
+      //   .min(1, "At least 1 role is required")
+      //   .max(2, "Maximum 2 roles allowed")
+      //  .required(Validation_Message.RoleValidation),
       status: Yup.string()
         .trim(Validation_Message.StatusValidation)
         .required(Validation_Message.StatusValidation),
@@ -734,25 +728,8 @@ const StaffPage = () => {
       };
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
-        
-        const isMainRoleRemoved =
-          editStaffData.id !== undefined &&
-          Array.isArray(values.role) &&
-          !values.role.includes(Number(editStaffData.role_id)) &&
-          !values.role.includes(String(editStaffData.role_id));
-
-        if (
-          isMainRoleRemoved &&
-          [3, 4, 6].includes(Number(editStaffData.role_id)) &&
-          editStaffData.is_customer_exist == 1
-        ) {
-          await getChangedRoleStaff(editStaffData);
-          setChangeRole(true);
-          setEditStaff(false);
-          console.log("SENDING DATA:", editStaffData.role_id)
-          return; // Stop normal submit, wait for popup assignment
-        }
       }
+
 
       await dispatch(
         Staff({
@@ -776,7 +753,7 @@ const StaffPage = () => {
               setEditStaffData({});
               SetRefresh(!refresh);
               formik.resetForm();
-              // window.location.reload();
+              window.location.reload();
             }, 1500);
           } else {
             sweatalert.fire({
@@ -844,46 +821,46 @@ const StaffPage = () => {
       disable: false,
       placeholder: "Enter Email",
     },
-    // {
-    //   type: "select1",
-    //   name: "role",
-    //   label: "Role",
-    //   label_size: 12,
-    //   col_size: 6,
-    //   options:
-    //     roleDataAll &&
-    //     roleDataAll.data.map((data) => {
-    //       if (formik.values.role_id == data.id) {
-    //         return { label: data.role_name, value: data.id, selected: true };
-    //       } else {
-    //         return { label: data.role_name, value: data.id };
-    //       }
-    //     }),
-    // },
-
     {
-      type: "reactSelectRole",
+      type: "select1",
       name: "role",
       label: "Role",
       label_size: 12,
       col_size: 6,
-      isMulti: true,
-      maxSelection: 2,
-
-      fixedRoleId: editStaff
-        ? (Array.isArray(editStaffData?.role_id)
-          ? editStaffData.role_id[0]
-          : editStaffData?.role_id)
-        : null,
-
-      isEditMode: editStaff,
-
       options:
-        roleDataAll?.data?.map((data) => ({
-          label: data.role_name,
-          value: data.id,
-        })) || [],
+        roleDataAll &&
+        roleDataAll.data.map((data) => {
+          if (formik.values.role_id == data.id) {
+            return { label: data.role_name, value: data.id, selected: true };
+          } else {
+            return { label: data.role_name, value: data.id };
+          }
+        }),
     },
+   
+    // {
+    //   type: "reactSelectRole",
+    //   name: "role",
+    //   label: "Role",
+    //   label_size: 12,
+    //   col_size: 6,
+    //   isMulti: true,
+    //   maxSelection: 2,
+
+    //   fixedRoleId: editStaff
+    //     ? (Array.isArray(editStaffData?.role_id)
+    //       ? editStaffData.role_id[0]
+    //       : editStaffData?.role_id)
+    //     : null,
+
+    //   isEditMode: editStaff,
+
+    //   options:
+    //     roleDataAll?.data?.map((data) => ({
+    //       label: data.role_name,
+    //       value: data.id,
+    //     })) || [],
+    // },
     {
       type: "select1",
       name: "status",
@@ -982,19 +959,19 @@ const StaffPage = () => {
   useEffect(() => {
     if (editStaffData && editStaffData) {
 
-      //  console.log("editStaffData", editStaffData);
+    //  console.log("editStaffData", editStaffData);
       const roleIds = [].concat(editStaffData?.role_id || []);
-      if (editStaffData?.staff_other_role_id != null) {
-        roleIds.push(editStaffData?.staff_other_role_id)
+      if(editStaffData?.staff_other_role_id != null){
+       roleIds.push(editStaffData?.staff_other_role_id)
       }
 
-
+     
       formik.setFieldValue("first_name", editStaffData.first_name || "null");
       formik.setFieldValue("last_name", editStaffData.last_name || "null");
       formik.setFieldValue("email", editStaffData.email || "null");
       formik.setFieldValue("phone", editStaffData.phone || null);
-      //formik.setFieldValue("role", editStaffData.role_id || "null");
-      formik.setFieldValue("role", roleIds || []);
+      formik.setFieldValue("role", editStaffData.role_id || "null");
+     // formik.setFieldValue("role", roleIds || []);
       formik.setFieldValue("status", editStaffData.status || "null");
       formik.setFieldValue(
         "employee_number",
@@ -1085,8 +1062,6 @@ const StaffPage = () => {
       const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
       if (response.status) {
         setDeleteStaffCustomer(response.data);
-        console.log("customer data", response.data);
-
       } else {
         setDeleteStaffCustomer([]);
       }
@@ -1104,7 +1079,6 @@ const StaffPage = () => {
       const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
       if (response.status) {
         setDeleteStaffCustomer(response.data);
-        console.log("customer data 2", response.data);
       } else {
         setDeleteStaffCustomer([]);
       }
@@ -1143,37 +1117,31 @@ const StaffPage = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchChangedRoleStaff = async () => {
+      if (
+        editStaffData.id !== undefined &&
+        Number(formik.values.role) !== Number(editStaffData.role_id)
+      ) {
+        if (Number(editStaffData.role_id) === 3) {
+          await getChangedRoleStaff(editStaffData);
+        } else if (Number(editStaffData.role_id) === 4) {
+          await getChangedRoleStaff(editStaffData);
+        } else if (Number(editStaffData.role_id) === 6) {
+          await getChangedRoleStaff(editStaffData);
+        }
 
-
-  // useEffect(() => {
-  //   const fetchChangedRoleStaff = async () => {
-  //     if (
-  //       editStaffData.id !== undefined &&
-  //       Number(formik.values.role) !== Number(editStaffData.role_id)
-  //     ) {
-  //       if (Number(editStaffData.role_id) === 3) {
-  //         await getChangedRoleStaff(editStaffData);
-  //       } else if (Number(editStaffData.role_id) === 4) {
-  //         await getChangedRoleStaff(editStaffData);
-  //       } else if (Number(editStaffData.role_id) === 6) {
-  //         await getChangedRoleStaff(editStaffData);
-  //       }
-
-  //       setChangeRole(true);
-  //       setEditStaff(false);
-  //     }
-  //   };
-  //   if (
-  //     [3, 4, 6].includes(Number(editStaffData.role_id)) &&
-  //     editStaffData.is_customer_exist == 1
-  //   ) {
-  //     fetchChangedRoleStaff();
-  //   }
-  // }, [formik.values.role]);
-
-
-
-
+        setChangeRole(true);
+        setEditStaff(false);
+      }
+    };
+    if (
+      [3, 4, 6].includes(Number(editStaffData.role_id)) &&
+      editStaffData.is_customer_exist == 1
+    ) {
+      fetchChangedRoleStaff();
+    }
+  }, [formik.values.role]);
 
   const handleChangeRole = async () => {
     try {
@@ -1183,24 +1151,6 @@ const StaffPage = () => {
         updateData: formik.values,
         selectedStaff: selectedStaff,
       };
-
-      // Also perform normal staff update
-      let updateReq = {
-        first_name: formik.values.first_name.trim(),
-        last_name: formik.values.last_name,
-        email: formik.values.email,
-        phone: formik.values.phone,
-        phone_code: formik.values.phone_code,
-        role_id: formik.values.role,
-        status: formik.values.status,
-        employee_number: formik.values.employee_number,
-        staff_to: formik.values.staff_to,
-        created_by: StaffUserId.id,
-        hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"}`,
-        id: editStaffData && editStaffData.id,
-      };
-      await dispatch(Staff({ req: { action: "update", ...updateReq }, authToken: token })).unwrap();
-
       const data = { req: req, authToken: token };
       await dispatch(getAllTaskByStaff(data))
         .unwrap()
