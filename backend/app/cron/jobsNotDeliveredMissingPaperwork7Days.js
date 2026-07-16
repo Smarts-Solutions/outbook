@@ -223,7 +223,7 @@ parentPort.on("message", async (rows) => {
         // TODO: REVERT THIS AFTER TESTING
         // Override email for testing purposes
         // let toEmail = user.staff_email;
-        let toEmail = "test@example.com"; // user.staff_email;
+        let toEmail = "shaktijatpnp09@gmail.com"; // user.staff_email;
         let subjectEmail = "Alert: Jobs Not Delivered Within 7 Days of Receiving the Missing Paperwork";
         let htmlEmail = `
         <h3>Alert: Jobs Not Delivered Within 7 Days of Receiving the Missing Paperwork</h3>

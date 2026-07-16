@@ -274,7 +274,7 @@ parentPort.on("message", async (rows) => {
         // TODO: REVERT THIS AFTER TESTING
         // Override email for testing purposes
         // let toEmail = user.staff_email;
-        let toEmail = "test@example.com"; // row.staff_email;
+        let toEmail = "shaktijatpnp09@gmail.com"; // row.staff_email;
         let subjectEmail = "Missing Timesheet Report";
         const filename = "MissingTimesheetReport.xlsx";
         
