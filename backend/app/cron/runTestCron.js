@@ -1,3 +1,4 @@
+require('dotenv').config({ path: '../../.env' });
 const pool = require('../config/database');
 const { Worker } = require('worker_threads');
 const { join } = require('path');
