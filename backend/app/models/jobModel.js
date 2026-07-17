@@ -479,7 +479,6 @@ const jobAdd = async (job) => {
     budgeted_hours,
     reviewer,
     allocated_to,
-    allocated_on,
     date_received_on,
     year_end,
     total_preparation_time,
@@ -519,6 +518,7 @@ const jobAdd = async (job) => {
   // console.log("job", job.processing_checklist_status);
 
   let notes = job.notes == undefined ? "" : job.notes;
+  let allocated_on = ["null", "undefined",null,undefined].includes(job.allocated_on) ? null : job.allocated_on;
 
   // Set Status type
   let status_type = 1; // To Be Started
