@@ -218,7 +218,7 @@ function TimesheetReport() {
           response.data.forEach(manager => {
             // Check if this manager matches the selected customer, client, or job
             let keep = true;
-            
+
             // manager.assigned_customers is a comma-separated string like '89,90'
             if (customer_id) {
               const assignedCusts = manager.assigned_customers ? manager.assigned_customers.split(',') : [];
@@ -257,7 +257,7 @@ function TimesheetReport() {
       }
 
       if (searchValue) {
-        dataList = dataList.filter(item => 
+        dataList = dataList.filter(item =>
           item.label.toLowerCase().includes(searchValue.toLowerCase())
         );
       }
@@ -818,7 +818,7 @@ function TimesheetReport() {
             setInternalTaskAllData([]);
           }
         })
-        .catch(() => {});
+        .catch(() => { });
       return;
     }
 
@@ -838,7 +838,7 @@ function TimesheetReport() {
             setInternalTaskAllData([]);
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     }
 
     const cacheKey = `${searchValue}_${pageNo}_${customer_id}_${client_id}_${job_id}_${staff_id}`;
@@ -1019,7 +1019,7 @@ function TimesheetReport() {
       setFilters((prev) => {
         let updated = { ...prev, [key]: [null, undefined, ""].includes(value) ? null : value };
         if (key === "staff_id" || key === "employee_number") {
-updated.internal_job_id = null;
+          updated.internal_job_id = null;
           updated.internal_task_id = null;
 
           let resolvedStaffId = value;
@@ -1144,7 +1144,7 @@ updated.internal_job_id = null;
           setInternalTaskAllData([]);
 
         } else if (key === "customer_id") {
-updated.internal_job_id = null;
+          updated.internal_job_id = null;
           updated.internal_task_id = null;
 
           const isClearing = [null, undefined, ""].includes(value);
@@ -1238,7 +1238,7 @@ updated.internal_job_id = null;
           setInternalJobAllData([]);
           setInternalTaskAllData([]);
         } else if (key === "client_id") {
-updated.internal_job_id = null;
+          updated.internal_job_id = null;
           updated.internal_task_id = null;
 
           const isClearing = [null, undefined, ""].includes(value);
@@ -1332,7 +1332,7 @@ updated.internal_job_id = null;
           setInternalJobAllData([]);
           setInternalTaskAllData([]);
         } else if (key === "job_id") {
-updated.internal_task_id = null;
+          updated.internal_task_id = null;
 
           const isClearing = [null, undefined, ""].includes(value);
 
@@ -1430,7 +1430,7 @@ updated.internal_task_id = null;
           setInternalTaskAllData([]);
         } else if (key === "task_id") {
           updated.internal_task_id = null;
-          
+
           const isClearing = [null, undefined, ""].includes(value);
 
           if (isClearing) {
@@ -1515,7 +1515,7 @@ updated.internal_task_id = null;
                 setStaffHasMore(true);
                 GetAllStaff({ searchValue: "", pageNo: 1, task_id: value, job_id: upJobForStaff, customer_id: upCustomerForStaff, client_id: upClientForStaff });
               }
-              
+
               if (jobIdx === -1 || taskIdx < jobIdx) {
                 const upCustomerForJob = customerIdx !== -1 && customerIdx < taskIdx ? filters.customer_id : null;
                 const upClientForJob = clientIdx !== -1 && clientIdx < taskIdx ? filters.client_id : null;
@@ -2216,7 +2216,7 @@ updated.internal_task_id = null;
                 }
               }}
               options={[
-                { value: "", label: "Select..." }, 
+                { value: "", label: "Select..." },
                 ...staffAllData.filter(staff => {
                   if (filters.employee_number) {
                     const matchedEmployee = employeeNumberAllData.find(e => e.value === filters.employee_number);
@@ -2287,13 +2287,13 @@ updated.internal_task_id = null;
               value={
                 employeeNumberAllData && employeeNumberAllData.length > 0
                   ? employeeNumberAllData.find(opt => {
-                      if (opt.value !== filters.employee_number) return false;
-                      // Must also be valid in staffAllData if upstream filters apply
-                      if (filters.customer_id || filters.client_id || filters.job_id || filters.task_id) {
-                        return staffAllData.some(staff => Number(staff.value) === Number(opt.staff_id));
-                      }
-                      return true;
-                    }) || null
+                    if (opt.value !== filters.employee_number) return false;
+                    // Must also be valid in staffAllData if upstream filters apply
+                    if (filters.customer_id || filters.client_id || filters.job_id || filters.task_id) {
+                      return staffAllData.some(staff => Number(staff.value) === Number(opt.staff_id));
+                    }
+                    return true;
+                  }) || null
                   : null
               }
               onChange={(selected) =>
@@ -2868,6 +2868,7 @@ updated.internal_task_id = null;
               <option value={100}>100</option>
               <option value={500}>500</option>
               <option value={1000}>1000</option>
+              <option value={1000000}>All</option>
             </select>
           </div>
         )}
