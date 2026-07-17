@@ -75,36 +75,6 @@ const Timesheet = () => {
 
   const [hasValidWeekOffsetZero, setHasValidWeekOffsetZero] = useState(false);
 
-  const validateRowDatesMatchWeek = (data) => {
-    const dayMap = {
-      monday_date: weekDays.monday,
-      tuesday_date: weekDays.tuesday,
-      wednesday_date: weekDays.wednesday,
-      thursday_date: weekDays.thursday,
-      friday_date: weekDays.friday,
-      saturday_date: weekDays.saturday,
-      sunday_date: weekDays.sunday,
-    };
-    for (const row of data) {
-      for (const [dateKey, expectedDisplayDate] of Object.entries(dayMap)) {
-        if (row[dateKey] && expectedDisplayDate) {
-          const expectedISO = convertDateFormatForCopy(expectedDisplayDate);
-          if (row[dateKey] !== expectedISO) {
-            return {
-              valid: false,
-              field: dateKey,
-              expected: expectedISO,
-              got: row[dateKey],
-            };
-          }
-        }
-      }
-    }
-    return {
-      valid: true
-    };
-  };
-
   const [weekDays, setWeekDays] = useState({
     monday: "",
     tuesday: "",
@@ -119,7 +89,7 @@ const Timesheet = () => {
     const today = new Date();
     // console.log("weekOffset==>", weekOffset);
     let dayOfWeek = today.getDay();
-
+   
     dayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
 
     const startOfWeek = new Date(today);
@@ -144,36 +114,36 @@ const Timesheet = () => {
       saturday: formatDate(
         new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
       ),
-      // sunday: formatDate(startOfWeek),
+     // sunday: formatDate(startOfWeek),
       sunday: formatDate(
         new Date(startOfWeek.setDate(startOfWeek.getDate() + 1))
       ),
     });
   }, [weekOffset]);
-
+  
   console.log("weekDays==>", weekDays);
-  //   useEffect(() => {
-  //   // const today = new Date("2026-06-21"); // test sunday
-  //   const today = new Date();
+//   useEffect(() => {
+//   // const today = new Date("2026-06-21"); // test sunday
+//   const today = new Date();
 
-  //   let dayOfWeek = today.getDay();
-  //   dayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
+//   let dayOfWeek = today.getDay();
+//   dayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
 
-  //   const monday = new Date(today);
-  //   monday.setDate(
-  //     today.getDate() - (dayOfWeek - 1) + weekOffset * 7
-  //   );
+//   const monday = new Date(today);
+//   monday.setDate(
+//     today.getDate() - (dayOfWeek - 1) + weekOffset * 7
+//   );
 
-  //   setWeekDays({
-  //     monday: formatDate(new Date(monday)),
-  //     tuesday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 1)),
-  //     wednesday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 2)),
-  //     thursday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 3)),
-  //     friday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 4)),
-  //     saturday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 5)),
-  //     sunday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6)),
-  //   });
-  // }, [weekOffset]);
+//   setWeekDays({
+//     monday: formatDate(new Date(monday)),
+//     tuesday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 1)),
+//     wednesday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 2)),
+//     thursday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 3)),
+//     friday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 4)),
+//     saturday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 5)),
+//     sunday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6)),
+//   });
+// }, [weekOffset]);
 
 
 
@@ -238,7 +208,6 @@ const Timesheet = () => {
   };
 
   const GetTimeSheet = async (weekOffset) => {
-    setIsWeekSwitching(true);
     const req = { staff_id: multipleFilter.staff_id, weekOffset: weekOffset };
     const res = await dispatch(
       getTimesheetData({ req, authToken: token })
@@ -305,10 +274,7 @@ const Timesheet = () => {
       setSubmitStatusAllKey(0);
       setTimeSheetRows([]);
     }
-    setIsWeekSwitching(false);
   };
-
-
 
   const selectFilterStaffANdWeek = async (e) => {
     let { name, value } = e.target;
@@ -430,16 +396,8 @@ const Timesheet = () => {
   }, []);
 
   // Function to handle week change
-  // const changeWeek = (offset) => {
-  //   // alert(offset);
-  //   setWeekOffset(parseInt(weekOffset) + offset);
-  //   weekOffSetValue.current = parseInt(weekOffset) + offset;
-  //   GetTimeSheet(parseInt(weekOffset) + offset);
-  // };
-
   const changeWeek = (offset) => {
-    if (isWeekSwitching) return;   //  ADD: 
-
+    // alert(offset);
     setWeekOffset(parseInt(weekOffset) + offset);
     weekOffSetValue.current = parseInt(weekOffset) + offset;
     GetTimeSheet(parseInt(weekOffset) + offset);
@@ -456,8 +414,6 @@ const Timesheet = () => {
   const [selectedTab, setSelectedTab] = useState("this-week");
   const [loading, setLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
-
-  const [isWeekSwitching, setIsWeekSwitching] = useState(false);
 
   // console.log(`timeSheetRows`, timeSheetRows);
 
@@ -1247,16 +1203,6 @@ const Timesheet = () => {
           timerProgressBar: true,
           showConfirmButton: true,
           timer: 3000,
-        });
-        return;
-      }
-
-      const dateCheck = validateRowDatesMatchWeek(req.data);
-      if (!dateCheck.valid) {
-        sweatalert.fire({
-          icon: "error",
-          title: `Date mismatch detected in ${dateCheck.field}. Expected ${dateCheck.expected}, but found ${dateCheck.got}. Please refresh and re-enter.`,
-          showConfirmButton: true,
         });
         return;
       }
@@ -2245,13 +2191,11 @@ const Timesheet = () => {
                             // style={{ width: isExpanded ? "50%" : "100px" }}
                             >
                               <div className="d-flex align-items-center">
-                                {/* <ChevronLeft
+                                <ChevronLeft
                                   onClick={(e) => {
                                     e.preventDefault();
                                     changeWeek(-1);
                                   }}
-                                /> */}
-                                < ChevronLeft style={{ cursor: isWeekSwitching ? "not-allowed" : "pointer", opacity: isWeekSwitching ? 0.5 : 1 }} onClick={(e) => { e.preventDefault(); if (!isWeekSwitching) changeWeek(-1); }}
                                 />
                                 <span className="me-0">
                                   {weekDays.monday
@@ -2298,13 +2242,12 @@ const Timesheet = () => {
                                   )}
                                 </button>
 
-                                {/* <ChevronRight
+                                <ChevronRight
                                   onClick={(e) => {
                                     e.preventDefault();
                                     changeWeek(1);
                                   }}
-                                /> */}
-                                <ChevronRight style={{ cursor: isWeekSwitching ? "not-allowed" : "pointer", opacity: isWeekSwitching ? 0.5 : 1 }} onClick={(e) => { e.preventDefault(); if (!isWeekSwitching) changeWeek(1); }} />
+                                />
                               </div>
                             </th>
 
@@ -2731,22 +2674,14 @@ const Timesheet = () => {
                                                 ? "0"
                                                 : item.monday_hours
                                             }
-                                            // disabled={
-                                            //   staffDetails.id !=
-                                            //     multipleFilter.staff_id
-                                            //     ? true
-                                            //     : item.submit_status === "1"
-                                            //       ? true
-                                            //       : false
-                                            // }
+                                            // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false :false}
                                             disabled={
-                                              staffDetails.id != multipleFilter.staff_id
+                                              staffDetails.id !=
+                                                multipleFilter.staff_id
                                                 ? true
                                                 : item.submit_status === "1"
                                                   ? true
-                                                  : isWeekSwitching
-                                                    ? true
-                                                    : false
+                                                  : false
                                             }
                                             onFocus={() => {
                                               setActiveIndex(index);
@@ -2794,22 +2729,14 @@ const Timesheet = () => {
                                               ? "0"
                                               : item.tuesday_hours
                                           }
-                                          //  disabled={
-                                          //   staffDetails.id !=
-                                          //     multipleFilter.staff_id
-                                          //     ? true
-                                          //     : item.submit_status === "1"
-                                          //       ? true
-                                          //       : false
-                                          // }
+                                          // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.tuesday) > new Date() ? currentDay === 'tuesday' ? false : true : false : currentDay !== 'tuesday'}
                                           disabled={
-                                            staffDetails.id != multipleFilter.staff_id
+                                            staffDetails.id !=
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
-                                                : isWeekSwitching
-                                                  ? true
-                                                  : false
+                                                : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
@@ -2855,23 +2782,14 @@ const Timesheet = () => {
                                               ? "0"
                                               : item.wednesday_hours
                                           }
-
-                                          // disabled={
-                                          //   staffDetails.id !=
-                                          //     multipleFilter.staff_id
-                                          //     ? true
-                                          //     : item.submit_status === "1"
-                                          //       ? true
-                                          //       : false
-                                          // }
+                                          // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.wednesday) > new Date() ? currentDay === 'wednesday' ? false : true : false : currentDay !== 'wednesday'}
                                           disabled={
-                                            staffDetails.id != multipleFilter.staff_id
+                                            staffDetails.id !=
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
-                                                : isWeekSwitching
-                                                  ? true
-                                                  : false
+                                                : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
@@ -2917,24 +2835,15 @@ const Timesheet = () => {
                                               ? "0"
                                               : item.thursday_hours
                                           }
-                                          // disabled={
-                                          //   staffDetails.id !=
-                                          //     multipleFilter.staff_id
-                                          //     ? true
-                                          //     : item.submit_status === "1"
-                                          //       ? true
-                                          //       : false
-                                          // }
+                                          // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.thursday) > new Date() ? currentDay === 'thursday' ? false : true : false : currentDay !== 'thursday'}
                                           disabled={
-                                            staffDetails.id != multipleFilter.staff_id
+                                            staffDetails.id !=
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
-                                                : isWeekSwitching
-                                                  ? true
-                                                  : false
+                                                : false
                                           }
-
                                           onFocus={() => {
                                             setActiveIndex(index);
                                             setActiveField("thursday");
@@ -2979,23 +2888,14 @@ const Timesheet = () => {
                                               ? "0"
                                               : item.friday_hours
                                           }
-
-                                          // disabled={
-                                          //   staffDetails.id !=
-                                          //     multipleFilter.staff_id
-                                          //     ? true
-                                          //     : item.submit_status === "1"
-                                          //       ? true
-                                          //       : false
-                                          // }
+                                          // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.friday) > new Date() ? currentDay === 'friday' ? false : true : false : currentDay !== 'friday'}
                                           disabled={
-                                            staffDetails.id != multipleFilter.staff_id
+                                            staffDetails.id !=
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
-                                                : isWeekSwitching
-                                                  ? true
-                                                  : false
+                                                : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
@@ -3041,23 +2941,14 @@ const Timesheet = () => {
                                               ? "0"
                                               : item.saturday_hours
                                           }
-
-                                          // disabled={
-                                          //   staffDetails.id !=
-                                          //     multipleFilter.staff_id
-                                          //     ? true
-                                          //     : item.submit_status === "1"
-                                          //       ? true
-                                          //       : false
-                                          // }
+                                          // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.saturday) > new Date() ? currentDay === 'saturday' ? false : true : false : currentDay !== 'saturday'}
                                           disabled={
-                                            staffDetails.id != multipleFilter.staff_id
+                                            staffDetails.id !=
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
-                                                : isWeekSwitching
-                                                  ? true
-                                                  : false
+                                                : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
@@ -3105,23 +2996,14 @@ const Timesheet = () => {
                                               ? "0"
                                               : item.monday_hours
                                           }
-
-                                          // disabled={
-                                          //   staffDetails.id !=
-                                          //     multipleFilter.staff_id
-                                          //     ? true
-                                          //     : item.submit_status === "1"
-                                          //       ? true
-                                          //       : false
-                                          // }
+                                          // disabled={item.submit_status === "1" ? true : item.editRow == 1 ? new Date(weekDays.monday) > new Date() ? currentDay === 'monday' ? false : true : false : currentDay !== 'monday'}
                                           disabled={
-                                            staffDetails.id != multipleFilter.staff_id
+                                            staffDetails.id !=
+                                              multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
-                                                : isWeekSwitching
-                                                  ? true
-                                                  : false
+                                                : false
                                           }
                                           onFocus={() => {
                                             setActiveIndex(index);
