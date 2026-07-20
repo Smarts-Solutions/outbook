@@ -807,6 +807,7 @@ const StaffPage = () => {
       type: "number1",
       name: "phone",
       label: "Phone",
+      star: false,
       label_size: 12,
       col_size: 6,
       disable: false,
