@@ -790,17 +790,26 @@ const CustomerUsers = () => {
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      const req = { action: 'getCustomerUsers', staff_id: staffDetails.id, page: 1, limit: 100000, search: "" };
+      const req = { action: 'getCustomerUsers', staff_id: staffDetails.id, page: 1, limit: 100000, search: searchTerm || "" };
       const data = { req, authToken: token };
       const response = await dispatch(getAllCustomerUsers(data)).unwrap();
       if (!response.status) {
         alert("No data to export!");
         return;
       }
-      const apiData = response?.data?.data;
+      let apiData = response?.data?.data;
 
       if (!apiData || apiData.length === 0) {
         alert("No data to export!");
+        return;
+      }
+
+      if (statusFilter !== "") {
+        apiData = apiData.filter((item) => item.status == statusFilter);
+      }
+
+      if (apiData.length === 0) {
+        alert("No matching data to export!");
         return;
       }
 
