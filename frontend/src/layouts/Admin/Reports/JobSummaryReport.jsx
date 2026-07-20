@@ -10,6 +10,7 @@ const JobStatus = () => {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const [jobSummaryReportData, setJobSummaryReportData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     JobSummary();
@@ -17,6 +18,7 @@ const JobStatus = () => {
 
 
   const JobSummary = async () => {
+    setLoading(true);
     const data = { req: {}, authToken: token };
     await dispatch(jobSummaryReports(data))
       .unwrap()
@@ -27,9 +29,11 @@ const JobStatus = () => {
         else {
           setJobSummaryReportData([]);
         }
+        setLoading(false);
       })
       .catch((err) => {
         console.log(err);
+        setLoading(false);
       });
   }
 
@@ -71,6 +75,11 @@ const JobStatus = () => {
           </div>
         </div>
         <div className='datatable-wrapper mt-minus'>
+          {loading && (
+            <div className="overlay">
+              <div className="loader"></div>
+            </div>
+          )}
           <Datatable
             filter={true}
             columns={columns}

@@ -8,13 +8,14 @@ const TeamMonthlyReport = () => {
     const dispatch = useDispatch();
     const token = JSON.parse(localStorage.getItem("token"));
     const [getMonthlyReport, setMonthlyReport] = useState([]);
-
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         MonthlyReport();
       }, []);
     
       const MonthlyReport = async () => {
+        setLoading(true);
         const data = { req: {}, authToken: token };
         await dispatch(teamMonthlyReports(data))
           .unwrap()
@@ -25,9 +26,10 @@ const TeamMonthlyReport = () => {
             else {
                 setMonthlyReport([]);
             }
+            setLoading(false);
           })
           .catch((err) => {
-           
+            setLoading(false);
           });
       }
 
@@ -58,6 +60,11 @@ const TeamMonthlyReport = () => {
               </div>
             </div>
             <div className='datatable-wrapper mt-minus'>
+              {loading && (
+                <div className="overlay">
+                  <div className="loader"></div>
+                </div>
+              )}
               <Datatable
                 filter={true}
                 columns={columns} data={getMonthlyReport && getMonthlyReport} />

@@ -9,13 +9,14 @@ const JobPendingReport = () => {
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
   const [getJobPendingReport, setJobPendingReport] = useState([]);
-
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     JobPending();
   }, []);
 
   const JobPending = async () => {
+    setLoading(true);
     const data = { req: {}, authToken: token };
     await dispatch(jobPendingReports(data))
       .unwrap()
@@ -26,9 +27,11 @@ const JobPendingReport = () => {
         else {
           setJobPendingReport([]);
         }
+        setLoading(false);
       })
       .catch((err) => {
         console.log(err);
+        setLoading(false);
       });
   }
 
@@ -90,6 +93,11 @@ const JobPendingReport = () => {
           </div>
         </div>
         <div className='datatable-wrapper mt-minus'>
+          {loading && (
+            <div className="overlay">
+              <div className="loader"></div>
+            </div>
+          )}
           <Datatable
             filter={true}
             columns={columns} data={getJobPendingReport && getJobPendingReport} />

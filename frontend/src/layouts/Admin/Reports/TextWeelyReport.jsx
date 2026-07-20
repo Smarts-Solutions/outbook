@@ -26,7 +26,7 @@ const SlidingTable = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
-
+  const [loading, setLoading] = useState(false);
 
 
 
@@ -40,6 +40,7 @@ const SlidingTable = () => {
   }, [multipleFilter, page, limit]);
 
   const getAllWeeklyReports = async () => {
+    setLoading(true);
     const req = {
       // Pagination state (must be before any usage)
 
@@ -62,10 +63,11 @@ const SlidingTable = () => {
           setWeeklyReportData([]);
           setTotalCount(0);
         }
+        setLoading(false);
       })
       .catch((err) => {
-  
         setTotalCount(0);
+        setLoading(false);
       })
   };
 
@@ -324,6 +326,11 @@ const SlidingTable = () => {
 
         </div>
         <div className="table-wrapper">
+          {loading && (
+            <div className="overlay">
+              <div className="loader"></div>
+            </div>
+          )}
           <table className="table ">
             <thead className='table-light table-head-blue'>
               <tr>
