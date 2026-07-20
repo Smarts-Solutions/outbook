@@ -27,6 +27,7 @@ const JobStatus = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const handlePageChange = (selected) => {
     const newPage = selected.selected + 1;
@@ -490,21 +491,23 @@ const JobStatus = () => {
 
 
   const handleExport = async () => {
-    const data = {
-      req: { page: 1, limit: 1000000, search: "" },
-      authToken: token,
-    };
+    setIsExporting(true);
+    try {
+      const data = {
+        req: { page: 1, limit: 1000000, search: searchTerm || "" },
+        authToken: token,
+      };
 
-    const response = await dispatch(JobStatusReport(data)).unwrap();
+      const response = await dispatch(JobStatusReport(data)).unwrap();
 
-    if (
-      !response.status ||
-      !response?.data?.rows ||
-      response?.data?.rows?.length === 0
-    ) {
-      alert("No data to export!");
-      return;
-    }
+      if (
+        !response.status ||
+        !response?.data?.rows ||
+        response?.data?.rows?.length === 0
+      ) {
+        alert("No data to export!");
+        return;
+      }
 
     const rows = response?.data?.rows || [];
 
@@ -741,6 +744,12 @@ const JobStatus = () => {
     });
 
     downloadCSV(exportData, "Job Status Report.csv");
+    } catch (error) {
+      console.error("Export Error:", error);
+      alert("Failed to export data!");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const downloadCSV = (data, filename) => {
@@ -779,11 +788,11 @@ const JobStatus = () => {
             {JobStatusData && JobStatusData.length > 0 && (
               <div className="col-md-8 d-flex justify-content-end">
                 <button
-                  className="btn btn-outline-info fw-bold border-3 d-inline-flex align-items-center gap-2 lh-1"
+                  className="btn btn-outline-info fw-bold border-3"
                   onClick={handleExport}
                 >
-                 <Download size={16}/>
-                  <span>Export Excel</span>
+                  <Download size={16} />{" "}
+                  Export Excel
                 </button>
               </div>
             )}
@@ -801,7 +810,7 @@ const JobStatus = () => {
             </div>
           </div>
 
-          {loading && (
+          {(loading || isExporting) && (
             <div className="overlay">
               <div className="loader"></div>
             </div>
