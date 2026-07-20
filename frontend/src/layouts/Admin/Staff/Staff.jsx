@@ -1189,7 +1189,7 @@ const StaffPage = () => {
       action: "get",
       page: 1,
       limit: 100000,
-      search: "",
+      search: searchTerm || "",
     };
     const data = { req, authToken: token };
     const response = await dispatch(Staff(data)).unwrap();
