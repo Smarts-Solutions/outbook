@@ -1123,12 +1123,29 @@ const ClientList = () => {
       setLoading(false);
       return;
     }
-    const apiData = response?.data;
+    let apiData = response?.data;
 
     if (!apiData || apiData.length === 0) {
       alert("No data to export!");
       setLoading(false);
       return;
+    }
+
+    const searchInput = document.querySelector("#assignedjob .data-table-extensions-filter input");
+    const searchValue = searchInput ? searchInput.value.toLowerCase() : "";
+
+    if (searchValue) {
+      const exportColumns = columns.filter((col) => typeof col.selector === "function");
+      apiData = apiData.filter((row) => {
+        return exportColumns.some((col) => {
+          const cellValue = col.selector(row);
+          return (
+            cellValue !== null &&
+            cellValue !== undefined &&
+            cellValue.toString().toLowerCase().includes(searchValue)
+          );
+        });
+      });
     }
 
     const exportData = apiData?.map((item) => ({
