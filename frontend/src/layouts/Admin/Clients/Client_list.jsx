@@ -1597,7 +1597,24 @@ const ClientList = () => {
       (col) => typeof col.selector === "function",
     );
 
-    const exportData = currentTab.data.map((row) => {
+    let filteredData = currentTab.data;
+    const searchInput = document.querySelector(`#${tabKey} .data-table-extensions-filter input`);
+    const searchValue = searchInput ? searchInput.value.toLowerCase() : "";
+
+    if (searchValue) {
+      filteredData = filteredData.filter((row) => {
+        return columns.some((col) => {
+          const cellValue = col.selector(row);
+          return (
+            cellValue !== null &&
+            cellValue !== undefined &&
+            cellValue.toString().toLowerCase().includes(searchValue)
+          );
+        });
+      });
+    }
+
+    const exportData = filteredData.map((row) => {
       const obj = {};
       columns.forEach((col) => {
         obj[col.name] = col.selector(row) ?? "";
