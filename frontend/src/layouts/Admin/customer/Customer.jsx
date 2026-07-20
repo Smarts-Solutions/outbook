@@ -525,7 +525,7 @@ const Customer = () => {
   //   "Account Manager": item.account_manager_firstname + " " + item.account_manager_lastname,
   //   "Created by": item.customer_created_by,
   //   "Created At": item.created_at,
-  //   "Status": item.status == 1 ? "Active" : "Deactive",
+  //   "Status": item.status == 1 ? "Active" : "Inactive",
   // }));
 
   const handleExport = async () => {
@@ -536,7 +536,7 @@ const Customer = () => {
       staff_id: staffDetails.id,
       page: 1,
       limit: 100000,
-      search: "",
+      search: searchTerm,
     };
     const data = { req, authToken: token };
     const response = await dispatch(GET_ALL_CUSTOMERS(data)).unwrap();
@@ -545,10 +545,20 @@ const Customer = () => {
       setLoading(false);
       return;
     }
-    const apiData = response?.data?.data;
+    let apiData = response?.data?.data;
 
     if (!apiData || apiData.length === 0) {
       alert("No data to export!");
+      setLoading(false);
+      return;
+    }
+
+    if (statusFilter !== "") {
+      apiData = apiData.filter((item) => item.status == statusFilter);
+    }
+
+    if (!apiData || apiData.length === 0) {
+      alert("No data to export after applying filters!");
       setLoading(false);
       return;
     }
@@ -570,7 +580,7 @@ const Customer = () => {
       "Employee Id": item.account_manager_employee_number,
       "Created by": item.customer_created_by,
       "Created At": item.created_at,
-      Status: item.status == 1 ? "Active" : "Deactive",
+      Status: item.status == 1 ? "Active" : "Inactive",
     }));
 
     setLoading(false);
