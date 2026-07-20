@@ -719,7 +719,11 @@ const Dashboard = () => {
                           <option value="last_week">Last Week</option>
                           <option value="this_month">This Month</option>
                           <option value="last_month">Last Month</option>
+                          <option value="this_quarter">This Quarter</option>
+                          <option value="last_quarter">Last Quarter</option>
+                          <option value="this_six_month">This 6 Months</option>
                           <option value="last_six_month">Last 6 Months</option>
+                          <option value="this_year">This Year</option>
                           <option value="last_year">Last Year</option>
                           <option value="custom">Custom</option>
                         </select>

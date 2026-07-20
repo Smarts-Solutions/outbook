@@ -974,12 +974,7 @@ const JobStatus = () => {
   const handleExport = async () => {
     const key = location?.state?.req?.key;
 
-    Swal.fire({
-      title: "Exporting...",
-      text: "Please wait while we fetch all data.",
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading(),
-    });
+    setLoading(true);
 
     try {
       const exportPayload = {
@@ -1006,7 +1001,6 @@ const JobStatus = () => {
       }
 
       const allData = res.data;
-      Swal.close();
 
       if (key === "customer") {
         const data = allData.map((item) => ({
@@ -1122,6 +1116,8 @@ const JobStatus = () => {
       }
     } catch (error) {
       Swal.fire({ title: "Error", text: "Export failed.", icon: "error" });
+    } finally {
+      setLoading(false);
     }
   };
 
