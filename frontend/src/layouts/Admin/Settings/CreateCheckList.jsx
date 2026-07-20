@@ -36,7 +36,7 @@ const CreateCheckList = () => {
   const [jobTypeOptions, setJobTypeOptions] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
 
- 
+
 
   const [formData, setFormData] = useState({
     customer_id: [],
@@ -169,7 +169,7 @@ const CreateCheckList = () => {
           // Only validate up to the last non-empty row to allow trailing empty rows
           for (let i = 0; i <= lastNonEmptyIndex; i++) {
             const row = dataRows[i];
-            
+
             // 3. Skip empty rows in the middle of data instead of throwing error
             if (!row || row.every(cell => cell === null || cell === undefined || cell.toString().trim() === "")) {
               continue;
@@ -394,9 +394,9 @@ const CreateCheckList = () => {
     let name = e.target.name;
     let value = e.target.value;
 
-   if( name === "customer_id"){
-     getServiceData(value);
-   }
+    if (name === "customer_id") {
+      getServiceData(value);
+    }
 
 
     setFormData((prevState) => ({
@@ -469,7 +469,7 @@ const CreateCheckList = () => {
     }
 
     try {
-       const calls = service_ids.map((service_id) => {
+      const calls = service_ids.map((service_id) => {
         const req = { service_id, action: "get" };
         const data = { req, authToken: token };
         return dispatch(JobType(data)).unwrap();
@@ -495,14 +495,14 @@ const CreateCheckList = () => {
 
   const getServiceData = async (customer_ids) => {
 
-     customer_ids = Array.isArray(customer_ids) ? customer_ids.map(String) : [];
-     if (!Array.isArray(customer_ids) || customer_ids.length === 0) {
+    customer_ids = Array.isArray(customer_ids) ? customer_ids.map(String) : [];
+    if (!Array.isArray(customer_ids) || customer_ids.length === 0) {
       getAllServices();
       return;
     }
 
-     try {
-       const calls = customer_ids.map((customer_id) => {
+    try {
+      const calls = customer_ids.map((customer_id) => {
         const req = { customer_id, action: "customerGetServiceCheckList" };
         const data = { req, authToken: token };
         return dispatch(GetServicesByCustomers(data)).unwrap();
@@ -528,7 +528,7 @@ const CreateCheckList = () => {
 
 
   const handleSubmit = async () => {
-    
+
     let validationErrors = {};
 
     const isValid = validateAllFields();
@@ -637,7 +637,7 @@ const CreateCheckList = () => {
             <div className="col-lg-4">
               <div className=" row flex-column">
                 <div>
-                  <label className="form-label">CheckList Name</label>
+                  <label className="form-label">CheckList Name<span className="text-danger">*</span></label>
                   <input
                     type="text"
                     className={
@@ -660,7 +660,7 @@ const CreateCheckList = () => {
             <div className="col-lg-4 mb-lg-0 mb-3">
               <div className="row">
                 <div className="col-lg-12">
-                  <label className="form-label">Work Flow Type</label>
+                  <label className="form-label">Work Flow Type<span className="text-danger">*</span></label>
                   <select
                     className={
                       errors.work_flow_type
@@ -817,7 +817,7 @@ const CreateCheckList = () => {
             <div className="col-lg-4 mt-3">
               <div className="row">
                 <div className="col-lg-12">
-                  <label className="form-label">Client Type</label>
+                  <label className="form-label">Client Type<span className="text-danger">*</span></label>
                   <Select
                     isMulti
                     closeMenuOnSelect={false}

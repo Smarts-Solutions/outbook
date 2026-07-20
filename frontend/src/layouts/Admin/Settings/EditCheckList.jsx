@@ -554,7 +554,7 @@ const EditCheckList = () => {
             <div className="col-lg-4">
               <div className=" row flex-column">
                 <div>
-                  <label className="form-label">CheckList Name</label>
+                  <label className="form-label">CheckList Name<span className="text-danger">*</span></label>
                   <input
                     type="text"
                     className={
@@ -577,7 +577,7 @@ const EditCheckList = () => {
             <div className="col-lg-4 mb-lg-0 mb-3">
               <div className="row">
                 <div className="col-lg-12">
-                  <label className="form-label">Work Flow Type</label>
+                  <label className="form-label">Work Flow Type<span className="text-danger">*</span></label>
                   <select
                     className={
                       errors.work_flow_type
@@ -835,7 +835,7 @@ const EditCheckList = () => {
             <div className="col-lg-4 mt-3">
               <div className="row">
                 <div className="col-lg-12">
-                  <label className="form-label">Client Type</label>
+                  <label className="form-label">Client Type<span className="text-danger">*</span></label>
                   <Select
                     isMulti
                     closeMenuOnSelect={false}
