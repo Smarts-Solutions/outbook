@@ -806,7 +806,7 @@ const CustomerUsers = () => {
       "Full Name": item.first_name + " " + item.last_name,
       "Email": item.email,
       "Role": item.role_name,
-      "Phone": item.phone_code + item.phone,
+      "Phone": "\t+" + String(item.phone_code || "").replace("+", "") + " " + (item.phone || ""),
       "Created At": item.created_at,
       "Status": item.status == 1 ? "Active" : "Inactive",
     }));
