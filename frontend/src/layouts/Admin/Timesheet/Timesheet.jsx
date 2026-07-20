@@ -728,6 +728,12 @@ const Timesheet = () => {
     updatedRows[index].clientData = [];
     updatedRows[index].taskData = [];
 
+    updatedRows[index].customer_id = null;
+    updatedRows[index].client_id = null;
+    updatedRows[index].job_id = null;
+    updatedRows[index].task_id = null;
+
+
     const req = {
       staff_id: multipleFilter.staff_id,
       task_type: "3",
@@ -807,9 +813,15 @@ const Timesheet = () => {
   }
 
   const selectClientData = async (e, index) => {
+
     const updatedRows = [...timeSheetRows];
     updatedRows[index].jobData = [];
     updatedRows[index].taskData = [];
+
+    updatedRows[index].client_id = null;
+    updatedRows[index].job_id = null;
+    updatedRows[index].task_id = null;
+
 
     const req = {
       staff_id: multipleFilter.staff_id,
@@ -874,6 +886,10 @@ const Timesheet = () => {
     const updatedRows = [...timeSheetRows];
 
     updatedRows[index].taskData = [];
+
+    updatedRows[index].job_id = null;
+    updatedRows[index].task_id = null;
+
     let req;
     if (task_type === "1") {
       req = {
