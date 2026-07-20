@@ -10,11 +10,12 @@ import { fa_time } from "../../../Utils/Date_formet";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { convertDate } from "../../../Utils/Comman_function";
 
-import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
 import { use } from "react";
 
 import { JobAction } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
-import { Plus, User2 } from "lucide-react";
+import { Plus, User2, Download } from "lucide-react";
+import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
 
 const Status = () => {
   const dispatch = useDispatch();
@@ -362,13 +363,71 @@ const Status = () => {
     statusTypeData();
   }, []);
 
-  const exportData = statusDataAll.map((item) => ({
-    "Detailed Status": item.name,
-    "Created Date": convertDate(item.created_at),
-    "Last Update On": convertDate(item.updated_at),
-    "Status": item.status_type,
-    "Hide Jobs from Timesheet After (Days)": item.x_days || "-",
-  }));
+  const handleExport = () => {
+    let apiData = statusDataAll;
+    const searchInput = document.querySelector(".data-table-extensions-filter input");
+    const searchValue = searchInput ? searchInput.value.toLowerCase() : "";
+
+    if (searchValue) {
+      const exportColumns = columns.filter((col) => typeof col.selector === "function");
+      apiData = apiData.filter((row) => {
+        return exportColumns.some((col) => {
+          const cellValue = col.selector(row);
+          return (
+            cellValue !== null &&
+            cellValue !== undefined &&
+            cellValue.toString().toLowerCase().includes(searchValue)
+          );
+        });
+      });
+    }
+
+    const formattedData = apiData.map((item) => ({
+      "Detailed Status": item.name,
+      "Created Date": convertDate(item.created_at),
+      "Last Update On": convertDate(item.updated_at),
+      "Status": item.status_type,
+      "Hide Jobs from Timesheet After (Days)": item.x_days || "-",
+    }));
+
+    if (formattedData.length === 0) {
+      Swal.fire({ icon: "info", title: "No Data", text: "No data available to export." });
+      return;
+    }
+
+    const headers = Object.keys(formattedData[0]);
+    const dataWithHeaders = [headers, ...formattedData.map(row => headers.map(h => row[h]))];
+    const ws = XLSX.utils.aoa_to_sheet(dataWithHeaders);
+    const range = XLSX.utils.decode_range(ws["!ref"]);
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: C });
+        if (ws[cellAddress]) {
+            ws[cellAddress].s = {
+                font: { bold: true, sz: 14, color: { rgb: "FFFFFF" } },
+                alignment: { horizontal: "center", vertical: "center" },
+                fill: { fgColor: { rgb: "000000" } },
+            };
+        }
+    }
+    const colWidths = headers.map((header) => ({
+        width: Math.max(header.length + 5, 15),
+    }));
+    ws["!cols"] = colWidths;
+    for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+            const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+            if (ws[cellAddress]) {
+                ws[cellAddress].s = {
+                    alignment: { horizontal: "center", vertical: "center" },
+                };
+            }
+        }
+    }
+    const wb = { Sheets: { Data: ws }, SheetNames: ["Data"] };
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const dataBlob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8" });
+    saveAs(dataBlob, "Status.xlsx");
+  };
 
   const JobDetails = async () => {
     const req = { action: "getByStatus", status_id: DeleteStatus?.id };
@@ -432,12 +491,15 @@ const Status = () => {
         </div>
         <div className="report-data mt-4 ">
           <div className="d-flex justify-content-end">
-            {exportData && exportData.length > 0 && (
-              <ExportToExcel
+            {statusDataAll && statusDataAll.length > 0 && (
+              <button
+                onClick={handleExport}
+                type="button"
                 className="btn btn-outline-info fw-bold float-end border-3"
-                apiData={exportData}
-                fileName={`Status`}
-              />
+                title="Export To Excel"
+              >
+                <Download size={16} /> Export Excel
+              </button>
             )}
           </div>
 
