@@ -913,24 +913,6 @@ function TimesheetReport() {
   };
   ///////////////---- FOR TASK SERACH  END-----//////////////
 
-  const handleExportAllData = async () => {
-    setLoading(true);
-    const req = { action: "get", filters: filters, role: role, page: 1, limit: 100000 };
-    const data = { req: req, authToken: token };
-    try {
-      const response = await dispatch(getTimesheetReportData(data)).unwrap();
-      if (response.status) {
-        exportToCSV(response.data);
-      } else {
-        alert("No data to export!");
-      }
-    } catch (error) {
-      console.error("Export error", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const exportToCSV = (data) => {
     if (!data || !data.rows || data.rows.length === 0) {
       alert("No data to export!");
@@ -2084,7 +2066,7 @@ function TimesheetReport() {
                 <button
                   className="btn btn-info d-inline-flex align-items-center gap-2 lh-1"
                   id="btn-export"
-                  onClick={() => handleExportAllData()}
+                  onClick={() => exportToCSV(showData)}
                 >
                      <Download size={16}/>
 
@@ -2099,7 +2081,7 @@ function TimesheetReport() {
                   <button
                     className="btn btn-info d-inline-flex align-items-center gap-2 lh-1"
                     id="btn-export"
-                    onClick={() => handleExportAllData()}
+                    onClick={() => exportToCSV(showData)}
                   >
                     <Download size={16} />
                     <span>Export Data</span>
