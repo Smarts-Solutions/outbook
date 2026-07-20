@@ -7,17 +7,32 @@ export default function ExportToExcel({ apiData = [], fileName, headers = [] }) 
     const fileType =
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
     const fileExtension = ".xlsx";
-    const exportToExcel = (apiData, fileName, headers) => {
+    const exportToExcel = (e, apiData, fileName, headers) => {
         if (!Array.isArray(headers) || headers.length === 0) {
             return;
         }
+
+        let filteredData = [...apiData];
+        // Find the relevant search input for the current tab/context
+        const container = e.target.closest('.tab-pane') || e.target.closest('.report-data') || document;
+        const searchInput = container.querySelector('.data-table-extensions-filter input') || container.querySelector('input[placeholder*="Search"]');
+        
+        if (searchInput && searchInput.value) {
+            const query = searchInput.value.toLowerCase();
+            filteredData = filteredData.filter(row => {
+                return Object.values(row).some(val => 
+                    val && String(val).toLowerCase().includes(query)
+                );
+            });
+        }
+
         // Format data based on provided headers
-        const formattedData = apiData.map((row) =>
+        const formattedData = filteredData.map((row) =>
             headers.reduce((formattedRow, header) => {
-                formattedRow[header.label] = row[header.key] || ""; // Map data to header labels
+                formattedRow[header.label] = row[header.key] || row[header.label] || ""; // Map data to header labels
                 return formattedRow;
             }, {})
-        ); 
+        );
         const headerRow = headers.map((header) => header.label);
         const dataRows = formattedData.map((row) =>
             headers.map((header) => row[header.label])
@@ -69,7 +84,7 @@ export default function ExportToExcel({ apiData = [], fileName, headers = [] }) 
                 : [];
     return (
         <button
-            onClick={() => exportToExcel(apiData, fileName, dynamicHeaders)}
+            onClick={(e) => exportToExcel(e, apiData, fileName, dynamicHeaders)}
             type="button"
             className="btn btn-outline-info fw-bold float-end border-3"
             title="Export To Excel"
