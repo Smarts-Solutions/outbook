@@ -1849,7 +1849,34 @@ async function getAllJobsSidebar(
 }
 
 const getJobByClient = async (job) => {
-  const { client_id, StaffUserId } = job;
+  let { client_id, StaffUserId, search } = job;
+
+  search = search ? search.trim() : "";
+
+  let searchCondition = "";
+  let searchParams = [];
+
+  if (search) {
+    const jobCodeExpr = `
+      CONCAT(
+        SUBSTRING(customers.trading_name, 1, 3), '_',
+        SUBSTRING(clients.trading_name, 1, 3), '_',
+        SUBSTRING(job_types.type, 1, 4), '_',
+        SUBSTRING(jobs.job_id, 1, 15)
+      )
+    `;
+    searchCondition = `
+      AND (
+        customers.trading_name LIKE ?
+        OR clients.trading_name LIKE ?
+        OR job_types.type LIKE ?
+        OR jobs.job_id LIKE ?
+        OR ${jobCodeExpr} LIKE ?
+      )
+    `;
+    const likeSearch = `%${search}%`;
+    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
+  }
 
   // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
@@ -1938,12 +1965,13 @@ const getJobByClient = async (job) => {
         LEFT JOIN
         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE
-        jobs.client_id = ${client_id}
+        jobs.client_id = ?
+        ${searchCondition}
         GROUP BY jobs.id
         ORDER BY 
          jobs.id DESC;
         `;
-      const [rows] = await pool.execute(query);
+      const [rows] = await pool.execute(query, [client_id, ...searchParams]);
       return { status: true, message: "Success.", data: rows };
     }
 
@@ -2030,7 +2058,8 @@ const getJobByClient = async (job) => {
          LEFT JOIN
          timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
         WHERE
-        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) AND jobs.client_id = ${client_id}
+        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) AND jobs.client_id = ?
+        ${searchCondition}
         AND (
             (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
@@ -2044,7 +2073,7 @@ const getJobByClient = async (job) => {
     //console.log("query -", query);
 
 
-    const [result] = await pool.execute(query);
+    const [result] = await pool.execute(query, [client_id, ...searchParams]);
 
     //////-----START Assign Customer Service Data START----////////
     // let isExistAssignCustomer = result?.find(

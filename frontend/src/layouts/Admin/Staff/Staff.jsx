@@ -136,7 +136,7 @@ const StaffPage = () => {
         const formatted = response.data.data
           .filter(
             (data) =>
-              data.role !== "ADMIN" &&
+              // data.role !== "ADMIN" &&
               data.role !== "SUPERADMIN" &&
               data.id !== editStaffData.id,
           )
@@ -807,6 +807,7 @@ const StaffPage = () => {
       type: "number1",
       name: "phone",
       label: "Phone",
+      star: false,
       label_size: 12,
       col_size: 6,
       disable: false,
@@ -1189,7 +1190,7 @@ const StaffPage = () => {
       action: "get",
       page: 1,
       limit: 100000,
-      search: "",
+      search: searchTerm || "",
     };
     const data = { req, authToken: token };
     const response = await dispatch(Staff(data)).unwrap();

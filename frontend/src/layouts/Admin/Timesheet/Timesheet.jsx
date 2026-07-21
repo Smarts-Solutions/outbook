@@ -239,6 +239,7 @@ const Timesheet = () => {
 
   const GetTimeSheet = async (weekOffset) => {
     setIsWeekSwitching(true);
+    setLoading(true);
     const req = { staff_id: multipleFilter.staff_id, weekOffset: weekOffset };
     const res = await dispatch(
       getTimesheetData({ req, authToken: token })
@@ -305,6 +306,7 @@ const Timesheet = () => {
       setSubmitStatusAllKey(0);
       setTimeSheetRows([]);
     }
+    setLoading(false);
     setIsWeekSwitching(false);
   };
 

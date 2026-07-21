@@ -1033,64 +1033,67 @@ const ClientList = () => {
 
   const handleExport = async () => {
     setLoading(true);
-    const req = {
-      action: clientDetailSingle.id ? "getByClient" : "getByCustomer",
-      customer_id: customerDetails.id || "",
-      client_id: clientDetailSingle.id,
-      page: 1,
-      limit: 100000,
-      search: "",
-    };
+    try {
+      const req = {
+        action: clientDetailSingle.id ? "getByClient" : "getByCustomer",
+        customer_id: customerDetails.id || "",
+        client_id: clientDetailSingle.id,
+        page: 1,
+        limit: 100000,
+        search: searchTerm,
+      };
 
-    const data = { req, authToken: token };
-    const response = await dispatch(JobAction(data)).unwrap();
-    if (!response.status) {
-      alert("No data to export!");
-      setLoading(false);
-      return;
-    }
-    const apiData = response?.data;
+      const data = { req, authToken: token };
+      const response = await dispatch(JobAction(data)).unwrap();
+      if (!response.status) {
+        alert("No data to export!");
+        return;
+      }
+      const apiData = response?.data;
 
-    if (!apiData || apiData.length === 0) {
-      alert("No data to export!");
-      setLoading(false);
-      return;
-    }
+      if (!apiData || apiData.length === 0) {
+        alert("No data to export!");
+        return;
+      }
 
-    const exportData = apiData?.map((item) => ({
-      "Job Code Id": item.job_code_id || "-",
-      "Job Priority": item.job_priority || "-",
-      "Client Trading Name": item.client_trading_name || "-",
-      "Job Type Name": item.job_type_name || "-",
-      // "Account Manager":
-      //   item.account_manager_officer_first_name +
-      //   " " +
-      //   item.account_manager_officer_last_name||"-",
-      "Client Contact Person":
-        item.account_manager_officer_first_name &&
-          item.account_manager_officer_last_name
-          ? item.account_manager_officer_first_name +
+      const exportData = apiData?.map((item) => ({
+        "Job Code Id": item.job_code_id || "-",
+        "Job Priority": item.job_priority || "-",
+        "Client Trading Name": item.client_trading_name || "-",
+        "Job Type Name": item.job_type_name || "-",
+        // "Account Manager":
+        //   item.account_manager_officer_first_name +
+        //   " " +
+        //   item.account_manager_officer_last_name||"-",
+        "Client Contact Person":
+          item.account_manager_officer_first_name &&
+            item.account_manager_officer_last_name
+            ? item.account_manager_officer_first_name +
+            " " +
+            item.account_manager_officer_last_name
+            : "-",
+        "Outbooks Account Manager":
+          item.outbooks_acount_manager_first_name +
           " " +
-          item.account_manager_officer_last_name
-          : "-",
-      "Outbooks Account Manager":
-        item.outbooks_acount_manager_first_name +
-        " " +
-        item.outbooks_acount_manager_last_name || "-",
-      "Employee ID": item.account_manager_employee_number || "-",
-      "Allocated To":
-        item.allocated_id != null
-          ? item.allocated_first_name + " " + item.allocated_last_name
-          : "-",
-      Invoiced: item.invoiced == "1" ? "YES" : "NO" || "-",
-      "Created By": item.job_created_by || "-",
-      "Created At": item.created_at || "-",
-      Status: item.status || "-",
-    }));
+          item.outbooks_acount_manager_last_name || "-",
+        "Employee ID": item.account_manager_employee_number || "-",
+        "Allocated To":
+          item.allocated_id != null
+            ? item.allocated_first_name + " " + item.allocated_last_name
+            : "-",
+        Invoiced: item.invoiced == "1" ? "YES" : "NO" || "-",
+        "Created By": item.job_created_by || "-",
+        "Created At": item.created_at || "-",
+        Status: item.status || "-",
+      }));
 
-    setLoading(false);
-
-    downloadCSV(exportData, "Job Details.csv");
+      downloadCSV(exportData, "Job Details.csv");
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert("An error occurred while exporting.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const downloadCSV = (data, filename) => {

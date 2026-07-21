@@ -1214,89 +1214,92 @@ const ClientLists = () => {
   const handleExport = async () => {
     let exportData = [];
     setLoading(true);
-    if (activeTab === "client") {
-      const req = {
-        action: "get",
-        customer_id: customerId,
-        page: 1,
-        limit: 100000,
-        search: "",
-      };
-      const data = { req, authToken: token };
-      const response = await dispatch(ClientAction(data)).unwrap();
+    try {
+      if (activeTab === "client") {
+        const req = {
+          action: "get",
+          customer_id: customerId,
+          page: 1,
+          limit: 100000,
+          search: searchTerm,
+        };
+        const data = { req, authToken: token };
+        const response = await dispatch(ClientAction(data)).unwrap();
 
-      if (!response.status || !response.data || response.data.length === 0) {
-        alert("No data to export!");
-        setLoading(false);
-        return;
+        if (!response.status || !response.data || response.data.length === 0) {
+          alert("No data to export!");
+          return;
+        }
+
+        exportData = response.data.map((item) => ({
+          "Client Name": item.client_name,
+          "Client Code": item.client_code,
+          "Customer Name": item.customer_name,
+          "Client Type Name": item.client_type_name,
+          "Created By": item.client_created_by,
+          "Created At": item.created_at,
+          Status: item.status == 1 ? "Active" : "Deactive",
+        }));
+      } else if (activeTab === "job") {
+        const req = {
+          action: "getByCustomer",
+          customer_id: customerId,
+          page: 1,
+          limit: 100000,
+          search: searchTerm,
+        };
+        const data = { req, authToken: token };
+        const response = await dispatch(JobAction(data)).unwrap();
+
+        if (!response.status || !response.data || response.data.length === 0) {
+          alert("No data to export!");
+          return;
+        }
+
+        exportData = response.data.map((item) => ({
+          "Job ID (CustName+ClientName+UniqueNo)": item.job_code_id,
+          "Job Priority": item.job_priority || "-",
+          "Client Name": item.client_trading_name,
+          "Job Type": item.job_type_name,
+          Status: item.status,
+          "Client Contact Person":
+            item.account_manager_officer_first_name +
+            " " +
+            item.account_manager_officer_last_name,
+          "Client Job Code": item.client_job_code,
+          "Outbook Account Manager":
+            item.outbooks_acount_manager_first_name +
+            " " +
+            item.outbooks_acount_manager_last_name,
+          "Allocated To":
+            item.allocated_id != null
+              ? item.allocated_first_name + " " + item.allocated_last_name
+              : "",
+          Timesheet:
+            item.total_hours_status == 1 && item.total_hours != null
+              ? item.total_hours?.split(":")[0] +
+                "h " +
+                item.total_hours.split(":")[1] +
+                "m"
+              : "-",
+          Invoicing: item.invoiced == 1 ? "YES" : "NO",
+          "Created By": item.job_created_by,
+          "Created At": item.created_at,
+        }));
       }
 
-      exportData = response.data.map((item) => ({
-        "Client Name": item.client_name,
-        "Client Code": item.client_code,
-        "Customer Name": item.customer_name,
-        "Client Type Name": item.client_type_name,
-        "Created By": item.client_created_by,
-        "Created At": item.created_at,
-        Status: item.status == 1 ? "Active" : "Deactive",
-      }));
-      setLoading(false);
-    } else if (activeTab === "job") {
-      const req = {
-        action: "getByCustomer",
-        customer_id: customerId,
-        page: 1,
-        limit: 100000,
-        search: "",
-      };
-      const data = { req, authToken: token };
-      const response = await dispatch(JobAction(data)).unwrap();
-
-      if (!response.status || !response.data || response.data.length === 0) {
-        alert("No data to export!");
-        setLoading(false);
-        return;
+      if (exportData.length > 0) {
+        downloadCSV(
+          exportData,
+          `${activeTab === "client" ? "Client" : "Job"} Details.csv`,
+        );
       }
-
-      exportData = response.data.map((item) => ({
-        "Job ID (CustName+ClientName+UniqueNo)": item.job_code_id,
-        "Job Priority": item.job_priority || "-",
-        "Client Name": item.client_trading_name,
-        "Job Type": item.job_type_name,
-        Status: item.status,
-        "Client Contact Person":
-          item.account_manager_officer_first_name +
-          " " +
-          item.account_manager_officer_last_name,
-        "Client Job Code": item.client_job_code,
-        "Outbook Account Manager":
-          item.outbooks_acount_manager_first_name +
-          " " +
-          item.outbooks_acount_manager_last_name,
-        "Allocated To":
-          item.allocated_id != null
-            ? item.allocated_first_name + " " + item.allocated_last_name
-            : "",
-        Timesheet:
-          item.total_hours_status == 1 && item.total_hours != null
-            ? item.total_hours?.split(":")[0] +
-              "h " +
-              item.total_hours.split(":")[1] +
-              "m"
-            : "-",
-        Invoicing: item.invoiced == 1 ? "YES" : "NO",
-        "Created By": item.job_created_by,
-        "Created At": item.created_at,
-      }));
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert("An error occurred while exporting.");
+    } finally {
       setLoading(false);
     }
-
-    setLoading(false);
-
-    downloadCSV(
-      exportData,
-      `${activeTab === "client" ? "Client" : "Job"} Details.csv`,
-    );
   };
 
   const downloadCSV = (data, filename) => {

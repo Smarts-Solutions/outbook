@@ -13,6 +13,7 @@ const MissingTimesheet = () => {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const [missingTimesheetReportData, setMissingTimesheetReportData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     MissingTimesheet();
@@ -20,6 +21,7 @@ const MissingTimesheet = () => {
 
 
   const MissingTimesheet = async () => {
+    setLoading(true);
     const req = { action: "missingTimesheetReport" };
     const data = { req: req, authToken: token };
     await dispatch(getAllTaskByStaff(data))
@@ -32,9 +34,10 @@ const MissingTimesheet = () => {
         else {
           setMissingTimesheetReportData([]);
         }
+        setLoading(false);
       })
       .catch((err) => {
-    
+        setLoading(false);
       });
   }
 
@@ -73,6 +76,11 @@ const MissingTimesheet = () => {
         </div>
 
         <div className='datatable-wrapper mt-minus'>
+          {loading && (
+            <div className="overlay">
+              <div className="loader"></div>
+            </div>
+          )}
           <div className='row'>
           </div>
           <Datatable

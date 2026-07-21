@@ -13,6 +13,7 @@ const DiscrepancyReportProcessor = () => {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const [discrepancyReportData, setDiscrepancyReportData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -26,6 +27,7 @@ const DiscrepancyReportProcessor = () => {
 
 
   const Discrepancy = async () => {
+    setLoading(true);
     const req = { action: "discrepancyReportProcessor" };
     const data = { req: req, authToken: token };
     await dispatch(getAllTaskByStaff(data))
@@ -37,9 +39,11 @@ const DiscrepancyReportProcessor = () => {
         else {
           setDiscrepancyReportData([]);
         }
+        setLoading(false);
       })
       .catch((err) => {
         console.log(err);
+        setLoading(false);
       });
   }
 
@@ -134,6 +138,11 @@ const DiscrepancyReportProcessor = () => {
         </div>
 
         <div className='datatable-wrapper mt-minus'>
+          {loading && (
+            <div className="overlay">
+              <div className="loader"></div>
+            </div>
+          )}
           <Datatable
             filter={true}
             columns={columns}

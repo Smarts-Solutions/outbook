@@ -270,6 +270,7 @@ const CustomerUsers = () => {
   const [type, setType] = useState("add")
   const [updatedata, setUpdatedata] = useState("")
   const [loading, setLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const [personRoleDataAll, setPersonRoleDataAll] = useState([]);
 
@@ -787,31 +788,47 @@ const CustomerUsers = () => {
 
 
   const handleExport = async () => {
-    const req = { action: 'getCustomerUsers', staff_id: staffDetails.id, page: 1, limit: 100000, search: "" };
-    const data = { req, authToken: token };
-    const response = await dispatch(getAllCustomerUsers(data)).unwrap();
-    if (!response.status) {
-      alert("No data to export!");
-      return;
+    setIsExporting(true);
+    try {
+      const req = { action: 'getCustomerUsers', staff_id: staffDetails.id, page: 1, limit: 100000, search: searchTerm || "" };
+      const data = { req, authToken: token };
+      const response = await dispatch(getAllCustomerUsers(data)).unwrap();
+      if (!response.status) {
+        alert("No data to export!");
+        return;
+      }
+      let apiData = response?.data?.data;
+
+      if (!apiData || apiData.length === 0) {
+        alert("No data to export!");
+        return;
+      }
+
+      if (statusFilter !== "") {
+        apiData = apiData.filter((item) => item.status == statusFilter);
+      }
+
+      if (apiData.length === 0) {
+        alert("No matching data to export!");
+        return;
+      }
+
+      const exportData = apiData?.map((item) => ({
+        "Full Name": item.first_name + " " + item.last_name,
+        "Email": item.email,
+        "Role": item.role_name,
+        "Phone": "\t+" + String(item.phone_code || "").replace("+", "") + " " + (item.phone || ""),
+        "Created At": item.created_at,
+        "Status": item.status == 1 ? "Active" : "Inactive",
+      }));
+
+      downloadCSV(exportData, "Customer Details.csv");
+    } catch (error) {
+      console.error("Export Error:", error);
+      alert("Failed to export data!");
+    } finally {
+      setIsExporting(false);
     }
-    const apiData = response?.data?.data;
-
-    if (!apiData || apiData.length === 0) {
-      alert("No data to export!");
-      return;
-    }
-
-
-    const exportData = apiData?.map((item) => ({
-      "Full Name": item.first_name + " " + item.last_name,
-      "Email": item.email,
-      "Role": item.role_name,
-      "Phone": item.phone_code + item.phone,
-      "Created At": item.created_at,
-      "Status": item.status == 1 ? "Active" : "Inactive",
-    }));
-
-    downloadCSV(exportData, "Customer Details.csv");
   };
   const downloadCSV = (data, filename) => {
     const csvRows = [];
@@ -1481,9 +1498,19 @@ const CustomerUsers = () => {
                             <button
                               className="btn btn-outline-info fw-bold float-end border-3 "
                               onClick={handleExport}
+                              disabled={isExporting}
                             >
-                              <Download size={16} /> {" "}
-                              Export Excel
+                              {isExporting ? (
+                                <>
+                                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                  Exporting...
+                                </>
+                              ) : (
+                                <>
+                                  <Download size={16} /> {" "}
+                                  Export Excel
+                                </>
+                              )}
                             </button>
                           </div>
                         </div>

@@ -11,12 +11,14 @@ const DueByReport = () => {
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
   const [getDueByReport, setDueByReport] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     DueReport();
   }, []);
 
   const DueReport = async () => {
+    setLoading(true);
     const data = { req: {}, authToken: token };
     await dispatch(dueByReport(data))
       .unwrap()
@@ -27,9 +29,11 @@ const DueByReport = () => {
         } else {
           setDueByReport([]);
         }
+        setLoading(false);
       })
       .catch((err) => {
         console.log(err);
+        setLoading(false);
       });
   };
 
@@ -345,6 +349,11 @@ const DueByReport = () => {
           </div>
         </div>
         <div className="datatable-wrapper mt-minus">
+          {loading && (
+            <div className="overlay">
+              <div className="loader"></div>
+            </div>
+          )}
           <Datatable
             filter={true}
             columns={columns}
