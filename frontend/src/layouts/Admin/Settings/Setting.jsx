@@ -970,42 +970,46 @@ const Setting = () => {
     fetchApiData(newStatus);
   };
 
-  const fetchApiData = (status) => {
-    const req = {
-      action: "getAll",
-    };
-    switch (status) {
-      case "1":
-        roleData(req);
-        break;
-      case "2":
-        PersonRoleData(req);
-        break;
-      case "3":
-        statusTypeData(req);
-        break;
-      case "4":
-        serviceData(req);
-        break;
-      case "5":
-        ClientIndustryData(req);
-        break;
-      case "6":
-        CountryData(req);
-        break;
-      case "7":
-        incorporationData(req);
-        break;
-      case "8":
-        customerSourceData(req);
-      case "9":
-        getCheckListData();
-        break;
-      case "10":
-        InternalData(req);
-        break;
-      default:
-        break;
+  const fetchApiData = async (status) => {
+    setLoading(true);
+    try {
+      const req = { action: "getAll" };
+      switch (status) {
+        case "1":
+          await roleData(req);
+          break;
+        case "2":
+          await PersonRoleData(req);
+          break;
+        case "3":
+          await statusTypeData(req);
+          break;
+        case "4":
+          await serviceData(req);
+          break;
+        case "5":
+          await ClientIndustryData(req);
+          break;
+        case "6":
+          await CountryData(req);
+          break;
+        case "7":
+          await incorporationData(req);
+          break;
+        case "8":
+          await customerSourceData(req);
+          break;
+        case "9":
+          await getCheckListData();
+          break;
+        case "10":
+          await InternalData(req);
+          break;
+        default:
+          break;
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -3019,7 +3023,7 @@ const Setting = () => {
   return (
     <>
       <div>
-        <div className="container-fluid">
+        <div className="container-fluid" style={{ position: "relative" }}>
           {loading && (
             <div className="overlay">
               <div className="loader"></div>

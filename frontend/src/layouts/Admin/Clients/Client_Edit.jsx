@@ -1881,7 +1881,12 @@ const ClientEdit = () => {
 
 
   return (
-    <div>
+    <div className="position-relative">
+      {getClientDetails.loading && (
+        <div className="overlay" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
+          <div className="loader"></div>
+        </div>
+      )}
       <div className="container-fluid mt-4">
         <div className="row">
           <div className="col-xl-12">

@@ -11,7 +11,8 @@ const Access = () => {
   const token = JSON.parse(localStorage.getItem("token"));
   const [checkboxState, setCheckboxState] = useState([]);
   const [roleDataAll, setRoleDataAll] = useState({ loading: true, data: [] });
-  const [accessData, setAccessData] = useState({ loading: true, data: [] });
+  const [accessData, setAccessData] = useState({ loading: false, data: [] });
+  const [saving, setSaving] = useState(false);
   const [modalOpen, setOpenModalOpen] = useState(false);
 
 
@@ -124,6 +125,7 @@ const Access = () => {
   };
 
   const OpenAccourdian = async (val) => {
+    setAccessData((prev) => ({ ...prev, loading: true }));
     try {
       const req = { action: "get", role_id: val.id };
       const data = { req, authToken: token };
@@ -184,6 +186,7 @@ const Access = () => {
   };
 
   const handleSaveChanges = async () => {
+    setSaving(true);
     try {
       const response = await dispatch(
         GetAccess({
@@ -228,6 +231,8 @@ const Access = () => {
         icon: "error",
         confirmButtonText: "OK",
       });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -242,7 +247,12 @@ const Access = () => {
           <h3 className="mt-0">Access</h3>
         </div>
       </div>
-      <div className="report-data mt-4">
+      <div className="report-data mt-4" style={{ position: "relative" }}>
+        {(roleDataAll.loading || accessData.loading || saving) && (
+          <div className="overlay">
+            <div className="loader"></div>
+          </div>
+        )}
         <div className="tab-title">
           <h3>Set Default Access</h3>
         </div>

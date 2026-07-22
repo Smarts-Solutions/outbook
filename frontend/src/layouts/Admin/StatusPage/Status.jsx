@@ -34,6 +34,7 @@ const Status = () => {
   const [DeleteStatus, setDeleteStatus] = useState(false);
   const [replaceStatue, setReplaceStatue] = useState(null);
   const [JobData, setJobData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const accessData =
     JSON.parse(localStorage.getItem("accessData") || "[]").find(
@@ -231,6 +232,7 @@ const Status = () => {
   };
 
   const GetStatus = async () => {
+    setLoading(true);
     const data = { req: { action: "get" }, authToken: token };
     await dispatch(MasterStatusData(data))
       .unwrap()
@@ -243,6 +245,9 @@ const Status = () => {
       })
       .catch((error) => {
         return;
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -504,6 +509,11 @@ const Status = () => {
           </div>
 
           <div className="datatable-wrapper  ">
+            {loading && (
+              <div className="overlay">
+                <div className="loader"></div>
+              </div>
+            )}
             <Datatable filter={true} columns={columns} data={statusDataAll} />
           </div>
         </div>

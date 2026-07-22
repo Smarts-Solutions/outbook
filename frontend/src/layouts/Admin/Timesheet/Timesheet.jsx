@@ -457,6 +457,7 @@ const Timesheet = () => {
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
   const [loading, setLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
   const [isWeekSwitching, setIsWeekSwitching] = useState(false);
@@ -1683,6 +1684,8 @@ const Timesheet = () => {
       return;
     }
 
+    setExporting(true);
+    setTimeout(() => {
     // const headers = [
     //   "Index",
     //   "Task Type",
@@ -1773,6 +1776,8 @@ const Timesheet = () => {
     link.href = URL.createObjectURL(blob);
     link.download = "TimeSheetData.csv";
     link.click();
+      setExporting(false);
+    }, 100);
   };
 
   const handleSingleRemark = (e, item, index) => {
@@ -2013,9 +2018,9 @@ const Timesheet = () => {
 
   return (
 
-    <div className="container-fluid">
-      {loading && (
-        <div className="overlay">
+    <div className="container-fluid" style={{ position: "relative" }}>
+      {(loading || exporting || staffDataAll.loading || staffDataWeekDataAll.loading || isExistStaffDataWeekDataAll.loading || staffDataWeekDataAllSubmitTImeSheet.loading) && (
+        <div className="overlay" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
           <div className="loader"></div>
         </div>
       )}

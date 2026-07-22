@@ -22,6 +22,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
   const location = useLocation();
+  const [loading, setLoading] = useState(true);
   const [AllJobData, setAllJobData] = useState([]);
   const dispatch = useDispatch();
   const [budgetedhours, setBudgetedHours] = useState({
@@ -234,6 +235,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
   }, [JobInformationData]);
 
   const JobDetails = async () => {
+    setLoading(true);
     const req = { action: "getByJobId", job_id: location.state.job_id };
     const data = { req: req, authToken: token };
     await dispatch(JobAction(data))
@@ -462,6 +464,9 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
       })
       .catch((error) => {
         return;
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -1566,7 +1571,12 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
   }, [JobInformationData?.Service]);
 
   return (
-    <div>
+    <div className="position-relative">
+      {loading && (
+        <div className="overlay" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
+          <div className="loader"></div>
+        </div>
+      )}
       <div className="row mb-3">
         <div className="col-md-7">
           <div className="tab-title">

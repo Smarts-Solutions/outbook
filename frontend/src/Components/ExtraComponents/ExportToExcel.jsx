@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import {saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import Swal from "sweetalert2";
 import { Download } from "lucide-react";
 export default function ExportToExcel({ apiData = [], fileName, headers = [] }) {
+    const [exporting, setExporting] = useState(false);
     const fileType =
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
     const fileExtension = ".xlsx";
@@ -12,7 +13,10 @@ export default function ExportToExcel({ apiData = [], fileName, headers = [] }) 
             return;
         }
 
-        let filteredData = [...apiData];
+        setExporting(true);
+        setTimeout(() => {
+            try {
+                let filteredData = [...apiData];
         // Find the relevant search input for the current tab/context
         const container = e.target.closest('.tab-pane') || e.target.closest('.report-data') || document;
         const searchInput = container.querySelector('.data-table-extensions-filter input') || container.querySelector('input[placeholder*="Search"]');
@@ -71,6 +75,10 @@ export default function ExportToExcel({ apiData = [], fileName, headers = [] }) 
         const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
         const data = new Blob([excelBuffer], { type: fileType });
         saveAs(data, fileName + fileExtension);
+            } finally {
+                setExporting(false);
+            }
+        }, 100);
     };
     // Dynamically generate headers if not provided
     const dynamicHeaders =
@@ -83,13 +91,20 @@ export default function ExportToExcel({ apiData = [], fileName, headers = [] }) 
                 }))
                 : [];
     return (
-        <button
-            onClick={(e) => exportToExcel(e, apiData, fileName, dynamicHeaders)}
-            type="button"
-            className="btn btn-outline-info fw-bold float-end border-3"
-            title="Export To Excel"
-        >
-             <Download size={16} /> Export Excel
-        </button>
+        <>
+            {exporting && (
+                <div className="overlay" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
+                    <div className="loader"></div>
+                </div>
+            )}
+            <button
+                onClick={(e) => exportToExcel(e, apiData, fileName, dynamicHeaders)}
+                type="button"
+                className="btn btn-outline-info fw-bold float-end border-3"
+                title="Export To Excel"
+            >
+                 <Download size={16} /> Export Excel
+            </button>
+        </>
     );
 }

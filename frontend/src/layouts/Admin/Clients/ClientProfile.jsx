@@ -1191,22 +1191,12 @@ const ClientList = () => {
   };
 
   return (
-    <div className={isLoading ? "blur-container" : ""}>
-      {isLoading && (
-        <div className="loader-overlay">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      )}
-
-      {loading && (
-        <div className="overlay">
+    <div className={isLoading ? "blur-container container-fluid position-relative" : "container-fluid position-relative"}>
+      {(isLoading || loading || getClientDetails.loading) && (
+        <div className="overlay" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
           <div className="loader"></div>
         </div>
       )}
-
-      <div className="container-fluid">
         <div className="col-sm-12">
           <div className="page-title-box">
             <div className="row align-items-start flex-md-row flex-column-reverse justify-content-between">
@@ -2130,7 +2120,6 @@ const ClientList = () => {
           )}
         </div>
       </div>
-    </div>
   );
 };
 
