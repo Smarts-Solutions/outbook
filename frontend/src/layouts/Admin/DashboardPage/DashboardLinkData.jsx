@@ -1196,9 +1196,9 @@ const JobStatus = () => {
           </div>
         </div>
 
-        <div className="datatable-wrapper mt-minus">
+        <div className="datatable-wrapper mt-minus position-relative">
           {loading && (
-            <div className="overlay">
+            <div className="overlay" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
               <div className="loader"></div>
             </div>
           )}

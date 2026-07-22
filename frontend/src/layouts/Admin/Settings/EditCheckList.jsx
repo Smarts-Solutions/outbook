@@ -60,6 +60,7 @@ const EditCheckList = () => {
   const [customerHasMore, setCustomerHasMore] = useState(true);
   const [loadingCustomers, setLoadingCustomers] = useState(false);
   const [customerSearch, setCustomerSearch] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const customerCache = useRef({});
   const debounceRef = useRef(null);
 
@@ -495,6 +496,7 @@ const EditCheckList = () => {
       return;
     }
 
+    setIsSaving(true);
     const checklist_id = location.state?.checklist_id || location.state?.id;
     const formDataToSubmit = new FormData();
     formDataToSubmit.append("checklists_id", checklist_id);
@@ -524,7 +526,7 @@ const EditCheckList = () => {
         });
         window.history.back();
       }
-    } catch (err) { }
+    } catch (err) { } finally { setIsSaving(false); }
   };
 
   const handleMultipleSelect = (e) => {
@@ -538,10 +540,21 @@ const EditCheckList = () => {
     setSelectedClientType(e);
   };
 
-  if (!isLoaded) return <div className="p-4 text-center">Loading...</div>;
+  if (!isLoaded) return (
+      <div className="container-fluid position-relative" style={{ height: "100vh" }}>
+        <div className="overlay" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
+          <div className="loader"></div>
+        </div>
+      </div>
+  );
 
   return (
-    <div className="container-fluid">
+    <div className="container-fluid position-relative">
+      {isSaving && (
+        <div className="overlay" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
+          <div className="loader"></div>
+        </div>
+      )}
       <div className="card mt-4">
         <div className="card-header d-flex step-header-blue">
           <button type="button" className="btn p-0" onClick={() => window.history.back()}>

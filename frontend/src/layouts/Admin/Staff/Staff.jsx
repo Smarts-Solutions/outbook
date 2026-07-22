@@ -98,6 +98,7 @@ const StaffPage = () => {
 
 
   const [loading, setLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     // GetAllStaffData(1, 10000, ""); // Removed this as we now fetch on click
@@ -1186,38 +1187,45 @@ const StaffPage = () => {
   };
 
   const handleExport = async () => {
-    const req = {
-      action: "get",
-      page: 1,
-      limit: 100000,
-      search: searchTerm || "",
-    };
-    const data = { req, authToken: token };
-    const response = await dispatch(Staff(data)).unwrap();
+    setExporting(true);
+    try {
+      const req = {
+        action: "get",
+        page: 1,
+        limit: 100000,
+        search: searchTerm || "",
+      };
+      const data = { req, authToken: token };
+      const response = await dispatch(Staff(data)).unwrap();
 
-    if (
-      !response.status ||
-      !response?.data?.data ||
-      response?.data?.data?.length === 0
-    ) {
-      alert("No data to export!");
-      return;
+      if (
+        !response.status ||
+        !response?.data?.data ||
+        response?.data?.data?.length === 0
+      ) {
+        alert("No data to export!");
+        return;
+      }
+
+      const exportData = response?.data?.data?.map((item) => ({
+        "Full Name":
+          item.first_name && item.last_name
+            ? item.first_name + " " + item.last_name
+            : item.first_name || item.last_name || "-",
+        Email: item.email,
+        Phone: item.phone,
+        Role: item.role_name,
+        "Employee ID": item.employee_number || "-",
+        "Line Manager": item.line_manager_name || "-",
+        Status: item.status === "1" ? "Active" : "Inactive",
+      }));
+
+      downloadCSV(exportData, "Staff Details.csv");
+    } catch (error) {
+      console.error("Export Error:", error);
+    } finally {
+      setExporting(false);
     }
-
-    const exportData = response?.data?.data?.map((item) => ({
-      "Full Name":
-        item.first_name && item.last_name
-          ? item.first_name + " " + item.last_name
-          : item.first_name || item.last_name || "-",
-      Email: item.email,
-      Phone: item.phone,
-      Role: item.role_name,
-      "Employee ID": item.employee_number || "-",
-      "Line Manager": item.line_manager_name || "-",
-      Status: item.status === "1" ? "Active" : "Inactive",
-    }));
-
-    downloadCSV(exportData, "Staff Details.csv");
   };
 
   const downloadCSV = (data, filename) => {
@@ -1304,9 +1312,9 @@ const StaffPage = () => {
                 <button
                   className="btn btn-outline-info fw-bold border-3"
                   onClick={handleExport}
+                  disabled={exporting}
                 >
-                  <Download size={16} />{" "}
-                  Export Excel
+                  <Download size={16} /> Export Excel
                 </button>
               </div>
             </div>
@@ -1321,7 +1329,7 @@ const StaffPage = () => {
               role="tabpanel"
             >
               <div className="datatable-wrapper">
-                {loading && (
+                {(loading || exporting) && (
                   <div className="overlay">
                     <div className="loader"></div>
                   </div>
@@ -1495,7 +1503,13 @@ const StaffPage = () => {
           setEditStaffData({});
         }}
       >
-        <Formicform
+        <div style={{ position: "relative" }}>
+          {managerLoading && (
+            <div className="overlay">
+              <div className="loader"></div>
+            </div>
+          )}
+          <Formicform
           fieldtype={fields.filter(
             (field) => !field.showWhen || field.showWhen(formik.values),
           )}
@@ -1564,6 +1578,7 @@ const StaffPage = () => {
             </div>
           }
         />
+        </div>
       </CommanModal>
 
       <CommanModal

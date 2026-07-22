@@ -523,9 +523,13 @@ const CustomerUsers = () => {
               <div className="d-flex justify-content-start">
                 <button className="edit-icon rounded-pills border-primary"
                   onClick={() => {
-                    setType("edit");
-                    setUpdatedata(row);
-                    setShowAddCustomerModal(true);
+                    setLoading(true);
+                    setTimeout(() => {
+                      setType("edit");
+                      setUpdatedata(row);
+                      setShowAddCustomerModal(true);
+                      setLoading(false);
+                    }, 500);
                   }}
                 >
                   <i className="ti-pencil text-primary" />
@@ -1142,6 +1146,11 @@ const CustomerUsers = () => {
 
   return (
     <div>
+      {(loading || isExporting || isTransferring) && (
+        <div className="overlay" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
+          <div className="loader"></div>
+        </div>
+      )}
       <style>{customStyles}</style>
       <CommanModal
         isOpen={showAddCustomerModal}
@@ -1444,7 +1453,15 @@ const CustomerUsers = () => {
               <div className="col-md-6 col-sm-7">
                 <button
                   className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
-                  onClick={() => { setShowAddCustomerModal(true); setType("add"); setUpdatedata("") }}
+                  onClick={() => {
+                    setLoading(true);
+                    setTimeout(() => {
+                      setShowAddCustomerModal(true);
+                      setType("add");
+                      setUpdatedata("");
+                      setLoading(false);
+                    }, 500);
+                  }}
                 >
                   <Plus size={16} />
                   Add Customer User
@@ -1471,11 +1488,6 @@ const CustomerUsers = () => {
                   <div className="tab-content mt-minus-60" id="pills-tabContent">
                     <div className="card-datatable">
                         <div className="card-datatable position-relative">
-                          {loading && (
-                            <div className="overlay">
-                              <div className="loader"></div>
-                            </div>
-                          )}
 
                         <div className="row mb-3">
                           <div className="col-md-4">

@@ -327,7 +327,12 @@ const Dashboard = () => {
 
   return (
     <div>
-      <div className="container-fluid">
+      <div className="container-fluid" style={{ position: "relative" }}>
+        {exporting && (
+          <div className="overlay">
+            <div className="loader"></div>
+          </div>
+        )}
         <div className="row">
           <div className="col-sm-12">
             <div className="page-title-box">
@@ -344,20 +349,7 @@ const Dashboard = () => {
                       onClick={exportAllActivityLog}
                       disabled={exporting || !getActiviyLog?.length}
                     >
-                      {exporting ? (
-                        <>
-                          <span
-                            className="spinner-border spinner-border-sm me-2"
-                            role="status"
-                            aria-hidden="true"
-                          ></span>
-                          Exporting...
-                        </>
-                      ) : (
-                        <>
-                          <Download size={16} /> Export All
-                        </>
-                      )}
+                      <Download size={16} /> Export All
                     </button>
                   </div>
                 </div>
@@ -406,13 +398,8 @@ const Dashboard = () => {
               <div className="tab-content mt-5">
                 <div className="tab-pane show active">
                   {loading ? (
-                    <div className="text-center py-5">
-                      <div
-                        className="spinner-border text-primary"
-                        role="status"
-                      >
-                        <span className="visually-hidden">Loading...</span>
-                      </div>
+                    <div className="overlay">
+                      <div className="loader"></div>
                     </div>
                   ) : (
                     <div className="row justify-content-center">

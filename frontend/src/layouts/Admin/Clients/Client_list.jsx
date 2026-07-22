@@ -50,6 +50,7 @@ const ClientList = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -1586,43 +1587,48 @@ const ClientList = () => {
   // };
 
   const exportByTab = (tabKey) => {
-    const currentTab = tabs1.find((t) => t.key === tabKey);
+    setIsExporting(true);
+    setTimeout(() => {
+      const currentTab = tabs1.find((t) => t.key === tabKey);
 
-    if (!currentTab || !currentTab.data || currentTab.data.length === 0) {
-      Swal.fire("No data", "No data to export!", "warning");
-      return;
-    }
+      if (!currentTab || !currentTab.data || currentTab.data.length === 0) {
+        Swal.fire("No data", "No data to export!", "warning");
+        setIsExporting(false);
+        return;
+      }
 
-    const columns = currentTab.columns.filter(
-      (col) => typeof col.selector === "function",
-    );
+      const columns = currentTab.columns.filter(
+        (col) => typeof col.selector === "function",
+      );
 
-    let filteredData = currentTab.data;
-    const searchInput = document.querySelector(`#${tabKey} .data-table-extensions-filter input`);
-    const searchValue = searchInput ? searchInput.value.toLowerCase() : "";
+      let filteredData = currentTab.data;
+      const searchInput = document.querySelector(`#${tabKey} .data-table-extensions-filter input`);
+      const searchValue = searchInput ? searchInput.value.toLowerCase() : "";
 
-    if (searchValue) {
-      filteredData = filteredData.filter((row) => {
-        return columns.some((col) => {
-          const cellValue = col.selector(row);
-          return (
-            cellValue !== null &&
-            cellValue !== undefined &&
-            cellValue.toString().toLowerCase().includes(searchValue)
-          );
+      if (searchValue) {
+        filteredData = filteredData.filter((row) => {
+          return columns.some((col) => {
+            const cellValue = col.selector(row);
+            return (
+              cellValue !== null &&
+              cellValue !== undefined &&
+              cellValue.toString().toLowerCase().includes(searchValue)
+            );
+          });
         });
-      });
-    }
+      }
 
-    const exportData = filteredData.map((row) => {
-      const obj = {};
-      columns.forEach((col) => {
-        obj[col.name] = col.selector(row) ?? "";
+      const exportData = filteredData.map((row) => {
+        const obj = {};
+        columns.forEach((col) => {
+          obj[col.name] = col.selector(row) ?? "";
+        });
+        return obj;
       });
-      return obj;
-    });
 
-    downloadCSV(exportData, `${currentTab.title}.csv`);
+      downloadCSV(exportData, `${currentTab.title}.csv`);
+      setIsExporting(false);
+    }, 500);
   };
 
   const downloadCSV = (data, filename) => {
@@ -1647,9 +1653,9 @@ const ClientList = () => {
   };
 
   return (
-    <div className="container-fluid">
-      {loading && (
-        <div className="overlay">
+    <div className="container-fluid position-relative">
+      {(loading || customerDetails.loading || isExporting) && (
+        <div className="overlay" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
           <div className="loader"></div>
         </div>
       )}
