@@ -458,6 +458,7 @@ const Timesheet = () => {
   const [isDisabled, setIsDisabled] = useState(false);
 
   const [isWeekSwitching, setIsWeekSwitching] = useState(false);
+   const [isAddingRow, setIsAddingRow] = useState(false);
 
   // console.log(`timeSheetRows`, timeSheetRows);
 
@@ -467,13 +468,41 @@ const Timesheet = () => {
   };
 
   const handleAddNewSheet = async () => {
-    if (timeSheetRows.length > 0) {
-      const lastObject = timeSheetRows[timeSheetRows.length - 1];
-      if (lastObject.task_id == null) {
-        alert("Please select the Task");
-        return;
+
+    // if (timeSheetRows.length > 0) {
+    //   const lastObject = timeSheetRows[timeSheetRows.length - 1];
+    //   if (lastObject.task_id == null) {
+    //     alert("Please select the Task");
+    //     return;
+    //   }
+    // }
+     if (isAddingRow) return;
+    setIsAddingRow(true);
+    try {
+      if (timeSheetRows.length > 0) {
+        const lastObject = timeSheetRows[timeSheetRows.length - 1];
+        let missingFields = [];
+        
+        if (lastObject.task_type === "2") {
+          if (!lastObject.customer_id) missingFields.push("Customer");
+          if (!lastObject.client_id) missingFields.push("Client");
+        }
+        
+        if (!lastObject.job_id) missingFields.push("Job");
+        if (!lastObject.task_id) missingFields.push("Task");
+
+        if (missingFields.length > 0) {
+          sweatalert.fire({
+            icon: "warning",
+            title: "Missing Fields",
+            text: `Please select: ${missingFields.join(", ")}`,
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 3000,
+          });
+          return;
+        }
       }
-    }
 
     const newSheetRow = {
       id: null,
@@ -562,7 +591,15 @@ const Timesheet = () => {
       // Handle the error case as needed
       console.log("API call failed:", res);
     }
+
+      } catch (error) {
+      console.log("Error in handleAddNewSheet:", error);
+    } finally {
+      setIsAddingRow(false);
+    }
   };
+
+  
 
   const [deleteRows, setDeleteRows] = useState([]);
   const handleDeleteRow = (index) => {
@@ -1187,8 +1224,30 @@ const Timesheet = () => {
 
     if (timeSheetRows.length > 0) {
       const lastObject = timeSheetRows[timeSheetRows.length - 1];
-      if (lastObject.task_id == null) {
-        alert("Please select the Task");
+      // if (lastObject.task_id == null) {
+      //   alert("Please select the Task");
+
+ let missingFields = [];
+      
+      if (lastObject.task_type === "2") {
+        if (!lastObject.customer_id) missingFields.push("Customer");
+        if (!lastObject.client_id) missingFields.push("Client");
+      }
+      
+      if (!lastObject.job_id) missingFields.push("Job");
+      if (!lastObject.task_id) missingFields.push("Task");
+
+      if (missingFields.length > 0) {
+        sweatalert.fire({
+          icon: "warning",
+          title: "Missing Fields",
+          text: `Please select: ${missingFields.join(", ")}`,
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 3000,
+        });
+
+
         return;
       }
     }
@@ -1359,8 +1418,29 @@ const Timesheet = () => {
 
     if (timeSheetRows.length > 0) {
       const lastObject = timeSheetRows[timeSheetRows.length - 1];
-      if (lastObject.task_id == null) {
-        alert("Please select the Task");
+      // if (lastObject.task_id == null) {
+      //   alert("Please select the Task");
+
+
+       let missingFields = [];
+      
+      if (lastObject.task_type === "2") {
+        if (!lastObject.customer_id) missingFields.push("Customer");
+        if (!lastObject.client_id) missingFields.push("Client");
+      }
+      
+      if (!lastObject.job_id) missingFields.push("Job");
+      if (!lastObject.task_id) missingFields.push("Task");
+
+      if (missingFields.length > 0) {
+        sweatalert.fire({
+          icon: "warning",
+          title: "Missing Fields",
+          text: `Please select: ${missingFields.join(", ")}`,
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 3000,
+        });
         return;
       }
     }
