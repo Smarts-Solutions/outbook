@@ -1491,6 +1491,14 @@ const saveTimesheet = async (Timesheet) => {
     // ======================
 
     if (data?.length > 0) {
+
+     const invalidRow = data.find(row => !row.job_id || !row.task_id);
+    if (invalidRow) {
+      return { status: false, message: "Please select Job and Task for all entries before saving." };
+    }
+
+
+
       await Promise.all(
         data?.map(async (row) => {
           let task_type_name = getTaskTypeName(row.task_type);
