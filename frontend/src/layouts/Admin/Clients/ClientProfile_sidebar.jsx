@@ -1045,53 +1045,56 @@ const ClientList = () => {
 
       const data = { req, authToken: token };
       const response = await dispatch(JobAction(data)).unwrap();
-      if (!response.status) {
+      
+      if (!response.status || !response.data || response.data.length === 0) {
         alert("No data to export!");
+        setLoading(false);
         return;
       }
-      const apiData = response?.data;
+      
+      const apiData = response.data;
 
-      if (!apiData || apiData.length === 0) {
-        alert("No data to export!");
-        return;
-      }
+      // Wrap processing in setTimeout to avoid blocking the UI thread for large datasets
+      setTimeout(() => {
+        try {
+          const exportData = apiData.map((item) => ({
+            "Job Code Id": item.job_code_id || "-",
+            "Job Priority": item.job_priority || "-",
+            "Client Trading Name": item.client_trading_name || "-",
+            "Job Type Name": item.job_type_name || "-",
+            "Client Contact Person":
+              item.account_manager_officer_first_name &&
+              item.account_manager_officer_last_name
+                ? item.account_manager_officer_first_name +
+                  " " +
+                  item.account_manager_officer_last_name
+                : "-",
+            "Outbooks Account Manager":
+              item.outbooks_acount_manager_first_name +
+              " " +
+              item.outbooks_acount_manager_last_name || "-",
+            "Employee ID": item.account_manager_employee_number || "-",
+            "Allocated To":
+              item.allocated_id != null
+                ? item.allocated_first_name + " " + item.allocated_last_name
+                : "-",
+            Invoiced: item.invoiced == "1" ? "YES" : "NO",
+            "Created By": item.job_created_by || "-",
+            "Created At": item.created_at || "-",
+            Status: item.status || "-",
+          }));
 
-      const exportData = apiData?.map((item) => ({
-        "Job Code Id": item.job_code_id || "-",
-        "Job Priority": item.job_priority || "-",
-        "Client Trading Name": item.client_trading_name || "-",
-        "Job Type Name": item.job_type_name || "-",
-        // "Account Manager":
-        //   item.account_manager_officer_first_name +
-        //   " " +
-        //   item.account_manager_officer_last_name||"-",
-        "Client Contact Person":
-          item.account_manager_officer_first_name &&
-            item.account_manager_officer_last_name
-            ? item.account_manager_officer_first_name +
-            " " +
-            item.account_manager_officer_last_name
-            : "-",
-        "Outbooks Account Manager":
-          item.outbooks_acount_manager_first_name +
-          " " +
-          item.outbooks_acount_manager_last_name || "-",
-        "Employee ID": item.account_manager_employee_number || "-",
-        "Allocated To":
-          item.allocated_id != null
-            ? item.allocated_first_name + " " + item.allocated_last_name
-            : "-",
-        Invoiced: item.invoiced == "1" ? "YES" : "NO" || "-",
-        "Created By": item.job_created_by || "-",
-        "Created At": item.created_at || "-",
-        Status: item.status || "-",
-      }));
-
-      downloadCSV(exportData, "Job Details.csv");
+          downloadCSV(exportData, "Job Details.csv");
+        } catch (err) {
+          console.error("Export processing failed:", err);
+          alert("An error occurred while generating CSV.");
+        } finally {
+          setLoading(false);
+        }
+      }, 100);
     } catch (error) {
       console.error("Export failed:", error);
       alert("An error occurred while exporting.");
-    } finally {
       setLoading(false);
     }
   };

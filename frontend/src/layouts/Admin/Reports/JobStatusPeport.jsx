@@ -506,16 +506,19 @@ const JobStatus = () => {
         response?.data?.rows?.length === 0
       ) {
         alert("No data to export!");
+        setIsExporting(false);
         return;
       }
 
     const rows = response?.data?.rows || [];
 
     // ✅ Find maximum account managers
-
     console.log("maxManagers", maxManagers)
-    const exportData = rows.map((item) => {
-      // ✅ Build rowData in EXACT same order as columns array
+
+    setTimeout(() => {
+      try {
+        const exportData = rows.map((item) => {
+          // ✅ Build rowData in EXACT same order as columns array
       const rowData = {};
 
       // 1. Job ID
@@ -744,10 +747,16 @@ const JobStatus = () => {
     });
 
     downloadCSV(exportData, "Job Status Report.csv");
+      } catch (err) {
+        console.error("Export Processing Error:", err);
+        alert("Failed to process export data!");
+      } finally {
+        setIsExporting(false);
+      }
+    }, 100);
     } catch (error) {
       console.error("Export Error:", error);
       alert("Failed to export data!");
-    } finally {
       setIsExporting(false);
     }
   };

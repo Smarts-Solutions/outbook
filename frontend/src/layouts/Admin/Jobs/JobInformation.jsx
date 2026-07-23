@@ -230,6 +230,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
     GetStatus();
   }, []);
 
+
   useEffect(() => {
     GetJobData();
   }, [JobInformationData]);
@@ -460,13 +461,13 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
             job_priority: response.data.job_priority ?? null,
           }));
           setStatusId(response.data.status_type);
+        } else {
+          setLoading(false);
         }
       })
       .catch((error) => {
-        return;
-      })
-      .finally(() => {
         setLoading(false);
+        return;
       });
   };
 
@@ -487,6 +488,8 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
   };
 
   const GetJobData = async () => {
+    if (!JobInformationData?.Customer_id) return;
+    setLoading(true);
     const req = { customer_id: JobInformationData?.Customer_id, job_id: location.state.job_id };
     const data = { req: req, authToken: token };
     await dispatch(GetAllJabData(data))
@@ -494,13 +497,13 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
       .then(async (response) => {
         if (response.status) {
           setAllJobData({
-            loading: true,
+            loading: false,
             data: response.data,
           });
           setAllStaffData(response?.data?.allStaff || []);
         } else {
           setAllJobData({
-            loading: true,
+            loading: false,
             data: [],
           });
           setAllStaffData([]);
@@ -508,6 +511,9 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
       })
       .catch((error) => {
         return;
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 

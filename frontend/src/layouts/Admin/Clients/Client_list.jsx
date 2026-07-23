@@ -227,17 +227,24 @@ const ClientList = () => {
   };
 
   useEffect(() => {
-    GetStatus();
-    if (activeTab !== "") {
-      if (activeTab === "checklist") {
-        getCheckListData();
-      } else if (activeTab === "client") {
-        GetAllClientData();
-      } else if (activeTab === "job") {
-        GetAllClientData();
-        JobDetails();
+    const fetchTabContent = async () => {
+      setLoading(true);
+      try {
+        await GetStatus();
+        if (activeTab !== "") {
+          if (activeTab === "checklist") {
+            await getCheckListData();
+          } else if (activeTab === "client") {
+            await GetAllClientData();
+          } else if (activeTab === "job") {
+            await Promise.all([GetAllClientData(), JobDetails()]);
+          }
+        }
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+    fetchTabContent();
   }, [activeTab]);
 
   useEffect(() => {
