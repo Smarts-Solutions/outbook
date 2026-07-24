@@ -461,7 +461,6 @@ const Timesheet = () => {
   const [isDisabled, setIsDisabled] = useState(false);
 
   const [isWeekSwitching, setIsWeekSwitching] = useState(false);
-  const [isAddingRow, setIsAddingRow] = useState(false);
 
   // console.log(`timeSheetRows`, timeSheetRows);
 
@@ -471,40 +470,13 @@ const Timesheet = () => {
   };
 
   const handleAddNewSheet = async () => {
-    if (isAddingRow) return;
-    setIsAddingRow(true);
-    try {
-      if (timeSheetRows.length > 0) {
-        const lastObject = timeSheetRows[timeSheetRows.length - 1];
-        let missingFields = [];
-        
-        if (lastObject.task_type === "2") {
-          if (!lastObject.customer_id) missingFields.push("Customer");
-          if (!lastObject.client_id) missingFields.push("Client");
-        }
-        
-        if (!lastObject.job_id) missingFields.push("Job");
-        if (!lastObject.task_id) missingFields.push("Task");
-
-        if (missingFields.length > 0) {
-          let textMsg = "";
-          if (missingFields.includes("Client")) {
-            textMsg = `This row cannot be added because ${missingFields.join(", ")} are missing. Please complete the current row first.`;
-          } else {
-            textMsg = `This row cannot be added because no Job or Task is available for the selected client. Please choose a different client or create a Job first.`;
-          }
-
-          sweatalert.fire({
-            icon: "warning",
-            title: "Missing Fields",
-            text: textMsg,
-            timerProgressBar: true,
-            showConfirmButton: true,
-            timer: 3000,
-          });
-          return;
-        }
+    if (timeSheetRows.length > 0) {
+      const lastObject = timeSheetRows[timeSheetRows.length - 1];
+      if (lastObject.task_id == null) {
+        alert("Please select the Task");
+        return;
       }
+    }
 
     const newSheetRow = {
       id: null,
@@ -592,11 +564,6 @@ const Timesheet = () => {
     } else {
       // Handle the error case as needed
       console.log("API call failed:", res);
-    }
-    } catch (error) {
-      console.log("Error in handleAddNewSheet:", error);
-    } finally {
-      setIsAddingRow(false);
     }
   };
 
@@ -1223,32 +1190,8 @@ const Timesheet = () => {
 
     if (timeSheetRows.length > 0) {
       const lastObject = timeSheetRows[timeSheetRows.length - 1];
-      let missingFields = [];
-      
-      if (lastObject.task_type === "2") {
-        if (!lastObject.customer_id) missingFields.push("Customer");
-        if (!lastObject.client_id) missingFields.push("Client");
-      }
-      
-      if (!lastObject.job_id) missingFields.push("Job");
-      if (!lastObject.task_id) missingFields.push("Task");
-
-      if (missingFields.length > 0) {
-        let textMsg = "";
-        if (missingFields.includes("Client")) {
-          textMsg = `This row cannot be saved because ${missingFields.join(", ")} are missing. Please complete the current row first.`;
-        } else {
-          textMsg = `This row cannot be saved because no Job or Task is available for the selected client. Please choose a different client or create a Job first.`;
-        }
-
-        sweatalert.fire({
-          icon: "warning",
-          title: "Missing Fields",
-          text: textMsg,
-          timerProgressBar: true,
-          showConfirmButton: true,
-          timer: 3000,
-        });
+      if (lastObject.task_id == null) {
+        alert("Please select the Task");
         return;
       }
     }
@@ -1419,32 +1362,8 @@ const Timesheet = () => {
 
     if (timeSheetRows.length > 0) {
       const lastObject = timeSheetRows[timeSheetRows.length - 1];
-      let missingFields = [];
-      
-      if (lastObject.task_type === "2") {
-        if (!lastObject.customer_id) missingFields.push("Customer");
-        if (!lastObject.client_id) missingFields.push("Client");
-      }
-      
-      if (!lastObject.job_id) missingFields.push("Job");
-      if (!lastObject.task_id) missingFields.push("Task");
-
-      if (missingFields.length > 0) {
-        let textMsg = "";
-        if (missingFields.includes("Client")) {
-          textMsg = `This row cannot be submitted because ${missingFields.join(", ")} are missing. Please complete the current row first.`;
-        } else {
-          textMsg = `This row cannot be submitted because no Job or Task is available for the selected client. Please choose a different client or create a Job first.`;
-        }
-
-        sweatalert.fire({
-          icon: "warning",
-          title: "Missing Fields",
-          text: textMsg,
-          timerProgressBar: true,
-          showConfirmButton: true,
-          timer: 3000,
-        });
+      if (lastObject.task_id == null) {
+        alert("Please select the Task");
         return;
       }
     }
@@ -2100,7 +2019,7 @@ const Timesheet = () => {
   return (
 
     <div className="container-fluid" style={{ position: "relative" }}>
-      {(loading || exporting || staffDataAll.loading || staffDataWeekDataAll.loading || isExistStaffDataWeekDataAll.loading || staffDataWeekDataAllSubmitTImeSheet.loading || isAddingRow) && (
+      {(loading || exporting || staffDataAll.loading || staffDataWeekDataAll.loading || isExistStaffDataWeekDataAll.loading || staffDataWeekDataAllSubmitTImeSheet.loading) && (
         <div className="overlay" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
           <div className="loader"></div>
         </div>
@@ -2844,7 +2763,7 @@ const Timesheet = () => {
                                             //       : false
                                             // }
                                             disabled={
-                                              !item.task_id ? true : staffDetails.id != multipleFilter.staff_id
+                                              staffDetails.id != multipleFilter.staff_id
                                                 ? true
                                                 : item.submit_status === "1"
                                                   ? true
@@ -2907,7 +2826,7 @@ const Timesheet = () => {
                                           //       : false
                                           // }
                                           disabled={
-                                            !item.task_id ? true : staffDetails.id != multipleFilter.staff_id
+                                            staffDetails.id != multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
@@ -2969,7 +2888,7 @@ const Timesheet = () => {
                                           //       : false
                                           // }
                                           disabled={
-                                            !item.task_id ? true : staffDetails.id != multipleFilter.staff_id
+                                            staffDetails.id != multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
@@ -3030,7 +2949,7 @@ const Timesheet = () => {
                                           //       : false
                                           // }
                                           disabled={
-                                            !item.task_id ? true : staffDetails.id != multipleFilter.staff_id
+                                            staffDetails.id != multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
@@ -3093,7 +3012,7 @@ const Timesheet = () => {
                                           //       : false
                                           // }
                                           disabled={
-                                            !item.task_id ? true : staffDetails.id != multipleFilter.staff_id
+                                            staffDetails.id != multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
@@ -3155,7 +3074,7 @@ const Timesheet = () => {
                                           //       : false
                                           // }
                                           disabled={
-                                            !item.task_id ? true : staffDetails.id != multipleFilter.staff_id
+                                            staffDetails.id != multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
@@ -3219,7 +3138,7 @@ const Timesheet = () => {
                                           //       : false
                                           // }
                                           disabled={
-                                            !item.task_id ? true : staffDetails.id != multipleFilter.staff_id
+                                            staffDetails.id != multipleFilter.staff_id
                                               ? true
                                               : item.submit_status === "1"
                                                 ? true
@@ -3458,7 +3377,6 @@ const Timesheet = () => {
                                       style={{ zIndex: "unset" }}
                                       className="d-flex btn btn-info fw-normal px-2"
                                       onClick={handleAddNewSheet}
-                                      disabled={isAddingRow}
                                     >
                                       <i
                                         style={{

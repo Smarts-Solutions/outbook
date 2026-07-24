@@ -28,6 +28,7 @@ const EditJob = () => {
   const staffCreatedId = JSON.parse(localStorage.getItem("staffDetails")).id;
   const dispatch = useDispatch();
   const [AllJobData, setAllJobData] = useState({ loading: false, data: [] });
+  const [isLoading, setIsLoading] = useState(true);
   const [showHistoryInline, setShowHistoryInline] = useState(false);
 
   // customer Details
@@ -752,6 +753,7 @@ const EditJob = () => {
             data: response.data,
           });
         } else {
+          setIsLoading(false);
           setGetJobDetails({
             loading: true,
             data: {},
@@ -759,6 +761,7 @@ const EditJob = () => {
         }
       })
       .catch((error) => {
+        setIsLoading(false);
         return;
       });
   };
@@ -943,6 +946,8 @@ const EditJob = () => {
   }, [getChecklistId]);
 
   const GetJobData = async () => {
+    if (!getJobDetails?.data?.customer_id) return;
+    setIsLoading(true);
     const req = { customer_id: getJobDetails?.data?.customer_id || 0, job_id: location.state.job_id };
     const data = { req: req, authToken: token };
     await dispatch(GetAllJabData(data))
@@ -950,7 +955,7 @@ const EditJob = () => {
       .then(async (response) => {
         if (response.status) {
           setAllJobData({
-            loading: true,
+            loading: false,
             data: response.data,
           });
 
@@ -960,7 +965,7 @@ const EditJob = () => {
           setAllClientDetails(response?.data?.client || []);
         } else {
           setAllJobData({
-            loading: true,
+            loading: false,
             data: [],
           });
           setAllStaffData([]);
@@ -968,6 +973,9 @@ const EditJob = () => {
       })
       .catch((error) => {
         return;
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
@@ -2935,7 +2943,7 @@ const EditJob = () => {
 
   return (
     <div className="position-relative">
-      {!getJobDetails.loading && (
+      {isLoading && (
         <div className="overlay" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
           <div className="loader"></div>
         </div>

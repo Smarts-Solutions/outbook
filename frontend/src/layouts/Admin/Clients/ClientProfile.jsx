@@ -87,10 +87,20 @@ const ClientList = () => {
   };
 
   useEffect(() => {
-    GetAllJobList();
-    GetClientDetails();
-    GetStatus();
-    fetchSiteDetails();
+    const fetchInitialData = async () => {
+      setIsLoading(true);
+      try {
+        await Promise.all([
+          GetAllJobList(),
+          GetClientDetails(),
+          GetStatus(),
+          fetchSiteDetails(),
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchInitialData();
   }, []);
 
   const accessDataJob =
@@ -1197,71 +1207,90 @@ const ClientList = () => {
           <div className="loader"></div>
         </div>
       )}
-        <div className="col-sm-12">
-          <div className="page-title-box">
-            <div className="row align-items-start flex-md-row flex-column-reverse justify-content-between">
-              <div className=" col-md-6 col-lg-8">
-                <ul
-                  className="nav nav-pills rounded-tabs"
-                  id="pills-tab"
-                  role="tablist"
-                >
-                  {tabs.map((tab) => (
-                    <li className="nav-item" role="presentation" key={tab.id}>
-                      <button
-                        className={`nav-link ${activeTab === tab.id ? "active" : ""
-                          }`}
-                        id={`${tab.id}-tab`}
-                        data-bs-toggle="pill"
-                        data-bs-target={`#${tab.id}`}
-                        type="button"
-                        role="tab"
-                        aria-controls={tab.id}
-                        aria-selected={activeTab === tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                      >
-                        {/* <i className={tab.icon}></i> */}
-                        {tab.icon}
-                        {tab.label}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              {activeTab == "NoOfJobs" && (
-                <>
-                  <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
+      <div className="col-sm-12">
+        <div className="page-title-box">
+          <div className="row align-items-start flex-md-row flex-column-reverse justify-content-between">
+            <div className=" col-md-6 col-lg-8">
+              <ul
+                className="nav nav-pills rounded-tabs"
+                id="pills-tab"
+                role="tablist"
+              >
+                {tabs.map((tab) => (
+                  <li className="nav-item" role="presentation" key={tab.id}>
                     <button
+                      className={`nav-link ${activeTab === tab.id ? "active" : ""
+                        }`}
+                      id={`${tab.id}-tab`}
+                      data-bs-toggle="pill"
+                      data-bs-target={`#${tab.id}`}
                       type="button"
-                      className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
-                      onClick={() => {
-                        sessionStorage.setItem(
-                          "activeTab",
-                          location.state.activeTab,
-                        );
-                        window.history.back();
-                      }}
+                      role="tab"
+                      aria-controls={tab.id}
+                      aria-selected={activeTab === tab.id}
+                      onClick={() => setActiveTab(tab.id)}
                     >
-                      <ArrowLeft size={16} /> Back
+                      {/* <i className={tab.icon}></i> */}
+                      {tab.icon}
+                      {tab.label}
                     </button>
-                    {(getAccessDataJob.insert == 1 ||
-                      role === "SUPERADMIN") && (
-                        <div
-                          className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
-                          onClick={handleCreateJob}
-                        >
-                          <Plus size={16} /> Create Job
-                        </div>
-                      )}
-                  </div>
-                </>
-              )}
-
-              {activeTab === "view client" && (
-                <div className="col-md-4 col-auto">
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {activeTab == "NoOfJobs" && (
+              <>
+                <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
                   <button
                     type="button"
-                    className="btn btn-info text-white float-end blue-btn me-2"
+                    className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
+                    onClick={() => {
+                      sessionStorage.setItem(
+                        "activeTab",
+                        location.state.activeTab,
+                      );
+                      window.history.back();
+                    }}
+                  >
+                    <ArrowLeft size={16} /> Back
+                  </button>
+                  {(getAccessDataJob.insert == 1 ||
+                    role === "SUPERADMIN") && (
+                      <div
+                        className="btn btn-info text-white  blue-btn mt-2 mt-sm-0"
+                        onClick={handleCreateJob}
+                      >
+                        <Plus size={16} /> Create Job
+                      </div>
+                    )}
+                </div>
+              </>
+            )}
+
+            {activeTab === "view client" && (
+              <div className="col-md-4 col-auto">
+                <button
+                  type="button"
+                  className="btn btn-info text-white float-end blue-btn me-2"
+                  onClick={() => {
+                    sessionStorage.setItem(
+                      "activeTab",
+                      location.state.activeTab,
+                    );
+                    window.history.back();
+                  }}
+                >
+                  <ArrowLeft size={16} /> Back
+                </button>
+              </div>
+            )}
+
+            {activeTab == "documents" && (
+              <>
+                <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
+                  <button
+                    type="button"
+                    className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
                     onClick={() => {
                       sessionStorage.setItem(
                         "activeTab",
@@ -1273,671 +1302,652 @@ const ClientList = () => {
                     <ArrowLeft size={16} /> Back
                   </button>
                 </div>
-              )}
-
-              {activeTab == "documents" && (
-                <>
-                  <div className="col-md-6 col-lg-4 d-block col-sm-auto d-sm-flex justify-content-end ps-lg-0">
-                    <button
-                      type="button"
-                      className="btn btn-info text-white float-sm-end blue-btn me-2 mt-2 mt-sm-0"
-                      onClick={() => {
-                        sessionStorage.setItem(
-                          "activeTab",
-                          location.state.activeTab,
-                        );
-                        window.history.back();
-                      }}
-                    >
-                      <ArrowLeft size={16} /> Back
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
+              </>
+            )}
           </div>
-
-          <Hierarchy
-            show={[
-              "Customer",
-              "Client",
-              activeTab == "NoOfJobs" ? "No. Of Jobs" : activeTab,
-            ]}
-            active={2}
-            data={hararchyData}
-            NumberOfActive={activeTab == "NoOfJobs" ? customerData.length : ""}
-          />
         </div>
 
-        <div className="mt-4">
-          {activeTab == "NoOfJobs" && (
-            <div
-              className={`tab-pane fade ${activeTab == "NoOfJobs" ? "show active" : ""
-                }`}
-              id={"NoOfJobs"}
-              role="tabpanel"
-              aria-labelledby={`NoOfJobs-tab`}
-            >
-              <div className="">
-                <div className="report-data mt-4 ">
-                  <div className="d-flex justify-content-between align-items-center">
-                    <ul className="nav nav-tabs border-0 mb-3" role="tablist">
-                      <li className="nav-item" role="presentation">
-                        <button
-                          className="nav-link active"
-                          id="assignedjob-tab"
-                          data-bs-toggle="pill"
-                          data-bs-target="#assignedjob"
-                          type="button"
-                          role="tab"
-                          aria-controls="assignedjob"
-                          aria-selected="true"
-                          tabIndex={-1}
-                        >
-                          Assigned Jobs
-                        </button>
-                      </li>
-                    </ul>
+        <Hierarchy
+          show={[
+            "Customer",
+            "Client",
+            activeTab == "NoOfJobs" ? "No. Of Jobs" : activeTab,
+          ]}
+          active={2}
+          data={hararchyData}
+          NumberOfActive={activeTab == "NoOfJobs" ? customerData.length : ""}
+        />
+      </div>
 
-                    {customerData && customerData.length > 0 && (
+      <div className="mt-4">
+        {activeTab == "NoOfJobs" && (
+          <div
+            className={`tab-pane fade ${activeTab == "NoOfJobs" ? "show active" : ""
+              }`}
+            id={"NoOfJobs"}
+            role="tabpanel"
+            aria-labelledby={`NoOfJobs-tab`}
+          >
+            <div className="">
+              <div className="report-data mt-4 ">
+                <div className="d-flex justify-content-between align-items-center">
+                  <ul className="nav nav-tabs border-0 mb-3" role="tablist">
+                    <li className="nav-item" role="presentation">
                       <button
-                        className="btn btn-outline-info fw-bold float-end border-3"
-                        onClick={handleExport}
+                        className="nav-link active"
+                        id="assignedjob-tab"
+                        data-bs-toggle="pill"
+                        data-bs-target="#assignedjob"
+                        type="button"
+                        role="tab"
+                        aria-controls="assignedjob"
+                        aria-selected="true"
+                        tabIndex={-1}
                       >
-                        <Download size={16}/>{" "}
-                        Export Excel
+                        Assigned Jobs
                       </button>
-                    )}
-                  </div>
-                  <div className="tab-content" id="pills-tabContent">
-                    <div
-                      className="tab-pane fade active show"
-                      id="assignedjob"
-                      role="tabpanel"
-                      aria-labelledby="assignedjob-tab"
+                    </li>
+                  </ul>
+
+                  {customerData && customerData.length > 0 && (
+                    <button
+                      className="btn btn-outline-info fw-bold float-end border-3"
+                      onClick={handleExport}
                     >
-                      <div className="datatable-wrapper ">
-                        {customerData && statusDataAll.length > 0 && (
-                          <Datatable
-                            columns={columns}
-                            data={customerData}
-                            filter={true}
-                          />
-                        )}
+                      <Download size={16} />{" "}
+                      Export Excel
+                    </button>
+                  )}
+                </div>
+                <div className="tab-content" id="pills-tabContent">
+                  <div
+                    className="tab-pane fade active show"
+                    id="assignedjob"
+                    role="tabpanel"
+                    aria-labelledby="assignedjob-tab"
+                  >
+                    <div className="datatable-wrapper ">
+                      {customerData && statusDataAll.length > 0 && (
+                        <Datatable
+                          columns={columns}
+                          data={customerData}
+                          filter={true}
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <div
+                    className="tab-pane fade"
+                    id="alljob"
+                    role="tabpanel"
+                    aria-labelledby="alljob-tab"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+
+        {activeTab == "view client" && clientInformationData && (
+          <div className="tab-content" id="pills-tabContent">
+            <div className="report-data">
+              <div className="card-body">
+                <div className="dastyle-profile">
+                  <div className="row">
+                    <div className="col-md-4 col-sm-12 col-lg-4 align-self-center mb-3 mb-lg-0">
+                      <div className="dastyle-profile-main">
+                        <div className="dastyle-profile-main-pic">
+                          <span className="dastyle-profile_main-pic-change">
+                            <i className="ti-user"></i>
+                          </span>
+                        </div>
+                        <div className="dastyle-profile_user-detail">
+                          <h5 className="dastyle-user-name">
+                            {getClientDetails?.data?.client?.client_type ==
+                              5 ||
+                              getClientDetails?.data?.client?.client_type == 6
+                              ? getClientDetails?.data?.member_details?.[0]
+                                .first_name +
+                              " " +
+                              getClientDetails?.data?.member_details?.[0]
+                                .last_name
+                              : getClientDetails?.data?.client?.client_type ==
+                                7
+                                ? getClientDetails?.data
+                                  ?.beneficiaries_details?.[0].first_name +
+                                " " +
+                                getClientDetails?.data
+                                  ?.beneficiaries_details?.[0].last_name
+                                : clientInformationData.first_name +
+                                " " +
+                                clientInformationData.last_name}
+                          </h5>
+                          <p className="mb-0 dastyle-user-name-post">
+                            Client Code: {informationData.client_code}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                    <div
-                      className="tab-pane fade"
-                      id="alljob"
-                      role="tabpanel"
-                      aria-labelledby="alljob-tab"
-                    ></div>
+                    <div className="col-md-4 col-sm-6 col-lg-4 ml-auto align-self-center">
+                      <ul className="list-unstyled personal-detail mb-0">
+                        <li className="">
+                          <Phone
+                            size={22}
+                            className="me-2 text-secondary align-middle"
+                          />
+                          <b>Phone : </b>
+                          {getClientDetails?.data?.client?.client_type == 5 ||
+                            getClientDetails?.data?.client?.client_type == 6
+                            ? getClientDetails?.data?.member_details?.[0]
+                              .phone_code +
+                            " " +
+                            getClientDetails?.data?.member_details?.[0]
+                              .phone || "NA"
+                            : getClientDetails?.data?.client?.client_type == 7
+                              ? getClientDetails?.data
+                                ?.beneficiaries_details?.[0].phone_code +
+                              " " +
+                              getClientDetails?.data
+                                ?.beneficiaries_details?.[0].phone || "NA"
+                              : clientInformationData.phone_code +
+                              " " +
+                              clientInformationData.phone || "NA"}
+                        </li>
+                        <li className="mt-2">
+                          <Mail
+                            size={22}
+                            className="text-secondary align-middle me-2"
+                          />
+                          <b>Email : </b>{" "}
+                          {getClientDetails?.data?.client?.client_type == 5 ||
+                            getClientDetails?.data?.client?.client_type == 6
+                            ? getClientDetails?.data?.member_details?.[0]
+                              .email || "NA"
+                            : getClientDetails?.data?.client?.client_type == 7
+                              ? getClientDetails?.data
+                                ?.beneficiaries_details?.[0].email || "NA"
+                              : clientInformationData.email || "NA"}
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className=" col-md-4 col-sm-6 col-lg-4 align-self-center mt-2 mt-sm-0">
+                      <ul className="list-unstyled personal-detail mb-0">
+                        <li className="row">
+                          <div className="col-md-12">
+                            <b>Trading Name :</b>{" "}
+                            {(informationData &&
+                              informationData.trading_name) ||
+                              "NA"}
+                          </div>
+                        </li>
+                        <li className="mt-2 row">
+                          <div className="col-md-12">
+                            <b>Trading Address :</b>{" "}
+                            {(informationData &&
+                              informationData.trading_address) ||
+                              "NA"}
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          )}
-
-
-          {activeTab == "view client" && clientInformationData && (
-            <div className="tab-content" id="pills-tabContent">
-              <div className="report-data">
-                <div className="card-body">
-                  <div className="dastyle-profile">
-                    <div className="row">
-                      <div className="col-md-4 col-sm-12 col-lg-4 align-self-center mb-3 mb-lg-0">
-                        <div className="dastyle-profile-main">
-                          <div className="dastyle-profile-main-pic">
-                            <span className="dastyle-profile_main-pic-change">
-                              <i className="ti-user"></i>
-                            </span>
-                          </div>
-                          <div className="dastyle-profile_user-detail">
-                            <h5 className="dastyle-user-name">
-                              {getClientDetails?.data?.client?.client_type ==
-                                5 ||
-                                getClientDetails?.data?.client?.client_type == 6
-                                ? getClientDetails?.data?.member_details?.[0]
-                                  .first_name +
-                                " " +
-                                getClientDetails?.data?.member_details?.[0]
-                                  .last_name
-                                : getClientDetails?.data?.client?.client_type ==
-                                  7
-                                  ? getClientDetails?.data
-                                    ?.beneficiaries_details?.[0].first_name +
-                                  " " +
-                                  getClientDetails?.data
-                                    ?.beneficiaries_details?.[0].last_name
-                                  : clientInformationData.first_name +
-                                  " " +
-                                  clientInformationData.last_name}
-                            </h5>
-                            <p className="mb-0 dastyle-user-name-post">
-                              Client Code: {informationData.client_code}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-md-4 col-sm-6 col-lg-4 ml-auto align-self-center">
-                        <ul className="list-unstyled personal-detail mb-0">
-                          <li className="">
-                            <Phone
-                              size={22}
-                              className="me-2 text-secondary align-middle"
-                            />
-                            <b>Phone : </b>
-                            {getClientDetails?.data?.client?.client_type == 5 ||
-                              getClientDetails?.data?.client?.client_type == 6
-                              ? getClientDetails?.data?.member_details?.[0]
-                                .phone_code +
-                              " " +
-                              getClientDetails?.data?.member_details?.[0]
-                                .phone || "NA"
-                              : getClientDetails?.data?.client?.client_type == 7
-                                ? getClientDetails?.data
-                                  ?.beneficiaries_details?.[0].phone_code +
-                                " " +
-                                getClientDetails?.data
-                                  ?.beneficiaries_details?.[0].phone || "NA"
-                                : clientInformationData.phone_code +
-                                " " +
-                                clientInformationData.phone || "NA"}
-                          </li>
-                          <li className="mt-2">
-                            <Mail
-                              size={22}
-                              className="text-secondary align-middle me-2"
-                            />
-                            <b>Email : </b>{" "}
-                            {getClientDetails?.data?.client?.client_type == 5 ||
-                              getClientDetails?.data?.client?.client_type == 6
-                              ? getClientDetails?.data?.member_details?.[0]
-                                .email || "NA"
-                              : getClientDetails?.data?.client?.client_type == 7
-                                ? getClientDetails?.data
-                                  ?.beneficiaries_details?.[0].email || "NA"
-                                : clientInformationData.email || "NA"}
-                          </li>
-                        </ul>
-                      </div>
-
-                      <div className=" col-md-4 col-sm-6 col-lg-4 align-self-center mt-2 mt-sm-0">
-                        <ul className="list-unstyled personal-detail mb-0">
-                          <li className="row">
-                            <div className="col-md-12">
-                              <b>Trading Name :</b>{" "}
-                              {(informationData &&
-                                informationData.trading_name) ||
-                                "NA"}
-                            </div>
-                          </li>
-                          <li className="mt-2 row">
-                            <div className="col-md-12">
-                              <b>Trading Address :</b>{" "}
-                              {(informationData &&
-                                informationData.trading_address) ||
-                                "NA"}
-                            </div>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
+            {informationData.client_type == 4 ? (
+              ""
+            ) : (
+              <div className=" report-data mt-4">
+                <div className="card-header border-bottom pb-3 row">
+                  <div className="col-8">
+                    <h4 className="card-title">
+                      {informationData && informationData.client_type == 1
+                        ? "Sole Trader"
+                        : informationData.client_type == 2
+                          ? "Company"
+                          : informationData.client_type == 3
+                            ? "Partnership"
+                            : getClientDetails?.data?.client?.client_type == 5
+                              ? "Charity Incorporated Organisation Information"
+                              : getClientDetails?.data?.client?.client_type ==
+                                6
+                                ? "Charity Unincorporated Association Information"
+                                : getClientDetails?.data?.client
+                                  ?.client_type == 7
+                                  ? "Trust"
+                                  : ""}
+                    </h4>
                   </div>
                 </div>
-              </div>
-              {informationData.client_type == 4 ? (
-                ""
-              ) : (
-                <div className=" report-data mt-4">
-                  <div className="card-header border-bottom pb-3 row">
-                    <div className="col-8">
-                      <h4 className="card-title">
-                        {informationData && informationData.client_type == 1
-                          ? "Sole Trader"
-                          : informationData.client_type == 2
-                            ? "Company"
-                            : informationData.client_type == 3
-                              ? "Partnership"
-                              : getClientDetails?.data?.client?.client_type == 5
-                                ? "Charity Incorporated Organisation Information"
-                                : getClientDetails?.data?.client?.client_type ==
-                                  6
-                                  ? "Charity Unincorporated Association Information"
-                                  : getClientDetails?.data?.client
-                                    ?.client_type == 7
-                                    ? "Trust"
-                                    : ""}
-                      </h4>
-                    </div>
-                  </div>
 
-                  {informationData.client_type == 1 ? (
-                    <div className="card-body pt-3">
-                      <div className="row">
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b>Trading Name :</b>{" "}
-                              {informationData.trading_name || "NA"}
-                              {/* <p className="font-14  ml-3">
+                {informationData.client_type == 1 ? (
+                  <div className="card-body pt-3">
+                    <div className="row">
+                      <div className="col-lg-6">
+                        <ul className="list-unstyled faq-qa">
+                          <li className="mb-4">
+                            <b>Trading Name :</b>{" "}
+                            {informationData.trading_name || "NA"}
+                            {/* <p className="font-14  ml-3">
                             {informationData.trading_name}
                           </p> */}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">VAT Registered : </b>
-                              {informationData.vat_registered == 0
-                                ? "No"
-                                : "Yes"}
-                              {/* <p className="font-14  ml-3">
+                          </li>
+                          <li className="mb-4">
+                            <b className="">VAT Registered : </b>
+                            {informationData.vat_registered == 0
+                              ? "No"
+                              : "Yes"}
+                            {/* <p className="font-14  ml-3">
                             {" "}
                             
                           </p> */}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">Website : </b>
-                              {informationData.website || "NA"}
-                              {/* <p className="font-14  ml-3">
+                          </li>
+                          <li className="mb-4">
+                            <b className="">Website : </b>
+                            {informationData.website || "NA"}
+                            {/* <p className="font-14  ml-3">
                             
                           </p> */}
-                            </li>
-                          </ul>
-                        </div>
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b className="">Trading Address :</b>{" "}
-                              {informationData.trading_address || "NA"}
-                              {/* <p className="font-14  ml-3">
+                          </li>
+                        </ul>
+                      </div>
+                      <div className="col-lg-6">
+                        <ul className="list-unstyled faq-qa">
+                          <li className="mb-4">
+                            <b className="">Trading Address :</b>{" "}
+                            {informationData.trading_address || "NA"}
+                            {/* <p className="font-14  ml-3">
                             {" "}
                             {informationData.trading_address}
                           </p> */}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">VAT Number :</b>{" "}
-                              {informationData.vat_number || "NA"}
-                              {/* <p className="font-14  ml-3">
+                          </li>
+                          <li className="mb-4">
+                            <b className="">VAT Number :</b>{" "}
+                            {informationData.vat_number || "NA"}
+                            {/* <p className="font-14  ml-3">
                             {" "}
                             {informationData.vat_number}
                           </p> */}
-                            </li>
-                          </ul>
-                        </div>
+                          </li>
+                        </ul>
                       </div>
                     </div>
-                  ) : informationData.client_type == 2 ? (
-                    <div className="card-body pt-3">
-                      <div className="row">
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b className="">Company Name : </b>{" "}
-                              {companyDetails.company_name || "NA"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">Company Status :</b>{" "}
-                              {companyDetails.company_status || "NA"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">Registered Office Address :</b>{" "}
-                              {companyDetails.registered_office_address || "NA"}
-                            </li>
-                          </ul>
-                        </div>
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b className="">Entity Type :</b>{" "}
-                              {companyDetails.entity_type || "NA"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">Company Number :</b>{" "}
-                              {companyDetails.company_number || "NA"}
-                            </li>
-                          </ul>
-                        </div>
+                  </div>
+                ) : informationData.client_type == 2 ? (
+                  <div className="card-body pt-3">
+                    <div className="row">
+                      <div className="col-lg-6">
+                        <ul className="list-unstyled faq-qa">
+                          <li className="mb-4">
+                            <b className="">Company Name : </b>{" "}
+                            {companyDetails.company_name || "NA"}
+                          </li>
+                          <li className="mb-4">
+                            <b className="">Company Status :</b>{" "}
+                            {companyDetails.company_status || "NA"}
+                          </li>
+                          <li className="mb-4">
+                            <b className="">Registered Office Address :</b>{" "}
+                            {companyDetails.registered_office_address || "NA"}
+                          </li>
+                        </ul>
+                      </div>
+                      <div className="col-lg-6">
+                        <ul className="list-unstyled faq-qa">
+                          <li className="mb-4">
+                            <b className="">Entity Type :</b>{" "}
+                            {companyDetails.entity_type || "NA"}
+                          </li>
+                          <li className="mb-4">
+                            <b className="">Company Number :</b>{" "}
+                            {companyDetails.company_number || "NA"}
+                          </li>
+                        </ul>
                       </div>
                     </div>
-                  ) : informationData.client_type == 3 ? (
-                    <div className="card-body pt-3">
-                      <div className="row">
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b className="">Trading Name :</b>{" "}
-                              {(informationData &&
-                                informationData.trading_name) ||
-                                "NA"}
-                              <p className="font-14  ml-3"></p>
-                            </li>
-                            <li className="mb-4">
-                              <b className="">VAT Registered :</b>{" "}
-                              {informationData &&
-                                informationData.vat_registered == "0"
-                                ? "No"
-                                : "Yes"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">Website :</b>{" "}
-                              {(informationData && informationData.website) ||
-                                "NA"}
-                            </li>
-                          </ul>
-                        </div>
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b className="">Trading Address :</b>{" "}
-                              {(informationData &&
-                                informationData.trading_address) ||
-                                "NA"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">VAT Number :</b>{" "}
-                              {(informationData &&
-                                informationData.vat_number) ||
-                                "NA"}
-                            </li>
-                          </ul>
-                        </div>
+                  </div>
+                ) : informationData.client_type == 3 ? (
+                  <div className="card-body pt-3">
+                    <div className="row">
+                      <div className="col-lg-6">
+                        <ul className="list-unstyled faq-qa">
+                          <li className="mb-4">
+                            <b className="">Trading Name :</b>{" "}
+                            {(informationData &&
+                              informationData.trading_name) ||
+                              "NA"}
+                            <p className="font-14  ml-3"></p>
+                          </li>
+                          <li className="mb-4">
+                            <b className="">VAT Registered :</b>{" "}
+                            {informationData &&
+                              informationData.vat_registered == "0"
+                              ? "No"
+                              : "Yes"}
+                          </li>
+                          <li className="mb-4">
+                            <b className="">Website :</b>{" "}
+                            {(informationData && informationData.website) ||
+                              "NA"}
+                          </li>
+                        </ul>
+                      </div>
+                      <div className="col-lg-6">
+                        <ul className="list-unstyled faq-qa">
+                          <li className="mb-4">
+                            <b className="">Trading Address :</b>{" "}
+                            {(informationData &&
+                              informationData.trading_address) ||
+                              "NA"}
+                          </li>
+                          <li className="mb-4">
+                            <b className="">VAT Number :</b>{" "}
+                            {(informationData &&
+                              informationData.vat_number) ||
+                              "NA"}
+                          </li>
+                        </ul>
                       </div>
                     </div>
-                  ) : informationData.client_type == 4 ? (
-                    <div className="card-body pt-3">
-                      <div className="row">
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b className="">Trading Name :</b>{" "}
-                              {(informationData &&
-                                informationData.trading_name) ||
-                                "NA"}
-                              <p className="font-14  ml-3"></p>
-                            </li>
-                            <li className="mb-4">
-                              <b className="">VAT Registered :</b>{" "}
-                              {informationData &&
-                                informationData.vat_registered == "0"
-                                ? "No"
-                                : "Yes"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">Website :</b>{" "}
-                              {(informationData && informationData.website) ||
-                                "NA"}
-                            </li>
-                          </ul>
-                        </div>
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b className="">Trading Address :</b>{" "}
-                              {(informationData &&
-                                informationData.trading_address) ||
-                                "NA"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">VAT Number :</b>{" "}
-                              {(informationData &&
-                                informationData.vat_number) ||
-                                "NA"}
-                            </li>
-                          </ul>
-                        </div>
+                  </div>
+                ) : informationData.client_type == 4 ? (
+                  <div className="card-body pt-3">
+                    <div className="row">
+                      <div className="col-lg-6">
+                        <ul className="list-unstyled faq-qa">
+                          <li className="mb-4">
+                            <b className="">Trading Name :</b>{" "}
+                            {(informationData &&
+                              informationData.trading_name) ||
+                              "NA"}
+                            <p className="font-14  ml-3"></p>
+                          </li>
+                          <li className="mb-4">
+                            <b className="">VAT Registered :</b>{" "}
+                            {informationData &&
+                              informationData.vat_registered == "0"
+                              ? "No"
+                              : "Yes"}
+                          </li>
+                          <li className="mb-4">
+                            <b className="">Website :</b>{" "}
+                            {(informationData && informationData.website) ||
+                              "NA"}
+                          </li>
+                        </ul>
+                      </div>
+                      <div className="col-lg-6">
+                        <ul className="list-unstyled faq-qa">
+                          <li className="mb-4">
+                            <b className="">Trading Address :</b>{" "}
+                            {(informationData &&
+                              informationData.trading_address) ||
+                              "NA"}
+                          </li>
+                          <li className="mb-4">
+                            <b className="">VAT Number :</b>{" "}
+                            {(informationData &&
+                              informationData.vat_number) ||
+                              "NA"}
+                          </li>
+                        </ul>
                       </div>
                     </div>
-                  ) : informationData.client_type == 5 ? (
-                    <div className="card-body pt-3">
-                      <div className="row">
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b className="">Trading Name :</b>{" "}
-                              {(informationData &&
-                                informationData.trading_name) ||
-                                "NA"}
-                              <p className="font-14  ml-3"></p>
-                            </li>
-                            <li className="mb-4">
-                              <b className="">VAT Registered :</b>{" "}
-                              {informationData &&
-                                informationData.vat_registered == "0"
-                                ? "No"
-                                : "Yes"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">Website :</b>{" "}
-                              {(informationData && informationData.website) ||
-                                "NA"}
-                            </li>
-                          </ul>
-                        </div>
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b className="">Trading Address :</b>{" "}
-                              {(informationData &&
-                                informationData.trading_address) ||
-                                "NA"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">VAT Number :</b>{" "}
-                              {(informationData &&
-                                informationData.vat_number) ||
-                                "NA"}
-                            </li>
-                          </ul>
-                        </div>
+                  </div>
+                ) : informationData.client_type == 5 ? (
+                  <div className="card-body pt-3">
+                    <div className="row">
+                      <div className="col-lg-6">
+                        <ul className="list-unstyled faq-qa">
+                          <li className="mb-4">
+                            <b className="">Trading Name :</b>{" "}
+                            {(informationData &&
+                              informationData.trading_name) ||
+                              "NA"}
+                            <p className="font-14  ml-3"></p>
+                          </li>
+                          <li className="mb-4">
+                            <b className="">VAT Registered :</b>{" "}
+                            {informationData &&
+                              informationData.vat_registered == "0"
+                              ? "No"
+                              : "Yes"}
+                          </li>
+                          <li className="mb-4">
+                            <b className="">Website :</b>{" "}
+                            {(informationData && informationData.website) ||
+                              "NA"}
+                          </li>
+                        </ul>
+                      </div>
+                      <div className="col-lg-6">
+                        <ul className="list-unstyled faq-qa">
+                          <li className="mb-4">
+                            <b className="">Trading Address :</b>{" "}
+                            {(informationData &&
+                              informationData.trading_address) ||
+                              "NA"}
+                          </li>
+                          <li className="mb-4">
+                            <b className="">VAT Number :</b>{" "}
+                            {(informationData &&
+                              informationData.vat_number) ||
+                              "NA"}
+                          </li>
+                        </ul>
                       </div>
                     </div>
-                  ) : informationData.client_type == 6 ? (
-                    <div className="card-body pt-3">
-                      <div className="row">
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b className="">Trading Name :</b>{" "}
-                              {(informationData &&
-                                informationData.trading_name) ||
-                                "NA"}
-                              <p className="font-14  ml-3"></p>
-                            </li>
-                            <li className="mb-4">
-                              <b className="">VAT Registered :</b>{" "}
-                              {informationData &&
-                                informationData.vat_registered == "0"
-                                ? "No"
-                                : "Yes"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">Website :</b>{" "}
-                              {(informationData && informationData.website) ||
-                                "NA"}
-                            </li>
-                          </ul>
-                        </div>
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b className="">Trading Address :</b>{" "}
-                              {(informationData &&
-                                informationData.trading_address) ||
-                                "NA"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">VAT Number :</b>{" "}
-                              {(informationData &&
-                                informationData.vat_number) ||
-                                "NA"}
-                            </li>
-                          </ul>
-                        </div>
+                  </div>
+                ) : informationData.client_type == 6 ? (
+                  <div className="card-body pt-3">
+                    <div className="row">
+                      <div className="col-lg-6">
+                        <ul className="list-unstyled faq-qa">
+                          <li className="mb-4">
+                            <b className="">Trading Name :</b>{" "}
+                            {(informationData &&
+                              informationData.trading_name) ||
+                              "NA"}
+                            <p className="font-14  ml-3"></p>
+                          </li>
+                          <li className="mb-4">
+                            <b className="">VAT Registered :</b>{" "}
+                            {informationData &&
+                              informationData.vat_registered == "0"
+                              ? "No"
+                              : "Yes"}
+                          </li>
+                          <li className="mb-4">
+                            <b className="">Website :</b>{" "}
+                            {(informationData && informationData.website) ||
+                              "NA"}
+                          </li>
+                        </ul>
+                      </div>
+                      <div className="col-lg-6">
+                        <ul className="list-unstyled faq-qa">
+                          <li className="mb-4">
+                            <b className="">Trading Address :</b>{" "}
+                            {(informationData &&
+                              informationData.trading_address) ||
+                              "NA"}
+                          </li>
+                          <li className="mb-4">
+                            <b className="">VAT Number :</b>{" "}
+                            {(informationData &&
+                              informationData.vat_number) ||
+                              "NA"}
+                          </li>
+                        </ul>
                       </div>
                     </div>
-                  ) : informationData.client_type == 7 ? (
-                    <div className="card-body pt-3">
-                      <div className="row">
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b className="">Trading Name :</b>{" "}
-                              {(informationData &&
-                                informationData.trading_name) ||
-                                "NA"}
-                              <p className="font-14  ml-3"></p>
-                            </li>
-                            <li className="mb-4">
-                              <b className="">VAT Registered :</b>{" "}
-                              {informationData &&
-                                informationData.vat_registered == "0"
-                                ? "No"
-                                : "Yes"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">Website :</b>{" "}
-                              {(informationData && informationData.website) ||
-                                "NA"}
-                            </li>
-                          </ul>
-                        </div>
-                        <div className="col-lg-6">
-                          <ul className="list-unstyled faq-qa">
-                            <li className="mb-4">
-                              <b className="">Trading Address :</b>{" "}
-                              {(informationData &&
-                                informationData.trading_address) ||
-                                "NA"}
-                            </li>
-                            <li className="mb-4">
-                              <b className="">VAT Number :</b>{" "}
-                              {(informationData &&
-                                informationData.vat_number) ||
-                                "NA"}
-                            </li>
-                          </ul>
-                        </div>
+                  </div>
+                ) : informationData.client_type == 7 ? (
+                  <div className="card-body pt-3">
+                    <div className="row">
+                      <div className="col-lg-6">
+                        <ul className="list-unstyled faq-qa">
+                          <li className="mb-4">
+                            <b className="">Trading Name :</b>{" "}
+                            {(informationData &&
+                              informationData.trading_name) ||
+                              "NA"}
+                            <p className="font-14  ml-3"></p>
+                          </li>
+                          <li className="mb-4">
+                            <b className="">VAT Registered :</b>{" "}
+                            {informationData &&
+                              informationData.vat_registered == "0"
+                              ? "No"
+                              : "Yes"}
+                          </li>
+                          <li className="mb-4">
+                            <b className="">Website :</b>{" "}
+                            {(informationData && informationData.website) ||
+                              "NA"}
+                          </li>
+                        </ul>
+                      </div>
+                      <div className="col-lg-6">
+                        <ul className="list-unstyled faq-qa">
+                          <li className="mb-4">
+                            <b className="">Trading Address :</b>{" "}
+                            {(informationData &&
+                              informationData.trading_address) ||
+                              "NA"}
+                          </li>
+                          <li className="mb-4">
+                            <b className="">VAT Number :</b>{" "}
+                            {(informationData &&
+                              informationData.vat_number) ||
+                              "NA"}
+                          </li>
+                        </ul>
                       </div>
                     </div>
-                  ) : (
-                    ""
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+                  </div>
+                ) : (
+                  ""
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
-          {activeTab == "documents" && (
-            <div
-              className={`tab-pane fade ${activeTab == "documents" ? "show active" : ""
-                }`}
-              id={"documents"}
-              role="tabpanel"
-              aria-labelledby={`documents-tab`}
-            >
-              <div className="">
-                <div className="report-data mt-4 ">
-                  <Formik
-                    initialValues={{ files: [] }}
-                    // onSubmit={(values) => {
-                    // }}
-                    onSubmit={(values, { resetForm }) => {
+        {activeTab == "documents" && (
+          <div
+            className={`tab-pane fade ${activeTab == "documents" ? "show active" : ""
+              }`}
+            id={"documents"}
+            role="tabpanel"
+            aria-labelledby={`documents-tab`}
+          >
+            <div className="">
+              <div className="report-data mt-4 ">
+                <Formik
+                  initialValues={{ files: [] }}
+                  // onSubmit={(values) => {
+                  // }}
+                  onSubmit={(values, { resetForm }) => {
 
-                      resetForm(); // Reset Formik form state
-                      resetFileInput(); // Reset file input
-                    }}
-                  >
-                    {({ setFieldValue }) => (
-                      <Form className="details__wrapper">
-                        <div className="row">
-                          <div className="col-lg-12">
-                            <div className="card">
-                              <div className="card-header step-header-blue">
-                                <h4 className="card-title mb-0">
-                                  Upload Client Documents
-                                </h4>
-                              </div>
-                              <div className="card-body">
-                                <div className="input-group">
-                                  <div className="custom-file w-100">
-                                    <input
-                                      type="file"
-                                      ref={fileInputRef}
-                                      multiple
-                                      onChange={(event) => {
-                                        handleFileChange(event);
-                                        setFieldValue("files", [
-                                          ...fileState,
-                                          ...newFiles,
-                                        ]);
-                                      }}
-                                      className="custom-file-input form-control"
-                                      id="inputGroupFile04"
-                                    />
-                                  </div>
+                    resetForm(); // Reset Formik form state
+                    resetFileInput(); // Reset file input
+                  }}
+                >
+                  {({ setFieldValue }) => (
+                    <Form className="details__wrapper">
+                      <div className="row">
+                        <div className="col-lg-12">
+                          <div className="card">
+                            <div className="card-header step-header-blue">
+                              <h4 className="card-title mb-0">
+                                Upload Client Documents
+                              </h4>
+                            </div>
+                            <div className="card-body">
+                              <div className="input-group">
+                                <div className="custom-file w-100">
+                                  <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    multiple
+                                    onChange={(event) => {
+                                      handleFileChange(event);
+                                      setFieldValue("files", [
+                                        ...fileState,
+                                        ...newFiles,
+                                      ]);
+                                    }}
+                                    className="custom-file-input form-control"
+                                    id="inputGroupFile04"
+                                  />
                                 </div>
+                              </div>
 
-                                <ul
-                                  className="list-unstyled mb-0"
-                                  id="dropzone-preview"
-                                ></ul>
-                                <div className="container-fluid page-title-box">
-                                  <div className="row">
-                                    <div className="col-lg-12">
-                                      <div className="card">
-                                        <div className="card-body pt-0">
-                                          <div id="customerList">
-                                            <div className="row g-4 mb-3">
-                                              <div className="d-flex justify-content-end">
-                                                <div className="pagination-wrap hstack gap-2"></div>
-                                              </div>
+                              <ul
+                                className="list-unstyled mb-0"
+                                id="dropzone-preview"
+                              ></ul>
+                              <div className="container-fluid page-title-box">
+                                <div className="row">
+                                  <div className="col-lg-12">
+                                    <div className="card">
+                                      <div className="card-body pt-0">
+                                        <div id="customerList">
+                                          <div className="row g-4 mb-3">
+                                            <div className="d-flex justify-content-end">
+                                              <div className="pagination-wrap hstack gap-2"></div>
                                             </div>
-                                            <div className="table-responsive table-card mb-1">
-                                              <table
-                                                className="table align-middle table-nowrap"
-                                                id="customerTable"
-                                              >
-                                                <thead className="table-light table-head-blue">
-                                                  <tr>
-                                                    <th
-                                                      className=""
-                                                      data-sort="file_name"
-                                                    >
-                                                      File Image
-                                                    </th>
-                                                    <th
-                                                      className=""
-                                                      data-sort="file_name"
-                                                    >
-                                                      File Name
-                                                    </th>
-                                                    <th
-                                                      className=""
-                                                      data-sort="file_type"
-                                                    >
-                                                      File Type
-                                                    </th>
-                                                    <th
-                                                      className=""
-                                                      data-sort="size"
-                                                    >
-                                                      Size
-                                                    </th>
-                                                    <th
-                                                      className=""
-                                                      data-sort="action"
-                                                    >
-                                                      Action
-                                                    </th>
-                                                  </tr>
-                                                </thead>
-                                                <tbody className="list form-check-all">
-                                                  {newFiles.length > 0 &&
-                                                    Array.from(newFiles).map(
-                                                      (file, index) => (
-                                                        <tr
-                                                          key={`new-${index}`}
-                                                        >
-                                                          {/* <td className="file_name">
+                                          </div>
+                                          <div className="table-responsive table-card mb-1">
+                                            <table
+                                              className="table align-middle table-nowrap"
+                                              id="customerTable"
+                                            >
+                                              <thead className="table-light table-head-blue">
+                                                <tr>
+                                                  <th
+                                                    className=""
+                                                    data-sort="file_name"
+                                                  >
+                                                    File Image
+                                                  </th>
+                                                  <th
+                                                    className=""
+                                                    data-sort="file_name"
+                                                  >
+                                                    File Name
+                                                  </th>
+                                                  <th
+                                                    className=""
+                                                    data-sort="file_type"
+                                                  >
+                                                    File Type
+                                                  </th>
+                                                  <th
+                                                    className=""
+                                                    data-sort="size"
+                                                  >
+                                                    Size
+                                                  </th>
+                                                  <th
+                                                    className=""
+                                                    data-sort="action"
+                                                  >
+                                                    Action
+                                                  </th>
+                                                </tr>
+                                              </thead>
+                                              <tbody className="list form-check-all">
+                                                {newFiles.length > 0 &&
+                                                  Array.from(newFiles).map(
+                                                    (file, index) => (
+                                                      <tr
+                                                        key={`new-${index}`}
+                                                      >
+                                                        {/* <td className="file_name">
                                                             {" "}
                                                             <img
                                                               src={previews[index]}
@@ -1948,113 +1958,112 @@ const ClientList = () => {
                                                               }}
                                                             />{" "}
                                                           </td> */}
-                                                          <td>
-                                                            {file.type.startsWith(
-                                                              "image/",
-                                                            ) ? (
-                                                              <img
-                                                                src={
-                                                                  previews[
-                                                                  index
-                                                                  ]
-                                                                }
-                                                                alt="preview"
-                                                                style={{
-                                                                  width: "50px",
-                                                                  height:
-                                                                    "50px",
-                                                                }}
-                                                              />
-                                                            ) : file.type ===
-                                                              "application/pdf" ? (
-                                                              <FileText size={24} style={{ color: "#FF0000" }} />
-                                                            ) : (
-                                                              <File size={24} style={{ color: "#000" }} />
-                                                            )}
-                                                          </td>
-                                                          <td className="file_name">
-                                                            {file.name}
-                                                          </td>
-                                                          <td className="file_type">
-                                                            {file.type}
-                                                          </td>
-                                                          <td className="size">
-                                                            {file.size <
-                                                              1024 * 1024
-                                                              ? `${(
-                                                                file.size /
-                                                                1024
-                                                              ).toFixed(
-                                                                2,
-                                                              )} KB`
-                                                              : `${(
-                                                                file.size /
-                                                                (1024 * 1024)
-                                                              ).toFixed(
-                                                                2,
-                                                              )} MB`}
-                                                          </td>
+                                                        <td>
+                                                          {file.type.startsWith(
+                                                            "image/",
+                                                          ) ? (
+                                                            <img
+                                                              src={
+                                                                previews[
+                                                                index
+                                                                ]
+                                                              }
+                                                              alt="preview"
+                                                              style={{
+                                                                width: "50px",
+                                                                height:
+                                                                  "50px",
+                                                              }}
+                                                            />
+                                                          ) : file.type ===
+                                                            "application/pdf" ? (
+                                                            <FileText size={24} style={{ color: "#FF0000" }} />
+                                                          ) : (
+                                                            <File size={24} style={{ color: "#000" }} />
+                                                          )}
+                                                        </td>
+                                                        <td className="file_name">
+                                                          {file.name}
+                                                        </td>
+                                                        <td className="file_type">
+                                                          {file.type}
+                                                        </td>
+                                                        <td className="size">
+                                                          {file.size <
+                                                            1024 * 1024
+                                                            ? `${(
+                                                              file.size /
+                                                              1024
+                                                            ).toFixed(
+                                                              2,
+                                                            )} KB`
+                                                            : `${(
+                                                              file.size /
+                                                              (1024 * 1024)
+                                                            ).toFixed(
+                                                              2,
+                                                            )} MB`}
+                                                        </td>
 
-                                                          <td className="action">
-                                                            <div className="d-flex gap-2">
-                                                              <div className="remove">
-                                                                <button
-                                                                  className="delete-icon"
-                                                                  onClick={() => {
-                                                                    fileInputRef.current.value =
-                                                                      "";
-                                                                    const updatedFiles =
-                                                                      newFiles.filter(
-                                                                        (
-                                                                          _,
-                                                                          idx,
-                                                                        ) =>
-                                                                          idx !==
-                                                                          index,
-                                                                      );
-                                                                    setNewFiles(
-                                                                      updatedFiles,
+                                                        <td className="action">
+                                                          <div className="d-flex gap-2">
+                                                            <div className="remove">
+                                                              <button
+                                                                className="delete-icon"
+                                                                onClick={() => {
+                                                                  fileInputRef.current.value =
+                                                                    "";
+                                                                  const updatedFiles =
+                                                                    newFiles.filter(
+                                                                      (
+                                                                        _,
+                                                                        idx,
+                                                                      ) =>
+                                                                        idx !==
+                                                                        index,
                                                                     );
-                                                                    setFieldValue(
-                                                                      "files",
-                                                                      [
-                                                                        ...fileState,
-                                                                        ...updatedFiles,
-                                                                      ],
-                                                                    );
-                                                                    setPreviews(
-                                                                      previews.filter(
-                                                                        (
-                                                                          _,
-                                                                          idx,
-                                                                        ) =>
-                                                                          idx !==
-                                                                          index,
-                                                                      ),
-                                                                    );
-                                                                  }}
-                                                                >
-                                                                  <i className="ti-trash text-danger " />
-                                                                </button>
-                                                              </div>
+                                                                  setNewFiles(
+                                                                    updatedFiles,
+                                                                  );
+                                                                  setFieldValue(
+                                                                    "files",
+                                                                    [
+                                                                      ...fileState,
+                                                                      ...updatedFiles,
+                                                                    ],
+                                                                  );
+                                                                  setPreviews(
+                                                                    previews.filter(
+                                                                      (
+                                                                        _,
+                                                                        idx,
+                                                                      ) =>
+                                                                        idx !==
+                                                                        index,
+                                                                    ),
+                                                                  );
+                                                                }}
+                                                              >
+                                                                <i className="ti-trash text-danger " />
+                                                              </button>
                                                             </div>
-                                                          </td>
-                                                        </tr>
-                                                      ),
-                                                    )}
-                                                </tbody>
-                                              </table>
-                                            </div>
-                                            <div className="d-flex align-items-start justify-content-between gap-3 mt-4">
-                                              <Button
-                                                style={{ height: "40px" }}
-                                                className="btn btn-outline-success text-center  d-flex align-items-center"
-                                                type="submit"
-                                                onClick={(e) => handleSubmit(e)}
-                                              >
-                                                Save <ArrowRight size={16} />
-                                              </Button>
-                                            </div>
+                                                          </div>
+                                                        </td>
+                                                      </tr>
+                                                    ),
+                                                  )}
+                                              </tbody>
+                                            </table>
+                                          </div>
+                                          <div className="d-flex align-items-start justify-content-between gap-3 mt-4">
+                                            <Button
+                                              style={{ height: "40px" }}
+                                              className="btn btn-outline-success text-center  d-flex align-items-center"
+                                              type="submit"
+                                              onClick={(e) => handleSubmit(e)}
+                                            >
+                                              Save <ArrowRight size={16} />
+                                            </Button>
                                           </div>
                                         </div>
                                       </div>
@@ -2065,61 +2074,62 @@ const ClientList = () => {
                             </div>
                           </div>
                         </div>
-                      </Form>
-                    )}
-                  </Formik>
-                </div>
-
-                <div className="report-data mt-4 ">
-                  <div className="d-flex justify-content-between align-items-center">
-                    <ul className="nav nav-tabs border-0 mb-3" role="tablist">
-                      <li className="nav-item" role="presentation">
-                        <button
-                          className="nav-link active"
-                          id="assignedjob-tab"
-                          data-bs-toggle="pill"
-                          data-bs-target="#assignedjob"
-                          type="button"
-                          role="tab"
-                          aria-controls="assignedjob"
-                          aria-selected="true"
-                          tabIndex={-1}
-                        >
-                          Documents
-                        </button>
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="tab-content" id="pills-tabContent">
-                    <div
-                      className="tab-pane fade active show"
-                      id="assignedjob"
-                      role="tabpanel"
-                      aria-labelledby="assignedjob-tab"
-                    >
-                      <div className="datatable-wrapper ">
-                        {fileStateClient && fileStateClient && (
-                          <Datatable
-                            columns={DocumentListColumns}
-                            data={fileStateClient}
-                            filter={true}
-                          />
-                        )}
                       </div>
+                    </Form>
+                  )}
+                </Formik>
+              </div>
+
+              <div className="report-data mt-4 ">
+                <div className="d-flex justify-content-between align-items-center">
+                  <ul className="nav nav-tabs border-0 mb-3" role="tablist">
+                    <li className="nav-item" role="presentation">
+                      <button
+                        className="nav-link active"
+                        id="assignedjob-tab"
+                        data-bs-toggle="pill"
+                        data-bs-target="#assignedjob"
+                        type="button"
+                        role="tab"
+                        aria-controls="assignedjob"
+                        aria-selected="true"
+                        tabIndex={-1}
+                      >
+                        Documents
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+                <div className="tab-content" id="pills-tabContent">
+                  <div
+                    className="tab-pane fade active show"
+                    id="assignedjob"
+                    role="tabpanel"
+                    aria-labelledby="assignedjob-tab"
+                  >
+                    <div className="datatable-wrapper ">
+                      {fileStateClient && fileStateClient && (
+                        <Datatable
+                          columns={DocumentListColumns}
+                          data={fileStateClient}
+                          filter={true}
+                        />
+                      )}
                     </div>
-                    <div
-                      className="tab-pane fade"
-                      id="alldocuments"
-                      role="tabpanel"
-                      aria-labelledby="alldocuments-tab"
-                    ></div>
                   </div>
+                  <div
+                    className="tab-pane fade"
+                    id="alldocuments"
+                    role="tabpanel"
+                    aria-labelledby="alldocuments-tab"
+                  ></div>
                 </div>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
+    </div>
   );
 };
 

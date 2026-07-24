@@ -16,6 +16,7 @@ const JobsReceivedSentReports = () => {
   const [receivedSentData, setReceivedSentData] = useState([]);
   const [expandedRows, setExpandedRows] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -23,6 +24,7 @@ const JobsReceivedSentReports = () => {
   }, []);
 
   const ReceivedSentData = async () => {
+    setLoading(true);
     const data = { req: {}, authToken: token };
     await dispatch(ReceivedSentReport(data))
       .unwrap()
@@ -35,6 +37,9 @@ const JobsReceivedSentReports = () => {
       })
       .catch((err) => {
         console.log(err);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -61,6 +66,21 @@ const JobsReceivedSentReports = () => {
 
   return (
     <div>
+      {loading && (
+        <div
+          className="overlay"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+          }}
+        >
+          <div className="loader"></div>
+        </div>
+      )}
       <div className="report-data">
         <div className="row mb-5">
           <div className="col-lg-12">
