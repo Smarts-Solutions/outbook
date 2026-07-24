@@ -487,10 +487,17 @@ const Timesheet = () => {
         if (!lastObject.task_id) missingFields.push("Task");
 
         if (missingFields.length > 0) {
+          let textMsg = "";
+          if (missingFields.includes("Client")) {
+            textMsg = `This row cannot be added because ${missingFields.join(", ")} are missing. Please complete the current row first.`;
+          } else {
+            textMsg = `This row cannot be added because no Job or Task is available for the selected client. Please choose a different client or create a Job first.`;
+          }
+
           sweatalert.fire({
             icon: "warning",
             title: "Missing Fields",
-            text: `Please select: ${missingFields.join(", ")}`,
+            text: textMsg,
             timerProgressBar: true,
             showConfirmButton: true,
             timer: 3000,
@@ -1227,10 +1234,17 @@ const Timesheet = () => {
       if (!lastObject.task_id) missingFields.push("Task");
 
       if (missingFields.length > 0) {
+        let textMsg = "";
+        if (missingFields.includes("Client")) {
+          textMsg = `This row cannot be saved because ${missingFields.join(", ")} are missing. Please complete the current row first.`;
+        } else {
+          textMsg = `This row cannot be saved because no Job or Task is available for the selected client. Please choose a different client or create a Job first.`;
+        }
+
         sweatalert.fire({
           icon: "warning",
           title: "Missing Fields",
-          text: `Please select: ${missingFields.join(", ")}`,
+          text: textMsg,
           timerProgressBar: true,
           showConfirmButton: true,
           timer: 3000,
@@ -1416,10 +1430,17 @@ const Timesheet = () => {
       if (!lastObject.task_id) missingFields.push("Task");
 
       if (missingFields.length > 0) {
+        let textMsg = "";
+        if (missingFields.includes("Client")) {
+          textMsg = `This row cannot be submitted because ${missingFields.join(", ")} are missing. Please complete the current row first.`;
+        } else {
+          textMsg = `This row cannot be submitted because no Job or Task is available for the selected client. Please choose a different client or create a Job first.`;
+        }
+
         sweatalert.fire({
           icon: "warning",
           title: "Missing Fields",
-          text: `Please select: ${missingFields.join(", ")}`,
+          text: textMsg,
           timerProgressBar: true,
           showConfirmButton: true,
           timer: 3000,
