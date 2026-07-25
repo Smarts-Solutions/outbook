@@ -12,7 +12,7 @@ const {
 const { getCompanyOfficerDetailsFun } = require("../controllers/companies/companyController")
 
 
-const getAddJobData1 = async (job) => {
+const getAddJobData_working = async (job) => {
   const { customer_id, StaffUserId, job_id } = job;
 
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
@@ -465,338 +465,197 @@ const getAddJobData1 = async (job) => {
   }
 };
 
-
 const getAddJobData = async (job) => {
   const { customer_id, StaffUserId, job_id } = job;
 
   try {
-    // Queries to execute in Group 1 (Independent)
     const queryCustomerWithClient = `
-    SELECT  
-        customers.id AS customer_id,
-        customers.trading_name AS customer_trading_name,
-        customers.account_manager_id  AS customer_account_manager_id,
-
-        clients.id AS client_id,
-        clients.trading_name AS client_trading_name,
-        clients.client_type AS client_client_type,
-        clients.company_number AS company_number,
-
-        client_company_information.company_number AS client_company_number
-
-    FROM 
-        customers
-    JOIN 
-        clients ON customers.id = clients.customer_id
-   LEFT JOIN
-       client_company_information ON clients.id = client_company_information.client_id     
-   WHERE customers.id = ?    
-   ORDER BY 
-    clients.trading_name ASC;
-  `;
-
+      SELECT customers.id AS customer_id, customers.trading_name AS customer_trading_name,
+             customers.account_manager_id AS customer_account_manager_id,
+             clients.id AS client_id, clients.trading_name AS client_trading_name,
+             clients.client_type AS client_client_type, clients.company_number AS company_number,
+             client_company_information.company_number AS client_company_number
+      FROM customers
+      JOIN clients ON customers.id = clients.customer_id
+      LEFT JOIN client_company_information ON clients.id = client_company_information.client_id
+      WHERE customers.id = ?
+      ORDER BY clients.trading_name ASC;
+    `;
     const queryCustomerDetails = `
-    SELECT  
-        customers.id AS customer_id,
-        customers.trading_name AS customer_trading_name,
-        customers.account_manager_id  AS customer_account_manager_id,
-        assigned_jobs_staff_view.source AS assigned_source,
-        assigned_jobs_staff_view.service_id_assign AS service_id_assign
-    FROM 
-        customers
-   LEFT JOIN 
-        assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
-   WHERE customers.id = ? AND assigned_jobs_staff_view.staff_id = ?
-   GROUP BY assigned_jobs_staff_view.service_id_assign , customers.id
-   ORDER BY 
-    customers.id DESC;
-  `;
-
+      SELECT customers.id AS customer_id, customers.trading_name AS customer_trading_name,
+             customers.account_manager_id AS customer_account_manager_id,
+             assigned_jobs_staff_view.source AS assigned_source,
+             assigned_jobs_staff_view.service_id_assign AS service_id_assign
+      FROM customers
+      LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+      WHERE customers.id = ? AND assigned_jobs_staff_view.staff_id = ?
+      GROUP BY assigned_jobs_staff_view.service_id_assign, customers.id
+      ORDER BY customers.id DESC;
+    `;
     const queryCustomerWithCustomerAccountManager = `
-    SELECT  
-        customer_contact_details.id AS customer_account_manager_officer_id,
-        customer_contact_details.first_name AS customer_account_manager_officer_first_name,
-        customer_contact_details.last_name AS customer_account_manager_officer_last_name
-   FROM 
-        customers
-   JOIN 
-        customer_contact_details ON customers.id = customer_contact_details.customer_id
-   WHERE customers.id = ?     
-   ORDER BY 
-    customers.id DESC;
-  `;
-
+      SELECT customer_contact_details.id AS customer_account_manager_officer_id,
+             customer_contact_details.first_name AS customer_account_manager_officer_first_name,
+             customer_contact_details.last_name AS customer_account_manager_officer_last_name
+      FROM customers
+      JOIN customer_contact_details ON customers.id = customer_contact_details.customer_id
+      WHERE customers.id = ?
+      ORDER BY customers.id DESC;
+    `;
     const queryCustomerWithJobType = `
-     SELECT  
-         job_types.id AS job_type_id,
-         job_types.type AS job_type_name
-    FROM 
-         customers
-    JOIN 
-         customer_services ON customers.id = customer_services.customer_id
-    JOIN 
-         job_types ON job_types.service_id = customer_services.service_id
-    WHERE customers.id = ?
-    ORDER BY 
-     customers.id DESC;
-   `;
-
+      SELECT job_types.id AS job_type_id, job_types.type AS job_type_name
+      FROM customers
+      JOIN customer_services ON customers.id = customer_services.customer_id
+      JOIN job_types ON job_types.service_id = customer_services.service_id
+      WHERE customers.id = ?
+      ORDER BY customers.id DESC;
+    `;
     const queryReviewer = `
-     SELECT  
-         staffs.id AS reviewer_id,
-         staffs.first_name AS reviewer_first_name,
-         staffs.last_name AS reviewer_last_name,
-         staffs.email AS reviewer_email
-    FROM 
-         staffs
-    JOIN 
-         roles ON staffs.role_id = roles.id
-    WHERE  
-     (staffs.role_id = 6 || staffs.role_id = 4) AND staffs.status = '1' 
-    ORDER BY 
-     staffs.first_name ASC;
-   `;
-
+      SELECT staffs.id AS reviewer_id, staffs.first_name AS reviewer_first_name,
+             staffs.last_name AS reviewer_last_name, staffs.email AS reviewer_email
+      FROM staffs
+      JOIN roles ON staffs.role_id = roles.id
+      WHERE (staffs.role_id = 6 || staffs.role_id = 4) AND staffs.status = '1'
+      ORDER BY staffs.first_name ASC;
+    `;
     const queryAllocated = `
-     SELECT  
-         staffs.id AS staff_id,
-         staffs.first_name AS staff_first_name,
-         staffs.last_name AS staff_last_name,
-          staffs.email AS staff_email
-    FROM 
-         staffs
-    JOIN 
-         roles ON staffs.role_id = roles.id
-    WHERE  
-     (staffs.role_id = 3 || staffs.role_id = 4) AND staffs.status = '1' 
-    ORDER BY 
-     staffs.first_name ASC
-   `;
-
+      SELECT staffs.id AS staff_id, staffs.first_name AS staff_first_name,
+             staffs.last_name AS staff_last_name, staffs.email AS staff_email
+      FROM staffs
+      JOIN roles ON staffs.role_id = roles.id
+      WHERE (staffs.role_id = 3 || staffs.role_id = 4) AND staffs.status = '1'
+      ORDER BY staffs.first_name ASC;
+    `;
     const queryEngagementModel = `
-     SELECT  
-         customer_engagement_model.fte_dedicated_staffing AS fte_dedicated_staffing,
-         customer_engagement_model.percentage_model AS percentage_model,
-         customer_engagement_model.adhoc_payg_hourly AS adhoc_payg_hourly,
-         customer_engagement_model.customised_pricing AS customised_pricing
-    FROM 
-         customers
-    JOIN 
-         customer_engagement_model ON customer_engagement_model.customer_id = customers.id 
-    WHERE  
-     customers.id = ?
-   `;
-
+      SELECT customer_engagement_model.fte_dedicated_staffing AS fte_dedicated_staffing,
+             customer_engagement_model.percentage_model AS percentage_model,
+             customer_engagement_model.adhoc_payg_hourly AS adhoc_payg_hourly,
+             customer_engagement_model.customised_pricing AS customised_pricing
+      FROM customers
+      JOIN customer_engagement_model ON customer_engagement_model.customer_id = customers.id
+      WHERE customers.id = ?
+    `;
     const queryCustomerWithCurrency = `
-     SELECT  
-         countries.id AS country_id,
-         countries.currency AS currency_name
-    FROM 
-         countries     
-    ORDER BY 
-     countries.id DESC;
-   `;
-
+      SELECT countries.id AS country_id, countries.currency AS currency_name
+      FROM countries
+      ORDER BY countries.id DESC;
+    `;
     const allStaff = `
-       SELECT  
-           staffs.id AS id,
-           CONCAT(staffs.first_name, ' ', staffs.last_name,' (',staffs.email,')') AS full_name
-      FROM 
-           staffs
-      WHERE  
-       (staffs.role_id != 1  AND staffs.role_id != 2) AND staffs.status = '1'
-       ORDER BY
-       staffs.first_name ASC;
-         `;
-
+      SELECT staffs.id AS id, CONCAT(staffs.first_name, ' ', staffs.last_name,' (',staffs.email,')') AS full_name
+      FROM staffs
+      WHERE (staffs.role_id != 1 AND staffs.role_id != 2) AND staffs.status = '1'
+      ORDER BY staffs.first_name ASC;
+    `;
     const queryProcessingType = `
-    SELECT *
-    FROM checklists
-    WHERE 
-        (FIND_IN_SET(?, customer_id)
-        OR customer_id IS NULL) AND work_flow_type = "3"
-  `;
-
+      SELECT * FROM checklists
+      WHERE (FIND_IN_SET(?, customer_id) OR customer_id IS NULL) AND work_flow_type = "3"
+    `;
     const queryReviewingType = `
-    SELECT *
-    FROM checklists
-    WHERE 
-        (FIND_IN_SET(?, customer_id)
-        OR customer_id IS NULL) AND work_flow_type = "6"
-  `;
-
+      SELECT * FROM checklists
+      WHERE (FIND_IN_SET(?, customer_id) OR customer_id IS NULL) AND work_flow_type = "6"
+    `;
     const historyQuery = `
-        SELECT 
-          jsu.id,
-          jsu.job_id,
-          jsu.status_type,
-          ms.name AS status_name,
-          jsu.status_update_date
-        FROM job_status_updation jsu
-        LEFT JOIN master_status ms ON jsu.status_type = ms.id
-        WHERE jsu.job_id = ?
-        ORDER BY jsu.id ASC;
-      `;
+      SELECT jsu.id, jsu.job_id, jsu.status_type, ms.name AS status_name, jsu.status_update_date
+      FROM job_status_updation jsu
+      LEFT JOIN master_status ms ON jsu.status_type = ms.id
+      WHERE jsu.job_id = ?
+      ORDER BY jsu.id ASC;
+    `;
 
-    // Group 1 Execution
-    const [
-      LineManageStaffId,
-      roleData,
-      [rows],
-      [customerDetails],
-      [rows2],
-      [rows3],
-      [rows4],
-      [rows5],
-      [rows6],
-      [rows8],
-      [rowsStaff],
-      [processing_checklist_data],
-      [reviewing_checklist_data],
-      [historyRows]
-    ] = await Promise.all([
-      LineManageStaffIdHelperFunction(StaffUserId),
-      QueryRoleHelperFunction(StaffUserId),
-      pool.execute(queryCustomerWithClient, [customer_id]),
-      pool.execute(queryCustomerDetails, [customer_id, StaffUserId]),
-      pool.execute(queryCustomerWithCustomerAccountManager, [customer_id]),
-      pool.execute(queryCustomerWithJobType, [customer_id]),
-      pool.execute(queryReviewer, [customer_id]),
-      pool.execute(queryAllocated, [customer_id]),
-      pool.execute(queryEngagementModel, [customer_id]),
-      pool.execute(queryCustomerWithCurrency),
-      pool.execute(allStaff),
-      pool.execute(queryProcessingType, [customer_id]),
-      pool.execute(queryReviewingType, [customer_id]),
-      job_id ? pool.execute(historyQuery, [job_id]) : Promise.resolve([[]])
+    // Fire ALL independent queries at once — including the ones needed for Group2
+    const p_lineManageStaffId = LineManageStaffIdHelperFunction(StaffUserId);
+    const p_roleData = QueryRoleHelperFunction(StaffUserId);
+    const p_rows = pool.execute(queryCustomerWithClient, [customer_id]);
+    const p_customerDetails = pool.execute(queryCustomerDetails, [customer_id, StaffUserId]);
+    const p_rows2 = pool.execute(queryCustomerWithCustomerAccountManager, [customer_id]);
+    const p_rows3 = pool.execute(queryCustomerWithJobType, [customer_id]);
+    const p_rows4 = pool.execute(queryReviewer);
+    const p_rows5 = pool.execute(queryAllocated);
+    const p_rows6 = pool.execute(queryEngagementModel, [customer_id]);
+    const p_rows8 = pool.execute(queryCustomerWithCurrency);
+    const p_rowsStaff = pool.execute(allStaff);
+    const p_processing = pool.execute(queryProcessingType, [customer_id]);
+    const p_reviewing = pool.execute(queryReviewingType, [customer_id]);
+    const p_history = job_id ? pool.execute(historyQuery, [job_id]) : Promise.resolve([[]]);
+
+    // Wait ONLY for the 3 things Group2 actually needs — don't block on the rest
+    const [LineManageStaffId, roleData, [rows]] = await Promise.all([
+      p_lineManageStaffId,
+      p_roleData,
+      p_rows
     ]);
 
-
-    // Group 2 Queries
+    // Build Group2 queries now that we have what they need
     const clientDataQuery = `
-      SELECT  
-        customers.id AS customer_id,
-        customers.trading_name AS customer_trading_name,
-        customers.account_manager_id  AS customer_account_manager_id,
-
-        clients.id AS client_id,
-        clients.trading_name AS client_trading_name,
-        clients.client_type AS client_client_type,
-        clients.company_number AS company_number,
-
-        client_company_information.company_number AS client_company_number
-
-      FROM 
-      clients
-      JOIN 
-      customers ON customers.id = clients.customer_id
-      LEFT JOIN
-      client_company_information ON clients.id = client_company_information.client_id  
-      LEFT JOIN 
-      assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id 
+      SELECT customers.id AS customer_id, customers.trading_name AS customer_trading_name,
+             customers.account_manager_id AS customer_account_manager_id,
+             clients.id AS client_id, clients.trading_name AS client_trading_name,
+             clients.client_type AS client_client_type, clients.company_number AS company_number,
+             client_company_information.company_number AS client_company_number
+      FROM clients
+      JOIN customers ON customers.id = clients.customer_id
+      LEFT JOIN client_company_information ON clients.id = client_company_information.client_id
+      LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id
         AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
-      WHERE 
-        (clients.staff_created_id IN (${LineManageStaffId})
+      WHERE (clients.staff_created_id IN (${LineManageStaffId})
         OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))
         AND clients.customer_id = ?
       GROUP BY clients.id
       ORDER BY clients.trading_name ASC
-      `;
+    `;
 
     let queryCustomerWithServices = `
-     SELECT  
-         services.id AS service_id,
-         services.name AS service_name
-    FROM 
-         customers
-    JOIN 
-         customer_services ON customers.id = customer_services.customer_id
-    JOIN 
-         services ON services.id = customer_services.service_id
-    WHERE  
-     customer_services.customer_id = ?     
-    ORDER BY 
-     services.id DESC;
-   `;
-    if (roleData?.length > 0 && (roleData[0]?.role_name != "SUPERADMIN")) {
-      if (roleData[0]?.role_id == 4) {
-        queryCustomerWithServices = `
-     SELECT  
-         services.id AS service_id,
-         services.name AS service_name
-    FROM 
-         customers
-    JOIN 
-         customer_services ON customers.id = customer_services.customer_id  
-    JOIN 
-         services ON services.id = customer_services.service_id
-    JOIN 
-         customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
-    JOIN 
-         staffs ON staffs.id = customer_service_account_managers.account_manager_id          
-    WHERE  
-     customer_services.customer_id = ? AND staffs.id IN (${LineManageStaffId})     
-    ORDER BY 
-     services.id DESC;
-   `;
-      } else {
-        queryCustomerWithServices = `
-     SELECT  
-         services.id AS service_id,
-         services.name AS service_name
-    FROM 
-         customers
-    JOIN 
-         customer_services ON customers.id = customer_services.customer_id  
-    JOIN 
-         services ON services.id = customer_services.service_id          
-    WHERE  
-     customer_services.customer_id = ?    
-    ORDER BY 
-     services.id DESC;
-   `;
-      }
+      SELECT services.id AS service_id, services.name AS service_name
+      FROM customers
+      JOIN customer_services ON customers.id = customer_services.customer_id
+      JOIN services ON services.id = customer_services.service_id
+      WHERE customer_services.customer_id = ?
+      ORDER BY services.id DESC;
+    `;
+    if (roleData?.length > 0 && roleData[0]?.role_name != "SUPERADMIN") {
+      queryCustomerWithServices = roleData[0]?.role_id == 4 ? `
+      SELECT services.id AS service_id, services.name AS service_name
+      FROM customers
+      JOIN customer_services ON customers.id = customer_services.customer_id
+      JOIN services ON services.id = customer_services.service_id
+      JOIN customer_service_account_managers ON customer_service_account_managers.customer_service_id = customer_services.id
+      JOIN staffs ON staffs.id = customer_service_account_managers.account_manager_id
+      WHERE customer_services.customer_id = ? AND staffs.id IN (${LineManageStaffId})
+      ORDER BY services.id DESC;
+      ` : `
+      SELECT services.id AS service_id, services.name AS service_name
+      FROM customers
+      JOIN customer_services ON customers.id = customer_services.customer_id
+      JOIN services ON services.id = customer_services.service_id
+      WHERE customer_services.customer_id = ?
+      ORDER BY services.id DESC;
+      `;
     }
 
     const queryAccountManeger = rows.length > 0 ? `
-       SELECT  
-           staffs.id AS manager_id,
-           staffs.first_name AS manager_first_name,
-           staffs.last_name AS manager_last_name
-      FROM 
-           staffs
-      WHERE  
-       staffs.id = ${rows[0].customer_account_manager_id}` : null;
+      SELECT staffs.id AS manager_id, staffs.first_name AS manager_first_name, staffs.last_name AS manager_last_name
+      FROM staffs
+      WHERE staffs.id = ${rows[0].customer_account_manager_id}
+    ` : null;
 
-    // Group 2 Execution
-    const group2Promises = [
-      pool.execute(clientDataQuery, [customer_id]),
-      pool.execute(queryCustomerWithServices, [customer_id])
-    ];
+    const p_clientData = pool.execute(clientDataQuery, [customer_id]);
+    const p_rows7 = pool.execute(queryCustomerWithServices, [customer_id]);
+    const p_roleAccess = (rows.length > 0 && roleData.length > 0 && roleData[0].role_name !== "SUPERADMIN")
+      ? pool.execute("SELECT * FROM role_permissions WHERE role_id = ? AND permission_id = ?", [roleData[0].role_id, 34])
+      : Promise.resolve([[]]);
+    const p_rows9 = queryAccountManeger ? pool.execute(queryAccountManeger) : Promise.resolve([[]]);
 
-    if (rows.length > 0 && roleData.length > 0 && roleData[0].role_name !== "SUPERADMIN") {
-       group2Promises.push(pool.execute(
-        "SELECT * FROM role_permissions WHERE role_id = ? AND permission_id = ?",
-        [roleData[0].role_id, 34]
-      ));
-    } else {
-       group2Promises.push(Promise.resolve([[]]));
-    }
-
-    if (queryAccountManeger) {
-       group2Promises.push(pool.execute(queryAccountManeger));
-    } else {
-       group2Promises.push(Promise.resolve([[]]));
-    }
-
+    // Now collect EVERYTHING — Group2 promises + the remaining Group1 promises — in one final wait
     const [
-      [clientData],
-      [rows7],
-      [RoleAccess],
-      [rows9]
-    ] = await Promise.all(group2Promises);
+      [clientData], [rows7], [RoleAccess], [rows9],
+      [customerDetails], [rows2], [rows3], [rows4], [rows5], [rows6],
+      [rows8], [rowsStaff], [processing_checklist_data], [reviewing_checklist_data], [historyRows]
+    ] = await Promise.all([
+      p_clientData, p_rows7, p_roleAccess, p_rows9,
+      p_customerDetails, p_rows2, p_rows3, p_rows4, p_rows5, p_rows6,
+      p_rows8, p_rowsStaff, p_processing, p_reviewing, p_history
+    ]);
 
-    // Format Data
+    // ---- Formatting (bilkul same as tumhare current code, untouched) ----
     let customer = [];
     let client = [];
     if (rows.length > 0) {
@@ -805,7 +664,6 @@ const getAddJobData = async (job) => {
         customer_trading_name: rows[0].customer_trading_name,
         customer_account_manager_id: rows[0].customer_account_manager_id,
       };
-
       if (roleData.length > 0 && (roleData[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)) {
         client = rows.map((row) => ({
           client_id: row.client_id,
@@ -828,20 +686,16 @@ const getAddJobData = async (job) => {
     let customer_account_manager = [];
     if (rows2.length > 0) {
       customer_account_manager = rows2.map((row) => ({
-        customer_account_manager_officer_id:
-          row.customer_account_manager_officer_id,
+        customer_account_manager_officer_id: row.customer_account_manager_officer_id,
         customer_account_manager_officer_name:
-          row.customer_account_manager_officer_first_name +
-          " " +
-          row.customer_account_manager_officer_last_name,
+          row.customer_account_manager_officer_first_name + " " + row.customer_account_manager_officer_last_name,
       }));
     }
 
     let job_type = [];
     if (rows3.length > 0) {
       job_type = rows3.filter(
-        (value, index, self) =>
-          index === self.findIndex((t) => t.job_type_id === value.job_type_id)
+        (value, index, self) => index === self.findIndex((t) => t.job_type_id === value.job_type_id)
       );
     }
 
@@ -875,10 +729,7 @@ const getAddJobData = async (job) => {
 
     let services = [];
     if (rows7.length > 0) {
-      services = rows7.map((row) => ({
-        service_id: row.service_id,
-        service_name: row.service_name,
-      }));
+      services = rows7.map((row) => ({ service_id: row.service_id, service_name: row.service_name }));
     }
 
     let AccountManagerArr = [];
@@ -889,36 +740,22 @@ const getAddJobData = async (job) => {
       }));
     }
 
-    let status_history = [];
-    if (job_id) {
-      status_history = historyRows;
-    }
+    let status_history = job_id ? historyRows : [];
 
     return {
       status: true,
       message: "success.",
       data: {
-        customer: customer,
-        client: client,
-        customer_account_manager: customer_account_manager,
-        services: services,
-        job_type: job_type,
-        reviewer: reviewer,
-        allocated: allocated,
-        engagement_model: engagement_model,
-        currency: rows8,
-        Manager: AccountManagerArr,
-        allStaff: rowsStaff,
-        customerDetails: customerDetails,
-        processing_checklist_data: processing_checklist_data,
-        reviewing_checklist_data: reviewing_checklist_data,
-        status_history: status_history
+        customer, client, customer_account_manager, services, job_type, reviewer, allocated,
+        engagement_model, currency: rows8, Manager: AccountManagerArr, allStaff: rowsStaff,
+        customerDetails, processing_checklist_data, reviewing_checklist_data, status_history
       },
     };
   } catch (err) {
     return { status: false, message: "Err Customer Get" };
   }
 };
+
 
 const jobAdd = async (job) => {
   const {
