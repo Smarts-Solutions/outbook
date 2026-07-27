@@ -124,8 +124,8 @@ const getStaff = async (data) => {
  
   let { page, limit, search, StaffUserId } = data;
 
-  // let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
-  // const rows = await QueryRoleHelperFunction(StaffUserId);
+  let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
+  const rows = await QueryRoleHelperFunction(StaffUserId);
 
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 10;
@@ -148,7 +148,11 @@ const getStaff = async (data) => {
   // }
 
   // where = "WHERE 1=1 AND staffs.role_id != 12";
+
    where = "WHERE s.role_id != 12";
+   if (rows.length > 0 && (role_name === "SUPERADMIN")) {
+    where = "WHERE s.role_id != 12";
+  }
 
   // 🔍 SEARCH CONDITION
   let searchCondition = "";
