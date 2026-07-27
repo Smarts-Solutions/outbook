@@ -114,7 +114,7 @@ const getAddJobData_working = async (job) => {
       }
     }
 
-    const queryCustomerDetails = `
+    let queryCustomerDetails = `
     SELECT  
         customers.id AS customer_id,
         customers.trading_name AS customer_trading_name,
@@ -130,7 +130,7 @@ const getAddJobData_working = async (job) => {
    ORDER BY 
     customers.id DESC;
   `;
-
+  
     const [customerDetails] = await pool.execute(queryCustomerDetails, [
       customer_id,
       StaffUserId,
