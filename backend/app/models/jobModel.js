@@ -590,7 +590,6 @@ const getAddJobData = async (job) => {
     `;
     if (roleData?.length > 0 && roleData[0]?.role_name != "SUPERADMIN") {
 
-
       queryCustomerWithServices = roleData[0]?.role_id == 4 ? `
       SELECT services.id AS service_id, services.name AS service_name
       FROM customers
@@ -664,7 +663,7 @@ const getAddJobData = async (job) => {
       SELECT customers.id AS customer_id, customers.trading_name AS customer_trading_name,
              customers.account_manager_id AS customer_account_manager_id
       FROM customers
-      WHERE customers.id = ? 
+      WHERE customers.id = ?
       GROUP BY customers.id
       ORDER BY customers.id DESC;
     `;
