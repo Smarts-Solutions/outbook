@@ -481,17 +481,7 @@ const getAddJobData = async (job) => {
       WHERE customers.id = ?
       ORDER BY clients.trading_name ASC;
     `;
-    const queryCustomerDetails = `
-      SELECT customers.id AS customer_id, customers.trading_name AS customer_trading_name,
-             customers.account_manager_id AS customer_account_manager_id,
-             assigned_jobs_staff_view.source AS assigned_source,
-             assigned_jobs_staff_view.service_id_assign AS service_id_assign
-      FROM customers
-      LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
-      WHERE customers.id = ? AND assigned_jobs_staff_view.staff_id = ?
-      GROUP BY assigned_jobs_staff_view.service_id_assign, customers.id
-      ORDER BY customers.id DESC;
-    `;
+    
     const queryCustomerWithCustomerAccountManager = `
       SELECT customer_contact_details.id AS customer_account_manager_officer_id,
              customer_contact_details.first_name AS customer_account_manager_officer_first_name,
@@ -564,8 +554,10 @@ const getAddJobData = async (job) => {
     // Fire ALL independent queries at once — including the ones needed for Group2
     const p_lineManageStaffId = LineManageStaffIdHelperFunction(StaffUserId);
     const p_roleData = QueryRoleHelperFunction(StaffUserId);
+
+
     const p_rows = pool.execute(queryCustomerWithClient, [customer_id]);
-    const p_customerDetails = pool.execute(queryCustomerDetails, [customer_id, StaffUserId]);
+    
     const p_rows2 = pool.execute(queryCustomerWithCustomerAccountManager, [customer_id]);
     const p_rows3 = pool.execute(queryCustomerWithJobType, [customer_id]);
     const p_rows4 = pool.execute(queryReviewer);
@@ -578,30 +570,15 @@ const getAddJobData = async (job) => {
     const p_history = job_id ? pool.execute(historyQuery, [job_id]) : Promise.resolve([[]]);
 
     // Wait ONLY for the 3 things Group2 actually needs — don't block on the rest
-    const [LineManageStaffId, roleData, [rows]] = await Promise.all([
+    let [LineManageStaffId, roleData, [rows]] = await Promise.all([
       p_lineManageStaffId,
       p_roleData,
       p_rows
     ]);
 
     // Build Group2 queries now that we have what they need
-    const clientDataQuery = `
-      SELECT customers.id AS customer_id, customers.trading_name AS customer_trading_name,
-             customers.account_manager_id AS customer_account_manager_id,
-             clients.id AS client_id, clients.trading_name AS client_trading_name,
-             clients.client_type AS client_client_type, clients.company_number AS company_number,
-             client_company_information.company_number AS client_company_number
-      FROM clients
-      JOIN customers ON customers.id = clients.customer_id
-      LEFT JOIN client_company_information ON clients.id = client_company_information.client_id
-      LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id
-        AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
-      WHERE (clients.staff_created_id IN (${LineManageStaffId})
-        OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))
-        AND clients.customer_id = ?
-      GROUP BY clients.id
-      ORDER BY clients.trading_name ASC
-    `;
+    let p_clientData;
+    let p_customerDetails;
 
     let queryCustomerWithServices = `
       SELECT services.id AS service_id, services.name AS service_name
@@ -612,6 +589,8 @@ const getAddJobData = async (job) => {
       ORDER BY services.id DESC;
     `;
     if (roleData?.length > 0 && roleData[0]?.role_name != "SUPERADMIN") {
+
+
       queryCustomerWithServices = roleData[0]?.role_id == 4 ? `
       SELECT services.id AS service_id, services.name AS service_name
       FROM customers
@@ -629,7 +608,73 @@ const getAddJobData = async (job) => {
       WHERE customer_services.customer_id = ?
       ORDER BY services.id DESC;
       `;
+
+      const connection = await pool.getConnection();
+      await buildAssignedJobsTempTable(connection, LineManageStaffId);
+      const clientDataQuery = `
+      SELECT customers.id AS customer_id, customers.trading_name AS customer_trading_name,
+             customers.account_manager_id AS customer_account_manager_id,
+             clients.id AS client_id, clients.trading_name AS client_trading_name,
+             clients.client_type AS client_client_type, clients.company_number AS company_number,
+             client_company_information.company_number AS client_company_number
+      FROM clients
+      JOIN customers ON customers.id = clients.customer_id
+      LEFT JOIN client_company_information ON clients.id = client_company_information.client_id
+      LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.client_id = clients.id
+        AND temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
+      WHERE (clients.staff_created_id IN (${LineManageStaffId})
+        OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId}))
+        AND clients.customer_id = ?
+      GROUP BY clients.id
+      ORDER BY clients.trading_name ASC
+    `;
+
+    const queryCustomerDetails = `
+      SELECT customers.id AS customer_id, customers.trading_name AS customer_trading_name,
+             customers.account_manager_id AS customer_account_manager_id,
+             temp_assigned_jobs_staff.source AS assigned_source,
+             temp_assigned_jobs_staff.service_id_assign AS service_id_assign
+      FROM customers
+      LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.customer_id = customers.id
+      WHERE customers.id = ? AND temp_assigned_jobs_staff.staff_id = ?
+      GROUP BY temp_assigned_jobs_staff.service_id_assign, customers.id
+      ORDER BY customers.id DESC;
+    `;
+
+
+    p_clientData = connection.execute(clientDataQuery, [customer_id]);
+    p_customerDetails = connection.execute(queryCustomerDetails, [customer_id, StaffUserId]);
+
+    }else{
+      const clientDataQuery = `
+      SELECT customers.id AS customer_id, customers.trading_name AS customer_trading_name,
+             customers.account_manager_id AS customer_account_manager_id,
+             clients.id AS client_id, clients.trading_name AS client_trading_name,
+             clients.client_type AS client_client_type, clients.company_number AS company_number,
+             client_company_information.company_number AS client_company_number
+      FROM clients
+      JOIN customers ON customers.id = clients.customer_id
+      LEFT JOIN client_company_information ON clients.id = client_company_information.client_id
+      WHERE clients.customer_id = ?
+      GROUP BY clients.id
+      ORDER BY clients.trading_name ASC
+    `;
+
+     const queryCustomerDetails = `
+      SELECT customers.id AS customer_id, customers.trading_name AS customer_trading_name,
+             customers.account_manager_id AS customer_account_manager_id
+      FROM customers
+      WHERE customers.id = ? 
+      GROUP BY customers.id
+      ORDER BY customers.id DESC;
+    `;
+  
+  
+    p_clientData =await pool.execute(clientDataQuery, [customer_id]);
+    p_customerDetails = await pool.execute(queryCustomerDetails, [customer_id, StaffUserId]);
     }
+
+
 
     const queryAccountManeger = rows.length > 0 ? `
       SELECT staffs.id AS manager_id, staffs.first_name AS manager_first_name, staffs.last_name AS manager_last_name
@@ -637,7 +682,7 @@ const getAddJobData = async (job) => {
       WHERE staffs.id = ${rows[0].customer_account_manager_id}
     ` : null;
 
-    const p_clientData = pool.execute(clientDataQuery, [customer_id]);
+    
     const p_rows7 = pool.execute(queryCustomerWithServices, [customer_id]);
     const p_roleAccess = (rows.length > 0 && roleData.length > 0 && roleData[0].role_name !== "SUPERADMIN")
       ? pool.execute("SELECT * FROM role_permissions WHERE role_id = ? AND permission_id = ?", [roleData[0].role_id, 34])
@@ -752,7 +797,8 @@ const getAddJobData = async (job) => {
       },
     };
   } catch (err) {
-    return { status: false, message: "Err Customer Get" };
+    console.log(err);
+    return { status: false, message: err.message };
   }
 };
 
