@@ -9,3 +9,6 @@ const isLocalhost = window.location.hostname === "localhost";
 export const base_url = isLocalhost
 ? "http://localhost:2222/"
 : `${window.location.origin}/backend/`;
+
+
+// export const base_url = `http://192.168.0.79:2222/`;
