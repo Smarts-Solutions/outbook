@@ -381,6 +381,43 @@ async function LineManageStaffIdHelperFunction(staff_id) {
   return LineManageStaffId;
 }
 
+async function LineManageStaffIdHelperFunctionForStaff(staff_id) {
+  try {
+  const query = `
+    WITH RECURSIVE StaffHierarchy AS (
+        SELECT
+            staff_by,
+            staff_to
+        FROM line_managers
+        WHERE staff_to = ?
+
+        UNION ALL
+
+        SELECT
+            lm.staff_by,
+            lm.staff_to
+        FROM line_managers lm
+        INNER JOIN StaffHierarchy sh
+            ON lm.staff_to = sh.staff_by
+    )
+
+    SELECT DISTINCT staff_by
+    FROM StaffHierarchy;
+  `;
+
+  const [rows] = await pool.execute(query, [staff_id]);
+
+  // Extract only staff ids
+  const staffIds = rows.map(row => row.staff_by);
+
+  // Remove duplicates (if any)
+  return [...new Set(staffIds)];
+}catch (error) {
+        console.error("Hierarchy Error:", error);
+        return [staff_id];
+    }
+}
+
 // async function LineManageStaffIdHelperFunction(staff_id) {
 //   const LineManageQuery = `
 //     SELECT staff_by FROM line_managers WHERE staff_to = ?
@@ -570,4 +607,4 @@ const grantStaffAccess = async (staff_id, customer_id, entity_type, entity_id) =
   }
 };
 
-module.exports = { SatffLogUpdateOperation, generateNextUniqueCode, generateNextUniqueCodeJobLogTitle, getDateRange, JobTaskNameWithId, getAllCustomerIds, LineManageStaffIdHelperFunction, QueryRoleHelperFunction, JobStatusUpdate,buildAssignedJobsTempTable, getStaffAccessFilters, grantStaffAccess };
+module.exports = { SatffLogUpdateOperation, generateNextUniqueCode, generateNextUniqueCodeJobLogTitle, getDateRange, JobTaskNameWithId, getAllCustomerIds, LineManageStaffIdHelperFunction, QueryRoleHelperFunction, JobStatusUpdate,buildAssignedJobsTempTable, getStaffAccessFilters, grantStaffAccess, LineManageStaffIdHelperFunctionForStaff };

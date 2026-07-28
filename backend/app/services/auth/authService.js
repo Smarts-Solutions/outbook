@@ -43,6 +43,10 @@ const getStaff = async (data) => {
   return staffModel.getStaff(data);
 };
 
+const getStaffNew = async (data) => {
+  return staffModel.getStaffNew(data);
+}
+
 const getStaffByFilter = async (data) => {
   return staffModel.getStaffByFilter(data);
 }
@@ -266,6 +270,7 @@ module.exports = {
   GetStaffAndDeleteData,
   getLineManagerStaff,
   getMyLineManagers,
-  getStaffByFilter
+  getStaffByFilter,
+  getStaffNew
 
 };

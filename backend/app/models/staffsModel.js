@@ -4,6 +4,7 @@ const {
   LineManageStaffIdHelperFunction,
   buildAssignedJobsTempTable,
   QueryRoleHelperFunction,
+  LineManageStaffIdHelperFunctionForStaff
 } = require("../../app/utils/helper");
 const axios = require("axios");
 const qs = require("qs");
@@ -238,6 +239,162 @@ const getStaff = async (data) => {
     //   `,
     //   [...searchParams, limit, offset]
     // );
+
+    const [rows] = await pool.query(
+      `
+      SELECT
+    s.id,
+    s.role_id,
+    s.first_name,
+    s.last_name,
+    s.email,
+    s.phone_code,
+    s.phone,
+    s.is_disable,
+    s.status,
+    s.employee_number,
+    s.created_at,
+    s.hourminute,
+    r.role_name,
+    r.role,
+    lm.staff_to,
+    CONCAT(m.first_name, ' ', m.last_name) AS line_manager_name,
+    CASE
+        WHEN se.staff_id IS NOT NULL THEN TRUE
+        ELSE FALSE
+    END AS is_customer_exist
+    FROM staffs s
+    INNER JOIN roles r
+        ON s.role_id = r.id
+    LEFT JOIN line_managers lm
+        ON lm.staff_by = s.id
+    LEFT JOIN staffs m
+        ON m.id = lm.staff_to
+    LEFT JOIN (
+        SELECT staff_id
+        FROM customers
+        WHERE staff_id IS NOT NULL
+
+        UNION
+
+        SELECT account_manager_id
+        FROM customers
+        WHERE account_manager_id IS NOT NULL
+
+        UNION
+
+        SELECT staff_created_id
+        FROM clients
+        WHERE staff_created_id IS NOT NULL
+
+        UNION
+
+        SELECT staff_created_id
+        FROM jobs
+        WHERE staff_created_id IS NOT NULL
+
+        UNION
+
+        SELECT account_manager_id
+        FROM jobs
+        WHERE account_manager_id IS NOT NULL
+    ) se
+        ON se.staff_id = s.id
+    ${where}
+    ${searchCondition}
+    ORDER BY s.first_name ASC
+    LIMIT ? OFFSET ?
+      `,
+      [...searchParams, limit, offset]
+    );
+  
+  
+
+    // (
+    //         SELECT sor.role_id
+    //         FROM staff_other_role sor
+    //         WHERE sor.staff_id = staffs.id
+    //         LIMIT 1
+    //     ) AS staff_other_role_id
+
+    return {
+      status: true,
+      message: "Success",
+      data: rows,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        search,
+      },
+    };
+  } catch (error) {
+    console.error("Error in getStaff:", error);
+    return { status: false, message: "Error fetching staff." };
+  }
+};
+
+
+const getStaffNew = async (data) => {
+ 
+  let { page, limit, search, StaffUserId } = data;
+
+  let LineManageStaffId = await LineManageStaffIdHelperFunctionForStaff(StaffUserId)
+  const rows = await QueryRoleHelperFunction(StaffUserId);
+
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const offset = (page - 1) * limit;
+  search = search.trim();
+
+  let role_name = rows[0].role_name?.toUpperCase();
+
+  let where = "";
+
+ if (role_name === "SUPERADMIN") {
+    where = "WHERE s.role_id != 12";
+} else {
+    if (LineManageStaffId.length > 0) {
+        where = `
+            WHERE s.role_id != 12
+            AND s.id IN (${LineManageStaffId.join(",")})
+        `;
+    } else {
+        where = "WHERE 1 = 0";
+    }
+}
+
+  // 🔍 SEARCH CONDITION
+  let searchCondition = "";
+  let searchParams = [];
+  if (search) {
+    searchCondition = `
+      AND (
+        s.first_name LIKE ?
+        OR s.last_name LIKE ?
+        OR s.email LIKE ?
+        OR s.phone LIKE ?
+        OR s.employee_number LIKE ?
+      )
+    `;
+    const likeSearch = `%${search}%`;
+    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
+  }
+
+  try {
+    // 🔹 TOTAL COUNT
+    const [countResult] = await pool.query(
+      `
+      SELECT COUNT(*) AS total
+      FROM staffs s
+      ${where}
+      ${searchCondition}
+      `,
+      searchParams
+    );
+
+    const total = countResult[0]?.total || 0;
 
     const [rows] = await pool.query(
       `
@@ -1383,6 +1540,7 @@ module.exports = {
   getLineManagerStaff,
   getMyLineManagers,
   getStaffOtherRole,
-  getStaffByFilter
+  getStaffByFilter,
+  getStaffNew
 };
 

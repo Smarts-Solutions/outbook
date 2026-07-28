@@ -214,7 +214,7 @@ const StaffPage = () => {
     //  setStaffDataAll({ loading: true, data: [] });
     await dispatch(
       Staff({
-        req: { action: "get", page, limit, search },
+        req: { action: "getnew", page, limit, search },
         authToken: token,
       }),
     )
