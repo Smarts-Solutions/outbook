@@ -1314,7 +1314,7 @@ const getSharePointToken = async (staff) => {
   }
 };
 
-const GetStaffPortfolio = async (staff) => {
+const GetStaffPortfolio_old_working = async (staff) => {
   const id = staff.staff_id;
   const type = staff.type;
   if (type === "assignCustomer") {
@@ -1354,6 +1354,68 @@ const GetStaffPortfolio = async (staff) => {
     }
   }
 };
+
+
+const GetStaffPortfolio = async (staff) => {
+  const id = staff.staff_id;
+  const type = staff.type;
+
+  if (type === "assignCustomer") {
+    const connection = await pool.getConnection();
+
+    const queryCustomerAssign = `
+      SELECT
+        t.customer_id,
+        c.trading_name
+      FROM temp_assigned_jobs_staff t
+      JOIN customers c
+        ON t.customer_id = c.id
+      WHERE t.staff_id = ?
+        AND t.source != 'assign_customer_portfolio'
+      GROUP BY t.customer_id
+    `;
+
+    try {
+      // Build temp table using stored procedure
+      await buildAssignedJobsTempTable(connection, [id]);
+
+      // Fetch data from temp table
+      const [assignedCustomers] = await connection.execute(
+        queryCustomerAssign,
+        [id]
+      );
+
+      return assignedCustomers;
+    } catch (err) {
+      console.error("Error selecting data:", err);
+      throw err;
+    } finally {
+      connection.release();
+    }
+
+  } else {
+
+    const query = `
+      SELECT
+        sp.customer_id,
+        c.trading_name
+      FROM staff_portfolio sp
+      JOIN customers c
+        ON sp.customer_id = c.id
+      WHERE sp.staff_id = ?
+    `;
+
+    try {
+      const [result] = await pool.execute(query, [id]);
+      return result;
+    } catch (err) {
+      console.error("Error selecting data:", err);
+      throw err;
+    }
+
+  }
+};
+
 
 const UpdateStaffPortfolio = async (staff) => {
   try {
