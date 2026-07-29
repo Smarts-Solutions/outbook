@@ -795,6 +795,7 @@ const StaffPage = () => {
       type: "select2",
       name: "phone_code",
       label: "Phone Code",
+      star: false,
       options: [
         { label: "+44", value: "+44" },
         { label: "+91", value: "+91" },
