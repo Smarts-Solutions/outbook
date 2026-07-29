@@ -60,6 +60,7 @@ const ClientList = () => {
   const [siteUrl, setSiteUrl] = useState("");
   const [sharepoint_token, setSharepoint_token] = useState("");
   const [folderPath, setFolderPath] = useState("");
+  const [siteDetailsLoading, setSiteDetailsLoading] = useState(true);
   const [customerDetails, setCustomerDetails] = useState({
     loading: true,
     data: [],
@@ -100,10 +101,16 @@ const ClientList = () => {
     )?.items || [];
 
   const fetchSiteDetails = async () => {
-    const { siteUrl, folderPath, sharepoint_token } = await SiteUrlFolderPath();
-    setSiteUrl(siteUrl);
-    setFolderPath(folderPath);
-    setSharepoint_token(sharepoint_token);
+    try {
+      const { siteUrl, folderPath, sharepoint_token } = await SiteUrlFolderPath();
+      setSiteUrl(siteUrl);
+      setFolderPath(folderPath);
+      setSharepoint_token(sharepoint_token);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSiteDetailsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -227,24 +234,30 @@ const ClientList = () => {
   };
 
   useEffect(() => {
+    let isCancelled = false;
     const fetchTabContent = async () => {
+      if (activeTab === "") return;
+      
       setLoading(true);
       try {
         await GetStatus();
-        if (activeTab !== "") {
-          if (activeTab === "checklist") {
-            await getCheckListData();
-          } else if (activeTab === "client") {
-            await GetAllClientData();
-          } else if (activeTab === "job") {
-            await Promise.all([GetAllClientData(), JobDetails()]);
-          }
+        if (activeTab === "checklist") {
+          await getCheckListData();
+        } else if (activeTab === "client") {
+          await GetAllClientData();
+        } else if (activeTab === "job") {
+          await Promise.all([GetAllClientData(), JobDetails()]);
         }
       } finally {
-        setLoading(false);
+        if (!isCancelled) {
+          setLoading(false);
+        }
       }
     };
     fetchTabContent();
+    return () => {
+      isCancelled = true;
+    };
   }, [activeTab]);
 
   useEffect(() => {
@@ -1209,13 +1222,16 @@ const ClientList = () => {
         } else {
           setFileState([]);
           setCustomerDetails({
-            loading: true,
+            loading: false,
             data: [],
           });
         }
       })
       .catch((error) => {
-        return;
+        setCustomerDetails({
+          loading: false,
+          data: [],
+        });
       });
   };
 
@@ -1661,7 +1677,7 @@ const ClientList = () => {
 
   return (
     <div className="container-fluid position-relative">
-      {(loading || customerDetails.loading || isExporting) && (
+      {(loading || customerDetails.loading || siteDetailsLoading || isExporting) && (
         <div className="overlay" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
           <div className="loader"></div>
         </div>
