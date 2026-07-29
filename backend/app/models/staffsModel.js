@@ -1363,26 +1363,44 @@ const GetStaffPortfolio = async (staff) => {
   if (type === "assignCustomer") {
     const connection = await pool.getConnection();
 
-    const queryCustomerAssign = `
-      SELECT
-        t.customer_id,
-        c.trading_name
-      FROM temp_assigned_jobs_staff t
-      JOIN customers c
-        ON t.customer_id = c.id
-      WHERE t.staff_id = ?
-        AND t.source != 'assign_customer_portfolio'
-      GROUP BY t.customer_id
-    `;
-
     try {
-      // Build temp table using stored procedure
-      await buildAssignedJobsTempTable(connection, [id]);
+      // getCustomer jaisa hi: subordinates bhi include karo
+      let LineManageStaffId = await LineManageStaffIdHelperFunction(id);
+      LineManageStaffId = [...new Set(LineManageStaffId)];
+      const lineManageIn = LineManageStaffId.length ? LineManageStaffId.join(",") : "0";
 
-      // Fetch data from temp table
+      // temp table ab self + subordinates dono ke liye banegi (getCustomer jaisa)
+      await buildAssignedJobsTempTable(connection, LineManageStaffId);
+
+      const unionFilter = `
+        SELECT id FROM customers WHERE staff_id = ?
+
+        UNION
+
+        SELECT id FROM customers 
+        WHERE staff_id IN (${lineManageIn})
+
+        UNION
+
+        SELECT c.id
+        FROM customers c
+        WHERE c.id IN (
+          SELECT customer_id 
+          FROM temp_assigned_jobs_staff 
+          WHERE staff_id = ? 
+             OR staff_id IN (${lineManageIn})
+        )
+      `;
+
+      const queryCustomerAssign = `
+        SELECT c.id AS customer_id, c.trading_name
+        FROM (${unionFilter}) ids
+        JOIN customers c ON c.id = ids.id
+      `;
+
       const [assignedCustomers] = await connection.execute(
         queryCustomerAssign,
-        [id]
+        [id, id]
       );
 
       return assignedCustomers;
@@ -1394,14 +1412,11 @@ const GetStaffPortfolio = async (staff) => {
     }
 
   } else {
-
+    // 'staff_portfolio' table alag concept hai (manual portfolio), isko touch nahi kiya
     const query = `
-      SELECT
-        sp.customer_id,
-        c.trading_name
+      SELECT sp.customer_id, c.trading_name
       FROM staff_portfolio sp
-      JOIN customers c
-        ON sp.customer_id = c.id
+      JOIN customers c ON sp.customer_id = c.id
       WHERE sp.staff_id = ?
     `;
 
@@ -1412,7 +1427,6 @@ const GetStaffPortfolio = async (staff) => {
       console.error("Error selecting data:", err);
       throw err;
     }
-
   }
 };
 
