@@ -1191,7 +1191,7 @@ const StaffPage = () => {
     setExporting(true);
     try {
       const req = {
-        action: "get",
+        action: "getnew",
         page: 1,
         limit: 100000,
         search: searchTerm || "",
