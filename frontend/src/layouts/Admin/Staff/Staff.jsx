@@ -1148,6 +1148,7 @@ const StaffPage = () => {
 
   const handleChangeRole = async () => {
     try {
+      setLoading(true);
       const req = {
         action: "staffRoleChangeUpdate",
         editStaffData: editStaffData,
@@ -1181,9 +1182,13 @@ const StaffPage = () => {
         })
         .catch((err) => {
 
+        })
+        .finally(() => {
+          setLoading(false);
         });
     } catch (error) {
       console.error("Error fetching staff tasks:", error);
+      setLoading(false);
     }
   };
 
