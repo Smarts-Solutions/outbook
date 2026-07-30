@@ -382,31 +382,31 @@ async function LineManageStaffIdHelperFunction(staff_id) {
 
   ////////////////////////////
 
-  // const query = `
-  //       WITH RECURSIVE parent_tree AS (
-  //           SELECT staff_by, staff_to
-  //           FROM line_managers
-  //           WHERE staff_to = ?
+  const query = `
+        WITH RECURSIVE parent_tree AS (
+            SELECT staff_by, staff_to
+            FROM line_managers
+            WHERE staff_to = ?
 
-  //           UNION ALL
+            UNION ALL
 
-  //           SELECT lm.staff_by, lm.staff_to
-  //           FROM line_managers lm
-  //           INNER JOIN parent_tree pt
-  //               ON lm.staff_to = pt.staff_by
-  //       )
+            SELECT lm.staff_by, lm.staff_to
+            FROM line_managers lm
+            INNER JOIN parent_tree pt
+                ON lm.staff_to = pt.staff_by
+        )
 
-  //       SELECT staff_by
-  //       FROM parent_tree;
-  //   `;
+        SELECT staff_by
+        FROM parent_tree;
+    `;
 
-  //   const [rows] = await pool.execute(query, [staffId]);
+    const [rows] = await pool.execute(query, [staffId]);
 
-  //   const ids = rows.map(row => row.staff_by);
+    const ids = rows.map(row => row.staff_by);
 
-  //   ids.push(staffId);
+    ids.push(staff_id);
 
-  //   return [...new Set(ids)];
+    return [...new Set(ids)];
 
 
 }
