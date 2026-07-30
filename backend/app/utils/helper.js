@@ -400,7 +400,7 @@ async function LineManageStaffIdHelperFunction(staff_id) {
         FROM parent_tree;
     `;
 
-    const [rows] = await pool.execute(query, [staffId]);
+    const [rows] = await pool.execute(query, [staff_id]);
 
     const ids = rows.map(row => row.staff_by);
 
