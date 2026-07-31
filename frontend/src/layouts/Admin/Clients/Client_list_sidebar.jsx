@@ -20,9 +20,10 @@ import { Plus ,ArrowLeft ,File, Info ,SquareCheck ,User ,Briefcase,Download} fro
 const ClientLists = () => {
   const navigate = useNavigate();
   const customer_id_sidebar = sessionStorage.getItem("customer_id_sidebar");
+  const customer_name_sidebar = sessionStorage.getItem("customer_name_sidebar");
   const [CustomerData, setCustomerData] = useState([]);
   const [customerId, setCustomerId] = useState(customer_id_sidebar || "");
-  const [customerName, setCustomerName] = useState("");
+  const [customerName, setCustomerName] = useState(customer_name_sidebar || "");
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -1174,6 +1175,7 @@ const ClientLists = () => {
   const selectCustomerId = (id, name) => {
     if (id && id != "") {
       sessionStorage.setItem("customer_id_sidebar", id);
+      sessionStorage.setItem("customer_name_sidebar", name);
       setCustomerId(id);
       setCustomerName(name);
       setHararchyData({ customer: { id: id, trading_name: name } });
@@ -1183,6 +1185,7 @@ const ClientLists = () => {
       GetAllClientData(id, 1, pageSize, "");
     } else {
       sessionStorage.removeItem("customer_id_sidebar");
+      sessionStorage.removeItem("customer_name_sidebar");
       setGetJobDetails([]);
       setCustomerId("");
       setCustomerName("");
@@ -1209,7 +1212,7 @@ const ClientLists = () => {
   const selectedOption =
     customerId === ""
       ? { value: "", label: "All" }
-      : customerOptions.find((opt) => Number(opt.value) === Number(customerId));
+      : customerOptions.find((opt) => Number(opt.value) === Number(customerId)) || { value: customerId, label: customerName };
 
   const handleExport = async () => {
     let exportData = [];
