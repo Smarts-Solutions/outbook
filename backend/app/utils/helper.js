@@ -370,15 +370,45 @@ async function LineManageStaffIdHelperFunction(staff_id) {
   // const LineManageQuery = `
   //   SELECT staff_to FROM line_managers WHERE staff_by = ?
   // `
-   const LineManageQuery = `
-    SELECT staff_by FROM line_managers WHERE staff_to = ?
-  `
-  const [LineManage] = await pool.execute(LineManageQuery, [staff_id]);
-  //let LineManageStaffId = LineManage?.map(item => item.staff_to);
-  let LineManageStaffId = LineManage?.map(item => item.staff_by);
+  //  const LineManageQuery = `
+  //   SELECT staff_by FROM line_managers WHERE staff_to = ?
+  // `
+  // const [LineManage] = await pool.execute(LineManageQuery, [staff_id]);
+  // //let LineManageStaffId = LineManage?.map(item => item.staff_to);
+  // let LineManageStaffId = LineManage?.map(item => item.staff_by);
   
-  LineManageStaffId.push(staff_id);
-  return LineManageStaffId;
+  // LineManageStaffId.push(staff_id);
+  // return LineManageStaffId;
+
+  ////////////////////////////
+
+  const query = `
+        WITH RECURSIVE parent_tree AS (
+            SELECT staff_by, staff_to
+            FROM line_managers
+            WHERE staff_to = ?
+
+            UNION ALL
+
+            SELECT lm.staff_by, lm.staff_to
+            FROM line_managers lm
+            INNER JOIN parent_tree pt
+                ON lm.staff_to = pt.staff_by
+        )
+
+        SELECT staff_by
+        FROM parent_tree;
+    `;
+
+    const [rows] = await pool.execute(query, [staff_id]);
+
+    const ids = rows.map(row => row.staff_by);
+
+    ids.push(staff_id);
+
+    return [...new Set(ids)];
+
+
 }
 
 async function LineManageStaffIdHelperFunctionForStaff(staff_id) {
