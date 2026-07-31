@@ -63,11 +63,16 @@ const ClientList = () => {
 
   useEffect(() => {
     GetStatus();
+    GetAllCustomer();
 
     if (
       ![undefined, "", null].includes(cust_id_sidebar) &&
       ![undefined, "", null].includes(cli_id_sidebar)
     ) {
+      setCustomerDetails({
+        id: cust_id_sidebar,
+        trading_name: cust_id_sidebar_name,
+      });
       getAllClientData1(
         cust_id_sidebar,
         cust_id_sidebar_name,
