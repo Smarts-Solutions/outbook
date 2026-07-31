@@ -172,13 +172,14 @@ const getStaff = async (data) => {
       AND (
         s.first_name LIKE ?
         OR s.last_name LIKE ?
+        OR CONCAT(s.first_name, ' ', s.last_name) LIKE ?
         OR s.email LIKE ?
         OR s.phone LIKE ?
         OR s.employee_number LIKE ?
       )
     `;
     const likeSearch = `%${search}%`;
-    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
+    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
   }
 
   try {
@@ -373,13 +374,14 @@ const getStaffNew = async (data) => {
       AND (
         s.first_name LIKE ?
         OR s.last_name LIKE ?
+        OR CONCAT(s.first_name, ' ', s.last_name) LIKE ?
         OR s.email LIKE ?
         OR s.phone LIKE ?
         OR s.employee_number LIKE ?
       )
     `;
     const likeSearch = `%${search}%`;
-    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
+    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
   }
 
   try {
