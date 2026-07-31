@@ -1049,6 +1049,7 @@ const getCustomer = async (customer) => {
 
         s2.first_name AS account_manager_firstname,
         s2.last_name AS account_manager_lastname,
+        s2.employee_number,
 
         cci.company_name,
         cci.company_number,

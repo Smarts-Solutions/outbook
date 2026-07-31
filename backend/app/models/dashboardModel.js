@@ -1243,7 +1243,7 @@ const getByAllCustomer = async (dashboard) => {
         customers.customer_type AS customer_type,
         customers.staff_id AS staff_id,
         customers.account_manager_id AS account_manager_id,
-        staffs.employee_number AS employee_number,
+        staff2.employee_number AS employee_number,
 
         customers.trading_name AS trading_name,
         customers.trading_address AS trading_address,
