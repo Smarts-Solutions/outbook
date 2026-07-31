@@ -1276,52 +1276,43 @@ const StaffPage = () => {
         </div>
       </div>
       <div className="report-data mt-4">
-        <div className="col-sm-12">
-          <div className="page-title-box pt-0">
-            <div className="row align-items-start">
-              <div className="col-md-6"></div>
+        <div className="tab-content" id="pills-tabContent">
+          {(staffDataAll?.data?.length > 0 || searchTerm || showStaffInsertTab) && (
+            <div className="row mb-3 align-items-center">
               <div className="col-md-4">
-                <div className="d-flex justify-content-end mb-4">
-                  <div className="">
-                    {showStaffInsertTab && (
-                      <button
-                        type="button"
-                        className="btn btn-info text-white ms-1"
-                        onClick={() => {
-                          setAddStaff(true);
-                          setEditShowModel(false);
-                          formik.resetForm();
-                        }}
-                      >
-                        <Plus size={16} /> Add Staff
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="tab-content mt-minus-90" id="pills-tabContent">
-          {(staffDataAll?.data?.length > 0 || searchTerm) && (
-            <div className="row mb-3">
-              <div className="col-md-4">
-                <input
-                  type="text"
-                  placeholder="Search Staff..."
-                  className="form-control"
-                  value={searchTerm}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                />
+                {(staffDataAll?.data?.length > 0 || searchTerm) && (
+                  <input
+                    type="text"
+                    placeholder="Search Staff..."
+                    className="form-control"
+                    value={searchTerm}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                  />
+                )}
               </div>
               <div className="col-md-8 d-flex justify-content-end">
-                <button
-                  className="btn btn-outline-info fw-bold border-3"
-                  onClick={handleExport}
-                  disabled={exporting}
-                >
-                  <Download size={16} /> Export Excel
-                </button>
+                {showStaffInsertTab && (
+                  <button
+                    type="button"
+                    className="btn btn-info text-white me-2"
+                    onClick={() => {
+                      setAddStaff(true);
+                      setEditShowModel(false);
+                      formik.resetForm();
+                    }}
+                  >
+                    <Plus size={16} /> Add Staff
+                  </button>
+                )}
+                {(staffDataAll?.data?.length > 0 || searchTerm) && (
+                  <button
+                    className="btn btn-outline-info fw-bold border-3"
+                    onClick={handleExport}
+                    disabled={exporting}
+                  >
+                    <Download size={16} /> Export Excel
+                  </button>
+                )}
               </div>
             </div>
           )}
