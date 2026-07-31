@@ -4484,6 +4484,15 @@ const staffRoleChangeUpdate = async (Report) => {
     );
   }
 
+  // Also transfer any jobs where the staff is assigned via 'allocated to others' (job_allowed_staffs table)
+  query.push(
+    `UPDATE IGNORE job_allowed_staffs SET staff_id = ${update_staff_id} WHERE staff_id = ${to_staff_id}`
+  );
+  query.push(
+    `DELETE FROM job_allowed_staffs WHERE staff_id = ${to_staff_id}`
+  );
+
+
   /// query = query.join(";");
 
   // console.log("Staff Role Change Update Query:", query);
