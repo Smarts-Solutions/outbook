@@ -1859,19 +1859,24 @@ id DESC;`;
         JOIN 
             staffs AS staff2 ON customers.account_manager_id = staff2.id
         LEFT JOIN
-            assigned_jobs_staff_view ON assigned_jobs_staff_view.customer_id = customers.id
+            temp_assigned_jobs_staff ON temp_assigned_jobs_staff.customer_id = customers.id
         LEFT JOIN
             customer_company_information ON customers.id = customer_company_information.customer_id
         WHERE
-             customers.staff_id IN (${LineManageStaffId}) OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+             customers.staff_id IN (${LineManageStaffId}) OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
            GROUP BY customers.id
            ORDER BY customers.id DESC
 
          `;
+    let connection;
     try {
-        const [result] = await pool.execute(query);
+        connection = await pool.getConnection();
+        await buildAssignedJobsTempTable(connection, LineManageStaffId);
+        const [result] = await connection.execute(query);
+        connection.release();
         return { status: true, message: 'Success..', data: result };
     } catch (err) {
+        if (connection) connection.release();
         console.error('Error executing query getCustomer_dropdown:', err);
         return { status: false, message: 'Error executing query', data: err };
     }
