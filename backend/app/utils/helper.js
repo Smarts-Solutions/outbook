@@ -370,15 +370,15 @@ async function LineManageStaffIdHelperFunction(staff_id) {
   // const LineManageQuery = `
   //   SELECT staff_to FROM line_managers WHERE staff_by = ?
   // `
-   const LineManageQuery = `
-    SELECT staff_by FROM line_managers WHERE staff_to = ?
-  `
-  const [LineManage] = await pool.execute(LineManageQuery, [staff_id]);
-  //let LineManageStaffId = LineManage?.map(item => item.staff_to);
-  let LineManageStaffId = LineManage?.map(item => item.staff_by);
+  //  const LineManageQuery = `
+  //   SELECT staff_by FROM line_managers WHERE staff_to = ?
+  // `
+  // const [LineManage] = await pool.execute(LineManageQuery, [staff_id]);
+  // //let LineManageStaffId = LineManage?.map(item => item.staff_to);
+  // let LineManageStaffId = LineManage?.map(item => item.staff_by);
   
-  LineManageStaffId.push(staff_id);
-  return LineManageStaffId;
+  // LineManageStaffId.push(staff_id);
+  // return LineManageStaffId;
 
   ////////////////////////////
 
