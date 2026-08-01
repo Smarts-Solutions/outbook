@@ -1810,116 +1810,122 @@ const getJobByCustomer = async (job) => {
       const placeholders = LineManageStaffId?.map(() => '?').join(',');
 
 
-      // TOTAL COUNT
-      const [countResult] = await pool.execute(
-        `
-        SELECT COUNT(DISTINCT jobs.id) AS total
-        FROM jobs
-        LEFT JOIN customers ON jobs.customer_id = customers.id
-        LEFT JOIN clients ON jobs.client_id = clients.id
-        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
-        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
-        WHERE (
-          assigned_jobs_staff_view.staff_id IN (${placeholders})
-          OR jobs.staff_created_id IN (${placeholders})
-          OR clients.staff_created_id IN (${placeholders}) OR customers.staff_id IN (${placeholders}) OR customers.account_manager_id IN (${placeholders})
-        )
+      const connection = await pool.getConnection();
+      try {
+        await buildAssignedJobsTempTable(connection, LineManageStaffId);
+
+        // TOTAL COUNT
+        const [countResult] = await connection.execute(
+          `
+          SELECT COUNT(DISTINCT jobs.id) AS total
+          FROM jobs
+          LEFT JOIN customers ON jobs.customer_id = customers.id
+          LEFT JOIN clients ON jobs.client_id = clients.id
+          LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+          LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = jobs.id AND temp_assigned_jobs_staff.staff_id IN (${placeholders})
+          WHERE (
+            temp_assigned_jobs_staff.staff_id IN (${placeholders})
+            OR jobs.staff_created_id IN (${placeholders})
+            OR clients.staff_created_id IN (${placeholders}) OR customers.staff_id IN (${placeholders}) OR customers.account_manager_id IN (${placeholders})
+          )
+            AND (
+              (temp_assigned_jobs_staff.source IS NULL OR temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
+              OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
+            ) 
+          AND jobs.customer_id = ?
+          ${searchCondition}
+          `,
+          [
+            ...LineManageStaffId,
+            ...LineManageStaffId,
+            ...LineManageStaffId,
+            ...LineManageStaffId,
+            ...LineManageStaffId,
+            ...LineManageStaffId,
+            customer_id,
+            ...searchParams,
+          ]
+        );
+        total = countResult[0].total;
+
+        // DATA
+        const query = `
+          SELECT 
+          jobs.id AS job_id,
+          timesheet.job_id AS timesheet_job_id,
+          job_types.type AS job_type_name,
+          jobs.status_type AS status_type,
+          jobs.job_priority AS job_priority,
+          customer_contact_details.id AS account_manager_officer_id,
+          customer_contact_details.first_name AS account_manager_officer_first_name,
+          customer_contact_details.last_name AS account_manager_officer_last_name,
+          clients.trading_name AS client_trading_name,
+          jobs.client_job_code AS client_job_code,
+          jobs.invoiced AS invoiced,
+          jobs.total_hours AS total_hours,
+          jobs.total_hours_status AS total_hours_status,
+          DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+
+          staffs.id AS allocated_id,
+          staffs.first_name AS allocated_first_name,
+          staffs.last_name AS allocated_last_name,
+          staffs2.id AS reviewer_id,
+          staffs2.first_name AS reviewer_first_name,
+          staffs2.last_name AS reviewer_last_name,
+          staffs3.id AS outbooks_acount_manager_id,
+          staffs3.first_name AS outbooks_acount_manager_first_name,
+          staffs3.last_name AS outbooks_acount_manager_last_name,
+          staffs3.employee_number AS account_manager_employee_number,
+
+          jobs.staff_created_id AS staff_created_id,
+
+          temp_assigned_jobs_staff.source AS assigned_source,
+          temp_assigned_jobs_staff.service_id_assign AS service_id_assign,
+          jobs.service_id AS job_service_id,
+
+          master_status.name AS status,
+          CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+          DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+          DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+          ${jobCodeExpr} AS job_code_id,
+          CASE 
+              WHEN EXISTS (
+                  SELECT 1 
+                  FROM client_job_task 
+                  WHERE client_job_task.job_id = jobs.id
+              ) THEN true 
+              ELSE false 
+          END AS has_client_job_task 
+          FROM 
+          jobs
+          JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+          LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = jobs.id AND temp_assigned_jobs_staff.staff_id IN (${placeholders})
+          LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+          LEFT JOIN clients ON jobs.client_id = clients.id
+          LEFT JOIN customers ON jobs.customer_id = customers.id
+          LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+          LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+          LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
+          LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+          LEFT JOIN master_status ON master_status.id = jobs.status_type
+          LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+          WHERE (
+            temp_assigned_jobs_staff.staff_id IN (${placeholders})
+            OR jobs.staff_created_id IN (${placeholders})
+            OR clients.staff_created_id IN (${placeholders}) OR customers.staff_id IN (${placeholders}) OR customers.account_manager_id IN (${placeholders})
+          )
           AND (
-            (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
-            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
-          ) 
-        AND jobs.customer_id = ?
-        ${searchCondition}
-        `,
-        [
-          ...LineManageStaffId,
-          ...LineManageStaffId,
-          ...LineManageStaffId,
-          ...LineManageStaffId,
-          ...LineManageStaffId,
-          customer_id,
-          ...searchParams,
-        ]
-      );
-      total = countResult[0].total;
-
-      // DATA
-      const query = `
-        SELECT 
-        jobs.id AS job_id,
-        timesheet.job_id AS timesheet_job_id,
-        job_types.type AS job_type_name,
-        jobs.status_type AS status_type,
-        jobs.job_priority AS job_priority,
-        customer_contact_details.id AS account_manager_officer_id,
-        customer_contact_details.first_name AS account_manager_officer_first_name,
-        customer_contact_details.last_name AS account_manager_officer_last_name,
-        clients.trading_name AS client_trading_name,
-        jobs.client_job_code AS client_job_code,
-        jobs.invoiced AS invoiced,
-        jobs.total_hours AS total_hours,
-        jobs.total_hours_status AS total_hours_status,
-        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
-
-        staffs.id AS allocated_id,
-        staffs.first_name AS allocated_first_name,
-        staffs.last_name AS allocated_last_name,
-        staffs2.id AS reviewer_id,
-        staffs2.first_name AS reviewer_first_name,
-        staffs2.last_name AS reviewer_last_name,
-        staffs3.id AS outbooks_acount_manager_id,
-        staffs3.first_name AS outbooks_acount_manager_first_name,
-        staffs3.last_name AS outbooks_acount_manager_last_name,
-        staffs3.employee_number AS account_manager_employee_number,
-
-        jobs.staff_created_id AS staff_created_id,
-
-        assigned_jobs_staff_view.source AS assigned_source,
-        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
-        jobs.service_id AS job_service_id,
-
-        master_status.name AS status,
-        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
-        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
-        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
-        ${jobCodeExpr} AS job_code_id,
-        CASE 
-            WHEN EXISTS (
-                SELECT 1 
-                FROM client_job_task 
-                WHERE client_job_task.job_id = jobs.id
-            ) THEN true 
-            ELSE false 
-        END AS has_client_job_task 
-        FROM 
-        jobs
-        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
-        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
-        LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-        LEFT JOIN clients ON jobs.client_id = clients.id
-        LEFT JOIN customers ON jobs.customer_id = customers.id
-        LEFT JOIN job_types ON jobs.job_type_id = job_types.id
-        LEFT JOIN staffs ON jobs.allocated_to = staffs.id
-        LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
-        LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-        LEFT JOIN master_status ON master_status.id = jobs.status_type
-        LEFT JOIN timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
-        WHERE (
-          assigned_jobs_staff_view.staff_id IN (${placeholders})
-          OR jobs.staff_created_id IN (${placeholders})
-          OR clients.staff_created_id IN (${placeholders}) OR customers.staff_id IN (${placeholders}) OR customers.account_manager_id IN (${placeholders})
-        )
-        AND (
-            (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
-            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
-          )  
-        AND jobs.customer_id = ?
-        ${searchCondition}
-        GROUP BY jobs.id
-        ORDER BY jobs.id DESC
-        LIMIT ? OFFSET ?;
-      `;
-      [result] = await pool.execute(query, [
+              (temp_assigned_jobs_staff.source IS NULL OR temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
+              OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
+            )  
+          AND jobs.customer_id = ?
+          ${searchCondition}
+          GROUP BY jobs.id
+          ORDER BY jobs.id DESC
+          LIMIT ? OFFSET ?;
+        `;
+      [result] = await connection.execute(query, [
+        ...LineManageStaffId,
         ...LineManageStaffId,
         ...LineManageStaffId,
         ...LineManageStaffId,
@@ -1946,6 +1952,13 @@ const getJobByCustomer = async (job) => {
       //   );
       //   result = [...matched, ...matched2];
       // }
+      
+      connection.release();
+    } catch (err) {
+      console.error(err);
+      connection.release();
+      throw err;
+    }
     }
 
     return {
@@ -2297,7 +2310,8 @@ async function getAllJobsSidebar(
       ON jobs.staff_created_id = staffs4.id
 
     LEFT JOIN temp_assigned_jobs_staff 
-      ON temp_assigned_jobs_staff.job_id = jobs.id
+      ON temp_assigned_jobs_staff.job_id = jobs.id 
+      AND temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
 
     LEFT JOIN customer_contact_details 
       ON jobs.customer_contact_details_id = customer_contact_details.id
@@ -2620,104 +2634,108 @@ const getJobByClient = async (job) => {
     }
 
     // Other Role Data
-    const query = `
-        SELECT 
-        jobs.id AS job_id,
-        timesheet.job_id AS timesheet_job_id,
-        job_types.type AS job_type_name,
-        jobs.status_type AS status_type,
-        jobs.job_priority AS job_priority,
-        customer_contact_details.id AS account_manager_officer_id,
-        customer_contact_details.first_name AS account_manager_officer_first_name,
-        customer_contact_details.last_name AS account_manager_officer_last_name,
-        clients.trading_name AS client_trading_name,
-        jobs.client_job_code AS client_job_code,
-        jobs.invoiced AS invoiced,
-        jobs.total_hours AS total_hours,
-        jobs.total_hours_status AS total_hours_status,
-        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
-   
-        staffs.id AS allocated_id,
-        staffs.first_name AS allocated_first_name,
-        staffs.last_name AS allocated_last_name,
-   
-        staffs2.id AS reviewer_id,
-        staffs2.first_name AS reviewer_first_name,
-        staffs2.last_name AS reviewer_last_name,
-   
-        staffs3.id AS outbooks_acount_manager_id,
-        staffs3.first_name AS outbooks_acount_manager_first_name,
-        staffs3.last_name AS outbooks_acount_manager_last_name,
-        staffs3.employee_number AS account_manager_employee_number,
+    const connection = await pool.getConnection();
+    try {
+      await buildAssignedJobsTempTable(connection, LineManageStaffId);
+      const query = `
+          SELECT 
+          jobs.id AS job_id,
+          timesheet.job_id AS timesheet_job_id,
+          job_types.type AS job_type_name,
+          jobs.status_type AS status_type,
+          jobs.job_priority AS job_priority,
+          customer_contact_details.id AS account_manager_officer_id,
+          customer_contact_details.first_name AS account_manager_officer_first_name,
+          customer_contact_details.last_name AS account_manager_officer_last_name,
+          clients.trading_name AS client_trading_name,
+          jobs.client_job_code AS client_job_code,
+          jobs.invoiced AS invoiced,
+          jobs.total_hours AS total_hours,
+          jobs.total_hours_status AS total_hours_status,
+          DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS date_received_on,
+    
+          staffs.id AS allocated_id,
+          staffs.first_name AS allocated_first_name,
+          staffs.last_name AS allocated_last_name,
+    
+          staffs2.id AS reviewer_id,
+          staffs2.first_name AS reviewer_first_name,
+          staffs2.last_name AS reviewer_last_name,
+    
+          staffs3.id AS outbooks_acount_manager_id,
+          staffs3.first_name AS outbooks_acount_manager_first_name,
+          staffs3.last_name AS outbooks_acount_manager_last_name,
+          staffs3.employee_number AS account_manager_employee_number,
 
-        jobs.staff_created_id AS staff_created_id,
+          jobs.staff_created_id AS staff_created_id,
 
-        assigned_jobs_staff_view.source AS assigned_source,
-        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
-        jobs.service_id AS job_service_id,
+          temp_assigned_jobs_staff.source AS assigned_source,
+          temp_assigned_jobs_staff.service_id_assign AS service_id_assign,
+          jobs.service_id AS job_service_id,
 
-        master_status.name AS status,
+          master_status.name AS status,
 
-        CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
-        DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
-        DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
+          CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
+          DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
+          DATE_FORMAT(jobs.updated_at, '%d/%m/%Y') AS updated_at,
 
-        CONCAT(
-            SUBSTRING(customers.trading_name, 1, 3), '_',
-            SUBSTRING(clients.trading_name, 1, 3), '_',
-            SUBSTRING(job_types.type, 1, 4), '_',
-            SUBSTRING(jobs.job_id, 1, 15)
-            ) AS job_code_id,
-        
-        CASE 
-            WHEN EXISTS (
-                SELECT 1 
-                FROM client_job_task 
-                WHERE client_job_task.job_id = jobs.id
-            ) THEN true 
-            ELSE false 
-        END AS has_client_job_task
-   
-        FROM 
-        jobs
-        JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
-        LEFT JOIN 
-        assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
-        LEFT JOIN 
-        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
-        LEFT JOIN 
-        clients ON jobs.client_id = clients.id
-        LEFT JOIN 
-        customers ON jobs.customer_id = customers.id
-        LEFT JOIN 
-        job_types ON jobs.job_type_id = job_types.id
-        LEFT JOIN 
-        staffs ON jobs.allocated_to = staffs.id
-        LEFT JOIN 
-        staffs AS staffs2 ON jobs.reviewer = staffs2.id
-        LEFT JOIN 
-        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-        LEFT JOIN 
-        master_status ON master_status.id = jobs.status_type
-         LEFT JOIN
-         timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
-        WHERE
-        (assigned_jobs_staff_view.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) AND jobs.client_id = ?
-        ${searchCondition}
-        AND (
-            (assigned_jobs_staff_view.source IS NULL OR assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
-            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
-          ) 
-        GROUP BY 
-        jobs.id 
-        ORDER BY 
-        jobs.id DESC;
-        `;
+          CONCAT(
+              SUBSTRING(customers.trading_name, 1, 3), '_',
+              SUBSTRING(clients.trading_name, 1, 3), '_',
+              SUBSTRING(job_types.type, 1, 4), '_',
+              SUBSTRING(jobs.job_id, 1, 15)
+              ) AS job_code_id,
+          
+          CASE 
+              WHEN EXISTS (
+                  SELECT 1 
+                  FROM client_job_task 
+                  WHERE client_job_task.job_id = jobs.id
+              ) THEN true 
+              ELSE false 
+          END AS has_client_job_task
+    
+          FROM 
+          jobs
+          JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+          LEFT JOIN 
+          temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = jobs.id AND temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
+          LEFT JOIN 
+          customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+          LEFT JOIN 
+          clients ON jobs.client_id = clients.id
+          LEFT JOIN 
+          customers ON jobs.customer_id = customers.id
+          LEFT JOIN 
+          job_types ON jobs.job_type_id = job_types.id
+          LEFT JOIN 
+          staffs ON jobs.allocated_to = staffs.id
+          LEFT JOIN 
+          staffs AS staffs2 ON jobs.reviewer = staffs2.id
+          LEFT JOIN 
+          staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+          LEFT JOIN 
+          master_status ON master_status.id = jobs.status_type
+          LEFT JOIN
+          timesheet ON timesheet.job_id = jobs.id AND timesheet.task_type = '2'
+          WHERE
+          (temp_assigned_jobs_staff.staff_id IN(${LineManageStaffId}) OR jobs.staff_created_id IN(${LineManageStaffId}) OR clients.staff_created_id IN(${LineManageStaffId}) OR customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId})) AND jobs.client_id = ?
+          ${searchCondition}
+          AND (
+              (temp_assigned_jobs_staff.source IS NULL OR temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
+              OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
+            ) 
+          GROUP BY 
+          jobs.id 
+          ORDER BY 
+          jobs.id DESC;
+          `;
 
-    //console.log("query -", query);
+      //console.log("query -", query);
 
 
-    const [result] = await pool.execute(query, [client_id, ...searchParams]);
+      const [result] = await connection.execute(query, [client_id, ...searchParams]);
+      connection.release();
 
     //////-----START Assign Customer Service Data START----////////
     // let isExistAssignCustomer = result?.find(
@@ -2738,6 +2756,10 @@ const getJobByClient = async (job) => {
     //////-----END Assign Customer Service Data END----////////
 
     return { status: true, message: "Success.", data: result };
+    } catch (innerError) {
+      connection.release();
+      throw innerError;
+    }
   } catch (error) {
     console.log("err -", error);
     return { status: false, message: "Error getting job. BY Client" };

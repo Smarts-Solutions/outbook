@@ -714,29 +714,32 @@ const getClient = async (client) => {
   }
 
   // ================= OTHER ROLES =================
+  const connection = await pool.getConnection();
   try {
-    const [[{ total }]] = await pool.execute(
+    await buildAssignedJobsTempTable(connection, LineManageStaffId);
+
+    const [[{ total }]] = await connection.execute(
       `
       SELECT COUNT(DISTINCT clients.id) AS total
       FROM clients
       JOIN staffs ON clients.staff_created_id = staffs.id
       JOIN customers ON customers.id = clients.customer_id
       JOIN client_types ON client_types.id = clients.client_type
-      LEFT JOIN assigned_jobs_staff_view 
-        ON assigned_jobs_staff_view.client_id = clients.id 
-        AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+      LEFT JOIN temp_assigned_jobs_staff 
+        ON temp_assigned_jobs_staff.client_id = clients.id 
+        AND temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
       WHERE 
         (clients.staff_created_id IN (${LineManageStaffId})
         OR customers.staff_id IN (${LineManageStaffId})
         OR customers.account_manager_id IN (${LineManageStaffId})
-        OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))
+        OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId}))
         AND clients.customer_id = ?
         ${searchCondition}
       `,
       [customer_id, ...searchParams]
     );
 
-    const [data] = await pool.execute(
+    const [data] = await connection.execute(
       `
       SELECT  
         clients.id AS id,
@@ -759,14 +762,14 @@ const getClient = async (client) => {
       JOIN customers ON customers.id = clients.customer_id    
       JOIN client_types ON client_types.id = clients.client_type
       LEFT JOIN jobs ON clients.id = jobs.client_id
-      LEFT JOIN assigned_jobs_staff_view 
-        ON assigned_jobs_staff_view.client_id = clients.id 
-        AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+      LEFT JOIN temp_assigned_jobs_staff 
+        ON temp_assigned_jobs_staff.client_id = clients.id 
+        AND temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
       WHERE 
         (clients.staff_created_id IN (${LineManageStaffId})
         OR customers.staff_id IN (${LineManageStaffId})
         OR customers.account_manager_id IN (${LineManageStaffId})
-        OR assigned_jobs_staff_view.staff_id IN (${LineManageStaffId}))
+        OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId}))
         AND clients.customer_id = ?
         ${searchCondition}
       GROUP BY clients.id
@@ -775,6 +778,8 @@ const getClient = async (client) => {
       `,
       [customer_id, ...searchParams, limit, offset]
     );
+
+    connection.release();
 
     return {
       status: true,
@@ -790,6 +795,7 @@ const getClient = async (client) => {
     };
   } catch (err) {
     console.error(err);
+    connection.release();
     return { status: false, message: "Error in other roles query" };
   }
 };
@@ -1322,45 +1328,54 @@ ORDER BY
 
   // Other Role Get data
 
-  const query = `
-   SELECT  
-    clients.id AS id,
-    clients.trading_name AS client_name,
-    clients.status AS status,
-    client_types.type AS client_type_name,
-    jobs.id AS Delete_Status,
-    CONCAT(staffs.first_name, ' ', staffs.last_name) AS client_created_by,
-    DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at,
-    DATE_FORMAT(clients.updated_at, '%d/%m/%Y') AS updated_at,
-    CONCAT(
-        'cli_', 
-        SUBSTRING(customers.trading_name, 1, 3), '_',
-        SUBSTRING(clients.trading_name, 1, 3), '_',
-        SUBSTRING(clients.client_code, 1, 15)
-    ) AS client_code
-      FROM 
-          clients
-      JOIN 
-          staffs ON clients.staff_created_id = staffs.id    
-      LEFT JOIN 
-          assigned_jobs_staff_view ON assigned_jobs_staff_view.client_id = clients.id AND assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
-      JOIN 
-          customers ON customers.id = clients.customer_id    
-      JOIN 
-          client_types ON client_types.id = clients.client_type
-      JOIN 
-          jobs ON clients.id = jobs.client_id
-      WHERE 
-        jobs.id IN (${job_id})
-      GROUP BY
-          clients.id    
-      ORDER BY 
-          clients.trading_name ASC;
-    `;
-  //console.log("Client Query:", query);
+  const connection = await pool.getConnection();
+  try {
+    await buildAssignedJobsTempTable(connection, LineManageStaffId);
+    const query = `
+     SELECT  
+      clients.id AS id,
+      clients.trading_name AS client_name,
+      clients.status AS status,
+      client_types.type AS client_type_name,
+      jobs.id AS Delete_Status,
+      CONCAT(staffs.first_name, ' ', staffs.last_name) AS client_created_by,
+      DATE_FORMAT(clients.created_at, '%d/%m/%Y') AS created_at,
+      DATE_FORMAT(clients.updated_at, '%d/%m/%Y') AS updated_at,
+      CONCAT(
+          'cli_', 
+          SUBSTRING(customers.trading_name, 1, 3), '_',
+          SUBSTRING(clients.trading_name, 1, 3), '_',
+          SUBSTRING(clients.client_code, 1, 15)
+      ) AS client_code
+        FROM 
+            clients
+        JOIN 
+            staffs ON clients.staff_created_id = staffs.id    
+        LEFT JOIN 
+            temp_assigned_jobs_staff ON temp_assigned_jobs_staff.client_id = clients.id AND temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
+        JOIN 
+            customers ON customers.id = clients.customer_id    
+        JOIN 
+            client_types ON client_types.id = clients.client_type
+        JOIN 
+            jobs ON clients.id = jobs.client_id
+        WHERE 
+          jobs.id IN (${job_id})
+        GROUP BY
+            clients.id    
+        ORDER BY 
+            clients.trading_name ASC;
+      `;
+    //console.log("Client Query:", query);
 
-  const [result] = await pool.execute(query);
-  return { status: true, message: "success.", data: result };
+    const [result] = await connection.execute(query);
+    connection.release();
+    return { status: true, message: "success.", data: result };
+  } catch (err) {
+    connection.release();
+    console.error(err);
+    return { status: false, message: "Error in other roles query" };
+  }
 }
 
 async function getAllClientByCustomerIdFilter(
