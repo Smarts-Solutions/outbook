@@ -2246,7 +2246,7 @@ const Timesheet = () => {
               ""
             )}
 
-            {lineMangerData && lineMangerData.length > 0 ? (
+            {role !== "SUPERADMIN" && lineMangerData && lineMangerData.length > 0 ? (
               <div className="form-group  col-md-4  pe-0">
                 <label className="form-label mb-2">Team Timesheet Status</label>
                 <Select
