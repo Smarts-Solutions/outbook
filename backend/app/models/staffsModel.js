@@ -1076,6 +1076,27 @@ const managePortfolio = async (staff_id) => {
   }
 };
 
+const getLineManagerStaff_old_working = async (staff) => {
+  let staff_to = staff.StaffUserId;
+  const LineManageQuery = `
+    SELECT 
+    line_managers.staff_by AS staff_id, 
+    CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name 
+    FROM line_managers 
+    JOIN staffs ON line_managers.staff_by = staffs.id
+    WHERE line_managers.staff_to = ?
+  `;
+  try {
+    const [lineManagerResult] = await pool.execute(LineManageQuery, [staff_to]);
+    return lineManagerResult;
+  } catch (err) {
+    console.error("Error selecting data:", err);
+    throw err;
+  }
+};
+
+
+
 const getLineManagerStaff = async (staff) => {
   let staff_to = staff.StaffUserId;
   const LineManageQuery = `
