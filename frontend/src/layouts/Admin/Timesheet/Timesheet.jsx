@@ -227,7 +227,8 @@ const Timesheet = () => {
       .then(async (response) => {
         if (response.status) {
           console.log(`response`, response);
-          setLineMangerData(response.data);
+          // Extract data array whether it's nested (like getStaffNew) or direct
+          setLineMangerData(response.data?.data || response.data);
         } else {
           setLineMangerData([]);
         }

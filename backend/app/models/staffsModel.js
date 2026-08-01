@@ -1098,21 +1098,104 @@ const getLineManagerStaff_old_working = async (staff) => {
 
 
 const getLineManagerStaff = async (staff) => {
-  let staff_to = staff.StaffUserId;
-  const LineManageQuery = `
-    SELECT 
-    line_managers.staff_by AS staff_id, 
-    CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_name 
-    FROM line_managers 
-    JOIN staffs ON line_managers.staff_by = staffs.id
-    WHERE line_managers.staff_to = ?
-  `;
+  let { StaffUserId } = staff;
+
+  let LineManageStaffId = await LineManageStaffIdHelperFunctionForStaff(StaffUserId);
+  const rowsRole = await QueryRoleHelperFunction(StaffUserId);
+  
+  let role_name = rowsRole[0]?.role_name?.toUpperCase();
+
+  let where = "";
+
+  if (role_name === "SUPERADMIN") {
+      where = "WHERE s.role_id != 12";
+  } else {
+      if (LineManageStaffId.length > 0) {
+          where = `
+              WHERE s.role_id != 12
+              AND s.id IN (${LineManageStaffId.join(",")})
+          `;
+      } else {
+          where = "WHERE 1 = 0";
+      }
+  }
+
   try {
-    const [lineManagerResult] = await pool.execute(LineManageQuery, [staff_to]);
-    return lineManagerResult;
-  } catch (err) {
-    console.error("Error selecting data:", err);
-    throw err;
+    const [rows] = await pool.query(
+      `
+      SELECT
+    s.id,
+    s.id AS staff_id,
+    CONCAT(s.first_name, ' ', s.last_name) AS staff_name,
+    s.role_id,
+    s.first_name,
+    s.last_name,
+    s.email,
+    s.phone_code,
+    s.phone,
+    s.is_disable,
+    s.status,
+    s.employee_number,
+    s.created_at,
+    s.hourminute,
+    r.role_name,
+    r.role,
+    lm.staff_to,
+    CONCAT(m.first_name, ' ', m.last_name) AS line_manager_name,
+    CASE
+        WHEN se.staff_id IS NOT NULL THEN TRUE
+        ELSE FALSE
+    END AS is_customer_exist
+    FROM staffs s
+    INNER JOIN roles r
+        ON s.role_id = r.id
+    LEFT JOIN line_managers lm
+        ON lm.staff_by = s.id
+    LEFT JOIN staffs m
+        ON m.id = lm.staff_to
+    LEFT JOIN (
+        SELECT staff_id
+        FROM customers
+        WHERE staff_id IS NOT NULL
+
+        UNION
+
+        SELECT account_manager_id
+        FROM customers
+        WHERE account_manager_id IS NOT NULL
+
+        UNION
+
+        SELECT staff_created_id
+        FROM clients
+        WHERE staff_created_id IS NOT NULL
+
+        UNION
+
+        SELECT staff_created_id
+        FROM jobs
+        WHERE staff_created_id IS NOT NULL
+
+        UNION
+
+        SELECT account_manager_id
+        FROM jobs
+        WHERE account_manager_id IS NOT NULL
+    ) se
+        ON se.staff_id = s.id
+    ${where}
+    ORDER BY s.first_name ASC
+      `
+    );
+  
+    return {
+      status: true,
+      message: "Success",
+      data: rows,
+    };
+  } catch (error) {
+    console.error("Error in getLineManagerStaff:", error);
+    return { status: false, message: "Error fetching staff." };
   }
 };
 
