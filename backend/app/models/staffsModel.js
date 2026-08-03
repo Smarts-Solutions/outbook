@@ -488,7 +488,7 @@ const getStaffNew = async (data) => {
         WHERE reviewer IS NOT NULL AND reviewer != 0
 
         UNION
-
+ 
         SELECT staff_id
         FROM job_allowed_staffs
         WHERE staff_id IS NOT NULL AND staff_id != 0
