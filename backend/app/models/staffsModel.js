@@ -299,6 +299,24 @@ const getStaff = async (data) => {
         SELECT account_manager_id
         FROM jobs
         WHERE account_manager_id IS NOT NULL
+
+        UNION
+
+        SELECT allocated_to AS staff_id
+        FROM jobs
+        WHERE allocated_to IS NOT NULL AND allocated_to != 0
+
+        UNION
+
+        SELECT reviewer AS staff_id
+        FROM jobs
+        WHERE reviewer IS NOT NULL AND reviewer != 0
+
+        UNION
+
+        SELECT staff_id
+        FROM job_allowed_staffs
+        WHERE staff_id IS NOT NULL AND staff_id != 0
     ) se
         ON se.staff_id = s.id
     ${where}
@@ -456,6 +474,24 @@ const getStaffNew = async (data) => {
         SELECT account_manager_id
         FROM jobs
         WHERE account_manager_id IS NOT NULL
+
+        UNION
+
+        SELECT allocated_to AS staff_id
+        FROM jobs
+        WHERE allocated_to IS NOT NULL AND allocated_to != 0
+
+        UNION
+
+        SELECT reviewer AS staff_id
+        FROM jobs
+        WHERE reviewer IS NOT NULL AND reviewer != 0
+
+        UNION
+
+        SELECT staff_id
+        FROM job_allowed_staffs
+        WHERE staff_id IS NOT NULL AND staff_id != 0
     ) se
         ON se.staff_id = s.id
     ${where}
@@ -1181,6 +1217,24 @@ const getLineManagerStaff = async (staff) => {
         SELECT account_manager_id
         FROM jobs
         WHERE account_manager_id IS NOT NULL
+
+        UNION
+
+        SELECT allocated_to AS staff_id
+        FROM jobs
+        WHERE allocated_to IS NOT NULL AND allocated_to != 0
+
+        UNION
+
+        SELECT reviewer AS staff_id
+        FROM jobs
+        WHERE reviewer IS NOT NULL AND reviewer != 0
+
+        UNION
+
+        SELECT staff_id
+        FROM job_allowed_staffs
+        WHERE staff_id IS NOT NULL AND staff_id != 0
     ) se
         ON se.staff_id = s.id
     ${where}
