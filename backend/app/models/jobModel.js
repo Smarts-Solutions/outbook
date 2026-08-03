@@ -130,7 +130,7 @@ const getAddJobData_working = async (job) => {
    ORDER BY 
     customers.id DESC;
   `;
-  
+
     const [customerDetails] = await pool.execute(queryCustomerDetails, [
       customer_id,
       StaffUserId,
@@ -481,7 +481,7 @@ const getAddJobData = async (job) => {
       WHERE customers.id = ?
       ORDER BY clients.trading_name ASC;
     `;
-    
+
     const queryCustomerWithCustomerAccountManager = `
       SELECT customer_contact_details.id AS customer_account_manager_officer_id,
              customer_contact_details.first_name AS customer_account_manager_officer_first_name,
@@ -557,7 +557,7 @@ const getAddJobData = async (job) => {
 
 
     const p_rows = pool.execute(queryCustomerWithClient, [customer_id]);
-    
+
     const p_rows2 = pool.execute(queryCustomerWithCustomerAccountManager, [customer_id]);
     const p_rows3 = pool.execute(queryCustomerWithJobType, [customer_id]);
     const p_rows4 = pool.execute(queryReviewer);
@@ -628,7 +628,7 @@ const getAddJobData = async (job) => {
       ORDER BY clients.trading_name ASC
     `;
 
-    const queryCustomerDetails = `
+      const queryCustomerDetails = `
       SELECT customers.id AS customer_id, customers.trading_name AS customer_trading_name,
              customers.account_manager_id AS customer_account_manager_id,
              temp_assigned_jobs_staff.source AS assigned_source,
@@ -641,8 +641,8 @@ const getAddJobData = async (job) => {
     `;
 
 
-    p_clientData = connection.execute(clientDataQuery, [customer_id]);
-    p_customerDetails = connection.execute(queryCustomerDetails, [customer_id, StaffUserId]);
+      p_clientData = connection.execute(clientDataQuery, [customer_id]);
+      p_customerDetails = connection.execute(queryCustomerDetails, [customer_id, StaffUserId]);
 
     }else{
       const clientDataQuery = `
@@ -659,7 +659,7 @@ const getAddJobData = async (job) => {
       ORDER BY clients.trading_name ASC
     `;
 
-     const queryCustomerDetails = `
+      const queryCustomerDetails = `
       SELECT customers.id AS customer_id, customers.trading_name AS customer_trading_name,
              customers.account_manager_id AS customer_account_manager_id
       FROM customers
@@ -667,10 +667,10 @@ const getAddJobData = async (job) => {
       GROUP BY customers.id
       ORDER BY customers.id DESC;
     `;
-  
-  
+
+
     p_clientData =await pool.execute(clientDataQuery, [customer_id]);
-    p_customerDetails = await pool.execute(queryCustomerDetails, [customer_id, StaffUserId]);
+      p_customerDetails = await pool.execute(queryCustomerDetails, [customer_id, StaffUserId]);
     }
 
 
@@ -681,7 +681,7 @@ const getAddJobData = async (job) => {
       WHERE staffs.id = ${rows[0].customer_account_manager_id}
     ` : null;
 
-    
+
     const p_rows7 = pool.execute(queryCustomerWithServices, [customer_id]);
     const p_roleAccess = (rows.length > 0 && roleData.length > 0 && roleData[0].role_name !== "SUPERADMIN")
       ? pool.execute("SELECT * FROM role_permissions WHERE role_id = ? AND permission_id = ?", [roleData[0].role_id, 34])
@@ -1210,7 +1210,9 @@ const jobAdd = async (job) => {
 
   try {
     // Helper function to replace undefined with null
-    const handleUndefined = (value) => (value === undefined ? null : value);
+    // const handleUndefined = (value) => (value === undefined ? null : value);
+    // Helper function to replace undefined and empty strings with null
+    const handleUndefined = (value) => (value === undefined || value === "" ? null : value);
 
     const query = `
 INSERT INTO jobs (
@@ -1924,41 +1926,41 @@ const getJobByCustomer = async (job) => {
           ORDER BY jobs.id DESC
           LIMIT ? OFFSET ?;
         `;
-      [result] = await connection.execute(query, [
-        ...LineManageStaffId,
-        ...LineManageStaffId,
-        ...LineManageStaffId,
-        ...LineManageStaffId,
-        ...LineManageStaffId,
-        ...LineManageStaffId,
-        customer_id,
-        ...searchParams,
-        limit,
-        offset,
-      ]);
+        [result] = await connection.execute(query, [
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          ...LineManageStaffId,
+          customer_id,
+          ...searchParams,
+          limit,
+          offset,
+        ]);
 
-      // assign_customer_service logic (UNCHANGED)
-      // let isExistAssignCustomer = result?.find(
-      //   (item) => item?.assigned_source === "assign_customer_service"
-      // );
-      // if (isExistAssignCustomer) {
-      //   const matched = result.filter(
-      //     (item) =>
-      //       item.assigned_source === "assign_customer_service" &&
-      //       Number(item.service_id_assign) === Number(item.job_service_id)
-      //   );
-      //   const matched2 = result.filter(
-      //     (item) => item.assigned_source !== "assign_customer_service"
-      //   );
-      //   result = [...matched, ...matched2];
-      // }
-      
-      connection.release();
-    } catch (err) {
-      console.error(err);
-      connection.release();
-      throw err;
-    }
+        // assign_customer_service logic (UNCHANGED)
+        // let isExistAssignCustomer = result?.find(
+        //   (item) => item?.assigned_source === "assign_customer_service"
+        // );
+        // if (isExistAssignCustomer) {
+        //   const matched = result.filter(
+        //     (item) =>
+        //       item.assigned_source === "assign_customer_service" &&
+        //       Number(item.service_id_assign) === Number(item.job_service_id)
+        //   );
+        //   const matched2 = result.filter(
+        //     (item) => item.assigned_source !== "assign_customer_service"
+        //   );
+        //   result = [...matched, ...matched2];
+        // }
+
+        connection.release();
+      } catch (err) {
+        console.error(err);
+        connection.release();
+        throw err;
+      }
     }
 
     return {
@@ -2274,29 +2276,29 @@ async function getAllJobsSidebar(
       // =========================================
       // ALL STAFF IDS
       // =========================================
-    //   await connection.execute("DROP TEMPORARY TABLE IF EXISTS temp_assigned_jobs_staff");
-    //   await connection.execute(`
-    //   CREATE TEMPORARY TABLE temp_assigned_jobs_staff (
-    //     customer_id       INT,
-    //     client_id         INT,
-    //     job_id            INT,
-    //     staff_id          INT,
-    //     source            VARCHAR(100),
-    //     service_id_assign INT
-    //   )
-    // `);
-    //   for (const sid of allStaffIds) {
-    //     await connection.execute("CALL get_assigned_jobs_staff(?)", [sid]);
-    //   }
+      //   await connection.execute("DROP TEMPORARY TABLE IF EXISTS temp_assigned_jobs_staff");
+      //   await connection.execute(`
+      //   CREATE TEMPORARY TABLE temp_assigned_jobs_staff (
+      //     customer_id       INT,
+      //     client_id         INT,
+      //     job_id            INT,
+      //     staff_id          INT,
+      //     source            VARCHAR(100),
+      //     service_id_assign INT
+      //   )
+      // `);
+      //   for (const sid of allStaffIds) {
+      //     await connection.execute("CALL get_assigned_jobs_staff(?)", [sid]);
+      //   }
 
-    //   // Index add
-    //   await connection.execute(`
-    //   ALTER TABLE temp_assigned_jobs_staff 
-    //     ADD INDEX idx_staff    (staff_id),
-    //     ADD INDEX idx_customer (customer_id),
-    //     ADD INDEX idx_client   (client_id),
-    //     ADD INDEX idx_job      (job_id)
-    // `);
+      //   // Index add
+      //   await connection.execute(`
+      //   ALTER TABLE temp_assigned_jobs_staff 
+      //     ADD INDEX idx_staff    (staff_id),
+      //     ADD INDEX idx_customer (customer_id),
+      //     ADD INDEX idx_client   (client_id),
+      //     ADD INDEX idx_job      (job_id)
+      // `);
       // =========================================
       // PLACEHOLDERS
       // =========================================
@@ -2737,25 +2739,25 @@ const getJobByClient = async (job) => {
       const [result] = await connection.execute(query, [client_id, ...searchParams]);
       connection.release();
 
-    //////-----START Assign Customer Service Data START----////////
-    // let isExistAssignCustomer = result?.find(
-    //   (item) => item?.assigned_source === "assign_customer_service"
-    // );
-    // if (isExistAssignCustomer != undefined) {
-    //   let matched = result?.filter(
-    //     (item) =>
-    //       item?.assigned_source === "assign_customer_service" &&
-    //       Number(item?.service_id_assign) === Number(item?.job_service_id)
-    //   );
-    //   let matched2 = result?.filter(
-    //     (item) => item?.assigned_source !== "assign_customer_service"
-    //   );
-    //   const resultAssignCustomer = [...matched, ...matched2];
-    //   return { status: true, message: "Success.", data: resultAssignCustomer };
-    // }
-    //////-----END Assign Customer Service Data END----////////
+      //////-----START Assign Customer Service Data START----////////
+      // let isExistAssignCustomer = result?.find(
+      //   (item) => item?.assigned_source === "assign_customer_service"
+      // );
+      // if (isExistAssignCustomer != undefined) {
+      //   let matched = result?.filter(
+      //     (item) =>
+      //       item?.assigned_source === "assign_customer_service" &&
+      //       Number(item?.service_id_assign) === Number(item?.job_service_id)
+      //   );
+      //   let matched2 = result?.filter(
+      //     (item) => item?.assigned_source !== "assign_customer_service"
+      //   );
+      //   const resultAssignCustomer = [...matched, ...matched2];
+      //   return { status: true, message: "Success.", data: resultAssignCustomer };
+      // }
+      //////-----END Assign Customer Service Data END----////////
 
-    return { status: true, message: "Success.", data: result };
+      return { status: true, message: "Success.", data: result };
     } catch (innerError) {
       connection.release();
       throw innerError;
@@ -2908,18 +2910,18 @@ async function getAllJobsSidebarFilter(
   // }
 
 
-    if (Array.isArray(customer_id) && customer_id.length > 0) {
-      extraFilter += ` AND jobs.customer_id IN (${customer_id}) `;
-    }
+  if (Array.isArray(customer_id) && customer_id.length > 0) {
+    extraFilter += ` AND jobs.customer_id IN (${customer_id}) `;
+  }
 
-    if (Array.isArray(client_id) && client_id.length > 0) {
-      extraFilter += ` AND jobs.client_id IN (${client_id}) `;
-    }
+  if (Array.isArray(client_id) && client_id.length > 0) {
+    extraFilter += ` AND jobs.client_id IN (${client_id}) `;
+  }
 
-    if (Array.isArray(task_id) && task_id.length > 0) {
-      extraFilter += ` AND EXISTS (SELECT 1 FROM timesheet ts WHERE ts.job_id = jobs.id AND ts.task_id IN (${task_id})) `;
-    }
-  
+  if (Array.isArray(task_id) && task_id.length > 0) {
+    extraFilter += ` AND EXISTS (SELECT 1 FROM timesheet ts WHERE ts.job_id = jobs.id AND ts.task_id IN (${task_id})) `;
+  }
+
 
   let searchCondition = "";
   let searchParams = [];
@@ -3029,21 +3031,21 @@ async function getAllJobsSidebarFilter(
         LIMIT ? OFFSET ?
       `;
 
-      const [result] = await pool.execute(query, [...searchParams, limit, offset]);
+        const [result] = await pool.execute(query, [...searchParams, limit, offset]);
 
-      return {
-        status: true,
-        message: "Success.",
-        data: result,
-        hasMore: rows.length === limit
-      };
+        return {
+          status: true,
+          message: "Success.",
+          data: result,
+          hasMore: rows.length === limit
+        };
       }
     }
 
 
     // ================= OTHER ROLE =================
     const placeholders = LineManageStaffId?.map(() => '?').join(',');
-    
+
     const connection = await pool.getConnection();
     try {
       await buildAssignedJobsTempTable(connection, LineManageStaffId);
@@ -3133,7 +3135,7 @@ async function getAllJobsSidebarFilter(
         ORDER BY job_code_id ASC
         LIMIT ? OFFSET ?
       `;
-  
+
       let [result] = await connection.execute(query, [
         ...LineManageStaffId,
         ...LineManageStaffId,
@@ -3144,7 +3146,7 @@ async function getAllJobsSidebarFilter(
         limit,
         offset
       ]);
-  
+
       return {
         status: true,
         message: "Success.",
