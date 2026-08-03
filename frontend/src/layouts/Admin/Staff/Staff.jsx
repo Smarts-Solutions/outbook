@@ -86,6 +86,7 @@ const StaffPage = () => {
   });
   const [changedRoleStaffData, setChangedRoleStaffData] = useState([]);
   const [changeRole, setChangeRole] = useState(false);
+  const [changeStatus, setChangeStatus] = useState(false);
 
   const [staffDataAllRecords, setStaffDataAllRecords] = useState({ loading: true, data: [] });
   const [managerOptions, setManagerOptions] = useState([]);
@@ -1146,6 +1147,33 @@ const StaffPage = () => {
     }
   }, [formik.values.role]);
 
+  useEffect(() => {
+    const fetchChangedStatusStaff = async () => {
+      if (
+        editStaffData.id !== undefined &&
+        formik.values.status === "0" &&
+        editStaffData.status === "1"
+      ) {
+        if (Number(editStaffData.role_id) === 3) {
+          await getChangedRoleStaff(editStaffData);
+        } else if (Number(editStaffData.role_id) === 4) {
+          await getChangedRoleStaff(editStaffData);
+        } else if (Number(editStaffData.role_id) === 6) {
+          await getChangedRoleStaff(editStaffData);
+        }
+
+        setChangeStatus(true);
+        setEditStaff(false);
+      }
+    };
+    if (
+      [3, 4, 6].includes(Number(editStaffData.role_id)) &&
+      editStaffData.is_customer_exist == 1
+    ) {
+      fetchChangedStatusStaff();
+    }
+  }, [formik.values.status]);
+
   const handleChangeRole = async () => {
     try {
       setLoading(true);
@@ -1188,6 +1216,51 @@ const StaffPage = () => {
         });
     } catch (error) {
       console.error("Error fetching staff tasks:", error);
+      setLoading(false);
+    }
+  };
+
+  const handleChangeStatusTransfer = async () => {
+    try {
+      setLoading(true);
+      const req = {
+        action: "staffStatusChangeUpdate",
+        editStaffData: editStaffData,
+        updateData: formik.values,
+        selectedStaff: selectedStaff,
+      };
+      const data = { req: req, authToken: token };
+      await dispatch(getAllTaskByStaff(data))
+        .unwrap()
+        .then((res) => {
+          if (res.status) {
+            setChangeStatus(false);
+            setSelectedStaff(null);
+            formik.resetForm();
+            setEditStaffData({});
+            Swal.fire({
+              title: "Success!",
+              text: "Staff status deactivated successfully.",
+              icon: "success",
+              confirmButtonText: "OK",
+            });
+            SetRefresh(!refresh);
+          } else {
+            Swal.fire({
+              title: "Error!",
+              text: "Failed to update staff status.",
+              icon: "error",
+              confirmButtonText: "OK",
+            });
+          }
+        })
+        .catch((err) => {
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } catch (error) {
+      console.error("Error updating staff status:", error);
       setLoading(false);
     }
   };
@@ -1897,6 +1970,101 @@ const StaffPage = () => {
             <button
               onClick={() => {
                 setChangeRole(false);
+                setSelectedStaff(null);
+                formik.resetForm();
+                setEditStaffData({});
+                setChangedRoleStaffData([]);
+              }}
+              className="btn btn-secondary"
+            >
+              <X size={16} /> Cancel
+            </button>
+          </div>
+
+          {deleteStaffCustomer.length > 0 && (
+            <div className="mb-4">
+              <h6 className="fw-bold text-primary">
+                <User2 size={16} /> Customers Assigned:
+              </h6>
+              <ul className="list-group">
+                {deleteStaffCustomer.map((customer) => (
+                  <li
+                    key={customer.id}
+                    className="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span className="text-dark">
+                      {customer?.trading_name}{" "}
+                      <span className="badge bg-secondary">
+                        {customer?.customer_code}
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </CommanModal>
+
+      <CommanModal
+        isOpen={changeStatus}
+        backdrop="static"
+        title="Change Status - Transfer Tasks"
+        hideBtn={true}
+        handleClose={() => {
+          setChangeStatus(false);
+          setSelectedStaff(null);
+          formik.resetForm();
+          setEditStaffData({});
+          setChangedRoleStaffData([]);
+        }}
+      >
+        <div className="modal-body">
+          <div className="mb-4">
+            <label htmlFor="staff-select" className="form-label fw-semibold">
+              <User2 size={16} /> Staff to Takeover
+            </label>
+
+            <Select
+              isSearchable
+              className="shadow-sm select-staff"
+              classNamePrefix="select"
+              placeholder="Choose Staff"
+              options={changedRoleStaffData?.map((staff) => ({
+                value: staff.id,
+                label: staff.staff_fullname,
+                staffData: staff,
+              }))}
+              value={
+                selectedStaff
+                  ? {
+                    value: selectedStaff.id,
+                    label: selectedStaff.staff_fullname,
+                  }
+                  : null
+              }
+              onChange={(selectedOption) => {
+                setSelectedStaff(selectedOption?.staffData || null);
+              }}
+              menuPortalTarget={document.body}
+              styles={{
+                menuPortal: (base) => ({
+                  ...base,
+                  zIndex: 9999,
+                }),
+              }}
+            />
+          </div>
+
+          <div className="d-flex justify-content-end gap-2">
+            {selectedStaff && (
+              <button onClick={handleChangeStatusTransfer} className="btn btn-info">
+                <i className="bi bi-arrow-repeat me-1"></i> Deactivate Staff
+              </button>
+            )}
+            <button
+              onClick={() => {
+                setChangeStatus(false);
                 setSelectedStaff(null);
                 formik.resetForm();
                 setEditStaffData({});

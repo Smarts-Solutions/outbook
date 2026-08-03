@@ -75,6 +75,9 @@ else if(data.action == "getChangedRoleStaff"){
 else if(data.action == "staffRoleChangeUpdate"){
   return reportModel.staffRoleChangeUpdate(Report);
 }
+else if(data.action == "staffStatusChangeUpdate"){
+  return reportModel.staffStatusChangeUpdate(Report);
+}
 
 // save Filters
 else if(data.action == "saveFilters"){

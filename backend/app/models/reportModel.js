@@ -4509,6 +4509,68 @@ const staffRoleChangeUpdate = async (Report) => {
   }
 };
 
+const staffStatusChangeUpdate = async (Report) => {
+  const { data } = Report;
+  const { editStaffData, updateData, selectedStaff } = data;
+
+  let role_id = Number(editStaffData?.role_id);
+  let to_staff_id = editStaffData?.id;
+  let update_staff_id = selectedStaff?.staff_id;
+
+  let query = [];
+  query.push(`UPDATE staffs SET status = '0' WHERE id = ${to_staff_id}`);
+
+  if (role_id == 3) {
+    query.push(
+      `UPDATE jobs SET allocated_to = ${update_staff_id} WHERE allocated_to = ${to_staff_id}`,
+    );
+  } else if (role_id == 6) {
+    query.push(
+      `UPDATE jobs SET reviewer = ${update_staff_id} WHERE reviewer = ${to_staff_id}`,
+    );
+  } else if (role_id == 4) {
+    query.push(
+      `UPDATE jobs SET reviewer = ${update_staff_id} WHERE reviewer = ${to_staff_id}`,
+    );
+
+    query.push(
+      `UPDATE jobs SET allocated_to = ${update_staff_id} WHERE allocated_to = ${to_staff_id}`,
+    );
+
+    query.push(
+      `UPDATE jobs SET account_manager_id = ${update_staff_id} WHERE account_manager_id = ${to_staff_id}`,
+    );
+
+    query.push(
+      `UPDATE customers SET account_manager_id = ${update_staff_id} WHERE account_manager_id = ${to_staff_id}`,
+    );
+
+    query.push(
+      `UPDATE IGNORE customer_service_account_managers SET account_manager_id = ${update_staff_id} WHERE account_manager_id = ${to_staff_id}`,
+    );
+  }
+
+  // Also transfer any jobs where the staff is assigned via 'allocated to others' (job_allowed_staffs table)
+  query.push(
+    `UPDATE IGNORE job_allowed_staffs SET staff_id = ${update_staff_id} WHERE staff_id = ${to_staff_id}`
+  );
+  query.push(
+    `DELETE FROM job_allowed_staffs WHERE staff_id = ${to_staff_id}`
+  );
+
+  try {
+    await Promise.all(query.map((q) => pool.execute(q)));
+    return { status: true, message: "Success.", data: [] };
+  } catch (error) {
+    console.error("Staff Status Change Update Error:", error);
+    return {
+      status: false,
+      message: "Error occurred while updating staff status.",
+      data: [],
+    };
+  }
+};
+
 /////////////---- START JOB CUSTOM REPORTS ----//////////////////////
 const getStaffWithRole = async (Report) => {
   const { data, StaffUserId } = Report;
@@ -9651,6 +9713,7 @@ module.exports = {
   capacityReport,
   getChangedRoleStaff,
   staffRoleChangeUpdate,
+  staffStatusChangeUpdate,
   saveFilters,
   getAllFilters,
   deleteFilterId,
