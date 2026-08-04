@@ -84,82 +84,14 @@ parentPort.on("message", async (rows) => {
                     });
                 }
 
-                // Fetch all staffs (moved up to include created_at)
-                const [allStaffsRaw] = await pool.execute("SELECT id as staff_id, CONCAT(first_name, ' ', last_name) as staff_fullname, email as staff_email, DATE_FORMAT(created_at, '%Y-%m-%d') as created_at_date, created_at, status, is_disable FROM staffs");
-
-                const staffDetailsMap = {};
-                const allStaffs = [];
-                allStaffsRaw.forEach(s => { 
-                    staffDetailsMap[s.staff_id] = s; 
-                    if (String(s.status) === '1' && String(s.is_disable) === '0') {
-                        allStaffs.push(s);
-                    }
-                });
-
-                let historicalSubmissions = {};
-                if (staffIds.length > 0) {
-                    const placeholders = staffIds.map(() => '?').join(',');
-                    const histQuery = `
-                        SELECT 
-                            staff_id, 
-                            COUNT(DISTINCT CASE WHEN YEARWEEK(COALESCE(monday_date, tuesday_date, wednesday_date, thursday_date, friday_date, saturday_date, sunday_date), 1) >= YEARWEEK(CURDATE() - INTERVAL 4 WEEK, 1) THEN YEARWEEK(COALESCE(monday_date, tuesday_date, wednesday_date, thursday_date, friday_date, saturday_date, sunday_date), 1) ELSE NULL END) as submitted_1m,
-                            COUNT(DISTINCT CASE WHEN YEARWEEK(COALESCE(monday_date, tuesday_date, wednesday_date, thursday_date, friday_date, saturday_date, sunday_date), 1) >= YEARWEEK(CURDATE() - INTERVAL 13 WEEK, 1) THEN YEARWEEK(COALESCE(monday_date, tuesday_date, wednesday_date, thursday_date, friday_date, saturday_date, sunday_date), 1) ELSE NULL END) as submitted_3m,
-                            COUNT(DISTINCT CASE WHEN YEARWEEK(COALESCE(monday_date, tuesday_date, wednesday_date, thursday_date, friday_date, saturday_date, sunday_date), 1) >= YEARWEEK(CURDATE() - INTERVAL 26 WEEK, 1) THEN YEARWEEK(COALESCE(monday_date, tuesday_date, wednesday_date, thursday_date, friday_date, saturday_date, sunday_date), 1) ELSE NULL END) as submitted_6m,
-                            COUNT(DISTINCT CASE WHEN YEARWEEK(COALESCE(monday_date, tuesday_date, wednesday_date, thursday_date, friday_date, saturday_date, sunday_date), 1) >= YEARWEEK(CURDATE() - INTERVAL 52 WEEK, 1) THEN YEARWEEK(COALESCE(monday_date, tuesday_date, wednesday_date, thursday_date, friday_date, saturday_date, sunday_date), 1) ELSE NULL END) as submitted_1y
-                        FROM timesheet
-                        WHERE staff_id IN (${placeholders})
-                          AND submit_status = '1'
-                          AND YEARWEEK(COALESCE(monday_date, tuesday_date, wednesday_date, thursday_date, friday_date, saturday_date, sunday_date), 1) >= YEARWEEK(CURDATE() - INTERVAL 52 WEEK, 1)
-                          AND YEARWEEK(COALESCE(monday_date, tuesday_date, wednesday_date, thursday_date, friday_date, saturday_date, sunday_date), 1) <= YEARWEEK(CURDATE() - INTERVAL 1 WEEK, 1)
-                        GROUP BY staff_id
-                    `;
-                    const [histRows] = await pool.execute(histQuery, staffIds);
-                    histRows.forEach(row => {
-                        historicalSubmissions[row.staff_id] = {
-                            submitted_1m: parseInt(row.submitted_1m || 0),
-                            submitted_3m: parseInt(row.submitted_3m || 0),
-                            submitted_6m: parseInt(row.submitted_6m || 0),
-                            submitted_1y: parseInt(row.submitted_1y || 0)
-                        };
-                    });
-                }
-
                 // --- 3. Process Tab 1: All Missing Employees ---
                 let tab1Data = [];
                 let sno = 1;
-                const nowMs = Date.now();
-                const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-
                 uniqueStaffs.forEach(staff => {
-                    const mgr = managersMap[staff.staff_id];
-                    const managerName = mgr ? mgr.manager_name : "Unassigned";
-
-                    const staffInfo = staffDetailsMap[staff.staff_id];
-                    const createdAtStr = staffInfo ? staffInfo.created_at_date : "-";
-
-                    let tenureWeeks = 9999;
-                    if (staffInfo && staffInfo.created_at) {
-                        const createdMs = new Date(staffInfo.created_at).getTime();
-                        tenureWeeks = Math.floor((nowMs - createdMs) / msPerWeek);
-                    }
-
-                    const hist = historicalSubmissions[staff.staff_id] || { submitted_1m: 0, submitted_3m: 0, submitted_6m: 0, submitted_1y: 0 };
-
-                    const missed1m = tenureWeeks >= 4 ? (4 - hist.submitted_1m) : "-";
-                    const missed3m = tenureWeeks >= 13 ? (13 - hist.submitted_3m) : "-";
-                    const missed6m = tenureWeeks >= 26 ? (26 - hist.submitted_6m) : "-";
-                    const missed1y = tenureWeeks >= 52 ? (52 - hist.submitted_1y) : "-";
-
                     tab1Data.push({
                         "S.No.": sno++,
                         "Staff Name": staff.staff_fullname,
-                        "Staff Email": staff.staff_email,
-                        "Line Manager": managerName,
-                        "1 Month Missed": missed1m,
-                        "3 Months Missed": missed3m,
-                        "6 Months Missed": missed6m,
-                        "1 Year Missed": missed1y,
-                        "Created At": createdAtStr
+                        "Staff Email": staff.staff_email
                     });
                 });
 
@@ -230,6 +162,8 @@ parentPort.on("message", async (rows) => {
                 const [[roleRow]] = await pool.execute('SELECT r.role FROM staffs s JOIN roles r ON s.role_id = r.id WHERE s.id = ?', [row.id]);
                 const roleName = roleRow ? roleRow.role : '';
 
+                const [allStaffs] = await pool.execute("SELECT id as staff_id, CONCAT(first_name, ' ', last_name) as staff_fullname, email as staff_email FROM staffs WHERE status = '1' AND is_disable = '0'");
+
                 let relevantStaffIds = [];
                 if (['SUPERADMIN', 'ADMIN', 'MANAGEMENT'].includes(roleName)) {
                     relevantStaffIds = allStaffs.map(s => s.staff_id);
@@ -239,6 +173,10 @@ parentPort.on("message", async (rows) => {
                     const activeStaffIds = new Set(allStaffs.map(s => s.staff_id));
                     relevantStaffIds = relevantStaffIds.filter(id => activeStaffIds.has(id));
                 }
+
+                // Dictionary for quick staff details lookup
+                const staffDetailsMap = {};
+                allStaffs.forEach(s => { staffDetailsMap[s.staff_id] = s; });
 
                 let tab4Data = [];
                 let tab5Data = [];
@@ -323,28 +261,7 @@ parentPort.on("message", async (rows) => {
                 }
 
                 // --- 6. Generate Excel File ---
-                const totalMissing = tab1Data.length;
-                const totalMissingManagers = tab2Data.length;
-                const totalDefaulters = tab4Data.length;
-                const totalImproved = tab5Data.length;
-
-                const lastWeekDate = new Date();
-                lastWeekDate.setDate(lastWeekDate.getDate() - 7);
-                const weekNum = Math.ceil(lastWeekDate.getDate() / 7);
-                const monthNum = lastWeekDate.getMonth() + 1;
-                const yearNum = lastWeekDate.getFullYear();
-                const lastWeekStr = `Week ${weekNum}, Month ${monthNum}, Year ${yearNum}`;
-                const shortLastWeekStr = `W${weekNum} M${monthNum} Y${yearNum}`;
-
-                const summaryData = [
-                    { "Metric": `Total employees who did not submit timesheet (${lastWeekStr})`, "Count": totalMissing },
-                    { "Metric": `Total line managers who did not submit timesheet (${lastWeekStr})`, "Count": totalMissingManagers },
-                    { "Metric": "Employees consistently missing for 4 weeks", "Count": totalDefaulters },
-                    { "Metric": "Employees showing improvement (Submitted this week after missing previously)", "Count": totalImproved }
-                ];
-
                 const wb = xlsx.utils.book_new();
-                xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(summaryData), `Summary ${shortLastWeekStr}`);
                 xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(tab1Data), "Missing Employees");
                 xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(tab2Data), "Missing Line Managers");
                 xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(tab3Data), "Missing by Line Manager");
@@ -358,16 +275,21 @@ parentPort.on("message", async (rows) => {
                 // Override email for testing purposes
                 // let toEmail = user.staff_email;
                 let toEmail = "shaktijatpnp09@gmail.com"; // row.staff_email;
-                let subjectEmail = `Missing Timesheet Report - ${lastWeekStr}`;
-                const filename = `MissingTimesheetReport_${shortLastWeekStr}.xlsx`;
+                let subjectEmail = "Missing Timesheet Report";
+                const filename = "MissingTimesheetReport.xlsx";
+
+                const totalMissing = tab1Data.length;
+                const totalMissingManagers = tab2Data.length;
+                const totalDefaulters = tab4Data.length;
+                const totalImproved = tab5Data.length;
 
                 let htmlEmail = `
-            <h3>Please find the attached Missing Timesheet Report for ${lastWeekStr}.</h3>
+            <h3>Please find the attached Missing Timesheet Report.</h3>
             <br/>
             <p><b>Summary:</b></p>
             <ul>
-                <li>Total employees who did not submit timesheet (${lastWeekStr}): <b>${totalMissing}</b></li>
-                <li>Total line managers who did not submit timesheet (${lastWeekStr}): <b>${totalMissingManagers}</b></li>
+                <li>Total employees who did not submit timesheet (Last Week): <b>${totalMissing}</b></li>
+                <li>Total line managers who did not submit timesheet (Last Week): <b>${totalMissingManagers}</b></li>
                 <li>Employees consistently missing for 4 weeks: <b>${totalDefaulters}</b></li>
                 <li>Employees showing improvement: <b>${totalImproved}</b></li>
             </ul>
@@ -377,7 +299,6 @@ parentPort.on("message", async (rows) => {
                 const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", excelBuffer, filename);
 
                 const attachmentJson = {
-                    summary: summaryData,
                     tab1: tab1Data,
                     tab2: tab2Data,
                     tab3: tab3Data,
