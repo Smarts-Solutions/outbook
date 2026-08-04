@@ -85,10 +85,16 @@ parentPort.on("message", async (rows) => {
                 }
 
                 // Fetch all staffs (moved up to include created_at)
-                const [allStaffs] = await pool.execute("SELECT id as staff_id, CONCAT(first_name, ' ', last_name) as staff_fullname, email as staff_email, DATE_FORMAT(created_at, '%Y-%m-%d') as created_at_date, created_at FROM staffs WHERE status = '1' AND is_disable = '0'");
+                const [allStaffsRaw] = await pool.execute("SELECT id as staff_id, CONCAT(first_name, ' ', last_name) as staff_fullname, email as staff_email, DATE_FORMAT(created_at, '%Y-%m-%d') as created_at_date, created_at, status, is_disable FROM staffs");
 
                 const staffDetailsMap = {};
-                allStaffs.forEach(s => { staffDetailsMap[s.staff_id] = s; });
+                const allStaffs = [];
+                allStaffsRaw.forEach(s => { 
+                    staffDetailsMap[s.staff_id] = s; 
+                    if (String(s.status) === '1' && String(s.is_disable) === '0') {
+                        allStaffs.push(s);
+                    }
+                });
 
                 let historicalSubmissions = {};
                 if (staffIds.length > 0) {
