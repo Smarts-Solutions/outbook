@@ -841,7 +841,7 @@ const StaffPage = () => {
           }
         }),
     },
-   
+
     // {
     //   type: "reactSelectRole",
     //   name: "role",
@@ -963,19 +963,19 @@ const StaffPage = () => {
   useEffect(() => {
     if (editStaffData && editStaffData) {
 
-    //  console.log("editStaffData", editStaffData);
+      //  console.log("editStaffData", editStaffData);
       const roleIds = [].concat(editStaffData?.role_id || []);
-      if(editStaffData?.staff_other_role_id != null){
-       roleIds.push(editStaffData?.staff_other_role_id)
+      if (editStaffData?.staff_other_role_id != null) {
+        roleIds.push(editStaffData?.staff_other_role_id)
       }
 
-     
+
       formik.setFieldValue("first_name", editStaffData.first_name || "null");
       formik.setFieldValue("last_name", editStaffData.last_name || "null");
       formik.setFieldValue("email", editStaffData.email || "null");
       formik.setFieldValue("phone", editStaffData.phone || null);
       formik.setFieldValue("role", editStaffData.role_id || "null");
-     // formik.setFieldValue("role", roleIds || []);
+      // formik.setFieldValue("role", roleIds || []);
       formik.setFieldValue("status", editStaffData.status || "null");
       formik.setFieldValue(
         "employee_number",
@@ -1240,7 +1240,7 @@ const StaffPage = () => {
             setEditStaffData({});
             Swal.fire({
               title: "Success!",
-              text: "Staff status deactivated successfully.",
+              text: "Staff status inactivated successfully.",
               icon: "success",
               confirmButtonText: "OK",
             });
@@ -1580,74 +1580,74 @@ const StaffPage = () => {
             </div>
           )}
           <Formicform
-          fieldtype={fields.filter(
-            (field) => !field.showWhen || field.showWhen(formik.values),
-          )}
-          formik={formik}
-          btn_name="Update"
-          closeBtn={(e) => {
-            formik.resetForm();
-            setEditStaff(false);
-            setEditStaffData({});
-          }}
-          additional_field={
-            <div className="row mt-2 ">
-              <label className="form-label">Weekly Timesheet Hours</label>
-              <div className="input-group row">
-                <div className="hours-div col-6">
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Hours"
-                    onChange={(e) => {
-                      const value = e.target.value;
+            fieldtype={fields.filter(
+              (field) => !field.showWhen || field.showWhen(formik.values),
+            )}
+            formik={formik}
+            btn_name="Update"
+            closeBtn={(e) => {
+              formik.resetForm();
+              setEditStaff(false);
+              setEditStaffData({});
+            }}
+            additional_field={
+              <div className="row mt-2 ">
+                <label className="form-label">Weekly Timesheet Hours</label>
+                <div className="input-group row">
+                  <div className="hours-div col-6">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Hours"
+                      onChange={(e) => {
+                        const value = e.target.value;
 
-                      if (value === "" || Number(value) >= 0) {
-                        setBudgetedHours({
-                          ...budgetedHours,
-                          hours: value,
-                        });
-                      }
-                    }}
-                    value={budgetedHours?.hours || ""}
-                  />
-                  <span className="input-group-text" id="basic-addon2">
-                    H
-                  </span>
-                </div>
-                <div className="hours-div col-6">
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Minutes"
-                    onChange={(e) => {
-                      const value = e.target.value;
+                        if (value === "" || Number(value) >= 0) {
+                          setBudgetedHours({
+                            ...budgetedHours,
+                            hours: value,
+                          });
+                        }
+                      }}
+                      value={budgetedHours?.hours || ""}
+                    />
+                    <span className="input-group-text" id="basic-addon2">
+                      H
+                    </span>
+                  </div>
+                  <div className="hours-div col-6">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Minutes"
+                      onChange={(e) => {
+                        const value = e.target.value;
 
-                      if (
-                        value === "" ||
-                        (Number(value) >= 0 && Number(value) <= 59)
-                      ) {
-                        setBudgetedHours({
-                          ...budgetedHours,
-                          minutes: value,
-                        });
-                      } else {
-                        setBudgetedHours({
-                          ...budgetedHours,
-                          minutes: "59",
-                        });
-                      }
-                    }}
-                    value={budgetedHours?.minutes || ""}
-                  />
-                  <span className="input-group-text" id="basic-addon2">
-                    M
-                  </span>
+                        if (
+                          value === "" ||
+                          (Number(value) >= 0 && Number(value) <= 59)
+                        ) {
+                          setBudgetedHours({
+                            ...budgetedHours,
+                            minutes: value,
+                          });
+                        } else {
+                          setBudgetedHours({
+                            ...budgetedHours,
+                            minutes: "59",
+                          });
+                        }
+                      }}
+                      value={budgetedHours?.minutes || ""}
+                    />
+                    <span className="input-group-text" id="basic-addon2">
+                      M
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          }
-        />
+            }
+          />
         </div>
       </CommanModal>
 
@@ -2009,7 +2009,7 @@ const StaffPage = () => {
       <CommanModal
         isOpen={changeStatus}
         backdrop="static"
-        title="Change Status - Transfer Tasks"
+        title="Change Status - Transfer Customer"
         hideBtn={true}
         handleClose={() => {
           setChangeStatus(false);
@@ -2059,7 +2059,7 @@ const StaffPage = () => {
           <div className="d-flex justify-content-end gap-2">
             {selectedStaff && (
               <button onClick={handleChangeStatusTransfer} className="btn btn-info">
-                <i className="bi bi-arrow-repeat me-1"></i> Deactivate Staff
+                <i className="bi bi-arrow-repeat me-1"></i> Inactivate Staff
               </button>
             )}
             <button
