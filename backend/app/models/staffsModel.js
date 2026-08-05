@@ -371,7 +371,7 @@ const getStaffNew = async (data) => {
 
   let where = "";
 
- if (role_name === "SUPERADMIN") {
+ if (role_name === "SUPERADMIN"|| role_name=="ADMIN") {
     where = "WHERE s.role_id != 12";
 } else {
     if (LineManageStaffId.length > 0) {
