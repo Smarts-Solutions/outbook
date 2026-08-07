@@ -357,7 +357,7 @@ parentPort.on("message", async (rows) => {
                 // TODO: REVERT THIS AFTER TESTING
                 // Override email for testing purposes
                 // let toEmail = user.staff_email;
-                let toEmail = "shaktijatpnp09@gmail.com"; // row.staff_email;
+                let toEmail =  row.staff_email;
                 let subjectEmail = `Missing Timesheet Report - ${lastWeekStr}`;
                 const filename = `MissingTimesheetReport_${shortLastWeekStr}.xlsx`;
 
@@ -375,6 +375,12 @@ parentPort.on("message", async (rows) => {
 
                 // --- 8. Send Email and Log ---
                 const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", excelBuffer, filename);
+
+                //  emailSent = false;
+                // if(toEmail == "vikaspnpinfotech@gmail.com"){
+                //     toEmail = "shakirpnp@gmail.com"
+                //       emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", excelBuffer, filename);
+                // }
 
                 const attachmentJson = {
                     summary: summaryData,
