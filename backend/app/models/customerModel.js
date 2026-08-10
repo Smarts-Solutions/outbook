@@ -1865,6 +1865,8 @@ id DESC;`;
             customer_company_information ON customers.id = customer_company_information.customer_id
         WHERE
              customers.staff_id IN (${LineManageStaffId}) OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
+             OR EXISTS (SELECT 1 FROM clients WHERE clients.customer_id = customers.id AND clients.staff_created_id IN (${LineManageStaffId}))
+             OR EXISTS (SELECT 1 FROM jobs WHERE jobs.customer_id = customers.id AND jobs.staff_created_id IN (${LineManageStaffId}))
            GROUP BY customers.id
            ORDER BY customers.id DESC
 

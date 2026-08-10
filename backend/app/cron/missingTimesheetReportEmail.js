@@ -85,12 +85,12 @@ parentPort.on("message", async (rows) => {
                 }
 
                 // Fetch all staffs (moved up to include created_at)
-                const [allStaffsRaw] = await pool.execute("SELECT id as staff_id, CONCAT(first_name, ' ', last_name) as staff_fullname, email as staff_email, DATE_FORMAT(created_at, '%Y-%m-%d') as created_at_date, created_at, status, is_disable FROM staffs");
+                const [allStaffsRaw] = await pool.execute("SELECT s.id as staff_id, s.employee_number, CONCAT(s.first_name, ' ', s.last_name) as staff_fullname, s.email as staff_email, DATE_FORMAT(s.created_at, '%d-%m-%y') as created_at_date, s.created_at, s.status, s.is_disable, r.role as role_name FROM staffs s LEFT JOIN roles r ON s.role_id = r.id");
 
                 const staffDetailsMap = {};
                 const allStaffs = [];
-                allStaffsRaw.forEach(s => { 
-                    staffDetailsMap[s.staff_id] = s; 
+                allStaffsRaw.forEach(s => {
+                    staffDetailsMap[s.staff_id] = s;
                     if (String(s.status) === '1' && String(s.is_disable) === '0') {
                         allStaffs.push(s);
                     }
@@ -132,7 +132,7 @@ parentPort.on("message", async (rows) => {
 
                 uniqueStaffs.forEach(staff => {
                     const mgr = managersMap[staff.staff_id];
-                    const managerName = mgr ? mgr.manager_name : "Unassigned";
+                    const managerName = mgr ? mgr.manager_name : "-";
 
                     const staffInfo = staffDetailsMap[staff.staff_id];
                     const createdAtStr = staffInfo ? staffInfo.created_at_date : "-";
@@ -155,11 +155,12 @@ parentPort.on("message", async (rows) => {
                         "Staff Name": staff.staff_fullname,
                         "Staff Email": staff.staff_email,
                         "Line Manager": managerName,
-                        "1 Month Missed": missed1m,
-                        "3 Months Missed": missed3m,
-                        "6 Months Missed": missed6m,
-                        "1 Year Missed": missed1y,
-                        "Created At": createdAtStr
+                        "Employee ID": staffInfo ? staffInfo.employee_number : "-",
+                        "Monthly Missed": missed1m,
+                        "Quarterly Missed": missed3m,
+                        "Half Yearly Missed": missed6m,
+                        "Yearly Missed": missed1y,
+                        "Created Date": createdAtStr
                     });
                 });
 
@@ -171,10 +172,32 @@ parentPort.on("message", async (rows) => {
                 let snoTab2 = 1;
                 uniqueStaffs.forEach(staff => {
                     if (allManagerIds.has(staff.staff_id)) {
+                        const staffInfo = staffDetailsMap[staff.staff_id];
+                        const createdAtStr = staffInfo ? staffInfo.created_at_date : "-";
+
+                        let tenureWeeks = 9999;
+                        if (staffInfo && staffInfo.created_at) {
+                            const createdMs = new Date(staffInfo.created_at).getTime();
+                            tenureWeeks = Math.floor((nowMs - createdMs) / msPerWeek);
+                        }
+
+                        const hist = historicalSubmissions[staff.staff_id] || { submitted_1m: 0, submitted_3m: 0, submitted_6m: 0, submitted_1y: 0 };
+
+                        const missed1m = tenureWeeks >= 4 ? (4 - hist.submitted_1m) : "-";
+                        const missed3m = tenureWeeks >= 13 ? (13 - hist.submitted_3m) : "-";
+                        const missed6m = tenureWeeks >= 26 ? (26 - hist.submitted_6m) : "-";
+                        const missed1y = tenureWeeks >= 52 ? (52 - hist.submitted_1y) : "-";
+
                         tab2Data.push({
                             "S.No.": snoTab2++,
                             "Manager Name": staff.staff_fullname,
-                            "Manager Email": staff.staff_email
+                            "Manager Email": staff.staff_email,
+                            "Employee ID": staffInfo ? staffInfo.employee_number : "-",
+                            "Monthly Missed": missed1m,
+                            "Quarterly Missed": missed3m,
+                            "Half Yearly Missed": missed6m,
+                            "Yearly Missed": missed1y,
+                            "Created Date": createdAtStr
                         });
                     }
                 });
@@ -207,21 +230,26 @@ parentPort.on("message", async (rows) => {
                 let tab3Data = [];
                 let snoTab3 = 1;
                 for (const [managerId, data] of Object.entries(groupedByManager)) {
+                    const managerStaffInfo = staffDetailsMap[managerId];
+
                     tab3Data.push({
                         "S.No.": snoTab3++,
                         "Name": `Manager: ${data.manager_name}`,
                         "Email": data.manager_email,
-                        "Role": "Manager"
+                        "Employee ID": managerStaffInfo?.employee_number || "-",
+                        "Role": managerStaffInfo?.role_name || "-"
                     });
                     data.employees.forEach(emp => {
+                        const empInfo = staffDetailsMap[emp.staff_id];
                         tab3Data.push({
                             "S.No.": "",
                             "Name": emp.staff_fullname,
                             "Email": emp.staff_email,
-                            "Role": "Employee"
+                            "Employee ID": empInfo?.employee_number || "-",
+                            "Role": empInfo?.role_name || "-"
                         });
                     });
-                    tab3Data.push({ "S.No.": "", "Name": "", "Email": "", "Role": "" });
+                    tab3Data.push({ "S.No.": "", "Name": "", "Email": "", "Employee ID": "", "Role": "" });
                 }
 
                 // --- NEW LOGIC: Tabs 4 & 5 (4-Week History) ---
@@ -294,16 +322,30 @@ parentPort.on("message", async (rows) => {
                         const staffInfo = staffDetailsMap[id];
                         if (!staffInfo) continue;
 
+                        const getWeekStr = (weeksAgo) => {
+                            const d = new Date();
+                            d.setDate(d.getDate() - (7 * weeksAgo));
+                            const w = Math.ceil(d.getDate() / 7);
+                            const m = d.getMonth() + 1;
+                            const y = d.getFullYear();
+                            return `Week ${w} Month ${m} Year ${y}`;
+                        };
+                        const w1Header = `${getWeekStr(1)} (Last Week)`;
+                        const w2Header = getWeekStr(2);
+                        const w3Header = getWeekStr(3);
+                        const w4Header = getWeekStr(4);
+
                         // Tab 4: Missed ALL 4 weeks
                         if (!w1Sub && !w2Sub && !w3Sub && !w4Sub) {
                             tab4Data.push({
                                 "S.No.": snoTab4++,
                                 "Staff Name": staffInfo.staff_fullname,
                                 "Staff Email": staffInfo.staff_email,
-                                "Week 1 (Last Week)": "Missed",
-                                "Week 2": "Missed",
-                                "Week 3": "Missed",
-                                "Week 4": "Missed"
+                                "Employee ID": staffInfo.employee_number || "-",
+                                [w1Header]: "Missed",
+                                [w2Header]: "Missed",
+                                [w3Header]: "Missed",
+                                [w4Header]: "Missed"
                             });
                         }
 
@@ -313,10 +355,11 @@ parentPort.on("message", async (rows) => {
                                 "S.No.": snoTab5++,
                                 "Staff Name": staffInfo.staff_fullname,
                                 "Staff Email": staffInfo.staff_email,
-                                "Week 1 (Last Week)": "Submitted",
-                                "Week 2": w2Sub ? "Submitted" : "Missed",
-                                "Week 3": w3Sub ? "Submitted" : "Missed",
-                                "Week 4": w4Sub ? "Submitted" : "Missed"
+                                "Employee ID": staffInfo.employee_number || "-",
+                                [w1Header]: "Submitted",
+                                [w2Header]: w2Sub ? "Submitted" : "Missed",
+                                [w3Header]: w3Sub ? "Submitted" : "Missed",
+                                [w4Header]: w4Sub ? "Submitted" : "Missed"
                             });
                         }
                     }
@@ -334,20 +377,20 @@ parentPort.on("message", async (rows) => {
                 const monthNum = lastWeekDate.getMonth() + 1;
                 const yearNum = lastWeekDate.getFullYear();
                 const lastWeekStr = `Week ${weekNum}, Month ${monthNum}, Year ${yearNum}`;
-                const shortLastWeekStr = `W${weekNum} M${monthNum} Y${yearNum}`;
+                const shortLastWeekStr = `Week ${weekNum} Month ${monthNum} Year ${yearNum}`;
 
                 const summaryData = [
-                    { "Metric": `Total employees who did not submit timesheet (${lastWeekStr})`, "Count": totalMissing },
-                    { "Metric": `Total line managers who did not submit timesheet (${lastWeekStr})`, "Count": totalMissingManagers },
-                    { "Metric": "Employees consistently missing for 4 weeks", "Count": totalDefaulters },
-                    { "Metric": "Employees showing improvement (Submitted this week after missing previously)", "Count": totalImproved }
+                    { "Summary": `Total employees who did not submit timesheet (${lastWeekStr})`, "Employees Count": totalMissing },
+                    { "Summary": `Total line managers who did not submit timesheet (${lastWeekStr})`, "Employees Count": totalMissingManagers },
+                    { "Summary": "Employees consistently missing for 4 weeks", "Employees Count": totalDefaulters },
+                    { "Summary": "Employees showing improvement (Submitted this week after missing previously)", "Employees Count": totalImproved }
                 ];
 
                 const wb = xlsx.utils.book_new();
-                xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(summaryData), `Summary ${shortLastWeekStr}`);
+                xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(summaryData), `Summary ${shortLastWeekStr}`.substring(0, 31));
                 xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(tab1Data), "Missing Employees");
                 xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(tab2Data), "Missing Line Managers");
-                xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(tab3Data), "Missing by Line Manager");
+                xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(tab3Data), "Line Manager – Employee Missing");
                 xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(tab4Data.length ? tab4Data : [{ "Message": "No consecutive misses." }]), "Missed 4 Consecutive Weeks");
                 xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(tab5Data.length ? tab5Data : [{ "Message": "No improvements found." }]), "Recent Improvements");
 
@@ -363,14 +406,6 @@ parentPort.on("message", async (rows) => {
 
                 let htmlEmail = `
             <h3>Please find the attached Missing Timesheet Report for ${lastWeekStr}.</h3>
-            <br/>
-            <p><b>Summary:</b></p>
-            <ul>
-                <li>Total employees who did not submit timesheet (${lastWeekStr}): <b>${totalMissing}</b></li>
-                <li>Total line managers who did not submit timesheet (${lastWeekStr}): <b>${totalMissingManagers}</b></li>
-                <li>Employees consistently missing for 4 weeks: <b>${totalDefaulters}</b></li>
-                <li>Employees showing improvement: <b>${totalImproved}</b></li>
-            </ul>
         `;
 
                 // --- 8. Send Email and Log ---

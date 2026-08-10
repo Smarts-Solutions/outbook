@@ -4485,9 +4485,16 @@ const staffRoleChangeUpdate = async (Report) => {
   }
 
   // Also transfer any jobs where the staff is assigned via 'allocated to others' (job_allowed_staffs table)
-  query.push(
-    `UPDATE IGNORE job_allowed_staffs SET staff_id = ${update_staff_id} WHERE staff_id = ${to_staff_id}`
-  );
+  if (update_staff_id) {
+    query.push(`UPDATE IGNORE job_allowed_staffs SET staff_id = ${update_staff_id} WHERE staff_id = ${to_staff_id}`);
+    
+    // Transfer Creator and Portfolio ownership
+    query.push(`UPDATE clients SET staff_created_id = ${update_staff_id} WHERE staff_created_id = ${to_staff_id}`);
+    query.push(`UPDATE customers SET staff_id = ${update_staff_id} WHERE staff_id = ${to_staff_id}`);
+    query.push(`UPDATE jobs SET staff_created_id = ${update_staff_id} WHERE staff_created_id = ${to_staff_id}`);
+    query.push(`UPDATE staff_portfolio SET staff_id = ${update_staff_id} WHERE staff_id = ${to_staff_id}`);
+  }
+  
   query.push(
     `DELETE FROM job_allowed_staffs WHERE staff_id = ${to_staff_id}`
   );
@@ -4551,9 +4558,16 @@ const staffStatusChangeUpdate = async (Report) => {
   }
 
   // Also transfer any jobs where the staff is assigned via 'allocated to others' (job_allowed_staffs table)
-  query.push(
-    `UPDATE IGNORE job_allowed_staffs SET staff_id = ${update_staff_id} WHERE staff_id = ${to_staff_id}`
-  );
+  if (update_staff_id) {
+    query.push(`UPDATE IGNORE job_allowed_staffs SET staff_id = ${update_staff_id} WHERE staff_id = ${to_staff_id}`);
+    
+    // Transfer Creator and Portfolio ownership
+    query.push(`UPDATE clients SET staff_created_id = ${update_staff_id} WHERE staff_created_id = ${to_staff_id}`);
+    query.push(`UPDATE customers SET staff_id = ${update_staff_id} WHERE staff_id = ${to_staff_id}`);
+    query.push(`UPDATE jobs SET staff_created_id = ${update_staff_id} WHERE staff_created_id = ${to_staff_id}`);
+    query.push(`UPDATE staff_portfolio SET staff_id = ${update_staff_id} WHERE staff_id = ${to_staff_id}`);
+  }
+  
   query.push(
     `DELETE FROM job_allowed_staffs WHERE staff_id = ${to_staff_id}`
   );

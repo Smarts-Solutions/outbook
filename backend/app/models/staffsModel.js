@@ -371,7 +371,7 @@ const getStaffNew = async (data) => {
 
   let where = "";
 
- if (role_name === "SUPERADMIN") {
+ if (role_name === "SUPERADMIN"|| role_name=="ADMIN") {
     where = "WHERE s.role_id != 12";
 } else {
     if (LineManageStaffId.length > 0) {
@@ -1550,6 +1550,14 @@ const GetStaffPortfolio = async (staff) => {
           WHERE staff_id = ? 
              OR staff_id IN (${lineManageIn})
         )
+
+        UNION
+
+        SELECT customer_id FROM clients WHERE staff_created_id = ?
+
+        UNION
+
+        SELECT customer_id FROM jobs WHERE staff_created_id = ?
       `;
 
       const queryCustomerAssign = `
@@ -1560,7 +1568,7 @@ const GetStaffPortfolio = async (staff) => {
 
       const [assignedCustomers] = await connection.execute(
         queryCustomerAssign,
-        [id, id]
+        [id, id, id, id]
       );
 
       return assignedCustomers;
