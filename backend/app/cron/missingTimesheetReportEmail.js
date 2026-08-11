@@ -335,28 +335,30 @@ parentPort.on("message", async (rows) => {
                         const w3Header = getWeekStr(3);
                         const w4Header = getWeekStr(4);
 
-                        // Tab 4: Missed ALL 4 weeks
-                        if (!w1Sub && !w2Sub && !w3Sub && !w4Sub) {
+                        const missedCount = (!w1Sub ? 1 : 0) + (!w2Sub ? 1 : 0) + (!w3Sub ? 1 : 0) + (!w4Sub ? 1 : 0);
+
+                        // Tab 4: Missed at least 3 weeks out of the last 4 weeks
+                        if (missedCount >= 3) {
                             tab4Data.push({
                                 "S.No.": snoTab4++,
                                 "Staff Name": staffInfo.staff_fullname,
                                 "Staff Email": staffInfo.staff_email,
                                 "Employee ID": staffInfo.employee_number || "-",
-                                [w1Header]: "Missed",
-                                [w2Header]: "Missed",
-                                [w3Header]: "Missed",
-                                [w4Header]: "Missed"
+                                [w1Header]: w1Sub ? "Submitted" : "Missed",
+                                [w2Header]: w2Sub ? "Submitted" : "Missed",
+                                [w3Header]: w3Sub ? "Submitted" : "Missed",
+                                [w4Header]: w4Sub ? "Submitted" : "Missed"
                             });
                         }
 
-                        // Tab 5: Improvement (Submitted Last Week, but missed at least 1 in previous 3 weeks)
-                        if (w1Sub && (!w2Sub || !w3Sub || !w4Sub)) {
+                        // Tab 5: Improvement (Missed >= 2 weeks in total, but submitted at least 1 in the last 2 weeks)
+                        if (missedCount >= 2 && (w1Sub || w2Sub)) {
                             tab5Data.push({
                                 "S.No.": snoTab5++,
                                 "Staff Name": staffInfo.staff_fullname,
                                 "Staff Email": staffInfo.staff_email,
                                 "Employee ID": staffInfo.employee_number || "-",
-                                [w1Header]: "Submitted",
+                                [w1Header]: w1Sub ? "Submitted" : "Missed",
                                 [w2Header]: w2Sub ? "Submitted" : "Missed",
                                 [w3Header]: w3Sub ? "Submitted" : "Missed",
                                 [w4Header]: w4Sub ? "Submitted" : "Missed"
@@ -382,8 +384,8 @@ parentPort.on("message", async (rows) => {
                 const summaryData = [
                     { "Summary": `Total employees who did not submit timesheet (${lastWeekStr})`, "Employees Count": totalMissing },
                     { "Summary": `Total line managers who did not submit timesheet (${lastWeekStr})`, "Employees Count": totalMissingManagers },
-                    { "Summary": "Employees consistently missing for 4 weeks", "Employees Count": totalDefaulters },
-                    { "Summary": "Employees showing improvement (Submitted this week after missing previously)", "Employees Count": totalImproved }
+                    { "Summary": "Employees missing 3 or more weeks (Last 4 Weeks)", "Employees Count": totalDefaulters },
+                    { "Summary": "Employees showing improvement (Submitted recently after misses)", "Employees Count": totalImproved }
                 ];
 
                 const wb = xlsx.utils.book_new();
@@ -391,7 +393,7 @@ parentPort.on("message", async (rows) => {
                 xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(tab1Data), "Missing Employees");
                 xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(tab2Data), "Missing Line Managers");
                 xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(tab3Data), "Line Manager – Employee Missing");
-                xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(tab4Data.length ? tab4Data : [{ "Message": "No consecutive misses." }]), "Missed 4 Consecutive Weeks");
+                xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(tab4Data.length ? tab4Data : [{ "Message": "No habitual misses." }]), "Missed 3 or More Weeks");
                 xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(tab5Data.length ? tab5Data : [{ "Message": "No improvements found." }]), "Recent Improvements");
 
                 const excelBuffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
