@@ -565,30 +565,10 @@ const getStaffByFilter = async (data) => {
   try {
 
     let timesheetWhere = "timesheet.task_type = '2'";
-
-    // Helper: normalize single value or array into a clean array
-    const ensureArr = (v) => {
-      if (Array.isArray(v)) return v.filter(x => !["", null, undefined].includes(x));
-      if (!["", null, undefined].includes(v)) return [v];
-      return [];
-    };
-
-    const custArr = ensureArr(customer_id);
-    if (custArr.length > 0) {
-      timesheetWhere += ` AND timesheet.customer_id IN (${custArr.map(v => connection.escape(v)).join(',')})`;
-    }
-    const cliArr = ensureArr(client_id);
-    if (cliArr.length > 0) {
-      timesheetWhere += ` AND timesheet.client_id IN (${cliArr.map(v => connection.escape(v)).join(',')})`;
-    }
-    const jArr = ensureArr(job_id);
-    if (jArr.length > 0) {
-      timesheetWhere += ` AND timesheet.job_id IN (${jArr.map(v => connection.escape(v)).join(',')})`;
-    }
-    const tArr = ensureArr(task_id);
-    if (tArr.length > 0) {
-      timesheetWhere += ` AND timesheet.task_id IN (${tArr.map(v => connection.escape(v)).join(',')})`;
-    }
+    if (customer_id) timesheetWhere += ` AND timesheet.customer_id = ${connection.escape(customer_id)}`;
+    if (client_id) timesheetWhere += ` AND timesheet.client_id = ${connection.escape(client_id)}`;
+    if (job_id) timesheetWhere += ` AND timesheet.job_id = ${connection.escape(job_id)}`;
+    if (task_id) timesheetWhere += ` AND timesheet.task_id = ${connection.escape(task_id)}`;
 
     // 🔹 DATA
     const [rows] = await connection.query(

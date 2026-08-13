@@ -2626,13 +2626,6 @@ const getTimesheetReportData = async (Report) => {
   const isSet = (v) => !["", null, undefined].includes(v);
   const num = (v) => Number(v);
 
-  // Helper: normalize single value or array into a clean array (filters out empty/null)
-  const ensureArray = (v) => {
-    if (Array.isArray(v)) return v.filter(x => !["", null, undefined].includes(x));
-    if (!["", null, undefined].includes(v)) return [v];
-    return [];
-  };
-
   const parseHours = (v) => {
     if (!isSet(v)) return 0;
     const s = String(v);
@@ -2652,54 +2645,45 @@ const getTimesheetReportData = async (Report) => {
 
     // ----------------------------------------------------------
     // INNER filters (pushed down inside each day subquery) - all parameterized
-    // Supports both single values and arrays (multiselect)
     // ----------------------------------------------------------
     const innerConds = [];
     const innerParams = [];
 
-    const staffArr = ensureArray(staff_id);
-    if (staffArr.length > 0) {
-      innerConds.push(`timesheet.staff_id IN (${staffArr.map(() => '?').join(',')})`);
-      innerParams.push(...staffArr.map(num));
+    if (isSet(staff_id)) {
+      innerConds.push(`timesheet.staff_id = ?`);
+      innerParams.push(num(staff_id));
     }
-    const customerArr = ensureArray(customer_id);
-    if (customerArr.length > 0) {
-      innerConds.push(`timesheet.customer_id IN (${customerArr.map(() => '?').join(',')})`);
-      innerParams.push(...customerArr.map(num));
+    if (isSet(customer_id)) {
+      innerConds.push(`timesheet.customer_id = ?`);
+      innerParams.push(num(customer_id));
     }
-    const clientArr = ensureArray(client_id);
-    if (clientArr.length > 0) {
-      innerConds.push(`timesheet.client_id IN (${clientArr.map(() => '?').join(',')})`);
-      innerParams.push(...clientArr.map(num));
+    if (isSet(client_id)) {
+      innerConds.push(`timesheet.client_id = ?`);
+      innerParams.push(num(client_id));
     }
     if (internal_external == "1" || internal_external == "2") {
       innerConds.push(`timesheet.task_type = ?`);
       innerParams.push(String(internal_external));
     }
-    const jobArr = ensureArray(job_id);
-    if (jobArr.length > 0) {
-      innerConds.push(`timesheet.job_id IN (${jobArr.map(() => '?').join(',')})`);
-      innerParams.push(...jobArr.map(num));
+    if (isSet(job_id)) {
+      innerConds.push(`timesheet.job_id = ?`);
+      innerParams.push(num(job_id));
     }
-    const taskArr = ensureArray(task_id);
-    if (taskArr.length > 0) {
-      innerConds.push(`timesheet.task_id IN (${taskArr.map(() => '?').join(',')})`);
-      innerParams.push(...taskArr.map(num));
+    if (isSet(task_id)) {
+      innerConds.push(`timesheet.task_id = ?`);
+      innerParams.push(num(task_id));
     }
-    const internalJobArr = ensureArray(internal_job_id);
-    if (internalJobArr.length > 0) {
-      innerConds.push(`(timesheet.task_type = '1' AND timesheet.job_id IN (${internalJobArr.map(() => '?').join(',')}))`);
-      innerParams.push(...internalJobArr.map(num));
+    if (isSet(internal_job_id)) {
+      innerConds.push(`(timesheet.task_type = '1' AND timesheet.job_id = ?)`);
+      innerParams.push(num(internal_job_id));
     }
-    const internalTaskArr = ensureArray(internal_task_id);
-    if (internalTaskArr.length > 0) {
-      innerConds.push(`(timesheet.task_type = '1' AND timesheet.task_id IN (${internalTaskArr.map(() => '?').join(',')}))`);
-      innerParams.push(...internalTaskArr.map(num));
+    if (isSet(internal_task_id)) {
+      innerConds.push(`(timesheet.task_type = '1' AND timesheet.task_id = ?)`);
+      innerParams.push(num(internal_task_id));
     }
-    const empArr = ensureArray(employee_number);
-    if (empArr.length > 0) {
-      innerConds.push(`s.employee_number IN (${empArr.map(() => '?').join(',')})`);
-      innerParams.push(...empArr.map(String));
+    if (isSet(employee_number)) {
+      innerConds.push(`s.employee_number = ?`);
+      innerParams.push(String(employee_number));
     }
 
     if (!["SUPERADMIN", "ADMIN"].includes(role_user) && isSet(StaffUserId)) {

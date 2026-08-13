@@ -1094,8 +1094,7 @@ async function getAllClientsSidebarFilter(
   const offset = (page - 1) * limit;
 
   if (filters?.staff_id) {
-    const staffArr = Array.isArray(filters.staff_id) ? filters.staff_id : [filters.staff_id];
-    LineManageStaffId = staffArr.filter(x => !["", null, undefined].includes(x));
+    LineManageStaffId = [filters.staff_id];
   }
 
   let extraFilter = "";
@@ -1106,25 +1105,16 @@ async function getAllClientsSidebarFilter(
   //   }
   // }
 
-  if (Array.isArray(customer_id)) {
-    const validCustomers = customer_id.filter(id => id && id !== "");
-    if (validCustomers.length > 0) {
-      extraFilter += ` AND clients.customer_id IN (${validCustomers.map(v => pool.escape ? pool.escape(v) : `'${v}'`).join(',')}) `;
-    }
+  if (Array.isArray(customer_id) && customer_id.length > 0) {
+    extraFilter += ` AND clients.customer_id IN (${customer_id}) `;
   }
 
-  if (Array.isArray(job_id)) {
-    const validJobs = job_id.filter(id => id && id !== "");
-    if (validJobs.length > 0) {
-      extraFilter += ` AND jobs.id IN (${validJobs.map(v => pool.escape ? pool.escape(v) : `'${v}'`).join(',')}) `;
-    }
+  if (Array.isArray(job_id) && job_id.length > 0) {
+    extraFilter += ` AND jobs.id IN (${job_id}) `;
   }
 
-  if (Array.isArray(task_id)) {
-    const validTasks = task_id.filter(id => id && id !== "");
-    if (validTasks.length > 0) {
-      extraFilter += ` AND EXISTS (SELECT 1 FROM timesheet ts WHERE ts.client_id = clients.id AND ts.task_id IN (${validTasks.map(v => pool.escape ? pool.escape(v) : `'${v}'`).join(',')})) `;
-    }
+  if (Array.isArray(task_id) && task_id.length > 0) {
+    extraFilter += ` AND EXISTS (SELECT 1 FROM timesheet ts WHERE ts.client_id = clients.id AND ts.task_id IN (${task_id})) `;
   }
   
   // Removed job_id filter to avoid restricting the Client dropdown when jobs are selected
@@ -1137,7 +1127,7 @@ async function getAllClientsSidebarFilter(
 
     // ================= ADMIN / SUPERADMIN =================
     if (rows.length > 0 && (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)) {
-      if (!filters?.staff_id || (Array.isArray(filters.staff_id) && filters.staff_id.length === 0)) {
+      if (!filters?.staff_id) {
         const clientCodeExpr = `
           CONCAT(
             'cli_', 

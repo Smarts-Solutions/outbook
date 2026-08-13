@@ -64,14 +64,14 @@ function TimesheetReport() {
     internal_external: "0",
     fieldsToDisplay: null,
     fieldsToDisplayId: null,
-    staff_id: [],
-    employee_number: [],
-    customer_id: [],
-    client_id: [],
-    job_id: [],
-    task_id: [],
-    internal_job_id: [],
-    internal_task_id: [],
+    staff_id: null,
+    employee_number: null,
+    customer_id: null,
+    client_id: null,
+    job_id: null,
+    task_id: null,
+    internal_job_id: null,
+    internal_task_id: null,
     timePeriod: "this_month",
     displayBy: "Weekly",
     fromDate: null,
@@ -82,6 +82,7 @@ function TimesheetReport() {
   // The FIRST item in this array was selected first → it always shows ALL options.
   // Later selections only filter based on what came before them.
   const [selectionOrder, setSelectionOrder] = useState([]);
+
   // Helper: get the upstream filters (those selected before `key` in selectionOrder)
   const getUpstreamFilters = (key, currentFilters) => {
     const idx = selectionOrder.indexOf(key);
@@ -270,7 +271,7 @@ function TimesheetReport() {
     if (value === "") return;
     clearTimeout(staffDebounceRef.current);
     staffDebounceRef.current = setTimeout(() => {
-      setStaffSearch(value); 
+      setStaffSearch(value);
       const up = getUpstreamFilters("staff_id", filters);
       GetAllStaff({
         searchValue: value,
@@ -330,7 +331,7 @@ function TimesheetReport() {
         const req = { action: "get_my_line_managers" };
         const response = await dispatch(Staff({ req, authToken: token })).unwrap();
         if (response.status && response.data) {
-          response.data.forEach(manager => {  
+          response.data.forEach(manager => {
             if (manager.employee_number && !dataList.find(item => item.value === manager.employee_number)) {
               dataList.push({
                 value: manager.employee_number,
@@ -450,10 +451,10 @@ function TimesheetReport() {
     setCustomerLoading(true);
     const req = {
       action: "get_customers_filter",
-      filters: { ...filters, staff_id: (Array.isArray(staff_id) ? staff_id : (staff_id !== null ? [staff_id] : (Array.isArray(filters.staff_id) ? filters.staff_id : []))).length > 0 ? (Array.isArray(staff_id) ? staff_id : (staff_id !== null ? [staff_id] : (Array.isArray(filters.staff_id) ? filters.staff_id : []))) : null },
-      job_id: Array.isArray(job_id) ? job_id : (job_id ? [job_id] : []),
-      client_id: Array.isArray(client_id) ? client_id : (client_id ? [client_id] : []),
-      task_id: Array.isArray(task_id) ? task_id : (task_id ? [task_id] : []),
+      filters: { ...filters, staff_id: staff_id !== null ? staff_id : filters.staff_id },
+      job_id: job_id ? [job_id] : [],
+      client_id: client_id ? [client_id] : [],
+      task_id: task_id ? [task_id] : [],
       pagination: {
         search: searchValue,
         page: pageNo,
@@ -557,10 +558,10 @@ function TimesheetReport() {
     setClientLoading(true);
     const req = {
       action: "get_clients_filter",
-      filters: { ...filters, staff_id: (Array.isArray(staff_id) ? staff_id : (staff_id !== null ? [staff_id] : (Array.isArray(filters.staff_id) ? filters.staff_id : []))).length > 0 ? (Array.isArray(staff_id) ? staff_id : (staff_id !== null ? [staff_id] : (Array.isArray(filters.staff_id) ? filters.staff_id : []))) : null },
-      job_id: Array.isArray(job_id) ? job_id : (job_id ? [job_id] : []),
-      customer_id: Array.isArray(customer_id) ? customer_id : (customer_id ? [customer_id] : []),
-      task_id: Array.isArray(task_id) ? task_id : (task_id ? [task_id] : []),
+      filters: { ...filters, staff_id: staff_id !== null ? staff_id : filters.staff_id },
+      job_id: job_id ? [job_id] : [],
+      customer_id: customer_id ? [customer_id] : [],
+      task_id: task_id ? [task_id] : [],
       pagination: {
         search: searchValue,
         page: pageNo,
@@ -728,10 +729,10 @@ function TimesheetReport() {
     setJobLoading(true);
     const req = {
       action: "get_jobs_filter",
-      filters: { ...filters, staff_id: (Array.isArray(staff_id) ? staff_id : (staff_id !== null ? [staff_id] : (Array.isArray(filters.staff_id) ? filters.staff_id : []))).length > 0 ? (Array.isArray(staff_id) ? staff_id : (staff_id !== null ? [staff_id] : (Array.isArray(filters.staff_id) ? filters.staff_id : []))) : null },
-      customer_id: Array.isArray(customer_id) ? customer_id : (customer_id ? [customer_id] : []),
-      client_id: Array.isArray(client_id) ? client_id : (client_id ? [client_id] : []),
-      task_id: Array.isArray(task_id) ? task_id : (task_id ? [task_id] : []),
+      filters: { ...filters, staff_id: staff_id !== null ? staff_id : filters.staff_id },
+      customer_id: customer_id ? [customer_id] : [],
+      client_id: client_id ? [client_id] : [],
+      task_id: task_id ? [task_id] : [],
       pagination: {
         search: searchValue,
         page: pageNo,
@@ -796,132 +797,6 @@ function TimesheetReport() {
   const [taskSearch, setTaskSearch] = useState("");
   const taskCache = useRef({});
   const taskDebounceRef = useRef(null);
-
-  useEffect(() => {
-    // Clear dependent caches when staff changes
-    customerCache.current = {};
-    setCustomerAllData([]);
-    setCustomerPage(1);
-    setCustomerHasMore(true);
-
-    clientCache.current = {};
-    setClientAllData([]);
-    setClientPage(1);
-    setClientHasMore(true);
-
-    cacheRef.current = {};
-    setJobOptions([]);
-    setPage(1);
-    setHasMore(true);
-
-    taskCache.current = {};
-    setTaskAllData([]);
-    setTaskPage(1);
-    setTaskHasMore(true);
-  }, [JSON.stringify(filters?.staff_id)]);
-
-  useEffect(() => {
-    // Clear dependent caches when customer changes
-    clientCache.current = {};
-    setClientAllData([]);
-    setClientPage(1);
-    setClientHasMore(true);
-
-    cacheRef.current = {};
-    setJobOptions([]);
-    setPage(1);
-    setHasMore(true);
-
-    taskCache.current = {};
-    setTaskAllData([]);
-    setTaskPage(1);
-    setTaskHasMore(true);
-  }, [JSON.stringify(filters?.customer_id)]);
-
-  useEffect(() => {
-    // Clear dependent caches when client changes
-    cacheRef.current = {};
-    setJobOptions([]);
-    setPage(1);
-    setHasMore(true);
-
-    taskCache.current = {};
-    setTaskAllData([]);
-    setTaskPage(1);
-    setTaskHasMore(true);
-  }, [JSON.stringify(filters?.client_id)]);
-
-  useEffect(() => {
-    // Clear dependent caches when job changes
-    taskCache.current = {};
-    setTaskAllData([]);
-    setTaskPage(1);
-    setTaskHasMore(true);
-  }, [JSON.stringify(filters?.job_id)]);
-
-
-  useEffect(() => {
-    // Clear dependent caches when staff changes
-    customerCache.current = {};
-    setCustomerAllData([]);
-    setCustomerPage(1);
-    setCustomerHasMore(true);
-
-    clientCache.current = {};
-    setClientAllData([]);
-    setClientPage(1);
-    setClientHasMore(true);
-
-    cacheRef.current = {};
-    setJobOptions([]);
-    setPage(1);
-    setHasMore(true);
-
-    taskCache.current = {};
-    setTaskAllData([]);
-    setTaskPage(1);
-    setTaskHasMore(true);
-  }, [JSON.stringify(filters?.staff_id)]);
-
-  useEffect(() => {
-    // Clear dependent caches when customer changes
-    clientCache.current = {};
-    setClientAllData([]);
-    setClientPage(1);
-    setClientHasMore(true);
-
-    cacheRef.current = {};
-    setJobOptions([]);
-    setPage(1);
-    setHasMore(true);
-
-    taskCache.current = {};
-    setTaskAllData([]);
-    setTaskPage(1);
-    setTaskHasMore(true);
-  }, [JSON.stringify(filters?.customer_id)]);
-
-  useEffect(() => {
-    // Clear dependent caches when client changes
-    cacheRef.current = {};
-    setJobOptions([]);
-    setPage(1);
-    setHasMore(true);
-
-    taskCache.current = {};
-    setTaskAllData([]);
-    setTaskPage(1);
-    setTaskHasMore(true);
-  }, [JSON.stringify(filters?.client_id)]);
-
-  useEffect(() => {
-    // Clear dependent caches when job changes
-    taskCache.current = {};
-    setTaskAllData([]);
-    setTaskPage(1);
-    setTaskHasMore(true);
-  }, [JSON.stringify(filters?.job_id)]);
-
   const [taskLoading, setTaskLoading] = useState(false);
 
   const GetAllTask = async (internal_external, options = {}) => {
@@ -982,10 +857,10 @@ function TimesheetReport() {
     setTaskLoading(true);
     const req = {
       action: "get_tasks_filter",
-      filters: { ...filters, staff_id: (Array.isArray(staff_id) ? staff_id : (staff_id !== null ? [staff_id] : (Array.isArray(filters.staff_id) ? filters.staff_id : []))).length > 0 ? (Array.isArray(staff_id) ? staff_id : (staff_id !== null ? [staff_id] : (Array.isArray(filters.staff_id) ? filters.staff_id : []))) : null },
-      customer_id: Array.isArray(customer_id) ? customer_id : (customer_id ? [customer_id] : []),
-      client_id: Array.isArray(client_id) ? client_id : (client_id ? [client_id] : []),
-      job_id: Array.isArray(job_id) ? job_id : (job_id ? [job_id] : []),
+      filters: { ...filters, staff_id: staff_id !== null ? staff_id : filters.staff_id },
+      customer_id: customer_id ? [customer_id] : [],
+      client_id: client_id ? [client_id] : [],
+      job_id: job_id ? [job_id] : [],
       pagination: {
         search: searchValue,
         page: pageNo,
@@ -1167,9 +1042,38 @@ function TimesheetReport() {
 
           let resolvedStaffId = value;
 
-          if (key === "employee_number") { if (updated.employee_number && updated.employee_number.length > 0) { const matchedEmployees = employeeNumberAllData.filter(e => updated.employee_number.includes(e.value)); if (matchedEmployees.length > 0) { resolvedStaffId = matchedEmployees.map(e => e.staff_id); setStaffAllData(prev => { let newArr = [...(prev || [])]; matchedEmployees.forEach(me => { if (!newArr.find(s => Number(s.value) === Number(me.staff_id))) { newArr.push({ value: me.staff_id, label: me.staff_label, employee_number: me.value }); } }); return newArr; }); } } else { resolvedStaffId = null; } } else { if (updated.staff_id && updated.staff_id.length > 0) { const matchedStaffs = staffAllData.filter(s => updated.staff_id.includes(s.value)); if (matchedStaffs.length > 0) { setEmployeeNumberAllData(prev => { let newArr = [...(prev || [])]; matchedStaffs.forEach(ms => { if (ms.employee_number && !newArr.find(e => e.value === ms.employee_number)) { newArr.push({ value: ms.employee_number, staff_id: ms.value, label: ms.employee_number, staff_label: ms.label }); } }); return newArr; }); } } }
+          if (key === "employee_number") {
+            if (updated.employee_number) {
+              const matchedEmployee = employeeNumberAllData.find(e => e.value === updated.employee_number);
+              if (matchedEmployee) {
+                // DO NOT update updated.staff_id to prevent auto-selection in UI
+                resolvedStaffId = matchedEmployee.staff_id;
+                setStaffAllData(prev => {
+                  if (prev && !prev.find(s => Number(s.value) === Number(matchedEmployee.staff_id))) {
+                    return [...prev, { value: matchedEmployee.staff_id, label: matchedEmployee.staff_label, employee_number: matchedEmployee.value }];
+                  }
+                  return prev || [];
+                });
+              }
+            } else {
+              resolvedStaffId = null;
+            }
+          } else {
+            if (updated.staff_id) {
+              const matchedStaff = staffAllData.find(s => Number(s.value) === Number(updated.staff_id));
+              if (matchedStaff && matchedStaff.employee_number) {
+                // DO NOT update updated.employee_number to prevent auto-selection in UI
+                setEmployeeNumberAllData(prev => {
+                  if (prev && !prev.find(e => e.value === matchedStaff.employee_number)) {
+                    return [...prev, { value: matchedStaff.employee_number, staff_id: matchedStaff.value, label: `${matchedStaff.employee_number}`, staff_label: matchedStaff.label }];
+                  }
+                  return prev || [];
+                });
+              }
+            }
+          }
 
-          const isClearing = [null, undefined, ""].includes(value) || (Array.isArray(value) && value.length === 0);
+          const isClearing = [null, undefined, ""].includes(resolvedStaffId);
           if (isClearing) {
             // Auto-clear downstream filters
             const staffIdx = selectionOrder.indexOf("staff_id");
@@ -1261,7 +1165,7 @@ function TimesheetReport() {
           updated.internal_job_id = null;
           updated.internal_task_id = null;
 
-          const isClearing = [null, undefined, ""].includes(value) || (Array.isArray(value) && value.length === 0);
+          const isClearing = [null, undefined, ""].includes(value);
 
           if (isClearing) {
             // Auto-clear downstream filters (those selected after customer in selectionOrder)
@@ -1355,7 +1259,7 @@ function TimesheetReport() {
           updated.internal_job_id = null;
           updated.internal_task_id = null;
 
-          const isClearing = [null, undefined, ""].includes(value) || (Array.isArray(value) && value.length === 0);
+          const isClearing = [null, undefined, ""].includes(value);
 
           if (isClearing) {
             // Auto-clear downstream filters (those selected after client in selectionOrder)
@@ -1448,7 +1352,7 @@ function TimesheetReport() {
         } else if (key === "job_id") {
           updated.internal_task_id = null;
 
-          const isClearing = [null, undefined, ""].includes(value) || (Array.isArray(value) && value.length === 0);
+          const isClearing = [null, undefined, ""].includes(value);
 
           if (isClearing) {
             // Auto-clear downstream filters (those selected after job in selectionOrder)
@@ -1545,7 +1449,7 @@ function TimesheetReport() {
         } else if (key === "task_id") {
           updated.internal_task_id = null;
 
-          const isClearing = [null, undefined, ""].includes(value) || (Array.isArray(value) && value.length === 0);
+          const isClearing = [null, undefined, ""].includes(value);
 
           if (isClearing) {
             const taskIdx = selectionOrder.indexOf("task_id");
@@ -1764,21 +1668,21 @@ function TimesheetReport() {
           setInternalJobAllData([]);
           setFilters((prev) => ({
             ...prev,
-            job_id: [],
-            internal_job_id: [],
+            job_id: null,
+            internal_job_id: null,
           }));
         } else if (filters.internal_external == "1") {
           setInternalJobAllData([]);
           setFilters((prev) => ({
             ...prev,
-            internal_job_id: [],
+            internal_job_id: null,
           }));
         } else if (filters.internal_external == "2") {
           setJobAllData([]);
           setJobOptions([]);
           setFilters((prev) => ({
             ...prev,
-            job_id: [],
+            job_id: null,
           }));
         }
       } else if (value == "task_id") {
@@ -1791,14 +1695,14 @@ function TimesheetReport() {
           setInternalTaskAllData([]);
           setFilters((prev) => ({
             ...prev,
-            task_id: [],
-            internal_task_id: [],
+            task_id: null,
+            internal_task_id: null,
           }));
         } else if (filters.internal_external == "1") {
           setInternalTaskAllData([]);
           setFilters((prev) => ({
             ...prev,
-            internal_task_id: [],
+            internal_task_id: null,
           }));
         } else if (filters.internal_external == "2") {
           setTaskAllData([]);
@@ -1808,7 +1712,7 @@ function TimesheetReport() {
           setTaskSearch("");
           setFilters((prev) => ({
             ...prev,
-            task_id: [],
+            task_id: null,
           }));
         }
       } else if (value == "employee_number") {
@@ -1873,13 +1777,13 @@ function TimesheetReport() {
       internal_external: "2",
       fieldsToDisplay: null,
       fieldsToDisplayId: null,
-      staff_id: [],
-      customer_id: [],
-      client_id: [],
-      job_id: [],
-      task_id: [],
-      internal_job_id: [],
-      internal_task_id: [],
+      staff_id: null,
+      customer_id: null,
+      client_id: null,
+      job_id: null,
+      task_id: null,
+      internal_job_id: null,
+      internal_task_id: null,
       timePeriod: "",
       displayBy: "",
       fromDate: null,
@@ -2049,13 +1953,13 @@ function TimesheetReport() {
         internal_external: "0",
         fieldsToDisplay: null,
         fieldsToDisplayId: null,
-        staff_id: [],
-        customer_id: [],
-        client_id: [],
-        job_id: [],
-        task_id: [],
-        internal_job_id: [],
-        internal_task_id: [],
+        staff_id: null,
+        customer_id: null,
+        client_id: null,
+        job_id: null,
+        task_id: null,
+        internal_job_id: null,
+        internal_task_id: null,
         timePeriod: "this_month",
         displayBy: "Weekly",
         fromDate: null,
@@ -2220,10 +2124,9 @@ function TimesheetReport() {
 
           <Select
             isMulti
-            closeMenuOnSelect={false}
             options={optionGroupBy}
             value={optionGroupBy.filter((opt) =>
-              (filters.groupBy || []).includes(opt.value),
+              filters.groupBy.includes(opt.value),
             )}
             onChange={(selectedOptions, actionMeta) => {
 
@@ -2303,18 +2206,19 @@ function TimesheetReport() {
 
             {/* <Select
               options={[{ value: "", label: "Select..." }, ...staffAllData]}
-              isMulti
               value={
                 staffAllData && staffAllData.length > 0
-                  ? staffAllData.filter((opt) => (filters.staff_id || []).includes(opt.value))
-                  : []
+                  ? staffAllData.find(
+                    (opt) => Number(opt.value) === Number(filters.staff_id),
+                  ) || null
+                  : null
               }
               onChange={(selected) =>
                 handleFilterChange({
                   target: {
                     key: "staff_id",
-                    value: selected ? selected.map(item => item.value) : [],
-                    label: selected ? selected.map(item => item.label).join(", ") : "",
+                    value: selected.value,
+                    label: selected.label,
                   },
                 })
               }
@@ -2332,22 +2236,27 @@ function TimesheetReport() {
               options={[
                 { value: "", label: "Select..." },
                 ...staffAllData.filter(staff => {
-                  if (filters.employee_number && filters.employee_number.length > 0) { const matchedEmployees = employeeNumberAllData.filter(e => filters.employee_number.includes(e.value)); if (matchedEmployees.length > 0 && !matchedEmployees.some(m => Number(staff.value) === Number(m.staff_id))) return false; }
+                  if (filters.employee_number) {
+                    const matchedEmployee = employeeNumberAllData.find(e => e.value === filters.employee_number);
+                    if (matchedEmployee && Number(staff.value) !== Number(matchedEmployee.staff_id)) return false;
+                  }
                   return true;
                 })
               ]}
-              isMulti
               value={
                 staffAllData && staffAllData.length > 0
-                  ? staffAllData.filter((opt) => (filters.staff_id || []).includes(opt.value))
-                  : []
+                  ? staffAllData.find(
+                    (opt) => Number(opt.value) === Number(filters.staff_id)
+                  ) || null
+                  : null
               }
+
               onChange={(selected) =>
                 handleFilterChange({
                   target: {
                     key: "staff_id",
-                    value: selected ? selected.map(item => item.value) : [],
-                    label: selected ? selected.map(item => item.label).join(", ") : "",
+                    value: selected.value,
+                    label: selected.label,
                   },
                 })
               }
@@ -2385,7 +2294,7 @@ function TimesheetReport() {
               options={[
                 { value: "", label: "Select..." },
                 ...employeeNumberAllData.filter(e => {
-                  if (filters.staff_id && filters.staff_id.length > 0 && !filters.staff_id.some(id => Number(id) === Number(e.staff_id))) return false;
+                  if (filters.staff_id && Number(e.staff_id) !== Number(filters.staff_id)) return false;
                   // If upstream filters apply, staff must be in staffAllData
                   if (filters.customer_id || filters.client_id || filters.job_id || filters.task_id) {
                     if (!staffAllData.some(staff => Number(staff.value) === Number(e.staff_id))) return false;
@@ -2393,18 +2302,24 @@ function TimesheetReport() {
                   return true;
                 })
               ]}
-              isMulti
               value={
                 employeeNumberAllData && employeeNumberAllData.length > 0
-                  ? employeeNumberAllData.filter((opt) => (filters.employee_number || []).includes(opt.value))
-                  : []
+                  ? employeeNumberAllData.find(opt => {
+                    if (opt.value !== filters.employee_number) return false;
+                    // Must also be valid in staffAllData if upstream filters apply
+                    if (filters.customer_id || filters.client_id || filters.job_id || filters.task_id) {
+                      return staffAllData.some(staff => Number(staff.value) === Number(opt.staff_id));
+                    }
+                    return true;
+                  }) || null
+                  : null
               }
               onChange={(selected) =>
                 handleFilterChange({
                   target: {
                     key: "employee_number",
-                    value: selected ? selected.map(item => item.value) : [],
-                    label: selected ? selected.map(item => item.label).join(", ") : "",
+                    value: selected.value,
+                    label: selected.label,
                   },
                 })
               }
@@ -2420,18 +2335,20 @@ function TimesheetReport() {
             <label className="form-label fw-medium">Customer</label>
             {/* <Select
               options={[{ value: "", label: "Select..." }, ...customerAllData]}
-              isMulti
               value={
                 customerAllData && customerAllData.length > 0
-                  ? customerAllData.filter((opt) => (filters.customer_id || []).includes(opt.value))
-                  : []
+                  ? customerAllData.find(
+                    (opt) =>
+                      Number(opt.value) === Number(filters.customer_id),
+                  ) || null
+                  : null
               }
               onChange={(selected) =>
                 handleFilterChange({
                   target: {
                     key: "customer_id",
-                    value: selected ? selected.map(item => item.value) : [],
-                    label: selected ? selected.map(item => item.label).join(", ") : "",
+                    value: selected.value,
+                    label: selected.label,
                   },
                 })
               }
@@ -2447,18 +2364,20 @@ function TimesheetReport() {
                 }
               }}
               options={[{ value: "", label: "Select..." }, ...customerAllData]}
-              isMulti
               value={
                 customerAllData && customerAllData.length > 0
-                  ? customerAllData.filter((opt) => (filters.customer_id || []).includes(opt.value))
-                  : []
+                  ? customerAllData.find(
+                    (opt) =>
+                      Number(opt.value) === Number(filters.customer_id),
+                  ) || null
+                  : null
               }
               onChange={(selected) =>
                 handleFilterChange({
                   target: {
                     key: "customer_id",
-                    value: selected ? selected.map(item => item.value) : [],
-                    label: selected ? selected.map(item => item.label).join(", ") : "",
+                    value: selected.value,
+                    label: selected.label,
                   },
                 })
               }
@@ -2487,18 +2406,19 @@ function TimesheetReport() {
             <label className="form-label fw-medium">Client</label>
             {/* <Select
               options={[{ value: "", label: "Select..." }, ...clientAllData]}
-              isMulti
               value={
                 clientAllData && clientAllData.length > 0
-                  ? clientAllData.filter((opt) => (filters.client_id || []).includes(opt.value))
-                  : []
+                  ? clientAllData.find(
+                    (opt) => Number(opt.value) === Number(filters.client_id),
+                  ) || null
+                  : null
               }
               onChange={(selected) =>
                 handleFilterChange({
                   target: {
                     key: "client_id",
-                    value: selected ? selected.map(item => item.value) : [],
-                    label: selected ? selected.map(item => item.label).join(", ") : "",
+                    value: selected.value,
+                    label: selected.label,
                   },
                 })
               }
@@ -2515,18 +2435,19 @@ function TimesheetReport() {
                 }
               }}
               options={[{ value: "", label: "Select..." }, ...clientAllData]}
-              isMulti
               value={
                 clientAllData && clientAllData.length > 0
-                  ? clientAllData.filter((opt) => (filters.client_id || []).includes(opt.value))
-                  : []
+                  ? clientAllData.find(
+                    (opt) => Number(opt.value) === Number(filters.client_id),
+                  ) || null
+                  : null
               }
               onChange={(selected) =>
                 handleFilterChange({
                   target: {
                     key: "client_id",
-                    value: selected ? selected.map(item => item.value) : [],
-                    label: selected ? selected.map(item => item.label).join(", ") : "",
+                    value: selected.value,
+                    label: selected.label,
                   },
                 })
               }
@@ -2585,18 +2506,19 @@ function TimesheetReport() {
                   }
                 }}
                 options={[{ value: "", label: "Select..." }, ...jobOptions]}
-                isMulti
                 value={
                   jobOptions && jobOptions.length > 0
-                    ? jobOptions.filter((opt) => (filters.job_id || []).includes(opt.value))
-                    : []
+                    ? jobOptions.find(
+                      (opt) => Number(opt.value) === Number(filters.job_id),
+                    ) || null
+                    : null
                 }
                 onChange={(selected) =>
                   handleFilterChange({
                     target: {
                       key: "job_id",
-                      value: selected ? selected.map(item => item.value) : [],
-                      label: selected ? selected.map(item => item.label).join(", ") : "",
+                      value: selected.value,
+                      label: selected.label,
                     },
                   })
                 }
@@ -2633,18 +2555,19 @@ function TimesheetReport() {
                   }
                 }}
                 options={[{ value: "", label: "Select..." }, ...taskAllData]}
-                isMulti
                 value={
                   taskAllData && taskAllData.length > 0
-                    ? taskAllData.filter((opt) => (filters.task_id || []).includes(opt.value))
-                    : []
+                    ? taskAllData.find(
+                      (opt) => Number(opt.value) === Number(filters.task_id),
+                    ) || null
+                    : null
                 }
                 onChange={(selected) =>
                   handleFilterChange({
                     target: {
                       key: "task_id",
-                      value: selected ? selected.map(item => item.value) : [],
-                      label: selected ? selected.map(item => item.label).join(", ") : "",
+                      value: selected.value,
+                      label: selected.label,
                     },
                   })
                 }
@@ -2684,18 +2607,20 @@ function TimesheetReport() {
                   { value: "", label: "Select..." },
                   ...internalJobAllData,
                 ]}
-                isMulti
                 value={
                   internalJobAllData && internalJobAllData.length > 0
-                    ? internalJobAllData.filter((opt) => (filters.internal_job_id || []).includes(opt.value))
-                    : []
+                    ? internalJobAllData.find(
+                      (opt) =>
+                        Number(opt.value) === Number(filters.internal_job_id),
+                    ) || null
+                    : null
                 }
                 onChange={(selected) =>
                   handleFilterChange({
                     target: {
                       key: "internal_job_id",
-                      value: selected ? selected.map(item => item.value) : [],
-                      label: selected ? selected.map(item => item.label).join(", ") : "",
+                      value: selected.value,
+                      label: selected.label,
                     },
                   })
                 }
@@ -2720,18 +2645,21 @@ function TimesheetReport() {
                   { value: "", label: "Select..." },
                   ...internalTaskAllData,
                 ]}
-                isMulti
                 value={
                   internalTaskAllData && internalTaskAllData.length > 0
-                    ? internalTaskAllData.filter((opt) => (filters.internal_task_id || []).includes(opt.value))
-                    : []
+                    ? internalTaskAllData.find(
+                      (opt) =>
+                        Number(opt.value) ===
+                        Number(filters.internal_task_id),
+                    ) || null
+                    : null
                 }
                 onChange={(selected) =>
                   handleFilterChange({
                     target: {
                       key: "internal_task_id",
-                      value: selected ? selected.map(item => item.value) : [],
-                      label: selected ? selected.map(item => item.label).join(", ") : "",
+                      value: selected.value,
+                      label: selected.label,
                     },
                   })
                 }
