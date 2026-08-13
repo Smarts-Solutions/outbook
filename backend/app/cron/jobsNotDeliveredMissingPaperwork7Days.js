@@ -85,20 +85,25 @@ const generateExcelDataAndBuffer = (result) => {
       });
     }
 
-    let summaryData = Object.keys(reviewCountMap).map(name => ({
-      'Responsible For Receiving Paperwork': name,
-      'No of Jobs': reviewCountMap[name]
-    }));
+    let summaryData = [
+      { "Summary": "Total Jobs Not Delivered After Missing Paperwork 7 Days", "Total Count": jobsData.length }
+    ];
+
+    const currentDate = new Date();
+    const weekNum = Math.ceil(currentDate.getDate() / 7);
+    const monthNum = currentDate.getMonth() + 1;
+    const yearNum = currentDate.getFullYear();
+    const shortDateStr = `Week ${weekNum} Month ${monthNum} Year ${yearNum}`;
 
     const wb = xlsx.utils.book_new();
-    
-    // Add Jobs tab
-    const wsJobs = xlsx.utils.json_to_sheet(jobsData.length ? jobsData : [{"Message": "No jobs found"}]);
-    xlsx.utils.book_append_sheet(wb, wsJobs, "Pending Jobs");
 
-    // Add Summary tab
+    // Add Summary tab FIRST
     const wsSummary = xlsx.utils.json_to_sheet(summaryData.length ? summaryData : [{"Message": "No missing logs found"}]);
-    xlsx.utils.book_append_sheet(wb, wsSummary, "Summary");
+    xlsx.utils.book_append_sheet(wb, wsSummary, `Summary ${shortDateStr}`.substring(0, 31));
+    
+    // Add Jobs tab SECOND
+    const wsJobs = xlsx.utils.json_to_sheet(jobsData.length ? jobsData : [{"Message": "No jobs found"}]);
+    xlsx.utils.book_append_sheet(wb, wsJobs, "Missing Paperwork 7 Days");
 
     const excelBuffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
 

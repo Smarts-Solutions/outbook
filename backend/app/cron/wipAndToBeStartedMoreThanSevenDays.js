@@ -2,6 +2,7 @@ const pool = require("../config/database");
 const { parentPort } = require("worker_threads");
 const { commonEmail } = require("../utils/commonEmail");
 const { logEmail } = require("../utils/emailLogger");
+const xlsx = require('xlsx');
 
 /* ---------------- HELPERS ---------------- */
 
@@ -11,17 +12,7 @@ const convertDate = (date) => {
   return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
 };
 
-const formatCSV = (value) => {
-  if (!value) return " - ";
-  value = value.toString();
 
-  if (value.includes(",") || value.includes('"') || value.includes("\n")) {
-    value = value.replace(/"/g, '""');
-    return `"${value}"`;
-  }
-
-  return value;
-};
 
 /* 🔥 LIMIT PARALLEL EXECUTION */
 async function processWithLimit(items, limit, handler) {
@@ -121,7 +112,7 @@ parentPort.on("message", async (rows) => {
         queries ON queries.job_id = jobs.id
         LEFT JOIN
         drafts ON drafts.job_id = jobs.id
-        WHERE customers.status = '1' ANDjobs.status_type = 1 AND DATE(jobs.date_received_on) <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        WHERE customers.status = '1' AND jobs.status_type = 1 AND DATE(jobs.date_received_on) <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
         GROUP BY jobs.id
         ORDER BY 
           jobs.id DESC;
@@ -135,36 +126,30 @@ parentPort.on("message", async (rows) => {
 
     /* ✅ STEP 3: GENERATE CSV ONCE */
 
-    let csv =
-      "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent ,Created By\n";
+    let jobDataList = [];
     if (result && result.length > 0) {
       result?.forEach((val) => {
-        let job_received_on = convertDate(val.job_received_on);
-        let customer_trading_name =
-          formatCSV(val.customer_trading_name) || " - ";
-        let account_manager_name = formatCSV(val.account_manager_name) || " - ";
-        let client_trading_name = formatCSV(val.client_trading_name) || " - ";
-        let service_name = formatCSV(val.service_name) || " - ";
-        let job_type_name = formatCSV(val.job_type_name) || " - ";
-        let status = formatCSV(val.status) || " - ";
-        let allocated_name = formatCSV(val.allocated_name) || " - ";
-        let multiple_staff_names = formatCSV(val.multiple_staff_names) || " - ";
-        let reviewer_name = formatCSV(val.reviewer_name) || " - ";
-        let filing_Companies_date =
-          convertDate(val.filing_Companies_date) || " - ";
-        let internal_deadline_date =
-          convertDate(val.internal_deadline_date) || " - ";
-        let customer_deadline_date =
-          convertDate(val.customer_deadline_date) || " - ";
-        let query_sent_date = convertDate(val.query_sent_date) || " - ";
-        let final_query_response_received_date =
-          convertDate(val.final_query_response_received_date) || " - ";
-        let draft_sent_on = convertDate(val.draft_sent_on) || " - ";
-        let final_draft_sent_on = convertDate(val.final_draft_sent_on) || " - ";
-
-        let created_by = val.created_by || " - ";
-
-        csv += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on},${created_by}\n`;
+        jobDataList.push({
+          "Job Id": val.job_code_id || ' - ',
+          "Job Received On": convertDate(val.job_received_on),
+          "Customer Name": val.customer_trading_name || " - ",
+          "Account Manager": val.account_manager_name || " - ",
+          "Clients": val.client_trading_name || " - ",
+          "Service Type": val.service_name || " - ",
+          "Job Type": val.job_type_name || " - ",
+          "Status": val.status || " - ",
+          "Allocated To": val.allocated_name || " - ",
+          "Allocated to (Other)": val.multiple_staff_names || " - ",
+          "Reviewer Name": val.reviewer_name || " - ",
+          "Companies House Due Date": convertDate(val.filing_Companies_date),
+          "Internal Deadline": convertDate(val.internal_deadline_date),
+          "Customer Deadline": convertDate(val.customer_deadline_date),
+          "Initial Query Sent Date": convertDate(val.query_sent_date),
+          "Final Query Response Received Date": convertDate(val.final_query_response_received_date),
+          "First Draft Sent": convertDate(val.draft_sent_on),
+          "Final Draft Sent": convertDate(val.final_draft_sent_on),
+          "Created By": val.created_by || " - "
+        });
       });
     }
 
@@ -173,44 +158,40 @@ parentPort.on("message", async (rows) => {
       try {
 
         
-        let finalCSV = csv;
+        let finalJobData = jobDataList;
 
         /* 👉 NON ADMIN USER */
         if (![1, 2, 8].includes(user.role_id)) {
           const res = await otherUserDataGet(user);
           if (!res.status) return;
-          finalCSV = res.csvContent;
+          finalJobData = res.jobDataList;
         }
 
         let toEmail = user?.staff_email;
         let subjectEmail = "Jobs (WIP / To Be Started) Not Updated in the Last 7 Days"
         let htmlEmail = "<h3>Alert: Jobs (WIP / To Be Started) Not Updated in the Last 7 Days.</h3>"
-        const dynamic_attachment = finalCSV;
-        const filename = `Jobs (with status WIP and To Be Started) that haven’t been modified for more than 7 days consecutively -${new Date().toISOString().slice(0, 10)}.csv`;
+        
+        const summaryData = [
+          { "Summary": "Total Jobs (WIP / To Be Started) Not Updated in 7 Days", "Total Count": finalJobData.length }
+        ];
 
-        const sent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+        const currentDate = new Date();
+        const weekNum = Math.ceil(currentDate.getDate() / 7);
+        const monthNum = currentDate.getMonth() + 1;
+        const yearNum = currentDate.getFullYear();
+        const shortDateStr = `Week ${weekNum} Month ${monthNum} Year ${yearNum}`;
 
-         const csvToJson = (csv) => {
-          const lines = csv.trim().split("\n");
+        const wb = xlsx.utils.book_new();
+        xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(summaryData), `Summary ${shortDateStr}`.substring(0, 31));
+        xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(finalJobData), "WIP Not Updated 7 Days");
 
-          // headers
-          const headers = lines[0].split(",");
+        const excelBuffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
 
-          // data rows
-          const result = lines.slice(1).map((line) => {
-            const values = line.split(",");
+        const filename = `Jobs (with status WIP and To Be Started) that haven’t been modified for more than 7 days consecutively -${new Date().toISOString().slice(0, 10)}.xlsx`;
 
-            let obj = {};
-            headers.forEach((header, index) => {
-              obj[header.trim()] = values[index]?.trim() || "";
-            });
+        const sent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", excelBuffer, filename);
 
-            return obj;
-          });
-
-          return result;
-        };
-        const attachmentJson = csvToJson(dynamic_attachment);
+          const attachmentJson = finalJobData;
           logEmail({
             toEmail: toEmail,
             filename: filename,
@@ -316,38 +297,33 @@ async function otherUserDataGet(row) {
 
   const [result] = await pool.execute(query);
   // console.log("Generating CSV for other user: Length --- ", result.length);
-  let csvContent =
-    "Job Id,Job Received On,Customer Name,Account Manager,Clients,Service Type,Job Type,Status,Allocated To,Allocated to (Other),Reviewer Name,Companies House Due Date,Internal Deadline,Customer Deadline,Initial Query Sent Date,Final Query Response Received Date,First Draft Sent,Final Draft Sent ,Created By\n";
+  let jobDataList = [];
   if (result && result.length > 0) {
     result?.forEach((val) => {
-      let job_received_on = convertDate(val.job_received_on);
-      let customer_trading_name = formatCSV(val.customer_trading_name) || " - ";
-      let account_manager_name = formatCSV(val.account_manager_name) || " - ";
-      let client_trading_name = formatCSV(val.client_trading_name) || " - ";
-      let service_name = formatCSV(val.service_name) || " - ";
-      let job_type_name = formatCSV(val.job_type_name) || " - ";
-      let status = formatCSV(val.status) || " - ";
-      let allocated_name = formatCSV(val.allocated_name) || " - ";
-      let multiple_staff_names = formatCSV(val.multiple_staff_names) || " - ";
-      let reviewer_name = formatCSV(val.reviewer_name) || " - ";
-      let filing_Companies_date =
-        convertDate(val.filing_Companies_date) || " - ";
-      let internal_deadline_date =
-        convertDate(val.internal_deadline_date) || " - ";
-      let customer_deadline_date =
-        convertDate(val.customer_deadline_date) || " - ";
-      let query_sent_date = convertDate(val.query_sent_date) || " - ";
-      let final_query_response_received_date =
-        convertDate(val.final_query_response_received_date) || " - ";
-      let draft_sent_on = convertDate(val.draft_sent_on) || " - ";
-      let final_draft_sent_on = convertDate(val.final_draft_sent_on) || " - ";
-
-      let created_by = val.created_by || " - ";
-
-      csvContent += `${val.job_code_id},${job_received_on},${customer_trading_name},${account_manager_name},${client_trading_name},${service_name},${job_type_name},${status},${allocated_name},${multiple_staff_names},${reviewer_name},${filing_Companies_date},${internal_deadline_date},${customer_deadline_date},${query_sent_date},${final_query_response_received_date},${draft_sent_on},${final_draft_sent_on},${created_by}\n`;
+      jobDataList.push({
+        "Job Id": val.job_code_id || ' - ',
+        "Job Received On": convertDate(val.job_received_on),
+        "Customer Name": val.customer_trading_name || " - ",
+        "Account Manager": val.account_manager_name || " - ",
+        "Clients": val.client_trading_name || " - ",
+        "Service Type": val.service_name || " - ",
+        "Job Type": val.job_type_name || " - ",
+        "Status": val.status || " - ",
+        "Allocated To": val.allocated_name || " - ",
+        "Allocated to (Other)": val.multiple_staff_names || " - ",
+        "Reviewer Name": val.reviewer_name || " - ",
+        "Companies House Due Date": convertDate(val.filing_Companies_date),
+        "Internal Deadline": convertDate(val.internal_deadline_date),
+        "Customer Deadline": convertDate(val.customer_deadline_date),
+        "Initial Query Sent Date": convertDate(val.query_sent_date),
+        "Final Query Response Received Date": convertDate(val.final_query_response_received_date),
+        "First Draft Sent": convertDate(val.draft_sent_on),
+        "Final Draft Sent": convertDate(val.final_draft_sent_on),
+        "Created By": val.created_by || " - "
+      });
     });
 
-    return { status: true, csvContent };
+    return { status: true, jobDataList };
   } else {
     return { status: false };
   }
