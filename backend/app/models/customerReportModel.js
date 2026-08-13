@@ -2592,6 +2592,13 @@ async function getTimesheetReportDataInternal(Report) {
   }
 
   try {
+    // Helper: normalize single value or array into a clean array (filters out empty/null)
+    const ensureArray = (v) => {
+      if (Array.isArray(v)) return v.filter(x => !["", null, undefined].includes(x));
+      if (!["", null, undefined].includes(v)) return [v];
+      return [];
+    };
+
     let range;
     try {
       range = await getDateRange(timePeriod, fromDate, toDate);
@@ -2603,35 +2610,44 @@ async function getTimesheetReportDataInternal(Report) {
 
     let where = [`work_date BETWEEN ? AND ?`];
 
-    if (!["", null, undefined].includes(staff_id)) {
-      where.push(`raw.staff_id = ${staff_id}`);
+    // Multiselect-aware filters: supports both single values and arrays
+    const staffArr = ensureArray(staff_id);
+    if (staffArr.length > 0) {
+      where.push(`raw.staff_id IN (${staffArr.map(v => Number(v)).join(',')})`);
     }
-    if (!["", null, undefined].includes(customer_id)) {
-      where.push(`raw.customer_id = ${customer_id}`);
+    const customerArr = ensureArray(customer_id);
+    if (customerArr.length > 0) {
+      where.push(`raw.customer_id IN (${customerArr.map(v => Number(v)).join(',')})`);
     }
-    if (!["", null, undefined].includes(client_id)) {
-      where.push(`raw.client_id = ${client_id}`);
+    const clientArr = ensureArray(client_id);
+    if (clientArr.length > 0) {
+      where.push(`raw.client_id IN (${clientArr.map(v => Number(v)).join(',')})`);
     }
 
     if (internal_external == "1" || internal_external == "2") {
       where.push(`raw.task_type = '${internal_external}'`);
     }
 
-    if (!["", null, undefined].includes(job_id)) {
-      where.push(`raw.job_id = ${job_id}`);
+    const jobArr = ensureArray(job_id);
+    if (jobArr.length > 0) {
+      where.push(`raw.job_id IN (${jobArr.map(v => Number(v)).join(',')})`);
     }
-    if (!["", null, undefined].includes(task_id)) {
-      where.push(`raw.task_id = ${task_id}`);
+    const taskArr = ensureArray(task_id);
+    if (taskArr.length > 0) {
+      where.push(`raw.task_id IN (${taskArr.map(v => Number(v)).join(',')})`);
     }
 
-    if (!["", null, undefined].includes(internal_job_id)) {
-      where.push(`(raw.task_type = '1' AND raw.job_id = ${internal_job_id})`);
+    const internalJobArr = ensureArray(internal_job_id);
+    if (internalJobArr.length > 0) {
+      where.push(`(raw.task_type = '1' AND raw.job_id IN (${internalJobArr.map(v => Number(v)).join(',')}))`);
     }
-    if (!["", null, undefined].includes(internal_task_id)) {
-      where.push(`(raw.task_type = '1' AND raw.task_id = ${internal_task_id})`);
+    const internalTaskArr = ensureArray(internal_task_id);
+    if (internalTaskArr.length > 0) {
+      where.push(`(raw.task_type = '1' AND raw.task_id IN (${internalTaskArr.map(v => Number(v)).join(',')}))`);
     }
-    if (!["", null, undefined].includes(employee_number)) {
-      where.push(`s.employee_number = '${employee_number}'`);
+    const empArr = ensureArray(employee_number);
+    if (empArr.length > 0) {
+      where.push(`s.employee_number IN (${empArr.map(v => `'${String(v).replace(/'/g, "''")}'`).join(',')})`);
     }
 
     // Apply customer-scoped filters
@@ -2938,7 +2954,11 @@ async function getTasksFilter(Report) {
     where.push(`ts.job_id IN (${incomingFilters.job_id.join(",")})`);
   }
   if (incomingFilters?.staff_id) {
-    where.push(`ts.staff_id = ${incomingFilters.staff_id}`);
+    const staffArr = Array.isArray(incomingFilters.staff_id) ? incomingFilters.staff_id : [incomingFilters.staff_id];
+    const cleanStaffArr = staffArr.filter(x => !["", null, undefined].includes(x));
+    if (cleanStaffArr.length > 0) {
+      where.push(`ts.staff_id IN (${cleanStaffArr.join(",")})`);
+    }
   }
 
   let params = [];

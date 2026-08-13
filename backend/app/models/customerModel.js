@@ -1243,7 +1243,8 @@ const getCustomer_dropdown_filter = async (customer) => {
     let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
     
     if (filterStaffId) {
-        LineManageStaffId = [filterStaffId];
+        const staffArr = Array.isArray(filterStaffId) ? filterStaffId : [filterStaffId];
+        LineManageStaffId = staffArr.filter(x => !["", null, undefined].includes(x));
     }
 
     // Get Role
@@ -1253,7 +1254,7 @@ const getCustomer_dropdown_filter = async (customer) => {
 
     // Condition with Admin And SuperAdmin
     if (rows.length > 0 && (rows[0].role_name == "SUPERADMIN" || RoleAccess.length > 0)) {
-        if (!filterStaffId) {
+        if (!filterStaffId || (Array.isArray(filterStaffId) && filterStaffId.length === 0)) {
    
        try {
         // let query = `

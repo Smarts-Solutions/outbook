@@ -2890,7 +2890,8 @@ async function getAllJobsSidebarFilter(
   const offset = (page - 1) * limit;
 
   if (filters?.staff_id) {
-    LineManageStaffId = [filters.staff_id];
+    const staffArr = Array.isArray(filters.staff_id) ? filters.staff_id : [filters.staff_id];
+    LineManageStaffId = staffArr.filter(x => !["", null, undefined].includes(x));
   }
 
   let extraFilter = "";
@@ -2962,7 +2963,7 @@ async function getAllJobsSidebarFilter(
       rows.length > 0 &&
       (rows[0].role_name === "SUPERADMIN" || RoleAccess.length > 0)
     ) {
-      if (!filters?.staff_id) {
+      if (!filters?.staff_id || (Array.isArray(filters.staff_id) && filters.staff_id.length === 0)) {
         // 🔹 DATA
         const query = `
            SELECT 
