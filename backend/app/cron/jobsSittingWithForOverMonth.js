@@ -56,6 +56,7 @@ parentPort.on("message", async (rows) => {
     const query = `
         SELECT 
         jobs.id AS id,
+        (SELECT MAX(status_update_date) FROM job_status_updation WHERE job_id = jobs.id) AS current_status_date,
           CONCAT(
                 SUBSTRING(customers.trading_name, 1, 3), '_',
                 SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -144,6 +145,13 @@ parentPort.on("message", async (rows) => {
         "Service Type": val.service_name || ' - ',
         "Job Type": val.job_type_name || ' - ',
         "Status": val.status || ' - ',
+        "Days in Current Status": (() => {
+            if (!val.current_status_date) return "0 Day";
+            const ms = new Date() - new Date(val.current_status_date);
+            if (isNaN(ms) || ms < 0) return "0 Day";
+            const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+            return `${days} Day${days > 1 ? 's' : ''}`;
+        })(),
         "Allocated To": val.allocated_name || ' - ',
         "Allocated to (Other)": val.multiple_staff_names || ' - ',
         "Reviewer Name": val.reviewer_name || ' - ',
@@ -159,6 +167,10 @@ parentPort.on("message", async (rows) => {
     });
   }
 
+    
+    const [allStatusRecords] = await pool.execute("SELECT name FROM master_status");
+    const allStatuses = allStatusRecords.map(s => s.name);
+    
     /* ✅ STEP 4: SEND EMAILS WITH LIMIT */
     await processWithLimit(uniqueUsers, 5, async (user) => {
       try {
@@ -184,9 +196,23 @@ parentPort.on("message", async (rows) => {
           <p>Regards,<br>Team Outbooks</p>
         `;
         
-        const summaryData = [
-          { "Summary": "Total Jobs Sitting For Over Month", "Total Count": finalJobData.length }
-        ];
+        const statusCounts = {};
+        if (typeof allStatuses !== 'undefined') {
+            allStatuses.forEach(s => { statusCounts[s] = 0; });
+        }
+        finalJobData.forEach(job => {
+          const status = job.Status || ' - ';
+          if (statusCounts[status] !== undefined) {
+             statusCounts[status]++;
+          } else {
+             statusCounts[status] = 1;
+          }
+        });
+        const summaryData = Object.keys(statusCounts).map(status => ({
+          "Summary": status,
+          "Total Count": statusCounts[status]
+        }));
+        summaryData.push({ "Summary": "Total Jobs Sitting For Over Month", "Total Count": finalJobData.length });
 
         const currentDate = new Date();
         const weekNum = Math.ceil(currentDate.getDate() / 7);
@@ -234,6 +260,7 @@ async function otherUserDataGet(row) {
   const query = `
         SELECT 
         jobs.id AS id,
+        (SELECT MAX(status_update_date) FROM job_status_updation WHERE job_id = jobs.id) AS current_status_date,
           CONCAT(
                 SUBSTRING(customers.trading_name, 1, 3), '_',
                 SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -330,6 +357,13 @@ async function otherUserDataGet(row) {
         "Service Type": val.service_name || ' - ',
         "Job Type": val.job_type_name || ' - ',
         "Status": val.status || ' - ',
+        "Days in Current Status": (() => {
+            if (!val.current_status_date) return "0 Day";
+            const ms = new Date() - new Date(val.current_status_date);
+            if (isNaN(ms) || ms < 0) return "0 Day";
+            const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+            return `${days} Day${days > 1 ? 's' : ''}`;
+        })(),
         "Allocated To": val.allocated_name || ' - ',
         "Allocated to (Other)": val.multiple_staff_names || ' - ',
         "Reviewer Name": val.reviewer_name || ' - ',

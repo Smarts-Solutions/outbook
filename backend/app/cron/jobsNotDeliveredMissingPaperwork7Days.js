@@ -30,7 +30,7 @@ const formatCSV = (value) => {
   return cleanStr;
 };
 
-const generateExcelDataAndBuffer = (result) => {
+const generateExcelDataAndBuffer = async (result) => {
     let jobsData = [];
     let reviewCountMap = {};
 
@@ -66,6 +66,13 @@ const generateExcelDataAndBuffer = (result) => {
           'Service Type': service_name,
           'Job Type': job_type_name,
           'Status': status,
+        "Days in Current Status": (() => {
+            if (!val.current_status_date) return "0 Day";
+            const ms = new Date() - new Date(val.current_status_date);
+            if (isNaN(ms) || ms < 0) return "0 Day";
+            const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+            return `${days} Day${days > 1 ? 's' : ''}`;
+        })(),
           'Allocated To': allocated_name,
           'Allocated to (Other)': multiple_staff_names,
           'Reviewer Name': reviewer_name,
@@ -85,9 +92,24 @@ const generateExcelDataAndBuffer = (result) => {
       });
     }
 
-    let summaryData = [
-      { "Summary": "Total Jobs Not Delivered After Missing Paperwork 7 Days", "Total Count": jobsData.length }
-    ];
+    let summaryData = [];
+    const statusCounts = {};
+    if (typeof allStatuses !== 'undefined') {
+        allStatuses.forEach(s => { statusCounts[s] = 0; });
+    }
+    jobsData.forEach(job => {
+      const status = job.Status || ' - ';
+      if (statusCounts[status] !== undefined) {
+         statusCounts[status]++;
+      } else {
+         statusCounts[status] = 1;
+      }
+    });
+    summaryData = Object.keys(statusCounts).map(status => ({
+      "Summary": status,
+      "Total Count": statusCounts[status]
+    }));
+    summaryData.push({ "Summary": "Total Jobs Not Delivered After Missing Paperwork 7 Days", "Total Count": jobsData.length });
 
     const currentDate = new Date();
     const weekNum = Math.ceil(currentDate.getDate() / 7);
@@ -145,6 +167,7 @@ parentPort.on("message", async (rows) => {
     const query = `
         SELECT 
         jobs.id AS id,
+        (SELECT MAX(status_update_date) FROM job_status_updation WHERE job_id = jobs.id) AS current_status_date,
         CONCAT(
           SUBSTRING(customers.trading_name, 1, 3), '_',
           SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -209,7 +232,7 @@ parentPort.on("message", async (rows) => {
       return;
     }
 
-    let adminReport = generateExcelDataAndBuffer(result);
+    let adminReport = await generateExcelDataAndBuffer(result);
 
     /* ✅ STEP 4: SEND EMAILS WITH LIMIT */
     await processWithLimit(uniqueUsers, 5, async (user) => {
@@ -284,6 +307,7 @@ async function otherUserDataGet(row) {
   const query = `
         SELECT 
         jobs.id AS id,
+        (SELECT MAX(status_update_date) FROM job_status_updation WHERE job_id = jobs.id) AS current_status_date,
         CONCAT(
           SUBSTRING(customers.trading_name, 1, 3), '_',
           SUBSTRING(clients.trading_name, 1, 3), '_',
@@ -356,7 +380,7 @@ async function otherUserDataGet(row) {
   const [result] = await pool.execute(query);
 
   if (result && result.length > 0) {
-    let report = generateExcelDataAndBuffer(result);
+    let report = await generateExcelDataAndBuffer(result);
     return { status: true, report };
   } else {
     return { status: false };
