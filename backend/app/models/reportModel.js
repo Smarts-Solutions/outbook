@@ -2594,6 +2594,7 @@ const getTimesheetReportData = async (Report) => {
     displayBy,
     fromDate,
     toDate,
+    status,
   } = data.filters;
 
   const role_user = data?.role?.toUpperCase() || "";
@@ -2684,6 +2685,12 @@ const getTimesheetReportData = async (Report) => {
     if (isSet(employee_number)) {
       innerConds.push(`s.employee_number = ?`);
       innerParams.push(String(employee_number));
+    }
+
+    if (status === "Submit") {
+      innerConds.push(`timesheet.submit_status = '1'`);
+    } else if (status === "Save") {
+      innerConds.push(`(timesheet.submit_status = '0' OR timesheet.submit_status IS NULL)`);
     }
 
     if (!["SUPERADMIN", "ADMIN"].includes(role_user) && isSet(StaffUserId)) {

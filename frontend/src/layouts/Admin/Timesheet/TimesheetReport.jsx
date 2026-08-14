@@ -15,6 +15,7 @@ import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 import dayjs from "dayjs";
 import sweatalert from "sweetalert2";
 import { Trash, Download } from "lucide-react";
+import Datatable from "../../../Components/ExtraComponents/Datatable";
 
 function TimesheetReport() {
   const noDataImage = "/assets/images/No-data-amico.png";
@@ -74,6 +75,7 @@ function TimesheetReport() {
     internal_task_id: null,
     timePeriod: "this_month",
     displayBy: "Weekly",
+    status: "Both",
     fromDate: null,
     toDate: null,
   });
@@ -1768,6 +1770,7 @@ function TimesheetReport() {
     filters.internal_job_id,
     filters.internal_task_id,
     filters.employee_number,
+    filters.status,
   ]);
 
 
@@ -1786,6 +1789,7 @@ function TimesheetReport() {
       internal_task_id: null,
       timePeriod: "",
       displayBy: "",
+      status: "Both",
       fromDate: null,
       toDate: null,
     });
@@ -1962,6 +1966,7 @@ function TimesheetReport() {
         internal_task_id: null,
         timePeriod: "this_month",
         displayBy: "Weekly",
+        status: "Both",
         fromDate: null,
         toDate: null,
       });
@@ -2164,6 +2169,29 @@ function TimesheetReport() {
             <option value="0">Both</option>
             <option value="1">Internal</option>
             <option value="2">External</option>
+          </select>
+        </div>
+
+        {/* Status */}
+        <div className="col-lg-4 col-md-6">
+          <label className="form-label fw-medium">Save/Submit</label>
+          <select
+            className="form-select shadow-sm"
+            id="status"
+            value={filters.status || "Both"}
+            onChange={(e) =>
+              handleFilterChange({
+                target: {
+                  key: "status",
+                  value: e.target.value,
+                  label: e.target.options[e.target.selectedIndex].text,
+                },
+              })
+            }
+          >
+            <option value="Both">Both</option>
+            <option value="Submit">Submit</option>
+            <option value="Save">Save</option>
           </select>
         </div>
 
@@ -2806,60 +2834,31 @@ function TimesheetReport() {
       </div>
 
       {/* Filtered Data Display */}
-      <div className="datatable-container">
+      <div className="position-relative">
         {loading && (
           <div className="overlay">
             <div className="loader"></div>
           </div>
         )}
 
-        {showData?.rows == undefined || showData?.rows?.length === 0 ? (
-          <div className="text-center">
-            <img
-              src={noDataImage}
-              alt="No records available"
-              style={{ width: "250px", height: "auto", objectFit: "contain" }}
-            />
-            <p className="fs-16">There are no records to display</p>
-          </div>
-        ) : (
-          <div className="table-responsive fixed-table-header">
-            <table
-              className="table rdt_Table"
-
-            >
-              <thead >
-                <tr className="rdt_TableHeadRow">
-                  {showData?.columns?.map((col, idx) => (
-                    <th
-                      className="border-bottom-0"
-                      key={idx}
-                      style={{
-                        fontSize: "15px",
-                        fontWeight: "bold",
-                        minWidth: "130px",
-                      }}
-                    >
-                      {getColumnName(col)}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {showData?.rows?.map((row, rowIdx) => (
-                  <tr key={rowIdx}>
-                    {showData?.columns?.map((col, colIdx) => (
-                      <td key={colIdx} style={{ padding: "10px" }}>
-                        {[undefined, null, ""]?.includes(row[col]) ? "-" : row[col]}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
+        <Datatable
+          filter={false}
+          pagination={false}
+          columns={
+            showData?.columns?.map((col) => ({
+              name: getColumnName(col),
+              selector: (row) => row[col],
+              sortable: true,
+              cell: (row) => (
+                <div style={{ padding: "10px" }}>
+                  {[undefined, null, ""].includes(row[col]) ? "-" : row[col]}
+                </div>
+              ),
+              minWidth: "130px"
+            })) || []
+          }
+          data={showData?.rows || []}
+        />
         {totalRecords > 0 && (
           <div className="d-flex justify-content-between align-items-center mt-3 mb-3">
             <ReactPaginate
