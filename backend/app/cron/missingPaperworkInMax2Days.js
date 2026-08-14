@@ -212,7 +212,7 @@ parentPort.on("message", async (rows) => {
              statusCounts[status] = 1;
           }
         });
-        const summaryData = Object.keys(statusCounts).map(status => ({
+        const summaryData = Object.keys(statusCounts).filter(status => statusCounts[status] > 0).map(status => ({
           "Summary": status,
           "Total Count": statusCounts[status]
         }));

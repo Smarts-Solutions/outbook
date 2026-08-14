@@ -105,7 +105,7 @@ const generateExcelDataAndBuffer = async (result) => {
          statusCounts[status] = 1;
       }
     });
-    summaryData = Object.keys(statusCounts).map(status => ({
+    summaryData = Object.keys(statusCounts).filter(status => statusCounts[status] > 0).map(status => ({
       "Summary": status,
       "Total Count": statusCounts[status]
     }));
