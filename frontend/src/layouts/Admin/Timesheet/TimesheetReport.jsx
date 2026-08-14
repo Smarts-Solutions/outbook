@@ -74,6 +74,7 @@ function TimesheetReport() {
     internal_task_id: [],
     timePeriod: "this_month",
     displayBy: "Weekly",
+    status: "Both",
     fromDate: null,
     toDate: null,
   });
@@ -270,7 +271,7 @@ function TimesheetReport() {
     if (value === "") return;
     clearTimeout(staffDebounceRef.current);
     staffDebounceRef.current = setTimeout(() => {
-      setStaffSearch(value); 
+      setStaffSearch(value);
       const up = getUpstreamFilters("staff_id", filters);
       GetAllStaff({
         searchValue: value,
@@ -330,7 +331,7 @@ function TimesheetReport() {
         const req = { action: "get_my_line_managers" };
         const response = await dispatch(Staff({ req, authToken: token })).unwrap();
         if (response.status && response.data) {
-          response.data.forEach(manager => {  
+          response.data.forEach(manager => {
             if (manager.employee_number && !dataList.find(item => item.value === manager.employee_number)) {
               dataList.push({
                 value: manager.employee_number,
@@ -1864,6 +1865,7 @@ function TimesheetReport() {
     filters.internal_job_id,
     filters.internal_task_id,
     filters.employee_number,
+    filters.status,
   ]);
 
 
@@ -1882,6 +1884,7 @@ function TimesheetReport() {
       internal_task_id: [],
       timePeriod: "",
       displayBy: "",
+      status: "Both",
       fromDate: null,
       toDate: null,
     });
@@ -2058,6 +2061,7 @@ function TimesheetReport() {
         internal_task_id: [],
         timePeriod: "this_month",
         displayBy: "Weekly",
+        status: "Both",
         fromDate: null,
         toDate: null,
       });
@@ -2261,6 +2265,29 @@ function TimesheetReport() {
             <option value="0">Both</option>
             <option value="1">Internal</option>
             <option value="2">External</option>
+          </select>
+        </div>
+
+        {/* Status */}
+        <div className="col-lg-4 col-md-6">
+          <label className="form-label fw-medium">Save/Submit</label>
+          <select
+            className="form-select shadow-sm"
+            id="status"
+            value={filters.status || "Both"}
+            onChange={(e) =>
+              handleFilterChange({
+                target: {
+                  key: "status",
+                  value: e.target.value,
+                  label: e.target.options[e.target.selectedIndex].text,
+                },
+              })
+            }
+          >
+            <option value="Both">Both</option>
+            <option value="Submit">Submit</option>
+            <option value="Save">Save</option>
           </select>
         </div>
 
