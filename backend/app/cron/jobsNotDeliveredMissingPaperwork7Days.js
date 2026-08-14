@@ -99,7 +99,7 @@ const generateExcelDataAndBuffer = (result) => {
 
     // Add Summary tab FIRST
     const wsSummary = xlsx.utils.json_to_sheet(summaryData.length ? summaryData : [{"Message": "No missing logs found"}]);
-    xlsx.utils.book_append_sheet(wb, wsSummary, `Summary ${shortDateStr}`.substring(0, 31));
+    xlsx.utils.book_append_sheet(wb, wsSummary, "Summary");
     
     // Add Jobs tab SECOND
     const wsJobs = xlsx.utils.json_to_sheet(jobsData.length ? jobsData : [{"Message": "No jobs found"}]);

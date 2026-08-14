@@ -191,7 +191,7 @@ parentPort.on("message", async (rows) => {
         const shortDateStr = `Week ${weekNum} Month ${monthNum} Year ${yearNum}`;
 
         const wb = xlsx.utils.book_new();
-        xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(summaryData), `Summary ${shortDateStr}`.substring(0, 31));
+        xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(summaryData), "Summary");
         xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(finalJobData), "Expected Date Changed");
 
         const excelBuffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
