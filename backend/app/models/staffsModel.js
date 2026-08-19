@@ -150,9 +150,9 @@ const getStaff = async (data) => {
 
   // where = "WHERE 1=1 AND staffs.role_id != 12";
 
-   where = "WHERE s.role_id != 12 AND s.status = '1'";
+   where = "WHERE s.role_id != 12 ";
    if (rows.length > 0 && (role_name === "SUPERADMIN")) {
-    where = "WHERE s.role_id != 12 AND s.status = '1'";
+    where = "WHERE s.role_id != 12 ";
   }
 
   // 🔍 SEARCH CONDITION

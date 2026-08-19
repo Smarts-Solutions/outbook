@@ -1179,7 +1179,7 @@ async function getAllClientsSidebarFilter(
           JOIN customers ON customers.id = clients.customer_id    
           JOIN client_types ON client_types.id = clients.client_type
           LEFT JOIN jobs ON clients.id = jobs.client_id
-          WHERE clients.status = '1' 
+          WHERE 1=1 
           ${searchCondition}
           ${extraFilter}
           GROUP BY clients.id
@@ -1246,7 +1246,7 @@ async function getAllClientsSidebarFilter(
       LEFT JOIN temp_assigned_jobs_staff 
         ON temp_assigned_jobs_staff.client_id = clients.id
         AND temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
-      WHERE clients.status = '1' AND
+      WHERE
         (clients.staff_created_id IN (${LineManageStaffId})
         OR customers.staff_id IN (${LineManageStaffId})
         OR customers.account_manager_id IN (${LineManageStaffId})
