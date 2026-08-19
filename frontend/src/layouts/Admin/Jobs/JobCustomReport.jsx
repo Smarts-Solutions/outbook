@@ -295,7 +295,7 @@ function JobCustomReport() {
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-            const data = response?.data?.map((item) => ({
+            const data = response?.data?.filter(item => item.status == 1)?.map((item) => ({
               value: item.id,
               label: `${item.first_name} ${item.last_name} (${item.email})`,
             }));
@@ -318,7 +318,7 @@ function JobCustomReport() {
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-            const data = response?.data?.map((item) => ({
+            const data = response?.data?.filter(item => item.status == 1)?.map((item) => ({
               value: item.id,
               label: `${item.first_name} ${item.last_name} (${item.email})`,
             }));
@@ -341,7 +341,7 @@ function JobCustomReport() {
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-            const data = response?.data?.map((item) => ({
+            const data = response?.data?.filter(item => item.status == 1)?.map((item) => ({
               value: item.id,
               label: `${item.first_name} ${item.last_name} (${item.email})`,
             }));
@@ -364,7 +364,7 @@ function JobCustomReport() {
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-            const data = response?.data?.map((item) => ({
+            const data = response?.data?.filter(item => item.status == 1)?.map((item) => ({
               value: item.id,
               label: `${item.first_name} ${item.last_name} (${item.email})`,
             }));
@@ -388,7 +388,7 @@ function JobCustomReport() {
                 (item) =>
                   ![null, "", "null", undefined].includes(
                     item.employee_number,
-                  ),
+                  ) && item.status == 1,
               )
               ?.map((item) => ({
                 value: item.employee_number,
@@ -1533,7 +1533,8 @@ function JobCustomReport() {
       }
       const response = await dispatch(getAllCustomerDropDown(data)).unwrap();
       if (response.status) {
-        const formatted = response.data.map((item) => {
+        const activeData = response.data.filter(item => item.status == 1);
+        const formatted = activeData.map((item) => {
           const opt = {
             value: item.id,
             label: item.trading_name,
@@ -1543,7 +1544,7 @@ function JobCustomReport() {
         });
 
         if(job_id.length > 0 || client_id.length > 0) {
-          const availableCustomerIds = new Set(response.data.map(item => item.id));
+          const availableCustomerIds = new Set(activeData.map(item => item.id));
           setFilters(prev => ({
             ...prev,
             customer_id: prev.customer_id.filter(id => availableCustomerIds.has(id)),
@@ -1677,20 +1678,21 @@ function JobCustomReport() {
       }
       const response = await dispatch(ClientAction(data)).unwrap();
       if (response.status) {
-        response.data.forEach((item) => {
+        const activeData = response.data.filter(item => item.status == 1);
+        activeData.forEach((item) => {
           clientToCustomerMap.current[item.id] = item.customer_id;
           optionCacheRef.current[item.id] = {
             value: item.id,
             label: `${item.client_name} (${item.client_code})`,
           };
         });
-        const formatted = response.data.map((item) => ({
+        const formatted = activeData.map((item) => ({
           value: item.id,
           label: `${item.client_name} (${item.client_code})`,
         }));
 
         if(job_id.length > 0 || customer_id.length > 0) {
-          const availableClientIds = new Set(response.data.map(item => item.id));
+          const availableClientIds = new Set(activeData.map(item => item.id));
           setFilters(prev => ({
             ...prev,
             client_id: prev.client_id.filter(id => availableClientIds.has(id)),

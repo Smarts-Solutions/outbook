@@ -189,7 +189,7 @@ function TimesheetReport() {
         if (response.status) {
           const staffList = response.data.data;
 
-          const formatted = staffList.map((item) => ({
+          const formatted = staffList.filter(item => item.status == 1).map((item) => ({
             value: item.id,
             label: `${item.first_name} ${item.last_name} (${item.email})`,
             employee_number: item.employee_number
@@ -220,6 +220,7 @@ function TimesheetReport() {
         const response = await dispatch(Staff({ req, authToken: token })).unwrap();
         if (response.status && response.data) {
           response.data.forEach(manager => {
+            if (manager.status != 1) return;
             // Check if this manager matches the selected customer, client, or job
             let keep = true;
 
@@ -305,7 +306,7 @@ function TimesheetReport() {
             const data = response?.data
               ?.filter(
                 (item) =>
-                  ![null, "", "null", undefined].includes(item.employee_number),
+                  ![null, "", "null", undefined].includes(item.employee_number) && item.status == 1,
               )
               ?.map((item) => ({
                 value: item.employee_number,
@@ -336,7 +337,7 @@ function TimesheetReport() {
         const response = await dispatch(Staff({ req, authToken: token })).unwrap();
         if (response.status && response.data) {
           response.data.forEach(manager => {
-            if (manager.employee_number && !dataList.find(item => item.value === manager.employee_number)) {
+            if (manager.status == 1 && manager.employee_number && !dataList.find(item => item.value === manager.employee_number)) {
               dataList.push({
                 value: manager.employee_number,
                 staff_id: manager.id,
@@ -359,7 +360,7 @@ function TimesheetReport() {
         const response = await dispatch(Staff({ req, authToken: token })).unwrap();
         if (response.status) {
           const rawData = response.data?.data || response.data || [];
-          const formatted = rawData.map((item) => ({
+          const formatted = rawData.filter(item => item.status == 1).map((item) => ({
             value: item.id,
             label: `${item.first_name || ""} ${item.last_name || ""} (${item.email || ""})`.trim(),
           }));
@@ -374,7 +375,7 @@ function TimesheetReport() {
         const req = { action: "get_my_line_managers" };
         const response = await dispatch(Staff({ req, authToken: token })).unwrap();
         if (response.status && response.data) {
-          dataList = response.data.map((manager) => ({
+          dataList = response.data.filter(manager => manager.status == 1).map((manager) => ({
             value: manager.id,
             label: `${manager.first_name || ""} ${manager.last_name || ""} (${manager.email || ""})`.trim(),
           }));
@@ -510,7 +511,7 @@ function TimesheetReport() {
     try {
       const response = await dispatch(getAllCustomerDropDown(data)).unwrap();
       if (response.status) {
-        const formatted = response.data.map((item) => ({
+        const formatted = response.data.filter(item => item.status == 1).map((item) => ({
           value: item.id,
           label: item.trading_name
         }));
@@ -616,7 +617,7 @@ function TimesheetReport() {
     try {
       const response = await dispatch(ClientAction(data)).unwrap();
       if (response.status) {
-        const formatted = response.data.map((item) => ({
+        const formatted = response.data.filter(item => item.status == 1).map((item) => ({
           value: item.id,
           label: `${item.client_name} (${item.client_code})`
         }));
