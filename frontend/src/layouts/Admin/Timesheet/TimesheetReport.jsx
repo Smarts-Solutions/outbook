@@ -58,6 +58,7 @@ function TimesheetReport() {
   const [getAllFilterData, setGetAllFilterData] = useState([]);
   // set filter id
   const [filterId, setFilterId] = useState(null);
+  const [lineManagerAllData, setLineManagerAllData] = useState([]);
 
 
   const [filters, setFilters] = useState({
@@ -66,6 +67,7 @@ function TimesheetReport() {
     fieldsToDisplay: null,
     fieldsToDisplayId: null,
     staff_id: [],
+    line_manager: [],
     employee_number: [],
     customer_id: [],
     client_id: [],
@@ -90,6 +92,7 @@ function TimesheetReport() {
     const upstream = idx === -1 ? selectionOrder : selectionOrder.slice(0, idx);
     return {
       staff_id: upstream.includes("staff_id") ? currentFilters?.staff_id : null,
+      line_manager: upstream.includes("line_manager") ? currentFilters?.line_manager : null,
       customer_id: upstream.includes("customer_id") ? currentFilters?.customer_id : null,
       client_id: upstream.includes("client_id") ? currentFilters?.client_id : null,
       job_id: upstream.includes("job_id") ? currentFilters?.job_id : null,
@@ -349,6 +352,45 @@ function TimesheetReport() {
     }
   };
 
+  const getLineManagerData = async () => {
+    if (role?.toUpperCase() === "SUPERADMIN" || role?.toUpperCase() === "ADMIN") {
+      try {
+        const req = { action: "get_line_manager" };
+        const response = await dispatch(Staff({ req, authToken: token })).unwrap();
+        if (response.status) {
+          const rawData = response.data?.data || response.data || [];
+          const formatted = rawData.map((item) => ({
+            value: item.id,
+            label: `${item.first_name || ""} ${item.last_name || ""} (${item.email || ""})`.trim(),
+          }));
+          setLineManagerAllData(formatted);
+        } else {
+          setLineManagerAllData([]);
+        }
+      } catch (error) {}
+    } else {
+      let dataList = [];
+      try {
+        const req = { action: "get_my_line_managers" };
+        const response = await dispatch(Staff({ req, authToken: token })).unwrap();
+        if (response.status && response.data) {
+          dataList = response.data.map((manager) => ({
+            value: manager.id,
+            label: `${manager.first_name || ""} ${manager.last_name || ""} (${manager.email || ""})`.trim(),
+          }));
+        }
+      } catch (err) {}
+      
+      if (dataList.length === 0) {
+        dataList.push({
+          value: staffDetails?.id,
+          label: `${staffDetails.first_name || ""} ${staffDetails?.last_name || ""} (${staffDetails?.email || ""})`.trim(),
+        });
+      }
+      setLineManagerAllData(dataList);
+    }
+  };
+
   function formatStringToTitleCase(text, key) {
     if (!text) return "";
 
@@ -376,6 +418,7 @@ function TimesheetReport() {
             label: `
             Group By : [${JSON.parse(item?.groupBy)?.map((item) => item.replace(/_id$/i, ""))}]<br/>
             ${item.staff_fullname ? `⮞ Staff : ${item.staff_fullname}<br/>` : ""}
+            ${item.line_manager ? `⮞ Line Manager : ${item.line_manager}<br/>` : ""}
             ${item.customer_name ? `⮞ Customer : ${item.customer_name}<br/>` : ""}
             ${item.client_name ? `⮞ Client : ${item.client_name}<br/>` : ""}
             ${item.job_name ? `⮞ Job : ${item.job_name}<br/>` : ""}
@@ -1122,6 +1165,7 @@ function TimesheetReport() {
 
     if (
       key === "staff_id" ||
+      key === "line_manager" ||
       key === "customer_id" ||
       key === "client_id" ||
       key === "job_id" ||
@@ -1169,7 +1213,7 @@ function TimesheetReport() {
 
           let resolvedStaffId = value;
 
-          if (key === "employee_number") { if (updated.employee_number && updated.employee_number.length > 0) { const matchedEmployees = employeeNumberAllData.filter(e => updated.employee_number.includes(e.value)); if (matchedEmployees.length > 0) { resolvedStaffId = matchedEmployees.map(e => e.staff_id); setStaffAllData(prev => { let newArr = [...(prev || [])]; matchedEmployees.forEach(me => { if (!newArr.find(s => Number(s.value) === Number(me.staff_id))) { newArr.push({ value: me.staff_id, label: me.staff_label, employee_number: me.value }); } }); return newArr; }); } } else { resolvedStaffId = null; } } else { if (updated.staff_id && updated.staff_id.length > 0) { const matchedStaffs = staffAllData.filter(s => updated.staff_id.includes(s.value)); if (matchedStaffs.length > 0) { setEmployeeNumberAllData(prev => { let newArr = [...(prev || [])]; matchedStaffs.forEach(ms => { if (ms.employee_number && !newArr.find(e => e.value === ms.employee_number)) { newArr.push({ value: ms.employee_number, staff_id: ms.value, label: ms.employee_number, staff_label: ms.label }); } }); return newArr; }); } } }
+          if (key === "employee_number") { if (updated.employee_number && updated.employee_number.length > 0) { const matchedEmployees = employeeNumberAllData.filter(e => updated.employee_number.includes(e.value)); if (matchedEmployees.length > 0) { resolvedStaffId = matchedEmployees.map(e => e.staff_id); setStaffAllData(prev => { let newArr = [...(prev || [])]; matchedEmployees.forEach(me => { if (!newArr.find(s => Number(s.value) === Number(me.staff_id))) { newArr.push({ value: me.staff_id, label: me.staff_label, employee_number: me.value }); } }); return newArr; }); } } else { resolvedStaffId = null; } } else if (key === "line_manager") { resolvedStaffId = null; } else { if (updated.staff_id && updated.staff_id.length > 0) { const matchedStaffs = staffAllData.filter(s => updated.staff_id.includes(s.value)); if (matchedStaffs.length > 0) { setEmployeeNumberAllData(prev => { let newArr = [...(prev || [])]; matchedStaffs.forEach(ms => { if (ms.employee_number && !newArr.find(e => e.value === ms.employee_number)) { newArr.push({ value: ms.employee_number, staff_id: ms.value, label: ms.employee_number, staff_label: ms.label }); } }); return newArr; }); } } }
 
           const isClearing = [null, undefined, ""].includes(value) || (Array.isArray(value) && value.length === 0);
           if (isClearing) {
@@ -1905,12 +1949,14 @@ function TimesheetReport() {
     setTaskSearch("");
     setInternalJobAllData([]);
     setInternalTaskAllData([]);
+    setLineManagerAllData([]);
 
     //staffData();
   };
 
   const optionGroupBy = [
     { value: "staff_id", label: "Staff" },
+    { value: "line_manager", label: "Line Manager" },
     ...(filters?.internal_external == "2" || filters?.internal_external == "0"
       ? [{ value: "customer_id", label: "Customer" }]
       : []),
@@ -1924,6 +1970,8 @@ function TimesheetReport() {
 
   const labels = {
     staff_id: "Staff",
+    line_manager: "Line Manager",
+    employee_number: "Employee ID",
     customer_id: "Customer",
     client_id: "Client",
     job_id: "Job",
@@ -2396,6 +2444,40 @@ function TimesheetReport() {
                 }
               }}
 
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
+            />
+          </div>
+        )}
+
+        {/* Field To Display Line Manager */}
+        {filters?.groupBy?.includes("line_manager") && (
+          <div className="col-lg-4 col-md-6">
+            <label className="form-label fw-medium">Line Manager</label>
+            <Select
+              closeMenuOnSelect={false}
+              onMenuOpen={() => {
+                if (lineManagerAllData.length === 0) getLineManagerData();
+              }}
+              options={[
+                { value: "", label: "Select..." },
+                ...lineManagerAllData
+              ]}
+              isMulti
+              value={
+                lineManagerAllData && lineManagerAllData.length > 0
+                  ? lineManagerAllData.filter((opt) => (filters.line_manager || []).includes(opt.value))
+                  : []
+              }
+              onChange={(selected) =>
+                handleFilterChange({
+                  target: {
+                    key: "line_manager",
+                    value: selected ? selected.map(item => item.value) : [],
+                    label: selected ? selected.map(item => item.label).join(", ") : "",
+                  },
+                })
+              }
               isSearchable
               className="shadow-sm select-staff rounded-pill"
             />

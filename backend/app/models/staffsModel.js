@@ -1308,7 +1308,7 @@ const getMyLineManagers = async (staff_by_id) => {
              OR j.id IN (SELECT job_id FROM temp_assigned_jobs_staff WHERE staff_id = staffs.id)
         ) as assigned_jobs
       FROM staffs
-      WHERE staffs.id IN (${LineManageStaffId})
+      WHERE staffs.id IN (${LineManageStaffId}) AND staffs.status = '1'
     `;
     
     const [result] = await connection.execute(query);
