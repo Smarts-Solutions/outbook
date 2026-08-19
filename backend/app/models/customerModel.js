@@ -1312,7 +1312,7 @@ const getCustomer_dropdown_filter = async (customer) => {
                     SUBSTRING(c.customer_code, 1, 15)
                 ) AS customer_code
             FROM customers c
-            WHERE c.trading_name LIKE ?
+            WHERE c.status = '1' AND c.trading_name LIKE ?
         `;
 
         const params = [`%${search}%`];
@@ -1439,7 +1439,8 @@ const getCustomer_dropdown_filter = async (customer) => {
             LEFT JOIN
                 customer_company_information ON customers.id = customer_company_information.customer_id
             WHERE
-              (customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId}))
+              customers.status = '1' 
+              AND (customers.staff_id IN (${LineManageStaffId}) OR customers.account_manager_id IN (${LineManageStaffId}) OR temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId}))
               AND customers.trading_name LIKE '%${search}%'
              `;
         
