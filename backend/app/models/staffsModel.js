@@ -123,7 +123,7 @@ const createStaff = async (staff) => {
 
 const getStaff = async (data) => {
  
-  let { page, limit, search, StaffUserId } = data;
+  let { page, limit, search, StaffUserId, line_manager_id } = data;
 
   let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
   const rows = await QueryRoleHelperFunction(StaffUserId);
@@ -133,26 +133,30 @@ const getStaff = async (data) => {
   const offset = (page - 1) * limit;
   search = search.trim();
 
-  // LineManageStaffId = [
-  //   ...new Set(LineManageStaffId),
-  // ];
-  // const connection = await pool.getConnection();
-  // await buildAssignedJobsTempTable(connection, LineManageStaffId);
   let role_name = rows[0].role_name?.toUpperCase();
 
-  let where = "";
-
-  // if (rows.length > 0 && (role_name === "SUPERADMIN" || role_name === "ADMIN" || role_name === "MANAGEMENT")) {
-  //   where = "WHERE 1=1 AND staffs.role_id != 12";
-  // } else {
-  //   where = `WHERE 1=1 AND staffs.role_id != 12 AND staffs.created_by IN (${LineManageStaffId})`;
-  // }
-
-  // where = "WHERE 1=1 AND staffs.role_id != 12";
-
-   where = "WHERE s.role_id != 12 ";
-   if (rows.length > 0 && (role_name === "SUPERADMIN")) {
-    where = "WHERE s.role_id != 12 ";
+  let where = "WHERE s.role_id != 12 ";
+  
+  if (line_manager_id && line_manager_id.length > 0) {
+    const ensureArr = (v) => {
+      if (Array.isArray(v)) return v.filter(x => !["", null, undefined].includes(x));
+      if (!["", null, undefined].includes(v)) return [v];
+      return [];
+    };
+    const lmArr = ensureArr(line_manager_id);
+    if (lmArr.length > 0) {
+      let subordinates = [];
+      for (const lm of lmArr) {
+        let sub = await LineManageStaffIdHelperFunctionForStaff(lm);
+        subordinates.push(...sub, lm);
+      }
+      if (subordinates.length > 0) {
+        subordinates = [...new Set(subordinates)];
+        where += ` AND s.id IN (${subordinates.map(v => pool.escape(v)).join(',')}) `;
+      } else {
+        where += ` AND 1=0 `;
+      }
+    }
   }
 
   // 🔍 SEARCH CONDITION
@@ -588,6 +592,20 @@ const getStaffByFilter = async (data) => {
     const tArr = ensureArr(task_id);
     if (tArr.length > 0) {
       timesheetWhere += ` AND timesheet.task_id IN (${tArr.map(v => connection.escape(v)).join(',')})`;
+    }
+    const lmArr = ensureArr(data.line_manager_id);
+    if (lmArr.length > 0) {
+      let subordinates = [];
+      for(const lm of lmArr) {
+         let sub = await LineManageStaffIdHelperFunctionForStaff(lm);
+         subordinates.push(...sub, lm);
+      }
+      if(subordinates.length > 0) {
+        subordinates = [...new Set(subordinates)];
+        timesheetWhere += ` AND staffs.id IN (${subordinates.map(v => connection.escape(v)).join(',')})`;
+      } else {
+        timesheetWhere += ` AND 1=0`;
+      }
     }
 
     // 🔹 DATA
