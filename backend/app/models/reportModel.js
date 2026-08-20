@@ -3,6 +3,7 @@ const pool = require("../config/database");
 const {
   SatffLogUpdateOperation,
   LineManageStaffIdHelperFunction,
+  LineManageStaffIdHelperFunctionForStaff,
   QueryRoleHelperFunction,
   buildAssignedJobsTempTable,
   getStaffAccessFilters
@@ -2595,6 +2596,7 @@ const getTimesheetReportData = async (Report) => {
     fromDate,
     toDate,
     status,
+    line_manager,
   } = data.filters;
 
   const role_user = data?.role?.toUpperCase() || "";
@@ -2615,6 +2617,7 @@ const getTimesheetReportData = async (Report) => {
     "job_id",
     "task_id",
     "employee_number",
+    "line_manager",
   ];
 
   if (!Array.isArray(groupBy)) groupBy = [groupBy];
@@ -2659,9 +2662,25 @@ const getTimesheetReportData = async (Report) => {
     const innerParams = [];
 
     const staffArr = ensureArray(staff_id);
+    const lineManagerArr = ensureArray(line_manager);
+
     if (staffArr.length > 0) {
       innerConds.push(`timesheet.staff_id IN (${staffArr.map(() => '?').join(',')})`);
       innerParams.push(...staffArr.map(num));
+    } else if (lineManagerArr.length > 0) {
+      let subordinates = [];
+      for (const lm of lineManagerArr) {
+        let sub = await LineManageStaffIdHelperFunctionForStaff(lm);
+        subordinates.push(...sub, lm);
+      }
+      if (subordinates.length > 0) {
+        const uniqueSubordinates = [...new Set(subordinates)].map(num).filter((n) => !Number.isNaN(n));
+        innerConds.push(`timesheet.staff_id IN (${uniqueSubordinates.map(() => '?').join(',')})`);
+        innerParams.push(...uniqueSubordinates);
+      } else {
+        innerConds.push(`timesheet.staff_id = ?`);
+        innerParams.push(0);
+      }
     }
     const customerArr = ensureArray(customer_id);
     if (customerArr.length > 0) {
@@ -2727,7 +2746,11 @@ const getTimesheetReportData = async (Report) => {
     const innerWhereSQL = innerConds.length ? ` AND ${innerConds.join(" AND ")}` : "";
 
     const groupValueSQL = `CONCAT_WS('::', ${groupBy
-      .map((f) => (f === "employee_number" ? "s.employee_number" : `timesheet.${f}`))
+      .map((f) => {
+        if (f === "employee_number") return "s.employee_number";
+        if (f === "line_manager") return "(SELECT GROUP_CONCAT(lm.staff_to) FROM line_managers lm WHERE lm.staff_by = timesheet.staff_id)";
+        return `timesheet.${f}`;
+      })
       .join(", ")}) AS group_value`;
 
     // ----------------------------------------------------------
@@ -2786,6 +2809,7 @@ const getTimesheetReportData = async (Report) => {
           return `CASE WHEN raw.task_type='1' THEN sub_internal.name
                        WHEN raw.task_type='2' THEN t.name END`;
         if (f === "employee_number") return "s.employee_number";
+        if (f === "line_manager") return "(SELECT GROUP_CONCAT(lm_s.first_name, ' ', lm_s.last_name) FROM line_managers lm JOIN staffs lm_s ON lm.staff_to = lm_s.id WHERE lm.staff_by = s.id)";
         return f;
       })
       .join(", ' - ', ");
@@ -2950,8 +2974,8 @@ const getTimesheetReportData = async (Report) => {
     const columnsWeeks = [...groupBy, ...weeks, "total_hours"];
     const finalRows = normalizeRows(columnsWeeks, allRows);
 
-    const fixed = [...groupBy, "task_type", "total_hours"];
-    const dynamic = columnsWeeks.filter((col) => !fixed.includes(col));
+    const fixed = [...groupBy.filter(g => g !== 'line_manager'), "task_type", "total_hours"];
+    const dynamic = columnsWeeks.filter((col) => !fixed.includes(col) && col !== 'line_manager');
     const columnsWeeksDecOrder = [...fixed, ...dynamic.reverse()];
 
     // rows already paginated at SQL level (only current page's groups fetched)
@@ -3001,7 +3025,7 @@ const getTimesheetReportDataOld = async (Report) => {
   } = data.filters;
 
   let role_user = data?.role?.toUpperCase() || "";
-  const page  = Math.max(Number(data.page) || 1, 1);
+  const page = Math.max(Number(data.page) || 1, 1);
   const limit = Math.max(Number(data.limit) || 100000000, 1);
   const offset = (page - 1) * limit;
   //console.log("groupBy", groupBy);
@@ -3111,7 +3135,11 @@ const getTimesheetReportDataOld = async (Report) => {
     // Build group_value for SQL
     // const groupValueSQL = `CONCAT_WS('::', ${groupBy.join(", ")}) AS group_value`;
     const groupValueSQL = `CONCAT_WS('::', ${groupBy
-      .map((f) => (f === "employee_number" ? "s.employee_number" : `${f}`))
+      .map((f) => {
+        if (f === "employee_number") return "s.employee_number";
+        if (f === "line_manager") return "(SELECT GROUP_CONCAT(lm.staff_to) FROM line_managers lm WHERE lm.staff_by = raw.staff_id)";
+        return `${f}`;
+      })
       .join(", ")}) AS group_value`;
 
     // Build readable group_label
@@ -3474,7 +3502,7 @@ const getTimesheetReportDatLive = async (Report) => {
   } = data.filters;
 
   let role_user = data?.role?.toUpperCase() || "";
-  const page  = Math.max(Number(data.page) || 1, 1);
+  const page = Math.max(Number(data.page) || 1, 1);
   const limit = Math.max(Number(data.limit) || 100000000, 1);
   const offset = (page - 1) * limit;
   //console.log("groupBy", groupBy);
@@ -3584,7 +3612,11 @@ const getTimesheetReportDatLive = async (Report) => {
     // Build group_value for SQL
     // const groupValueSQL = `CONCAT_WS('::', ${groupBy.join(", ")}) AS group_value`;
     const groupValueSQL = `CONCAT_WS('::', ${groupBy
-      .map((f) => (f === "employee_number" ? "s.employee_number" : `${f}`))
+      .map((f) => {
+        if (f === "employee_number") return "s.employee_number";
+        if (f === "line_manager") return "(SELECT GROUP_CONCAT(lm.staff_to) FROM line_managers lm WHERE lm.staff_by = raw.staff_id)";
+        return `${f}`;
+      })
       .join(", ")}) AS group_value`;
 
     // Build readable group_label
@@ -3805,7 +3837,7 @@ const getTimesheetReportDatLive = async (Report) => {
         ${baseQuery}
     ) x
     `;
-    
+
     const conn = await pool.getConnection();
     const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate]);
     conn.release();
@@ -4510,14 +4542,14 @@ const staffRoleChangeUpdate = async (Report) => {
   // Also transfer any jobs where the staff is assigned via 'allocated to others' (job_allowed_staffs table)
   if (update_staff_id) {
     query.push(`UPDATE IGNORE job_allowed_staffs SET staff_id = ${update_staff_id} WHERE staff_id = ${to_staff_id}`);
-    
+
     // Transfer Creator and Portfolio ownership
     query.push(`UPDATE clients SET staff_created_id = ${update_staff_id} WHERE staff_created_id = ${to_staff_id}`);
     query.push(`UPDATE customers SET staff_id = ${update_staff_id} WHERE staff_id = ${to_staff_id}`);
     query.push(`UPDATE jobs SET staff_created_id = ${update_staff_id} WHERE staff_created_id = ${to_staff_id}`);
     query.push(`UPDATE staff_portfolio SET staff_id = ${update_staff_id} WHERE staff_id = ${to_staff_id}`);
   }
-  
+
   query.push(
     `DELETE FROM job_allowed_staffs WHERE staff_id = ${to_staff_id}`
   );
@@ -4583,14 +4615,14 @@ const staffStatusChangeUpdate = async (Report) => {
   // Also transfer any jobs where the staff is assigned via 'allocated to others' (job_allowed_staffs table)
   if (update_staff_id) {
     query.push(`UPDATE IGNORE job_allowed_staffs SET staff_id = ${update_staff_id} WHERE staff_id = ${to_staff_id}`);
-    
+
     // Transfer Creator and Portfolio ownership
     query.push(`UPDATE clients SET staff_created_id = ${update_staff_id} WHERE staff_created_id = ${to_staff_id}`);
     query.push(`UPDATE customers SET staff_id = ${update_staff_id} WHERE staff_id = ${to_staff_id}`);
     query.push(`UPDATE jobs SET staff_created_id = ${update_staff_id} WHERE staff_created_id = ${to_staff_id}`);
     query.push(`UPDATE staff_portfolio SET staff_id = ${update_staff_id} WHERE staff_id = ${to_staff_id}`);
   }
-  
+
   query.push(
     `DELETE FROM job_allowed_staffs WHERE staff_id = ${to_staff_id}`
   );
@@ -7137,15 +7169,15 @@ const getJobCustomReport = async (Report) => {
     }
 
     const conn = await pool.getConnection();
-   
+
 
     let tmpTableJoin = "";
-   console.log("LineManageStaffId==>>>", LineManageStaffId);
+    console.log("LineManageStaffId==>>>", LineManageStaffId);
     if (
       !["SUPERADMIN", "ADMIN"].includes(role_user) &&
       !["", null, undefined].includes(StaffUserId)
     ) {
-      
+
       await buildAssignedJobsTempTable(conn, LineManageStaffId);
       //where.push(`temp_assigned_jobs_staff.staff_id = ${StaffUserId}`);
       where.push(`
@@ -7158,13 +7190,13 @@ const getJobCustomReport = async (Report) => {
 
       tmpTableJoin = `LEFT JOIN temp_assigned_jobs_staff
                 ON raw.job_id = temp_assigned_jobs_staff.job_id`;
-       where.push(`(
+      where.push(`(
             temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR raw.service_id = temp_assigned_jobs_staff.service_id_assign
-          )`);         
+          )`);
     }
 
-    
+
 
     where = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
@@ -7328,7 +7360,7 @@ const getJobCustomReport = async (Report) => {
         `;
 
 
-        const unpivotSQLCount = `
+    const unpivotSQLCount = `
             SELECT
                 raw.job_id
             FROM (
@@ -7396,17 +7428,17 @@ const getJobCustomReport = async (Report) => {
             ${GROUPBY}
             ORDER BY raw.job_id
             LIMIT ${100000} OFFSET ${offset}
-        `; 
+        `;
 
     //console.log("fromDate", fromDate);
     // console.log("toDate", toDate);
-   // console.log("Total Count Query ---- ", unpivotSQLCount);
+    // console.log("Total Count Query ---- ", unpivotSQLCount);
     // Get Total Count
-    const [countResult] = await conn.execute(unpivotSQLCount,[fromDate, toDate]);
+    const [countResult] = await conn.execute(unpivotSQLCount, [fromDate, toDate]);
 
-  
+
     const totalCount = countResult.length || 0;
-   // const totalCount = countResult[0]?.total_count || 0;
+    // const totalCount = countResult[0]?.total_count || 0;
 
     //console.log("Total Count --->>- ", totalCount);
 
@@ -7568,7 +7600,7 @@ const getJobCustomReport = async (Report) => {
             LIMIT ${limit} OFFSET ${offset}
         `;
 
-     const unpivotSQL = `
+    const unpivotSQL = `
             SELECT
                 raw.job_id,
 
@@ -7723,14 +7755,14 @@ const getJobCustomReport = async (Report) => {
              ${GROUPBY}
             ORDER BY raw.job_id
             LIMIT ${limit} OFFSET ${offset}
-        `;   
+        `;
 
-     console.log("fromDate ---> ", fromDate, "toDate ", toDate);
-     console.log("unpivotSQL", unpivotSQL);
+    console.log("fromDate ---> ", fromDate, "toDate ", toDate);
+    console.log("unpivotSQL", unpivotSQL);
 
-      //console.log("GROUPBY ---->> ", GROUPBY);
+    //console.log("GROUPBY ---->> ", GROUPBY);
 
-    
+
     const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate]);
     conn.release();
 
@@ -8742,15 +8774,15 @@ const getJobCustomReport2 = async (Report) => {
     }
 
     const conn = await pool.getConnection();
-   
+
 
     let tmpTableJoin = "";
-   console.log("LineManageStaffId==>>>", LineManageStaffId);
+    console.log("LineManageStaffId==>>>", LineManageStaffId);
     if (
       !["SUPERADMIN", "ADMIN"].includes(role_user) &&
       !["", null, undefined].includes(StaffUserId)
     ) {
-      
+
       await buildAssignedJobsTempTable(conn, LineManageStaffId);
       //where.push(`temp_assigned_jobs_staff.staff_id = ${StaffUserId}`);
       where.push(`
@@ -8763,13 +8795,13 @@ const getJobCustomReport2 = async (Report) => {
 
       tmpTableJoin = `LEFT JOIN temp_assigned_jobs_staff
                 ON raw.job_id = temp_assigned_jobs_staff.job_id`;
-       where.push(`(
+      where.push(`(
             temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR raw.service_id = temp_assigned_jobs_staff.service_id_assign
-          )`);         
+          )`);
     }
 
-    
+
 
     where = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
@@ -8933,7 +8965,7 @@ const getJobCustomReport2 = async (Report) => {
         `;
 
 
-        const unpivotSQLCount = `
+    const unpivotSQLCount = `
             SELECT
                 raw.job_id
             FROM (
@@ -9001,17 +9033,17 @@ const getJobCustomReport2 = async (Report) => {
             ${GROUPBY}
             ORDER BY raw.job_id
             LIMIT ${100000} OFFSET ${offset}
-        `; 
+        `;
 
     //console.log("fromDate", fromDate);
     // console.log("toDate", toDate);
-   // console.log("Total Count Query ---- ", unpivotSQLCount);
+    // console.log("Total Count Query ---- ", unpivotSQLCount);
     // Get Total Count
-    const [countResult] = await conn.execute(unpivotSQLCount,[fromDate, toDate]);
+    const [countResult] = await conn.execute(unpivotSQLCount, [fromDate, toDate]);
 
-  
+
     const totalCount = countResult.length || 0;
-   // const totalCount = countResult[0]?.total_count || 0;
+    // const totalCount = countResult[0]?.total_count || 0;
 
     //console.log("Total Count --->>- ", totalCount);
 
@@ -9173,7 +9205,7 @@ const getJobCustomReport2 = async (Report) => {
             LIMIT ${limit} OFFSET ${offset}
         `;
 
-     const unpivotSQL = `
+    const unpivotSQL = `
             SELECT
                 raw.job_id,
 
@@ -9328,14 +9360,14 @@ const getJobCustomReport2 = async (Report) => {
              ${GROUPBY}
             ORDER BY raw.job_id
             LIMIT ${limit} OFFSET ${offset}
-        `;   
+        `;
 
-     console.log("fromDate ---> ", fromDate, "toDate ", toDate);
-     console.log("unpivotSQL", unpivotSQL);
+    console.log("fromDate ---> ", fromDate, "toDate ", toDate);
+    console.log("unpivotSQL", unpivotSQL);
 
-      //console.log("GROUPBY ---->> ", GROUPBY);
+    //console.log("GROUPBY ---->> ", GROUPBY);
 
-    
+
     const [rows] = await conn.execute(unpivotSQL, [fromDate, toDate]);
     conn.release();
 

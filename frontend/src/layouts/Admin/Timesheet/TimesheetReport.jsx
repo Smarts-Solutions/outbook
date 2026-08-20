@@ -178,10 +178,10 @@ function TimesheetReport() {
           line_manager_id: line_manager_id || ""
         };
       } else {
-        req = { 
-          action: "get", 
-          page: pageNo, 
-          limit: (line_manager_id && line_manager_id.length > 0) ? 1000 : 20, 
+        req = {
+          action: "get",
+          page: pageNo,
+          limit: (line_manager_id && line_manager_id.length > 0) ? 1000 : 20,
           search: searchValue,
           line_manager_id: line_manager_id || ""
         };
@@ -371,7 +371,7 @@ function TimesheetReport() {
         } else {
           setLineManagerAllData([]);
         }
-      } catch (error) {}
+      } catch (error) { }
     } else {
       let dataList = [];
       try {
@@ -383,8 +383,8 @@ function TimesheetReport() {
             label: `${manager.first_name || ""} ${manager.last_name || ""} (${manager.email || ""})`.trim(),
           }));
         }
-      } catch (err) {}
-      
+      } catch (err) { }
+
       if (dataList.length === 0) {
         dataList.push({
           value: staffDetails?.id,
@@ -1310,9 +1310,9 @@ function TimesheetReport() {
         } else if (key === "line_manager") {
           updated.staff_id = null;
           updated.employee_number = null;
-          
+
           const isClearing = [null, undefined, ""].includes(value) || (Array.isArray(value) && value.length === 0);
-          
+
           if (isClearing) {
             const lineManagerIdx = selectionOrder.indexOf("line_manager");
             if (lineManagerIdx !== -1) {
@@ -1335,7 +1335,7 @@ function TimesheetReport() {
               const newOrder = prev.includes("line_manager") ? prev : [...prev, "line_manager"];
               const lineManagerIdx = newOrder.indexOf("line_manager");
               const staffIdx = newOrder.indexOf("staff_id");
-              
+
               if (staffIdx === -1 || lineManagerIdx < staffIdx) {
                 staffCache.current = {};
                 setStaffAllData([]);
@@ -1344,7 +1344,7 @@ function TimesheetReport() {
                 const up = getUpstreamFilters("staff_id", filters);
                 GetAllStaff({ searchValue: "", pageNo: 1, line_manager_id: value, job_id: up.job_id, customer_id: up.customer_id, client_id: up.client_id, task_id: up.task_id });
               }
-              
+
               return newOrder;
             });
           }
