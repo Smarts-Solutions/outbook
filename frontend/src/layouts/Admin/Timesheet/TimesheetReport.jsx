@@ -1956,6 +1956,7 @@ function TimesheetReport() {
     filters.internal_external,
     filters.groupBy,
     filters.staff_id,
+    filters.line_manager,
     filters.customer_id,
     filters.client_id,
     filters.job_id,
