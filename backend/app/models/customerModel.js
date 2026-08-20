@@ -1,6 +1,6 @@
 const pool = require('../config/database');
 const deleteUploadFile = require('../../app/middlewares/deleteUploadFile');
-const { SatffLogUpdateOperation, generateNextUniqueCode, LineManageStaffIdHelperFunction, QueryRoleHelperFunction, buildAssignedJobsTempTable } = require('../../app/utils/helper');
+const { SatffLogUpdateOperation, generateNextUniqueCode, LineManageStaffIdHelperFunction, QueryRoleHelperFunction, buildAssignedJobsTempTable, LineManageStaffIdHelperFunctionForStaff } = require('../../app/utils/helper');
 
 
 
@@ -1242,9 +1242,23 @@ const getCustomer_dropdown_filter = async (customer) => {
     // Line Manager
     let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
     
-    if (filterStaffId) {
+    if (filterStaffId && filterStaffId.length > 0) {
         const staffArr = Array.isArray(filterStaffId) ? filterStaffId : [filterStaffId];
         LineManageStaffId = staffArr.filter(x => !["", null, undefined].includes(x));
+    } else if (filters?.line_manager && (Array.isArray(filters.line_manager) ? filters.line_manager.length > 0 : true)) {
+        let subordinates = [];
+        const lmArr = Array.isArray(filters.line_manager) ? filters.line_manager : [filters.line_manager];
+        for (const lm of lmArr) {
+            if (!["", null, undefined].includes(lm)) {
+                let sub = await LineManageStaffIdHelperFunctionForStaff(lm);
+                subordinates.push(...sub, lm);
+            }
+        }
+        if (subordinates.length > 0) {
+            LineManageStaffId = [...new Set(subordinates)];
+        } else {
+            LineManageStaffId = [0];
+        }
     }
 
     // Get Role

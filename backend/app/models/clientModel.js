@@ -6,7 +6,8 @@ const {
   getAllCustomerIds,
   LineManageStaffIdHelperFunction,
   QueryRoleHelperFunction,
-  buildAssignedJobsTempTable
+  buildAssignedJobsTempTable,
+  LineManageStaffIdHelperFunctionForStaff
 } = require("../../app/utils/helper");
 
 const createClient = async (client) => {
@@ -1093,9 +1094,23 @@ async function getAllClientsSidebarFilter(
 
   const offset = (page - 1) * limit;
 
-  if (filters?.staff_id) {
+  if (filters?.staff_id && (Array.isArray(filters.staff_id) ? filters.staff_id.length > 0 : true)) {
     const staffArr = Array.isArray(filters.staff_id) ? filters.staff_id : [filters.staff_id];
     LineManageStaffId = staffArr.filter(x => !["", null, undefined].includes(x));
+  } else if (filters?.line_manager && (Array.isArray(filters.line_manager) ? filters.line_manager.length > 0 : true)) {
+    let subordinates = [];
+    const lmArr = Array.isArray(filters.line_manager) ? filters.line_manager : [filters.line_manager];
+    for (const lm of lmArr) {
+      if (!["", null, undefined].includes(lm)) {
+        let sub = await LineManageStaffIdHelperFunctionForStaff(lm);
+        subordinates.push(...sub, lm);
+      }
+    }
+    if (subordinates.length > 0) {
+      LineManageStaffId = [...new Set(subordinates)];
+    } else {
+      LineManageStaffId = [0];
+    }
   }
 
   let extraFilter = "";
