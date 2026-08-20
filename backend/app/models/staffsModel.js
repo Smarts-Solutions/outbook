@@ -1322,6 +1322,33 @@ const getMyLineManagers = async (staff_by_id) => {
 };
 
 
+const getActiveLineManagers = async () => {
+  const query = `
+    SELECT DISTINCT 
+      s.id, 
+      s.first_name, 
+      s.last_name, 
+      s.email, 
+      s.employee_number,
+      s.status
+    FROM staffs s
+    JOIN line_managers lm ON s.id = lm.staff_to
+    WHERE s.status = '1'
+    ORDER BY s.first_name ASC
+  `;
+  try {
+    const [rows] = await pool.query(query);
+    return {
+      status: true,
+      message: "Success",
+      data: rows,
+    };
+  } catch (error) {
+    console.error("Error in getActiveLineManagers:", error);
+    return { status: false, message: "Error fetching active line managers." };
+  }
+};
+
 const status = async (id) => {
   if (id != undefined) {
     const query = `SELECT status FROM staffs WHERE id = ?`;
@@ -1802,6 +1829,7 @@ module.exports = {
   GetStaffByRoleId,
   GetStaffAndDelete,
   getLineManagerStaff,
+  getActiveLineManagers,
   getMyLineManagers,
   getStaffOtherRole,
   getStaffByFilter,

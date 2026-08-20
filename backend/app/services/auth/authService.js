@@ -59,6 +59,10 @@ const getLineManagerStaff = async (staff) => {
   return staffModel.getLineManagerStaff(staff);
 }
 
+const getActiveLineManagers = async () => {
+  return staffModel.getActiveLineManagers();
+};
+
 const getMyLineManagers = async (staff) => {
   return staffModel.getMyLineManagers(staff.StaffUserId);
 };
@@ -269,8 +273,8 @@ module.exports = {
   GetStaffByRole,
   GetStaffAndDeleteData,
   getLineManagerStaff,
+  getActiveLineManagers,
   getMyLineManagers,
   getStaffByFilter,
   getStaffNew
-
 };

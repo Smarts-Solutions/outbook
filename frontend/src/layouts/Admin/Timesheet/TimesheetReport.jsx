@@ -356,11 +356,11 @@ function TimesheetReport() {
   const getLineManagerData = async () => {
     if (role?.toUpperCase() === "SUPERADMIN" || role?.toUpperCase() === "ADMIN") {
       try {
-        const req = { action: "get_line_manager" };
+        const req = { action: "get_active_line_managers" };
         const response = await dispatch(Staff({ req, authToken: token })).unwrap();
         if (response.status) {
           const rawData = response.data?.data || response.data || [];
-          const formatted = rawData.filter(item => item.status == 1).map((item) => ({
+          const formatted = rawData.filter(item => item.status == 1 || item.status == '1').map((item) => ({
             value: item.id,
             label: `${item.first_name || ""} ${item.last_name || ""} (${item.email || ""})`.trim(),
           }));
