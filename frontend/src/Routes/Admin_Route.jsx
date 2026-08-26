@@ -61,6 +61,7 @@ import JobCustomReport from "../layouts/Admin/Jobs/JobCustomReport";
 import CreateJob from "../layouts/Admin/Jobs/JobAction/CreateJob";
 import JobEdit from "../layouts/Admin/Jobs/JobAction/EditJob";
 import Timesheet from "../layouts/Admin/Timesheet/Timesheet";
+import TimesheetNewDesign from "../layouts/Admin/Timesheet/TimesheetNewDesign";
 import TimesheetNew from "../layouts/Admin/Timesheet/TimesheetNew";
 import TimesheetReport from "../layouts/Admin/Timesheet/TimesheetReport";
 import Reports from "../layouts/Admin/Reports/Reports";
@@ -309,6 +310,7 @@ const Admin_Route = () => {
               <Route path="/setting/checklist" element={<SettingCheckList />} />
               <Route path="/edit/setting/checklist" element={<EditSettingCheckList />} />
               <Route path="/timesheet" element={<Timesheet />} />
+              <Route path="/timesheetnewdesign" element={<TimesheetNewDesign />} />
               <Route path="/timesheetnew" element={<TimesheetNew />} />
               <Route path="/timesheetReports" element={<TimesheetReport />} />
               <Route path="/subinternal" element={<SubInternal />} />
