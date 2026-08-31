@@ -12,6 +12,8 @@ import Select from "react-select";
 import * as XLSX from "xlsx";
 import ReactPaginate from "react-paginate";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
+import { CustomTimesheetAction } from "../../../ReduxStore/Slice/CustomTimesheet/CustomTimesheetSlice";
+
 import dayjs from "dayjs";
 import sweatalert from "sweetalert2";
 import { Trash, Download } from "lucide-react";
@@ -188,9 +190,9 @@ function TimesheetReport() {
       }
       const data = { req: req, authToken: token };
       try {
-        const response = await dispatch(Staff(data)).unwrap();
+        const response = await dispatch(CustomTimesheetAction(data)).unwrap();
         if (response.status) {
-          const staffList = response.data.data;
+          const staffList = Array.isArray(response.data) ? response.data : (response.data?.data || []);
 
           const formatted = staffList.map((item) => ({
             value: item.id,
@@ -220,7 +222,7 @@ function TimesheetReport() {
 
       try {
         const req = { action: "get_my_line_managers" };
-        const response = await dispatch(Staff({ req, authToken: token })).unwrap();
+        const response = await dispatch(CustomTimesheetAction({ req, authToken: token })).unwrap();
         if (response.status && response.data) {
           response.data.forEach(manager => {
             // Check if this manager matches the selected customer, client, or job
@@ -302,14 +304,16 @@ function TimesheetReport() {
         role_id: "employee_number" || "",
       };
       var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
+      await dispatch(CustomTimesheetAction(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-            const data = response?.data
+            const rawData = Array.isArray(response?.data) ? response.data : (response?.data?.data || []);
+            console.log("employeeData rawData:", rawData);
+            const data = rawData
               ?.filter(
                 (item) =>
-                  ![null, "", "null", undefined].includes(item.employee_number) && item.status == 1,
+                  ![null, "", "null", undefined].includes(item.employee_number) && (item.status == 1 || item.status === undefined || item.status == '1'),
               )
               ?.map((item) => ({
                 value: item.employee_number,
@@ -317,6 +321,7 @@ function TimesheetReport() {
                 label: `${item.employee_number}`,
                 staff_label: `${item.first_name || ""} ${item.last_name || ""} (${item.email || ""})`.trim(),
               }));
+            console.log("employeeData final data:", data);
             setEmployeeNumberAllData(data);
           } else {
             setEmployeeNumberAllData([]);
@@ -337,7 +342,7 @@ function TimesheetReport() {
 
       try {
         const req = { action: "get_my_line_managers" };
-        const response = await dispatch(Staff({ req, authToken: token })).unwrap();
+        const response = await dispatch(CustomTimesheetAction({ req, authToken: token })).unwrap();
         if (response.status && response.data) {
           response.data.forEach(manager => {
             if (manager.status == 1 && manager.employee_number && !dataList.find(item => item.value === manager.employee_number)) {
@@ -356,27 +361,68 @@ function TimesheetReport() {
     }
   };
 
-  const getLineManagerData = async () => {
+  const [lineManagerPage, setLineManagerPage] = useState(1);
+  const [lineManagerHasMore, setLineManagerHasMore] = useState(true);
+  const [lineManagerLoading, setLineManagerLoading] = useState(false);
+  const [lineManagerSearch, setLineManagerSearch] = useState("");
+  const lineManagerCache = useRef({});
+  const lineManagerDebounceRef = useRef(null);
+
+  const getLineManagerData = async ({ searchValue = "", pageNo = 1, append = false, staff_id = null }) => {
     if (role?.toUpperCase() === "SUPERADMIN" || role?.toUpperCase() === "ADMIN") {
+      const cacheKey = `${searchValue}_${pageNo}_${staff_id}`;
+      if (lineManagerCache.current[cacheKey]) {
+        const cached = lineManagerCache.current[cacheKey];
+        setLineManagerAllData(prev => {
+          const combined = append ? [...prev, ...cached] : cached;
+          const unique = Array.from(new Map(combined.map(item => [item.value, item])).values());
+          return unique;
+        });
+        return;
+      }
+
+      setLineManagerLoading(true);
       try {
-        const req = { action: "get_active_line_managers" };
-        const response = await dispatch(Staff({ req, authToken: token })).unwrap();
+        const req = { 
+          action: "get_active_line_managers",
+          filters: { ...filters, staff_id: (Array.isArray(staff_id) ? staff_id : (staff_id !== null ? [staff_id] : (Array.isArray(filters.staff_id) ? filters.staff_id : []))).length > 0 ? (Array.isArray(staff_id) ? staff_id : (staff_id !== null ? [staff_id] : (Array.isArray(filters.staff_id) ? filters.staff_id : []))) : null },
+          pagination: { page: pageNo, limit: staff_id ? 1000 : 20, search: searchValue }
+        };
+        const response = await dispatch(CustomTimesheetAction({ req, authToken: token })).unwrap();
         if (response.status) {
           const rawData = response.data?.data || response.data || [];
           const formatted = rawData.filter(item => item.status == 1 || item.status == '1').map((item) => ({
             value: item.id,
             label: `${item.first_name || ""} ${item.last_name || ""} (${item.email || ""})`.trim(),
           }));
-          setLineManagerAllData(formatted);
+          
+          lineManagerCache.current[cacheKey] = formatted;
+          
+          setLineManagerAllData(prev => {
+            const combined = append ? [...prev, ...formatted] : formatted;
+            const unique = Array.from(new Map(combined.map(item => [item.value, item])).values());
+            return unique;
+          });
+
+          if (response.pagination) {
+            setLineManagerHasMore(pageNo < response.pagination.totalPages);
+          } else {
+            setLineManagerHasMore(false);
+          }
         } else {
-          setLineManagerAllData([]);
+          if (!append) setLineManagerAllData([]);
+          setLineManagerHasMore(false);
         }
-      } catch (error) { }
+      } catch (error) { 
+        setLineManagerHasMore(false);
+      } finally {
+        setLineManagerLoading(false);
+      }
     } else {
       let dataList = [];
       try {
         const req = { action: "get_my_line_managers" };
-        const response = await dispatch(Staff({ req, authToken: token })).unwrap();
+        const response = await dispatch(CustomTimesheetAction({ req, authToken: token })).unwrap();
         if (response.status && response.data) {
           dataList = response.data.filter(manager => manager.status == 1).map((manager) => ({
             value: manager.id,
@@ -392,6 +438,7 @@ function TimesheetReport() {
         });
       }
       setLineManagerAllData(dataList);
+      setLineManagerHasMore(false);
     }
   };
 
@@ -512,7 +559,7 @@ function TimesheetReport() {
 
     const data = { req: req, authToken: token };
     try {
-      const response = await dispatch(getAllCustomerDropDown(data)).unwrap();
+      const response = await dispatch(CustomTimesheetAction(data)).unwrap();
       if (response.status) {
         const formatted = response.data.filter(item => item.status == 1).map((item) => ({
           value: item.id,
@@ -618,7 +665,7 @@ function TimesheetReport() {
     };
     const data = { req, authToken: token };
     try {
-      const response = await dispatch(ClientAction(data)).unwrap();
+      const response = await dispatch(CustomTimesheetAction(data)).unwrap();
       if (response.status) {
         const formatted = response.data.filter(item => item.status == 1).map((item) => ({
           value: item.id,
@@ -669,7 +716,7 @@ function TimesheetReport() {
     if (internal_external == "0") {
       var req = { action: "getInternalJobs" };
       var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
+      await dispatch(CustomTimesheetAction(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
@@ -689,7 +736,7 @@ function TimesheetReport() {
       // External get All jobs
       var req = { action: "getByCustomer", customer_id: "", page: 1, limit: 100000, search: "" };
       var data = { req: req, authToken: token };
-      await dispatch(JobAction(data))
+      await dispatch(CustomTimesheetAction(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
@@ -710,7 +757,7 @@ function TimesheetReport() {
     } else if (internal_external == "1") {
       var req = { action: "getInternalJobs" };
       var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
+      await dispatch(CustomTimesheetAction(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
@@ -732,7 +779,7 @@ function TimesheetReport() {
       // External get All jobs
       const req = { action: "getByCustomer", customer_id: "", page: 1, limit: 100000, search: "" };
       const data = { req: req, authToken: token };
-      await dispatch(JobAction(data))
+      await dispatch(CustomTimesheetAction(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
@@ -790,7 +837,7 @@ function TimesheetReport() {
     const data = { req, authToken: token };
 
     try {
-      const response = await dispatch(JobAction(data)).unwrap();
+      const response = await dispatch(CustomTimesheetAction(data)).unwrap();
       if (response.status) {
         const formatted = response.data.map(item => ({
           value: item.job_id,
@@ -1257,6 +1304,14 @@ function TimesheetReport() {
                 setTaskHasMore(true);
                 setTaskSearch("");
               }
+              if (!upstream.includes("line_manager")) {
+                updated.line_manager = null;
+                setLineManagerAllData([]);
+                lineManagerCache.current = {};
+                setLineManagerPage(1);
+                setLineManagerHasMore(true);
+                setLineManagerSearch("");
+              }
               setSelectionOrder(upstream);
             } else {
               setSelectionOrder(prev => prev.filter(k => k !== "staff_id"));
@@ -1298,6 +1353,15 @@ function TimesheetReport() {
                 setPage(1);
                 setHasMore(true);
                 GetAllJobs({ searchValue: "", pageNo: 1, customer_id: upCustomerForJob, client_id: upClientForJob, staff_id: resolvedStaffId });
+              }
+
+              const lineManagerIdx = newOrder.indexOf("line_manager");
+              if (lineManagerIdx === -1 || staffIdx < lineManagerIdx) {
+                lineManagerCache.current = {};
+                setLineManagerAllData([]);
+                setLineManagerPage(1);
+                setLineManagerHasMore(true);
+                getLineManagerData({ searchValue: "", pageNo: 1, staff_id: resolvedStaffId });
               }
 
               return newOrder;
@@ -2514,8 +2578,29 @@ function TimesheetReport() {
             <Select
               closeMenuOnSelect={false}
               onMenuOpen={() => {
-                if (lineManagerAllData.length === 0) getLineManagerData();
+                if (lineManagerAllData.length === 0) getLineManagerData({ searchValue: "", pageNo: 1, append: false, staff_id: filters?.staff_id });
               }}
+              onMenuScrollToBottom={() => {
+                if (lineManagerHasMore && !lineManagerLoading) {
+                  const nextPage = lineManagerPage + 1;
+                  setLineManagerPage(nextPage);
+                  getLineManagerData({ searchValue: lineManagerSearch, pageNo: nextPage, append: true, staff_id: filters?.staff_id });
+                }
+              }}
+              onInputChange={(val, { action }) => {
+                if (action === "input-change" || action === "set-value") {
+                  setLineManagerSearch(val);
+                  setLineManagerPage(1);
+                  setLineManagerHasMore(true);
+
+                  if (lineManagerDebounceRef.current) clearTimeout(lineManagerDebounceRef.current);
+
+                  lineManagerDebounceRef.current = setTimeout(() => {
+                    getLineManagerData({ searchValue: val, pageNo: 1, append: false, staff_id: filters?.staff_id });
+                  }, 500);
+                }
+              }}
+              isLoading={lineManagerLoading}
               options={[
                 { value: "", label: "Select..." },
                 ...lineManagerAllData
@@ -2554,7 +2639,12 @@ function TimesheetReport() {
                 ...employeeNumberAllData.filter(e => {
                   if (filters.staff_id && filters.staff_id.length > 0 && !filters.staff_id.some(id => Number(id) === Number(e.staff_id))) return false;
                   // If upstream filters apply, staff must be in staffAllData
-                  if (filters.customer_id || filters.client_id || filters.job_id || filters.task_id) {
+                  if (
+                    (filters.customer_id && filters.customer_id.length > 0) ||
+                    (filters.client_id && filters.client_id.length > 0) ||
+                    (filters.job_id && filters.job_id.length > 0) ||
+                    (filters.task_id && filters.task_id.length > 0)
+                  ) {
                     if (!staffAllData.some(staff => Number(staff.value) === Number(e.staff_id))) return false;
                   }
                   return true;
