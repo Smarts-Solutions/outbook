@@ -3663,6 +3663,158 @@ const TimesheetNewDesign = () => {
                 <button type="button" className="btn btn-outline-info fw-bold">Today</button>
               </div>
             </div>
+
+
+            <div className="row mt-3">
+              {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) ? (
+                <div className="form-group col-md-4">
+                  <label className="form-label mb-2 ms-2">Select Staff</label>
+
+                  <Select
+                    id="tabSelect"
+                    name="staff_id"
+                    className="basic-multi-select"
+                    options={staffOptions}
+                    value={staffOptions.find(
+                      (opt) => Number(opt.value) === Number(selectedStaff)
+                    )}
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = {
+                        target: { name: "staff_id", value: selectedOption.value },
+                      };
+                      selectFilterStaffANdWeek(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+
+              {staffDataWeekDataAll.data &&
+                staffDataWeekDataAll.data.length > 0 ? (
+                <div className="form-group col-md-4   pe-0">
+                  <label className="form-label mb-2">Select Date</label>
+                  <Select
+                    id="tabSelect"
+                    name="week"
+                    className="basic-multi-select"
+                    // options={weekOptions}
+                    // defaultValue={currentValue}
+                    options={weekOptionsWithPlaceholder}
+                    value={currentValue || null}
+                    placeholder="-- Select --"
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = {
+                        target: { name: "week", value: selectedOption.value },
+                      };
+                      selectFilterStaffANdWeek(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
+                    isDisabled={selectedLineManager != "" ? true : false}
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+
+              {isExistStaffDataWeekDataAll?.data &&
+                isExistStaffDataWeekDataAll?.data.length > 0 &&
+                staffDataWeekDataAll?.data.length === 0 ? (
+                <div className="form-group col-md-4 pe-0">
+                  <label className="form-label mb-2">Select Date</label>
+                  <Select
+                    id="tabSelect"
+                    name="week"
+                    className="basic-multi-select"
+                    // options={weekOptions}
+                    // defaultValue={currentValue}
+                    options={weekOptionsWithPlaceholder}
+                    value={currentValue || null}
+                    placeholder="-- Select --"
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = {
+                        target: { name: "week", value: selectedOption.value },
+                      };
+                      selectFilterStaffANdWeek(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
+                    isDisabled={selectedLineManager != "" ? true : false}
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+
+              {role !== "SUPERADMIN" && lineMangerData && lineMangerData.length > 0 ? (
+                <div className="form-group  col-md-4  pe-0">
+                  <label className="form-label mb-2">Team Timesheet Status</label>
+                  <Select
+                    id="tabSelect"
+                    name="week"
+                    className="basic-multi-select"
+                    // options={weekOptions}
+                    // defaultValue={currentValue}
+                    options={lineMangerDataWithPlaceholder}
+                    defaultValue={null}
+                    placeholder="-- Select --"
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = {
+                        target: {
+                          name: "lineManger",
+                          value: selectedOption.value,
+                        },
+                      };
+                      selectLineManager(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+
+              {selectedLineManager != "" &&
+                staffDataWeekDataAll.data &&
+                staffDataWeekDataAll.data.length > 0 ? (
+                <div className="form-group col-md-4  pe-0">
+                  <label className="form-label mb-2">
+                    Line Manager Select Week
+                  </label>
+                  <Select
+                    id="tabSelect"
+                    name="week"
+                    className="basic-multi-select"
+                    // options={weekOptions}
+                    // defaultValue={currentValue}
+                    options={weekOptionsWithPlaceholderSubmitTimeSheet}
+                    defaultValue={null}
+                    placeholder="-- Select --"
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = {
+                        target: { name: "week", value: selectedOption.value },
+                      };
+                      selectFilterStaffANdWeek(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+            </div>
+
+
             <div className="timesheet-white-card mt-4">
               <div className="timesheet-whitediv-flex">
                 <div className="timesheet-white-card-div-25">

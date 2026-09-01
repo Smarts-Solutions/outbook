@@ -258,7 +258,7 @@ const TimesheetDatatable = () => {
                     {activeRowId === row.id && activeField === 'mon' && (
                         <Pencil
                             className="ms-1 mt-2 cursor-pointer"
-                            size={14}
+                            size={22}
                             onMouseDown={(e) => {
                                 e.preventDefault();
                                 setModalText(row.mon_note || '');
@@ -302,7 +302,7 @@ const TimesheetDatatable = () => {
                     {activeRowId === row.id && activeField === 'tue' && (
                         <Pencil
                             className="ms-1 mt-2 cursor-pointer"
-                            size={14}
+                            size={22}
                             onMouseDown={(e) => {
                                 e.preventDefault();
                                 setModalText(row.tue_note || '');
@@ -346,7 +346,7 @@ const TimesheetDatatable = () => {
                     {activeRowId === row.id && activeField === 'wed' && (
                         <Pencil
                             className="ms-1 mt-2 cursor-pointer"
-                            size={14}
+                            size={22}
                             onMouseDown={(e) => {
                                 e.preventDefault();
                                 setModalText(row.wed_note || '');
@@ -390,7 +390,7 @@ const TimesheetDatatable = () => {
                     {activeRowId === row.id && activeField === 'thu' && (
                         <Pencil
                             className="ms-1 mt-2 cursor-pointer"
-                            size={14}
+                            size={22}
                             onMouseDown={(e) => {
                                 e.preventDefault();
                                 setModalText(row.thu_note || '');
@@ -434,7 +434,7 @@ const TimesheetDatatable = () => {
                     {activeRowId === row.id && activeField === 'fri' && (
                         <Pencil
                             className="ms-1 mt-2 cursor-pointer"
-                            size={14}
+                            size={22}
                             onMouseDown={(e) => {
                                 e.preventDefault();
                                 setModalText(row.fri_note || '');
@@ -478,7 +478,7 @@ const TimesheetDatatable = () => {
                     {activeRowId === row.id && activeField === 'sat' && (
                         <Pencil
                             className="ms-1 mt-2 cursor-pointer"
-                            size={14}
+                            size={22}
                             onMouseDown={(e) => {
                                 e.preventDefault();
                                 setModalText(row.sat_note || '');
@@ -522,7 +522,7 @@ const TimesheetDatatable = () => {
                     {activeRowId === row.id && activeField === 'sun' && (
                         <Pencil
                             className="ms-1 mt-2 cursor-pointer"
-                            size={14}
+                            size={22}
                             onMouseDown={(e) => {
                                 e.preventDefault();
                                 setModalText(row.sun_note || '');
