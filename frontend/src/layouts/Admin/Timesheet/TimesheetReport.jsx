@@ -1268,6 +1268,9 @@ function TimesheetReport() {
 
           const isClearing = [null, undefined, ""].includes(value) || (Array.isArray(value) && value.length === 0);
           if (isClearing) {
+            if (key === "staff_id") updated.employee_number = null;
+            if (key === "employee_number") updated.staff_id = null;
+            
             // Auto-clear downstream filters
             const staffIdx = selectionOrder.indexOf("staff_id");
             if (staffIdx !== -1) {
@@ -1390,6 +1393,46 @@ function TimesheetReport() {
                 setStaffHasMore(true);
                 setStaffSearch("");
               }
+              if (!upstream.includes("customer_id")) {
+                updated.customer_id = null;
+                setCustomerAllData([]);
+                customerCache.current = {};
+                setCustomerPage(1);
+                setCustomerHasMore(true);
+                setCustomerSearch("");
+              }
+              if (!upstream.includes("client_id")) {
+                updated.client_id = null;
+                setClientAllData([]);
+                clientCache.current = {};
+                setClientPage(1);
+                setClientHasMore(true);
+                setClientSearch("");
+              }
+              if (!upstream.includes("job_id")) {
+                updated.job_id = null;
+                setJobOptions([]);
+                cacheRef.current = {};
+                setPage(1);
+                setHasMore(true);
+                setSearch("");
+              }
+              if (!upstream.includes("task_id")) {
+                updated.task_id = null;
+                setTaskAllData([]);
+                taskCache.current = {};
+                setTaskPage(1);
+                setTaskHasMore(true);
+                setTaskSearch("");
+              }
+              if (!upstream.includes("line_manager")) {
+                updated.line_manager = null;
+                setLineManagerAllData([]);
+                lineManagerCache.current = {};
+                setLineManagerPage(1);
+                setLineManagerHasMore(true);
+                setLineManagerSearch("");
+              }
               setSelectionOrder(upstream);
             } else {
               setSelectionOrder(prev => prev.filter(k => k !== "line_manager"));
@@ -1455,6 +1498,14 @@ function TimesheetReport() {
                 setTaskPage(1);
                 setTaskHasMore(true);
                 setTaskSearch("");
+              }
+              if (!upstream.includes("line_manager")) {
+                updated.line_manager = null;
+                setLineManagerAllData([]);
+                lineManagerCache.current = {};
+                setLineManagerPage(1);
+                setLineManagerHasMore(true);
+                setLineManagerSearch("");
               }
               // Remove customer and all downstream from selectionOrder
               setSelectionOrder(upstream);
@@ -1552,6 +1603,14 @@ function TimesheetReport() {
                 setTaskHasMore(true);
                 setTaskSearch("");
               }
+              if (!upstream.includes("line_manager")) {
+                updated.line_manager = null;
+                setLineManagerAllData([]);
+                lineManagerCache.current = {};
+                setLineManagerPage(1);
+                setLineManagerHasMore(true);
+                setLineManagerSearch("");
+              }
               // Remove client and all downstream from selectionOrder
               setSelectionOrder(upstream);
             } else {
@@ -1646,6 +1705,14 @@ function TimesheetReport() {
                 setTaskPage(1);
                 setTaskHasMore(true);
                 setTaskSearch("");
+              }
+              if (!upstream.includes("line_manager")) {
+                updated.line_manager = null;
+                setLineManagerAllData([]);
+                lineManagerCache.current = {};
+                setLineManagerPage(1);
+                setLineManagerHasMore(true);
+                setLineManagerSearch("");
               }
               // Remove job and all downstream from selectionOrder
               setSelectionOrder(upstream);
