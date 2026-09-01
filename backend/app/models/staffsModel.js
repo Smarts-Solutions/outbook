@@ -123,7 +123,7 @@ const createStaff = async (staff) => {
 
 const getStaff = async (data) => {
  
-  let { page, limit, search, StaffUserId } = data;
+  let { page, limit, search, StaffUserId, line_manager_id } = data;
 
   let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
   const rows = await QueryRoleHelperFunction(StaffUserId);
@@ -133,26 +133,30 @@ const getStaff = async (data) => {
   const offset = (page - 1) * limit;
   search = search.trim();
 
-  // LineManageStaffId = [
-  //   ...new Set(LineManageStaffId),
-  // ];
-  // const connection = await pool.getConnection();
-  // await buildAssignedJobsTempTable(connection, LineManageStaffId);
   let role_name = rows[0].role_name?.toUpperCase();
 
-  let where = "";
-
-  // if (rows.length > 0 && (role_name === "SUPERADMIN" || role_name === "ADMIN" || role_name === "MANAGEMENT")) {
-  //   where = "WHERE 1=1 AND staffs.role_id != 12";
-  // } else {
-  //   where = `WHERE 1=1 AND staffs.role_id != 12 AND staffs.created_by IN (${LineManageStaffId})`;
-  // }
-
-  // where = "WHERE 1=1 AND staffs.role_id != 12";
-
-   where = "WHERE s.role_id != 12";
-   if (rows.length > 0 && (role_name === "SUPERADMIN")) {
-    where = "WHERE s.role_id != 12";
+  let where = "WHERE s.role_id != 12 ";
+  
+  if (line_manager_id && line_manager_id.length > 0) {
+    const ensureArr = (v) => {
+      if (Array.isArray(v)) return v.filter(x => !["", null, undefined].includes(x));
+      if (!["", null, undefined].includes(v)) return [v];
+      return [];
+    };
+    const lmArr = ensureArr(line_manager_id);
+    if (lmArr.length > 0) {
+      let subordinates = [];
+      for (const lm of lmArr) {
+        let sub = await LineManageStaffIdHelperFunctionForStaff(lm);
+        subordinates.push(...sub, lm);
+      }
+      if (subordinates.length > 0) {
+        subordinates = [...new Set(subordinates)];
+        where += ` AND s.id IN (${subordinates.map(v => pool.escape(v)).join(',')}) `;
+      } else {
+        where += ` AND 1=0 `;
+      }
+    }
   }
 
   // 🔍 SEARCH CONDITION
@@ -565,10 +569,44 @@ const getStaffByFilter = async (data) => {
   try {
 
     let timesheetWhere = "timesheet.task_type = '2'";
-    if (customer_id) timesheetWhere += ` AND timesheet.customer_id = ${connection.escape(customer_id)}`;
-    if (client_id) timesheetWhere += ` AND timesheet.client_id = ${connection.escape(client_id)}`;
-    if (job_id) timesheetWhere += ` AND timesheet.job_id = ${connection.escape(job_id)}`;
-    if (task_id) timesheetWhere += ` AND timesheet.task_id = ${connection.escape(task_id)}`;
+
+    // Helper: normalize single value or array into a clean array
+    const ensureArr = (v) => {
+      if (Array.isArray(v)) return v.filter(x => !["", null, undefined].includes(x));
+      if (!["", null, undefined].includes(v)) return [v];
+      return [];
+    };
+
+    const custArr = ensureArr(customer_id);
+    if (custArr.length > 0) {
+      timesheetWhere += ` AND timesheet.customer_id IN (${custArr.map(v => connection.escape(v)).join(',')})`;
+    }
+    const cliArr = ensureArr(client_id);
+    if (cliArr.length > 0) {
+      timesheetWhere += ` AND timesheet.client_id IN (${cliArr.map(v => connection.escape(v)).join(',')})`;
+    }
+    const jArr = ensureArr(job_id);
+    if (jArr.length > 0) {
+      timesheetWhere += ` AND timesheet.job_id IN (${jArr.map(v => connection.escape(v)).join(',')})`;
+    }
+    const tArr = ensureArr(task_id);
+    if (tArr.length > 0) {
+      timesheetWhere += ` AND timesheet.task_id IN (${tArr.map(v => connection.escape(v)).join(',')})`;
+    }
+    const lmArr = ensureArr(data.line_manager_id);
+    if (lmArr.length > 0) {
+      let subordinates = [];
+      for(const lm of lmArr) {
+         let sub = await LineManageStaffIdHelperFunctionForStaff(lm);
+         subordinates.push(...sub, lm);
+      }
+      if(subordinates.length > 0) {
+        subordinates = [...new Set(subordinates)];
+        timesheetWhere += ` AND staffs.id IN (${subordinates.map(v => connection.escape(v)).join(',')})`;
+      } else {
+        timesheetWhere += ` AND 1=0`;
+      }
+    }
 
     // 🔹 DATA
     const [rows] = await connection.query(
@@ -1288,7 +1326,7 @@ const getMyLineManagers = async (staff_by_id) => {
              OR j.id IN (SELECT job_id FROM temp_assigned_jobs_staff WHERE staff_id = staffs.id)
         ) as assigned_jobs
       FROM staffs
-      WHERE staffs.id IN (${LineManageStaffId})
+      WHERE staffs.id IN (${LineManageStaffId}) AND staffs.status = '1'
     `;
     
     const [result] = await connection.execute(query);
@@ -1301,6 +1339,33 @@ const getMyLineManagers = async (staff_by_id) => {
   }
 };
 
+
+const getActiveLineManagers = async () => {
+  const query = `
+    SELECT DISTINCT 
+      s.id, 
+      s.first_name, 
+      s.last_name, 
+      s.email, 
+      s.employee_number,
+      s.status
+    FROM staffs s
+    JOIN line_managers lm ON s.id = lm.staff_to
+    WHERE s.status = '1'
+    ORDER BY s.first_name ASC
+  `;
+  try {
+    const [rows] = await pool.query(query);
+    return {
+      status: true,
+      message: "Success",
+      data: rows,
+    };
+  } catch (error) {
+    console.error("Error in getActiveLineManagers:", error);
+    return { status: false, message: "Error fetching active line managers." };
+  }
+};
 
 const status = async (id) => {
   if (id != undefined) {
@@ -1782,6 +1847,7 @@ module.exports = {
   GetStaffByRoleId,
   GetStaffAndDelete,
   getLineManagerStaff,
+  getActiveLineManagers,
   getMyLineManagers,
   getStaffOtherRole,
   getStaffByFilter,

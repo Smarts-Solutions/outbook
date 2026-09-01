@@ -12,6 +12,8 @@ import Select from "react-select";
 import * as XLSX from "xlsx";
 import ReactPaginate from "react-paginate";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
+import { CustomTimesheetAction } from "../../../ReduxStore/Slice/CustomTimesheet/CustomTimesheetSlice";
+
 import dayjs from "dayjs";
 import sweatalert from "sweetalert2";
 import { Trash, Download } from "lucide-react";
@@ -58,6 +60,7 @@ function TimesheetReport() {
   const [getAllFilterData, setGetAllFilterData] = useState([]);
   // set filter id
   const [filterId, setFilterId] = useState(null);
+  const [lineManagerAllData, setLineManagerAllData] = useState([]);
 
 
   const [filters, setFilters] = useState({
@@ -65,14 +68,14 @@ function TimesheetReport() {
     internal_external: "0",
     fieldsToDisplay: null,
     fieldsToDisplayId: null,
-    staff_id: null,
-    employee_number: null,
-    customer_id: null,
-    client_id: null,
-    job_id: null,
-    task_id: null,
-    internal_job_id: null,
-    internal_task_id: null,
+    staff_id: [],
+    employee_number: [],
+    customer_id: [],
+    client_id: [],
+    job_id: [],
+    task_id: [],
+    internal_job_id: [],
+    internal_task_id: [],
     timePeriod: "this_month",
     displayBy: "Weekly",
     status: "Both",
@@ -91,6 +94,7 @@ function TimesheetReport() {
     const upstream = idx === -1 ? selectionOrder : selectionOrder.slice(0, idx);
     return {
       staff_id: upstream.includes("staff_id") ? currentFilters?.staff_id : null,
+      line_manager: upstream.includes("line_manager") ? currentFilters?.line_manager : null,
       customer_id: upstream.includes("customer_id") ? currentFilters?.customer_id : null,
       client_id: upstream.includes("client_id") ? currentFilters?.client_id : null,
       job_id: upstream.includes("job_id") ? currentFilters?.job_id : null,
@@ -142,10 +146,10 @@ function TimesheetReport() {
   const staffCache = useRef({});
   const staffDebounceRef = useRef(null);
 
-  const GetAllStaff = async ({ searchValue = "", pageNo = 1, append = false, customer_id = null, client_id = null, job_id = null, task_id = null }) => {
+  const GetAllStaff = async ({ searchValue = "", pageNo = 1, append = false, customer_id = null, client_id = null, job_id = null, task_id = null, line_manager_id = null }) => {
     if (role?.toUpperCase() === "SUPERADMIN" || role?.toUpperCase() === "ADMIN") {
       // guard removed to match JobCustomReport pattern - each fetch has its own dedicated loading flag
-      const cacheKey = `${searchValue}_${pageNo}_${customer_id}_${client_id}_${job_id}_${task_id}`;
+      const cacheKey = `${searchValue}_${pageNo}_${customer_id}_${client_id}_${job_id}_${task_id}_${line_manager_id}`;
       if (staffCache.current[cacheKey]) {
 
         const cached = staffCache.current[cacheKey];
@@ -161,31 +165,34 @@ function TimesheetReport() {
         return;
       }
       setStaffLoading(true);
-      let req = {};
-      if (customer_id || client_id || job_id || task_id) {
+      let req;
+      const hasFilter = (f) => f && (Array.isArray(f) ? f.length > 0 : String(f).trim() !== "");
+      if (hasFilter(customer_id) || hasFilter(client_id) || hasFilter(job_id) || hasFilter(task_id)) {
         req = {
           action: "getstaffbyfilter",
           page: pageNo,
-          limit: (customer_id || client_id || job_id || task_id) ? 1000 : 20,
+          limit: 1000,
           search: searchValue,
           customer_id: customer_id || "",
           client_id: client_id || "",
           job_id: job_id || "",
-          task_id: task_id || ""
+          task_id: task_id || "",
+          line_manager_id: line_manager_id || ""
         };
       } else {
         req = {
           action: "get",
           page: pageNo,
-          limit: 20,
-          search: searchValue
+          limit: (line_manager_id && line_manager_id.length > 0) ? 1000 : 20,
+          search: searchValue,
+          line_manager_id: line_manager_id || ""
         };
       }
       const data = { req: req, authToken: token };
       try {
-        const response = await dispatch(Staff(data)).unwrap();
+        const response = await dispatch(CustomTimesheetAction(data)).unwrap();
         if (response.status) {
-          const staffList = response.data.data;
+          const staffList = Array.isArray(response.data) ? response.data : (response.data?.data || []);
 
           const formatted = staffList.map((item) => ({
             value: item.id,
@@ -215,7 +222,7 @@ function TimesheetReport() {
 
       try {
         const req = { action: "get_my_line_managers" };
-        const response = await dispatch(Staff({ req, authToken: token })).unwrap();
+        const response = await dispatch(CustomTimesheetAction({ req, authToken: token })).unwrap();
         if (response.status && response.data) {
           response.data.forEach(manager => {
             // Check if this manager matches the selected customer, client, or job
@@ -278,6 +285,7 @@ function TimesheetReport() {
       GetAllStaff({
         searchValue: value,
         pageNo: 1,
+        line_manager_id: up.line_manager,
         customer_id: up.customer_id,
         client_id: up.client_id,
         job_id: up.job_id,
@@ -296,14 +304,16 @@ function TimesheetReport() {
         role_id: "employee_number" || "",
       };
       var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
+      await dispatch(CustomTimesheetAction(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-            const data = response?.data
+            const rawData = Array.isArray(response?.data) ? response.data : (response?.data?.data || []);
+            console.log("employeeData rawData:", rawData);
+            const data = rawData
               ?.filter(
                 (item) =>
-                  ![null, "", "null", undefined].includes(item.employee_number),
+                  ![null, "", "null", undefined].includes(item.employee_number) && (item.status == 1 || item.status === undefined || item.status == '1'),
               )
               ?.map((item) => ({
                 value: item.employee_number,
@@ -311,6 +321,7 @@ function TimesheetReport() {
                 label: `${item.employee_number}`,
                 staff_label: `${item.first_name || ""} ${item.last_name || ""} (${item.email || ""})`.trim(),
               }));
+            console.log("employeeData final data:", data);
             setEmployeeNumberAllData(data);
           } else {
             setEmployeeNumberAllData([]);
@@ -331,10 +342,10 @@ function TimesheetReport() {
 
       try {
         const req = { action: "get_my_line_managers" };
-        const response = await dispatch(Staff({ req, authToken: token })).unwrap();
+        const response = await dispatch(CustomTimesheetAction({ req, authToken: token })).unwrap();
         if (response.status && response.data) {
           response.data.forEach(manager => {
-            if (manager.employee_number && !dataList.find(item => item.value === manager.employee_number)) {
+            if (manager.status == 1 && manager.employee_number && !dataList.find(item => item.value === manager.employee_number)) {
               dataList.push({
                 value: manager.employee_number,
                 staff_id: manager.id,
@@ -347,6 +358,87 @@ function TimesheetReport() {
       } catch (err) { }
 
       setEmployeeNumberAllData(dataList);
+    }
+  };
+
+  const [lineManagerPage, setLineManagerPage] = useState(1);
+  const [lineManagerHasMore, setLineManagerHasMore] = useState(true);
+  const [lineManagerLoading, setLineManagerLoading] = useState(false);
+  const [lineManagerSearch, setLineManagerSearch] = useState("");
+  const lineManagerCache = useRef({});
+  const lineManagerDebounceRef = useRef(null);
+
+  const getLineManagerData = async ({ searchValue = "", pageNo = 1, append = false, staff_id = null }) => {
+    if (role?.toUpperCase() === "SUPERADMIN" || role?.toUpperCase() === "ADMIN") {
+      const cacheKey = `${searchValue}_${pageNo}_${staff_id}`;
+      if (lineManagerCache.current[cacheKey]) {
+        const cached = lineManagerCache.current[cacheKey];
+        setLineManagerAllData(prev => {
+          const combined = append ? [...prev, ...cached] : cached;
+          const unique = Array.from(new Map(combined.map(item => [item.value, item])).values());
+          return unique;
+        });
+        return;
+      }
+
+      setLineManagerLoading(true);
+      try {
+        const req = { 
+          action: "get_active_line_managers",
+          filters: { ...filters, staff_id: (Array.isArray(staff_id) ? staff_id : (staff_id !== null ? [staff_id] : (Array.isArray(filters.staff_id) ? filters.staff_id : []))).length > 0 ? (Array.isArray(staff_id) ? staff_id : (staff_id !== null ? [staff_id] : (Array.isArray(filters.staff_id) ? filters.staff_id : []))) : null },
+          pagination: { page: pageNo, limit: staff_id ? 1000 : 20, search: searchValue }
+        };
+        const response = await dispatch(CustomTimesheetAction({ req, authToken: token })).unwrap();
+        if (response.status) {
+          const rawData = response.data?.data || response.data || [];
+          const formatted = rawData.filter(item => item.status == 1 || item.status == '1').map((item) => ({
+            value: item.id,
+            label: `${item.first_name || ""} ${item.last_name || ""} (${item.email || ""})`.trim(),
+          }));
+          
+          lineManagerCache.current[cacheKey] = formatted;
+          
+          setLineManagerAllData(prev => {
+            const combined = append ? [...prev, ...formatted] : formatted;
+            const unique = Array.from(new Map(combined.map(item => [item.value, item])).values());
+            return unique;
+          });
+
+          if (response.pagination) {
+            setLineManagerHasMore(pageNo < response.pagination.totalPages);
+          } else {
+            setLineManagerHasMore(false);
+          }
+        } else {
+          if (!append) setLineManagerAllData([]);
+          setLineManagerHasMore(false);
+        }
+      } catch (error) { 
+        setLineManagerHasMore(false);
+      } finally {
+        setLineManagerLoading(false);
+      }
+    } else {
+      let dataList = [];
+      try {
+        const req = { action: "get_my_line_managers" };
+        const response = await dispatch(CustomTimesheetAction({ req, authToken: token })).unwrap();
+        if (response.status && response.data) {
+          dataList = response.data.filter(manager => manager.status == 1).map((manager) => ({
+            value: manager.id,
+            label: `${manager.first_name || ""} ${manager.last_name || ""} (${manager.email || ""})`.trim(),
+          }));
+        }
+      } catch (err) { }
+
+      if (dataList.length === 0) {
+        dataList.push({
+          value: staffDetails?.id,
+          label: `${staffDetails.first_name || ""} ${staffDetails?.last_name || ""} (${staffDetails?.email || ""})`.trim(),
+        });
+      }
+      setLineManagerAllData(dataList);
+      setLineManagerHasMore(false);
     }
   };
 
@@ -377,6 +469,7 @@ function TimesheetReport() {
             label: `
             Group By : [${JSON.parse(item?.groupBy)?.map((item) => item.replace(/_id$/i, ""))}]<br/>
             ${item.staff_fullname ? `⮞ Staff : ${item.staff_fullname}<br/>` : ""}
+            ${item.line_manager ? `⮞ Line Manager : ${item.line_manager}<br/>` : ""}
             ${item.customer_name ? `⮞ Customer : ${item.customer_name}<br/>` : ""}
             ${item.client_name ? `⮞ Client : ${item.client_name}<br/>` : ""}
             ${item.job_name ? `⮞ Job : ${item.job_name}<br/>` : ""}
@@ -466,9 +559,9 @@ function TimesheetReport() {
 
     const data = { req: req, authToken: token };
     try {
-      const response = await dispatch(getAllCustomerDropDown(data)).unwrap();
+      const response = await dispatch(CustomTimesheetAction(data)).unwrap();
       if (response.status) {
-        const formatted = response.data.map((item) => ({
+        const formatted = response.data.filter(item => item.status == 1).map((item) => ({
           value: item.id,
           label: item.trading_name
         }));
@@ -572,9 +665,9 @@ function TimesheetReport() {
     };
     const data = { req, authToken: token };
     try {
-      const response = await dispatch(ClientAction(data)).unwrap();
+      const response = await dispatch(CustomTimesheetAction(data)).unwrap();
       if (response.status) {
-        const formatted = response.data.map((item) => ({
+        const formatted = response.data.filter(item => item.status == 1).map((item) => ({
           value: item.id,
           label: `${item.client_name} (${item.client_code})`
         }));
@@ -623,7 +716,7 @@ function TimesheetReport() {
     if (internal_external == "0") {
       var req = { action: "getInternalJobs" };
       var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
+      await dispatch(CustomTimesheetAction(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
@@ -643,7 +736,7 @@ function TimesheetReport() {
       // External get All jobs
       var req = { action: "getByCustomer", customer_id: "", page: 1, limit: 100000, search: "" };
       var data = { req: req, authToken: token };
-      await dispatch(JobAction(data))
+      await dispatch(CustomTimesheetAction(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
@@ -664,7 +757,7 @@ function TimesheetReport() {
     } else if (internal_external == "1") {
       var req = { action: "getInternalJobs" };
       var data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
+      await dispatch(CustomTimesheetAction(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
@@ -686,7 +779,7 @@ function TimesheetReport() {
       // External get All jobs
       const req = { action: "getByCustomer", customer_id: "", page: 1, limit: 100000, search: "" };
       const data = { req: req, authToken: token };
-      await dispatch(JobAction(data))
+      await dispatch(CustomTimesheetAction(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
@@ -744,7 +837,7 @@ function TimesheetReport() {
     const data = { req, authToken: token };
 
     try {
-      const response = await dispatch(JobAction(data)).unwrap();
+      const response = await dispatch(CustomTimesheetAction(data)).unwrap();
       if (response.status) {
         const formatted = response.data.map(item => ({
           value: item.job_id,
@@ -997,6 +1090,7 @@ function TimesheetReport() {
 
     if (
       key === "staff_id" ||
+      key === "line_manager" ||
       key === "customer_id" ||
       key === "client_id" ||
       key === "job_id" ||
@@ -1044,39 +1138,13 @@ function TimesheetReport() {
 
           let resolvedStaffId = value;
 
-          if (key === "employee_number") {
-            if (updated.employee_number) {
-              const matchedEmployee = employeeNumberAllData.find(e => e.value === updated.employee_number);
-              if (matchedEmployee) {
-                // DO NOT update updated.staff_id to prevent auto-selection in UI
-                resolvedStaffId = matchedEmployee.staff_id;
-                setStaffAllData(prev => {
-                  if (prev && !prev.find(s => Number(s.value) === Number(matchedEmployee.staff_id))) {
-                    return [...prev, { value: matchedEmployee.staff_id, label: matchedEmployee.staff_label, employee_number: matchedEmployee.value }];
-                  }
-                  return prev || [];
-                });
-              }
-            } else {
-              resolvedStaffId = null;
-            }
-          } else {
-            if (updated.staff_id) {
-              const matchedStaff = staffAllData.find(s => Number(s.value) === Number(updated.staff_id));
-              if (matchedStaff && matchedStaff.employee_number) {
-                // DO NOT update updated.employee_number to prevent auto-selection in UI
-                setEmployeeNumberAllData(prev => {
-                  if (prev && !prev.find(e => e.value === matchedStaff.employee_number)) {
-                    return [...prev, { value: matchedStaff.employee_number, staff_id: matchedStaff.value, label: `${matchedStaff.employee_number}`, staff_label: matchedStaff.label }];
-                  }
-                  return prev || [];
-                });
-              }
-            }
-          }
+          if (key === "employee_number") { if (updated.employee_number && updated.employee_number.length > 0) { const matchedEmployees = employeeNumberAllData.filter(e => updated.employee_number.includes(e.value)); if (matchedEmployees.length > 0) { resolvedStaffId = matchedEmployees.map(e => e.staff_id); setStaffAllData(prev => { let newArr = [...(prev || [])]; matchedEmployees.forEach(me => { if (!newArr.find(s => Number(s.value) === Number(me.staff_id))) { newArr.push({ value: me.staff_id, label: me.staff_label, employee_number: me.value }); } }); return newArr; }); } } else { resolvedStaffId = null; } } else { if (updated.staff_id && updated.staff_id.length > 0) { const matchedStaffs = staffAllData.filter(s => updated.staff_id.includes(s.value)); if (matchedStaffs.length > 0) { setEmployeeNumberAllData(prev => { let newArr = [...(prev || [])]; matchedStaffs.forEach(ms => { if (ms.employee_number && !newArr.find(e => e.value === ms.employee_number)) { newArr.push({ value: ms.employee_number, staff_id: ms.value, label: ms.employee_number, staff_label: ms.label }); } }); return newArr; }); } } }
 
           const isClearing = [null, undefined, ""].includes(resolvedStaffId);
           if (isClearing) {
+            if (key === "staff_id") updated.employee_number = null;
+            if (key === "employee_number") updated.staff_id = null;
+            
             // Auto-clear downstream filters
             const staffIdx = selectionOrder.indexOf("staff_id");
             if (staffIdx !== -1) {
@@ -1112,6 +1180,14 @@ function TimesheetReport() {
                 setTaskPage(1);
                 setTaskHasMore(true);
                 setTaskSearch("");
+              }
+              if (!upstream.includes("line_manager")) {
+                updated.line_manager = null;
+                setLineManagerAllData([]);
+                lineManagerCache.current = {};
+                setLineManagerPage(1);
+                setLineManagerHasMore(true);
+                setLineManagerSearch("");
               }
               setSelectionOrder(upstream);
             } else {
@@ -1156,6 +1232,15 @@ function TimesheetReport() {
                 GetAllJobs({ searchValue: "", pageNo: 1, customer_id: upCustomerForJob, client_id: upClientForJob, staff_id: resolvedStaffId });
               }
 
+              const lineManagerIdx = newOrder.indexOf("line_manager");
+              if (lineManagerIdx === -1 || staffIdx < lineManagerIdx) {
+                lineManagerCache.current = {};
+                setLineManagerAllData([]);
+                setLineManagerPage(1);
+                setLineManagerHasMore(true);
+                getLineManagerData({ searchValue: "", pageNo: 1, staff_id: resolvedStaffId });
+              }
+
               return newOrder;
             });
           }
@@ -1163,6 +1248,87 @@ function TimesheetReport() {
           setInternalJobAllData([]);
           setInternalTaskAllData([]);
 
+        } else if (key === "line_manager") {
+          updated.staff_id = null;
+          updated.employee_number = null;
+
+          const isClearing = [null, undefined, ""].includes(value) || (Array.isArray(value) && value.length === 0);
+
+          if (isClearing) {
+            const lineManagerIdx = selectionOrder.indexOf("line_manager");
+            if (lineManagerIdx !== -1) {
+              const upstream = selectionOrder.slice(0, lineManagerIdx);
+              if (!upstream.includes("staff_id")) {
+                updated.staff_id = null;
+                updated.employee_number = null;
+                setStaffAllData([]);
+                staffCache.current = {};
+                setStaffPage(1);
+                setStaffHasMore(true);
+                setStaffSearch("");
+              }
+              if (!upstream.includes("customer_id")) {
+                updated.customer_id = null;
+                setCustomerAllData([]);
+                customerCache.current = {};
+                setCustomerPage(1);
+                setCustomerHasMore(true);
+                setCustomerSearch("");
+              }
+              if (!upstream.includes("client_id")) {
+                updated.client_id = null;
+                setClientAllData([]);
+                clientCache.current = {};
+                setClientPage(1);
+                setClientHasMore(true);
+                setClientSearch("");
+              }
+              if (!upstream.includes("job_id")) {
+                updated.job_id = null;
+                setJobOptions([]);
+                cacheRef.current = {};
+                setPage(1);
+                setHasMore(true);
+                setSearch("");
+              }
+              if (!upstream.includes("task_id")) {
+                updated.task_id = null;
+                setTaskAllData([]);
+                taskCache.current = {};
+                setTaskPage(1);
+                setTaskHasMore(true);
+                setTaskSearch("");
+              }
+              if (!upstream.includes("line_manager")) {
+                updated.line_manager = null;
+                setLineManagerAllData([]);
+                lineManagerCache.current = {};
+                setLineManagerPage(1);
+                setLineManagerHasMore(true);
+                setLineManagerSearch("");
+              }
+              setSelectionOrder(upstream);
+            } else {
+              setSelectionOrder(prev => prev.filter(k => k !== "line_manager"));
+            }
+          } else {
+            setSelectionOrder(prev => {
+              const newOrder = prev.includes("line_manager") ? prev : [...prev, "line_manager"];
+              const lineManagerIdx = newOrder.indexOf("line_manager");
+              const staffIdx = newOrder.indexOf("staff_id");
+
+              if (staffIdx === -1 || lineManagerIdx < staffIdx) {
+                staffCache.current = {};
+                setStaffAllData([]);
+                setStaffPage(1);
+                setStaffHasMore(true);
+                const up = getUpstreamFilters("staff_id", filters);
+                GetAllStaff({ searchValue: "", pageNo: 1, line_manager_id: value, job_id: up.job_id, customer_id: up.customer_id, client_id: up.client_id, task_id: up.task_id });
+              }
+
+              return newOrder;
+            });
+          }
         } else if (key === "customer_id") {
           updated.internal_job_id = null;
           updated.internal_task_id = null;
@@ -1207,6 +1373,14 @@ function TimesheetReport() {
                 setTaskHasMore(true);
                 setTaskSearch("");
               }
+              if (!upstream.includes("line_manager")) {
+                updated.line_manager = null;
+                setLineManagerAllData([]);
+                lineManagerCache.current = {};
+                setLineManagerPage(1);
+                setLineManagerHasMore(true);
+                setLineManagerSearch("");
+              }
               // Remove customer and all downstream from selectionOrder
               setSelectionOrder(upstream);
             } else {
@@ -1244,11 +1418,13 @@ function TimesheetReport() {
               if (staffIdx === -1 || customerIdx < staffIdx) {
                 const upJobForStaff = jobIdx !== -1 && jobIdx < customerIdx ? filters.job_id : null;
                 const upClientForStaff = clientIdx !== -1 && clientIdx < customerIdx ? filters.client_id : null;
+                const lineManagerIdx = newOrder.indexOf("line_manager");
+                const upLineManagerForStaff = lineManagerIdx !== -1 && lineManagerIdx < customerIdx ? filters.line_manager : null;
                 staffCache.current = {};
                 setStaffAllData([]);
                 setStaffPage(1);
                 setStaffHasMore(true);
-                GetAllStaff({ searchValue: "", pageNo: 1, customer_id: value, job_id: upJobForStaff, client_id: upClientForStaff });
+                GetAllStaff({ searchValue: "", pageNo: 1, customer_id: value, job_id: upJobForStaff, client_id: upClientForStaff, line_manager_id: upLineManagerForStaff });
               }
 
               return newOrder;
@@ -1301,6 +1477,14 @@ function TimesheetReport() {
                 setTaskHasMore(true);
                 setTaskSearch("");
               }
+              if (!upstream.includes("line_manager")) {
+                updated.line_manager = null;
+                setLineManagerAllData([]);
+                lineManagerCache.current = {};
+                setLineManagerPage(1);
+                setLineManagerHasMore(true);
+                setLineManagerSearch("");
+              }
               // Remove client and all downstream from selectionOrder
               setSelectionOrder(upstream);
             } else {
@@ -1338,11 +1522,13 @@ function TimesheetReport() {
               if (staffIdx === -1 || clientIdx < staffIdx) {
                 const upJobForStaff = jobIdx !== -1 && jobIdx < clientIdx ? filters.job_id : null;
                 const upCustomerForStaff = customerIdx !== -1 && customerIdx < clientIdx ? filters.customer_id : null;
+                const lineManagerIdx = newOrder.indexOf("line_manager");
+                const upLineManagerForStaff = lineManagerIdx !== -1 && lineManagerIdx < clientIdx ? filters.line_manager : null;
                 staffCache.current = {};
                 setStaffAllData([]);
                 setStaffPage(1);
                 setStaffHasMore(true);
-                GetAllStaff({ searchValue: "", pageNo: 1, client_id: value, job_id: upJobForStaff, customer_id: upCustomerForStaff });
+                GetAllStaff({ searchValue: "", pageNo: 1, client_id: value, job_id: upJobForStaff, customer_id: upCustomerForStaff, line_manager_id: upLineManagerForStaff });
               }
 
               return newOrder;
@@ -1394,6 +1580,14 @@ function TimesheetReport() {
                 setTaskHasMore(true);
                 setTaskSearch("");
               }
+              if (!upstream.includes("line_manager")) {
+                updated.line_manager = null;
+                setLineManagerAllData([]);
+                lineManagerCache.current = {};
+                setLineManagerPage(1);
+                setLineManagerHasMore(true);
+                setLineManagerSearch("");
+              }
               // Remove job and all downstream from selectionOrder
               setSelectionOrder(upstream);
             } else {
@@ -1431,11 +1625,13 @@ function TimesheetReport() {
               if (staffIdx === -1 || jobIdx < staffIdx) {
                 const upCustomerForStaff = customerIdx !== -1 && customerIdx < jobIdx ? filters.customer_id : null;
                 const upClientForStaff = clientIdx !== -1 && clientIdx < jobIdx ? filters.client_id : null;
+                const lineManagerIdx = newOrder.indexOf("line_manager");
+                const upLineManagerForStaff = lineManagerIdx !== -1 && lineManagerIdx < jobIdx ? filters.line_manager : null;
                 staffCache.current = {};
                 setStaffAllData([]);
                 setStaffPage(1);
                 setStaffHasMore(true);
-                GetAllStaff({ searchValue: "", pageNo: 1, job_id: value, customer_id: upCustomerForStaff, client_id: upClientForStaff });
+                GetAllStaff({ searchValue: "", pageNo: 1, job_id: value, customer_id: upCustomerForStaff, client_id: upClientForStaff, line_manager_id: upLineManagerForStaff });
               }
 
               return newOrder;
@@ -1529,11 +1725,13 @@ function TimesheetReport() {
                 const upCustomerForStaff = customerIdx !== -1 && customerIdx < taskIdx ? filters.customer_id : null;
                 const upClientForStaff = clientIdx !== -1 && clientIdx < taskIdx ? filters.client_id : null;
                 const upJobForStaff = jobIdx !== -1 && jobIdx < taskIdx ? filters.job_id : null;
+                const lineManagerIdx = newOrder.indexOf("line_manager");
+                const upLineManagerForStaff = lineManagerIdx !== -1 && lineManagerIdx < taskIdx ? filters.line_manager : null;
                 staffCache.current = {};
                 setStaffAllData([]);
                 setStaffPage(1);
                 setStaffHasMore(true);
-                GetAllStaff({ searchValue: "", pageNo: 1, task_id: value, job_id: upJobForStaff, customer_id: upCustomerForStaff, client_id: upClientForStaff });
+                GetAllStaff({ searchValue: "", pageNo: 1, task_id: value, job_id: upJobForStaff, customer_id: upCustomerForStaff, client_id: upClientForStaff, line_manager_id: upLineManagerForStaff });
               }
 
               if (jobIdx === -1 || taskIdx < jobIdx) {
@@ -1763,6 +1961,7 @@ function TimesheetReport() {
     filters.internal_external,
     filters.groupBy,
     filters.staff_id,
+    filters.line_manager,
     filters.customer_id,
     filters.client_id,
     filters.job_id,
@@ -1809,12 +2008,14 @@ function TimesheetReport() {
     setTaskSearch("");
     setInternalJobAllData([]);
     setInternalTaskAllData([]);
+    setLineManagerAllData([]);
 
     //staffData();
   };
 
   const optionGroupBy = [
     { value: "staff_id", label: "Staff" },
+    { value: "line_manager", label: "Line Manager" },
     ...(filters?.internal_external == "2" || filters?.internal_external == "0"
       ? [{ value: "customer_id", label: "Customer" }]
       : []),
@@ -1828,6 +2029,8 @@ function TimesheetReport() {
 
   const labels = {
     staff_id: "Staff",
+    line_manager: "Line Manager",
+    employee_number: "Employee ID",
     customer_id: "Customer",
     client_id: "Client",
     job_id: "Job",
@@ -1910,7 +2113,9 @@ function TimesheetReport() {
             pageNo: 1,
             customer_id: parsedFilters?.customer_id,
             client_id: parsedFilters?.client_id,
-            job_id: parsedFilters?.job_id
+            job_id: parsedFilters?.job_id,
+            task_id: parsedFilters?.task_id,
+            line_manager_id: parsedFilters?.line_manager
           });
         }
         if (parsedFilters?.groupBy?.includes("customer_id")) {
@@ -2258,7 +2463,7 @@ function TimesheetReport() {
               onMenuOpen={() => {
                 if (staffAllData.length === 0) {
                   const up = getUpstreamFilters("staff_id", filters);
-                  GetAllStaff({ searchValue: "", pageNo: 1, customer_id: up.customer_id, client_id: up.client_id, job_id: up.job_id });
+                  GetAllStaff({ searchValue: "", pageNo: 1, line_manager_id: up.line_manager, customer_id: up.customer_id, client_id: up.client_id, job_id: up.job_id });
                 }
               }}
               options={[
@@ -2298,6 +2503,7 @@ function TimesheetReport() {
                     searchValue: staffSearch,
                     pageNo: staffPage + 1,
                     append: true,
+                    line_manager_id: up.line_manager,
                     customer_id: up.customer_id,
                     client_id: up.client_id,
                     job_id: up.job_id
@@ -2305,6 +2511,61 @@ function TimesheetReport() {
                 }
               }}
 
+              isSearchable
+              className="shadow-sm select-staff rounded-pill"
+            />
+          </div>
+        )}
+
+        {/* Field To Display Line Manager */}
+        {filters?.groupBy?.includes("line_manager") && (
+          <div className="col-lg-4 col-md-6">
+            <label className="form-label fw-medium">Line Manager</label>
+            <Select
+              closeMenuOnSelect={false}
+              onMenuOpen={() => {
+                if (lineManagerAllData.length === 0) getLineManagerData({ searchValue: "", pageNo: 1, append: false, staff_id: filters?.staff_id });
+              }}
+              onMenuScrollToBottom={() => {
+                if (lineManagerHasMore && !lineManagerLoading) {
+                  const nextPage = lineManagerPage + 1;
+                  setLineManagerPage(nextPage);
+                  getLineManagerData({ searchValue: lineManagerSearch, pageNo: nextPage, append: true, staff_id: filters?.staff_id });
+                }
+              }}
+              onInputChange={(val, { action }) => {
+                if (action === "input-change" || action === "set-value") {
+                  setLineManagerSearch(val);
+                  setLineManagerPage(1);
+                  setLineManagerHasMore(true);
+
+                  if (lineManagerDebounceRef.current) clearTimeout(lineManagerDebounceRef.current);
+
+                  lineManagerDebounceRef.current = setTimeout(() => {
+                    getLineManagerData({ searchValue: val, pageNo: 1, append: false, staff_id: filters?.staff_id });
+                  }, 500);
+                }
+              }}
+              isLoading={lineManagerLoading}
+              options={[
+                { value: "", label: "Select..." },
+                ...lineManagerAllData
+              ]}
+              isMulti
+              value={
+                lineManagerAllData && lineManagerAllData.length > 0
+                  ? lineManagerAllData.filter((opt) => (filters.line_manager || []).includes(opt.value))
+                  : []
+              }
+              onChange={(selected) =>
+                handleFilterChange({
+                  target: {
+                    key: "line_manager",
+                    value: selected ? selected.map(item => item.value) : [],
+                    label: selected ? selected.map(item => item.label).join(", ") : "",
+                  },
+                })
+              }
               isSearchable
               className="shadow-sm select-staff rounded-pill"
             />
@@ -2324,7 +2585,12 @@ function TimesheetReport() {
                 ...employeeNumberAllData.filter(e => {
                   if (filters.staff_id && Number(e.staff_id) !== Number(filters.staff_id)) return false;
                   // If upstream filters apply, staff must be in staffAllData
-                  if (filters.customer_id || filters.client_id || filters.job_id || filters.task_id) {
+                  if (
+                    (filters.customer_id && filters.customer_id.length > 0) ||
+                    (filters.client_id && filters.client_id.length > 0) ||
+                    (filters.job_id && filters.job_id.length > 0) ||
+                    (filters.task_id && filters.task_id.length > 0)
+                  ) {
                     if (!staffAllData.some(staff => Number(staff.value) === Number(e.staff_id))) return false;
                   }
                   return true;

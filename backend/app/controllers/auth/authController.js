@@ -69,6 +69,10 @@ const handleStaff = async (req, res) => {
         result = await authService.getLineManagerStaff(staff);
         res.status(200).json({ status: true, data: result });
         break;
+      case "get_active_line_managers":
+        result = await authService.getActiveLineManagers();
+        res.status(200).json(result);
+        break;
       case "get_my_line_managers":
         result = await authService.getMyLineManagers(staff);
         res.status(200).json({ status: true, data: result });

@@ -4977,3 +4977,464 @@ svg {
 .sc-gtstET {
   z-index: 0 !important;
 }
+
+
+/* Timesheet Css start */
+
+.timesheet-header {
+  border-bottom: 1px solid #d6e0e4;
+  padding-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.timesheet-header-title-div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.timesheet-header-icon {
+  color: #fffafc;
+  background: #00afef;
+  border-radius: 8px;
+  height: 36px;
+  width: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.timesheet-header-icon svg {
+  top: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.timesheet-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.timesheet-tabs li button {
+  color: #5d6f7a;
+  padding: 6px 12px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.4;
+  background: transparent;
+}
+
+.timesheet-tabs li button.active {
+  color: #0c1a24;
+  background: rgb(237 247 251);
+}
+
+.timesheet-tabs li button:not(.active):hover {
+  color: #0c1a24;
+  background: #d5f2f3;
+}
+
+.timesheet-tab-content {
+  margin-top: 32px;
+}
+
+.timesheet-tab-content-header {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.timesheet-tab-content-heading {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 24.2px;
+}
+
+.timesheet-tab-content-para {
+  color: #333547;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 19.36px;
+  margin-bottom: 0;
+  margin-top: 5px;
+}
+
+.timesheet-week-div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timesheet-week-button {
+  box-shadow: 0 1px 3px 0 #0000001a, 0 1px 2px -1px #0000001a;
+  background: rgb(237 247 251);
+  border: 1px solid #d6e0e4;
+  border-radius: 6px;
+  padding: 0;
+  width: 36px;
+  height: 36px;
+  color: #0cb2ef;
+}
+
+.timesheet-week-button svg {
+  top: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.timesheet-week-content-div {
+  padding: 8px 16px;
+  border: 1px solid #d6e0e4;
+  border-radius: 6px;
+  min-width: 240px;
+}
+
+.timesheet-week-date {
+  margin: 0;
+  text-align: center;
+  font-weight: 600;
+  color: #333547;
+  font-size: 14px;
+}
+
+.timesheet-week-text {
+  margin: 5px 0 0 0;
+  text-align: center;
+  font-size: 12px;
+  color: #000;
+  font-weight: 400;
+  line-height: 14.52px;
+}
+
+.timesheet-tab-content-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timesheet-white-card {
+  padding: 16px;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.timesheet-whitediv-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.timesheet-white-card-div-25 {
+  width: calc(25% - 15px);
+}
+
+.timesheet-white-card-label {
+  margin: 0;
+  color: #212529;
+  font-weight: 500;
+  /* text-transform: uppercase; */
+}
+
+.timesheet-white-card-value {
+  margin: 6px 0 0 0;
+  font-size: 14px;
+  color: #4b4b4b;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.timesheet-white-card-value-small {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.timesheet-progress {
+  margin-top: 20px;
+  width: 100%;
+  background: rgb(237 247 251);
+  height: 10px;
+  border-radius: 1000px;
+  overflow: hidden;
+}
+
+.timesheet-progress-bar {
+  height: 100%;
+  background: #0cb2ef;
+}
+
+.timesheet-white-card-status {
+  color: #4b4b4b;
+  background: rgb(237 247 251);
+  padding: 2px 10px;
+  border-radius: 1000px;
+  font-size: 12px;
+}
+
+.timesheet-white-card-unsaved {
+  color: #a46400;
+  font-size: 12px;
+  margin-left: 8px;
+}
+
+.timesheet-white-card-value-big {
+  margin: 15px 0 0 0;
+  color: #333547;
+  font-size: 28px;
+  line-height: 110%;
+}
+
+.timesheet-white-card-value-big-blue {
+  color: #0cb2ef;
+}
+
+.timesheet-table-header-div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.timesheet-table-header-div-right {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.timesheet-table-header-btn svg {
+  height: 16px;
+  width: 16px;
+}
+
+.timesheet-table-header-btn {
+  border: 1px solid #00afef;
+  color: #00afef;
+  border-radius: 20px;
+  padding: 7px 20px;
+  font-weight: 700;
+  font-size: 14px;
+  background: #fff;
+}
+
+/* .timesheet-table-header-btn:hover {
+  background: #00afef;
+  color: #fff;
+} */
+
+
+.timesheet-table-header-add-task-btn {
+  border: 1px solid #00afef;
+  color: #fff;
+  border-radius: 20px;
+  padding: 7px 20px;
+  font-weight: 700;
+  font-size: 14px;
+  background: #00afef;
+}
+
+.timesheet-submit-div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.timesheet-submit-div-left p {
+  margin: 0;
+  color: #333547;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 19.36px;
+}
+
+.timesheet-submit-div-right {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.timesheet-table-strong {
+  color: #000;
+}
+
+.timesheet-row-add-hours-btn {
+  border: 1px solid #00afef;
+  color: #00afef;
+  border-radius: 20px;
+  padding: 4px 8px;
+  font-weight: 700;
+  font-size: 12px;
+  background: #fff;
+}
+
+.timesheet-row-add-hours-btn:hover {
+  background: #00afef;
+  color: #fff;
+}
+
+.timesheet-white-card-value-big-green {
+  color: #43c752;
+}
+
+.timesheet-white-card-value-big-red {
+  color: #ff0000;
+}
+
+.timesheet-table-header-btn-approve svg {
+  height: 16px;
+  width: 16px;
+}
+
+.timesheet-table-header-btn-approve {
+  border: 1px solid #43c752;
+  color: #43c752;
+  border-radius: 20px;
+  padding: 7px 20px;
+  font-weight: 700;
+  font-size: 14px;
+  background: #fff;
+}
+
+.timesheet-table-header-btn-approve:hover {
+  color: #fff;
+  background-color: #43c752;
+}
+
+.timesheet-table-header-btn-reject svg {
+  height: 16px;
+  width: 16px;
+}
+
+.timesheet-table-header-btn-reject {
+  border: 1px solid #ff3e39ff;
+  color: #ff3e39ff;
+  border-radius: 20px;
+  padding: 7px 20px;
+  font-weight: 700;
+  font-size: 14px;
+  background: #fff;
+}
+
+.timesheet-table-header-btn-reject:hover {
+  color: #fff;
+  background-color: #ff3e39ff;
+}
+
+.timesheet-table-header-status-approved {
+  color: #fff;
+  background: #43c752;
+  padding: 2px 10px;
+  border-radius: 1000px;
+  font-size: 12px;
+}
+
+.timesheet-table-header-status-rejected {
+  color: #fff;
+  background: #ff3e39ff;
+  padding: 2px 10px;
+  border-radius: 1000px;
+  font-size: 12px;
+}
+
+
+.timesheet-week-content-div-mis {
+  border-radius: 6px;
+  min-width: 160px;
+}
+
+.timesheet-submitted-mis {
+  color: #1f689d;
+}
+
+.resource-tabs {
+  display: flex;
+  background: rgb(237 247 251);
+  width: fit-content;
+  margin-top: 16px;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.resource-tabs li button {
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #5d6f7a;
+}
+
+.resource-tabs li button.active {
+  box-shadow: 0 1px 3px 0 #0000001a, 0 1px 2px -1px #0000001a;
+  color: #0c1a24;
+  background: oklch(98.5% .004 210);
+}
+
+.staff-name {
+  font-size: 12px;
+  color: #000;
+  font-weight: 600;
+  line-height: 14.52px;
+}
+
+.staff-date {
+  font-size: 12px;
+  color: #000;
+  font-weight: 400;
+  line-height: 14.52px;
+}
+
+.staff-status {
+  color: #c92f33;
+  background: #ffe0dc;
+  padding: 2px 10px;
+  border-radius: 1000px;
+  font-size: 12px;
+}
+
+.staff-report-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  /* box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px; */
+  border: 1px solid #d6e0e4;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.staff-report-list {
+  max-height: 223px;
+  overflow: auto;
+  margin-top: 16px;
+}
+
+.staff-report-list .staff-report-card:first-child {
+  margin-top: 0;
+}
+
+.timesheet-pending-mis {
+  color: #a46400;
+}
+
+.datatable-container .rdt_TableCol {
+  color: #000;
+  font-size: 16px;
+}
+
+.timesheet-datatable-container .rdt_TableCol * {
+  font-size: 14px;
+}
+
+/* Timesheet Css end */

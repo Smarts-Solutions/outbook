@@ -19,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 import ReactPaginate from "react-paginate";
 import { AsyncPaginate } from "react-select-async-paginate";
 import { Download, Trash } from "lucide-react";
+import Datatable from "../../../Components/ExtraComponents/Datatable";
 
 function JobCustomReport() {
   const noDataImage = "/assets/images/No-data-amico.png";
@@ -277,7 +278,7 @@ function JobCustomReport() {
   // };
 
   // All Type Staff Get
-  
+
   const staffData = async (role_id, type) => {
     /// alert(role_id);
     if (["", null, undefined].includes(role_id)) {
@@ -295,7 +296,7 @@ function JobCustomReport() {
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-            const data = response?.data?.map((item) => ({
+            const data = response?.data?.filter(item => item.status == 1)?.map((item) => ({
               value: item.id,
               label: `${item.first_name} ${item.last_name} (${item.email})`,
             }));
@@ -318,7 +319,7 @@ function JobCustomReport() {
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-            const data = response?.data?.map((item) => ({
+            const data = response?.data?.filter(item => item.status == 1)?.map((item) => ({
               value: item.id,
               label: `${item.first_name} ${item.last_name} (${item.email})`,
             }));
@@ -341,7 +342,7 @@ function JobCustomReport() {
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-            const data = response?.data?.map((item) => ({
+            const data = response?.data?.filter(item => item.status == 1)?.map((item) => ({
               value: item.id,
               label: `${item.first_name} ${item.last_name} (${item.email})`,
             }));
@@ -364,7 +365,7 @@ function JobCustomReport() {
         .unwrap()
         .then(async (response) => {
           if (response.status) {
-            const data = response?.data?.map((item) => ({
+            const data = response?.data?.filter(item => item.status == 1)?.map((item) => ({
               value: item.id,
               label: `${item.first_name} ${item.last_name} (${item.email})`,
             }));
@@ -388,7 +389,7 @@ function JobCustomReport() {
                 (item) =>
                   ![null, "", "null", undefined].includes(
                     item.employee_number,
-                  ),
+                  ) && item.status == 1,
               )
               ?.map((item) => ({
                 value: item.employee_number,
@@ -605,7 +606,7 @@ function JobCustomReport() {
   };
 
   const handleFilterChange = (e, type) => {
-    
+
     if (type == "additionalField") {
       const values = e.map((opt) => opt.value);
       let additionalFieldArray = sortByReference(values);
@@ -618,7 +619,7 @@ function JobCustomReport() {
 
     if (Array.isArray(e)) {
 
-      
+
       // this case is for multi-select (Group By)
       const values = e.map((opt) => opt.value);
       setOptions([]);
@@ -646,7 +647,7 @@ function JobCustomReport() {
     }
 
     const { key, value, label } = e.target;
-    
+
 
     if (key == "timePeriod") {
       setFilters((prev) => ({
@@ -672,67 +673,67 @@ function JobCustomReport() {
         const newFilters = { ...prev, [key]: value };
         return newFilters;
       });
-    
-        if(key === "job_id") {
+
+      if (key === "job_id") {
         setCustomerAllData([]);
         GetAllCustomer({
-        searchValue: "",
-        pageNo: 1,
-        append: true,
-        job_id: value,
-        client_id: filters.client_id,
+          searchValue: "",
+          pageNo: 1,
+          append: true,
+          job_id: value,
+          client_id: filters.client_id,
         });
 
         setClientAllData([]);
         GetAllClient({
-        searchValue: "",
-        pageNo: 1,
-        append: true,
-        job_id: value,
-        customer_id: filters.customer_id,
-        });  
+          searchValue: "",
+          pageNo: 1,
+          append: true,
+          job_id: value,
+          customer_id: filters.customer_id,
+        });
       }
 
       else if (key === "customer_id") {
-        setJobOptions([]); 
+        setJobOptions([]);
         GetAllJobs({
-        searchValue: "",
-        pageNo: 1,
-        append: true,
-        customer_id: value,
-        client_id: filters.client_id,
+          searchValue: "",
+          pageNo: 1,
+          append: true,
+          customer_id: value,
+          client_id: filters.client_id,
         });
-        
+
         setClientAllData([]);
         GetAllClient({
-        searchValue: "",
-        pageNo: 1,
-        append: true,
-        customer_id: value,
-        job_id: filters.job_id,
-        });  
-       } 
-
-       else if (key === "client_id") {
-        setJobOptions([]); 
-        GetAllJobs({
-        searchValue: "",
-        pageNo: 1,
-        append: true,
-        client_id: value,
-        customer_id: filters.customer_id,
+          searchValue: "",
+          pageNo: 1,
+          append: true,
+          customer_id: value,
+          job_id: filters.job_id,
         });
-        
+      }
+
+      else if (key === "client_id") {
+        setJobOptions([]);
+        GetAllJobs({
+          searchValue: "",
+          pageNo: 1,
+          append: true,
+          client_id: value,
+          customer_id: filters.customer_id,
+        });
+
         setCustomerAllData([]);
         GetAllCustomer({
-        searchValue: "",
-        pageNo: 1,
-        append: true,
-        client_id: value,
-        job_id: filters.job_id,
+          searchValue: "",
+          pageNo: 1,
+          append: true,
+          client_id: value,
+          job_id: filters.job_id,
         });
 
-       }
+      }
 
 
 
@@ -1364,9 +1365,9 @@ function JobCustomReport() {
     customer_id = [],
   }) => {
 
-  
 
-   // if (jobLoading) return;
+
+    // if (jobLoading) return;
     const filtersKey = JSON.stringify(filters?.customer_id || []) + JSON.stringify(filters?.client_id || []);
     const cacheKey = `${searchValue}_${pageNo}_${client_id}_${customer_id}`;
     // if (cacheRef.current[cacheKey]) {
@@ -1403,7 +1404,7 @@ function JobCustomReport() {
       },
     };
     const data = { req, authToken: token };
-    
+
     try {
       if (client_id.length > 0 || customer_id.length > 0) {
         setJobOptions([]);
@@ -1422,16 +1423,16 @@ function JobCustomReport() {
           value: item.job_id,
           label: item.job_code_id,
         }));
-        
-       if (client_id.length > 0 || customer_id.length > 0) {
-        const availableJobIds = new Set(response.data.map(item => item.job_id));
-        setFilters(prev => ({
-          ...prev,
-          job_id: prev.job_id.filter(id => availableJobIds.has(id)),
-        }));
-       }
 
-      
+        if (client_id.length > 0 || customer_id.length > 0) {
+          const availableJobIds = new Set(response.data.map(item => item.job_id));
+          setFilters(prev => ({
+            ...prev,
+            job_id: prev.job_id.filter(id => availableJobIds.has(id)),
+          }));
+        }
+
+
 
         cacheRef.current[cacheKey] = formatted;
         // setJobOptions(prev =>
@@ -1459,9 +1460,9 @@ function JobCustomReport() {
     debounceTimeout.current = setTimeout(() => {
       setSearch(value);
       setPage(1);
-      GetAllJobs({ 
-        searchValue: value, 
-        pageNo: 1 ,
+      GetAllJobs({
+        searchValue: value,
+        pageNo: 1,
         client_id: filters?.client_id || [],
         customer_id: filters?.customer_id || [],
       });
@@ -1488,7 +1489,7 @@ function JobCustomReport() {
 
     //if (customerLoading) return;
     const filtersKey = JSON.stringify(filters?.client_id || []);
-    
+
     console.log("client_id --", client_id)
     console.log("job_id --", job_id)
 
@@ -1533,7 +1534,8 @@ function JobCustomReport() {
       }
       const response = await dispatch(getAllCustomerDropDown(data)).unwrap();
       if (response.status) {
-        const formatted = response.data.map((item) => {
+        const activeData = response.data.filter(item => item.status == 1);
+        const formatted = activeData.map((item) => {
           const opt = {
             value: item.id,
             label: item.trading_name,
@@ -1542,16 +1544,16 @@ function JobCustomReport() {
           return opt;
         });
 
-        if(job_id.length > 0 || client_id.length > 0) {
-          const availableCustomerIds = new Set(response.data.map(item => item.id));
+        if (job_id.length > 0 || client_id.length > 0) {
+          const availableCustomerIds = new Set(activeData.map(item => item.id));
           setFilters(prev => ({
             ...prev,
             customer_id: prev.customer_id.filter(id => availableCustomerIds.has(id)),
           }));
-         }
+        }
 
         customerCache.current[cacheKey] = formatted;
-        
+
 
         // setCustomerAllData(prev =>
         //   append ? [...prev, ...formatted] : formatted
@@ -1630,7 +1632,7 @@ function JobCustomReport() {
     job_id = [],
     customer_id = [],
   }) => {
-   // if (clientLoading) return;
+    // if (clientLoading) return;
     const filtersKey = JSON.stringify(filters?.customer_id || []);
     const cacheKey = `${searchValue}_${pageNo}_${job_id}_${customer_id}`;
     // Cache check
@@ -1677,25 +1679,26 @@ function JobCustomReport() {
       }
       const response = await dispatch(ClientAction(data)).unwrap();
       if (response.status) {
-        response.data.forEach((item) => {
+        const activeData = response.data.filter(item => item.status == 1);
+        activeData.forEach((item) => {
           clientToCustomerMap.current[item.id] = item.customer_id;
           optionCacheRef.current[item.id] = {
             value: item.id,
             label: `${item.client_name} (${item.client_code})`,
           };
         });
-        const formatted = response.data.map((item) => ({
+        const formatted = activeData.map((item) => ({
           value: item.id,
           label: `${item.client_name} (${item.client_code})`,
         }));
 
-        if(job_id.length > 0 || customer_id.length > 0) {
-          const availableClientIds = new Set(response.data.map(item => item.id));
+        if (job_id.length > 0 || customer_id.length > 0) {
+          const availableClientIds = new Set(activeData.map(item => item.id));
           setFilters(prev => ({
             ...prev,
             client_id: prev.client_id.filter(id => availableClientIds.has(id)),
           }));
-         }
+        }
 
         // Cache store
         clientCache.current[cacheKey] = formatted;
@@ -1885,7 +1888,7 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (jobOptions.length === 0) GetAllJobs({ searchValue: "", pageNo: 1 , client_id: filters?.client_id || [], customer_id: filters?.customer_id || []}); }}
+              onMenuOpen={() => { if (jobOptions.length === 0) GetAllJobs({ searchValue: "", pageNo: 1, client_id: filters?.client_id || [], customer_id: filters?.customer_id || [] }); }}
               options={jobOptions}
               value={(filters?.job_id || []).map((id) =>
                 optionCacheRef.current[id] || { value: id, label: `Loading...` }
@@ -1940,7 +1943,7 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (customerAllData.length === 0) GetAllCustomer({ searchValue: "", pageNo: 1 , job_id: filters?.job_id || [], client_id: filters?.client_id || [] }); }}
+              onMenuOpen={() => { if (customerAllData.length === 0) GetAllCustomer({ searchValue: "", pageNo: 1, job_id: filters?.job_id || [], client_id: filters?.client_id || [] }); }}
               options={customerAllData}
               value={(filters?.customer_id || []).map((id) =>
                 optionCacheRef.current[id] || { value: id, label: `Loading...` }
@@ -1999,7 +2002,7 @@ function JobCustomReport() {
             <Select
               isMulti
               closeMenuOnSelect={false}
-              onMenuOpen={() => { if (clientAllData.length === 0) GetAllClient({ searchValue: "", pageNo: 1 , job_id: filters?.job_id || [], customer_id: filters?.customer_id || [] }); }}
+              onMenuOpen={() => { if (clientAllData.length === 0) GetAllClient({ searchValue: "", pageNo: 1, job_id: filters?.job_id || [], customer_id: filters?.customer_id || [] }); }}
               options={clientAllData}
               value={(filters?.client_id || []).map((id) =>
                 optionCacheRef.current[id] || { value: id, label: `Loading...` }
@@ -2654,65 +2657,39 @@ function JobCustomReport() {
           </div>
         ) : (
           <>
-            <div className="table-responsive fixed-table-header">
-              <table
-                className="table rdt_Table"
-              // className="table table-bordered"
-              // style={{
-              //   fontSize: "14px",
-              //   width: "100%",
-              //   overflowX: "auto",
-              //   display: "block",
-              // }}
-              >
-                <thead
-                // className="rdt_TableHead"
-                >
-                  <tr className="rdt_TableHeadRow">
-                    {showData?.columns?.map((col, idx) => (
-                      <th
-                        className="border-bottom-0"
-                        key={idx}
-                        style={{
-                          fontSize: "15px",
-                          fontWeight: "bold",
-                          minWidth: "130px",
-                        }}
-                      >
-                        {getColumnName(col)}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {showData?.rows?.map((row, rowIdx) => (
-                    <tr key={rowIdx}>
-                      {showData?.columns?.map((col, colIdx) => (
-                        <td key={colIdx} style={{ padding: "10px" }}>
-                          {/* Job ID column ke liye special handling */}
-                          {col === "job_id" && row[col] ? (
-                            <a
-                              onClick={() => HandleJob(row)}
-                              style={{
-                                cursor: "pointer",
-                                color: "#26bdf0",
-                                textDecoration: "underline",
-                              }}
-                            >
-                              {row[col]}
-                            </a>
-                          ) : row[col] !== undefined ? (
-                            row[col]
-                          ) : (
-                            ""
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <Datatable
+              filter={false}
+              pagination={false}
+              columns={
+                showData?.columns?.map((col) => ({
+                  name: getColumnName(col),
+                  selector: (row) => row[col],
+                  sortable: true,
+                  cell: (row) => (
+                    <div style={{ padding: "10px" }}>
+                      {col === "job_id" && row[col] ? (
+                        <a
+                          onClick={() => HandleJob(row)}
+                          style={{
+                            cursor: "pointer",
+                            color: "#26bdf0",
+                            textDecoration: "underline",
+                          }}
+                        >
+                          {row[col]}
+                        </a>
+                      ) : [undefined, null, ""].includes(row[col]) ? (
+                        "-"
+                      ) : (
+                        row[col]
+                      )}
+                    </div>
+                  ),
+                  minWidth: "130px"
+                })) || []
+              }
+              data={showData?.rows || []}
+            />
 
             <ReactPaginate
               previousLabel={"Previous"}
