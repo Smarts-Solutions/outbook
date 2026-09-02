@@ -282,9 +282,8 @@ function TimesheetReport() {
     }
   };
 
-  const handleStaffSearch = (value) => {
-
-    if (value === "") return;
+  const handleStaffSearch = (value, actionMeta) => {
+    if (actionMeta && actionMeta.action !== "input-change" && actionMeta.action !== "set-value") return;
     clearTimeout(staffDebounceRef.current);
     staffDebounceRef.current = setTimeout(() => {
       setStaffSearch(value);
@@ -2621,7 +2620,8 @@ function TimesheetReport() {
             <Select
               closeMenuOnSelect={false}
               onMenuOpen={() => {
-                if (staffAllData.length === 0) {
+                if (staffAllData.length === 0 || staffSearch !== "") {
+                  setStaffSearch("");
                   const up = getUpstreamFilters("staff_id", filters);
                   GetAllStaff({ searchValue: "", pageNo: 1, line_manager_id: up.line_manager, customer_id: up.customer_id, client_id: up.client_id, job_id: up.job_id });
                 }
@@ -2679,7 +2679,10 @@ function TimesheetReport() {
             <Select
               closeMenuOnSelect={false}
               onMenuOpen={() => {
-                if (lineManagerAllData.length === 0) getLineManagerData({ searchValue: "", pageNo: 1, append: false, staff_id: filters?.staff_id });
+                if (lineManagerAllData.length === 0 || lineManagerSearch !== "") {
+                  setLineManagerSearch("");
+                  getLineManagerData({ searchValue: "", pageNo: 1, append: false, staff_id: filters?.staff_id });
+                }
               }}
               onMenuScrollToBottom={() => {
                 if (lineManagerHasMore && !lineManagerLoading) {
@@ -2799,7 +2802,8 @@ function TimesheetReport() {
             <Select
               closeMenuOnSelect={false}
               onMenuOpen={() => {
-                if (customerAllData.length === 0) {
+                if (customerAllData.length === 0 || customerSearch !== "") {
+                  setCustomerSearch("");
                   const up = getUpstreamFilters("customer_id", filters);
                   GetAllCustomer({ searchValue: "", pageNo: 1, job_id: up.job_id, client_id: up.client_id });
                 }
@@ -2867,7 +2871,8 @@ function TimesheetReport() {
             <Select
               closeMenuOnSelect={false}
               onMenuOpen={() => {
-                if (clientAllData.length === 0) {
+                if (clientAllData.length === 0 || clientSearch !== "") {
+                  setClientSearch("");
                   const up = getUpstreamFilters("client_id", filters);
                   GetAllClient({ searchValue: "", pageNo: 1, job_id: up.job_id, customer_id: up.customer_id });
                 }
@@ -2937,7 +2942,8 @@ function TimesheetReport() {
               <Select
                 closeMenuOnSelect={false}
                 onMenuOpen={() => {
-                  if (jobOptions.length === 0) {
+                  if (jobOptions.length === 0 || search !== "") {
+                    setSearch("");
                     const up = getUpstreamFilters("job_id", filters);
                     GetAllJobs({ searchValue: "", pageNo: 1, customer_id: up.customer_id, client_id: up.client_id });
                   }
@@ -2985,7 +2991,8 @@ function TimesheetReport() {
               <Select
                 closeMenuOnSelect={false}
                 onMenuOpen={() => {
-                  if (taskAllData.length === 0) {
+                  if (taskAllData.length === 0 || taskSearch !== "") {
+                    setTaskSearch("");
                     const up = getUpstreamFilters("task_id", filters);
                     GetAllTask(filters.internal_external, { searchValue: "", pageNo: 1, customer_id: up.customer_id, client_id: up.client_id, job_id: up.job_id, staff_id: up.staff_id });
                   }
