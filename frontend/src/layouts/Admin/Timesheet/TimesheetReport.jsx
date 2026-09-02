@@ -3469,6 +3469,14 @@ function TimesheetReport() {
               name: getColumnName(col),
               selector: (row) => row[col],
               sortable: true,
+              sortFunction: (a, b) => {
+                const aNum = parseFloat(a[col]);
+                const bNum = parseFloat(b[col]);
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                  return aNum - bNum;
+                }
+                return String(a[col] ?? "").localeCompare(String(b[col] ?? ""));
+              },
               cell: (row) => (
                 <div style={{ padding: "10px" }}>
                   {[undefined, null, ""].includes(row[col]) ? "-" : row[col]}
