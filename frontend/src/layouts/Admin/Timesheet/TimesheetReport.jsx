@@ -375,9 +375,9 @@ function TimesheetReport() {
   const lineManagerCache = useRef({});
   const lineManagerDebounceRef = useRef(null);
 
-  const getLineManagerData = async ({ searchValue = "", pageNo = 1, append = false }) => {
+  const getLineManagerData = async ({ searchValue = "", pageNo = 1, append = false, staff_id = null }) => {
     if (role?.toUpperCase() === "SUPERADMIN" || role?.toUpperCase() === "ADMIN") {
-      const cacheKey = `${searchValue}_${pageNo}`;
+      const cacheKey = `${searchValue}_${pageNo}_${staff_id}`;
       if (lineManagerCache.current[cacheKey]) {
         const cachedObj = lineManagerCache.current[cacheKey];
         const cached = Array.isArray(cachedObj) ? cachedObj : cachedObj.data;
@@ -399,7 +399,7 @@ function TimesheetReport() {
       try {
         const req = {
           action: "get_active_line_managers",
-          filters: { ...filters, staff_id: null },
+          filters: { ...filters, staff_id: staff_id ? (Array.isArray(staff_id) ? staff_id : [staff_id]) : null },
           pagination: { page: pageNo, limit: 20, search: searchValue }
         };
         const response = await dispatch(CustomTimesheetAction({ req, authToken: token })).unwrap();
@@ -1582,7 +1582,15 @@ function TimesheetReport() {
                 GetAllJobs({ searchValue: "", pageNo: 1, customer_id: upCustomerForJob, client_id: upClientForJob, staff_id: resolvedStaffId });
               }
 
-              // Removed Line Manager fetch here. Line manager is upstream of staff.
+              const lineManagerIdx = newOrder.indexOf("line_manager");
+              if (lineManagerIdx === -1 || staffIdx < lineManagerIdx) {
+                lineManagerCache.current = {};
+                setLineManagerAllData(prev => (prev || []).filter(item => (filtersRef.current.line_manager || []).includes(item.value)));
+                setLineManagerPage(1);
+                setLineManagerHasMore(true);
+                getLineManagerData({ searchValue: "", pageNo: 1, staff_id: resolvedStaffId });
+              }
+
               return newOrder;
             });
           }
@@ -2866,16 +2874,26 @@ function TimesheetReport() {
             <Select
               closeMenuOnSelect={false}
               onMenuOpen={() => {
+                const staffIdx = selectionOrder.indexOf("staff_id");
+                const lmIdx = selectionOrder.indexOf("line_manager");
+                const shouldFilter = staffIdx !== -1 && (lmIdx === -1 || staffIdx < lmIdx);
+                const resolvedStaffForLM = shouldFilter ? filters?.staff_id : null;
+
                 if (lineManagerAllData.length === 0 || lineManagerSearch !== "") {
                   setLineManagerSearch("");
-                  getLineManagerData({ searchValue: "", pageNo: 1, append: false });
+                  getLineManagerData({ searchValue: "", pageNo: 1, append: false, staff_id: resolvedStaffForLM });
                 }
               }}
               onMenuScrollToBottom={() => {
+                const staffIdx = selectionOrder.indexOf("staff_id");
+                const lmIdx = selectionOrder.indexOf("line_manager");
+                const shouldFilter = staffIdx !== -1 && (lmIdx === -1 || staffIdx < lmIdx);
+                const resolvedStaffForLM = shouldFilter ? filters?.staff_id : null;
+
                 if (lineManagerHasMore && !lineManagerLoading) {
                   const nextPage = lineManagerPage + 1;
                   setLineManagerPage(nextPage);
-                  getLineManagerData({ searchValue: lineManagerSearch, pageNo: nextPage, append: true });
+                  getLineManagerData({ searchValue: lineManagerSearch, pageNo: nextPage, append: true, staff_id: resolvedStaffForLM });
                 }
               }}
               onInputChange={(val, { action }) => {
@@ -2887,7 +2905,12 @@ function TimesheetReport() {
                   if (lineManagerDebounceRef.current) clearTimeout(lineManagerDebounceRef.current);
 
                   lineManagerDebounceRef.current = setTimeout(() => {
-                    getLineManagerData({ searchValue: val, pageNo: 1, append: false });
+                    const staffIdx = selectionOrder.indexOf("staff_id");
+                    const lmIdx = selectionOrder.indexOf("line_manager");
+                    const shouldFilter = staffIdx !== -1 && (lmIdx === -1 || staffIdx < lmIdx);
+                    const resolvedStaffForLM = shouldFilter ? filters?.staff_id : null;
+
+                    getLineManagerData({ searchValue: val, pageNo: 1, append: false, staff_id: resolvedStaffForLM });
                   }, 500);
                 }
               }}
