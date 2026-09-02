@@ -283,7 +283,7 @@ function TimesheetReport() {
   };
 
   const handleStaffSearch = (value, actionMeta) => {
-    if (actionMeta && actionMeta.action !== "input-change" && actionMeta.action !== "set-value") return;
+    if (actionMeta && !["input-change", "set-value", "input-blur", "menu-close"].includes(actionMeta.action)) return;
     clearTimeout(staffDebounceRef.current);
     staffDebounceRef.current = setTimeout(() => {
       setStaffSearch(value);
@@ -606,7 +606,7 @@ function TimesheetReport() {
   };
 
   const handleCustomerSearch = (value, actionMeta) => {
-    if (actionMeta && actionMeta.action !== "input-change" && actionMeta.action !== "set-value") return;
+    if (actionMeta && !["input-change", "set-value", "input-blur", "menu-close"].includes(actionMeta.action)) return;
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setCustomerSearch(value);
@@ -716,7 +716,7 @@ function TimesheetReport() {
     setClientLoading(false);
   };
   const handleClientSearch = (value, actionMeta) => {
-    if (actionMeta && actionMeta.action !== "input-change" && actionMeta.action !== "set-value") return;
+    if (actionMeta && !["input-change", "set-value", "input-blur", "menu-close"].includes(actionMeta.action)) return;
     clearTimeout(clientDebounceRef.current);
     clientDebounceRef.current = setTimeout(() => {
       setClientSearch(value);
@@ -890,7 +890,7 @@ function TimesheetReport() {
   };
 
   const handleSearch = (value, actionMeta) => {
-    if (actionMeta && actionMeta.action !== "input-change" && actionMeta.action !== "set-value") return;
+    if (actionMeta && !["input-change", "set-value", "input-blur", "menu-close"].includes(actionMeta.action)) return;
     clearTimeout(debounceTimeout.current);
     debounceTimeout.current = setTimeout(() => {
       setSearch(value);
@@ -1149,7 +1149,7 @@ function TimesheetReport() {
   };
 
   const handleTaskSearch = (value, actionMeta) => {
-    if (actionMeta && actionMeta.action !== "input-change" && actionMeta.action !== "set-value") return;
+    if (actionMeta && !["input-change", "set-value", "input-blur", "menu-close"].includes(actionMeta.action)) return;
     clearTimeout(taskDebounceRef.current);
     taskDebounceRef.current = setTimeout(() => {
       setTaskSearch(value);
@@ -2628,10 +2628,7 @@ function TimesheetReport() {
               }}
               options={[
                 { value: "", label: "Select..." },
-                ...staffAllData.filter(staff => {
-                  if (filters.employee_number && filters.employee_number.length > 0) { const matchedEmployees = employeeNumberAllData.filter(e => filters.employee_number.includes(e.value)); if (matchedEmployees.length > 0 && !matchedEmployees.some(m => Number(staff.value) === Number(m.staff_id))) return false; }
-                  return true;
-                })
+                ...staffAllData
               ]}
               isMulti
               value={
@@ -2744,6 +2741,7 @@ function TimesheetReport() {
                   if (filters.staff_id && filters.staff_id.length > 0 && !filters.staff_id.some(id => Number(id) === Number(e.staff_id))) return false;
                   // If upstream filters apply, staff must be in staffAllData
                   if (
+                    (filters.line_manager && filters.line_manager.length > 0) ||
                     (filters.customer_id && filters.customer_id.length > 0) ||
                     (filters.client_id && filters.client_id.length > 0) ||
                     (filters.job_id && filters.job_id.length > 0) ||
