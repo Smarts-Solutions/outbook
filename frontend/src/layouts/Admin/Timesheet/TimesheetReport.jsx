@@ -923,22 +923,22 @@ function TimesheetReport() {
   useEffect(() => {
     // Clear dependent caches when staff changes
     customerCache.current = {};
-    setCustomerAllData([]);
+    setCustomerAllData(prev => (prev || []).filter(item => (filtersRef.current.customer_id || []).includes(item.value)));
     setCustomerPage(1);
     setCustomerHasMore(true);
 
     clientCache.current = {};
-    setClientAllData([]);
+    setClientAllData(prev => (prev || []).filter(item => (filtersRef.current.client_id || []).includes(item.value)));
     setClientPage(1);
     setClientHasMore(true);
 
     cacheRef.current = {};
-    setJobOptions([]);
+    setJobOptions(prev => (prev || []).filter(item => (filtersRef.current.job_id || []).includes(item.value)));
     setPage(1);
     setHasMore(true);
 
     taskCache.current = {};
-    setTaskAllData([]);
+    setTaskAllData(prev => (prev || []).filter(item => (filtersRef.current.task_id || []).includes(item.value)));
     setTaskPage(1);
     setTaskHasMore(true);
   }, [JSON.stringify(filters?.staff_id)]);
@@ -946,17 +946,17 @@ function TimesheetReport() {
   useEffect(() => {
     // Clear dependent caches when customer changes
     clientCache.current = {};
-    setClientAllData([]);
+    setClientAllData(prev => (prev || []).filter(item => (filtersRef.current.client_id || []).includes(item.value)));
     setClientPage(1);
     setClientHasMore(true);
 
     cacheRef.current = {};
-    setJobOptions([]);
+    setJobOptions(prev => (prev || []).filter(item => (filtersRef.current.job_id || []).includes(item.value)));
     setPage(1);
     setHasMore(true);
 
     taskCache.current = {};
-    setTaskAllData([]);
+    setTaskAllData(prev => (prev || []).filter(item => (filtersRef.current.task_id || []).includes(item.value)));
     setTaskPage(1);
     setTaskHasMore(true);
   }, [JSON.stringify(filters?.customer_id)]);
@@ -964,12 +964,12 @@ function TimesheetReport() {
   useEffect(() => {
     // Clear dependent caches when client changes
     cacheRef.current = {};
-    setJobOptions([]);
+    setJobOptions(prev => (prev || []).filter(item => (filtersRef.current.job_id || []).includes(item.value)));
     setPage(1);
     setHasMore(true);
 
     taskCache.current = {};
-    setTaskAllData([]);
+    setTaskAllData(prev => (prev || []).filter(item => (filtersRef.current.task_id || []).includes(item.value)));
     setTaskPage(1);
     setTaskHasMore(true);
   }, [JSON.stringify(filters?.client_id)]);
@@ -977,7 +977,7 @@ function TimesheetReport() {
   useEffect(() => {
     // Clear dependent caches when job changes
     taskCache.current = {};
-    setTaskAllData([]);
+    setTaskAllData(prev => (prev || []).filter(item => (filtersRef.current.task_id || []).includes(item.value)));
     setTaskPage(1);
     setTaskHasMore(true);
   }, [JSON.stringify(filters?.job_id)]);
@@ -986,22 +986,22 @@ function TimesheetReport() {
   useEffect(() => {
     // Clear dependent caches when staff changes
     customerCache.current = {};
-    setCustomerAllData([]);
+    setCustomerAllData(prev => (prev || []).filter(item => (filtersRef.current.customer_id || []).includes(item.value)));
     setCustomerPage(1);
     setCustomerHasMore(true);
 
     clientCache.current = {};
-    setClientAllData([]);
+    setClientAllData(prev => (prev || []).filter(item => (filtersRef.current.client_id || []).includes(item.value)));
     setClientPage(1);
     setClientHasMore(true);
 
     cacheRef.current = {};
-    setJobOptions([]);
+    setJobOptions(prev => (prev || []).filter(item => (filtersRef.current.job_id || []).includes(item.value)));
     setPage(1);
     setHasMore(true);
 
     taskCache.current = {};
-    setTaskAllData([]);
+    setTaskAllData(prev => (prev || []).filter(item => (filtersRef.current.task_id || []).includes(item.value)));
     setTaskPage(1);
     setTaskHasMore(true);
   }, [JSON.stringify(filters?.staff_id)]);
@@ -1009,17 +1009,17 @@ function TimesheetReport() {
   useEffect(() => {
     // Clear dependent caches when customer changes
     clientCache.current = {};
-    setClientAllData([]);
+    setClientAllData(prev => (prev || []).filter(item => (filtersRef.current.client_id || []).includes(item.value)));
     setClientPage(1);
     setClientHasMore(true);
 
     cacheRef.current = {};
-    setJobOptions([]);
+    setJobOptions(prev => (prev || []).filter(item => (filtersRef.current.job_id || []).includes(item.value)));
     setPage(1);
     setHasMore(true);
 
     taskCache.current = {};
-    setTaskAllData([]);
+    setTaskAllData(prev => (prev || []).filter(item => (filtersRef.current.task_id || []).includes(item.value)));
     setTaskPage(1);
     setTaskHasMore(true);
   }, [JSON.stringify(filters?.customer_id)]);
@@ -1027,12 +1027,12 @@ function TimesheetReport() {
   useEffect(() => {
     // Clear dependent caches when client changes
     cacheRef.current = {};
-    setJobOptions([]);
+    setJobOptions(prev => (prev || []).filter(item => (filtersRef.current.job_id || []).includes(item.value)));
     setPage(1);
     setHasMore(true);
 
     taskCache.current = {};
-    setTaskAllData([]);
+    setTaskAllData(prev => (prev || []).filter(item => (filtersRef.current.task_id || []).includes(item.value)));
     setTaskPage(1);
     setTaskHasMore(true);
   }, [JSON.stringify(filters?.client_id)]);
@@ -1040,7 +1040,7 @@ function TimesheetReport() {
   useEffect(() => {
     // Clear dependent caches when job changes
     taskCache.current = {};
-    setTaskAllData([]);
+    setTaskAllData(prev => (prev || []).filter(item => (filtersRef.current.task_id || []).includes(item.value)));
     setTaskPage(1);
     setTaskHasMore(true);
   }, [JSON.stringify(filters?.job_id)]);
@@ -1365,7 +1365,7 @@ function TimesheetReport() {
                 const upJobForCustomer = jobIdx !== -1 && jobIdx < staffIdx ? filters.job_id : null;
                 const upClientForCustomer = clientIdx !== -1 && clientIdx < staffIdx ? filters.client_id : null;
                 customerCache.current = {};
-                setCustomerAllData([]);
+                setCustomerAllData(prev => (prev || []).filter(item => (filtersRef.current.customer_id || []).includes(item.value)));
                 setCustomerPage(1);
                 setCustomerHasMore(true);
                 GetAllCustomer({ searchValue: "", pageNo: 1, job_id: upJobForCustomer, client_id: upClientForCustomer, staff_id: resolvedStaffId });
@@ -1375,7 +1375,7 @@ function TimesheetReport() {
                 const upJobForClient = jobIdx !== -1 && jobIdx < staffIdx ? filters.job_id : null;
                 const upCustomerForClient = customerIdx !== -1 && customerIdx < staffIdx ? filters.customer_id : null;
                 clientCache.current = {};
-                setClientAllData([]);
+                setClientAllData(prev => (prev || []).filter(item => (filtersRef.current.client_id || []).includes(item.value)));
                 setClientPage(1);
                 setClientHasMore(true);
                 GetAllClient({ searchValue: "", pageNo: 1, job_id: upJobForClient, customer_id: upCustomerForClient, staff_id: resolvedStaffId });
@@ -1385,7 +1385,7 @@ function TimesheetReport() {
                 const upCustomerForJob = customerIdx !== -1 && customerIdx < staffIdx ? filters.customer_id : null;
                 const upClientForJob = clientIdx !== -1 && clientIdx < staffIdx ? filters.client_id : null;
                 cacheRef.current = {};
-                setJobOptions([]);
+                setJobOptions(prev => (prev || []).filter(item => (filtersRef.current.job_id || []).includes(item.value)));
                 setPage(1);
                 setHasMore(true);
                 GetAllJobs({ searchValue: "", pageNo: 1, customer_id: upCustomerForJob, client_id: upClientForJob, staff_id: resolvedStaffId });
@@ -1394,7 +1394,7 @@ function TimesheetReport() {
               const lineManagerIdx = newOrder.indexOf("line_manager");
               if (lineManagerIdx === -1 || staffIdx < lineManagerIdx) {
                 lineManagerCache.current = {};
-                setLineManagerAllData([]);
+                setLineManagerAllData(prev => (prev || []).filter(item => (filtersRef.current.line_manager || []).includes(item.value)));
                 setLineManagerPage(1);
                 setLineManagerHasMore(true);
                 getLineManagerData({ searchValue: "", pageNo: 1, staff_id: resolvedStaffId });
@@ -1478,7 +1478,7 @@ function TimesheetReport() {
 
               if (staffIdx === -1 || lineManagerIdx < staffIdx) {
                 staffCache.current = {};
-                setStaffAllData([]);
+                setStaffAllData(prev => (prev || []).filter(item => (filtersRef.current.staff_id || []).includes(item.value)));
                 setStaffPage(1);
                 setStaffHasMore(true);
                 const up = getUpstreamFilters("staff_id", filters);
@@ -1558,7 +1558,7 @@ function TimesheetReport() {
                 const upClientForJob = clientIdx !== -1 && clientIdx < customerIdx ? filters.client_id : null;
                 const upStaffForJob = staffIdx !== -1 && staffIdx < customerIdx ? filters.staff_id : null;
                 cacheRef.current = {};
-                setJobOptions([]);
+                setJobOptions(prev => (prev || []).filter(item => (filtersRef.current.job_id || []).includes(item.value)));
                 setPage(1);
                 setHasMore(true);
                 GetAllJobs({ searchValue: "", pageNo: 1, customer_id: value, client_id: upClientForJob, staff_id: upStaffForJob });
@@ -1568,7 +1568,7 @@ function TimesheetReport() {
                 const upJobForClient = jobIdx !== -1 && jobIdx < customerIdx ? filters.job_id : null;
                 const upStaffForClient = staffIdx !== -1 && staffIdx < customerIdx ? filters.staff_id : null;
                 clientCache.current = {};
-                setClientAllData([]);
+                setClientAllData(prev => (prev || []).filter(item => (filtersRef.current.client_id || []).includes(item.value)));
                 setClientPage(1);
                 setClientHasMore(true);
                 GetAllClient({ searchValue: "", pageNo: 1, customer_id: value, job_id: upJobForClient, staff_id: upStaffForClient });
@@ -1580,7 +1580,7 @@ function TimesheetReport() {
                 const lineManagerIdx = newOrder.indexOf("line_manager");
                 const upLineManagerForStaff = lineManagerIdx !== -1 && lineManagerIdx < customerIdx ? filters.line_manager : null;
                 staffCache.current = {};
-                setStaffAllData([]);
+                setStaffAllData(prev => (prev || []).filter(item => (filtersRef.current.staff_id || []).includes(item.value)));
                 setStaffPage(1);
                 setStaffHasMore(true);
                 GetAllStaff({ searchValue: "", pageNo: 1, customer_id: value, job_id: upJobForStaff, client_id: upClientForStaff, line_manager_id: upLineManagerForStaff });
@@ -1662,7 +1662,7 @@ function TimesheetReport() {
                 const upCustomerForJob = customerIdx !== -1 && customerIdx < clientIdx ? filters.customer_id : null;
                 const upStaffForJob = staffIdx !== -1 && staffIdx < clientIdx ? filters.staff_id : null;
                 cacheRef.current = {};
-                setJobOptions([]);
+                setJobOptions(prev => (prev || []).filter(item => (filtersRef.current.job_id || []).includes(item.value)));
                 setPage(1);
                 setHasMore(true);
                 GetAllJobs({ searchValue: "", pageNo: 1, client_id: value, customer_id: upCustomerForJob, staff_id: upStaffForJob });
@@ -1672,7 +1672,7 @@ function TimesheetReport() {
                 const upJobForCustomer = jobIdx !== -1 && jobIdx < clientIdx ? filters.job_id : null;
                 const upStaffForCustomer = staffIdx !== -1 && staffIdx < clientIdx ? filters.staff_id : null;
                 customerCache.current = {};
-                setCustomerAllData([]);
+                setCustomerAllData(prev => (prev || []).filter(item => (filtersRef.current.customer_id || []).includes(item.value)));
                 setCustomerPage(1);
                 setCustomerHasMore(true);
                 GetAllCustomer({ searchValue: "", pageNo: 1, client_id: value, job_id: upJobForCustomer, staff_id: upStaffForCustomer });
@@ -1684,7 +1684,7 @@ function TimesheetReport() {
                 const lineManagerIdx = newOrder.indexOf("line_manager");
                 const upLineManagerForStaff = lineManagerIdx !== -1 && lineManagerIdx < clientIdx ? filters.line_manager : null;
                 staffCache.current = {};
-                setStaffAllData([]);
+                setStaffAllData(prev => (prev || []).filter(item => (filtersRef.current.staff_id || []).includes(item.value)));
                 setStaffPage(1);
                 setStaffHasMore(true);
                 GetAllStaff({ searchValue: "", pageNo: 1, client_id: value, job_id: upJobForStaff, customer_id: upCustomerForStaff, line_manager_id: upLineManagerForStaff });
@@ -1765,7 +1765,7 @@ function TimesheetReport() {
                 const upClientForCustomer = clientIdx !== -1 && clientIdx < jobIdx ? filters.client_id : null;
                 const upStaffForCustomer = staffIdx !== -1 && staffIdx < jobIdx ? filters.staff_id : null;
                 customerCache.current = {};
-                setCustomerAllData([]);
+                setCustomerAllData(prev => (prev || []).filter(item => (filtersRef.current.customer_id || []).includes(item.value)));
                 setCustomerPage(1);
                 setCustomerHasMore(true);
                 GetAllCustomer({ searchValue: "", pageNo: 1, job_id: value, client_id: upClientForCustomer, staff_id: upStaffForCustomer });
@@ -1775,7 +1775,7 @@ function TimesheetReport() {
                 const upCustomerForClient = customerIdx !== -1 && customerIdx < jobIdx ? filters.customer_id : null;
                 const upStaffForClient = staffIdx !== -1 && staffIdx < jobIdx ? filters.staff_id : null;
                 clientCache.current = {};
-                setClientAllData([]);
+                setClientAllData(prev => (prev || []).filter(item => (filtersRef.current.client_id || []).includes(item.value)));
                 setClientPage(1);
                 setClientHasMore(true);
                 GetAllClient({ searchValue: "", pageNo: 1, job_id: value, customer_id: upCustomerForClient, staff_id: upStaffForClient });
@@ -1787,7 +1787,7 @@ function TimesheetReport() {
                 const lineManagerIdx = newOrder.indexOf("line_manager");
                 const upLineManagerForStaff = lineManagerIdx !== -1 && lineManagerIdx < jobIdx ? filters.line_manager : null;
                 staffCache.current = {};
-                setStaffAllData([]);
+                setStaffAllData(prev => (prev || []).filter(item => (filtersRef.current.staff_id || []).includes(item.value)));
                 setStaffPage(1);
                 setStaffHasMore(true);
                 GetAllStaff({ searchValue: "", pageNo: 1, job_id: value, customer_id: upCustomerForStaff, client_id: upClientForStaff, line_manager_id: upLineManagerForStaff });
@@ -1863,7 +1863,7 @@ function TimesheetReport() {
                 const upStaffForCustomer = staffIdx !== -1 && staffIdx < taskIdx ? filters.staff_id : null;
                 const upJobForCustomer = jobIdx !== -1 && jobIdx < taskIdx ? filters.job_id : null;
                 customerCache.current = {};
-                setCustomerAllData([]);
+                setCustomerAllData(prev => (prev || []).filter(item => (filtersRef.current.customer_id || []).includes(item.value)));
                 setCustomerPage(1);
                 setCustomerHasMore(true);
                 GetAllCustomer({ searchValue: "", pageNo: 1, task_id: value, job_id: upJobForCustomer, client_id: upClientForCustomer, staff_id: upStaffForCustomer });
@@ -1874,7 +1874,7 @@ function TimesheetReport() {
                 const upStaffForClient = staffIdx !== -1 && staffIdx < taskIdx ? filters.staff_id : null;
                 const upJobForClient = jobIdx !== -1 && jobIdx < taskIdx ? filters.job_id : null;
                 clientCache.current = {};
-                setClientAllData([]);
+                setClientAllData(prev => (prev || []).filter(item => (filtersRef.current.client_id || []).includes(item.value)));
                 setClientPage(1);
                 setClientHasMore(true);
                 GetAllClient({ searchValue: "", pageNo: 1, task_id: value, job_id: upJobForClient, customer_id: upCustomerForClient, staff_id: upStaffForClient });
@@ -1887,7 +1887,7 @@ function TimesheetReport() {
                 const lineManagerIdx = newOrder.indexOf("line_manager");
                 const upLineManagerForStaff = lineManagerIdx !== -1 && lineManagerIdx < taskIdx ? filters.line_manager : null;
                 staffCache.current = {};
-                setStaffAllData([]);
+                setStaffAllData(prev => (prev || []).filter(item => (filtersRef.current.staff_id || []).includes(item.value)));
                 setStaffPage(1);
                 setStaffHasMore(true);
                 GetAllStaff({ searchValue: "", pageNo: 1, task_id: value, job_id: upJobForStaff, customer_id: upCustomerForStaff, client_id: upClientForStaff, line_manager_id: upLineManagerForStaff });
@@ -1898,7 +1898,7 @@ function TimesheetReport() {
                 const upClientForJob = clientIdx !== -1 && clientIdx < taskIdx ? filters.client_id : null;
                 const upStaffForJob = staffIdx !== -1 && staffIdx < taskIdx ? filters.staff_id : null;
                 cacheRef.current = {};
-                setJobOptions([]);
+                setJobOptions(prev => (prev || []).filter(item => (filtersRef.current.job_id || []).includes(item.value)));
                 setPage(1);
                 setHasMore(true);
                 GetAllJobs({ searchValue: "", pageNo: 1, task_id: value, customer_id: upCustomerForJob, client_id: upClientForJob, staff_id: upStaffForJob });
