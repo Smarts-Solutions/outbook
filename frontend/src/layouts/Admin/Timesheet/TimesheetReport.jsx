@@ -83,6 +83,10 @@ function TimesheetReport() {
     fromDate: null,
     toDate: null,
   });
+  const filtersRef = useRef(filters);
+  useEffect(() => {
+    filtersRef.current = filters;
+  }, [filters]);
 
   // Tracks the order in which customer/client/job filters were selected.
   // The FIRST item in this array was selected first → it always shows ALL options.
@@ -151,17 +155,19 @@ function TimesheetReport() {
       // guard removed to match JobCustomReport pattern - each fetch has its own dedicated loading flag
       const cacheKey = `${searchValue}_${pageNo}_${customer_id}_${client_id}_${job_id}_${task_id}_${line_manager_id}`;
       if (staffCache.current[cacheKey]) {
-
-        const cached = staffCache.current[cacheKey];
-
+        const cachedObj = staffCache.current[cacheKey];
+        const cached = Array.isArray(cachedObj) ? cachedObj : cachedObj.data;
+        const hasMore = Array.isArray(cachedObj) ? (cached.length >= 20) : cachedObj.hasMore;
         setStaffAllData(prev => {
-          const combined = append ? [...prev, ...cached] : cached;
+          const selectedItems = prev.filter(item => (filtersRef.current.staff_id || []).includes(item.value));
+          const combined = append ? [...prev, ...cached] : [...selectedItems, ...cached];
           const unique = Array.from(
             new Map(combined.map(item => [item.value, item])).values()
           );
           return unique;
         });
-
+        if (setStaffHasMore) setStaffHasMore(hasMore);
+        if (setStaffPage) setStaffPage(pageNo);
         return;
       }
       setStaffLoading(true);
@@ -171,7 +177,7 @@ function TimesheetReport() {
         req = {
           action: "getstaffbyfilter",
           page: pageNo,
-          limit: 1000,
+          limit: 20,
           search: searchValue,
           customer_id: customer_id || "",
           client_id: client_id || "",
@@ -183,7 +189,7 @@ function TimesheetReport() {
         req = {
           action: "get",
           page: pageNo,
-          limit: (line_manager_id && line_manager_id.length > 0) ? 1000 : 20,
+          limit: 20,
           search: searchValue,
           line_manager_id: line_manager_id || ""
         };
@@ -200,9 +206,10 @@ function TimesheetReport() {
             employee_number: item.employee_number
           }));
 
-          staffCache.current[cacheKey] = formatted;
+          staffCache.current[cacheKey] = { data: formatted, hasMore: (req.action === "getstaffbyfilter" ? false : staffList.length === 20) };
           setStaffAllData(prev => {
-            const combined = append ? [...prev, ...formatted] : formatted;
+            const selectedItems = prev.filter(item => (filtersRef.current.staff_id || []).includes(item.value));
+            const combined = append ? [...prev, ...formatted] : [...selectedItems, ...formatted];
             const unique = Array.from(
               new Map(combined.map(item => [item.value, item])).values()
             );
@@ -212,7 +219,7 @@ function TimesheetReport() {
           setStaffHasMore(req.action === "getstaffbyfilter" ? false : staffList.length === 20);
           setStaffPage(pageNo);
         } else {
-          if (!append) setStaffAllData([]);
+          if (!append) setStaffAllData(prev => prev.filter(item => (filtersRef.current.staff_id || []).includes(item.value)));
         }
       } catch (error) { }
       setStaffLoading(false);
@@ -275,9 +282,8 @@ function TimesheetReport() {
     }
   };
 
-  const handleStaffSearch = (value) => {
-
-    if (value === "") return;
+  const handleStaffSearch = (value, actionMeta) => {
+    if (actionMeta && actionMeta.action !== "input-change" && actionMeta.action !== "set-value") return;
     clearTimeout(staffDebounceRef.current);
     staffDebounceRef.current = setTimeout(() => {
       setStaffSearch(value);
@@ -372,18 +378,25 @@ function TimesheetReport() {
     if (role?.toUpperCase() === "SUPERADMIN" || role?.toUpperCase() === "ADMIN") {
       const cacheKey = `${searchValue}_${pageNo}_${staff_id}`;
       if (lineManagerCache.current[cacheKey]) {
-        const cached = lineManagerCache.current[cacheKey];
+        const cachedObj = lineManagerCache.current[cacheKey];
+        const cached = Array.isArray(cachedObj) ? cachedObj : cachedObj.data;
+        const hasMore = Array.isArray(cachedObj) ? (cached.length >= 20) : cachedObj.hasMore;
         setLineManagerAllData(prev => {
-          const combined = append ? [...prev, ...cached] : cached;
-          const unique = Array.from(new Map(combined.map(item => [item.value, item])).values());
+          const selectedItems = prev.filter(item => (filtersRef.current.line_manager || []).includes(item.value));
+          const combined = append ? [...prev, ...cached] : [...selectedItems, ...cached];
+          const unique = Array.from(
+            new Map(combined.map(item => [item.value, item])).values()
+          );
           return unique;
         });
+        if (setLineManagerHasMore) setLineManagerHasMore(hasMore);
+        if (setLineManagerPage) setLineManagerPage(pageNo);
         return;
       }
 
       setLineManagerLoading(true);
       try {
-        const req = { 
+        const req = {
           action: "get_active_line_managers",
           filters: { ...filters, staff_id: (Array.isArray(staff_id) ? staff_id : (staff_id !== null ? [staff_id] : (Array.isArray(filters.staff_id) ? filters.staff_id : []))).length > 0 ? (Array.isArray(staff_id) ? staff_id : (staff_id !== null ? [staff_id] : (Array.isArray(filters.staff_id) ? filters.staff_id : []))) : null },
           pagination: { page: pageNo, limit: staff_id ? 1000 : 20, search: searchValue }
@@ -395,11 +408,12 @@ function TimesheetReport() {
             value: item.id,
             label: `${item.first_name || ""} ${item.last_name || ""} (${item.email || ""})`.trim(),
           }));
-          
-          lineManagerCache.current[cacheKey] = formatted;
-          
+
+          lineManagerCache.current[cacheKey] = { data: formatted, hasMore: (rawData.length === 20) };
+
           setLineManagerAllData(prev => {
-            const combined = append ? [...prev, ...formatted] : formatted;
+            const selectedItems = prev.filter(item => (filtersRef.current.line_manager || []).includes(item.value));
+            const combined = append ? [...prev, ...formatted] : [...selectedItems, ...formatted];
             const unique = Array.from(new Map(combined.map(item => [item.value, item])).values());
             return unique;
           });
@@ -410,10 +424,10 @@ function TimesheetReport() {
             setLineManagerHasMore(false);
           }
         } else {
-          if (!append) setLineManagerAllData([]);
+          if (!append) setLineManagerAllData(prev => prev.filter(item => (filtersRef.current.line_manager || []).includes(item.value)));
           setLineManagerHasMore(false);
         }
-      } catch (error) { 
+      } catch (error) {
         setLineManagerHasMore(false);
       } finally {
         setLineManagerLoading(false);
@@ -532,14 +546,19 @@ function TimesheetReport() {
   const GetAllCustomer = async ({ searchValue = "", pageNo = 1, append = false, job_id = null, client_id = null, staff_id = null, task_id = null }) => {
     const cacheKey = `${searchValue}_${pageNo}_${job_id}_${client_id}_${staff_id}_${task_id}`;
     if (customerCache.current[cacheKey]) {
-      const cached = customerCache.current[cacheKey];
+      const cachedObj = customerCache.current[cacheKey];
+      const cached = Array.isArray(cachedObj) ? cachedObj : cachedObj.data;
+      const hasMore = Array.isArray(cachedObj) ? (cached.length >= 20) : cachedObj.hasMore;
       setCustomerAllData(prev => {
-        const combined = append ? [...prev, ...cached] : cached;
+        const selectedItems = prev.filter(item => (filtersRef.current.customer_id || []).includes(item.value));
+        const combined = append ? [...prev, ...cached] : [...selectedItems, ...cached];
         const unique = Array.from(
           new Map(combined.map(item => [item.value, item])).values()
         );
         return unique;
       });
+      if (setCustomerHasMore) setCustomerHasMore(hasMore);
+      if (setCustomerPage) setCustomerPage(pageNo);
       return;
     }
 
@@ -553,7 +572,7 @@ function TimesheetReport() {
       pagination: {
         search: searchValue,
         page: pageNo,
-        limit: job_id || client_id || staff_id || task_id ? 1000 : 20
+        limit: 20
       }
     };
 
@@ -566,9 +585,10 @@ function TimesheetReport() {
           label: item.trading_name
         }));
 
-        customerCache.current[cacheKey] = formatted;
+        customerCache.current[cacheKey] = { data: formatted, hasMore: (req.action === "get_customers_filter" ? false : response.data.length === 20) };
         setCustomerAllData(prev => {
-          const combined = append ? [...prev, ...formatted] : formatted;
+          const selectedItems = prev.filter(item => (filtersRef.current.customer_id || []).includes(item.value));
+          const combined = append ? [...prev, ...formatted] : [...selectedItems, ...formatted];
           const unique = Array.from(
             new Map(combined.map(item => [item.value, item])).values()
           );
@@ -578,16 +598,14 @@ function TimesheetReport() {
         setCustomerPage(pageNo);
 
       } else {
-        if (!append) setCustomerAllData([]);
+        if (!append) setCustomerAllData(prev => prev.filter(item => (filtersRef.current.customer_id || []).includes(item.value)));
       }
     } catch (error) { }
     setCustomerLoading(false);
   };
 
-  const handleCustomerSearch = (value) => {
-    if (value === "") {
-      return;
-    }
+  const handleCustomerSearch = (value, actionMeta) => {
+    if (actionMeta && actionMeta.action !== "input-change" && actionMeta.action !== "set-value") return;
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setCustomerSearch(value);
@@ -640,14 +658,19 @@ function TimesheetReport() {
   const GetAllClient = async ({ searchValue = "", pageNo = 1, append = false, job_id = null, customer_id = null, staff_id = null, task_id = null }) => {
     const cacheKey = `${searchValue}_${pageNo}_${job_id}_${customer_id}_${staff_id}_${task_id}`;
     if (clientCache.current[cacheKey]) {
-      const cached = clientCache.current[cacheKey];
+      const cachedObj = clientCache.current[cacheKey];
+      const cached = Array.isArray(cachedObj) ? cachedObj : cachedObj.data;
+      const hasMore = Array.isArray(cachedObj) ? (cached.length >= 20) : cachedObj.hasMore;
       setClientAllData(prev => {
-        const combined = append ? [...prev, ...cached] : cached;
+        const selectedItems = prev.filter(item => (filtersRef.current.client_id || []).includes(item.value));
+        const combined = append ? [...prev, ...cached] : [...selectedItems, ...cached];
         const unique = Array.from(
           new Map(combined.map(item => [item.value, item])).values()
         );
         return unique;
       });
+      if (setClientHasMore) setClientHasMore(hasMore);
+      if (setClientPage) setClientPage(pageNo);
       return;
     }
     setClientLoading(true);
@@ -660,7 +683,7 @@ function TimesheetReport() {
       pagination: {
         search: searchValue,
         page: pageNo,
-        limit: job_id || customer_id || staff_id || task_id ? 1000 : 20
+        limit: 20
       }
     };
     const data = { req, authToken: token };
@@ -673,9 +696,10 @@ function TimesheetReport() {
         }));
 
         // Cache store
-        clientCache.current[cacheKey] = formatted;
+        clientCache.current[cacheKey] = { data: formatted, hasMore: (req.action === "get_clients_filter" ? false : response.data.length === 20) };
         setClientAllData(prev => {
-          const combined = append ? [...prev, ...formatted] : formatted;
+          const selectedItems = prev.filter(item => (filtersRef.current.client_id || []).includes(item.value));
+          const combined = append ? [...prev, ...formatted] : [...selectedItems, ...formatted];
           const unique = Array.from(
             new Map(combined.map(item => [item.value, item])).values()
           );
@@ -685,15 +709,13 @@ function TimesheetReport() {
         setClientPage(pageNo);
 
       } else {
-        if (!append) setClientAllData([]);
+        if (!append) setClientAllData(prev => prev.filter(item => (filtersRef.current.client_id || []).includes(item.value)));
       }
     } catch (error) { }
     setClientLoading(false);
   };
-  const handleClientSearch = (value) => {
-    if (value === "") {
-      return;
-    }
+  const handleClientSearch = (value, actionMeta) => {
+    if (actionMeta && actionMeta.action !== "input-change" && actionMeta.action !== "set-value") return;
     clearTimeout(clientDebounceRef.current);
     clientDebounceRef.current = setTimeout(() => {
       setClientSearch(value);
@@ -716,7 +738,7 @@ function TimesheetReport() {
     if (internal_external == "0") {
       var req = { action: "getInternalJobs" };
       var data = { req: req, authToken: token };
-      await dispatch(CustomTimesheetAction(data))
+      await dispatch(getAllTaskByStaff(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
@@ -734,9 +756,9 @@ function TimesheetReport() {
         });
       return
       // External get All jobs
-      var req = { action: "getByCustomer", customer_id: "", page: 1, limit: 100000, search: "" };
+      var req = { action: "getByCustomer", customer_id: "", page: 1, limit: 2000, search: "" };
       var data = { req: req, authToken: token };
-      await dispatch(CustomTimesheetAction(data))
+      await dispatch(JobAction(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
@@ -757,7 +779,7 @@ function TimesheetReport() {
     } else if (internal_external == "1") {
       var req = { action: "getInternalJobs" };
       var data = { req: req, authToken: token };
-      await dispatch(CustomTimesheetAction(data))
+      await dispatch(getAllTaskByStaff(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
@@ -777,9 +799,9 @@ function TimesheetReport() {
     } else if (internal_external == "2") {
       return;
       // External get All jobs
-      const req = { action: "getByCustomer", customer_id: "", page: 1, limit: 100000, search: "" };
+      const req = { action: "getByCustomer", customer_id: "", page: 1, limit: 2000, search: "" };
       const data = { req: req, authToken: token };
-      await dispatch(CustomTimesheetAction(data))
+      await dispatch(JobAction(data))
         .unwrap()
         .then(async (response) => {
           if (response.status) {
@@ -811,14 +833,19 @@ function TimesheetReport() {
   const GetAllJobs = async ({ searchValue = "", pageNo = 1, append = false, customer_id = null, client_id = null, staff_id = null, task_id = null }) => {
     const cacheKey = `${searchValue}_${pageNo}_${customer_id}_${client_id}_${staff_id}_${task_id}`;
     if (cacheRef.current[cacheKey]) {
-      const cached = cacheRef.current[cacheKey];
+      const cachedObj = cacheRef.current[cacheKey];
+      const cached = Array.isArray(cachedObj) ? cachedObj : cachedObj.data;
+      const hasMore = Array.isArray(cachedObj) ? (cached.length >= 20) : cachedObj.hasMore;
       setJobOptions(prev => {
-        const combined = append ? [...prev, ...cached] : cached;
+        const selectedItems = prev.filter(item => (filtersRef.current.job_id || []).includes(item.value));
+        const combined = append ? [...prev, ...cached] : [...selectedItems, ...cached];
         const unique = Array.from(
           new Map(combined.map(item => [item.value, item])).values()
         );
         return unique;
       });
+      if (setHasMore) setHasMore(hasMore);
+      if (setPage) setPage(pageNo);
       return;
     }
     setJobLoading(true);
@@ -831,7 +858,7 @@ function TimesheetReport() {
       pagination: {
         search: searchValue,
         page: pageNo,
-        limit: customer_id || client_id || staff_id || task_id ? 1000 : 20
+        limit: 20
       }
     };
     const data = { req, authToken: token };
@@ -844,9 +871,10 @@ function TimesheetReport() {
           label: item.job_code_id
         }));
 
-        cacheRef.current[cacheKey] = formatted;
+        cacheRef.current[cacheKey] = { data: formatted, hasMore: (req.action === "get_jobs_filter" ? false : response.data.length === (req.pagination?.limit || 20)) };
         setJobOptions(prev => {
-          const combined = append ? [...prev, ...formatted] : formatted;
+          const selectedItems = prev.filter(item => (filtersRef.current.job_id || []).includes(item.value));
+          const combined = append ? [...prev, ...formatted] : [...selectedItems, ...formatted];
           const unique = Array.from(
             new Map(combined.map(item => [item.value, item])).values()
           );
@@ -860,10 +888,8 @@ function TimesheetReport() {
 
   };
 
-  const handleSearch = (value) => {
-    if (value === "") {
-      return;
-    }
+  const handleSearch = (value, actionMeta) => {
+    if (actionMeta && actionMeta.action !== "input-change" && actionMeta.action !== "set-value") return;
     clearTimeout(debounceTimeout.current);
     debounceTimeout.current = setTimeout(() => {
       setSearch(value);
@@ -1064,14 +1090,19 @@ function TimesheetReport() {
 
     const cacheKey = `${searchValue}_${pageNo}_${customer_id}_${client_id}_${job_id}_${staff_id}`;
     if (taskCache.current[cacheKey]) {
-      const cached = taskCache.current[cacheKey];
+      const cachedObj = taskCache.current[cacheKey];
+      const cached = Array.isArray(cachedObj) ? cachedObj : cachedObj.data;
+      const hasMore = Array.isArray(cachedObj) ? (cached.length >= 20) : cachedObj.hasMore;
       setTaskAllData(prev => {
-        const combined = append ? [...prev, ...cached] : cached;
+        const selectedItems = prev.filter(item => (filtersRef.current.task_id || []).includes(item.value));
+        const combined = append ? [...prev, ...cached] : [...selectedItems, ...cached];
         const unique = Array.from(
           new Map(combined.map(item => [item.value, item])).values()
         );
         return unique;
       });
+      if (setTaskHasMore) setTaskHasMore(hasMore);
+      if (setTaskPage) setTaskPage(pageNo);
       return;
     }
 
@@ -1085,7 +1116,7 @@ function TimesheetReport() {
       pagination: {
         search: searchValue,
         page: pageNo,
-        limit: customer_id || client_id || job_id || staff_id ? 1000 : 20
+        limit: 20
       }
     };
     const data = { req, authToken: token };
@@ -1098,9 +1129,10 @@ function TimesheetReport() {
           label: item.task_name
         }));
 
-        taskCache.current[cacheKey] = formatted;
+        taskCache.current[cacheKey] = { data: formatted, hasMore: (response.data.length === 20) };
         setTaskAllData(prev => {
-          const combined = append ? [...prev, ...formatted] : formatted;
+          const selectedItems = prev.filter(item => (filtersRef.current.task_id || []).includes(item.value));
+          const combined = append ? [...prev, ...formatted] : [...selectedItems, ...formatted];
           const unique = Array.from(
             new Map(combined.map(item => [item.value, item])).values()
           );
@@ -1109,14 +1141,14 @@ function TimesheetReport() {
         setTaskHasMore(response.data.length === 20);
         setTaskPage(pageNo);
       } else {
-        if (!append) setTaskAllData([]);
+        if (!append) setTaskAllData(prev => prev.filter(item => (filtersRef.current.task_id || []).includes(item.value)));
       }
     } catch (err) { }
     setTaskLoading(false);
   };
 
-  const handleTaskSearch = (value) => {
-    if (value === "") return;
+  const handleTaskSearch = (value, actionMeta) => {
+    if (actionMeta && actionMeta.action !== "input-change" && actionMeta.action !== "set-value") return;
     clearTimeout(taskDebounceRef.current);
     taskDebounceRef.current = setTimeout(() => {
       setTaskSearch(value);
@@ -1136,7 +1168,7 @@ function TimesheetReport() {
 
   const handleExportAllData = async () => {
     setLoading(true);
-    const req = { action: "get", filters: filters, role: role, page: 1, limit: 100000 };
+    const req = { action: "get", filters: filters, role: role, page: 1, limit: 2000 };
     const data = { req: req, authToken: token };
     try {
       const response = await dispatch(getTimesheetReportData(data)).unwrap();
@@ -1270,7 +1302,7 @@ function TimesheetReport() {
           if (isClearing) {
             if (key === "staff_id") updated.employee_number = null;
             if (key === "employee_number") updated.staff_id = null;
-            
+
             // Auto-clear downstream filters
             const staffIdx = selectionOrder.indexOf("staff_id");
             if (staffIdx !== -1) {
@@ -2615,7 +2647,7 @@ function TimesheetReport() {
                 })
               }
 
-              onInputChange={(value) => handleStaffSearch(value)}
+              onInputChange={(value, actionMeta) => handleStaffSearch(value, actionMeta)}
 
               onMenuScrollToBottom={() => {
                 if (staffHasMore) {
@@ -2786,7 +2818,7 @@ function TimesheetReport() {
                   },
                 })
               }
-              onInputChange={(value) => handleCustomerSearch(value)}
+              onInputChange={(value, actionMeta) => handleCustomerSearch(value, actionMeta)}
               onMenuScrollToBottom={() => {
                 if (customerHasMore) {
                   const up = getUpstreamFilters("customer_id", filters);
@@ -2854,7 +2886,7 @@ function TimesheetReport() {
                   },
                 })
               }
-              onInputChange={(value) => handleClientSearch(value)}
+              onInputChange={(value, actionMeta) => handleClientSearch(value, actionMeta)}
               onMenuScrollToBottom={() => {
                 if (clientHasMore) {
                   const up = getUpstreamFilters("client_id", filters);
@@ -2924,7 +2956,7 @@ function TimesheetReport() {
                     },
                   })
                 }
-                onInputChange={(value) => handleSearch(value)}
+                onInputChange={(value, actionMeta) => handleSearch(value, actionMeta)}
                 onMenuScrollToBottom={() => {
                   if (hasMore) {
                     const up = getUpstreamFilters("job_id", filters);
@@ -2972,7 +3004,7 @@ function TimesheetReport() {
                     },
                   })
                 }
-                onInputChange={(value) => handleTaskSearch(value)}
+                onInputChange={(value, actionMeta) => handleTaskSearch(value, actionMeta)}
                 onMenuScrollToBottom={() => {
                   if (taskHasMore) {
                     const up = getUpstreamFilters("task_id", filters);

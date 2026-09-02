@@ -9730,7 +9730,11 @@ async function getTasksFilter(Report) {
     where.push(`ts.job_id IN (${job_id.join(",")})`);
   }
   if (incomingFilters?.staff_id) {
-    where.push(`ts.staff_id = ${incomingFilters.staff_id}`);
+    const staffArr = Array.isArray(incomingFilters.staff_id) ? incomingFilters.staff_id : [incomingFilters.staff_id];
+    const cleanStaffArr = staffArr.filter(x => !["", null, undefined].includes(x));
+    if (cleanStaffArr.length > 0) {
+      where.push(`ts.staff_id IN (${cleanStaffArr.join(",")})`);
+    }
   }
 
   let params = [];
