@@ -1305,6 +1305,10 @@ const getMyLineManagers = async (staff_by_id) => {
         staffs.employee_number,
         staffs.first_name,
         staffs.last_name,
+        staffs.status,
+        (
+          SELECT CASE WHEN EXISTS (SELECT 1 FROM line_managers lm WHERE lm.staff_to = staffs.id) THEN 1 ELSE 0 END
+        ) as is_line_manager,
         (
           SELECT GROUP_CONCAT(DISTINCT c.id)
           FROM customers c

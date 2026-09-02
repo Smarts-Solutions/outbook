@@ -148,7 +148,13 @@ const get_active_line_managers_custom = async (data) => {
 }
 
 const get_my_line_managers_custom = async (data) => {
-    return await staffsModel.getMyLineManagers(data);
+    try {
+        const result = await staffsModel.getMyLineManagers(data.StaffUserId);
+        return { status: true, data: result };
+    } catch (error) {
+        console.error("Error in get_my_line_managers_custom:", error);
+        return { status: false, message: "Error fetching line managers." };
+    }
 }
 
 const getStaffWithRole_custom = async (data) => {
