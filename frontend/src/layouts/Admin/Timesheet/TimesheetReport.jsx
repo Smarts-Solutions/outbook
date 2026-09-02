@@ -1167,6 +1167,197 @@ function TimesheetReport() {
   };
   ///////////////---- FOR TASK SERACH  END-----//////////////
 
+  ///////////////---- CASCADE REVALIDATION START -----//////////////
+  // Helper: query backend for valid IDs at a given hierarchy level, given upstream filter context
+  const getValidIdsForLevel = async (level, upstreamContext) => {
+    try {
+      const lm = upstreamContext.line_manager;
+      const staff = upstreamContext.staff_id;
+      const cust = upstreamContext.customer_id;
+      const cli = upstreamContext.client_id;
+      const job = upstreamContext.job_id;
+
+      let req, response;
+
+      switch (level) {
+        case 'staff_id': {
+          const hasNonLmFilter = [cust, cli, job].some(f =>
+            f && (Array.isArray(f) ? f.length > 0 : String(f).trim() !== "")
+          );
+          if (hasNonLmFilter) {
+            req = {
+              action: "getstaffbyfilter",
+              page: 1, limit: 9999, search: "",
+              customer_id: cust || "",
+              client_id: cli || "",
+              job_id: job || "",
+              task_id: "",
+              line_manager_id: lm || ""
+            };
+          } else {
+            req = {
+              action: "get",
+              page: 1, limit: 9999, search: "",
+              line_manager_id: lm || ""
+            };
+          }
+          response = await dispatch(CustomTimesheetAction({ req, authToken: token })).unwrap();
+          if (response.status) {
+            const list = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+            return list.map(item => item.id);
+          }
+          return [];
+        }
+        case 'customer_id': {
+          req = {
+            action: "get_customers_filter",
+            filters: { staff_id: staff && staff.length > 0 ? staff : null },
+            job_id: job || [],
+            client_id: cli || [],
+            task_id: [],
+            pagination: { search: "", page: 1, limit: 9999 }
+          };
+          response = await dispatch(CustomTimesheetAction({ req, authToken: token })).unwrap();
+          if (response.status) {
+            return response.data.filter(item => item.status == 1).map(item => item.id);
+          }
+          return [];
+        }
+        case 'client_id': {
+          req = {
+            action: "get_clients_filter",
+            filters: { staff_id: staff && staff.length > 0 ? staff : null },
+            customer_id: cust || [],
+            job_id: job || [],
+            task_id: [],
+            pagination: { search: "", page: 1, limit: 9999 }
+          };
+          response = await dispatch(CustomTimesheetAction({ req, authToken: token })).unwrap();
+          if (response.status) {
+            return response.data.filter(item => item.status == 1).map(item => item.id);
+          }
+          return [];
+        }
+        case 'job_id': {
+          req = {
+            action: "get_jobs_filter",
+            filters: { staff_id: staff && staff.length > 0 ? staff : null },
+            customer_id: cust || [],
+            client_id: cli || [],
+            task_id: [],
+            pagination: { search: "", page: 1, limit: 9999 }
+          };
+          response = await dispatch(CustomTimesheetAction({ req, authToken: token })).unwrap();
+          if (response.status) {
+            return response.data.map(item => item.job_id);
+          }
+          return [];
+        }
+        case 'task_id': {
+          req = {
+            action: "get_tasks_filter",
+            filters: { staff_id: staff && staff.length > 0 ? staff : null },
+            customer_id: cust || [],
+            client_id: cli || [],
+            job_id: job || [],
+            pagination: { search: "", page: 1, limit: 9999 }
+          };
+          response = await dispatch(getAllTaskByStaff({ req, authToken: token })).unwrap();
+          if (response.status) {
+            return response.data.map(item => item.task_id);
+          }
+          return [];
+        }
+        default:
+          return null;
+      }
+    } catch (error) {
+      console.error(`Cascade revalidation error for ${level}:`, error);
+      return null;
+    }
+  };
+
+  // Cascade: when a parent filter is partially removed, revalidate and prune downstream selections
+  // Hierarchy: line_manager → staff_id → customer_id → client_id → job_id → task_id
+  const handlePartialRemoval = async (changedKey, newValue) => {
+    const hierarchy = ['line_manager', 'staff_id', 'customer_id', 'client_id', 'job_id', 'task_id'];
+    const changedIdx = hierarchy.indexOf(changedKey);
+    if (changedIdx === -1) return;
+
+    // Wait for React state to settle after setFilters
+    await new Promise(r => setTimeout(r, 100));
+
+    const context = { ...filtersRef.current };
+    context[changedKey] = newValue;
+
+    const filterUpdates = {};
+    let hasChanges = false;
+
+    for (let i = changedIdx + 1; i < hierarchy.length; i++) {
+      const key = hierarchy[i];
+      const currentSelected = context[key];
+      if (!currentSelected || !Array.isArray(currentSelected) || currentSelected.length === 0) continue;
+
+      // Build upstream context for this level
+      const upstream = {};
+      for (let j = 0; j < i; j++) {
+        upstream[hierarchy[j]] = context[hierarchy[j]];
+      }
+
+      const validIds = await getValidIdsForLevel(key, upstream);
+
+      // null means API error — skip pruning for this level
+      if (validIds === null) continue;
+
+      const prunedIds = currentSelected.filter(id =>
+        validIds.some(vid => Number(vid) === Number(id))
+      );
+
+      if (prunedIds.length < currentSelected.length) {
+        filterUpdates[key] = prunedIds;
+        context[key] = prunedIds; // Update context so next cascade levels use pruned values
+        hasChanges = true;
+      }
+    }
+
+    if (hasChanges) {
+      // Also sync employee_number if staff_id was pruned
+      if (filterUpdates.staff_id !== undefined) {
+        const prunedStaff = filterUpdates.staff_id;
+        const currentEmpNumbers = filtersRef.current.employee_number || [];
+        if (Array.isArray(currentEmpNumbers) && currentEmpNumbers.length > 0) {
+          const validEmpNumbers = employeeNumberAllData
+            .filter(e => prunedStaff.some(sid => Number(sid) === Number(e.staff_id)))
+            .map(e => e.value);
+          const prunedEmpNumbers = currentEmpNumbers.filter(en => validEmpNumbers.includes(en));
+          if (prunedEmpNumbers.length < currentEmpNumbers.length) {
+            filterUpdates.employee_number = prunedEmpNumbers;
+          }
+        }
+      }
+
+      setFilters(prev => {
+        const newF = { ...prev };
+        for (const [k, v] of Object.entries(filterUpdates)) {
+          newF[k] = v;
+        }
+        return newF;
+      });
+
+      // Clear caches for pruned levels so dropdown options refresh correctly
+      for (const key of Object.keys(filterUpdates)) {
+        switch (key) {
+          case 'staff_id': staffCache.current = {}; break;
+          case 'customer_id': customerCache.current = {}; break;
+          case 'client_id': clientCache.current = {}; break;
+          case 'job_id': cacheRef.current = {}; break;
+          case 'task_id': taskCache.current = {}; break;
+        }
+      }
+    }
+  };
+  ///////////////---- CASCADE REVALIDATION END -----//////////////
+
   const handleExportAllData = async () => {
     setLoading(true);
     const req = { action: "get", filters: filters, role: role, page: 1, limit: 2000 };
@@ -1916,6 +2107,16 @@ function TimesheetReport() {
         }
         return updated;
       });
+
+      // Cascade: detect partial removal and revalidate downstream hierarchy
+      // Fixed hierarchy: line_manager → staff_id → customer_id → client_id → job_id → task_id
+      if (['line_manager', 'staff_id', 'customer_id', 'client_id', 'job_id'].includes(key)) {
+        const prevValue = filters[key] || [];
+        if (Array.isArray(prevValue) && Array.isArray(value) &&
+            value.length > 0 && prevValue.length > value.length) {
+          handlePartialRemoval(key, value);
+        }
+      }
     } else if (key === "internal_external") {
       let remainingPart = filters?.groupBy;
 
