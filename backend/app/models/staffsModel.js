@@ -1305,6 +1305,7 @@ const getMyLineManagers = async (staff_by_id) => {
         staffs.employee_number,
         staffs.first_name,
         staffs.last_name,
+        staffs.status,
         (
           SELECT GROUP_CONCAT(DISTINCT c.id)
           FROM customers c
