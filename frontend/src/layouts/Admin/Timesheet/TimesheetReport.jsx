@@ -1408,9 +1408,6 @@ function TimesheetReport() {
           setInternalTaskAllData([]);
 
         } else if (key === "line_manager") {
-          updated.staff_id = null;
-          updated.employee_number = null;
-
           const isClearing = [null, undefined, ""].includes(value) || (Array.isArray(value) && value.length === 0);
 
           if (isClearing) {
