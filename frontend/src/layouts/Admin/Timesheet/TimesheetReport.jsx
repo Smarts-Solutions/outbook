@@ -439,7 +439,7 @@ function TimesheetReport() {
         const req = { action: "get_my_line_managers" };
         const response = await dispatch(CustomTimesheetAction({ req, authToken: token })).unwrap();
         if (response.status && response.data) {
-          dataList = response.data.filter(manager => manager.status == 1).map((manager) => ({
+          dataList = response.data.filter(manager => manager.status == 1 && manager.is_line_manager == 1).map((manager) => ({
             value: manager.id,
             label: `${manager.first_name || ""} ${manager.last_name || ""} (${manager.email || ""})`.trim(),
           }));
