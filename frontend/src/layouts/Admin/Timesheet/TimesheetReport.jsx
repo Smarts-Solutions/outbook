@@ -282,11 +282,13 @@ function TimesheetReport() {
     }
   };
 
-  const handleStaffSearch = (value, actionMeta) => {
-    if (actionMeta && actionMeta.action !== "input-change" && actionMeta.action !== "set-value") return;
+  const handleStaffSearch = (value) => {
+
+    if (value === "") return;
     clearTimeout(staffDebounceRef.current);
     staffDebounceRef.current = setTimeout(() => {
       setStaffSearch(value);
+      setStaffPage(1);
       const up = getUpstreamFilters("staff_id", filters);
       GetAllStaff({
         searchValue: value,

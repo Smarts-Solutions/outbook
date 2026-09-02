@@ -44,6 +44,7 @@
     "react-select": "^5.8.0",
     "react-select-async-paginate": "^0.7.11",
     "reactstrap": "^9.2.2",
+    "recharts": "^3.10.1",
     "remixicon": "^4.3.0",
     "semantic-ui-css": "^2.5.0",
     "semantic-ui-react": "^2.1.5",
