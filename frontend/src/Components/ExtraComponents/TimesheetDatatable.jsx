@@ -1,603 +1,271 @@
-import React, { useState } from 'react';
+import React from 'react';
 import DataTable from 'react-data-table-component';
 import 'react-data-table-component-extensions/dist/index.css';
 import { Pencil } from 'lucide-react';
-import CommonModal from './Modals/CommanModal';
+import Select from 'react-select';
 
-const TimesheetDatatable = () => {
-    const [activeRowId, setActiveRowId] = useState(null);
-    const [activeField, setActiveField] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalText, setModalText] = useState('');
-
-    const [rows, setRows] = useState([
-        {
-            id: 1,
-            taskType: 'External',
-            customer: '',
-            client: '',
-            job: '',
-            task: '',
-            mon: '', mon_note: '',
-            tue: '', tue_note: '',
-            wed: '', wed_note: '',
-            thu: '', thu_note: '',
-            fri: '', fri_note: '',
-            sat: '', sat_note: '',
-            sun: '', sun_note: '',
-            remark: '',
-        }
-    ]);
-
-    const handleChange = (id, field, value) => {
-        setRows(prev =>
-            prev.map(row =>
-                row.id === id
-                    ? { ...row, [field]: value }
-                    : row
-            )
-        );
-    };
-
-    const handleSaveNote = () => {
-        if (activeRowId && activeField) {
-            handleChange(activeRowId, `${activeField}_note`, modalText);
-        }
-        setIsModalOpen(false);
-    };
-
-    const timeToMinutes = value => {
-        if (!value) return 0;
-
-        const [hours, minutes] = value.split(':').map(Number);
-        return (hours || 0) * 60 + (minutes || 0);
-    };
-
-    const minutesToTime = minutes => {
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-
-        return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
-    };
-
-    const getRowTotal = row => {
-        const total =
-            timeToMinutes(row.mon) +
-            timeToMinutes(row.tue) +
-            timeToMinutes(row.wed) +
-            timeToMinutes(row.thu) +
-            timeToMinutes(row.fri) +
-            timeToMinutes(row.sat) +
-            timeToMinutes(row.sun);
-
-        return minutesToTime(total);
-    };
-
-    const getDailyTotal = field => {
-        const total = rows.reduce(
-            (sum, row) => sum + timeToMinutes(row[field]),
-            0
-        );
-
-        return minutesToTime(total);
-    };
-
-    const getGrandTotal = () => {
-        const total = rows.reduce(
-            (sum, row) => sum + timeToMinutes(getRowTotal(row)),
-            0
-        );
-
-        return minutesToTime(total);
-    };
-
-    const handleDelete = id => {
-        setRows(prev => prev.filter(row => row.id !== id));
-    };
+const TimesheetDatatable = ({
+    rows,
+    weekDays,
+    multipleFilter,
+    staffDetails,
+    isWeekSwitching,
+    submitStatusAllKey,
+    handleChangeTaskType,
+    selectCustomerData,
+    selectClientData,
+    selectJobData,
+    selectTaskData,
+    handleHoursInput,
+    handleDeleteRow,
+    setActiveIndex,
+    setActiveField,
+    activeIndex,
+    activeField,
+    setIsModalOpen,
+    setModalText,
+    setSelectedRowIndex,
+    getTotalHoursFromKey,
+    getGrandTotal
+}) => {
 
     const columns = [
         {
             name: 'S.No',
-            selector: row => row.id,
+            selector: (row, index) => index + 1,
             width: '70px',
         },
-
         {
             name: 'Task Type',
             width: '150px',
-            cell: row =>
+            cell: (row, index) =>
                 row.isTotal ? null : (
-                    <select
-                        className="form-select form-select-sm"
-                        value={row.taskType}
-                        onChange={e =>
-                            handleChange(
-                                row.id,
-                                'taskType',
-                                e.target.value
-                            )
-                        }
-                    >
-                        <option value="">Task Type</option>
-                        <option value="External">External</option>
-                        <option value="Internal">Internal</option>
-                    </select>
+                    <Select
+                        className="basic-multi-select"
+                        menuPortalTarget={document.body}
+                        menuPosition="fixed"
+                        classNamePrefix="react-select"
+                        styles={{ container: (base) => ({ ...base, width: 130 }) }}
+                        options={[
+                            { value: "1", label: "Internal" },
+                            { value: "2", label: "External" }
+                        ]}
+                        value={[
+                            { value: "1", label: "Internal" },
+                            { value: "2", label: "External" }
+                        ].find(opt => String(opt.value) === String(row.task_type)) || null}
+                        isSearchable={false}
+                        placeholder="Task Type"
+                        isDisabled={row.submit_status === "1" || staffDetails.id != multipleFilter.staff_id}
+                        onChange={(selectedOption) => {
+                            const e = { target: { name: "task_type", value: selectedOption?.value || "" } };
+                            handleChangeTaskType(e, row, index);
+                        }}
+                    />
                 ),
         },
-
         {
             name: 'Customer',
             width: '150px',
-            cell: row =>
+            cell: (row, index) =>
                 row.isTotal ? null : (
-                    <select
-                        className="form-select form-select-sm"
-                        value={row.customer}
-                        onChange={e =>
-                            handleChange(
-                                row.id,
-                                'customer',
-                                e.target.value
-                            )
-                        }
-                    >
-                        <option value="">Customer</option>
-                        <option value="ABC Company">
-                            ABC Company
-                        </option>
-                        <option value="XYZ Limited">
-                            XYZ Limited
-                        </option>
-                    </select>
+                    row.task_type === "1" ? (
+                        <input
+                            className="form-control form-control-sm cursor-pointer"
+                            style={{ width: "130px" }}
+                            value="No Customer"
+                            disabled
+                        />
+                    ) : (
+                        <Select
+                            className="basic-multi-select"
+                            menuPortalTarget={document.body}
+                            menuPosition="fixed"
+                            classNamePrefix="react-select"
+                            styles={{ container: (base) => ({ ...base, width: 130 }) }}
+                            options={row.customerData?.map(item => ({ value: item.id, label: item.trading_name })) || []}
+                            value={(row.customerData?.map(item => ({ value: item.id, label: item.trading_name })) || []).find(opt => String(opt.value) === String(row.customer_id)) || (row.customer_name ? { value: row.customer_id, label: row.customer_name } : null)}
+                            isSearchable
+                            placeholder="Customer"
+                            isDisabled={row.task_type !== "2" || row.submit_status === "1" || staffDetails.id != multipleFilter.staff_id}
+                            onChange={(selectedOption) => {
+                                const e = { target: { name: "customer_id", value: selectedOption?.value || "" } };
+                                selectCustomerData(e, index);
+                            }}
+                        />
+                    )
                 ),
         },
-
         {
             name: 'Client',
             width: '150px',
-            cell: row =>
+            cell: (row, index) =>
                 row.isTotal ? null : (
-                    <select
-                        className="form-select form-select-sm"
-                        value={row.client}
-                        onChange={e =>
-                            handleChange(
-                                row.id,
-                                'client',
-                                e.target.value
-                            )
-                        }
-                    >
-                        <option value="">Client</option>
-                        <option value="Client 1">Client 1</option>
-                        <option value="Client 2">Client 2</option>
-                    </select>
+                    row.task_type === "1" ? (
+                        <input
+                            className="form-control form-control-sm cursor-pointer"
+                            style={{ width: "130px" }}
+                            value="No Client"
+                            disabled
+                        />
+                    ) : (
+                        <Select
+                            className="basic-multi-select"
+                            menuPortalTarget={document.body}
+                            menuPosition="fixed"
+                            classNamePrefix="react-select"
+                            styles={{ container: (base) => ({ ...base, width: 130 }) }}
+                            options={row.clientData?.map(item => ({ value: item.id, label: item.trading_name })) || []}
+                            value={(row.clientData?.map(item => ({ value: item.id, label: item.trading_name })) || []).find(opt => String(opt.value) === String(row.client_id)) || (row.client_name ? { value: row.client_id, label: row.client_name } : null)}
+                            isSearchable
+                            placeholder="Client"
+                            isDisabled={row.task_type !== "2" || row.submit_status === "1" || staffDetails.id != multipleFilter.staff_id}
+                            onChange={(selectedOption) => {
+                                const e = { target: { name: "client_id", value: selectedOption?.value || "" } };
+                                selectClientData(e, index);
+                            }}
+                        />
+                    )
                 ),
         },
-
         {
             name: 'Job',
-            width: '115px',
-            cell: row =>
+            width: '150px',
+            cell: (row, index) =>
                 row.isTotal ? null : (
-                    <select
-                        className="form-select form-select-sm"
-                        value={row.job}
-                        onChange={e =>
-                            handleChange(
-                                row.id,
-                                'job',
-                                e.target.value
-                            )
-                        }
-                    >
-                        <option value="">Job</option>
-                        <option value="Job 001">Job 001</option>
-                        <option value="Job 002">Job 002</option>
-                    </select>
+                    <Select
+                        className="basic-multi-select"
+                        menuPortalTarget={document.body}
+                        menuPosition="fixed"
+                        classNamePrefix="react-select"
+                        styles={{ container: (base) => ({ ...base, width: 130 }) }}
+                        options={row.jobData?.map(item => ({ value: item.id, label: item.name })) || []}
+                        value={(row.jobData?.map(item => ({ value: item.id, label: item.name })) || []).find(opt => String(opt.value) === String(row.job_id)) || (row.job_name ? { value: row.job_id, label: row.job_name } : null)}
+                        isSearchable
+                        placeholder="Job"
+                        isDisabled={row.submit_status === "1" || staffDetails.id != multipleFilter.staff_id}
+                        onChange={(selectedOption) => {
+                            const e = { target: { name: "job_id", value: selectedOption?.value || "" } };
+                            selectJobData(e, row.task_type, index);
+                        }}
+                    />
                 ),
         },
-
         {
             name: 'Task',
-            width: '130px',
-            cell: row =>
+            width: '150px',
+            cell: (row, index) =>
                 row.isTotal ? (
                     <span className='timesheet-table-strong'>Daily total</span>
                 ) : (
-                    <select
-                        className="form-select form-select-sm"
-                        value={row.task}
-                        onChange={e =>
-                            handleChange(
-                                row.id,
-                                'task',
-                                e.target.value
-                            )
-                        }
-                    >
-                        <option value="">Task</option>
-                        <option value="Development">
-                            Development
-                        </option>
-                        <option value="Testing">Testing</option>
-                        <option value="Meeting">Meeting</option>
-                    </select>
+                    <Select
+                        className="basic-multi-select"
+                        menuPortalTarget={document.body}
+                        menuPosition="fixed"
+                        classNamePrefix="react-select"
+                        styles={{ container: (base) => ({ ...base, width: 130 }) }}
+                        options={row.taskData?.map(item => ({ value: item.id, label: item.name })) || []}
+                        value={(row.taskData?.map(item => ({ value: item.id, label: item.name })) || []).find(opt => String(opt.value) === String(row.task_id)) || (row.task_name ? { value: row.task_id, label: row.task_name } : null)}
+                        isSearchable
+                        placeholder="Task"
+                        isDisabled={row.submit_status === "1" || staffDetails.id != multipleFilter.staff_id}
+                        onChange={(selectedOption) => {
+                            const e = { target: { name: "task_id", value: selectedOption?.value || "" } };
+                            selectTaskData(e, index);
+                        }}
+                    />
                 ),
-        },
+        }
+    ];
 
-        {
+    const days = [
+        { label: 'Mon', dateKey: 'monday', stateKey: 'monday_hours', noteKey: 'monday_note', dateValueKey: 'monday' },
+        { label: 'Tue', dateKey: 'tuesday', stateKey: 'tuesday_hours', noteKey: 'tuesday_note', dateValueKey: 'tuesday' },
+        { label: 'Wed', dateKey: 'wednesday', stateKey: 'wednesday_hours', noteKey: 'wednesday_note', dateValueKey: 'wednesday' },
+        { label: 'Thu', dateKey: 'thursday', stateKey: 'thursday_hours', noteKey: 'thursday_note', dateValueKey: 'thursday' },
+        { label: 'Fri', dateKey: 'friday', stateKey: 'friday_hours', noteKey: 'friday_note', dateValueKey: 'friday' },
+        { label: 'Sat', dateKey: 'saturday', stateKey: 'saturday_hours', noteKey: 'saturday_note', dateValueKey: 'saturday' },
+        { label: 'Sun', dateKey: 'sunday', stateKey: 'sunday_hours', noteKey: 'sunday_note', dateValueKey: 'sunday' }
+    ];
+
+    days.forEach(day => {
+        columns.push({
             name: (
                 <div className="text-center">
-                    Mon
-                    <small className="d-block">24 Aug</small>
+                    {day.label}
+                    <small className="d-block">{weekDays && weekDays[day.dateValueKey] ? weekDays[day.dateValueKey].split('/')[0] : ""}</small>
                 </div>
             ),
             width: '100px',
-            cell: row =>
+            cell: (row, index) =>
                 row.isTotal ? (
-                    <span className='timesheet-table-strong'>{getDailyTotal('mon')}</span>
-                ) : (<div className="d-flex">
-                    <input
-                        type="text"
-                        className="form-control form-control-sm"
-                        value={row.mon}
-                        placeholder="00:00"
-                        onChange={e =>
-                            handleChange(
-                                row.id,
-                                'mon',
-                                e.target.value
-                            )
-                        }
-                        onFocus={() => {
-                            setActiveRowId(row.id);
-                            setActiveField('mon');
-                        }}
-                    />
-                    {activeRowId === row.id && activeField === 'mon' && (
-                        <Pencil
-                            className="ms-1 mt-2 cursor-pointer"
-                            size={14}
-                            onMouseDown={(e) => {
-                                e.preventDefault();
-                                setModalText(row.mon_note || '');
-                                setIsModalOpen(true);
-                            }}
-                        />
-                    )}
-                </div>
-                ),
-        },
-
-        {
-            name: (
-                <div className="text-center">
-                    Tue
-                    <small className="d-block">25 Aug</small>
-                </div>
-            ),
-            width: '100px',
-            cell: row =>
-                row.isTotal ? (
-                    <span className='timesheet-table-strong'>{getDailyTotal('tue')}</span>
-                ) : (<div className="d-flex">
-                    <input
-                        type="text"
-                        className="form-control form-control-sm"
-                        value={row.tue}
-                        placeholder="00:00"
-                        onChange={e =>
-                            handleChange(
-                                row.id,
-                                'tue',
-                                e.target.value
-                            )
-                        }
-                        onFocus={() => {
-                            setActiveRowId(row.id);
-                            setActiveField('tue');
-                        }}
-                    />
-                    {activeRowId === row.id && activeField === 'tue' && (
-                        <Pencil
-                            className="ms-1 mt-2 cursor-pointer"
-                            size={14}
-                            onMouseDown={(e) => {
-                                e.preventDefault();
-                                setModalText(row.tue_note || '');
-                                setIsModalOpen(true);
-                            }}
-                        />
-                    )}
-                </div>
-                ),
-        },
-
-        {
-            name: (
-                <div className="text-center">
-                    Wed
-                    <small className="d-block">26 Aug</small>
-                </div>
-            ),
-            width: '100px',
-            cell: row =>
-                row.isTotal ? (
-                    <span className='timesheet-table-strong'>{getDailyTotal('wed')}</span>
-                ) : (<div className="d-flex">
-                    <input
-                        type="text"
-                        className="form-control form-control-sm"
-                        value={row.wed}
-                        placeholder="00:00"
-                        onChange={e =>
-                            handleChange(
-                                row.id,
-                                'wed',
-                                e.target.value
-                            )
-                        }
-                        onFocus={() => {
-                            setActiveRowId(row.id);
-                            setActiveField('wed');
-                        }}
-                    />
-                    {activeRowId === row.id && activeField === 'wed' && (
-                        <Pencil
-                            className="ms-1 mt-2 cursor-pointer"
-                            size={14}
-                            onMouseDown={(e) => {
-                                e.preventDefault();
-                                setModalText(row.wed_note || '');
-                                setIsModalOpen(true);
-                            }}
-                        />
-                    )}
-                </div>
-                ),
-        },
-
-        {
-            name: (
-                <div className="text-center">
-                    Thu
-                    <small className="d-block">27 Aug</small>
-                </div>
-            ),
-            width: '100px',
-            cell: row =>
-                row.isTotal ? (
-                    <span className='timesheet-table-strong'>{getDailyTotal('thu')}</span>
-                ) : (<div className="d-flex">
-                    <input
-                        type="text"
-                        className="form-control form-control-sm"
-                        value={row.thu}
-                        placeholder="00:00"
-                        onChange={e =>
-                            handleChange(
-                                row.id,
-                                'thu',
-                                e.target.value
-                            )
-                        }
-                        onFocus={() => {
-                            setActiveRowId(row.id);
-                            setActiveField('thu');
-                        }}
-                    />
-                    {activeRowId === row.id && activeField === 'thu' && (
-                        <Pencil
-                            className="ms-1 mt-2 cursor-pointer"
-                            size={14}
-                            onMouseDown={(e) => {
-                                e.preventDefault();
-                                setModalText(row.thu_note || '');
-                                setIsModalOpen(true);
-                            }}
-                        />
-                    )}
-                </div>
-                ),
-        },
-
-        {
-            name: (
-                <div className="text-center">
-                    Fri
-                    <small className="d-block">28 Aug</small>
-                </div>
-            ),
-            width: '100px',
-            cell: row =>
-                row.isTotal ? (
-                    <span className='timesheet-table-strong'>{getDailyTotal('fri')}</span>
-                ) : (<div className="d-flex">
-                    <input
-                        type="text"
-                        className="form-control form-control-sm"
-                        value={row.fri}
-                        placeholder="00:00"
-                        onChange={e =>
-                            handleChange(
-                                row.id,
-                                'fri',
-                                e.target.value
-                            )
-                        }
-                        onFocus={() => {
-                            setActiveRowId(row.id);
-                            setActiveField('fri');
-                        }}
-                    />
-                    {activeRowId === row.id && activeField === 'fri' && (
-                        <Pencil
-                            className="ms-1 mt-2 cursor-pointer"
-                            size={14}
-                            onMouseDown={(e) => {
-                                e.preventDefault();
-                                setModalText(row.fri_note || '');
-                                setIsModalOpen(true);
-                            }}
-                        />
-                    )}
-                </div>
-                ),
-        },
-
-        {
-            name: (
-                <div className="text-center">
-                    Sat
-                    <small className="d-block">29 Aug</small>
-                </div>
-            ),
-            width: '100px',
-            cell: row =>
-                row.isTotal ? (
-                    <span className='timesheet-table-strong'>{getDailyTotal('sat')}</span>
-                ) : (<div className="d-flex">
-                    <input
-                        type="text"
-                        className="form-control form-control-sm"
-                        value={row.sat}
-                        placeholder="00:00"
-                        onChange={e =>
-                            handleChange(
-                                row.id,
-                                'sat',
-                                e.target.value
-                            )
-                        }
-                        onFocus={() => {
-                            setActiveRowId(row.id);
-                            setActiveField('sat');
-                        }}
-                    />
-                    {activeRowId === row.id && activeField === 'sat' && (
-                        <Pencil
-                            className="ms-1 mt-2 cursor-pointer"
-                            size={14}
-                            onMouseDown={(e) => {
-                                e.preventDefault();
-                                setModalText(row.sat_note || '');
-                                setIsModalOpen(true);
-                            }}
-                        />
-                    )}
-                </div>
-                ),
-        },
-
-        {
-            name: (
-                <div className="text-center">
-                    Sun
-                    <small className="d-block">30 Aug</small>
-                </div>
-            ),
-            width: '100px',
-            cell: row =>
-                row.isTotal ? (
-                    <span className='timesheet-table-strong'>{getDailyTotal('sun')}</span>
-                ) : (<div className="d-flex">
-                    <input
-                        type="text"
-                        className="form-control form-control-sm"
-                        value={row.sun}
-                        placeholder="00:00"
-                        onChange={e =>
-                            handleChange(
-                                row.id,
-                                'sun',
-                                e.target.value
-                            )
-                        }
-                        onFocus={() => {
-                            setActiveRowId(row.id);
-                            setActiveField('sun');
-                        }}
-                    />
-                    {activeRowId === row.id && activeField === 'sun' && (
-                        <Pencil
-                            className="ms-1 mt-2 cursor-pointer"
-                            size={14}
-                            onMouseDown={(e) => {
-                                e.preventDefault();
-                                setModalText(row.sun_note || '');
-                                setIsModalOpen(true);
-                            }}
-                        />
-                    )}
-                </div>
-                ),
-        },
-
-        {
-            name: 'Total',
-            width: '100px',
-            cell: row =>
-                row.isTotal ? (
-                    <span className='timesheet-table-strong'>{getGrandTotal()}</span>
+                    <span className='timesheet-table-strong'>{getTotalHoursFromKey(day.stateKey)}</span>
                 ) : (
-                    <span className='timesheet-table-strong'>{getRowTotal(row)}</span>
+                    <div className="d-flex align-items-center">
+                        <input
+                            type="text"
+                            className="form-control form-control-sm"
+                            name={day.stateKey}
+                            value={row[day.stateKey] == null ? "0" : row[day.stateKey]}
+                            onChange={e => handleHoursInput(e, index, `${day.dateKey}_date`, weekDays[day.dateValueKey], row)}
+                            disabled={!row.task_id || row.submit_status === "1" || staffDetails.id != multipleFilter.staff_id || isWeekSwitching}
+                            onFocus={() => {
+                                setActiveIndex(index);
+                                setActiveField(day.dateKey);
+                            }}
+                        />
+                        {activeIndex === index && activeField === day.dateKey && (
+                            <Pencil
+                                className="ms-1 mt-2 cursor-pointer"
+                                size={14}
+                                onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    setSelectedRowIndex(index);
+                                    setModalText(row[day.noteKey] || '');
+                                    setIsModalOpen(true);
+                                }}
+                            />
+                        )}
+                    </div>
                 ),
-        },
+        });
+    });
 
-        // {
-        //     name: 'REMARK',
-        //     width: '200px',
-        //     cell: row =>
-        //         row.isTotal ? null : (
-        //             <input
-        //                 type="text"
-        //                 className="form-control form-control-sm"
-        //                 placeholder="Remark"
-        //                 value={row.remark}
-        //                 onChange={e =>
-        //                     handleChange(
-        //                         row.id,
-        //                         'remark',
-        //                         e.target.value
-        //                     )
-        //                 }
-        //             />
-        //         ),
-        // },
+    columns.push({
+        name: 'Total',
+        width: '100px',
+        cell: (row) =>
+            row.isTotal ? (
+                <span className='timesheet-table-strong'>{getGrandTotal()}</span>
+            ) : (
+                <span className='timesheet-table-strong'>{row.total_hours || "0.00"}</span>
+            ),
+    });
 
-        // {
-        //     name: '',
-        //     width: '70px',
-        //     cell: row =>
-        //         row.isTotal ? null : (
-        //             <button className='timesheet-row-add-hours-btn'>8×5</button>
-        //         ),
-        // },
-
-        {
-            name: '',
-            width: '70px',
-            cell: row =>
-                row.isTotal ? null : (
+    columns.push({
+        name: '',
+        width: '70px',
+        cell: (row, index) =>
+            row.isTotal ? null : (
+                submitStatusAllKey === 0 && staffDetails.id == multipleFilter.staff_id && (
                     <button
                         type="button"
-                        className="delete-icon"
-                        onClick={() => handleDelete(row.id)}
+                        className="delete-icon btn btn-sm"
+                        onClick={() => handleDeleteRow(index)}
                     >
                         <i className="ti-trash text-danger" />
                     </button>
-                ),
-        },
-    ];
+                )
+            ),
+    });
 
-    const tableData = [
-        ...rows,
-        {
-            id: '',
+    const tableData = rows ? [...rows] : [];
+    if (tableData.length > 0) {
+        tableData.push({
+            id: 'total-row',
             isTotal: true,
-        },
-    ];
+        });
+    }
 
     return (
         <div className="datatable-container timesheet-datatable-container">
@@ -611,40 +279,8 @@ const TimesheetDatatable = () => {
                 highlightOnHover
                 responsive
             />
-            
-            <CommonModal
-                isOpen={isModalOpen}
-                backdrop="static"
-                size="lg"
-                cancel_btn={false}
-                btn_2="true"
-                btn_name={"Save"}
-                title={activeField ? activeField.charAt(0).toUpperCase() + activeField.slice(1) + " Note" : "Note"}
-                hideBtn={false}
-                handleClose={() => {
-                    setIsModalOpen(false);
-                    setModalText("");
-                    setActiveRowId(null);
-                    setActiveField(null);
-                }}
-                Submit_Function={(e) => handleSaveNote(e)}
-            >
-                <div className="modal-body">
-                    <div className="row">
-                        <div className="col-lg-12">
-                            <h5>Add Note</h5>
-                            <textarea
-                                className="form-control"
-                                rows={4}
-                                value={modalText}
-                                onChange={(e) => setModalText(e.target.value)}
-                            />
-                        </div>
-                    </div>
-                </div>
-            </CommonModal>
         </div>
     );
 };
 
-export default TimesheetDatatable;
+export default TimesheetDatatable;

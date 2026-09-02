@@ -10,6 +10,7 @@ import ClientSlice from "../Slice/Client/ClientSlice";
 import DashboardSlice from "../Slice/Dashboard/DashboardSlice";
 import ReportSlice from '../Slice/Report/ReportSlice'
 import CustomerReportSlice from "../Slice/Report/CustomerReportSlice";
+import CustomTimesheetSlice from "../Slice/CustomTimesheet/CustomTimesheetSlice";
 
  
 const store = configureStore({
@@ -23,6 +24,7 @@ const store = configureStore({
     DashboardSlice: DashboardSlice.reducer,
     ReportSlice: ReportSlice.reducer,
     CustomerReportSlice: CustomerReportSlice.reducer,
+    CustomTimesheetSlice: CustomTimesheetSlice.reducer,
   },
 });
 

@@ -2166,6 +2166,11 @@ const TimesheetNewDesign = () => {
     );
   }
 
+  const totalEnteredHoursNum = timeSheetRows.reduce((sum, row) => sum + (parseFloat(row.total_hours) || 0), 0);
+  const totalSubmittedHoursNum = submitStatusAllKey === 1 ? totalEnteredHoursNum : 0;
+  const totalDraftHoursNum = submitStatusAllKey === 0 ? totalEnteredHoursNum : 0;
+  const weeklyRequiredHours = timeSheetRows.length > 0 && timeSheetRows[0].staffs_hourminute ? timeSheetRows[0].staffs_hourminute : "40:00";
+  const getGrandTotalStr = () => timeSheetRows.reduce((sum, row) => sum + (parseFloat(row.total_hours) || 0), 0).toFixed(2);
 
   return (
     <>
@@ -3611,7 +3616,12 @@ const TimesheetNewDesign = () => {
         </div>
       </div> */}
 
-      <div className="container-fluid mt-4">
+      <div className="container-fluid mt-4" style={{ position: "relative" }}>
+        {(loading || exporting || staffDataAll.loading || staffDataWeekDataAll.loading || isExistStaffDataWeekDataAll.loading || staffDataWeekDataAllSubmitTImeSheet.loading || isAddingRow) && (
+          <div className="overlay" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
+            <div className="loader"></div>
+          </div>
+        )}
         <div className="timesheet-header">
           <div className="timesheet-header-title-div">
             <span className="timesheet-header-icon">
@@ -3641,7 +3651,7 @@ const TimesheetNewDesign = () => {
                 <div className="text-center ">
                   <p className="text-info bg-soft-primary px-3 py-2 mb-0 font-11 rounded">
                     <i className="fa fa-calendar-clock me-1" />
-                    <span> Week 4, Month 8, Year 2026 </span>
+                    <span> {currentValue && currentValue.label ? currentValue.label : "Select Week"} </span>
                   </p>
                 </div>
 
@@ -3649,37 +3659,189 @@ const TimesheetNewDesign = () => {
               </div>
               <div className="timesheet-tab-content-header-right">
                 <div className="timesheet-week-div">
-                  <button className="timesheet-week-button" type="button">
+                  <button className="timesheet-week-button" type="button" onClick={() => changeWeek(-1)} disabled={isWeekSwitching}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left size-4" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
                   </button>
                   <div className="timesheet-week-content-div">
-                    <p className="timesheet-week-date">24 Aug 2026 – 30 Aug 2026</p>
-                    <p className="timesheet-week-text">Current week</p>
+                    <p className="timesheet-week-date">{weekDays?.monday ? `${weekDays.monday} – ${weekDays.sunday}` : ""}</p>
+                    <p className="timesheet-week-text">{weekOffset === 0 ? "Current week" : `Week ${weekOffset > 0 ? "+" : ""}${weekOffset}`}</p>
                   </div>
-                  <button className="timesheet-week-button" type="button">
+                  <button className="timesheet-week-button" type="button" onClick={() => changeWeek(1)} disabled={isWeekSwitching}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right size-4" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
                   </button>
                 </div>
                 <button type="button" className="btn btn-outline-info fw-bold">Today</button>
               </div>
             </div>
+
+
+            <div className="row mt-3">
+              {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) ? (
+                <div className="form-group col-md-4">
+                  <label className="form-label mb-2 ms-2">Select Staff</label>
+
+                  <Select
+                    id="tabSelect"
+                    name="staff_id"
+                    className="basic-multi-select"
+                    options={staffOptions}
+                    value={staffOptions.find(
+                      (opt) => Number(opt.value) === Number(selectedStaff)
+                    )}
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = {
+                        target: { name: "staff_id", value: selectedOption.value },
+                      };
+                      selectFilterStaffANdWeek(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+
+              {staffDataWeekDataAll.data &&
+                staffDataWeekDataAll.data.length > 0 ? (
+                <div className="form-group col-md-4   pe-0">
+                  <label className="form-label mb-2">Select Date</label>
+                  <Select
+                    id="tabSelect"
+                    name="week"
+                    className="basic-multi-select"
+                    // options={weekOptions}
+                    // defaultValue={currentValue}
+                    options={weekOptionsWithPlaceholder}
+                    value={currentValue || null}
+                    placeholder="-- Select --"
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = {
+                        target: { name: "week", value: selectedOption.value },
+                      };
+                      selectFilterStaffANdWeek(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
+                    isDisabled={selectedLineManager != "" ? true : false}
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+
+              {isExistStaffDataWeekDataAll?.data &&
+                isExistStaffDataWeekDataAll?.data.length > 0 &&
+                staffDataWeekDataAll?.data.length === 0 ? (
+                <div className="form-group col-md-4 pe-0">
+                  <label className="form-label mb-2">Select Date</label>
+                  <Select
+                    id="tabSelect"
+                    name="week"
+                    className="basic-multi-select"
+                    // options={weekOptions}
+                    // defaultValue={currentValue}
+                    options={weekOptionsWithPlaceholder}
+                    value={currentValue || null}
+                    placeholder="-- Select --"
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = {
+                        target: { name: "week", value: selectedOption.value },
+                      };
+                      selectFilterStaffANdWeek(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
+                    isDisabled={selectedLineManager != "" ? true : false}
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+
+              {role !== "SUPERADMIN" && lineMangerData && lineMangerData.length > 0 ? (
+                <div className="form-group  col-md-4  pe-0">
+                  <label className="form-label mb-2">Team Timesheet Status</label>
+                  <Select
+                    id="tabSelect"
+                    name="week"
+                    className="basic-multi-select"
+                    // options={weekOptions}
+                    // defaultValue={currentValue}
+                    options={lineMangerDataWithPlaceholder}
+                    defaultValue={null}
+                    placeholder="-- Select --"
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = {
+                        target: {
+                          name: "lineManger",
+                          value: selectedOption.value,
+                        },
+                      };
+                      selectLineManager(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+
+              {selectedLineManager != "" &&
+                staffDataWeekDataAll.data &&
+                staffDataWeekDataAll.data.length > 0 ? (
+                <div className="form-group col-md-4  pe-0">
+                  <label className="form-label mb-2">
+                    Line Manager Select Week
+                  </label>
+                  <Select
+                    id="tabSelect"
+                    name="week"
+                    className="basic-multi-select"
+                    // options={weekOptions}
+                    // defaultValue={currentValue}
+                    options={weekOptionsWithPlaceholderSubmitTimeSheet}
+                    defaultValue={null}
+                    placeholder="-- Select --"
+                    onChange={(selectedOption) => {
+                      // simulate e.target.value
+                      const e = {
+                        target: { name: "week", value: selectedOption.value },
+                      };
+                      selectFilterStaffANdWeek(e);
+                    }}
+                    classNamePrefix="react-select"
+                    isSearchable
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+            </div>
+
+
             <div className="timesheet-white-card mt-4">
               <div className="timesheet-whitediv-flex">
                 <div className="timesheet-white-card-div-25">
                   <p className="timesheet-white-card-label">Employee</p>
-                  <p className="timesheet-white-card-value">Vikas Patel</p>
+                  <p className="timesheet-white-card-value">{staffDetails?.first_name} {staffDetails?.last_name}</p>
                 </div>
                 <div className="timesheet-white-card-div-25">
                   <p className="timesheet-white-card-label">Weekly required hours</p>
-                  <p className="timesheet-white-card-value">40h <span className="timesheet-white-card-value-small">(min 35 / max 45)</span></p>
+                  <p className="timesheet-white-card-value">{weeklyRequiredHours}</p>
                 </div>
                 <div className="timesheet-white-card-div-25">
-                  <p className="timesheet-white-card-label">Entered / Remaining</p>
-                  <p className="timesheet-white-card-value">5h / 40h</p>
+                  <p className="timesheet-white-card-label">Entered</p>
+                  <p className="timesheet-white-card-value">{totalEnteredHoursNum.toFixed(2)}h</p>
                 </div>
                 <div className="timesheet-white-card-div-25">
                   <p className="timesheet-white-card-label">Status</p>
-                  <p className="timesheet-white-card-value"><span className="timesheet-white-card-status">Draft</span><span className="timesheet-white-card-unsaved">unsaved changes</span></p>
+                  <p className="timesheet-white-card-value"><span className="timesheet-white-card-status">{submitStatusAllKey === 1 ? "Submitted" : "Draft"}</span>{submitStatusAllKey !== 1 && <span className="timesheet-white-card-unsaved">unsaved changes</span>}</p>
                 </div>
               </div>
               <div className="timesheet-progress">
@@ -3690,25 +3852,25 @@ const TimesheetNewDesign = () => {
               <div className="col-md-3">
                 <div className="timesheet-white-card">
                   <p className="timesheet-white-card-label">Task Rows</p>
-                  <p className="timesheet-white-card-value-big">1</p>
+                  <p className="timesheet-white-card-value-big">{timeSheetRows.length}</p>
                 </div>
               </div>
               <div className="col-md-3">
                 <div className="timesheet-white-card">
                   <p className="timesheet-white-card-label">Total Hours</p>
-                  <p className="timesheet-white-card-value-big">0h</p>
+                  <p className="timesheet-white-card-value-big">{totalEnteredHoursNum.toFixed(2)}h</p>
                 </div>
               </div>
               <div className="col-md-3">
                 <div className="timesheet-white-card">
                   <p className="timesheet-white-card-label">Submitted Hours</p>
-                  <p className="timesheet-white-card-value-big timesheet-white-card-value-big-blue">0h</p>
+                  <p className="timesheet-white-card-value-big timesheet-white-card-value-big-blue">{totalSubmittedHoursNum.toFixed(2)}h</p>
                 </div>
               </div>
               <div className="col-md-3">
                 <div className="timesheet-white-card">
                   <p className="timesheet-white-card-label">Draft Hours</p>
-                  <p className="timesheet-white-card-value-big">0h</p>
+                  <p className="timesheet-white-card-value-big">{totalDraftHoursNum.toFixed(2)}h</p>
                 </div>
               </div>
             </div>
@@ -3719,7 +3881,7 @@ const TimesheetNewDesign = () => {
                     <div className="tab-title"><h3 className="mt-0">Weekly Grid</h3></div>
                   </div>
                   <div className="timesheet-table-header-div-right">
-                    <button className="timesheet-table-header-btn">
+                    <button type="button" className="timesheet-table-header-btn" onClick={() => setIsCopyModalOpen(true)}>
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> Copy previous week
                     </button>
                     {/* <button className="timesheet-table-header-btn">
@@ -3728,12 +3890,35 @@ const TimesheetNewDesign = () => {
                     <button className="timesheet-table-header-btn">
                       Clear hours
                     </button> */}
-                    <button className="timesheet-table-header-add-task-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg> Add task row</button>
+                    <button type="button" className="timesheet-table-header-add-task-btn" onClick={handleAddNewSheet} disabled={isAddingRow || submitStatusAllKey === 1 || staffDetails.id != multipleFilter.staff_id}><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg> Add task row</button>
                     <button className="timesheet-table-header-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg> Export</button>
                   </div>
                 </div>
                 <div className="mt-3">
-                  <TimesheetDatatable />
+                  <TimesheetDatatable 
+                    rows={timeSheetRows}
+                    weekDays={weekDays}
+                    multipleFilter={multipleFilter}
+                    staffDetails={staffDetails}
+                    isWeekSwitching={isWeekSwitching}
+                    submitStatusAllKey={submitStatusAllKey}
+                    handleChangeTaskType={handleChangeTaskType}
+                    selectCustomerData={selectCustomerData}
+                    selectClientData={selectClientData}
+                    selectJobData={selectJobData}
+                    selectTaskData={selectTaskData}
+                    handleHoursInput={handleHoursInput}
+                    handleDeleteRow={handleDeleteRow}
+                    setActiveIndex={setActiveIndex}
+                    setActiveField={setActiveField}
+                    activeIndex={activeIndex}
+                    activeField={activeField}
+                    setIsModalOpen={setIsModalOpen}
+                    setModalText={setModalText}
+                    setSelectedRowIndex={setSelectedRowIndex}
+                    getTotalHoursFromKey={getTotalHoursFromKey}
+                    getGrandTotal={getGrandTotalStr}
+                  />
                 </div>
                 <div className="mt-3">
                   <label className="form-label">Final remark (weekly)</label>
@@ -3745,8 +3930,12 @@ const TimesheetNewDesign = () => {
                       <p>Draft saves keep the timesheet editable. Submitting locks it for manager review.</p>
                     </div>
                     <div className="timesheet-submit-div-right">
-                      <button className="btn btn-info"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"></path></svg> Save</button>
-                      <button className="btn btn-outline-success"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path><path d="M7 3v4a1 1 0 0 0 1 1h7"></path></svg> Submit</button>
+                      {submitStatusAllKey === 0 && staffDetails.id == multipleFilter.staff_id && (
+                        <>
+                          <button type="button" className="btn btn-info" onClick={(e) => saveData(e, 0)} disabled={loading}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"></path></svg> {loading ? "Saving..." : "Save"}</button>
+                          <button type="button" className="btn btn-outline-success" onClick={(e) => saveData(e, 1)} disabled={loading}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path><path d="M7 3v4a1 1 0 0 0 1 1h7"></path></svg> {loading ? "Submitting..." : "Submit"}</button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -4251,6 +4440,79 @@ const TimesheetNewDesign = () => {
           </div>
         </div>
       </div >
+      <CommonModal
+        isOpen={isModalOpen}
+        backdrop="static"
+        size="lg"
+        cancel_btn={false}
+        btn_2="true"
+        btn_name={"Save"}
+        title={"Timesheet"}
+        hideBtn={false}
+        handleClose={() => {
+          setIsModalOpen(false);
+          setModalText("");
+          setActiveIndex(null);
+          setActiveField(null);
+        }}
+        Submit_Function={(e) => handleSaveNote(e)}
+      >
+        <div className="modal-body">
+          <div className="row">
+            <div className="col-lg-12">
+              <h5>Add Note</h5>
+              <textarea
+                className="form-control"
+                rows={4}
+                value={modalText}
+                onChange={(e) => setModalText(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+      </CommonModal>
+
+      <CommonModal
+        isOpen={isCopyModalOpen}
+        backdrop="static"
+        size="lg"
+        cancel_btn={false}
+        btn_2="true"
+        btn_name={"Save"}
+        title={"Timesheet"}
+        hideBtn={false}
+        handleClose={() => {
+          setIsCopyModalOpen(false);
+        }}
+        Submit_Function={(e) => handleCopyTimeSheetAutoFill(e)}
+      >
+        <div className="modal-body">
+          <div className="row">
+            <div className="col-lg-12">
+              <h5>Select Week to Copy Timesheet From</h5>
+              <Select
+                id="tabSelect"
+                name="week"
+                className="basic-multi-select"
+                options={weekOptionsWithPlaceholderSubmitTimeSheet}
+                defaultValue={null}
+                placeholder="-- Select --"
+                onChange={(selectedOption) => {
+                  const e = {
+                    target: {
+                      name: "copy_week",
+                      value: selectedOption.value,
+                    },
+                  };
+                  selectFilterStaffANdWeek(e);
+                }}
+                classNamePrefix="react-select"
+                isSearchable
+              />
+            </div>
+          </div>
+        </div>
+      </CommonModal>
     </>
   );
 };
