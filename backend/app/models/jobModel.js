@@ -1686,10 +1686,18 @@ const getJobByCustomer = async (job) => {
         OR job_types.type LIKE ?
         OR jobs.job_id LIKE ?
         OR ${jobCodeExpr} LIKE ?
+        OR DATE_FORMAT(jobs.created_at, '%e/%c/%Y') LIKE ?
+        OR DATE_FORMAT(jobs.created_at, '%d/%m/%Y') LIKE ?
+        OR jobs.job_priority LIKE ?
+        OR EXISTS (SELECT 1 FROM staffs s WHERE s.id = jobs.account_manager_id AND (CONCAT(s.first_name, ' ', s.last_name) LIKE ? OR s.employee_number LIKE ?))
+        OR EXISTS (SELECT 1 FROM customer_contact_details ccd WHERE ccd.id = jobs.customer_contact_details_id AND CONCAT(ccd.first_name, ' ', ccd.last_name) LIKE ?)
+        OR EXISTS (SELECT 1 FROM master_status ms WHERE ms.id = jobs.status_type AND ms.name LIKE ?)
+        OR EXISTS (SELECT 1 FROM staffs s WHERE s.id = jobs.allocated_to AND CONCAT(s.first_name, ' ', s.last_name) LIKE ?)
+        OR EXISTS (SELECT 1 FROM staffs s WHERE s.id = jobs.staff_created_id AND CONCAT(s.first_name, ' ', s.last_name) LIKE ?)
       )
     `;
     const likeSearch = `%${search}%`;
-    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
+    searchParams = Array(14).fill(likeSearch);
   }
   // Line Manager
   const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
@@ -2012,10 +2020,18 @@ async function getAllJobsSidebar(
         OR job_types.type LIKE ?
         OR jobs.job_id LIKE ?
         OR ${jobCodeExpr} LIKE ?
+        OR DATE_FORMAT(jobs.created_at, '%e/%c/%Y') LIKE ?
+        OR DATE_FORMAT(jobs.created_at, '%d/%m/%Y') LIKE ?
+        OR jobs.job_priority LIKE ?
+        OR EXISTS (SELECT 1 FROM staffs s WHERE s.id = jobs.account_manager_id AND (CONCAT(s.first_name, ' ', s.last_name) LIKE ? OR s.employee_number LIKE ?))
+        OR EXISTS (SELECT 1 FROM customer_contact_details ccd WHERE ccd.id = jobs.customer_contact_details_id AND CONCAT(ccd.first_name, ' ', ccd.last_name) LIKE ?)
+        OR EXISTS (SELECT 1 FROM master_status ms WHERE ms.id = jobs.status_type AND ms.name LIKE ?)
+        OR EXISTS (SELECT 1 FROM staffs s WHERE s.id = jobs.allocated_to AND CONCAT(s.first_name, ' ', s.last_name) LIKE ?)
+        OR EXISTS (SELECT 1 FROM staffs s WHERE s.id = jobs.staff_created_id AND CONCAT(s.first_name, ' ', s.last_name) LIKE ?)
       )
     `;
     const likeSearch = `%${search}%`;
-    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
+    searchParams = Array(14).fill(likeSearch);
   }
 
   try {
@@ -2533,10 +2549,18 @@ const getJobByClient = async (job) => {
         OR job_types.type LIKE ?
         OR jobs.job_id LIKE ?
         OR ${jobCodeExpr} LIKE ?
+        OR DATE_FORMAT(jobs.created_at, '%e/%c/%Y') LIKE ?
+        OR DATE_FORMAT(jobs.created_at, '%d/%m/%Y') LIKE ?
+        OR jobs.job_priority LIKE ?
+        OR EXISTS (SELECT 1 FROM staffs s WHERE s.id = jobs.account_manager_id AND (CONCAT(s.first_name, ' ', s.last_name) LIKE ? OR s.employee_number LIKE ?))
+        OR EXISTS (SELECT 1 FROM customer_contact_details ccd WHERE ccd.id = jobs.customer_contact_details_id AND CONCAT(ccd.first_name, ' ', ccd.last_name) LIKE ?)
+        OR EXISTS (SELECT 1 FROM master_status ms WHERE ms.id = jobs.status_type AND ms.name LIKE ?)
+        OR EXISTS (SELECT 1 FROM staffs s WHERE s.id = jobs.allocated_to AND CONCAT(s.first_name, ' ', s.last_name) LIKE ?)
+        OR EXISTS (SELECT 1 FROM staffs s WHERE s.id = jobs.staff_created_id AND CONCAT(s.first_name, ' ', s.last_name) LIKE ?)
       )
     `;
     const likeSearch = `%${search}%`;
-    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
+    searchParams = Array(14).fill(likeSearch);
   }
 
   // Line Manager
@@ -2959,10 +2983,18 @@ async function getAllJobsSidebarFilter(
         OR job_types.type LIKE ?
         OR jobs.job_id LIKE ?
         OR ${jobCodeExpr} LIKE ?
+        OR DATE_FORMAT(jobs.created_at, '%e/%c/%Y') LIKE ?
+        OR DATE_FORMAT(jobs.created_at, '%d/%m/%Y') LIKE ?
+        OR jobs.job_priority LIKE ?
+        OR EXISTS (SELECT 1 FROM staffs s WHERE s.id = jobs.account_manager_id AND (CONCAT(s.first_name, ' ', s.last_name) LIKE ? OR s.employee_number LIKE ?))
+        OR EXISTS (SELECT 1 FROM customer_contact_details ccd WHERE ccd.id = jobs.customer_contact_details_id AND CONCAT(ccd.first_name, ' ', ccd.last_name) LIKE ?)
+        OR EXISTS (SELECT 1 FROM master_status ms WHERE ms.id = jobs.status_type AND ms.name LIKE ?)
+        OR EXISTS (SELECT 1 FROM staffs s WHERE s.id = jobs.allocated_to AND CONCAT(s.first_name, ' ', s.last_name) LIKE ?)
+        OR EXISTS (SELECT 1 FROM staffs s WHERE s.id = jobs.staff_created_id AND CONCAT(s.first_name, ' ', s.last_name) LIKE ?)
       )
     `;
     const likeSearch = `%${search}%`;
-    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
+    searchParams = Array(14).fill(likeSearch);
   }
 
 
