@@ -365,10 +365,14 @@ function JobCustomReport() {
         .unwrap()
         .then(async (response) => {
           if (response.status) {
+            
+            console.log("response--->", response);
+
             const data = response?.data?.filter(item => item.status == 1)?.map((item) => ({
               value: item.id,
               label: `${item.first_name} ${item.last_name} (${item.email})`,
             }));
+            console.log("otherStaffAllData--->", data);
             setOtherStaffAllData(data);
           } else {
             setOtherStaffAllData([]);
@@ -2329,6 +2333,10 @@ function JobCustomReport() {
               isSearchable
               className="shadow-sm select-staff rounded-pill"
             /> */}
+
+            {
+              console.log("otherStaffAllData", otherStaffAllData)
+            }
 
             <Select
               isMulti

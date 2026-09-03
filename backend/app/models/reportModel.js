@@ -4768,7 +4768,8 @@ const getStaffWithRole = async (Report) => {
         staffs.id,
         staffs.first_name,
         staffs.last_name,
-        staffs.email 
+        staffs.email,
+        staffs.status
         FROM
         job_allowed_staffs 
         JOIN staffs ON staffs.id = job_allowed_staffs.staff_id
@@ -4785,7 +4786,8 @@ const getStaffWithRole = async (Report) => {
         staffs.first_name,
         staffs.last_name,
         staffs.email,
-        staffs.employee_number
+        staffs.employee_number,
+        staffs.status
         FROM
         staffs
         GROUP BY staffs.employee_number
@@ -4803,7 +4805,8 @@ const getStaffWithRole = async (Report) => {
         id,
         first_name,
         last_name,
-        email
+        email,
+        status
         FROM 
         staffs 
         WHERE ${where}
@@ -4824,7 +4827,8 @@ const getStaffWithRole = async (Report) => {
         staffs.id,
         staffs.first_name,
         staffs.last_name,
-        staffs.email 
+        staffs.email,
+        staffs.status 
         FROM
         job_allowed_staffs
         JOIN staffs ON staffs.id = job_allowed_staffs.staff_id
@@ -4843,7 +4847,8 @@ const getStaffWithRole = async (Report) => {
         staffs.first_name,
         staffs.last_name,
         staffs.email,
-        staffs.employee_number
+        staffs.employee_number,
+        staffs.status
         FROM
         staffs
         JOIN jobs ON jobs.allocated_to = staffs.id OR jobs.reviewer = staffs.id
@@ -4873,7 +4878,8 @@ const getStaffWithRole = async (Report) => {
         DISTINCT staffs.id,
         staffs.first_name,
         staffs.last_name,
-        staffs.email
+        staffs.email,
+        staffs.status
         FROM 
         staffs
         ${condition}
