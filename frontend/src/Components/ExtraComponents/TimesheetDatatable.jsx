@@ -247,13 +247,16 @@ const TimesheetDatatable = ({
         cell: (row, index) =>
             row.isTotal ? null : (
                 submitStatusAllKey === 0 && staffDetails.id == multipleFilter.staff_id && (
-                    <button
-                        type="button"
-                        className="delete-icon btn btn-sm"
-                        onClick={() => handleDeleteRow(index)}
-                    >
-                        <i className="ti-trash text-danger" />
-                    </button>
+                    <div className="d-flex align-items-center justify-content-center h-100">
+                        <button
+                            type="button"
+                            className="delete-icon"
+                            style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}
+                            onClick={() => handleDeleteRow(index)}
+                        >
+                            <i className="ti-trash text-danger" />
+                        </button>
+                    </div>
                 )
             ),
     });
