@@ -192,8 +192,7 @@ const TimesheetDatatable = ({
         columns.push({
             name: (
                 <div className="text-center">
-                    {day.label}
-                    <small className="d-block">{weekDays && weekDays[day.dateValueKey] ? weekDays[day.dateValueKey].split('/')[0] : ""}</small>
+                    <span className="d-block">{weekDays && weekDays[day.dateValueKey] ? weekDays[day.dateValueKey].split('/')[0] : day.label}</span>
                 </div>
             ),
             width: '100px',
@@ -217,7 +216,7 @@ const TimesheetDatatable = ({
                         {activeIndex === index && activeField === day.dateKey && (
                             <Pencil
                                 className="ms-1 mt-2 cursor-pointer"
-                                size={14}
+                                size={22}
                                 onMouseDown={(e) => {
                                     e.preventDefault();
                                     setSelectedRowIndex(index);
@@ -283,4 +282,4 @@ const TimesheetDatatable = ({
     );
 };
 
-export default TimesheetDatatable;
+export default TimesheetDatatable;

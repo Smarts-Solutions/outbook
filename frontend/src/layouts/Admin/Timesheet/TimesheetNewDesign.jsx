@@ -2219,6 +2219,12 @@ const TimesheetNewDesign = () => {
   const totalDraftHoursNum = submitStatusAllKey === 0 ? totalEnteredHoursNum : 0;
   const weeklyRequiredHours = timeSheetRows.length > 0 && timeSheetRows[0].staffs_hourminute ? timeSheetRows[0].staffs_hourminute : "40:00";
   const getGrandTotalStr = () => timeSheetRows.reduce((sum, row) => sum + (parseFloat(row.total_hours) || 0), 0).toFixed(2);
+  
+  const weeklyReqStr = String(weeklyRequiredHours || "0:0");
+  const [reqH, reqM] = weeklyReqStr.split(":");
+  const reqTotalNum = parseInt(reqH || 0) + parseInt(reqM || 0)/60;
+  const progressPercent = reqTotalNum > 0 ? Math.min((totalEnteredHoursNum / reqTotalNum) * 100, 100) : 0;
+
 
   return (
     <>
@@ -2466,7 +2472,7 @@ const TimesheetNewDesign = () => {
                 </div>
               </div>
               <div className="timesheet-progress">
-                <div className="timesheet-progress-bar" style={{ width: "25%" }}></div>
+                <div className="timesheet-progress-bar" style={{ width: `${progressPercent}%` }}></div>
               </div>
             </div>
             <div className="row mt-3">
