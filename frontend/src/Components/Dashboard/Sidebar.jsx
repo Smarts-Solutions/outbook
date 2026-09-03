@@ -695,7 +695,7 @@ const Sidebar = () => {
                   )}
 
 
-                {((updatedShowTab && updatedShowTab.timesheet) ||
+                {/* {((updatedShowTab && updatedShowTab.timesheet) ||
                   role === "SUPERADMIN") && (
                     <>
                       <li
@@ -707,14 +707,13 @@ const Sidebar = () => {
                           onClick={(e) => handleLinkClick(e, "/admin/timesheetnewdesign")}
                         >
                           <span className="sidebar-icons">
-                            <Clock10Icon /> {/* Time Sheet icon */}
+                            <Clock10Icon /> 
                           </span>
                           <span>New Time Sheet</span>
                         </Link>
                       </li>
                     </>
-                  )}
-
+                  )} */}
 
 
 
