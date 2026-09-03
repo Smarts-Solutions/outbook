@@ -616,13 +616,27 @@ const getClient = async (client) => {
         OR client_types.type LIKE ?
         OR CONCAT(staffs.first_name,' ',staffs.last_name) LIKE ?
         OR ${clientCodeExpr} LIKE ?
+        OR REPLACE(REPLACE(${clientCodeExpr}, '_', ''), ' ', '') LIKE ?
+        OR clients.client_code LIKE ?
         OR DATE_FORMAT(clients.created_at, '%e/%c/%Y') LIKE ?
         OR DATE_FORMAT(clients.created_at, '%d/%m/%Y') LIKE ?
         OR (CASE WHEN clients.status = 1 THEN 'Active' ELSE 'Deactive' END) LIKE ?
       )`
     : "";
 
-  const searchParams = search ? Array(8).fill(`%${search}%`) : [];
+  const strippedSearch = search ? search.replace(/[_ ]/g, '') : '';
+  const searchParams = search ? [
+    `%${search}%`,
+    `%${search}%`,
+    `%${search}%`,
+    `%${search}%`,
+    `%${search}%`,
+    `%${strippedSearch}%`,
+    `%${search}%`,
+    `%${search}%`,
+    `%${search}%`,
+    `%${search}%`
+  ] : [];
 
   // ================= SIDEBAR (NO CUSTOMER) =================
   if (!customer_id || customer_id === "undefined" || customer_id === "null") {
@@ -828,13 +842,27 @@ async function getAllClientsSidebar(
         OR client_types.type LIKE ?
         OR CONCAT(staffs.first_name,' ',staffs.last_name) LIKE ?
         OR ${clientCodeExpr} LIKE ?
+        OR REPLACE(REPLACE(${clientCodeExpr}, '_', ''), ' ', '') LIKE ?
+        OR clients.client_code LIKE ?
         OR DATE_FORMAT(clients.created_at, '%e/%c/%Y') LIKE ?
         OR DATE_FORMAT(clients.created_at, '%d/%m/%Y') LIKE ?
         OR (CASE WHEN clients.status = 1 THEN 'Active' ELSE 'Deactive' END) LIKE ?
       )`
     : "";
 
-  const searchParams = search ? Array(8).fill(`%${search}%`) : [];
+  const strippedSearch = search ? search.replace(/[_ ]/g, '') : '';
+  const searchParams = search ? [
+    `%${search}%`,
+    `%${search}%`,
+    `%${search}%`,
+    `%${search}%`,
+    `%${search}%`,
+    `%${strippedSearch}%`,
+    `%${search}%`,
+    `%${search}%`,
+    `%${search}%`,
+    `%${search}%`
+  ] : [];
 
   try {
     const [RoleAccess] = await pool.execute(
