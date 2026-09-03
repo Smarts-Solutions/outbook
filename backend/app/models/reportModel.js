@@ -7463,7 +7463,6 @@ const getJobCustomReport = async (Report) => {
                     j.Management_Accounts_ToDate_id_6,
 
 
-
                     j.customer_id,
                     j.client_id,
                     j.job_type_id,
