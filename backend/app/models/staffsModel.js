@@ -400,10 +400,12 @@ const getStaffNew = async (data) => {
         OR s.email LIKE ?
         OR s.phone LIKE ?
         OR s.employee_number LIKE ?
+        OR r.role_name LIKE ?
+        OR CONCAT(m.first_name, ' ', m.last_name) LIKE ?
       )
     `;
     const likeSearch = `%${search}%`;
-    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
+    searchParams = [likeSearch, likeSearch, likeSearch, likeSearch, likeSearch, likeSearch, likeSearch, likeSearch];
   }
 
   try {
@@ -412,6 +414,9 @@ const getStaffNew = async (data) => {
       `
       SELECT COUNT(*) AS total
       FROM staffs s
+      INNER JOIN roles r ON s.role_id = r.id
+      LEFT JOIN line_managers lm ON lm.staff_by = s.id
+      LEFT JOIN staffs m ON m.id = lm.staff_to
       ${where}
       ${searchCondition}
       `,
