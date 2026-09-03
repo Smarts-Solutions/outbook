@@ -348,26 +348,32 @@ const TimesheetNewDesign = () => {
   };
 
   const getTimeSheetCopyRecord = async (weekOffset) => {
-    const req = { staff_id: multipleFilter.staff_id, weekOffset: weekOffset };
-    const res = await dispatch(
-      getTimesheetData({ req, authToken: token })
-    ).unwrap();
-
-    if (res.status) {
-      setCopyTimeSheetRows(res.data);
-      setCopyTimeSheetRows((prevRows) =>
-        prevRows.map((row) => {
-          const sum =
-            (parseFloat(row.monday_hours) || 0) +
-            (parseFloat(row.tuesday_hours) || 0) +
-            (parseFloat(row.wednesday_hours) || 0) +
-            (parseFloat(row.thursday_hours) || 0) +
-            (parseFloat(row.friday_hours) || 0) +
-            (parseFloat(row.saturday_hours) || 0) +
-            (parseFloat(row.sunday_hours) || 0);
-          return { ...row, total_hours: parseFloat(sum).toFixed(2) };
-        })
-      );
+    try {
+      setLoading(true);
+      const req = { staff_id: multipleFilter.staff_id, weekOffset: weekOffset };
+      const res = await dispatch(
+        getTimesheetData({ req, authToken: token })
+      ).unwrap();
+  
+      if (res.status) {
+        setCopyTimeSheetRows(res.data);
+        setCopyTimeSheetRows((prevRows) =>
+          prevRows.map((row) => {
+            const sum =
+              (parseFloat(row.monday_hours) || 0) +
+              (parseFloat(row.tuesday_hours) || 0) +
+              (parseFloat(row.wednesday_hours) || 0) +
+              (parseFloat(row.thursday_hours) || 0) +
+              (parseFloat(row.friday_hours) || 0) +
+              (parseFloat(row.saturday_hours) || 0) +
+              (parseFloat(row.sunday_hours) || 0);
+            return { ...row, total_hours: parseFloat(sum).toFixed(2) };
+          })
+        );
+      }
+    
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -614,20 +620,26 @@ const TimesheetNewDesign = () => {
 
   const [deleteRows, setDeleteRows] = useState([]);
   const handleDeleteRow = (index) => {
-    const newSheetRows = [...timeSheetRows];
-    const id = newSheetRows[index].id;
-    if (id != null) {
-      setDeleteRows((prevRows) => {
-        const existingIds = new Set(prevRows);
-        if (!existingIds.has(id)) {
-          return [...prevRows, id];
-        }
-        return prevRows;
-      });
+    try {
+      setLoading(true);
+      const newSheetRows = [...timeSheetRows];
+      const id = newSheetRows[index].id;
+      if (id != null) {
+        setDeleteRows((prevRows) => {
+          const existingIds = new Set(prevRows);
+          if (!existingIds.has(id)) {
+            return [...prevRows, id];
+          }
+          return prevRows;
+        });
+      }
+  
+      newSheetRows.splice(index, 1);
+      setTimeSheetRows(newSheetRows);
+    
+    } finally {
+      setLoading(false);
     }
-
-    newSheetRows.splice(index, 1);
-    setTimeSheetRows(newSheetRows);
   };
 
   const [openRows, setOpenRows] = useState([]); // Track which rows are open
@@ -642,110 +654,199 @@ const TimesheetNewDesign = () => {
   };
 
   const handleChangeTaskType = async (e, item, index) => {
-    const updatedRows = [...timeSheetRows];
-    updatedRows[index] = {
-      ...updatedRows[index],
-      task_type: e.target.value,
-      jobData: [],
-      customerData: [],
-      clientData: [],
-      taskData: [],
-    };
-
-    setTimeSheetRows(updatedRows);
-
-    if (e.target.value === "1") {
-      const req = {
-        staff_id: multipleFilter.staff_id,
+    try {
+      setLoading(true);
+      const updatedRows = [...timeSheetRows];
+      updatedRows[index] = {
+        ...updatedRows[index],
         task_type: e.target.value,
+        jobData: [],
+        customerData: [],
+        clientData: [],
+        taskData: [],
       };
-      const res = await dispatch(
-        getTimesheetTaskTypedData({ req, authToken: token })
-      ).unwrap();
-
-      if (res.status) {
-        let req = {
+  
+      setTimeSheetRows(updatedRows);
+  
+      if (e.target.value === "1") {
+        const req = {
           staff_id: multipleFilter.staff_id,
-          task_type: "5",
-          internal_id: res.data[0].id,
+          task_type: e.target.value,
         };
-        const res1 = await dispatch(
+        const res = await dispatch(
           getTimesheetTaskTypedData({ req, authToken: token })
         ).unwrap();
-        updatedRows[index].jobData = res.data;
-        updatedRows[index].job_id = res.data[0].id;
-        updatedRows[index].taskData = res1.data;
-        updatedRows[index].task_id = res1.data[0].id;
-      }
-    } else if (e.target.value === "2") {
-      updatedRows[index].jobData = [];
-      updatedRows[index].job_id = null;
-      updatedRows[index].taskData = [];
-      updatedRows[index].task_id = null;
-      const req = {
-        staff_id: multipleFilter.staff_id,
-        task_type: e.target.value,
-      };
-      const res = await dispatch(
-        getTimesheetTaskTypedData({ req, authToken: token })
-      ).unwrap();
-      if (res.status) {
-        if (res.data.length > 0) {
-          updatedRows[index].customerData = res.data;
-          updatedRows[index].customer_id = res.data[0].id;
-
-          const req = {
+  
+        if (res.status) {
+          let req = {
             staff_id: multipleFilter.staff_id,
-            task_type: "3",
-            customer_id: res.data[0].id,
+            task_type: "5",
+            internal_id: res.data[0].id,
           };
           const res1 = await dispatch(
             getTimesheetTaskTypedData({ req, authToken: token })
           ).unwrap();
-          if (res1.status) {
-            if (res1.data.length > 0) {
-              updatedRows[index].clientData = res1.data;
-              updatedRows[index].client_id = res1.data[0].id;
+          updatedRows[index].jobData = res.data;
+          updatedRows[index].job_id = res.data[0].id;
+          updatedRows[index].taskData = res1.data;
+          updatedRows[index].task_id = res1.data[0].id;
+        }
+      } else if (e.target.value === "2") {
+        updatedRows[index].jobData = [];
+        updatedRows[index].job_id = null;
+        updatedRows[index].taskData = [];
+        updatedRows[index].task_id = null;
+        const req = {
+          staff_id: multipleFilter.staff_id,
+          task_type: e.target.value,
+        };
+        const res = await dispatch(
+          getTimesheetTaskTypedData({ req, authToken: token })
+        ).unwrap();
+        if (res.status) {
+          if (res.data.length > 0) {
+            updatedRows[index].customerData = res.data;
+            updatedRows[index].customer_id = res.data[0].id;
+  
+            const req = {
+              staff_id: multipleFilter.staff_id,
+              task_type: "3",
+              customer_id: res.data[0].id,
+            };
+            const res1 = await dispatch(
+              getTimesheetTaskTypedData({ req, authToken: token })
+            ).unwrap();
+            if (res1.status) {
+              if (res1.data.length > 0) {
+                updatedRows[index].clientData = res1.data;
+                updatedRows[index].client_id = res1.data[0].id;
+                const req = {
+                  staff_id: multipleFilter.staff_id,
+                  task_type: "4",
+                  client_id: res1.data[0].id,
+                };
+                const res2 = await dispatch(
+                  getTimesheetTaskTypedData({ req, authToken: token })
+                ).unwrap();
+                if (res2.status) {
+                  if (res2.data.length > 0) {
+                    updatedRows[index].jobData = res2.data;
+                    updatedRows[index].job_id = res2.data[0].id;
+                    const req = {
+                      staff_id: multipleFilter.staff_id,
+                      task_type: "6",
+                      job_id: res2.data[0].id,
+                    };
+                    const res3 = await dispatch(
+                      getTimesheetTaskTypedData({ req, authToken: token })
+                    ).unwrap();
+                    if (res3.status) {
+                      if (res3.data.length > 0) {
+                        updatedRows[index].taskData = res3.data;
+                        updatedRows[index].task_id = res3.data[0].id;
+                      }
+                    }
+                  } else {
+                    sweatalert.fire({
+                      icon: "warning",
+                      title: "There is no job available for this client.",
+                      timerProgressBar: true,
+                      showConfirmButton: true,
+                      timer: 1500,
+                    });
+                  }
+                }
+              } else {
+                sweatalert.fire({
+                  icon: "warning",
+                  title: "This customer does not have an available client.",
+                  timerProgressBar: true,
+                  showConfirmButton: true,
+                  timer: 1500,
+                });
+              }
+            }
+          } else {
+            sweatalert.fire({
+              icon: "warning",
+              title: "There is no customer available.",
+              timerProgressBar: true,
+              showConfirmButton: true,
+              timer: 1500,
+            });
+          }
+        }
+      }
+      setTimeSheetRows([...updatedRows]); // Save changes
+  
+      // update record only
+      const rowId = updatedRows[index].id;
+      updateRecordSheet(rowId, "task_type", e.target.value);
+    
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const selectCustomerData = async (e, index) => {
+    try {
+      setLoading(true);
+      const updatedRows = [...timeSheetRows];
+      updatedRows[index].jobData = [];
+      updatedRows[index].clientData = [];
+      updatedRows[index].taskData = [];
+  
+      updatedRows[index].customer_id = null;
+      updatedRows[index].client_id = null;
+      updatedRows[index].job_id = null;
+      updatedRows[index].task_id = null;
+  
+  
+      const req = {
+        staff_id: multipleFilter.staff_id,
+        task_type: "3",
+        customer_id: e.target.value,
+      };
+      const res = await dispatch(
+        getTimesheetTaskTypedData({ req, authToken: token })
+      ).unwrap();
+  
+      if (res.status) {
+        if (res.data.length > 0) {
+          updatedRows[index].customer_id = e.target.value;
+          updatedRows[index].clientData = res.data;
+          updatedRows[index].client_id = res.data[0].id;
+  
+          const req = {
+            staff_id: multipleFilter.staff_id,
+            task_type: "4",
+            client_id: res.data[0].id,
+          };
+          const res2 = await dispatch(
+            getTimesheetTaskTypedData({ req, authToken: token })
+          ).unwrap();
+          if (res2.status) {
+            if (res2.data.length > 0) {
+              updatedRows[index].jobData = res2.data;
+              updatedRows[index].job_id = res2.data[0].id;
               const req = {
                 staff_id: multipleFilter.staff_id,
-                task_type: "4",
-                client_id: res1.data[0].id,
+                task_type: "6",
+                job_id: res2.data[0].id,
               };
-              const res2 = await dispatch(
+              const res3 = await dispatch(
                 getTimesheetTaskTypedData({ req, authToken: token })
               ).unwrap();
-              if (res2.status) {
-                if (res2.data.length > 0) {
-                  updatedRows[index].jobData = res2.data;
-                  updatedRows[index].job_id = res2.data[0].id;
-                  const req = {
-                    staff_id: multipleFilter.staff_id,
-                    task_type: "6",
-                    job_id: res2.data[0].id,
-                  };
-                  const res3 = await dispatch(
-                    getTimesheetTaskTypedData({ req, authToken: token })
-                  ).unwrap();
-                  if (res3.status) {
-                    if (res3.data.length > 0) {
-                      updatedRows[index].taskData = res3.data;
-                      updatedRows[index].task_id = res3.data[0].id;
-                    }
-                  }
-                } else {
-                  sweatalert.fire({
-                    icon: "warning",
-                    title: "There is no job available for this client.",
-                    timerProgressBar: true,
-                    showConfirmButton: true,
-                    timer: 1500,
-                  });
+              if (res3.status) {
+                if (res3.data.length > 0) {
+                  updatedRows[index].taskData = res3.data;
+                  updatedRows[index].task_id = res3.data[0].id;
                 }
               }
             } else {
               sweatalert.fire({
                 icon: "warning",
-                title: "This customer does not have an available client.",
+                title: "There is no job available for this client.",
                 timerProgressBar: true,
                 showConfirmButton: true,
                 timer: 1500,
@@ -753,102 +854,25 @@ const TimesheetNewDesign = () => {
             }
           }
         } else {
+          updatedRows[index].customer_id = e.target.value;
           sweatalert.fire({
             icon: "warning",
-            title: "There is no customer available.",
+            title: "There is no client available for this customer.",
             timerProgressBar: true,
             showConfirmButton: true,
             timer: 1500,
           });
         }
       }
+      setTimeSheetRows(updatedRows);
+  
+      // update record only
+      const rowId = updatedRows[index].id;
+      updateRecordSheet(rowId, "customer_id", e.target.value);
+    
+    } finally {
+      setLoading(false);
     }
-    setTimeSheetRows([...updatedRows]); // Save changes
-
-    // update record only
-    const rowId = updatedRows[index].id;
-    updateRecordSheet(rowId, "task_type", e.target.value);
-  };
-
-  const selectCustomerData = async (e, index) => {
-    const updatedRows = [...timeSheetRows];
-    updatedRows[index].jobData = [];
-    updatedRows[index].clientData = [];
-    updatedRows[index].taskData = [];
-
-    updatedRows[index].customer_id = null;
-    updatedRows[index].client_id = null;
-    updatedRows[index].job_id = null;
-    updatedRows[index].task_id = null;
-
-
-    const req = {
-      staff_id: multipleFilter.staff_id,
-      task_type: "3",
-      customer_id: e.target.value,
-    };
-    const res = await dispatch(
-      getTimesheetTaskTypedData({ req, authToken: token })
-    ).unwrap();
-
-    if (res.status) {
-      if (res.data.length > 0) {
-        updatedRows[index].customer_id = e.target.value;
-        updatedRows[index].clientData = res.data;
-        updatedRows[index].client_id = res.data[0].id;
-
-        const req = {
-          staff_id: multipleFilter.staff_id,
-          task_type: "4",
-          client_id: res.data[0].id,
-        };
-        const res2 = await dispatch(
-          getTimesheetTaskTypedData({ req, authToken: token })
-        ).unwrap();
-        if (res2.status) {
-          if (res2.data.length > 0) {
-            updatedRows[index].jobData = res2.data;
-            updatedRows[index].job_id = res2.data[0].id;
-            const req = {
-              staff_id: multipleFilter.staff_id,
-              task_type: "6",
-              job_id: res2.data[0].id,
-            };
-            const res3 = await dispatch(
-              getTimesheetTaskTypedData({ req, authToken: token })
-            ).unwrap();
-            if (res3.status) {
-              if (res3.data.length > 0) {
-                updatedRows[index].taskData = res3.data;
-                updatedRows[index].task_id = res3.data[0].id;
-              }
-            }
-          } else {
-            sweatalert.fire({
-              icon: "warning",
-              title: "There is no job available for this client.",
-              timerProgressBar: true,
-              showConfirmButton: true,
-              timer: 1500,
-            });
-          }
-        }
-      } else {
-        updatedRows[index].customer_id = e.target.value;
-        sweatalert.fire({
-          icon: "warning",
-          title: "There is no client available for this customer.",
-          timerProgressBar: true,
-          showConfirmButton: true,
-          timer: 1500,
-        });
-      }
-    }
-    setTimeSheetRows(updatedRows);
-
-    // update record only
-    const rowId = updatedRows[index].id;
-    updateRecordSheet(rowId, "customer_id", e.target.value);
   };
 
   function convertTimeFormat(timeString) {
@@ -861,247 +885,271 @@ const TimesheetNewDesign = () => {
   }
 
   const selectClientData = async (e, index) => {
-
-    const updatedRows = [...timeSheetRows];
-    updatedRows[index].jobData = [];
-    updatedRows[index].taskData = [];
-
-    updatedRows[index].client_id = null;
-    updatedRows[index].job_id = null;
-    updatedRows[index].task_id = null;
-
-
-    const req = {
-      staff_id: multipleFilter.staff_id,
-      task_type: "4",
-      client_id: e.target.value,
-    };
-    const res = await dispatch(
-      getTimesheetTaskTypedData({ req, authToken: token })
-    ).unwrap();
-    if (res.status) {
-      if (res.data.length > 0) {
-        updatedRows[index].client_id = e.target.value;
-        updatedRows[index].jobData = res.data;
-        updatedRows[index].job_id = res.data[0].id;
-        updatedRows[index].job_total_time = convertTimeFormat(
-          res.data[0].job_total_time
-        );
-        let req;
-        if (updatedRows[index].task_type === "1") {
-          req = {
-            staff_id: multipleFilter.staff_id,
-            task_type: "5",
-            internal_id: res.data[0].id,
-          };
-        } else if (updatedRows[index].task_type === "2") {
-          req = {
-            staff_id: multipleFilter.staff_id,
-            task_type: "6",
-            job_id: res.data[0].id,
-          };
-        }
-        if (req.staff_id != undefined) {
-          const res = await dispatch(
-            getTimesheetTaskTypedData({ req, authToken: token })
-          ).unwrap();
-          if (res.status) {
-            if (res.data.length > 0) {
-              updatedRows[index].taskData = res.data;
-              updatedRows[index].task_id = res.data[0].id;
-            }
-          }
-        }
-      } else {
-        updatedRows[index].client_id = e.target.value;
-        sweatalert.fire({
-          icon: "warning",
-          title: "There is no job available for this client.",
-          timerProgressBar: true,
-          showConfirmButton: true,
-          timer: 1500,
-        });
-      }
-    }
-    setTimeSheetRows(updatedRows);
-
-    // update record only
-    const rowId = updatedRows[index].id;
-    updateRecordSheet(rowId, "client_id", e.target.value);
-  };
-
-  const selectJobData = async (e, task_type, index) => {
-    const updatedRows = [...timeSheetRows];
-
-    updatedRows[index].taskData = [];
-
-    updatedRows[index].job_id = null;
-    updatedRows[index].task_id = null;
-
-    let req;
-    if (task_type === "1") {
-      req = {
+    try {
+      setLoading(true);
+  
+      const updatedRows = [...timeSheetRows];
+      updatedRows[index].jobData = [];
+      updatedRows[index].taskData = [];
+  
+      updatedRows[index].client_id = null;
+      updatedRows[index].job_id = null;
+      updatedRows[index].task_id = null;
+  
+  
+      const req = {
         staff_id: multipleFilter.staff_id,
-        task_type: "5",
-        internal_id: e.target.value,
+        task_type: "4",
+        client_id: e.target.value,
       };
-    } else if (task_type === "2") {
-      req = {
-        staff_id: multipleFilter.staff_id,
-        task_type: "6",
-        job_id: e.target.value,
-      };
-    }
-    updatedRows[index].job_id = e.target.value;
-    if (req.staff_id != undefined) {
       const res = await dispatch(
         getTimesheetTaskTypedData({ req, authToken: token })
       ).unwrap();
       if (res.status) {
         if (res.data.length > 0) {
-          let job_total_time = updatedRows[index].jobData.find(
-            (item) => item.id === parseInt(e.target.value)
+          updatedRows[index].client_id = e.target.value;
+          updatedRows[index].jobData = res.data;
+          updatedRows[index].job_id = res.data[0].id;
+          updatedRows[index].job_total_time = convertTimeFormat(
+            res.data[0].job_total_time
           );
-          updatedRows[index].job_id = e.target.value;
-          updatedRows[index].job_total_time =
-            job_total_time.job_total_time == undefined
-              ? null
-              : convertTimeFormat(job_total_time.job_total_time);
-
-          updatedRows[index].taskData = res.data;
-          updatedRows[index].task_id = res.data[0].id;
+          let req;
+          if (updatedRows[index].task_type === "1") {
+            req = {
+              staff_id: multipleFilter.staff_id,
+              task_type: "5",
+              internal_id: res.data[0].id,
+            };
+          } else if (updatedRows[index].task_type === "2") {
+            req = {
+              staff_id: multipleFilter.staff_id,
+              task_type: "6",
+              job_id: res.data[0].id,
+            };
+          }
+          if (req.staff_id != undefined) {
+            const res = await dispatch(
+              getTimesheetTaskTypedData({ req, authToken: token })
+            ).unwrap();
+            if (res.status) {
+              if (res.data.length > 0) {
+                updatedRows[index].taskData = res.data;
+                updatedRows[index].task_id = res.data[0].id;
+              }
+            }
+          }
+        } else {
+          updatedRows[index].client_id = e.target.value;
+          sweatalert.fire({
+            icon: "warning",
+            title: "There is no job available for this client.",
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 1500,
+          });
         }
       }
+      setTimeSheetRows(updatedRows);
+  
+      // update record only
+      const rowId = updatedRows[index].id;
+      updateRecordSheet(rowId, "client_id", e.target.value);
+    
+    } finally {
+      setLoading(false);
     }
-    setTimeSheetRows(updatedRows);
+  };
 
-    // update record only
-    const rowId = updatedRows[index].id;
-    updateRecordSheet(rowId, "job_id", e.target.value);
+  const selectJobData = async (e, task_type, index) => {
+    try {
+      setLoading(true);
+      const updatedRows = [...timeSheetRows];
+  
+      updatedRows[index].taskData = [];
+  
+      updatedRows[index].job_id = null;
+      updatedRows[index].task_id = null;
+  
+      let req;
+      if (task_type === "1") {
+        req = {
+          staff_id: multipleFilter.staff_id,
+          task_type: "5",
+          internal_id: e.target.value,
+        };
+      } else if (task_type === "2") {
+        req = {
+          staff_id: multipleFilter.staff_id,
+          task_type: "6",
+          job_id: e.target.value,
+        };
+      }
+      updatedRows[index].job_id = e.target.value;
+      if (req.staff_id != undefined) {
+        const res = await dispatch(
+          getTimesheetTaskTypedData({ req, authToken: token })
+        ).unwrap();
+        if (res.status) {
+          if (res.data.length > 0) {
+            let job_total_time = updatedRows[index].jobData.find(
+              (item) => item.id === parseInt(e.target.value)
+            );
+            updatedRows[index].job_id = e.target.value;
+            updatedRows[index].job_total_time =
+              job_total_time.job_total_time == undefined
+                ? null
+                : convertTimeFormat(job_total_time.job_total_time);
+  
+            updatedRows[index].taskData = res.data;
+            updatedRows[index].task_id = res.data[0].id;
+          }
+        }
+      }
+      setTimeSheetRows(updatedRows);
+  
+      // update record only
+      const rowId = updatedRows[index].id;
+      updateRecordSheet(rowId, "job_id", e.target.value);
+    
+    } finally {
+      setLoading(false);
+    }
   };
 
   const selectTaskData = async (e, index) => {
-    const updatedRows = [...timeSheetRows];
-    updatedRows[index].task_id = e.target.value;
-    setTimeSheetRows(updatedRows);
-
-    // update record only
-    const rowId = updatedRows[index].id;
-    updateRecordSheet(rowId, "task_id", e.target.value);
+    try {
+      setLoading(true);
+      const updatedRows = [...timeSheetRows];
+      updatedRows[index].task_id = e.target.value;
+      setTimeSheetRows(updatedRows);
+  
+      // update record only
+      const rowId = updatedRows[index].id;
+      updateRecordSheet(rowId, "task_id", e.target.value);
+    
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleHoursInput = async (e, index, day_name, date_value, item) => {
-    let value = e.target.value;
-    let name = e.target.name;
-
-
-    let final_value = value;
-
-    let [intPart, decimalPart] = value.toString().split(".");
-
-    if (decimalPart) {
-      let multiplied = Math.floor(parseInt(decimalPart) * 0.6);
-
-      const multipliedStr = multiplied.toString().padStart(2, "0");
-      final_value = `${intPart}.${multipliedStr}`;
-      // final_value = `${intPart}.${multiplied}`;
-    }
-
-    // console.log(`final_value`, final_value);
-
-    const updatedRows = [...timeSheetRows];
-    if (updatedRows[index][name] == null) {
-      updatedRows[index][name] = "";
-      setTimeSheetRows(updatedRows);
-    }
-    // if (!/^[0-9.]*$/.test(value)) {
-    //   return;
-    // }
-    if (!/^\d*\.?\d{0,2}$/.test(value)) {
-      return;
-    }
-
-    if (parseFloat(final_value) > 23.59) {
-      sweatalert.fire({
-        icon: "warning",
-        title: "Total hours in a day cannot exceed 24",
-        timerProgressBar: true,
-        showConfirmButton: true,
-        timer: 1500,
-      });
-      return;
-    }
-
-    // const [integerPart, fractionalPart] = value.split(".");
-    // if (fractionalPart && parseInt(fractionalPart) > 59) {
-    //   sweatalert.fire({
-    //     icon: "warning",
-    //     title: "Minutes cannot exceed 59 ",
-    //     timerProgressBar: true,
-    //     showConfirmButton: true,
-    //     timer: 1500,
-    //   });
-    //   return;
-    // }
-
-    const [integerPart, fractionalPartRaw] = final_value.split(".");
-    let fractionalPart = fractionalPartRaw || "0";
-    if (fractionalPart.length === 1) {
-      fractionalPart = fractionalPart + "0";
-    }
-    if (parseInt(fractionalPart) > 59) {
-      sweatalert.fire({
-        icon: "warning",
-        title: "Minutes cannot exceed 59 ",
-        timerProgressBar: true,
-        showConfirmButton: true,
-        timer: 1500,
-      });
-      return;
-    }
-
-    const datePart = date_value.split(",")[1].trim(); // "07/10/2024"
-    const [day, month, year] = datePart.split("/");
-    const formattedDate = new Date(`${year}-${month}-${day}`);
-    const date_final_value = formattedDate.toISOString().split("T")[0];
-
-    updatedRows[index][day_name] = date_final_value;
-    updatedRows[index][name] = value;
-
-    const sum =
-      (parseFloat(updatedRows[index].monday_hours) || 0) +
-      (parseFloat(updatedRows[index].tuesday_hours) || 0) +
-      (parseFloat(updatedRows[index].wednesday_hours) || 0) +
-      (parseFloat(updatedRows[index].thursday_hours) || 0) +
-      (parseFloat(updatedRows[index].friday_hours) || 0) +
-      (parseFloat(updatedRows[index].saturday_hours) || 0) +
-      (parseFloat(updatedRows[index].sunday_hours) || 0);
-    updatedRows[index].total_hours = sum;
-
-    // warning total hours
-    if (
-      updatedRows[index].staffs_hourminute != null &&
-      updatedRows[index].staffs_hourminute != undefined &&
-      e.target.value != ""
-    ) {
-      if (
-        updatedRows[index].total_hours >
-        parseFloat(convertTimeFormat(updatedRows[index].staffs_hourminute))
-      ) {
+    try {
+      setLoading(true);
+      let value = e.target.value;
+      let name = e.target.name;
+  
+  
+      let final_value = value;
+  
+      let [intPart, decimalPart] = value.toString().split(".");
+  
+      if (decimalPart) {
+        let multiplied = Math.floor(parseInt(decimalPart) * 0.6);
+  
+        const multipliedStr = multiplied.toString().padStart(2, "0");
+        final_value = `${intPart}.${multipliedStr}`;
+        // final_value = `${intPart}.${multiplied}`;
+      }
+  
+      // console.log(`final_value`, final_value);
+  
+      const updatedRows = [...timeSheetRows];
+      if (updatedRows[index][name] == null) {
+        updatedRows[index][name] = "";
+        setTimeSheetRows(updatedRows);
+      }
+      // if (!/^[0-9.]*$/.test(value)) {
+      //   return;
+      // }
+      if (!/^\d*\.?\d{0,2}$/.test(value)) {
+        return;
+      }
+  
+      if (parseFloat(final_value) > 23.59) {
         sweatalert.fire({
           icon: "warning",
-          title: "Your total allocated time has been exceeded",
+          title: "Total hours in a day cannot exceed 24",
           timerProgressBar: true,
           showConfirmButton: true,
-          timer: 3000,
+          timer: 1500,
         });
+        return;
       }
+  
+      // const [integerPart, fractionalPart] = value.split(".");
+      // if (fractionalPart && parseInt(fractionalPart) > 59) {
+      //   sweatalert.fire({
+      //     icon: "warning",
+      //     title: "Minutes cannot exceed 59 ",
+      //     timerProgressBar: true,
+      //     showConfirmButton: true,
+      //     timer: 1500,
+      //   });
+      //   return;
+      // }
+  
+      const [integerPart, fractionalPartRaw] = final_value.split(".");
+      let fractionalPart = fractionalPartRaw || "0";
+      if (fractionalPart.length === 1) {
+        fractionalPart = fractionalPart + "0";
+      }
+      if (parseInt(fractionalPart) > 59) {
+        sweatalert.fire({
+          icon: "warning",
+          title: "Minutes cannot exceed 59 ",
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 1500,
+        });
+        return;
+      }
+  
+      const datePart = date_value.split(",")[1].trim(); // "07/10/2024"
+      const [day, month, year] = datePart.split("/");
+      const formattedDate = new Date(`${year}-${month}-${day}`);
+      const date_final_value = formattedDate.toISOString().split("T")[0];
+  
+      updatedRows[index][day_name] = date_final_value;
+      updatedRows[index][name] = value;
+  
+      const sum =
+        (parseFloat(updatedRows[index].monday_hours) || 0) +
+        (parseFloat(updatedRows[index].tuesday_hours) || 0) +
+        (parseFloat(updatedRows[index].wednesday_hours) || 0) +
+        (parseFloat(updatedRows[index].thursday_hours) || 0) +
+        (parseFloat(updatedRows[index].friday_hours) || 0) +
+        (parseFloat(updatedRows[index].saturday_hours) || 0) +
+        (parseFloat(updatedRows[index].sunday_hours) || 0);
+      updatedRows[index].total_hours = sum;
+  
+      // warning total hours
+      if (
+        updatedRows[index].staffs_hourminute != null &&
+        updatedRows[index].staffs_hourminute != undefined &&
+        e.target.value != ""
+      ) {
+        if (
+          updatedRows[index].total_hours >
+          parseFloat(convertTimeFormat(updatedRows[index].staffs_hourminute))
+        ) {
+          sweatalert.fire({
+            icon: "warning",
+            title: "Your total allocated time has been exceeded",
+            timerProgressBar: true,
+            showConfirmButton: true,
+            timer: 3000,
+          });
+        }
+      }
+  
+      setTimeSheetRows(updatedRows);
+      // update record only
+      const rowId = updatedRows[index].id;
+      updateRecordSheet(rowId, name, value);
+    
+    } finally {
+      setLoading(false);
     }
-
-    setTimeSheetRows(updatedRows);
-    // update record only
-    const rowId = updatedRows[index].id;
-    updateRecordSheet(rowId, name, value);
   };
 
   // update record only Function
@@ -2464,7 +2512,7 @@ const TimesheetNewDesign = () => {
                       Clear hours
                     </button> */}
                     <button type="button" className="timesheet-table-header-add-task-btn" onClick={handleAddNewSheet} disabled={isAddingRow || submitStatusAllKey === 1 || staffDetails.id != multipleFilter.staff_id}><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg> Add task row</button>
-                    <button className="timesheet-table-header-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg> Export</button>
+                    <button type="button" className="timesheet-table-header-btn" onClick={() => exportToCSV(timeSheetRows)}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg> Export</button>
                   </div>
                 </div>
                 <div className="mt-3">
@@ -2496,7 +2544,13 @@ const TimesheetNewDesign = () => {
                 <div className="mt-3">
                   <label className="form-label">Final remark (weekly)</label>
                   <div>
-                    <textarea className="form-control" placeholder="e.g. Completed all assigned development tasks for this week." style={{ minHeight: "60px" }}></textarea>
+                    <textarea 
+                      className="form-control" 
+                      placeholder="e.g. Completed all assigned development tasks for this week." 
+                      style={{ minHeight: "60px" }}
+                      value={remarkText || ""}
+                      onChange={(e) => setRemarkText(e.target.value)}
+                    ></textarea>
                   </div>
                   <div className="timesheet-submit-div">
                     <div className="timesheet-submit-div-left">
