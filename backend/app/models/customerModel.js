@@ -695,18 +695,20 @@ const getCustomer = async (customer) => {
         LEFT JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
         WHERE 
           customers.trading_name LIKE ?
-          OR staff2.first_name LIKE ?
-          OR staff2.last_name LIKE ?
-          OR CONCAT(staffs.first_name,' ',staffs.last_name) LIKE ?
-          OR CONCAT('cust_', SUBSTRING(customers.trading_name,1,3),'_',SUBSTRING(customers.customer_code,1,15)) LIKE ?
+          OR CONCAT('cust_', SUBSTRING(customers.trading_name, 1, 3), '_', SUBSTRING(customers.customer_code, 1, 15)) LIKE ?
+          OR REPLACE(REPLACE(CONCAT('cust_', SUBSTRING(customers.trading_name, 1, 3), '_', SUBSTRING(customers.customer_code, 1, 15)), '_', ''), ' ', '') LIKE ?
+          OR customers.customer_code LIKE ?
+          OR (CASE WHEN customers.customer_type = '1' THEN 'Sole Trader' WHEN customers.customer_type = '2' THEN 'Company' WHEN customers.customer_type = '3' THEN 'Partnership' ELSE '-' END) LIKE ?
+          OR CONCAT(staff2.first_name, ' ', staff2.last_name) LIKE ?
+          OR staff2.employee_number LIKE ?
+          OR CONCAT(staffs.first_name, ' ', staffs.last_name) LIKE ?
+          OR DATE_FORMAT(customers.created_at, '%d/%m/%Y') LIKE ?
+          OR DATE_FORMAT(customers.created_at, '%e/%c/%Y') LIKE ?
+          OR (CASE WHEN customers.form_process = '4' AND customers.status = 1 THEN 'Active' WHEN customers.form_process = '4' AND customers.status = 0 THEN 'Inactive' ELSE 'Inprogress' END) LIKE ?
       `;
 
             const [[{ total }]] = await pool.execute(countQuery, [
-                pattern,
-                pattern,
-                pattern,
-                pattern,
-                pattern,
+                pattern, pattern, search ? `%${search.replace(/[_ ]/g, '')}%` : '%', pattern, pattern, pattern, pattern, pattern, pattern, pattern, pattern
             ]);
 
             const query = `
@@ -741,10 +743,16 @@ const getCustomer = async (customer) => {
         LEFT JOIN staffs AS staff2 ON customers.account_manager_id = staff2.id
         WHERE 
           customers.trading_name LIKE ?
-          OR staff2.first_name LIKE ?
-          OR staff2.last_name LIKE ?
-          OR CONCAT(staffs.first_name,' ',staffs.last_name) LIKE ?
-          OR CONCAT('cust_', SUBSTRING(customers.trading_name,1,3),'_',SUBSTRING(customers.customer_code,1,15)) LIKE ?
+          OR CONCAT('cust_', SUBSTRING(customers.trading_name, 1, 3), '_', SUBSTRING(customers.customer_code, 1, 15)) LIKE ?
+          OR REPLACE(REPLACE(CONCAT('cust_', SUBSTRING(customers.trading_name, 1, 3), '_', SUBSTRING(customers.customer_code, 1, 15)), '_', ''), ' ', '') LIKE ?
+          OR customers.customer_code LIKE ?
+          OR (CASE WHEN customers.customer_type = '1' THEN 'Sole Trader' WHEN customers.customer_type = '2' THEN 'Company' WHEN customers.customer_type = '3' THEN 'Partnership' ELSE '-' END) LIKE ?
+          OR CONCAT(staff2.first_name, ' ', staff2.last_name) LIKE ?
+          OR staff2.employee_number LIKE ?
+          OR CONCAT(staffs.first_name, ' ', staffs.last_name) LIKE ?
+          OR DATE_FORMAT(customers.created_at, '%d/%m/%Y') LIKE ?
+          OR DATE_FORMAT(customers.created_at, '%e/%c/%Y') LIKE ?
+          OR (CASE WHEN customers.form_process = '4' AND customers.status = 1 THEN 'Active' WHEN customers.form_process = '4' AND customers.status = 0 THEN 'Inactive' ELSE 'Inprogress' END) LIKE ?
            GROUP BY customers.id
         ORDER BY customers.id DESC
        
@@ -752,13 +760,7 @@ const getCustomer = async (customer) => {
       `;
 
             const [result] = await pool.execute(query, [
-                pattern,
-                pattern,
-                pattern,
-                pattern,
-                pattern,
-                limit,
-                offset,
+                pattern, pattern, search ? `%${search.replace(/[_ ]/g, '')}%` : '%', pattern, pattern, pattern, pattern, pattern, pattern, pattern, pattern, limit, offset
             ]);
 
             return {
@@ -997,6 +999,7 @@ const getCustomer = async (customer) => {
         let countParams = [staff_id, staff_id];
 
         if (search) {
+            const strippedSearch = search.replace(/[_ ]/g, '');
             countQuery = `
         SELECT COUNT(*) as total
         FROM (
@@ -1007,19 +1010,21 @@ const getCustomer = async (customer) => {
         JOIN staffs s2 ON c.account_manager_id = s2.id
         WHERE
           c.trading_name LIKE ?
-          OR s2.first_name LIKE ?
-          OR s2.last_name LIKE ?
-          OR CONCAT(s1.first_name,' ',s1.last_name) LIKE ?
-          OR CONCAT('cust_',SUBSTRING(c.trading_name,1,3),'_',SUBSTRING(c.customer_code,1,15)) LIKE ?
+          OR CONCAT('cust_', SUBSTRING(c.trading_name, 1, 3), '_', SUBSTRING(c.customer_code, 1, 15)) LIKE ?
+          OR REPLACE(REPLACE(CONCAT('cust_', SUBSTRING(c.trading_name, 1, 3), '_', SUBSTRING(c.customer_code, 1, 15)), '_', ''), ' ', '') LIKE ?
+          OR c.customer_code LIKE ?
+          OR (CASE WHEN c.customer_type = '1' THEN 'Sole Trader' WHEN c.customer_type = '2' THEN 'Company' WHEN c.customer_type = '3' THEN 'Partnership' ELSE '-' END) LIKE ?
+          OR CONCAT(s2.first_name, ' ', s2.last_name) LIKE ?
+          OR s2.employee_number LIKE ?
+          OR CONCAT(s1.first_name, ' ', s1.last_name) LIKE ?
+          OR DATE_FORMAT(c.created_at, '%d/%m/%Y') LIKE ?
+          OR DATE_FORMAT(c.created_at, '%e/%c/%Y') LIKE ?
+          OR (CASE WHEN c.form_process = '4' AND c.status = 1 THEN 'Active' WHEN c.form_process = '4' AND c.status = 0 THEN 'Inactive' ELSE 'Inprogress' END) LIKE ?
       `;
 
-            countParams.push(
-                pattern,
-                pattern,
-                pattern,
-                pattern,
-                pattern
-            );
+            const p = `%${search}%`;
+            const sp = `%${strippedSearch}%`;
+            countParams.push(p, p, sp, p, p, p, p, p, p, p, p);
         }
 
         const [[{ total }]] = await connection.execute(countQuery, countParams);
@@ -1078,22 +1083,25 @@ const getCustomer = async (customer) => {
         let params = [staff_id, staff_id];
 
         if (search) {
+            const strippedSearch = search.replace(/[_ ]/g, '');
             query += `
         WHERE
           c.trading_name LIKE ?
-          OR s2.first_name LIKE ?
-          OR s2.last_name LIKE ?
-          OR CONCAT(s1.first_name,' ',s1.last_name) LIKE ?
-          OR CONCAT('cust_',SUBSTRING(c.trading_name,1,3),'_',SUBSTRING(c.customer_code,1,15)) LIKE ?
+          OR CONCAT('cust_', SUBSTRING(c.trading_name, 1, 3), '_', SUBSTRING(c.customer_code, 1, 15)) LIKE ?
+          OR REPLACE(REPLACE(CONCAT('cust_', SUBSTRING(c.trading_name, 1, 3), '_', SUBSTRING(c.customer_code, 1, 15)), '_', ''), ' ', '') LIKE ?
+          OR c.customer_code LIKE ?
+          OR (CASE WHEN c.customer_type = '1' THEN 'Sole Trader' WHEN c.customer_type = '2' THEN 'Company' WHEN c.customer_type = '3' THEN 'Partnership' ELSE '-' END) LIKE ?
+          OR CONCAT(s2.first_name, ' ', s2.last_name) LIKE ?
+          OR s2.employee_number LIKE ?
+          OR CONCAT(s1.first_name, ' ', s1.last_name) LIKE ?
+          OR DATE_FORMAT(c.created_at, '%d/%m/%Y') LIKE ?
+          OR DATE_FORMAT(c.created_at, '%e/%c/%Y') LIKE ?
+          OR (CASE WHEN c.form_process = '4' AND c.status = 1 THEN 'Active' WHEN c.form_process = '4' AND c.status = 0 THEN 'Inactive' ELSE 'Inprogress' END) LIKE ?
       `;
 
-            params.push(
-                pattern,
-                pattern,
-                pattern,
-                pattern,
-                pattern
-            );
+            const p = `%${search}%`;
+            const sp = `%${strippedSearch}%`;
+            params.push(p, p, sp, p, p, p, p, p, p, p, p);
         }
 
         query += `
