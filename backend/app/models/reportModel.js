@@ -40,10 +40,38 @@ const jobStatusReports = async (Report) => {
         OR staffs.last_name LIKE ?
         OR jobs.job_id LIKE ?
         OR ${jobCodeExpr} LIKE ?
+        OR DATE_FORMAT(jobs.created_at, '%e/%c/%Y') LIKE ?
+        OR DATE_FORMAT(jobs.created_at, '%d/%m/%Y') LIKE ?
+        OR jobs.job_priority LIKE ?
+        OR EXISTS (SELECT 1 FROM staffs s WHERE s.id = jobs.account_manager_id AND (CONCAT(s.first_name, ' ', s.last_name) LIKE ? OR s.employee_number LIKE ?))
+        OR EXISTS (
+            SELECT 1 
+            FROM customer_service_account_managers csam
+            JOIN staffs s ON s.id = csam.account_manager_id
+            JOIN customer_services cs ON csam.customer_service_id = cs.id
+            WHERE cs.customer_id = jobs.customer_id 
+            AND cs.service_id = jobs.service_id
+            AND s.id != jobs.account_manager_id
+            AND (
+                CONCAT(s.first_name, ' ', s.last_name) LIKE ?
+                OR s.employee_number LIKE ?
+            )
+        )
+        OR jobs.Year_Ending_id_1 LIKE ?
+        OR DATE_FORMAT(jobs.Year_Ending_id_1, '%e/%c/%Y') LIKE ?
+        OR EXISTS (SELECT 1 FROM master_status ms WHERE ms.id = jobs.status_type AND ms.name LIKE ?)
+        OR CONCAT(staffs.first_name, ' ', staffs.last_name) LIKE ?
+        OR EXISTS (
+            SELECT 1 FROM job_allowed_staffs jas 
+            JOIN staffs s ON s.id = jas.staff_id 
+            WHERE jas.job_id = jobs.id AND CONCAT(s.first_name, ' ', s.last_name) LIKE ?
+        )
+        OR EXISTS (SELECT 1 FROM staffs s WHERE s.id = jobs.reviewer AND CONCAT(s.first_name, ' ', s.last_name) LIKE ?)
+        OR EXISTS (SELECT 1 FROM staffs s WHERE s.id = jobs.staff_created_id AND CONCAT(s.first_name, ' ', s.last_name) LIKE ?)
       )
     `;
     const s = `%${search}%`;
-    searchValues = Array(8).fill(s);
+    searchValues = Array(22).fill(s);
   }
 
   try {
@@ -937,10 +965,38 @@ const reportCountJob = async (Report) => {
         OR staffs.last_name LIKE ?
         OR jobs.job_id LIKE ?
         OR ${jobCodeExpr} LIKE ?
+        OR DATE_FORMAT(jobs.created_at, '%e/%c/%Y') LIKE ?
+        OR DATE_FORMAT(jobs.created_at, '%d/%m/%Y') LIKE ?
+        OR jobs.job_priority LIKE ?
+        OR EXISTS (SELECT 1 FROM staffs s WHERE s.id = jobs.account_manager_id AND (CONCAT(s.first_name, ' ', s.last_name) LIKE ? OR s.employee_number LIKE ?))
+        OR EXISTS (
+            SELECT 1 
+            FROM customer_service_account_managers csam
+            JOIN staffs s ON s.id = csam.account_manager_id
+            JOIN customer_services cs ON csam.customer_service_id = cs.id
+            WHERE cs.customer_id = jobs.customer_id 
+            AND cs.service_id = jobs.service_id
+            AND s.id != jobs.account_manager_id
+            AND (
+                CONCAT(s.first_name, ' ', s.last_name) LIKE ?
+                OR s.employee_number LIKE ?
+            )
+        )
+        OR jobs.Year_Ending_id_1 LIKE ?
+        OR DATE_FORMAT(jobs.Year_Ending_id_1, '%e/%c/%Y') LIKE ?
+        OR EXISTS (SELECT 1 FROM master_status ms WHERE ms.id = jobs.status_type AND ms.name LIKE ?)
+        OR CONCAT(staffs.first_name, ' ', staffs.last_name) LIKE ?
+        OR EXISTS (
+            SELECT 1 FROM job_allowed_staffs jas 
+            JOIN staffs s ON s.id = jas.staff_id 
+            WHERE jas.job_id = jobs.id AND CONCAT(s.first_name, ' ', s.last_name) LIKE ?
+        )
+        OR EXISTS (SELECT 1 FROM staffs s WHERE s.id = jobs.reviewer AND CONCAT(s.first_name, ' ', s.last_name) LIKE ?)
+        OR EXISTS (SELECT 1 FROM staffs s WHERE s.id = jobs.staff_created_id AND CONCAT(s.first_name, ' ', s.last_name) LIKE ?)
       )
     `;
     const s = `%${search}%`;
-    searchValues = Array(8).fill(s);
+    searchValues = Array(22).fill(s);
   }
 
   try {
