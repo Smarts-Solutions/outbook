@@ -97,12 +97,12 @@ const Status = () => {
     },
     {
       name: "Created Date",
-      selector: (row) => convertDate(row.created_at),
+      selector: (row) => row.formatted_created_at,
       sortable: true,
     },
     {
       name: "Last Update On",
-      selector: (row) => convertDate(row.updated_at),
+      selector: (row) => row.formatted_updated_at,
       sortable: true,
     },
     {
@@ -117,8 +117,8 @@ const Status = () => {
     },
     {
       name: "Hide Jobs from Timesheet After (Days)",
-      selector: (row) => row.x_days,
-      cell: (row) => <div>{row.x_days || "-"}</div>,
+      selector: (row) => row.x_days_str,
+      cell: (row) => <div>{row.x_days_str || "-"}</div>,
       sortable: true,
     },
     {
@@ -238,7 +238,13 @@ const Status = () => {
       .unwrap()
       .then((response) => {
         if (response.status) {
-          setStatusDataAll(response.data);
+          const formattedData = response.data.map(item => ({
+            ...item,
+            formatted_created_at: convertDate(item.created_at),
+            formatted_updated_at: convertDate(item.updated_at),
+            x_days_str: item.x_days ? item.x_days.toString() : "-",
+          }));
+          setStatusDataAll(formattedData);
         } else {
           setStatusDataAll([]);
         }
