@@ -7479,6 +7479,7 @@ const getJobCustomReport = async (Report) => {
             LEFT JOIN customer_contact_details AS ccd ON raw.customer_contact_details_id = ccd.id
             LEFT JOIN customers AS c ON raw.customer_id = c.id
             LEFT JOIN clients AS cl ON raw.client_id = cl.id
+            LEFT JOIN staffs AS sf ON raw.staff_created_id = sf.id
             ${tmpTableJoin}
             ${where}
             ${GROUPBY}
