@@ -49,14 +49,23 @@ const getAllCustomerUsers = async (req, res) => {
           `;
 
       if (search) {
-        query += ` AND (staffs.first_name LIKE ? OR staffs.email LIKE ? )`;
+        query += ` AND (
+          staffs.first_name LIKE ? 
+          OR staffs.last_name LIKE ? 
+          OR CONCAT(staffs.first_name, ' ', staffs.last_name) LIKE ?
+          OR staffs.email LIKE ? 
+          OR staffs.phone LIKE ? 
+          OR customer_contact_person_role.name LIKE ?
+          OR DATE_FORMAT(staffs.created_at, '%d/%m/%Y') LIKE ?
+          OR DATE_FORMAT(staffs.created_at, '%e/%c/%Y') LIKE ?
+        )`;
       }
       query += ` GROUP BY staffs.id LIMIT ? OFFSET ?`;
 
       const queryParams = [];
       if (search) {
         const searchParam = `%${search}%`;
-        queryParams.push(searchParam, searchParam);
+        queryParams.push(searchParam, searchParam, searchParam, searchParam, searchParam, searchParam, searchParam, searchParam);
       }
       queryParams.push(parseInt(limit), parseInt(offset));
 
@@ -65,13 +74,27 @@ const getAllCustomerUsers = async (req, res) => {
       const [rows] = await pool.execute(query, queryParams);
 
       // Get total count for pagination
-      let countQuery = `SELECT COUNT(*) as total FROM staffs WHERE role_id = 12`;
+      let countQuery = `
+        SELECT COUNT(DISTINCT staffs.id) as total 
+        FROM staffs 
+        LEFT JOIN customer_contact_person_role ON customer_contact_person_role.id = staffs.customer_contact_person_role_id
+        WHERE staffs.role_id = 12
+      `;
       const countParams = [];
       if (search) {
-        countQuery += ` AND (first_name LIKE ? OR email LIKE ? )`;
+        countQuery += ` AND (
+          staffs.first_name LIKE ? 
+          OR staffs.last_name LIKE ? 
+          OR CONCAT(staffs.first_name, ' ', staffs.last_name) LIKE ?
+          OR staffs.email LIKE ? 
+          OR staffs.phone LIKE ? 
+          OR customer_contact_person_role.name LIKE ?
+          OR DATE_FORMAT(staffs.created_at, '%d/%m/%Y') LIKE ?
+          OR DATE_FORMAT(staffs.created_at, '%e/%c/%Y') LIKE ?
+        )`;
 
         const searchParam = `%${search}%`;
-        countParams.push(searchParam, searchParam);
+        countParams.push(searchParam, searchParam, searchParam, searchParam, searchParam, searchParam, searchParam, searchParam);
       }
       const [countRows] = await pool.execute(countQuery, countParams);
       const totalRecords = countRows[0].total;
