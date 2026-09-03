@@ -278,6 +278,8 @@ function TimesheetReport() {
         );
       }
 
+      dataList.sort((a, b) => a.label.localeCompare(b.label));
+
       setStaffAllData(dataList);
     }
   };
@@ -363,6 +365,8 @@ function TimesheetReport() {
           });
         }
       } catch (err) { }
+
+      dataList.sort((a, b) => a.label.localeCompare(b.label));
 
       setEmployeeNumberAllData(dataList);
     }
@@ -452,6 +456,9 @@ function TimesheetReport() {
           label: `${staffDetails.first_name || ""} ${staffDetails?.last_name || ""} (${staffDetails?.email || ""})`.trim(),
         });
       }
+      
+      dataList.sort((a, b) => a.label.localeCompare(b.label));
+      
       setLineManagerAllData(dataList);
       setLineManagerHasMore(false);
     }
