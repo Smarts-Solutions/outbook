@@ -1046,6 +1046,8 @@ const getByAllClient = async (dashboard) => {
           OR ${clientCodeExpr} LIKE ?
           OR ? LIKE CONCAT('%', ${clientCodeExpr}, '%')
           OR CONCAT(staffs.first_name, ' ', staffs.last_name) LIKE ?
+          OR client_contact_details.phone LIKE ?
+          OR DATE_FORMAT(clients.created_at, '%d/%m/%Y') LIKE ?
         )
       `;
       const likeSearch = `%${search}%`;
@@ -1056,6 +1058,8 @@ const getByAllClient = async (dashboard) => {
         likeSearch,
         likeSearch,
         search,
+        likeSearch,
+        likeSearch,
         likeSearch,
       ];
     }
@@ -1207,8 +1211,14 @@ const getByAllCustomer = async (dashboard) => {
           OR ${customerCodeExpr} LIKE ?
           OR ? LIKE CONCAT('%', ${customerCodeExpr}, '%')
           OR CONCAT(staff2.first_name, ' ', staff2.last_name) LIKE ?
-          OR staff1.employee_number LIKE ?
+          OR staff2.employee_number LIKE ?
           OR CONCAT(staff1.first_name, ' ', staff1.last_name) LIKE ?
+          OR (CASE 
+                WHEN customers.customer_type = '1' THEN 'Sole Trader'
+                WHEN customers.customer_type = '2' THEN 'Company'
+                WHEN customers.customer_type = '3' THEN 'Partnership'
+                ELSE '-' END) LIKE ?
+          OR DATE_FORMAT(customers.created_at, '%d/%m/%Y') LIKE ?
         )
       `;
       const likeSearch = `%${search}%`;
@@ -1217,6 +1227,8 @@ const getByAllCustomer = async (dashboard) => {
         likeSearch,
         likeSearch,
         search,
+        likeSearch,
+        likeSearch,
         likeSearch,
         likeSearch,
         likeSearch,
@@ -1375,10 +1387,26 @@ const getByAllJob = async (dashboard) => {
           OR job_types.type LIKE ?
           OR jobs.client_job_code LIKE ?
           OR ${jobCodeExpr} LIKE ?
+          OR jobs.job_priority LIKE ?
+          OR CONCAT(staffs3.first_name, ' ', staffs3.last_name) LIKE ?
+          OR staffs3.employee_number LIKE ?
+          OR master_status.name LIKE ?
+          OR CONCAT(customer_contact_details.first_name, ' ', customer_contact_details.last_name) LIKE ?
+          OR CONCAT(staffs.first_name, ' ', staffs.last_name) LIKE ?
+          OR CONCAT(staffs4.first_name, ' ', staffs4.last_name) LIKE ?
+          OR DATE_FORMAT(jobs.created_at, '%d/%m/%Y') LIKE ?
         )
       `;
       const likeSearch = `%${search}%`;
       searchParams = [
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
         likeSearch,
         likeSearch,
         likeSearch,
@@ -1391,9 +1419,14 @@ const getByAllJob = async (dashboard) => {
       `
       SELECT COUNT(DISTINCT jobs.id) AS total
       FROM jobs
+      LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
       LEFT JOIN clients ON jobs.client_id = clients.id
       LEFT JOIN customers ON jobs.customer_id = customers.id
       LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+      LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+      LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+      LEFT JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+      LEFT JOIN master_status ON master_status.id = jobs.status_type
       WHERE jobs.id IN (${cleane_ids})
       ${searchCondition}
       `,
@@ -1552,10 +1585,26 @@ const getByAllCompletedJob = async (dashboard) => {
           OR job_types.type LIKE ?
           OR jobs.client_job_code LIKE ?
           OR ${jobCodeExpr} LIKE ?
+          OR jobs.job_priority LIKE ?
+          OR CONCAT(staffs3.first_name, ' ', staffs3.last_name) LIKE ?
+          OR staffs3.employee_number LIKE ?
+          OR master_status.name LIKE ?
+          OR CONCAT(customer_contact_details.first_name, ' ', customer_contact_details.last_name) LIKE ?
+          OR CONCAT(staffs.first_name, ' ', staffs.last_name) LIKE ?
+          OR CONCAT(staffs4.first_name, ' ', staffs4.last_name) LIKE ?
+          OR DATE_FORMAT(jobs.created_at, '%d/%m/%Y') LIKE ?
         )
       `;
       const likeSearch = `%${search}%`;
       searchParams = [
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
         likeSearch,
         likeSearch,
         likeSearch,
@@ -1568,9 +1617,14 @@ const getByAllCompletedJob = async (dashboard) => {
       `
       SELECT COUNT(DISTINCT jobs.id) AS total
       FROM jobs
+      LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
       LEFT JOIN clients ON jobs.client_id = clients.id
       LEFT JOIN customers ON jobs.customer_id = customers.id
       LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+      LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+      LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+      LEFT JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+      LEFT JOIN master_status ON master_status.id = jobs.status_type
       WHERE jobs.id IN (${cleane_ids})
       ${searchCondition}
       `,
@@ -1729,10 +1783,26 @@ const getByAllPendingJob = async (dashboard) => {
           OR job_types.type LIKE ?
           OR jobs.client_job_code LIKE ?
           OR ${jobCodeExpr} LIKE ?
+          OR jobs.job_priority LIKE ?
+          OR CONCAT(staffs3.first_name, ' ', staffs3.last_name) LIKE ?
+          OR staffs3.employee_number LIKE ?
+          OR master_status.name LIKE ?
+          OR CONCAT(customer_contact_details.first_name, ' ', customer_contact_details.last_name) LIKE ?
+          OR CONCAT(staffs.first_name, ' ', staffs.last_name) LIKE ?
+          OR CONCAT(staffs4.first_name, ' ', staffs4.last_name) LIKE ?
+          OR DATE_FORMAT(jobs.created_at, '%d/%m/%Y') LIKE ?
         )
       `;
       const likeSearch = `%${search}%`;
       searchParams = [
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
         likeSearch,
         likeSearch,
         likeSearch,
@@ -1745,9 +1815,14 @@ const getByAllPendingJob = async (dashboard) => {
       `
       SELECT COUNT(DISTINCT jobs.id) AS total
       FROM jobs
+      LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
       LEFT JOIN clients ON jobs.client_id = clients.id
       LEFT JOIN customers ON jobs.customer_id = customers.id
       LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+      LEFT JOIN staffs ON jobs.allocated_to = staffs.id
+      LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+      LEFT JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
+      LEFT JOIN master_status ON master_status.id = jobs.status_type
       WHERE jobs.id IN (${cleane_ids})
       ${searchCondition}
       `,
@@ -1898,6 +1973,9 @@ const getByAllStaff = async (dashboard) => {
           OR roles.role_name LIKE ?
           OR CONCAT(staffs.first_name, ' ', staffs.last_name) LIKE ?
           OR ? LIKE CONCAT('%', staffs.first_name, ' ', staffs.last_name, '%')
+          OR staffs.phone LIKE ?
+          OR staffs.employee_number LIKE ?
+          OR CONCAT(manager.first_name, ' ', manager.last_name) LIKE ?
         )
       `;
       const likeSearch = `%${search}%`;
@@ -1908,6 +1986,9 @@ const getByAllStaff = async (dashboard) => {
         likeSearch,
         likeSearch,
         search,
+        likeSearch,
+        likeSearch,
+        likeSearch,
       ];
     }
 
@@ -1916,6 +1997,8 @@ const getByAllStaff = async (dashboard) => {
       SELECT COUNT(DISTINCT staffs.id) AS total
       FROM staffs
       JOIN roles ON staffs.role_id = roles.id
+      LEFT JOIN line_managers lm ON lm.staff_by = staffs.id
+      LEFT JOIN staffs manager ON manager.id = lm.staff_to
       WHERE staffs.id IN (${cleane_ids})
       ${searchCondition}
       `,
