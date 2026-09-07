@@ -645,6 +645,18 @@ const TimesheetNewDesign = () => {
 
   const [deleteRows, setDeleteRows] = useState([]);
   const handleDeleteRow = async (index) => {
+    const confirmDelete = await sweatalert.fire({
+      title: "Are you sure?",
+      text: "You want to delete this row?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!"
+    });
+
+    if (!confirmDelete.isConfirmed) return;
+
     try {
       setLoading(true);
 
@@ -665,6 +677,8 @@ const TimesheetNewDesign = () => {
 
       newSheetRows.splice(index, 1);
       setTimeSheetRows(newSheetRows);
+      
+      sweatalert.fire({ icon: "success", title: "Row deleted successfully", timer: 1500, showConfirmButton: false });
 
     } catch (err) {
       console.log(err);
