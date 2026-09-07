@@ -514,6 +514,10 @@ const TimesheetNewDesign = () => {
   };
 
   const handleAddNewSheet = async () => {
+    if (submitStatusAllKey === 1) {
+      sweatalert.fire({ icon: "error", title: "Cannot add a new row to a submitted timesheet." });
+      return;
+    }
     if (isAddingRow) return;
     setIsAddingRow(true);
     try {
@@ -645,6 +649,10 @@ const TimesheetNewDesign = () => {
 
   const [deleteRows, setDeleteRows] = useState([]);
   const handleDeleteRow = async (index) => {
+    if (submitStatusAllKey === 1 || timeSheetRows[index]?.submit_status === "1") {
+      sweatalert.fire({ icon: "error", title: "Cannot delete a submitted timesheet." });
+      return;
+    }
     const confirmDelete = await sweatalert.fire({
       title: "Are you sure?",
       text: "You want to delete this row?",
@@ -700,6 +708,7 @@ const TimesheetNewDesign = () => {
   };
 
   const handleChangeTaskType = async (e, item, index) => {
+    if (submitStatusAllKey === 1 || timeSheetRows[index]?.submit_status === "1") return;
     try {
       setLoading(true);
       const updatedRows = [...timeSheetRows];
@@ -835,6 +844,7 @@ const TimesheetNewDesign = () => {
   };
 
   const selectCustomerData = async (e, index) => {
+    if (submitStatusAllKey === 1 || timeSheetRows[index]?.submit_status === "1") return;
     try {
       setLoading(true);
       const updatedRows = [...timeSheetRows];
@@ -931,6 +941,7 @@ const TimesheetNewDesign = () => {
   }
 
   const selectClientData = async (e, index) => {
+    if (submitStatusAllKey === 1 || timeSheetRows[index]?.submit_status === "1") return;
     try {
       setLoading(true);
 
@@ -1007,6 +1018,7 @@ const TimesheetNewDesign = () => {
   };
 
   const selectJobData = async (e, task_type, index) => {
+    if (submitStatusAllKey === 1 || timeSheetRows[index]?.submit_status === "1") return;
     try {
       setLoading(true);
       const updatedRows = [...timeSheetRows];
@@ -1063,6 +1075,7 @@ const TimesheetNewDesign = () => {
   };
 
   const selectTaskData = async (e, index) => {
+    if (submitStatusAllKey === 1 || timeSheetRows[index]?.submit_status === "1") return;
     try {
       setLoading(true);
       const updatedRows = [...timeSheetRows];
@@ -1079,6 +1092,7 @@ const TimesheetNewDesign = () => {
   };
 
   const handleHoursInput = async (e, index, day_name, date_value, item) => {
+    if (submitStatusAllKey === 1 || timeSheetRows[index]?.submit_status === "1") return;
     try {
       setLoading(true);
       let value = e.target.value;
@@ -1218,6 +1232,7 @@ const TimesheetNewDesign = () => {
   // update record Function
 
   const editRow = async (e, index) => {
+    if (submitStatusAllKey === 1 || timeSheetRows[index]?.submit_status === "1") return;
     const updatedRows = [...timeSheetRows];
     updatedRows[index].editRow = 1;
     setTimeSheetRows(updatedRows);
@@ -1981,6 +1996,7 @@ const TimesheetNewDesign = () => {
   };
 
   const handleRemarkSingleText = (e, index) => {
+    if (submitStatusAllKey === 1 || timeSheetRows[index]?.submit_status === "1") return;
     const updatedRows = [...timeSheetRows];
     updatedRows[index].remark = e.target.value;
     setTimeSheetRows(updatedRows);
@@ -2565,7 +2581,7 @@ const TimesheetNewDesign = () => {
                     <button type="button" className="timesheet-table-header-btn" onClick={() => openHistoryModal()}>
                       <History size={16} className="me-1" /> View Logs
                     </button>
-                    <button type="button" className="timesheet-table-header-btn" onClick={() => setIsCopyModalOpen(true)}>
+                    <button type="button" className="timesheet-table-header-btn" onClick={() => { if (submitStatusAllKey === 1) { sweatalert.fire({ icon: "error", title: "Cannot copy to a submitted timesheet." }); } else { setIsCopyModalOpen(true); } }}>
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> Copy previous week
                     </button>
                     {/* <button className="timesheet-table-header-btn">
