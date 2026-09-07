@@ -1758,7 +1758,11 @@ const saveTimesheet = async (Timesheet) => {
             const action_type = "UPDATE"; // Use UPDATE for changed hours
             const internal_external = parseInt(row.task_type) === 2 ? 2 : 1;
             for (const { day, date, hours } of days) {
-              if (hours !== existData[`${day}_hours`]) {
+              let newH = hours === null || hours === "" || hours === ":00" || hours === "0:00" ? null : hours;
+              let oldH = existData[`${day}_hours`];
+              oldH = oldH === null || oldH === "" || oldH === ":00" || oldH === "0:00" ? null : oldH;
+
+              if (newH !== oldH) {
                 const logDesc = `UPDATE entry for ${day}. Changed hours from ${existData[day + '_hours'] || 0} to ${hours || 0}.`;
                 const logQuery = `
                   INSERT INTO timesheet_logs 

@@ -3252,79 +3252,139 @@ const TimesheetNewDesign = () => {
                             </button>
                           </h2>
                           <div id={targetId} className={`accordion-collapse collapse ${index === 0 ? 'show' : ''}`} data-bs-parent="#accordionHistoryLog">
-                            <div className="accordion-body">
+                            <div className="accordion-body p-0">
                               <div className="table-responsive">
-                                <table className="normal-table">
-                                  <thead>
-                                    <tr>
-                                      <th>S.No.</th>
-                                      <th>Action By</th>
-                                      <th>Details</th>
-                                      <th>Date &amp; Time</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {group.logs.map((log, i) => {
-                                      let statusClass = "save-status"; // default
-                                      if (log.action_type === "SUBMIT") statusClass = "submit-status";
-                                      if (log.action_type === "UPDATE") statusClass = "update-status";
-                                      if (log.action_type === "DELETE") statusClass = "delete-status";
-                                      if (log.action_type === "SAVE") statusClass = "save-status";
+                                {(() => {
+                                  // Group logs by created_at timestamp to form "save events"
+                                  const saveEvents = [];
+                                  const dayKeys = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+                                  const dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-                                      return (
-                                        <tr key={i}>
-                                          <td>{i + 1}</td>
-                                          <td>{log.staff_name} {log.staff_surname}</td>
-                                          <td>
-                                            {log.action_type === "UPDATE" && log.description.includes("Changed hours from") ? (
-                                              (() => {
-                                                const match = log.description.match(/Changed hours from ([\d.]+) to ([\d.]+)/);
-                                                if (match) {
-                                                  const dayMatch = log.description.match(/for ([a-zA-Z]+)\./);
-                                                  const day = dayMatch ? dayMatch[1] : "";
-                                                  let dateStr = "";
-                                                  if (day && weekDays[day.toLowerCase()]) {
-                                                    const d = weekDays[day.toLowerCase()];
-                                                    dateStr = d.includes(",") ? d.split(",")[1].trim() : d;
-                                                    dateStr = ` (${dateStr})`;
-                                                  }
-                                                  return (
-                                                    <small className="text-muted">
-                                                      {day ? `Updated ${day}${dateStr} hours: ` : 'Updated hours: '}
-                                                      <span className="text-decoration-line-through me-1">{match[1]}</span>
-                                                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="me-1"><path d="m9 18 6-6-6-6" /></svg>
-                                                      <span className="text-primary">{match[2]}</span>
-                                                    </small>
-                                                  );
-                                                }
-                                                return <small className="text-muted">{log.description}</small>;
-                                              })()
-                                            ) : (
-                                              <small className="text-muted">
-                                                {(() => {
-                                                  let desc = log.description;
-                                                  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-                                                  days.forEach(day => {
-                                                    const regex = new RegExp(`\\b${day}\\b`, "gi");
-                                                    if (desc.match(regex)) {
-                                                      const dateVal = weekDays[day.toLowerCase()];
-                                                      if (dateVal) {
-                                                        const dateOnly = dateVal.includes(",") ? dateVal.split(",")[1].trim() : dateVal;
-                                                        desc = desc.replace(regex, (m) => `${m} (${dateOnly})`);
-                                                      }
-                                                    }
-                                                  });
-                                                  return desc;
-                                                })()}
-                                              </small>
-                                            )}
-                                          </td>
-                                          <td>{new Date(log.created_at).toLocaleString()}</td>
+                                  // Group logs that share the same created_at (same save action)
+                                  const eventMap = {};
+                                  group.logs.forEach(log => {
+                                    const timeKey = new Date(log.created_at).toISOString();
+                                    if (!eventMap[timeKey]) {
+                                      eventMap[timeKey] = {
+                                        created_at: log.created_at,
+                                        action_type: log.action_type,
+                                        staff_name: `${log.staff_name} ${log.staff_surname}`,
+                                        days: {},
+                                        description: log.description
+                                      };
+                                    }
+                                    if (log.entry_day) {
+                                      const dayKey = log.entry_day.toLowerCase();
+                                      eventMap[timeKey].days[dayKey] = {
+                                        hours: log.hours_entered,
+                                        description: log.description,
+                                        filled_at: log.created_at
+                                      };
+                                    }
+                                  });
+
+                                  Object.values(eventMap).forEach(ev => saveEvents.push(ev));
+                                  // Sort by created_at descending (newest first)
+                                  saveEvents.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+                                  // Helper to get short date from weekDays 
+                                  const getShortDate = (dayKey) => {
+                                    const val = weekDays[dayKey];
+                                    if (!val) return "";
+                                    // weekDays format: "Mon, 07/09/2026"
+                                    const parts = val.split(", ");
+                                    if (parts.length > 1) {
+                                      const dateParts = parts[1].split("/");
+                                      return `${dateParts[0]}/${dateParts[1]}`;
+                                    }
+                                    return val;
+                                  };
+
+                                  // Helper to format filled_at date/time compactly
+                                  const formatFilledAt = (dateStr) => {
+                                    if (!dateStr) return "";
+                                    const d = new Date(dateStr);
+                                    const date = d.toLocaleString("en-GB", { day: "2-digit", month: "2-digit", year: "2-digit" });
+                                    const time = d.toLocaleString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
+                                    return { date, time };
+                                  };
+
+                                  return (
+                                    <table className="normal-table" style={{ fontSize: "13px" }}>
+                                      <thead>
+                                        <tr>
+                                          <th style={{ minWidth: "40px", textAlign: "center" }}>S.No.</th>
+                                          <th style={{ minWidth: "100px" }}>Action By</th>
+                                          <th style={{ minWidth: "70px", textAlign: "center" }}>Type</th>
+                                          {dayKeys.map((dayKey, di) => (
+                                            <th key={dayKey} style={{ textAlign: "center", minWidth: "85px" }}>
+                                              <div>{dayLabels[di]}</div>
+                                              <div style={{ fontSize: "10px", fontWeight: "normal", color: "#888" }}>{getShortDate(dayKey)}</div>
+                                            </th>
+                                          ))}
                                         </tr>
-                                      );
-                                    })}
-                                  </tbody>
-                                </table>
+                                      </thead>
+                                      <tbody>
+                                        {saveEvents.map((event, i) => {
+                                          let statusClass = "save-status";
+                                          if (event.action_type === "SUBMIT") statusClass = "submit-status";
+                                          if (event.action_type === "UPDATE") statusClass = "update-status";
+                                          if (event.action_type === "DELETE") statusClass = "delete-status";
+
+                                          return (
+                                            <tr key={i}>
+                                              <td style={{ textAlign: "center" }}>{i + 1}</td>
+                                              <td style={{ whiteSpace: "nowrap" }}>{event.staff_name}</td>
+                                              <td style={{ textAlign: "center" }}>
+                                                <span className={`table-status ${statusClass}`} style={{ padding: '2px 8px', fontSize: '11px' }}>
+                                                  {event.action_type}
+                                                </span>
+                                              </td>
+                                              {dayKeys.map((dayKey) => {
+                                                const dayData = event.days[dayKey];
+                                                if (!dayData) {
+                                                  return <td key={dayKey} style={{ textAlign: "center", color: "#ccc" }}>-</td>;
+                                                }
+
+                                                const isUpdate = event.action_type === "UPDATE" && dayData.description && dayData.description.includes("Changed hours from");
+                                                let oldHours = null;
+                                                let newHours = dayData.hours;
+                                                if (isUpdate) {
+                                                  const match = dayData.description.match(/Changed hours from ([\d.:]+) to ([\d.:]+)/);
+                                                  if (match) {
+                                                    oldHours = match[1];
+                                                    newHours = match[2];
+                                                  }
+                                                }
+
+                                                const filledInfo = formatFilledAt(dayData.filled_at);
+
+                                                return (
+                                                  <td key={dayKey} style={{ textAlign: "center", verticalAlign: "middle", padding: "6px 4px" }}>
+                                                    {isUpdate && oldHours !== null ? (
+                                                      <div>
+                                                        <span style={{ textDecoration: "line-through", color: "#999", fontSize: "11px", marginRight: "2px" }}>{oldHours}</span>
+                                                        <span style={{ color: "#0d6efd", fontWeight: "600" }}>{newHours}</span>
+                                                      </div>
+                                                    ) : (
+                                                      <div style={{ fontWeight: "600" }}>{dayData.hours || 0}</div>
+                                                    )}
+                                                    {filledInfo && (
+                                                      <div style={{ fontSize: "10px", color: "#999", lineHeight: "1.2", marginTop: "2px" }}>
+                                                        <div>{filledInfo.date}</div>
+                                                        <div>{filledInfo.time}</div>
+                                                      </div>
+                                                    )}
+                                                  </td>
+                                                );
+                                              })}
+                                            </tr>
+                                          );
+                                        })}
+                                      </tbody>
+                                    </table>
+                                  );
+                                })()}
                               </div>
                             </div>
                           </div>
