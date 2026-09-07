@@ -5438,3 +5438,78 @@ svg {
 }
 
 /* Timesheet Css end */
+
+
+.accordion-history-log-btn-div {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding-right: 15px;
+}
+
+.accordion-button-right-text {
+  font-size: 12px;
+}
+
+.normal-table {
+  width: 100%;
+}
+
+.normal-table thead {
+  box-shadow: 2px 2px 1px #333547;
+}
+
+.normal-table thead th {
+  color: #000;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: none;
+  padding: 10px 15px;
+  white-space: normal;
+}
+
+.normal-table tbody td {
+  font-size: 14px;
+  color: #4b4b4b;
+  font-weight: 600;
+  padding: 10px 15px;
+  white-space: normal;
+}
+
+.normal-table tbody tr {
+  border-bottom: 2px solid rgba(99, 99, 99, 0.2);
+}
+
+.table-status {
+  border-radius: 1000px;
+  padding: 6px 10px;
+  font-size: 12px;
+  background: #fff;
+  color: #fff;
+}
+
+.table-status.save-status {
+  background: #00afef;
+}
+
+.table-status.submit-status {
+  background: #43c752;
+}
+
+.table-status.delete-status {
+  background: #ff0000;
+}
+
+.table-status.update-status {
+  background: #ffc107;
+}
+
+.accordion-history-log .accordion-item:first-child {
+  margin: 0 !important;
+}
+
+.accordion-history-log {
+  max-height: calc(100vh - 270px);
+  overflow-y: auto;
+  padding-right: 5px;
+}

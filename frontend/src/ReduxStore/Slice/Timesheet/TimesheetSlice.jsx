@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { GET_TIMESHEET_TASK_TYPE ,GET_TIMESHEET ,SAVE_TIMESHEET ,GET_STAFF_HOURSMINUTE } from "../../../Services/Timesheet/TimesheetService";
+import { GET_TIMESHEET_TASK_TYPE ,GET_TIMESHEET ,SAVE_TIMESHEET ,GET_STAFF_HOURSMINUTE, GET_TIMESHEET_LOGS, DELETE_TIMESHEET_ROW } from "../../../Services/Timesheet/TimesheetService";
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
 export const getTimesheetTaskTypedData = createAsyncThunk("getTimesheetTaskType", async (data) => {
@@ -66,8 +66,25 @@ export const getStaffHourMinute = createAsyncThunk("getStaffHourMinute", async (
     }
 });
 
+export const getTimesheetLogsData = createAsyncThunk("getTimesheetLogs", async (data) => {
+    try {
+        const { req } = data;
+        const res = await GET_TIMESHEET_LOGS(req);
+        return res; 
+    } catch (err) {
+        throw err;
+    }
+});
 
-
+export const deleteTimesheetRowData = createAsyncThunk("deleteTimesheetRow", async (data) => {
+    try {
+        const { req } = data;
+        const res = await DELETE_TIMESHEET_ROW(req);
+        return res; 
+    } catch (err) {
+        throw err;
+    }
+});
 
 const TimesheetSlice = createSlice({
     name: "TimesheetSlice",

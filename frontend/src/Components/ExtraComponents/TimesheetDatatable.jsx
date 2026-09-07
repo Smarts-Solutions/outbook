@@ -1,7 +1,7 @@
 import React from 'react';
 import DataTable from 'react-data-table-component';
 import 'react-data-table-component-extensions/dist/index.css';
-import { Pencil } from 'lucide-react';
+import { Pencil, History } from 'lucide-react';
 import Select from 'react-select';
 
 const TimesheetDatatable = ({
@@ -18,6 +18,7 @@ const TimesheetDatatable = ({
     selectTaskData,
     handleHoursInput,
     handleDeleteRow,
+    openHistoryModal,
     setActiveIndex,
     setActiveField,
     activeIndex,

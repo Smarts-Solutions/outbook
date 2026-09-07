@@ -1,5 +1,5 @@
 const pool = require("../config/database");
-const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds, LineManageStaffIdHelperFunction, QueryRoleHelperFunction ,buildAssignedJobsTempTable} = require('../utils/helper');
+const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds, LineManageStaffIdHelperFunction, QueryRoleHelperFunction, buildAssignedJobsTempTable } = require('../utils/helper');
 
 
 // SELECT 
@@ -227,17 +227,17 @@ const getTimesheet1 = async (Timesheet) => {
       LEFT JOIN jobs ON jobs.id = timesheet.job_id AND timesheet.task_type = 2
       LEFT JOIN job_types ON jobs.job_type_id = job_types.id AND timesheet.task_type = 2
       LEFT JOIN task ON task.id = timesheet.task_id AND timesheet.task_type = 2
-    WHERE 
-      timesheet.staff_id = ? AND (
-        timesheet.monday_date BETWEEN ? AND ? OR
-        timesheet.tuesday_date BETWEEN ? AND ? OR
-        timesheet.wednesday_date BETWEEN ? AND ? OR
-        timesheet.thursday_date BETWEEN ? AND ? OR
-        timesheet.friday_date BETWEEN ? AND ? OR
-        timesheet.saturday_date BETWEEN ? AND ?
-    )
-    ORDER BY
-      timesheet.id ASC;
+      WHERE 
+        timesheet.staff_id = ? AND timesheet.is_deleted = 0 AND (
+          timesheet.monday_date BETWEEN ? AND ? OR
+          timesheet.tuesday_date BETWEEN ? AND ? OR
+          timesheet.wednesday_date BETWEEN ? AND ? OR
+          timesheet.thursday_date BETWEEN ? AND ? OR
+          timesheet.friday_date BETWEEN ? AND ? OR
+          timesheet.saturday_date BETWEEN ? AND ?
+      )
+      ORDER BY
+        timesheet.id ASC;
   `;
 
     const [rows] = await pool.query(query, [
@@ -378,6 +378,7 @@ FROM
 WHERE 
     staff_id = ? 
     AND submit_status = '1'
+    AND is_deleted = 0
 
 GROUP BY valid_weekOffsets  
 ORDER BY valid_weekOffsets ASC;
@@ -551,7 +552,7 @@ const getTimesheet = async (Timesheet) => {
         LEFT JOIN job_types ON jobs.job_type_id = job_types.id AND timesheet.task_type = 2
         LEFT JOIN task ON task.id = timesheet.task_id AND timesheet.task_type = 2
       WHERE 
-        timesheet.staff_id = ? AND (
+        timesheet.staff_id = ? AND timesheet.is_deleted = 0 AND (
           timesheet.monday_date    BETWEEN ? AND ? OR
           timesheet.tuesday_date   BETWEEN ? AND ? OR
           timesheet.wednesday_date BETWEEN ? AND ? OR
@@ -632,6 +633,7 @@ const getTimesheet = async (Timesheet) => {
       WHERE 
         staff_id = ? 
         AND submit_status = '1'
+        AND is_deleted = 0
       GROUP BY valid_weekOffsets  
       ORDER BY valid_weekOffsets ASC;
     `;
@@ -782,7 +784,7 @@ const getTimesheetTaskType = async (Timesheet) => {
       try {
         // Line Manager
         let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
-        
+
 
         // Get Role
         const rows = await QueryRoleHelperFunction(StaffUserId)
@@ -971,7 +973,7 @@ const getTimesheetTaskType = async (Timesheet) => {
         // `;
         // const [result] = await pool.execute(query, [StaffUserId, StaffUserId]);
 
-       LineManageStaffId = [
+        LineManageStaffId = [
           ...new Set(LineManageStaffId),
         ];
         const connection = await pool.getConnection();
@@ -1085,7 +1087,7 @@ const getTimesheetTaskType = async (Timesheet) => {
         }
 
         // Other Role Data
-          LineManageStaffId = [
+        LineManageStaffId = [
           ...new Set(LineManageStaffId),
         ];
         const connection = await pool.getConnection();
@@ -1578,8 +1580,10 @@ const saveTimesheet = async (Timesheet) => {
             friday_date, friday_hours, saturday_date, saturday_hours,
             sunday_date, sunday_hours,remark,final_remark,submit_status,
             monday_note, tuesday_note, wednesday_note, thursday_note,
-            friday_note, saturday_note, sunday_note, save_date , submit_date,duplicate_entry
-            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+            friday_note, saturday_note, sunday_note, save_date , submit_date,duplicate_entry,
+            monday_filled_at, tuesday_filled_at, wednesday_filled_at, thursday_filled_at,
+            friday_filled_at, saturday_filled_at, sunday_filled_at
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
             const insertValues = [
               staff_id,
@@ -1614,10 +1618,36 @@ const saveTimesheet = async (Timesheet) => {
               sunday_note,
               save_date,
               submit_date,
-              duplicate_entry
+              duplicate_entry,
+              monday_hours ? new Date() : null,
+              tuesday_hours ? new Date() : null,
+              wednesday_hours ? new Date() : null,
+              thursday_hours ? new Date() : null,
+              friday_hours ? new Date() : null,
+              saturday_hours ? new Date() : null,
+              sunday_hours ? new Date() : null
             ];
 
-            await pool.query(insertQuery, insertValues);
+            const [insertResult] = await pool.query(insertQuery, insertValues);
+            const newRowId = insertResult.insertId;
+
+            // ---- Add Timesheet Logs for INSERT ----
+            const action_type = Number(row.submit_status) === 1 ? "SUBMIT" : "SAVE";
+            const internal_external = parseInt(row.task_type) === 2 ? 2 : 1;
+            for (const d of days) {
+              if (d.date !== null && d.hours !== null) {
+                const logDesc = `${action_type} entry for ${d.day} with ${d.hours} hours.`;
+                const logQuery = `
+                  INSERT INTO timesheet_logs 
+                  (timesheet_row_id, staff_id, action_type, internal_external, customer_id, client_id, job_id, task_id, entry_day, hours_entered, created_at, description)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)`;
+                const logValues = [
+                  newRowId, staff_id, action_type, internal_external, customer_id, client_id, row.job_id, row.task_id, d.day, d.hours, logDesc
+                ];
+                await pool.query(logQuery, logValues);
+              }
+            }
+            // ---------------------------------------
 
             if (DateTimeString !== "") {
               const eventType =
@@ -1651,7 +1681,9 @@ const saveTimesheet = async (Timesheet) => {
 
             const [[existData]] = await pool.execute(
               `SELECT monday_hours,tuesday_hours,wednesday_hours,
-              thursday_hours,friday_hours,saturday_hours,sunday_hours
+              thursday_hours,friday_hours,saturday_hours,sunday_hours,
+              monday_filled_at,tuesday_filled_at,wednesday_filled_at,
+              thursday_filled_at,friday_filled_at,saturday_filled_at,sunday_filled_at
               FROM timesheet WHERE id=?`,
               [row.id]
             );
@@ -1672,7 +1704,9 @@ const saveTimesheet = async (Timesheet) => {
             friday_date=?,friday_hours=?,saturday_date=?,saturday_hours=?,
             sunday_date=?,sunday_hours=?,remark=?,final_remark=?,submit_status=?,
             monday_note=?,tuesday_note=?,wednesday_note=?,thursday_note=?,
-            friday_note=?,saturday_note=?,sunday_note=? , save_date =?, submit_date=?,duplicate_entry=?
+            friday_note=?,saturday_note=?,sunday_note=? , save_date =?, submit_date=?,duplicate_entry=?,
+            monday_filled_at=?, tuesday_filled_at=?, wednesday_filled_at=?, thursday_filled_at=?,
+            friday_filled_at=?, saturday_filled_at=?, sunday_filled_at=?
             WHERE id=?`;
 
             const updateValues = [
@@ -1708,10 +1742,35 @@ const saveTimesheet = async (Timesheet) => {
               save_date,
               submit_date,
               duplicate_entry,
+              (monday_hours && monday_hours !== existData.monday_hours) ? new Date() : existData.monday_filled_at,
+              (tuesday_hours && tuesday_hours !== existData.tuesday_hours) ? new Date() : existData.tuesday_filled_at,
+              (wednesday_hours && wednesday_hours !== existData.wednesday_hours) ? new Date() : existData.wednesday_filled_at,
+              (thursday_hours && thursday_hours !== existData.thursday_hours) ? new Date() : existData.thursday_filled_at,
+              (friday_hours && friday_hours !== existData.friday_hours) ? new Date() : existData.friday_filled_at,
+              (saturday_hours && saturday_hours !== existData.saturday_hours) ? new Date() : existData.saturday_filled_at,
+              (sunday_hours && sunday_hours !== existData.sunday_hours) ? new Date() : existData.sunday_filled_at,
               row.id,
             ];
 
             await pool.query(updateQuery, updateValues);
+
+            // ---- Add Timesheet Logs for UPDATE ----
+            const action_type = "UPDATE"; // Use UPDATE for changed hours
+            const internal_external = parseInt(row.task_type) === 2 ? 2 : 1;
+            for (const { day, date, hours } of days) {
+              if (hours !== existData[`${day}_hours`]) {
+                const logDesc = `UPDATE entry for ${day}. Changed hours from ${existData[day + '_hours'] || 0} to ${hours || 0}.`;
+                const logQuery = `
+                  INSERT INTO timesheet_logs 
+                  (timesheet_row_id, staff_id, action_type, internal_external, customer_id, client_id, job_id, task_id, entry_day, hours_entered, created_at, description)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)`;
+                const logValues = [
+                  row.id, staff_id, action_type, internal_external, customer_id, client_id, row.job_id, row.task_id, day, hours, logDesc
+                ];
+                await pool.query(logQuery, logValues);
+              }
+            }
+            // ---------------------------------------
 
             if (updateString !== "") {
               if (!checkStringEvent.includes("update")) {
@@ -2087,11 +2146,108 @@ const getStaffHourMinute = async (Timesheet) => {
   }
 }
 
+const getTimesheetLogs = async (reqBody) => {
+  const { row_id, staff_id, weekOffset } = reqBody;
+  try {
+    let start_date = null;
+    let end_date = null;
+
+    if (weekOffset !== undefined && weekOffset !== null) {
+      const currentDate = new Date();
+      const currentDay = currentDate.getUTCDay();
+      const daysSinceMonday = currentDay === 0 ? 6 : currentDay - 1;
+      const startOfWeek = new Date(currentDate);
+      startOfWeek.setUTCDate(currentDate.getUTCDate() - daysSinceMonday + weekOffset * 7);
+      startOfWeek.setUTCHours(0, 0, 0, 0);
+
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setUTCDate(startOfWeek.getUTCDate() + 6);
+      endOfWeek.setUTCHours(23, 59, 59, 999);
+
+      start_date = startOfWeek.toISOString().slice(0, 10);
+      end_date = endOfWeek.toISOString().slice(0, 10);
+    }
+
+    let query = `
+          SELECT tl.*, 
+                 s.first_name as staff_name, s.last_name as staff_surname,
+                 c.trading_name as customer_name,
+                 cl.trading_name as client_name,
+                 j.job_id as job_name,
+                 i.name as internal_name,
+                 tsk.name as task_name,
+                 si.name as sub_internal_name
+          FROM timesheet_logs tl
+        LEFT JOIN staffs s ON s.id = tl.staff_id
+        LEFT JOIN customers c ON c.id = tl.customer_id
+        LEFT JOIN clients cl ON cl.id = tl.client_id
+        LEFT JOIN jobs j ON j.id = tl.job_id AND tl.internal_external = 2
+        LEFT JOIN internal i ON i.id = tl.job_id AND tl.internal_external = 1
+        LEFT JOIN task tsk ON tsk.id = tl.task_id AND tl.internal_external = 2
+        LEFT JOIN sub_internal si ON si.id = tl.task_id AND tl.internal_external = 1
+    `;
+    let queryParams = [];
+
+    if (row_id) {
+      query += ` WHERE tl.timesheet_row_id = ? `;
+      queryParams.push(row_id);
+    } else if (staff_id && start_date && end_date) {
+      query += ` WHERE tl.staff_id = ? AND DATE(tl.created_at) >= ? AND DATE(tl.created_at) <= ? `;
+      queryParams.push(staff_id, start_date, end_date);
+    } else if (staff_id) {
+      query += ` WHERE tl.staff_id = ? `;
+      queryParams.push(staff_id);
+    }
+
+    query += ` ORDER BY tl.created_at DESC;`;
+
+    const [rows] = await pool.query(query, queryParams);
+    return { status: true, message: "success", data: rows };
+  } catch (err) {
+    console.log(err);
+    return { status: false, message: "Error fetching logs", error: err.message };
+  }
+}
+
+const deleteTimesheetRow = async (reqBody) => {
+  const { row_id, staff_id } = reqBody;
+  if (!row_id) return { status: false, message: "row_id is required" };
+
+  try {
+    // get row info for log
+    const [rowInfo] = await pool.query("SELECT * FROM timesheet WHERE id = ?", [row_id]);
+    if (rowInfo.length === 0) return { status: false, message: "Row not found" };
+
+    const row = rowInfo[0];
+    const internal_external = parseInt(row.task_type) === 2 ? 2 : 1;
+
+    // soft delete
+    await pool.query("UPDATE timesheet SET is_deleted = 1 WHERE id = ?", [row_id]);
+
+    // Insert log
+    const logDesc = "DELETE entry: timesheet row removed.";
+    const logQuery = `
+      INSERT INTO timesheet_logs 
+      (timesheet_row_id, staff_id, action_type, internal_external, customer_id, client_id, job_id, task_id, created_at, description)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)`;
+    const logValues = [
+      row_id, staff_id || row.staff_id, "DELETE", internal_external, row.customer_id, row.client_id, row.job_id, row.task_id, logDesc
+    ];
+    await pool.query(logQuery, logValues);
+
+    return { status: true, message: "Timesheet row deleted successfully" };
+  } catch (err) {
+    console.log(err);
+    return { status: false, message: "Error deleting timesheet row", error: err.message };
+  }
+}
+
 module.exports = {
 
   getTimesheet,
   getTimesheetTaskType,
   saveTimesheet,
-  getStaffHourMinute
-
+  getStaffHourMinute,
+  getTimesheetLogs,
+  deleteTimesheetRow
 };

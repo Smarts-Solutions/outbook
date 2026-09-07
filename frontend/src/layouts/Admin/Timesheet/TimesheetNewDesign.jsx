@@ -18,7 +18,8 @@ import {
   File,
   ArrowLeft,
   Plus,
-  Minus
+  Minus,
+  History
 
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -29,6 +30,8 @@ import {
   getTimesheetTaskTypedData,
   saveTimesheetData,
   getStaffHourMinute,
+  getTimesheetLogsData,
+  deleteTimesheetRowData
 } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
 
 import { SAVE_TIMESHEET } from "../../../Services/Timesheet/TimesheetService";
@@ -58,6 +61,28 @@ const TimesheetNewDesign = () => {
   // copy timesheet modal state
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [copyTimeSheetRows, setCopyTimeSheetRows] = useState([]);
+
+  // history modal state
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [rowHistoryLogs, setRowHistoryLogs] = useState([]);
+
+  const openHistoryModal = async () => {
+    try {
+      setLoading(true);
+      const req = { staff_id: multipleFilter.staff_id, weekOffset: weekOffset };
+      const res = await dispatch(getTimesheetLogsData({ req, authToken: token })).unwrap();
+      if (res.status) {
+        setRowHistoryLogs(res.data);
+        setIsHistoryModalOpen(true);
+      } else {
+        sweatalert.fire({ icon: "error", title: "Error fetching logs" });
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getFormattedDate = (type, date) => {
     let now = new Date();
@@ -354,7 +379,7 @@ const TimesheetNewDesign = () => {
       const res = await dispatch(
         getTimesheetData({ req, authToken: token })
       ).unwrap();
-  
+
       if (res.status) {
         setCopyTimeSheetRows(res.data);
         setCopyTimeSheetRows((prevRows) =>
@@ -371,7 +396,7 @@ const TimesheetNewDesign = () => {
           })
         );
       }
-    
+
     } finally {
       setLoading(false);
     }
@@ -619,24 +644,31 @@ const TimesheetNewDesign = () => {
   };
 
   const [deleteRows, setDeleteRows] = useState([]);
-  const handleDeleteRow = (index) => {
+  const handleDeleteRow = async (index) => {
     try {
       setLoading(true);
+
       const newSheetRows = [...timeSheetRows];
       const id = newSheetRows[index].id;
       if (id != null) {
-        setDeleteRows((prevRows) => {
-          const existingIds = new Set(prevRows);
-          if (!existingIds.has(id)) {
-            return [...prevRows, id];
-          }
-          return prevRows;
-        });
+        // Call API to soft delete
+        const req = {
+          row_id: id,
+          staff_id: multipleFilter.staff_id
+        };
+        const res = await dispatch(deleteTimesheetRowData({ req, authToken: token })).unwrap();
+        if (!res.status) {
+          sweatalert.fire({ icon: "error", title: res.message || "Error deleting row" });
+          return; // don't remove from UI if API fails
+        }
       }
-  
+
       newSheetRows.splice(index, 1);
       setTimeSheetRows(newSheetRows);
-    
+
+    } catch (err) {
+      console.log(err);
+      sweatalert.fire({ icon: "error", title: "Error deleting row" });
     } finally {
       setLoading(false);
     }
@@ -665,9 +697,9 @@ const TimesheetNewDesign = () => {
         clientData: [],
         taskData: [],
       };
-  
+
       setTimeSheetRows(updatedRows);
-  
+
       if (e.target.value === "1") {
         const req = {
           staff_id: multipleFilter.staff_id,
@@ -676,7 +708,7 @@ const TimesheetNewDesign = () => {
         const res = await dispatch(
           getTimesheetTaskTypedData({ req, authToken: token })
         ).unwrap();
-  
+
         if (res.status) {
           let req = {
             staff_id: multipleFilter.staff_id,
@@ -707,7 +739,7 @@ const TimesheetNewDesign = () => {
           if (res.data.length > 0) {
             updatedRows[index].customerData = res.data;
             updatedRows[index].customer_id = res.data[0].id;
-  
+
             const req = {
               staff_id: multipleFilter.staff_id,
               task_type: "3",
@@ -778,11 +810,11 @@ const TimesheetNewDesign = () => {
         }
       }
       setTimeSheetRows([...updatedRows]); // Save changes
-  
+
       // update record only
       const rowId = updatedRows[index].id;
       updateRecordSheet(rowId, "task_type", e.target.value);
-    
+
     } finally {
       setLoading(false);
     }
@@ -795,13 +827,13 @@ const TimesheetNewDesign = () => {
       updatedRows[index].jobData = [];
       updatedRows[index].clientData = [];
       updatedRows[index].taskData = [];
-  
+
       updatedRows[index].customer_id = null;
       updatedRows[index].client_id = null;
       updatedRows[index].job_id = null;
       updatedRows[index].task_id = null;
-  
-  
+
+
       const req = {
         staff_id: multipleFilter.staff_id,
         task_type: "3",
@@ -810,13 +842,13 @@ const TimesheetNewDesign = () => {
       const res = await dispatch(
         getTimesheetTaskTypedData({ req, authToken: token })
       ).unwrap();
-  
+
       if (res.status) {
         if (res.data.length > 0) {
           updatedRows[index].customer_id = e.target.value;
           updatedRows[index].clientData = res.data;
           updatedRows[index].client_id = res.data[0].id;
-  
+
           const req = {
             staff_id: multipleFilter.staff_id,
             task_type: "4",
@@ -865,11 +897,11 @@ const TimesheetNewDesign = () => {
         }
       }
       setTimeSheetRows(updatedRows);
-  
+
       // update record only
       const rowId = updatedRows[index].id;
       updateRecordSheet(rowId, "customer_id", e.target.value);
-    
+
     } finally {
       setLoading(false);
     }
@@ -887,16 +919,16 @@ const TimesheetNewDesign = () => {
   const selectClientData = async (e, index) => {
     try {
       setLoading(true);
-  
+
       const updatedRows = [...timeSheetRows];
       updatedRows[index].jobData = [];
       updatedRows[index].taskData = [];
-  
+
       updatedRows[index].client_id = null;
       updatedRows[index].job_id = null;
       updatedRows[index].task_id = null;
-  
-  
+
+
       const req = {
         staff_id: multipleFilter.staff_id,
         task_type: "4",
@@ -950,11 +982,11 @@ const TimesheetNewDesign = () => {
         }
       }
       setTimeSheetRows(updatedRows);
-  
+
       // update record only
       const rowId = updatedRows[index].id;
       updateRecordSheet(rowId, "client_id", e.target.value);
-    
+
     } finally {
       setLoading(false);
     }
@@ -964,12 +996,12 @@ const TimesheetNewDesign = () => {
     try {
       setLoading(true);
       const updatedRows = [...timeSheetRows];
-  
+
       updatedRows[index].taskData = [];
-  
+
       updatedRows[index].job_id = null;
       updatedRows[index].task_id = null;
-  
+
       let req;
       if (task_type === "1") {
         req = {
@@ -999,18 +1031,18 @@ const TimesheetNewDesign = () => {
               job_total_time.job_total_time == undefined
                 ? null
                 : convertTimeFormat(job_total_time.job_total_time);
-  
+
             updatedRows[index].taskData = res.data;
             updatedRows[index].task_id = res.data[0].id;
           }
         }
       }
       setTimeSheetRows(updatedRows);
-  
+
       // update record only
       const rowId = updatedRows[index].id;
       updateRecordSheet(rowId, "job_id", e.target.value);
-    
+
     } finally {
       setLoading(false);
     }
@@ -1022,11 +1054,11 @@ const TimesheetNewDesign = () => {
       const updatedRows = [...timeSheetRows];
       updatedRows[index].task_id = e.target.value;
       setTimeSheetRows(updatedRows);
-  
+
       // update record only
       const rowId = updatedRows[index].id;
       updateRecordSheet(rowId, "task_id", e.target.value);
-    
+
     } finally {
       setLoading(false);
     }
@@ -1037,22 +1069,22 @@ const TimesheetNewDesign = () => {
       setLoading(true);
       let value = e.target.value;
       let name = e.target.name;
-  
-  
+
+
       let final_value = value;
-  
+
       let [intPart, decimalPart] = value.toString().split(".");
-  
+
       if (decimalPart) {
         let multiplied = Math.floor(parseInt(decimalPart) * 0.6);
-  
+
         const multipliedStr = multiplied.toString().padStart(2, "0");
         final_value = `${intPart}.${multipliedStr}`;
         // final_value = `${intPart}.${multiplied}`;
       }
-  
+
       // console.log(`final_value`, final_value);
-  
+
       const updatedRows = [...timeSheetRows];
       if (updatedRows[index][name] == null) {
         updatedRows[index][name] = "";
@@ -1064,7 +1096,7 @@ const TimesheetNewDesign = () => {
       if (!/^\d*\.?\d{0,2}$/.test(value)) {
         return;
       }
-  
+
       if (parseFloat(final_value) > 23.59) {
         sweatalert.fire({
           icon: "warning",
@@ -1075,7 +1107,7 @@ const TimesheetNewDesign = () => {
         });
         return;
       }
-  
+
       // const [integerPart, fractionalPart] = value.split(".");
       // if (fractionalPart && parseInt(fractionalPart) > 59) {
       //   sweatalert.fire({
@@ -1087,7 +1119,7 @@ const TimesheetNewDesign = () => {
       //   });
       //   return;
       // }
-  
+
       const [integerPart, fractionalPartRaw] = final_value.split(".");
       let fractionalPart = fractionalPartRaw || "0";
       if (fractionalPart.length === 1) {
@@ -1103,15 +1135,15 @@ const TimesheetNewDesign = () => {
         });
         return;
       }
-  
+
       const datePart = date_value.split(",")[1].trim(); // "07/10/2024"
       const [day, month, year] = datePart.split("/");
       const formattedDate = new Date(`${year}-${month}-${day}`);
       const date_final_value = formattedDate.toISOString().split("T")[0];
-  
+
       updatedRows[index][day_name] = date_final_value;
       updatedRows[index][name] = value;
-  
+
       const sum =
         (parseFloat(updatedRows[index].monday_hours) || 0) +
         (parseFloat(updatedRows[index].tuesday_hours) || 0) +
@@ -1121,7 +1153,7 @@ const TimesheetNewDesign = () => {
         (parseFloat(updatedRows[index].saturday_hours) || 0) +
         (parseFloat(updatedRows[index].sunday_hours) || 0);
       updatedRows[index].total_hours = sum;
-  
+
       // warning total hours
       if (
         updatedRows[index].staffs_hourminute != null &&
@@ -1141,12 +1173,12 @@ const TimesheetNewDesign = () => {
           });
         }
       }
-  
+
       setTimeSheetRows(updatedRows);
       // update record only
       const rowId = updatedRows[index].id;
       updateRecordSheet(rowId, name, value);
-    
+
     } finally {
       setLoading(false);
     }
@@ -2219,10 +2251,10 @@ const TimesheetNewDesign = () => {
   const totalDraftHoursNum = submitStatusAllKey === 0 ? totalEnteredHoursNum : 0;
   const weeklyRequiredHours = timeSheetRows.length > 0 && timeSheetRows[0].staffs_hourminute ? timeSheetRows[0].staffs_hourminute : "40:00";
   const getGrandTotalStr = () => timeSheetRows.reduce((sum, row) => sum + (parseFloat(row.total_hours) || 0), 0).toFixed(2);
-  
+
   const weeklyReqStr = String(weeklyRequiredHours || "0:0");
   const [reqH, reqM] = weeklyReqStr.split(":");
-  const reqTotalNum = parseInt(reqH || 0) + parseInt(reqM || 0)/60;
+  const reqTotalNum = parseInt(reqH || 0) + parseInt(reqM || 0) / 60;
   const progressPercent = reqTotalNum > 0 ? Math.min((totalEnteredHoursNum / reqTotalNum) * 100, 100) : 0;
 
 
@@ -2277,14 +2309,14 @@ const TimesheetNewDesign = () => {
                   <div className="timesheet-week-content-div">
                     <p className="timesheet-week-date">{weekDays?.monday ? `${weekDays.monday} – ${weekDays.sunday}` : ""}</p>
                     <p className="timesheet-week-text">
-                      {weekOffset === 0 
-                        ? "Current Week" 
-                        : weekOffset === -1 
-                          ? "Previous Week" 
-                          : weekOffset < -1 
-                            ? `Previous Week -${Math.abs(weekOffset) - 1}` 
-                            : weekOffset === 1 
-                              ? "Next Week" 
+                      {weekOffset === 0
+                        ? "Current Week"
+                        : weekOffset === -1
+                          ? "Previous Week"
+                          : weekOffset < -1
+                            ? `Previous Week -${Math.abs(weekOffset) - 1}`
+                            : weekOffset === 1
+                              ? "Next Week"
                               : `Next Week +${weekOffset - 1}`}
                     </p>
                   </div>
@@ -2508,6 +2540,9 @@ const TimesheetNewDesign = () => {
                     <div className="tab-title"><h3 className="mt-0">Weekly Grid</h3></div>
                   </div>
                   <div className="timesheet-table-header-div-right">
+                    <button type="button" className="timesheet-table-header-btn" onClick={() => openHistoryModal()}>
+                      <History size={16} className="me-1" /> View Logs
+                    </button>
                     <button type="button" className="timesheet-table-header-btn" onClick={() => setIsCopyModalOpen(true)}>
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> Copy previous week
                     </button>
@@ -2522,7 +2557,7 @@ const TimesheetNewDesign = () => {
                   </div>
                 </div>
                 <div className="mt-3">
-                  <TimesheetDatatable 
+                  <TimesheetDatatable
                     rows={timeSheetRows}
                     weekDays={weekDays}
                     multipleFilter={multipleFilter}
@@ -2536,6 +2571,7 @@ const TimesheetNewDesign = () => {
                     selectTaskData={selectTaskData}
                     handleHoursInput={handleHoursInput}
                     handleDeleteRow={handleDeleteRow}
+                    openHistoryModal={openHistoryModal}
                     setActiveIndex={setActiveIndex}
                     setActiveField={setActiveField}
                     activeIndex={activeIndex}
@@ -2550,9 +2586,9 @@ const TimesheetNewDesign = () => {
                 <div className="mt-3">
                   <label className="form-label">Final remark (weekly)</label>
                   <div>
-                    <textarea 
-                      className="form-control" 
-                      placeholder="e.g. Completed all assigned development tasks for this week." 
+                    <textarea
+                      className="form-control"
+                      placeholder="e.g. Completed all assigned development tasks for this week."
                       style={{ minHeight: "60px" }}
                       value={remarkText || ""}
                       onChange={(e) => setRemarkText(e.target.value)}
@@ -3146,6 +3182,164 @@ const TimesheetNewDesign = () => {
           </div>
         </div>
       </CommonModal>
+
+      {isHistoryModalOpen && (
+        <CommonModal
+          isOpen={isHistoryModalOpen}
+          backdrop="static"
+          size="xl"
+          cancel_btn={true}
+          Submit_Cancel_Function={() => setIsHistoryModalOpen(false)}
+          btn_2="false"
+          title={"Row History Logs"}
+          hideBtn={true}
+          handleClose={() => setIsHistoryModalOpen(false)}
+        >
+          <div className="modal-body p-3">
+            {rowHistoryLogs.length > 0 ? (
+              (() => {
+                // Group logs by timesheet_row_id
+                const groupedLogs = rowHistoryLogs.reduce((acc, log) => {
+                  if (!acc[log.timesheet_row_id]) {
+                    acc[log.timesheet_row_id] = {
+                      details: log,
+                      logs: []
+                    };
+                  }
+                  acc[log.timesheet_row_id].logs.push(log);
+                  return acc;
+                }, {});
+
+                return (
+                  <div className="accordion accordion-history-log" id="accordionHistoryLog">
+                    {Object.entries(groupedLogs).map(([rowId, group], index) => {
+                      const details = group.details;
+                      const targetId = `collapse_${rowId}`;
+                      const latestLog = group.logs[0];
+                      let headerStatusClass = "save-status";
+                      if (latestLog?.action_type === "SUBMIT") headerStatusClass = "submit-status";
+                      if (latestLog?.action_type === "UPDATE") headerStatusClass = "update-status";
+                      if (latestLog?.action_type === "DELETE") headerStatusClass = "delete-status";
+                      if (latestLog?.action_type === "SAVE") headerStatusClass = "save-status";
+
+                      return (
+                        <div className="accordion-item mt-2" key={rowId}>
+                          <h2 className="accordion-header">
+                            <button
+                              className={`accordion-button ${index === 0 ? '' : 'collapsed'}`}
+                              type="button"
+                              data-bs-toggle="collapse"
+                              data-bs-target={`#${targetId}`}
+                              aria-expanded={index === 0 ? "true" : "false"}
+                              aria-controls={targetId}
+                            >
+                              <div className="accordion-history-log-btn-div">
+                                <span className="accordion-button-left-text">
+                                  Row {index + 1}: {details.internal_external == 1 ? "Internal" : "External"}
+                                  {details.internal_external == 2 && details.customer_name ? ` - ${details.customer_name}` : ""}
+                                  {details.internal_external == 2 && details.client_name ? ` - ${details.client_name}` : ""}
+                                </span>
+                                <span className="accordion-button-right-text">
+                                  Job: {details.internal_external == 1 ? details.internal_name || "N/A" : details.job_name || "N/A"} |
+                                  Task: {details.internal_external == 1 ? details.sub_internal_name || "N/A" : details.task_name || "N/A"}
+                                  {latestLog && (
+                                    <span className={`table-status ${headerStatusClass} ms-2`} style={{ padding: '2px 8px', marginLeft: '10px' }}>
+                                      {latestLog.action_type}
+                                    </span>
+                                  )}
+                                </span>
+                              </div>
+                            </button>
+                          </h2>
+                          <div id={targetId} className={`accordion-collapse collapse ${index === 0 ? 'show' : ''}`} data-bs-parent="#accordionHistoryLog">
+                            <div className="accordion-body">
+                              <div className="table-responsive">
+                                <table className="normal-table">
+                                  <thead>
+                                    <tr>
+                                      <th>S.No.</th>
+                                      <th>Action By</th>
+                                      <th>Details</th>
+                                      <th>Date &amp; Time</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {group.logs.map((log, i) => {
+                                      let statusClass = "save-status"; // default
+                                      if (log.action_type === "SUBMIT") statusClass = "submit-status";
+                                      if (log.action_type === "UPDATE") statusClass = "update-status";
+                                      if (log.action_type === "DELETE") statusClass = "delete-status";
+                                      if (log.action_type === "SAVE") statusClass = "save-status";
+
+                                      return (
+                                        <tr key={i}>
+                                          <td>{i + 1}</td>
+                                          <td>{log.staff_name} {log.staff_surname}</td>
+                                          <td>
+                                            {log.action_type === "UPDATE" && log.description.includes("Changed hours from") ? (
+                                              (() => {
+                                                const match = log.description.match(/Changed hours from ([\d.]+) to ([\d.]+)/);
+                                                if (match) {
+                                                  const dayMatch = log.description.match(/for ([a-zA-Z]+)\./);
+                                                  const day = dayMatch ? dayMatch[1] : "";
+                                                  let dateStr = "";
+                                                  if (day && weekDays[day.toLowerCase()]) {
+                                                    const d = weekDays[day.toLowerCase()];
+                                                    dateStr = d.includes(",") ? d.split(",")[1].trim() : d;
+                                                    dateStr = ` (${dateStr})`;
+                                                  }
+                                                  return (
+                                                    <small className="text-muted">
+                                                      {day ? `Updated ${day}${dateStr} hours: ` : 'Updated hours: '}
+                                                      <span className="text-decoration-line-through me-1">{match[1]}</span>
+                                                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="me-1"><path d="m9 18 6-6-6-6" /></svg>
+                                                      <span className="text-primary">{match[2]}</span>
+                                                    </small>
+                                                  );
+                                                }
+                                                return <small className="text-muted">{log.description}</small>;
+                                              })()
+                                            ) : (
+                                              <small className="text-muted">
+                                                {(() => {
+                                                  let desc = log.description;
+                                                  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+                                                  days.forEach(day => {
+                                                    const regex = new RegExp(`\\b${day}\\b`, "gi");
+                                                    if (desc.match(regex)) {
+                                                      const dateVal = weekDays[day.toLowerCase()];
+                                                      if (dateVal) {
+                                                        const dateOnly = dateVal.includes(",") ? dateVal.split(",")[1].trim() : dateVal;
+                                                        desc = desc.replace(regex, (m) => `${m} (${dateOnly})`);
+                                                      }
+                                                    }
+                                                  });
+                                                  return desc;
+                                                })()}
+                                              </small>
+                                            )}
+                                          </td>
+                                          <td>{new Date(log.created_at).toLocaleString()}</td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()
+            ) : (
+              <div className="text-center p-4 text-muted">No history logs found for this week.</div>
+            )}
+          </div>
+        </CommonModal>
+      )}
     </>
   );
 };

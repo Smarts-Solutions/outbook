@@ -74,6 +74,31 @@ export async function GET_STAFF_HOURSMINUTE(data) {
   }
 }
 
+export async function GET_TIMESHEET_LOGS(data) {
+  try {
+    const token = JSON.parse(localStorage.getItem("token"));
+    const res = await axios.post(`${Config.base_url}getTimesheetLogs`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function DELETE_TIMESHEET_ROW(data) {
+  try {
+    const token = JSON.parse(localStorage.getItem("token"));
+    const res = await axios.post(`${Config.base_url}deleteTimesheetRow`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
 
 
 

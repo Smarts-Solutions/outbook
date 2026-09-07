@@ -149,9 +149,29 @@ const getStaffHourMinute = async (req, res) => {
 
 
 
+const getTimesheetLogs = async (req, res) => {
+  try {
+    const result = await timeSheetService.getTimesheetLogs(req.body);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+const deleteTimesheetRow = async (req, res) => {
+  try {
+    const result = await timeSheetService.deleteTimesheetRow(req.body);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   getTimesheet,
   getTimesheetTaskType,
   saveTimesheet,
-  getStaffHourMinute
+  getStaffHourMinute,
+  getTimesheetLogs,
+  deleteTimesheetRow
 };

@@ -11,5 +11,7 @@ router.post('/getTimesheet',verifyToken, timeSheetController.getTimesheet);
 router.post('/getTimesheetTaskType',verifyToken, timeSheetController.getTimesheetTaskType);
 router.post('/saveTimesheet',verifyToken, timeSheetController.saveTimesheet);
 router.post('/getStaffHourMinute',verifyToken, timeSheetController.getStaffHourMinute);
+router.post('/getTimesheetLogs',verifyToken, timeSheetController.getTimesheetLogs);
+router.post('/deleteTimesheetRow',verifyToken, timeSheetController.deleteTimesheetRow);
 
 module.exports = router;

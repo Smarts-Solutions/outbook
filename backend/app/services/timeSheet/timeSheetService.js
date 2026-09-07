@@ -15,9 +15,19 @@ const getStaffHourMinute = async (Timesheet) => {
   return timeSheetModel.getStaffHourMinute(Timesheet);
 }
 
+const getTimesheetLogs = async (data) => {
+  return timeSheetModel.getTimesheetLogs(data);
+}
+
+const deleteTimesheetRow = async (data) => {
+  return timeSheetModel.deleteTimesheetRow(data);
+}
+
 module.exports = {
   getTimesheet,
   getTimesheetTaskType,
   saveTimesheet,
-  getStaffHourMinute
+  getStaffHourMinute,
+  getTimesheetLogs,
+  deleteTimesheetRow
 };
