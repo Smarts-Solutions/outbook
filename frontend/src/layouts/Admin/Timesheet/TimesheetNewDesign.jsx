@@ -3371,6 +3371,12 @@ const TimesheetNewDesign = () => {
                                                 <span className={`table-status ${statusClass}`} style={{ padding: '2px 8px', fontSize: '11px' }}>
                                                   {event.action_type}
                                                 </span>
+                                                {event.action_type === "DELETE" && (
+                                                  <div style={{ fontSize: "10px", color: "#999", lineHeight: "1.2", marginTop: "4px" }}>
+                                                    <div>{formatFilledAt(event.created_at).date}</div>
+                                                    <div>{formatFilledAt(event.created_at).time}</div>
+                                                  </div>
+                                                )}
                                               </td>
                                               {dayKeys.map((dayKey) => {
                                                 const dayData = event.days[dayKey];
