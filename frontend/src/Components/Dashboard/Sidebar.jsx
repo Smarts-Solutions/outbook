@@ -695,7 +695,7 @@ const Sidebar = () => {
                   )}
 
 
-                {/* {((updatedShowTab && updatedShowTab.timesheet) ||
+                {((updatedShowTab && updatedShowTab.timesheet) ||
                   role === "SUPERADMIN") && (
                     <>
                       <li
@@ -713,7 +713,7 @@ const Sidebar = () => {
                         </Link>
                       </li>
                     </>
-                  )} */}
+                  )}
 
 
 
