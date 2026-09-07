@@ -1347,7 +1347,7 @@ const TimesheetNewDesign = () => {
 
     if (updateTimeSheetRows.length > 0 || deleteRows.length > 0 || status === 1) {
       const hasEditRow = timeSheetRows.some((item) => item.editRow === 1);
-      
+
       const updatedTimeSheetRows = timeSheetRows.map((row) => {
         const { customerData, clientData, jobData, taskData, ...rest } = row;
         if (status === 1) {
@@ -3208,6 +3208,7 @@ const TimesheetNewDesign = () => {
               (() => {
                 // Group logs by timesheet_row_id
                 const groupedLogs = rowHistoryLogs.reduce((acc, log) => {
+                  if (!log.timesheet_row_id || log.timesheet_row_id === "0" || log.timesheet_row_id === 0) return acc;
                   if (!acc[log.timesheet_row_id]) {
                     acc[log.timesheet_row_id] = {
                       details: log,
@@ -3218,17 +3219,26 @@ const TimesheetNewDesign = () => {
                   return acc;
                 }, {});
 
+                const hasSubmitLog = rowHistoryLogs.some(log => log.action_type === "SUBMIT");
+
                 return (
                   <div className="accordion accordion-history-log" id="accordionHistoryLog">
                     {Object.entries(groupedLogs).map(([rowId, group], index) => {
                       const details = group.details;
                       const targetId = `collapse_${rowId}`;
-                      const latestLog = group.logs[0];
+                      const latestLog = group.logs[group.logs.length - 1];
+                      let displayStatus = latestLog?.action_type || "SAVE";
                       let headerStatusClass = "save-status";
-                      if (latestLog?.action_type === "SUBMIT") headerStatusClass = "submit-status";
-                      if (latestLog?.action_type === "UPDATE") headerStatusClass = "update-status";
-                      if (latestLog?.action_type === "DELETE") headerStatusClass = "delete-status";
-                      if (latestLog?.action_type === "SAVE") headerStatusClass = "save-status";
+
+                      if (hasSubmitLog || submitStatusAllKey === 1) {
+                        displayStatus = "SUBMIT";
+                        headerStatusClass = "submit-status";
+                      } else {
+                        if (displayStatus === "SUBMIT") headerStatusClass = "submit-status";
+                        if (displayStatus === "UPDATE") headerStatusClass = "update-status";
+                        if (displayStatus === "DELETE") headerStatusClass = "delete-status";
+                        if (displayStatus === "SAVE") headerStatusClass = "save-status";
+                      }
 
                       return (
                         <div className="accordion-item mt-2" key={rowId}>
@@ -3252,7 +3262,7 @@ const TimesheetNewDesign = () => {
                                   Task: {details.internal_external == 1 ? details.sub_internal_name || "N/A" : details.task_name || "N/A"}
                                   {latestLog && (
                                     <span className={`table-status ${headerStatusClass} ms-2`} style={{ padding: '2px 8px', marginLeft: '10px' }}>
-                                      {latestLog.action_type}
+                                      {displayStatus}
                                     </span>
                                   )}
                                 </span>
@@ -3354,14 +3364,20 @@ const TimesheetNewDesign = () => {
                                                   return <td key={dayKey} style={{ textAlign: "center", color: "#ccc" }}>-</td>;
                                                 }
 
+                                                const parseHours = (val) => {
+                                                  if (!val) return "0.00";
+                                                  const strVal = val.toString().replace(':', '.');
+                                                  return !isNaN(parseFloat(strVal)) ? parseFloat(strVal).toFixed(2) : val;
+                                                };
+
                                                 const isUpdate = event.action_type === "UPDATE" && dayData.description && dayData.description.includes("Changed hours from");
                                                 let oldHours = null;
-                                                let newHours = dayData.hours;
+                                                let newHours = parseHours(dayData.hours);
                                                 if (isUpdate) {
                                                   const match = dayData.description.match(/Changed hours from ([\d.:]+) to ([\d.:]+)/);
                                                   if (match) {
-                                                    oldHours = match[1];
-                                                    newHours = match[2];
+                                                    oldHours = parseHours(match[1]);
+                                                    newHours = parseHours(match[2]);
                                                   }
                                                 }
 
@@ -3375,7 +3391,7 @@ const TimesheetNewDesign = () => {
                                                         <span style={{ color: "#0d6efd", fontWeight: "600" }}>{newHours}</span>
                                                       </div>
                                                     ) : (
-                                                      <div style={{ fontWeight: "600" }}>{dayData.hours || 0}</div>
+                                                      <div style={{ fontWeight: "600" }}>{parseHours(dayData.hours)}</div>
                                                     )}
                                                     {filledInfo && (
                                                       <div style={{ fontSize: "10px", color: "#999", lineHeight: "1.2", marginTop: "2px" }}>
