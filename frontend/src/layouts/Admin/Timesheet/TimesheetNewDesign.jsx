@@ -1300,7 +1300,7 @@ const TimesheetNewDesign = () => {
     return total.toFixed(2);
   };
 
-  const saveData = async (e) => {
+  const saveData = async (e, status = 0) => {
 
     if (timeSheetRows.length === 0) {
       sweatalert.fire({
@@ -1345,14 +1345,14 @@ const TimesheetNewDesign = () => {
       }
     }
 
-    if (updateTimeSheetRows.length > 0 || deleteRows.length > 0) {
+    if (updateTimeSheetRows.length > 0 || deleteRows.length > 0 || status === 1) {
       const hasEditRow = timeSheetRows.some((item) => item.editRow === 1);
-      if (hasEditRow == true) {
-        setRemarkModel(true);
-        return;
-      }
+      
       const updatedTimeSheetRows = timeSheetRows.map((row) => {
         const { customerData, clientData, jobData, taskData, ...rest } = row;
+        if (status === 1) {
+          return { ...rest, submit_status: "1", final_remark: remarkText };
+        }
         return rest;
       });
 
@@ -1390,21 +1390,29 @@ const TimesheetNewDesign = () => {
 
         const totalHours = Math.floor(total.totalMinutes / 60);
         const totalMins = total.totalMinutes % 60;
-        const finalTotalHours = `${totalHours}.${totalMins
+        const finalTotalHoursStr = `${totalHours}.${totalMins
           .toString()
           .padStart(2, "0")}`;
-        // console.log(`finalTotalHours`, finalTotalHours);
 
-        // if (staff_hourminute > parseFloat(finalTotalHours)) {
-        //   sweatalert.fire({
-        //     icon: "warning",
-        //     title: "Please enter the minimum required hourly time in the timesheet before submitting.",
-        //     timerProgressBar: true,
-        //     showConfirmButton: true,
-        //     timer: 3000,
-        //   });
-        //   return;
-        // }
+        if (status === 1) {
+          const totalHoursVal = timeSheetRows && timeSheetRows?.reduce((acc, item) => {
+            const val = parseFloat(item.total_hours || 0);
+            return acc + val;
+          }, 0);
+
+          let finalTotalHours = await convertHoursMinutes(totalHoursVal);
+
+          if (staff_hourminute > parseFloat(finalTotalHours)) {
+            sweatalert.fire({
+              icon: "warning",
+              title: "Please enter the minimum required hourly time in the timesheet before submitting.",
+              timerProgressBar: true,
+              showConfirmButton: true,
+              timer: 3000,
+            });
+            return;
+          }
+        }
       }
 
       let isvalid = await validateDateFields(req.data);
@@ -1448,7 +1456,7 @@ const TimesheetNewDesign = () => {
         setActiveField(null);
         sweatalert.fire({
           icon: "success",
-          title: res.message,
+          title: status === 1 ? "Timesheet data submit successfully." : res.message,
           timerProgressBar: true,
           showConfirmButton: true,
           timer: 1500,
@@ -1542,7 +1550,7 @@ const TimesheetNewDesign = () => {
     }
 
     setSubmitStatus(1);
-    setRemarkModel(true);
+    saveTimeSheetRemark(e, true);
   };
 
   async function convertHoursMinutes(totalHours) {
@@ -1555,9 +1563,9 @@ const TimesheetNewDesign = () => {
     return `${hours}.${formattedMinutes}`;
   }
 
-  const saveTimeSheetRemark = async (e) => {
+  const saveTimeSheetRemark = async (e, isSubmit = false) => {
 
-    if (submitStatus == 1) {
+    if (submitStatus == 1 || isSubmit) {
       const updatedTimeSheetRows = timeSheetRows.map((item) => {
         return {
           ...item,
