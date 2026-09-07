@@ -33,7 +33,7 @@ const TimesheetDatatable = ({
     const columns = [
         {
             name: 'S.No',
-            selector: (row, index) => index + 1,
+            cell: (row, index) => row.isTotal ? null : index + 1,
             width: '70px',
         },
         {
