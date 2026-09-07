@@ -3240,13 +3240,19 @@ const TimesheetNewDesign = () => {
                     {Object.entries(groupedLogs).map(([rowId, group], index) => {
                       const details = group.details;
                       const targetId = `collapse_${rowId}`;
-                      const latestLog = group.logs[group.logs.length - 1];
+                      const latestLog = group.logs.reduce((latest, current) => {
+                        return new Date(current.created_at) > new Date(latest.created_at) ? current : latest;
+                      }, group.logs[0]);
                       let displayStatus = latestLog?.action_type || "SAVE";
                       let headerStatusClass = "save-status";
 
                       if (hasSubmitLog || submitStatusAllKey === 1) {
-                        displayStatus = "SUBMIT";
-                        headerStatusClass = "submit-status";
+                        if (displayStatus === "DELETE") {
+                          headerStatusClass = "delete-status";
+                        } else {
+                          displayStatus = "SUBMIT";
+                          headerStatusClass = "submit-status";
+                        }
                       } else {
                         if (displayStatus === "SUBMIT") headerStatusClass = "submit-status";
                         if (displayStatus === "UPDATE") headerStatusClass = "update-status";
