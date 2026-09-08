@@ -1825,7 +1825,7 @@ const saveTimesheet = async (Timesheet) => {
       await Promise.all(
         deleteRows.map(async (id) => {
           const [[existData]] = await pool.execute(
-            `SELECT job_id,task_id,task_type,submit_status FROM timesheet WHERE id=?`,
+            `SELECT * FROM timesheet WHERE id=?`,
             [id]
           );
 
@@ -1852,6 +1852,47 @@ const saveTimesheet = async (Timesheet) => {
               Task name:${JobTaskName.task_name}`
             );
           }
+
+          // ---- Add Timesheet Logs for DELETE ----
+          const internal_external = parseInt(existData.task_type) === 2 ? 2 : 1;
+          const days = [
+            { day: "monday", date: existData.monday_date, hours: existData.monday_hours },
+            { day: "tuesday", date: existData.tuesday_date, hours: existData.tuesday_hours },
+            { day: "wednesday", date: existData.wednesday_date, hours: existData.wednesday_hours },
+            { day: "thursday", date: existData.thursday_date, hours: existData.thursday_hours },
+            { day: "friday", date: existData.friday_date, hours: existData.friday_hours },
+            { day: "saturday", date: existData.saturday_date, hours: existData.saturday_hours },
+            { day: "sunday", date: existData.sunday_date, hours: existData.sunday_hours }
+          ];
+
+          let hasHours = false;
+          for (const d of days) {
+            if (d.hours !== null && d.hours !== "" && d.hours !== "0:00" && d.hours !== "0.00" && d.hours !== 0) {
+              hasHours = true;
+              const logDesc = `DELETE entry: removed ${d.hours} hours.`;
+              const logQuery = `
+                INSERT INTO timesheet_logs 
+                (timesheet_row_id, staff_id, action_type, internal_external, customer_id, client_id, job_id, task_id, entry_day, hours_entered, created_at, description)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)`;
+              const logValues = [
+                id, staff_id, "DELETE", internal_external, existData.customer_id, existData.client_id, existData.job_id, existData.task_id, d.day, d.hours, logDesc
+              ];
+              await pool.query(logQuery, logValues);
+            }
+          }
+
+          if (!hasHours) {
+            const logDesc = "DELETE entry: timesheet row removed.";
+            const logQuery = `
+              INSERT INTO timesheet_logs 
+              (timesheet_row_id, staff_id, action_type, internal_external, customer_id, client_id, job_id, task_id, created_at, description)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)`;
+            const logValues = [
+              id, staff_id, "DELETE", internal_external, existData.customer_id, existData.client_id, existData.job_id, existData.task_id, logDesc
+            ];
+            await pool.query(logQuery, logValues);
+          }
+          // ---------------------------------------
 
           await pool.query(`DELETE FROM timesheet WHERE id=?`, [id]);
         })
@@ -2259,16 +2300,44 @@ const deleteTimesheetRow = async (reqBody) => {
     // soft delete
     await pool.query("UPDATE timesheet SET is_deleted = 1 WHERE id = ?", [row_id]);
 
-    // Insert log
-    const logDesc = "DELETE entry: timesheet row removed.";
-    const logQuery = `
-      INSERT INTO timesheet_logs 
-      (timesheet_row_id, staff_id, action_type, internal_external, customer_id, client_id, job_id, task_id, created_at, description)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)`;
-    const logValues = [
-      row_id, staff_id || row.staff_id, "DELETE", internal_external, row.customer_id, row.client_id, row.job_id, row.task_id, logDesc
+    // Insert log for each day with hours
+    const days = [
+      { day: "monday", date: row.monday_date, hours: row.monday_hours },
+      { day: "tuesday", date: row.tuesday_date, hours: row.tuesday_hours },
+      { day: "wednesday", date: row.wednesday_date, hours: row.wednesday_hours },
+      { day: "thursday", date: row.thursday_date, hours: row.thursday_hours },
+      { day: "friday", date: row.friday_date, hours: row.friday_hours },
+      { day: "saturday", date: row.saturday_date, hours: row.saturday_hours },
+      { day: "sunday", date: row.sunday_date, hours: row.sunday_hours }
     ];
-    await pool.query(logQuery, logValues);
+
+    let hasHours = false;
+    for (const d of days) {
+      if (d.hours !== null && d.hours !== "" && d.hours !== "0:00" && d.hours !== "0.00" && d.hours !== 0) {
+        hasHours = true;
+        const logDesc = `DELETE entry: removed ${d.hours} hours.`;
+        const logQuery = `
+          INSERT INTO timesheet_logs 
+          (timesheet_row_id, staff_id, action_type, internal_external, customer_id, client_id, job_id, task_id, entry_day, hours_entered, created_at, description)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)`;
+        const logValues = [
+          row_id, staff_id || row.staff_id, "DELETE", internal_external, row.customer_id, row.client_id, row.job_id, row.task_id, d.day, d.hours, logDesc
+        ];
+        await pool.query(logQuery, logValues);
+      }
+    }
+
+    if (!hasHours) {
+      const logDesc = "DELETE entry: timesheet row removed.";
+      const logQuery = `
+        INSERT INTO timesheet_logs 
+        (timesheet_row_id, staff_id, action_type, internal_external, customer_id, client_id, job_id, task_id, created_at, description)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)`;
+      const logValues = [
+        row_id, staff_id || row.staff_id, "DELETE", internal_external, row.customer_id, row.client_id, row.job_id, row.task_id, logDesc
+      ];
+      await pool.query(logQuery, logValues);
+    }
 
     return { status: true, message: "Timesheet row deleted successfully" };
   } catch (err) {
