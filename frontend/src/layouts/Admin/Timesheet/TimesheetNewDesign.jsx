@@ -2287,7 +2287,8 @@ const TimesheetNewDesign = () => {
   const totalEnteredHoursNum = timeSheetRows.reduce((sum, row) => sum + (parseFloat(row.total_hours) || 0), 0);
   const totalSubmittedHoursNum = submitStatusAllKey === 1 ? totalEnteredHoursNum : 0;
   const totalDraftHoursNum = submitStatusAllKey === 0 ? totalEnteredHoursNum : 0;
-  const weeklyRequiredHours = timeSheetRows.length > 0 && timeSheetRows[0].staffs_hourminute ? timeSheetRows[0].staffs_hourminute : "40:00";
+  const selectedStaffData = staffDataAll?.data?.find(s => Number(s.id) === Number(multipleFilter.staff_id));
+  const weeklyRequiredHours = (timeSheetRows.length > 0 && timeSheetRows[0].staffs_hourminute) ? timeSheetRows[0].staffs_hourminute : (selectedStaffData?.hourminute || "40:00");
   const getGrandTotalStr = () => timeSheetRows.reduce((sum, row) => sum + (parseFloat(row.total_hours) || 0), 0).toFixed(2);
 
   const weeklyReqStr = String(weeklyRequiredHours || "0:0");
@@ -2529,7 +2530,9 @@ const TimesheetNewDesign = () => {
               <div className="timesheet-whitediv-flex">
                 <div className="timesheet-white-card-div-25">
                   <p className="timesheet-white-card-label">Employee</p>
-                  <p className="timesheet-white-card-value">{staffDetails?.first_name} {staffDetails?.last_name}</p>
+                  <p className="timesheet-white-card-value">
+                    {staffOptions?.find((opt) => Number(opt.value) === Number(multipleFilter.staff_id))?.label || `${staffDetails?.first_name || ""} ${staffDetails?.last_name || ""}`.trim()}
+                  </p>
                 </div>
                 <div className="timesheet-white-card-div-25">
                   <p className="timesheet-white-card-label">Weekly required hours</p>
@@ -2541,7 +2544,11 @@ const TimesheetNewDesign = () => {
                 </div>
                 <div className="timesheet-white-card-div-25">
                   <p className="timesheet-white-card-label">Status</p>
-                  <p className="timesheet-white-card-value"><span className="timesheet-white-card-status">{submitStatusAllKey === 1 ? "Submitted" : "Draft"}</span>{submitStatusAllKey !== 1 && <span className="timesheet-white-card-unsaved">unsaved changes</span>}</p>
+                  <p className="timesheet-white-card-value">
+                    <span className="timesheet-white-card-status">
+                      {submitStatusAllKey === 1 ? "Submitted" : (timeSheetRows.length > 0 && timeSheetRows.some(r => r.id != null) ? "Saved" : "Draft")}
+                    </span>
+                  </p>
                 </div>
               </div>
               <div className="timesheet-progress">
