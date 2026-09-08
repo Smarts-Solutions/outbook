@@ -1727,8 +1727,8 @@ const TimesheetNewDesign = () => {
       updatedTimeSheetRows1?.[0]?.staffs_hourminute || null;
 
     if (staff_hourminute != null && staff_hourminute?.includes(":")) {
-      const [hours, minutes] = staff_hourminute.split(":").map(Number);
-      const decimal = hours + "." + minutes;
+      const [hours, minutes] = staff_hourminute.split(":");
+      const decimal = Number(hours) + "." + minutes.padStart(2, "0");
       staff_hourminute = parseFloat(decimal);
     } else if (staff_hourminute != null) {
       staff_hourminute = parseFloat(staff_hourminute);
