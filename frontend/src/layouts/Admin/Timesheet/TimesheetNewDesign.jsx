@@ -2281,6 +2281,7 @@ const TimesheetNewDesign = () => {
   const reqTotalNum = parseInt(reqH || 0) + parseInt(reqM || 0) / 60;
   const progressPercent = reqTotalNum > 0 ? Math.min((totalEnteredHoursNum / reqTotalNum) * 100, 100) : 0;
 
+  const isManagerReviewVisible = ["SUPERADMIN", "ADMIN"].includes(role) || (lineMangerData && lineMangerData.length > 0);
 
   return (
     <>
@@ -2301,9 +2302,11 @@ const TimesheetNewDesign = () => {
             <li role="presentation">
               <button className="active" id="timesheet-tab" data-bs-toggle="tab" data-bs-target="#timesheet-tab-pane" type="button" role="tab" aria-controls="timesheet-tab-pane" aria-selected="true">My Timesheet</button>
             </li>
-            <li role="presentation">
-              <button id="manager-review-tab" data-bs-toggle="tab" data-bs-target="#manager-review-tab-pane" type="button" role="tab" aria-controls="manager-review-tab-pane" aria-selected="false">Manager Review</button>
-            </li>
+            {isManagerReviewVisible && (
+              <li role="presentation">
+                <button id="manager-review-tab" data-bs-toggle="tab" data-bs-target="#manager-review-tab-pane" type="button" role="tab" aria-controls="manager-review-tab-pane" aria-selected="false">Manager Review</button>
+              </li>
+            )}
             <li role="presentation">
               <button id="mis-dashboard-tab" data-bs-toggle="tab" data-bs-target="#mis-dashboard-tab-pane" type="button" role="tab" aria-controls="mis-dashboard-tab-pane" aria-selected="false">MIS Dashboard</button>
             </li>
@@ -2636,54 +2639,43 @@ const TimesheetNewDesign = () => {
             </form>
           </div>
 
-          <div className="tab-pane fade" id="manager-review-tab-pane" role="tabpanel" aria-labelledby="manager-review-tab" tabindex="0">
-            <div className="timesheet-tab-content-header">
-              <div className="timesheet-tab-content-header-left">
-                <h3 className="timesheet-tab-content-heading">Manager Review</h3>
-                <p className="timesheet-tab-content-para">Track, filter and approve team timesheets.</p>
-              </div>
-              <div className="timesheet-tab-content-header-right">
-                <button type="button" className="btn btn-outline-info fw-bold"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg> Export filtered</button>
-              </div>
-            </div>
-            <div className="row mt-4">
-              <div className="col-md-4">
-                <div className="timesheet-white-card">
-                  <p className="timesheet-white-card-label">Timesheets</p>
-                  <p className="timesheet-white-card-value-big">3</p>
+          {isManagerReviewVisible && (
+            <div className="tab-pane fade" id="manager-review-tab-pane" role="tabpanel" aria-labelledby="manager-review-tab" tabindex="0">
+              <div className="timesheet-tab-content-header">
+                <div className="timesheet-tab-content-header-left">
+                  <h3 className="timesheet-tab-content-heading">Manager Review</h3>
+                  <p className="timesheet-tab-content-para">Track, filter and approve team timesheets.</p>
+                </div>
+                <div className="timesheet-tab-content-header-right">
+                  <button type="button" className="btn btn-outline-info fw-bold"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg> Export filtered</button>
                 </div>
               </div>
-              <div className="col-md-4">
-                <div className="timesheet-white-card">
-                  <p className="timesheet-white-card-label">Entries</p>
-                  <p className="timesheet-white-card-value-big">14</p>
+              <div className="row mt-4">
+                <div className="col-md-3">
+                  <div className="timesheet-white-card">
+                    <p className="timesheet-white-card-label">Total Staff</p>
+                    <p className="timesheet-white-card-value-big">48</p>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="timesheet-white-card">
+                    <p className="timesheet-white-card-label">Submitted</p>
+                    <p className="timesheet-white-card-value-big timesheet-white-card-value-big-blue">32</p>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="timesheet-white-card">
+                    <p className="timesheet-white-card-label">Saved Drafts</p>
+                    <p className="timesheet-white-card-value-big">12</p>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="timesheet-white-card">
+                    <p className="timesheet-white-card-label">Missing</p>
+                    <p className="timesheet-white-card-value-big timesheet-white-card-value-big-red">04</p>
+                  </div>
                 </div>
               </div>
-              <div className="col-md-4">
-                <div className="timesheet-white-card">
-                  <p className="timesheet-white-card-label">Total Hours</p>
-                  <p className="timesheet-white-card-value-big">95h</p>
-                </div>
-              </div>
-              <div className="col-md-4 mt-3">
-                <div className="timesheet-white-card">
-                  <p className="timesheet-white-card-label">Submitted</p>
-                  <p className="timesheet-white-card-value-big timesheet-white-card-value-big-blue">36h</p>
-                </div>
-              </div>
-              <div className="col-md-4 mt-3">
-                <div className="timesheet-white-card">
-                  <p className="timesheet-white-card-label">Approved</p>
-                  <p className="timesheet-white-card-value-big timesheet-white-card-value-big-green">39h</p>
-                </div>
-              </div>
-              <div className="col-md-4 mt-3">
-                <div className="timesheet-white-card">
-                  <p className="timesheet-white-card-label">Rejected</p>
-                  <p className="timesheet-white-card-value-big timesheet-white-card-value-big-red">20h</p>
-                </div>
-              </div>
-            </div>
             <div className="timesheet-white-card mt-3">
               <div className="row">
                 <div className="col-md-4">
@@ -2770,6 +2762,7 @@ const TimesheetNewDesign = () => {
               </div>
             </div>
           </div>
+          )}
 
           <div className="tab-pane fade" id="mis-dashboard-tab-pane" role="tabpanel" aria-labelledby="mis-dashboard-tab" tabindex="0">
 
