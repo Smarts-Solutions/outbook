@@ -2028,6 +2028,16 @@ const TimesheetNewDesign = () => {
   // SELECT OPTIONS FOR WEEK END //
 
   const handleSaveNote = (e) => {
+    if (submitStatusAllKey === 1 || timeSheetRows[selectedRowIndex]?.submit_status === "1") {
+      sweatalert.fire({
+        icon: "error",
+        title: "Cannot update a note on a submitted timesheet.",
+        timerProgressBar: true,
+        showConfirmButton: true,
+        timer: 1500,
+      });
+      return;
+    }
     // console.log("modalText ",modalText);
     // console.log("activeField ",activeField);
     const updatedRows = [...timeSheetRows];
