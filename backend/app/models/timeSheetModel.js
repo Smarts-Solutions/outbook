@@ -1498,22 +1498,6 @@ const saveTimesheet = async (Timesheet) => {
         return { status: false, message: "Please select Job and Task for all entries before saving." };
       }
 
-      const invalidHours = data.find(row => {
-        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-        for (let day of days) {
-          if (row[`${day}_hours`]) {
-            const val = parseFloat(row[`${day}_hours`]);
-            if (val > 23.59 || val < 0) return true;
-            const [, minutes] = row[`${day}_hours`].toString().split(".");
-            if (minutes && parseInt(minutes) >= 60) return true;
-          }
-        }
-        return false;
-      });
-      if (invalidHours) {
-        return { status: false, message: "Invalid hours entered. Daily hours cannot exceed 24 and minutes cannot exceed 59." };
-      }
-
       await Promise.all(
         data?.map(async (row) => {
           let task_type_name = getTaskTypeName(row.task_type);

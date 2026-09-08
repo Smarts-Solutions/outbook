@@ -1098,6 +1098,16 @@ const TimesheetNewDesign = () => {
       let value = e.target.value;
       let name = e.target.name;
 
+      let final_value = value;
+
+      let [intPart, decimalPart] = value.toString().split(".");
+
+      if (decimalPart) {
+        let multiplied = Math.floor(parseInt(decimalPart) * 0.6);
+
+        const multipliedStr = multiplied.toString().padStart(2, "0");
+        final_value = `${intPart}.${multipliedStr}`;
+      }
 
       const updatedRows = [...timeSheetRows];
       if (updatedRows[index][name] == null) {
@@ -1109,7 +1119,18 @@ const TimesheetNewDesign = () => {
         return;
       }
 
-      let [integerPart, fractionalPartRaw] = value.toString().split(".");
+      if (parseFloat(final_value) > 23.59) {
+        sweatalert.fire({
+          icon: "warning",
+          title: "Total hours in a day cannot exceed 24",
+          timerProgressBar: true,
+          showConfirmButton: true,
+          timer: 1500,
+        });
+        return;
+      }
+
+      const [integerPart, fractionalPartRaw] = final_value.split(".");
       let fractionalPart = fractionalPartRaw || "0";
       if (fractionalPart.length === 1) {
         fractionalPart = fractionalPart + "0";
@@ -1119,17 +1140,6 @@ const TimesheetNewDesign = () => {
         sweatalert.fire({
           icon: "warning",
           title: "Minutes cannot exceed 59",
-          timerProgressBar: true,
-          showConfirmButton: true,
-          timer: 1500,
-        });
-        return;
-      }
-
-      if (parseFloat(value) > 23.59) {
-        sweatalert.fire({
-          icon: "warning",
-          title: "Total hours in a day cannot exceed 24",
           timerProgressBar: true,
           showConfirmButton: true,
           timer: 1500,
