@@ -1498,6 +1498,22 @@ const saveTimesheet = async (Timesheet) => {
         return { status: false, message: "Please select Job and Task for all entries before saving." };
       }
 
+      const invalidHours = data.find(row => {
+        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        for (let day of days) {
+          if (row[`${day}_hours`]) {
+            const val = parseFloat(row[`${day}_hours`]);
+            if (val > 23.59 || val < 0) return true;
+            const [, minutes] = row[`${day}_hours`].toString().split(".");
+            if (minutes && parseInt(minutes) >= 60) return true;
+          }
+        }
+        return false;
+      });
+      if (invalidHours) {
+        return { status: false, message: "Invalid hours entered. Daily hours cannot exceed 24 and minutes cannot exceed 59." };
+      }
+
       await Promise.all(
         data?.map(async (row) => {
           let task_type_name = getTaskTypeName(row.task_type);
@@ -1683,10 +1699,17 @@ const saveTimesheet = async (Timesheet) => {
               `SELECT monday_hours,tuesday_hours,wednesday_hours,
               thursday_hours,friday_hours,saturday_hours,sunday_hours,
               monday_filled_at,tuesday_filled_at,wednesday_filled_at,
-              thursday_filled_at,friday_filled_at,saturday_filled_at,sunday_filled_at
+              thursday_filled_at,friday_filled_at,saturday_filled_at,sunday_filled_at,
+              submit_status
               FROM timesheet WHERE id=?`,
               [row.id]
             );
+
+            if (Number(existData.submit_status) === 1) {
+              const error = new Error("Cannot update a timesheet entry that is already submitted.");
+              error.custom = true;
+              throw error;
+            }
 
             let updateString = "";
 
@@ -1818,9 +1841,15 @@ const saveTimesheet = async (Timesheet) => {
       await Promise.all(
         deleteRows.map(async (id) => {
           const [[existData]] = await pool.execute(
-            `SELECT job_id,task_id,task_type FROM timesheet WHERE id=?`,
+            `SELECT job_id,task_id,task_type,submit_status FROM timesheet WHERE id=?`,
             [id]
           );
+
+          if (Number(existData.submit_status) === 1) {
+            const error = new Error("Cannot delete a timesheet entry that is already submitted.");
+            error.custom = true;
+            throw error;
+          }
 
           let JobTaskName = await JobTaskNameWithId({
             job_id: existData.job_id,
@@ -1880,7 +1909,7 @@ const saveTimesheet = async (Timesheet) => {
     console.error(err);
     return {
       status: false,
-      message: "Error saving timesheet data.",
+      message: err.custom ? err.message : "Error saving timesheet data.",
       error: err.message,
     };
   }
