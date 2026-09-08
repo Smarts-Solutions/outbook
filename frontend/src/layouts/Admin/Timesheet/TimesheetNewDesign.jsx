@@ -3268,7 +3268,7 @@ const TimesheetNewDesign = () => {
                             >
                               <div className="accordion-history-log-btn-div">
                                 <span className="accordion-button-left-text">
-                                  Row {index + 1}: {details.internal_external == 1 ? "Internal" : "External"}
+                                  {index + 1}: {details.internal_external == 1 ? "Internal" : "External"}
                                   {details.internal_external == 2 && details.customer_name ? ` - ${details.customer_name}` : ""}
                                   {details.internal_external == 2 && details.client_name ? ` - ${details.client_name}` : ""}
                                 </span>
@@ -3346,7 +3346,6 @@ const TimesheetNewDesign = () => {
                                     <table className="normal-table" style={{ fontSize: "13px" }}>
                                       <thead>
                                         <tr>
-                                          <th style={{ minWidth: "40px", textAlign: "center" }}>S.No.</th>
                                           <th style={{ minWidth: "100px" }}>Action By</th>
                                           <th style={{ minWidth: "70px", textAlign: "center" }}>Type</th>
                                           {dayKeys.map((dayKey, di) => (
@@ -3366,7 +3365,6 @@ const TimesheetNewDesign = () => {
 
                                           return (
                                             <tr key={i}>
-                                              <td style={{ textAlign: "center" }}>{i + 1}</td>
                                               <td style={{ whiteSpace: "nowrap" }}>{event.staff_name}</td>
                                               <td style={{ textAlign: "center" }}>
                                                 <span className={`table-status ${statusClass}`} style={{ padding: '2px 8px', fontSize: '11px' }}>
