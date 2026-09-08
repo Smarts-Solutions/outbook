@@ -685,7 +685,7 @@ const TimesheetNewDesign = () => {
 
       newSheetRows.splice(index, 1);
       setTimeSheetRows(newSheetRows);
-      
+
       sweatalert.fire({ icon: "success", title: "Row deleted successfully", timer: 1500, showConfirmButton: false });
 
     } catch (err) {
@@ -2676,70 +2676,70 @@ const TimesheetNewDesign = () => {
                   </div>
                 </div>
               </div>
-            <div className="timesheet-white-card mt-3">
-              <div className="row">
-                <div className="col-md-4">
-                  <label className="form-label">Employee</label>
-                  <select className="form-select" >
-                    <option>All</option>
-                    <option>All</option>
-                  </select>
-                </div>
-                <div className="col-md-4">
-                  <label className="form-label">Status</label>
-                  <select className="form-select" >
-                    <option>All</option>
-                    <option>All</option>
-                  </select>
-                </div>
-                <div className="col-md-4">
-                  <label className="form-label">Task Type</label>
-                  <select className="form-select" >
-                    <option>All</option>
-                    <option>All</option>
-                  </select>
-                </div>
-                <div className="col-md-4 mt-3">
-                  <label className="form-label">Customer</label>
-                  <select className="form-select" >
-                    <option>All</option>
-                    <option>All</option>
-                  </select>
-                </div>
-                <div className="col-md-4 mt-3">
-                  <label className="form-label">Client</label>
-                  <select className="form-select" >
-                    <option>All</option>
-                    <option>All</option>
-                  </select>
-                </div>
-                <div className="col-md-4 mt-3">
-                  <label className="form-label">Job</label>
-                  <select className="form-select" >
-                    <option>All</option>
-                    <option>All</option>
-                  </select>
-                </div>
-                <div className="col-md-4 mt-3">
-                  <label className="form-label">Date from</label>
-                  <input type="date" className="form-control" />
-                </div>
-                <div className="col-md-4 mt-3">
-                  <label className="form-label">Date to</label>
-                  <input type="date" className="form-control" />
-                </div>
-                <div className="mt-3 text-end">
-                  <button type="button" className="btn btn-outline-info fw-bold">Reset filters</button>
+              <div className="timesheet-white-card mt-3">
+                <div className="row">
+                  <div className="col-md-4">
+                    <label className="form-label">Employee</label>
+                    <select className="form-select" >
+                      <option>All</option>
+                      <option>All</option>
+                    </select>
+                  </div>
+                  <div className="col-md-4">
+                    <label className="form-label">Status</label>
+                    <select className="form-select" >
+                      <option>All</option>
+                      <option>All</option>
+                    </select>
+                  </div>
+                  <div className="col-md-4">
+                    <label className="form-label">Task Type</label>
+                    <select className="form-select" >
+                      <option>All</option>
+                      <option>All</option>
+                    </select>
+                  </div>
+                  <div className="col-md-4 mt-3">
+                    <label className="form-label">Customer</label>
+                    <select className="form-select" >
+                      <option>All</option>
+                      <option>All</option>
+                    </select>
+                  </div>
+                  <div className="col-md-4 mt-3">
+                    <label className="form-label">Client</label>
+                    <select className="form-select" >
+                      <option>All</option>
+                      <option>All</option>
+                    </select>
+                  </div>
+                  <div className="col-md-4 mt-3">
+                    <label className="form-label">Job</label>
+                    <select className="form-select" >
+                      <option>All</option>
+                      <option>All</option>
+                    </select>
+                  </div>
+                  <div className="col-md-4 mt-3">
+                    <label className="form-label">Date from</label>
+                    <input type="date" className="form-control" />
+                  </div>
+                  <div className="col-md-4 mt-3">
+                    <label className="form-label">Date to</label>
+                    <input type="date" className="form-control" />
+                  </div>
+                  <div className="mt-3 text-end">
+                    <button type="button" className="btn btn-outline-info fw-bold">Reset filters</button>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="timesheet-white-card mt-3">
-              <div className="timesheet-table-header-div">
-                <div className="timesheet-table-header-div-left">
-                  <div className="tab-title"><h3 className="mt-0">Ayesha Khan</h3></div>
-                  <p className="page-subtitle mb-0 mt-2">17 Aug 2026 – 23 Aug 2026 · 5 entries · 36h</p>
-                </div>
-                {/* <div className="timesheet-table-header-div-right">
+              <div className="timesheet-white-card mt-3">
+                <div className="timesheet-table-header-div">
+                  <div className="timesheet-table-header-div-left">
+                    <div className="tab-title"><h3 className="mt-0">Ayesha Khan</h3></div>
+                    <p className="page-subtitle mb-0 mt-2">17 Aug 2026 – 23 Aug 2026 · 5 entries · 36h</p>
+                  </div>
+                  {/* <div className="timesheet-table-header-div-right">
                   <span className="timesheet-table-header-status-approved">Approved</span>
                   <span className="timesheet-table-header-status-rejected">Rejected</span>
                   <button className="timesheet-table-header-btn-approve">
@@ -2751,17 +2751,17 @@ const TimesheetNewDesign = () => {
                     Reject
                   </button>
                 </div> */}
-              </div>
-              <div className="mt-3">
-                <TimesheetDatatable />
-              </div>
-              <div className="mt-3">
-                <div className="timesheet-submit-div-left">
-                  <p><b>Final remark:</b> Website revamp frontend in progress.</p>
+                </div>
+                <div className="mt-3">
+                  <TimesheetDatatable />
+                </div>
+                <div className="mt-3">
+                  <div className="timesheet-submit-div-left">
+                    <p><b>Final remark:</b> Website revamp frontend in progress.</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
           )}
 
           <div className="tab-pane fade" id="mis-dashboard-tab-pane" role="tabpanel" aria-labelledby="mis-dashboard-tab" tabindex="0">
