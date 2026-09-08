@@ -1375,10 +1375,14 @@ const TimesheetNewDesign = () => {
         weekOffset: weekOffset,
       };
 
-      let staff_hourminute =
-        parseFloat(updatedTimeSheetRows?.[0]?.staffs_hourminute) / 5 || null;
-      //console.log(`updatedTimeSheetRows?.[0]`, updatedTimeSheetRows?.[0]);
-      //console.log(`staff_hourminute`, staff_hourminute);
+      let staff_hourminute = updatedTimeSheetRows?.[0]?.staffs_hourminute || null;
+      if (staff_hourminute != null && staff_hourminute?.includes(":")) {
+        const [hours, minutes] = staff_hourminute.split(":").map(Number);
+        const decimal = hours + "." + minutes;
+        staff_hourminute = parseFloat(decimal);
+      } else if (staff_hourminute != null) {
+        staff_hourminute = parseFloat(staff_hourminute);
+      }
       if (staff_hourminute != null) {
         const converted =
           updatedTimeSheetRows &&
@@ -1656,7 +1660,7 @@ const TimesheetNewDesign = () => {
             showConfirmButton: true,
             timer: 3000,
           });
-
+          setSubmitStatus(0);
           return;
         }
       }
