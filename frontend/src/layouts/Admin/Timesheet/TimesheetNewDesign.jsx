@@ -1389,6 +1389,7 @@ const TimesheetNewDesign = () => {
         staff_id: multipleFilter.staff_id,
         data: updatedTimeSheetRows,
         deleteRows: deleteRows,
+        weekOffset: weekOffset,
       };
 
       let staff_hourminute =
@@ -1612,6 +1613,7 @@ const TimesheetNewDesign = () => {
         staff_id: multipleFilter.staff_id,
         data: updatedTimeSheetRows1,
         deleteRows: deleteRows,
+        weekOffset: weekOffset,
       };
 
       //let staff_hourminute = (parseFloat(updatedTimeSheetRows1?.[0]?.staffs_hourminute) / 5) || null;
@@ -1745,6 +1747,7 @@ const TimesheetNewDesign = () => {
       staff_id: multipleFilter.staff_id,
       data: updatedTimeSheetRows1,
       deleteRows: deleteRows,
+      weekOffset: weekOffset,
     };
 
     let staff_hourminute =

@@ -2189,6 +2189,7 @@ const getTimesheetLogs = async (reqBody) => {
         LEFT JOIN internal i ON i.id = tl.job_id AND tl.internal_external = 1
         LEFT JOIN task tsk ON tsk.id = tl.task_id AND tl.internal_external = 2
         LEFT JOIN sub_internal si ON si.id = tl.task_id AND tl.internal_external = 1
+        LEFT JOIN timesheet ts ON ts.id = tl.timesheet_row_id
     `;
     let queryParams = [];
 
@@ -2196,8 +2197,25 @@ const getTimesheetLogs = async (reqBody) => {
       query += ` WHERE tl.timesheet_row_id = ? `;
       queryParams.push(row_id);
     } else if (staff_id && start_date && end_date) {
-      query += ` WHERE tl.staff_id = ? AND DATE(tl.created_at) >= ? AND DATE(tl.created_at) <= ? `;
-      queryParams.push(staff_id, start_date, end_date);
+      query += ` WHERE tl.staff_id = ? AND (
+          ts.monday_date    BETWEEN ? AND ? OR
+          ts.tuesday_date   BETWEEN ? AND ? OR
+          ts.wednesday_date BETWEEN ? AND ? OR
+          ts.thursday_date  BETWEEN ? AND ? OR
+          ts.friday_date    BETWEEN ? AND ? OR
+          ts.saturday_date  BETWEEN ? AND ? OR
+          ts.sunday_date    BETWEEN ? AND ?
+      ) `;
+      queryParams.push(
+        staff_id,
+        start_date, end_date,
+        start_date, end_date,
+        start_date, end_date,
+        start_date, end_date,
+        start_date, end_date,
+        start_date, end_date,
+        start_date, end_date
+      );
     } else if (staff_id) {
       query += ` WHERE tl.staff_id = ? `;
       queryParams.push(staff_id);
