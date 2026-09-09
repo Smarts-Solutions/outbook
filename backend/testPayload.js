@@ -1,15 +1,357 @@
+// const staff = [
+//   411, 225, 279, 408, 340, 437, 390, 459, 528, 256,
+//   309, 470, 207, 150, 486, 302, 446, 22, 181, 559
+// ];
+
+// const payload = {
+//   staff_id: 182,
+//   data: [
+//     // ... your existing data
+//   ],
+//   deleteRows: [],
+//   weekOffset: 0,
+//   ip: "122.168.114.106",
+//   StaffUserId: 182
+// };
+
+// // Har staff ID ke liye payload generate hoga
+// const payloads = staff.map((staffId) => ({
+//   ...payload,
+//   staff_id: staffId,
+//   StaffUserId: staffId
+// }));
+
+// console.log(payloads);
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+const payload1 =  {
+    "staff_id": 182,
+    "data": [
+        {
+            "id": null,
+            "task_type": "1",
+            "customer_id": null,
+            "client_id": null,
+            "job_id": 12,
+            "task_id": 38,
+            "job_total_time": null,
+            "monday_date": "2026-09-07",
+            "monday_hours": "1",
+            "monday_note": null,
+            "tuesday_date": "2026-09-08",
+            "tuesday_hours": "2",
+            "tuesday_note": null,
+            "wednesday_date": "2026-09-09",
+            "wednesday_hours": "3",
+            "wednesday_note": null,
+            "thursday_date": "2026-09-10",
+            "thursday_hours": "4",
+            "thursday_note": null,
+            "friday_date": "2026-09-11",
+            "friday_hours": "5",
+            "friday_note": null,
+            "saturday_date": null,
+            "saturday_hours": null,
+            "saturday_note": null,
+            "sunday_date": null,
+            "sunday_hours": null,
+            "sunday_note": null,
+            "remark": null,
+            "newRow": 1,
+            "editRow": 0,
+            "submit_status": "0",
+            "staffs_hourminute": "42:30",
+            "total_hours": 15
+        },
+        {
+            "id": null,
+            "task_type": "1",
+            "customer_id": null,
+            "client_id": null,
+            "job_id": 12,
+            "task_id": 38,
+            "job_total_time": null,
+            "monday_date": "2026-09-07",
+            "monday_hours": "1",
+            "monday_note": null,
+            "tuesday_date": "2026-09-08",
+            "tuesday_hours": "2",
+            "tuesday_note": null,
+            "wednesday_date": "2026-09-09",
+            "wednesday_hours": "3",
+            "wednesday_note": null,
+            "thursday_date": "2026-09-10",
+            "thursday_hours": "4",
+            "thursday_note": null,
+            "friday_date": "2026-09-11",
+            "friday_hours": "5",
+            "friday_note": null,
+            "saturday_date": null,
+            "saturday_hours": null,
+            "saturday_note": null,
+            "sunday_date": null,
+            "sunday_hours": null,
+            "sunday_note": null,
+            "remark": null,
+            "newRow": 1,
+            "editRow": 0,
+            "submit_status": "0",
+            "staffs_hourminute": "42:30",
+            "total_hours": 15
+        },
+        {
+            "id": null,
+            "task_type": "1",
+            "customer_id": null,
+            "client_id": null,
+            "job_id": 12,
+            "task_id": 38,
+            "job_total_time": null,
+            "monday_date": "2026-09-07",
+            "monday_hours": "1",
+            "monday_note": null,
+            "tuesday_date": "2026-09-08",
+            "tuesday_hours": "2",
+            "tuesday_note": null,
+            "wednesday_date": "2026-09-09",
+            "wednesday_hours": "3",
+            "wednesday_note": null,
+            "thursday_date": "2026-09-10",
+            "thursday_hours": "4",
+            "thursday_note": null,
+            "friday_date": "2026-09-11",
+            "friday_hours": "5",
+            "friday_note": null,
+            "saturday_date": null,
+            "saturday_hours": null,
+            "saturday_note": null,
+            "sunday_date": null,
+            "sunday_hours": null,
+            "sunday_note": null,
+            "remark": null,
+            "newRow": 1,
+            "editRow": 0,
+            "submit_status": "0",
+            "staffs_hourminute": "42:30",
+            "total_hours": 15
+        },
+        {
+            "id": null,
+            "task_type": "1",
+            "customer_id": null,
+            "client_id": null,
+            "job_id": 12,
+            "task_id": 38,
+            "job_total_time": null,
+            "monday_date": "2026-09-07",
+            "monday_hours": "1",
+            "monday_note": null,
+            "tuesday_date": "2026-09-08",
+            "tuesday_hours": "2",
+            "tuesday_note": null,
+            "wednesday_date": "2026-09-09",
+            "wednesday_hours": "3",
+            "wednesday_note": null,
+            "thursday_date": "2026-09-10",
+            "thursday_hours": "4",
+            "thursday_note": null,
+            "friday_date": "2026-09-11",
+            "friday_hours": "5",
+            "friday_note": null,
+            "saturday_date": null,
+            "saturday_hours": null,
+            "saturday_note": null,
+            "sunday_date": null,
+            "sunday_hours": null,
+            "sunday_note": null,
+            "remark": null,
+            "newRow": 1,
+            "editRow": 0,
+            "submit_status": "0",
+            "staffs_hourminute": "42:30",
+            "total_hours": 15
+        },
+        {
+            "id": null,
+            "task_type": "1",
+            "customer_id": null,
+            "client_id": null,
+            "job_id": 12,
+            "task_id": 38,
+            "job_total_time": null,
+            "monday_date": "2026-09-07",
+            "monday_hours": "1",
+            "monday_note": null,
+            "tuesday_date": "2026-09-08",
+            "tuesday_hours": "2",
+            "tuesday_note": null,
+            "wednesday_date": "2026-09-09",
+            "wednesday_hours": "3",
+            "wednesday_note": null,
+            "thursday_date": "2026-09-10",
+            "thursday_hours": "4",
+            "thursday_note": null,
+            "friday_date": "2026-09-11",
+            "friday_hours": "5",
+            "friday_note": null,
+            "saturday_date": null,
+            "saturday_hours": null,
+            "saturday_note": null,
+            "sunday_date": null,
+            "sunday_hours": null,
+            "sunday_note": null,
+            "remark": null,
+            "newRow": 1,
+            "editRow": 0,
+            "submit_status": "0",
+            "staffs_hourminute": "42:30",
+            "total_hours": 15
+        },
+        {
+            "id": null,
+            "task_type": "1",
+            "customer_id": null,
+            "client_id": null,
+            "job_id": 12,
+            "task_id": 38,
+            "job_total_time": null,
+            "monday_date": "2026-09-07",
+            "monday_hours": "1",
+            "monday_note": null,
+            "tuesday_date": "2026-09-08",
+            "tuesday_hours": "2",
+            "tuesday_note": null,
+            "wednesday_date": "2026-09-09",
+            "wednesday_hours": "3",
+            "wednesday_note": null,
+            "thursday_date": "2026-09-10",
+            "thursday_hours": "4",
+            "thursday_note": null,
+            "friday_date": "2026-09-11",
+            "friday_hours": "5",
+            "friday_note": null,
+            "saturday_date": null,
+            "saturday_hours": null,
+            "saturday_note": null,
+            "sunday_date": null,
+            "sunday_hours": null,
+            "sunday_note": null,
+            "remark": null,
+            "newRow": 1,
+            "editRow": 0,
+            "submit_status": "0",
+            "staffs_hourminute": "42:30",
+            "total_hours": 15
+        },
+        {
+            "id": null,
+            "task_type": "1",
+            "customer_id": null,
+            "client_id": null,
+            "job_id": 12,
+            "task_id": 38,
+            "job_total_time": null,
+            "monday_date": "2026-09-07",
+            "monday_hours": "1",
+            "monday_note": null,
+            "tuesday_date": "2026-09-08",
+            "tuesday_hours": "2",
+            "tuesday_note": null,
+            "wednesday_date": "2026-09-09",
+            "wednesday_hours": "3",
+            "wednesday_note": null,
+            "thursday_date": "2026-09-10",
+            "thursday_hours": "4",
+            "thursday_note": null,
+            "friday_date": "2026-09-11",
+            "friday_hours": "5",
+            "friday_note": null,
+            "saturday_date": null,
+            "saturday_hours": null,
+            "saturday_note": null,
+            "sunday_date": null,
+            "sunday_hours": null,
+            "sunday_note": null,
+            "remark": null,
+            "newRow": 1,
+            "editRow": 0,
+            "submit_status": "0",
+            "staffs_hourminute": "42:30",
+            "total_hours": 15
+        },
+        {
+            "id": null,
+            "task_type": "1",
+            "customer_id": null,
+            "client_id": null,
+            "job_id": 12,
+            "task_id": 38,
+            "job_total_time": null,
+            "monday_date": "2026-09-07",
+            "monday_hours": "1",
+            "monday_note": null,
+            "tuesday_date": "2026-09-08",
+            "tuesday_hours": "2",
+            "tuesday_note": null,
+            "wednesday_date": "2026-09-09",
+            "wednesday_hours": "3",
+            "wednesday_note": null,
+            "thursday_date": "2026-09-10",
+            "thursday_hours": "4",
+            "thursday_note": null,
+            "friday_date": "2026-09-11",
+            "friday_hours": "5",
+            "friday_note": null,
+            "saturday_date": null,
+            "saturday_hours": null,
+            "saturday_note": null,
+            "sunday_date": null,
+            "sunday_hours": null,
+            "sunday_note": null,
+            "remark": null,
+            "newRow": 1,
+            "editRow": 0,
+            "submit_status": "0",
+            "staffs_hourminute": "42:30",
+            "total_hours": 15
+        }
+    ],
+    "deleteRows": [],
+    "weekOffset": 0,
+    "ip": "122.168.114.106",
+    "StaffUserId": 182
+}
 const staff = [
   411, 225, 279, 408, 340, 437, 390, 459, 528, 256,
   309, 470, 207, 150, 486, 302, 446, 22, 181, 559
 ];
 
-// Sirf 10 staff
-for (const currentStaffId of staff.slice(0, 10)) {
+for (const staffId of staff) {
 
-  console.log(`Processing staff_id: ${currentStaffId}`);
+  console.log(`Processing staff_id: ${staffId}`);
+  return
+
+  // Current staff ID
+  const currentStaffId = staffId;
 
   await Promise.all(
-    data?.map(async (row) => {
+    payload1?.data?.map(async (row) => {
 
       let task_type_name = getTaskTypeName(row.task_type);
 
@@ -38,7 +380,7 @@ for (const currentStaffId of staff.slice(0, 10)) {
       let duplicate_entry = null;
 
       let save_date = row?.save_date
-        ? new Date(row.save_date)
+        ? new Date(row?.save_date)
         : null;
 
       let submit_date = row?.submit_date
@@ -92,107 +434,42 @@ for (const currentStaffId of staff.slice(0, 10)) {
       let DateTimeString = "";
 
       days.forEach((d) => {
-        if (d.date !== null) {
-          DateTimeString += ` Date: ${d.date}, Hours : ${d.hours}`;
+        if (d?.date !== null) {
+          DateTimeString += ` Date: ${d?.date}, Hours : ${d?.hours}`;
         }
       });
 
-      const JobTaskName = await JobTaskNameWithId({
+      let JobTaskName = await JobTaskNameWithId({
         job_id: row.job_id,
         task_id: row.task_id,
-        TaskType: parseInt(row.task_type)
+        TaskType: parseInt(row.task_type),
       });
 
-      // =====================================================
+      // ======================
       // INSERT
-      // =====================================================
+      // ======================
 
       if (row.id === null) {
 
         const insertQuery = `
           INSERT INTO timesheet (
-            staff_id,
-            task_type,
-            customer_id,
-            client_id,
-            job_id,
-            task_id,
-
-            monday_date,
-            monday_hours,
-
-            tuesday_date,
-            tuesday_hours,
-
-            wednesday_date,
-            wednesday_hours,
-
-            thursday_date,
-            thursday_hours,
-
-            friday_date,
-            friday_hours,
-
-            saturday_date,
-            saturday_hours,
-
-            sunday_date,
-            sunday_hours,
-
-            remark,
-            final_remark,
-            submit_status,
-
-            monday_note,
-            tuesday_note,
-            wednesday_note,
-            thursday_note,
-            friday_note,
-            saturday_note,
-            sunday_note,
-
-            save_date,
-            submit_date,
-            duplicate_entry,
-
-            monday_filled_at,
-            tuesday_filled_at,
-            wednesday_filled_at,
-            thursday_filled_at,
-            friday_filled_at,
-            saturday_filled_at,
+            staff_id, task_type, customer_id, client_id, job_id, task_id,
+            monday_date, monday_hours, tuesday_date, tuesday_hours,
+            wednesday_date, wednesday_hours, thursday_date, thursday_hours,
+            friday_date, friday_hours, saturday_date, saturday_hours,
+            sunday_date, sunday_hours, remark, final_remark, submit_status,
+            monday_note, tuesday_note, wednesday_note, thursday_note,
+            friday_note, saturday_note, sunday_note,
+            save_date, submit_date, duplicate_entry,
+            monday_filled_at, tuesday_filled_at, wednesday_filled_at,
+            thursday_filled_at, friday_filled_at, saturday_filled_at,
             sunday_filled_at
           )
-          VALUES (
-            ?,?,?,?,?,?,
-            ?,?,
-            ?,?,
-            ?,?,
-            ?,?,
-            ?,?,
-            ?,?,
-            ?,?,
-            ?,?,
-            ?,?,
-            ?,?,
-            ?,?,
-            ?,?,
-            ?,?,
-            ?,?,
-            ?,?,
-            ?,?,
-            ?,?,
-            ?,?,
-            ?,?,
-            ?,?,
-            ?,?
-          )
+          VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         `;
 
         const insertValues = [
-
-          // IMPORTANT
-          // Outer loop ka current staff ID
+          // 🔥 YAHAN current staff ID
           currentStaffId,
 
           row.task_type,
@@ -254,9 +531,9 @@ for (const currentStaffId of staff.slice(0, 10)) {
 
         const newRowId = insertResult.insertId;
 
-        // =================================================
-        // TIMESHEET LOGS
-        // =================================================
+        // ======================
+        // TIMESHEET LOG
+        // ======================
 
         const action_type =
           Number(row.submit_status) === 1
@@ -264,9 +541,7 @@ for (const currentStaffId of staff.slice(0, 10)) {
             : "SAVE";
 
         const internal_external =
-          parseInt(row.task_type) === 2
-            ? 2
-            : 1;
+          parseInt(row.task_type) === 2 ? 2 : 1;
 
         for (const d of days) {
 
@@ -276,7 +551,8 @@ for (const currentStaffId of staff.slice(0, 10)) {
               `${action_type} entry for ${d.day} with ${d.hours} hours.`;
 
             const logQuery = `
-              INSERT INTO timesheet_logs (
+              INSERT INTO timesheet_logs
+              (
                 timesheet_row_id,
                 staff_id,
                 action_type,
@@ -296,7 +572,7 @@ for (const currentStaffId of staff.slice(0, 10)) {
             const logValues = [
               newRowId,
 
-              // IMPORTANT
+              // 🔥 SAME STAFF ID
               currentStaffId,
 
               action_type,
@@ -310,66 +586,23 @@ for (const currentStaffId of staff.slice(0, 10)) {
               logDesc
             ];
 
-            await pool.query(
-              logQuery,
-              logValues
-            );
+            await pool.query(logQuery, logValues);
           }
         }
-
-        // =================================================
-        // ACTIVITY LOG
-        // =================================================
-
-        if (DateTimeString !== "") {
-
-          const eventType =
-            parseInt(row.submit_status) === 1
-              ? "submit"
-              : "save";
-
-          if (!checkStringEvent.includes(eventType)) {
-
-            checkStringEvent.push(eventType);
-
-            timesheet_log_msg.push(
-              `${
-                eventType === "submit"
-                  ? "submitted"
-                  : "save"
-              } a timesheet entry. Task type:${task_type_name},
-              ${DateTimeString},
-              Job code:${JobTaskName.job_name},
-              Task name:${JobTaskName.task_name}`
-            );
-
-          } else {
-
-            timesheet_log_msg.push(
-              `Task type:${task_type_name},
-              ${DateTimeString},
-              Job code:${JobTaskName.job_name},
-              Task name:${JobTaskName.task_name}`
-            );
-          }
-        }
-
       }
 
-      // =====================================================
+      // ======================
       // UPDATE
-      // =====================================================
+      // ======================
 
       else {
 
-        // Aapka existing UPDATE code yahan same rahega.
-        // Lekin jahan bhi staff_id use ho raha hai,
-        // wahan currentStaffId use karna hai.
-
+        // Aapka existing UPDATE logic
+        // yahan same rahega...
       }
 
     })
   );
 
-  console.log(`Completed staff_id: ${currentStaffId}`);
+  console.log(`Completed staff_id: ${staffId}`);
 }
