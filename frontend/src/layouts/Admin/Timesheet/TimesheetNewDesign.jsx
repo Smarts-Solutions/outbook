@@ -1974,7 +1974,14 @@ const TimesheetNewDesign = () => {
       ];
 
       const csvContent = [headers, ...rows, finalRemarkRow]
-        .map((row) => row.join(","))
+        .map((row) => row.map(cell => {
+          if (cell === null || cell === undefined) return "";
+          const str = String(cell);
+          if (str.search(/["\r\n,]/) >= 0) {
+            return `"${str.replace(/"/g, '""')}"`;
+          }
+          return str;
+        }).join(","))
         .join("\n");
 
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });

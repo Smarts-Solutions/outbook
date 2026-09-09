@@ -513,6 +513,9 @@ const getTimesheet = async (Timesheet) => {
         DATE_FORMAT(timesheet.saturday_date, '%Y-%m-%d') AS saturday_date,
         REPLACE(SUBSTRING_INDEX(timesheet.saturday_hours, ':', 2), ':', '.') AS saturday_hours,
         timesheet.saturday_note AS saturday_note,
+        DATE_FORMAT(timesheet.sunday_date, '%Y-%m-%d') AS sunday_date,
+        REPLACE(SUBSTRING_INDEX(timesheet.sunday_hours, ':', 2), ':', '.') AS sunday_hours,
+        timesheet.sunday_note AS sunday_note,
         timesheet.remark AS remark,
         timesheet.final_remark AS final_remark,
         timesheet.status AS status,
@@ -558,13 +561,15 @@ const getTimesheet = async (Timesheet) => {
           timesheet.wednesday_date BETWEEN ? AND ? OR
           timesheet.thursday_date  BETWEEN ? AND ? OR
           timesheet.friday_date    BETWEEN ? AND ? OR
-          timesheet.saturday_date  BETWEEN ? AND ?
+          timesheet.saturday_date  BETWEEN ? AND ? OR
+          timesheet.sunday_date    BETWEEN ? AND ?
         )
       ORDER BY timesheet.id ASC;
     `;
 
     const queryParams = [
       staff_id,
+      startOfWeekFormatted, endOfWeekFormatted,
       startOfWeekFormatted, endOfWeekFormatted,
       startOfWeekFormatted, endOfWeekFormatted,
       startOfWeekFormatted, endOfWeekFormatted,
@@ -657,7 +662,8 @@ const getTimesheet = async (Timesheet) => {
             item.wednesday_date ||
             item.thursday_date ||
             item.friday_date ||
-            item.saturday_date;
+            item.saturday_date ||
+            item.sunday_date;
 
           if (!firstDate) return null;
 
@@ -711,6 +717,7 @@ const getTimesheet = async (Timesheet) => {
       "thursday_date",
       "friday_date",
       "saturday_date",
+      "sunday_date",
     ];
 
     // Current week ka Monday nikalo
@@ -722,17 +729,17 @@ const getTimesheet = async (Timesheet) => {
     // weekOffset apply karo — 7 din ka shift
     monday.setDate(monday.getDate() + weekOffset * 7);
 
-    // Us week ka Saturday
-    const saturday = new Date(monday);
-    saturday.setDate(monday.getDate() + 5);
-    saturday.setHours(23, 59, 59, 999);
+    // Us week ka Sunday
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
 
     // Filter: sirf wahi rows jinka koi bhi dateField us week ke andar ho
     rows = rows.filter((row) =>
       dateFields.some((field) => {
         if (!row[field]) return false;
         const d = new Date(row[field]).setHours(0, 0, 0, 0);
-        return d >= monday.getTime() && d <= saturday.getTime();
+        return d >= monday.getTime() && d <= sunday.getTime();
       })
     );
 
