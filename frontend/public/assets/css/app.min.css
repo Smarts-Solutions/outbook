@@ -5513,3 +5513,8 @@ svg {
   overflow-y: auto;
   padding-right: 5px;
 }
+
+.timesheet-datatable-container .rdt_TableHead {
+  position: sticky;
+  z-index: 99 !important;
+}

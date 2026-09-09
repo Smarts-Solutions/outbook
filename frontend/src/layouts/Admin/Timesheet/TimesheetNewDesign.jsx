@@ -500,6 +500,7 @@ const TimesheetNewDesign = () => {
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
   const [loading, setLoading] = useState(false);
+  const [saveAction, setSaveAction] = useState(null);
   const [exporting, setExporting] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
@@ -1313,7 +1314,8 @@ const TimesheetNewDesign = () => {
   };
 
   const saveData = async (e, status = 0) => {
-
+    setSaveAction(status);
+    e.preventDefault();
     if (timeSheetRows.length === 0) {
       sweatalert.fire({
         icon: "warning",
@@ -1925,7 +1927,9 @@ const TimesheetNewDesign = () => {
         "Friday Note",
         weekDays.saturday ? dayMonthFormatDate(weekDays.saturday) : "",
         "Saturday Note",
-        "Remark",
+        weekDays.sunday ? dayMonthFormatDate(weekDays.sunday) : "",
+        "Sunday Note",
+        // "Remark",
       ];
 
       let total_hours = 0;
@@ -1957,7 +1961,9 @@ const TimesheetNewDesign = () => {
             item.friday_note || "",
             item.saturday_hours || 0,
             item.saturday_note || "",
-            item.remark || "",
+            item.sunday_hours || 0,
+            item.sunday_note || "",
+            // item.remark || "",
           ];
         });
 
@@ -2633,13 +2639,14 @@ const TimesheetNewDesign = () => {
                 </div>
                 <div className="mt-3">
                   <label className="form-label">Final remark (weekly)</label>
-                  <div>
+                  <div className="timesheet-submit-div">
                     <textarea
                       className="form-control"
                       placeholder="e.g. Completed all assigned development tasks for this week."
                       style={{ minHeight: "60px" }}
                       value={remarkText || ""}
                       onChange={(e) => setRemarkText(e.target.value)}
+                      disabled={submitStatusAllKey === 1}
                     ></textarea>
                   </div>
                   <div className="timesheet-submit-div">
@@ -2649,8 +2656,8 @@ const TimesheetNewDesign = () => {
                     <div className="timesheet-submit-div-right">
                       {submitStatusAllKey === 0 && staffDetails.id == multipleFilter.staff_id && (
                         <>
-                          <button type="button" className="btn btn-info" onClick={(e) => saveData(e, 0)} disabled={loading}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"></path></svg> {loading ? "Saving..." : "Save"}</button>
-                          <button type="button" className="btn btn-outline-success" onClick={(e) => saveData(e, 1)} disabled={loading}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path><path d="M7 3v4a1 1 0 0 0 1 1h7"></path></svg> {loading ? "Submitting..." : "Submit"}</button>
+                          <button type="button" className="btn btn-info" onClick={(e) => saveData(e, 0)} disabled={loading}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"></path></svg> {loading && saveAction === 0 ? "Saving..." : "Save"}</button>
+                          <button type="button" className="btn btn-outline-success" onClick={(e) => saveData(e, 1)} disabled={loading}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path><path d="M7 3v4a1 1 0 0 0 1 1h7"></path></svg> {loading && saveAction === 1 ? "Submitting..." : "Submit"}</button>
                         </>
                       )}
                     </div>
@@ -3294,7 +3301,21 @@ const TimesheetNewDesign = () => {
                                   {details.internal_external == 2 && details.client_name ? ` - ${details.client_name}` : ""}
                                 </span>
                                 <span className="accordion-button-right-text">
-                                  Job: {details.internal_external == 1 ? details.internal_name || "N/A" : details.job_name || "N/A"} |
+                                  Job: {(() => {
+                                    if (details.internal_external == 1) {
+                                      return details.internal_name || "N/A";
+                                    } else {
+                                      const currentRow = timeSheetRows.find(r => String(r.id) === String(rowId));
+                                      if (currentRow) {
+                                        if (currentRow.jobData && currentRow.jobData.length > 0) {
+                                          const matched = currentRow.jobData.find(j => String(j.id) === String(details.job_name) || String(j.name) === String(details.job_name));
+                                          if (matched) return matched.name;
+                                        }
+                                        if (currentRow.job_name) return currentRow.job_name;
+                                      }
+                                      return details.job_name || "N/A";
+                                    }
+                                  })()} |
                                   Task: {details.internal_external == 1 ? details.sub_internal_name || "N/A" : details.task_name || "N/A"}
                                   {latestLog && (
                                     <span className={`table-status ${headerStatusClass} ms-2`} style={{ padding: '2px 8px', marginLeft: '10px' }}>
