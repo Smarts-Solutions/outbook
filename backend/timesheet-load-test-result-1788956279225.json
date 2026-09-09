@@ -1,0 +1,120 @@
+{
+  "summary": {
+    "target": "http://localhost:2222/saveTimesheet",
+    "totalIterations": 3,
+    "concurrency": 1,
+    "staffPool": [
+      411,
+      225,
+      279,
+      408,
+      340,
+      437,
+      390,
+      459,
+      528,
+      256,
+      309,
+      470,
+      207,
+      150,
+      486,
+      302,
+      446,
+      22,
+      181,
+      559
+    ],
+    "totals": {
+      "total": 3,
+      "succeeded": 0,
+      "queued": 0,
+      "failed": 3
+    },
+    "timingMs": {
+      "avg": 111,
+      "max": 306
+    },
+    "byStaff": {
+      "225": {
+        "total": 1,
+        "succeeded": 0,
+        "failed": 1,
+        "queued": 0
+      },
+      "279": {
+        "total": 1,
+        "succeeded": 0,
+        "failed": 1,
+        "queued": 0
+      },
+      "411": {
+        "total": 1,
+        "succeeded": 0,
+        "failed": 1,
+        "queued": 0
+      }
+    },
+    "failureBreakdown": {
+      "Error saving timesheet data.": 3
+    },
+    "failedSamples": [
+      {
+        "iteration": 0,
+        "staffId": 411,
+        "durationMs": 306,
+        "httpStatus": 200,
+        "status": false,
+        "message": "Error saving timesheet data.",
+        "queued": false
+      },
+      {
+        "iteration": 1,
+        "staffId": 225,
+        "durationMs": 16,
+        "httpStatus": 200,
+        "status": false,
+        "message": "Error saving timesheet data.",
+        "queued": false
+      },
+      {
+        "iteration": 2,
+        "staffId": 279,
+        "durationMs": 11,
+        "httpStatus": 200,
+        "status": false,
+        "message": "Error saving timesheet data.",
+        "queued": false
+      }
+    ]
+  },
+  "results": [
+    {
+      "iteration": 0,
+      "staffId": 411,
+      "durationMs": 306,
+      "httpStatus": 200,
+      "status": false,
+      "message": "Error saving timesheet data.",
+      "queued": false
+    },
+    {
+      "iteration": 1,
+      "staffId": 225,
+      "durationMs": 16,
+      "httpStatus": 200,
+      "status": false,
+      "message": "Error saving timesheet data.",
+      "queued": false
+    },
+    {
+      "iteration": 2,
+      "staffId": 279,
+      "durationMs": 11,
+      "httpStatus": 200,
+      "status": false,
+      "message": "Error saving timesheet data.",
+      "queued": false
+    }
+  ]
+}
