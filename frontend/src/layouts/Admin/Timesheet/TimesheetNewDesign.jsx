@@ -2067,7 +2067,8 @@ const TimesheetNewDesign = () => {
   }
 
   if (staffDataWeekDataAll.data) {
-    staffDataWeekDataAll.data.forEach((val) => {
+    let sortedData = [...staffDataWeekDataAll.data].sort((a, b) => new Date(b.month_date) - new Date(a.month_date));
+    sortedData.forEach((val) => {
       weekOptions.push({
         value: val.valid_weekOffsets,
         label: getFormattedDate("convert", val.month_date),
@@ -2078,7 +2079,8 @@ const TimesheetNewDesign = () => {
   const weekOptionsSubmitTimeSheet = [];
 
   if (staffDataWeekDataAllSubmitTImeSheet.data) {
-    staffDataWeekDataAllSubmitTImeSheet.data.forEach((val) => {
+    let sortedSubmitData = [...staffDataWeekDataAllSubmitTImeSheet.data].sort((a, b) => new Date(b.month_date) - new Date(a.month_date));
+    sortedSubmitData.forEach((val) => {
       weekOptionsSubmitTimeSheet.push({
         value: val.valid_weekOffsets,
         label: getFormattedDate("convert", val.month_date),
@@ -2422,13 +2424,13 @@ const TimesheetNewDesign = () => {
                   setWeekOffset(0);
                   weekOffSetValue.current = 0;
                   GetTimeSheet(0);
-                }}>Today</button>
+                }}>Go to Current Week</button>
               </div>
             </div>
 
 
             <div className="row mt-3">
-              {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) ? (
+              {/* {["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role) ? (
                 <div className="form-group col-md-4">
                   <label className="form-label mb-2 ms-2">Select Staff</label>
 
@@ -2453,7 +2455,7 @@ const TimesheetNewDesign = () => {
                 </div>
               ) : (
                 ""
-              )}
+              )} */}
 
               {staffDataWeekDataAll.data &&
                 staffDataWeekDataAll.data.length > 0 ? (
