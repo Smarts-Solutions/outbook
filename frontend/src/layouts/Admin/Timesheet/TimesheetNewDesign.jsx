@@ -2751,7 +2751,7 @@ const TimesheetNewDesign = () => {
                   </div>
                 </div>
               </div>
-              <div className="timesheet-white-card mt-3">
+              {/* <div className="timesheet-white-card mt-3">
                 <div className="row">
                   <div className="col-md-4">
                     <label className="form-label">Employee</label>
@@ -2807,7 +2807,7 @@ const TimesheetNewDesign = () => {
                     <button type="button" className="btn btn-outline-info fw-bold">Reset filters</button>
                   </div>
                 </div>
-              </div>
+              </div> */}
               <div className="timesheet-white-card mt-3">
                 <div className="timesheet-table-header-div">
                   <div className="timesheet-table-header-div-left">
