@@ -843,6 +843,7 @@ const TimesheetNewDesign = () => {
       // update record only
       const rowId = updatedRows[index].id;
       updateRecordSheet(rowId, "task_type", e.target.value);
+      resetRowHours(updatedRows, index, rowId);
 
     } finally {
       setLoading(false);
@@ -931,6 +932,7 @@ const TimesheetNewDesign = () => {
       // update record only
       const rowId = updatedRows[index].id;
       updateRecordSheet(rowId, "customer_id", e.target.value);
+      resetRowHours(updatedRows, index, rowId);
 
     } finally {
       setLoading(false);
@@ -1017,6 +1019,7 @@ const TimesheetNewDesign = () => {
       // update record only
       const rowId = updatedRows[index].id;
       updateRecordSheet(rowId, "client_id", e.target.value);
+      resetRowHours(updatedRows, index, rowId);
 
     } finally {
       setLoading(false);
@@ -1074,6 +1077,7 @@ const TimesheetNewDesign = () => {
       // update record only
       const rowId = updatedRows[index].id;
       updateRecordSheet(rowId, "job_id", e.target.value);
+      resetRowHours(updatedRows, index, rowId);
 
     } finally {
       setLoading(false);
@@ -1091,6 +1095,7 @@ const TimesheetNewDesign = () => {
       // update record only
       const rowId = updatedRows[index].id;
       updateRecordSheet(rowId, "task_id", e.target.value);
+      resetRowHours(updatedRows, index, rowId);
 
     } finally {
       setLoading(false);
@@ -1198,6 +1203,34 @@ const TimesheetNewDesign = () => {
 
     } finally {
       setLoading(false);
+    }
+  };
+
+  function updateRecordSheetMultiple(rowId, updates) {
+    setUpdateTimeSheetRows(prev => {
+      const updatedRows_update = [...prev];
+      const existingUpdateIndex = updatedRows_update.findIndex(row => row.id === rowId);
+      if (existingUpdateIndex !== -1) {
+        updatedRows_update[existingUpdateIndex] = { ...updatedRows_update[existingUpdateIndex], ...updates };
+      } else {
+        updatedRows_update.push({ id: rowId, ...updates });
+      }
+      return updatedRows_update;
+    });
+  }
+
+  const resetRowHours = (updatedRows, index, rowId) => {
+    const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+    const updates = {};
+    days.forEach(day => {
+      updatedRows[index][`${day}_hours`] = null;
+      updatedRows[index][`${day}_note`] = "";
+      updates[`${day}_hours`] = null;
+      updates[`${day}_note`] = "";
+    });
+    updatedRows[index].total_hours = 0;
+    if (rowId) {
+      updateRecordSheetMultiple(rowId, updates);
     }
   };
 
