@@ -141,7 +141,7 @@ const TimesheetDatatable = ({
                         classNamePrefix="react-select"
                         styles={{ container: (base) => ({ ...base, width: 130 }) }}
                         options={row.jobData?.map(item => ({ value: item.id, label: item.name })) || []}
-                        value={(row.jobData?.map(item => ({ value: item.id, label: item.name })) || []).find(opt => String(opt.value) === String(row.job_id)) || (row.job_name ? { value: row.job_id, label: row.job_name } : null)}
+                        value={(row.jobData?.map(item => ({ value: item.id, label: item.name })) || []).find(opt => String(opt.value) === String(row.job_id)) || ((row.task_type === "1" ? row.internal_name : row.job_name) ? { value: row.job_id, label: row.task_type === "1" ? row.internal_name : row.job_name } : null)}
                         isSearchable
                         placeholder="Job"
                         isDisabled={row.submit_status === "1" || staffDetails.id != multipleFilter.staff_id}
@@ -166,7 +166,7 @@ const TimesheetDatatable = ({
                         classNamePrefix="react-select"
                         styles={{ container: (base) => ({ ...base, width: 130 }) }}
                         options={row.taskData?.map(item => ({ value: item.id, label: item.name })) || []}
-                        value={(row.taskData?.map(item => ({ value: item.id, label: item.name })) || []).find(opt => String(opt.value) === String(row.task_id)) || (row.task_name ? { value: row.task_id, label: row.task_name } : null)}
+                        value={(row.taskData?.map(item => ({ value: item.id, label: item.name })) || []).find(opt => String(opt.value) === String(row.task_id)) || ((row.task_type === "1" ? row.sub_internal_name : row.task_name) ? { value: row.task_id, label: row.task_type === "1" ? row.sub_internal_name : row.task_name } : null)}
                         isSearchable
                         placeholder="Task"
                         isDisabled={row.submit_status === "1" || staffDetails.id != multipleFilter.staff_id}

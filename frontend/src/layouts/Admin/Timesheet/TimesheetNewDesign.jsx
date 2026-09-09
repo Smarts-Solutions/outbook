@@ -324,6 +324,11 @@ const TimesheetNewDesign = () => {
       if (res?.data?.length > 0 && res?.data[0]?.submit_status === "1") {
         setSubmitStatusAllKey(1);
       }
+      if (res?.data?.length > 0) {
+        setRemarkText(res.data[0].final_remark || "");
+      } else {
+        setRemarkText("");
+      }
       setTimeSheetRows(res.data);
       setTimeSheetRows((prevRows) =>
         prevRows?.map((row) => {
