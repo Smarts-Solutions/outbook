@@ -2647,7 +2647,7 @@ const TimesheetNewDesign = () => {
           </div>
         ) : timesheetData.length > 0 ? (
           <>
-            <div style={{ pointerEvents: "none", opacity: 0.9 }}>
+            <div style={{ opacity: 0.9 }}>
               <TimesheetDatatable
                 rows={timesheetData}
                 weekDays={weekDays}
