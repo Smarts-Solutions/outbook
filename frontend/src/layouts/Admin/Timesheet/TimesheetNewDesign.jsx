@@ -3079,16 +3079,20 @@ const TimesheetNewDesign = () => {
                     <button type="button" className="timesheet-table-header-btn" onClick={() => openHistoryModal()}>
                       <History size={16} className="me-1" /> View Logs
                     </button>
-                    <button type="button" className="timesheet-table-header-btn" onClick={() => { if (submitStatusAllKey === 1) { sweatalert.fire({ icon: "error", title: "Cannot copy to a submitted timesheet." }); } else { setIsCopyModalOpen(true); } }}>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> Copy previous week
-                    </button>
+                    {submitStatusAllKey !== 1 && (
+                      <button type="button" className="timesheet-table-header-btn" onClick={() => { if (submitStatusAllKey === 1) { sweatalert.fire({ icon: "error", title: "Cannot copy to a submitted timesheet." }); } else { setIsCopyModalOpen(true); } }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> Copy previous week
+                      </button>
+                    )}
                     {/* <button className="timesheet-table-header-btn">
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"></path><path d="m14 7 3 3"></path><path d="M5 6v4"></path><path d="M19 14v4"></path><path d="M10 2v2"></path><path d="M7 8H3"></path><path d="M21 16h-4"></path><path d="M11 3H9"></path></svg> Spread 40h Mon–Fri
                     </button>
                     <button className="timesheet-table-header-btn">
                       Clear hours
                     </button> */}
-                    <button type="button" className="timesheet-table-header-add-task-btn" onClick={handleAddNewSheet} disabled={isAddingRow || staffDetails.id != multipleFilter.staff_id}><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg> Add task row</button>
+                    {submitStatusAllKey !== 1 && (
+                      <button type="button" className="timesheet-table-header-add-task-btn" onClick={handleAddNewSheet} disabled={isAddingRow || staffDetails.id != multipleFilter.staff_id}><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg> Add task row</button>
+                    )}
                     <button type="button" className="timesheet-table-header-btn" onClick={() => exportToCSV(timeSheetRows)}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg> Export</button>
                   </div>
                 </div>
