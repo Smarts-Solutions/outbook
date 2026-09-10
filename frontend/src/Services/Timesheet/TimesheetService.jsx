@@ -113,6 +113,19 @@ export async function GET_MANAGER_REVIEW_COUNT(data, authToken) {
   }
 }
 
+export async function GET_MANAGER_REVIEW_DATA(data, authToken) {
+  try {
+    const token = authToken || JSON.parse(localStorage.getItem("token"));
+    const res = await axios.post(`${Config.base_url}getManagerReviewData`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
 
 
 

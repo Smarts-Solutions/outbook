@@ -176,6 +176,15 @@ const getManagerReviewCount = async (req, res) => {
   }
 }
 
+const getManagerReviewData = async (req, res) => {
+  try {
+    const result = await timeSheetService.getManagerReviewData(req.body);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   getTimesheet,
   getTimesheetTaskType,
@@ -183,5 +192,6 @@ module.exports = {
   getStaffHourMinute,
   getTimesheetLogs,
   deleteTimesheetRow,
-  getManagerReviewCount
+  getManagerReviewCount,
+  getManagerReviewData
 };

@@ -2532,6 +2532,672 @@ const getManagerReviewCount = async (data) => {
   }
 };
 
+
+const getManagerReviewData = async (data) => {
+  try {
+    let {
+      StaffUserId,
+      weekOffset = 0,
+      status = "all",
+      page = 1,
+      limit = 10,
+      search = "",
+    } = data;
+
+    // --------------------------------------------------
+    // VALIDATION
+    // --------------------------------------------------
+
+    if (!StaffUserId) {
+      return {
+        status: false,
+        message: "StaffUserId is required.",
+      };
+    }
+
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+    weekOffset = parseInt(weekOffset) || 0;
+
+    search = String(search || "").trim();
+
+    const offset = (page - 1) * limit;
+
+    status = String(status || "all").toLowerCase();
+
+    const allowedStatus = [
+      "all",
+      "submitted",
+      "saved",
+      "missing",
+    ];
+
+    if (!allowedStatus.includes(status)) {
+      return {
+        status: false,
+        message: "Invalid status filter.",
+      };
+    }
+
+    // --------------------------------------------------
+    // GET USER ROLE
+    // --------------------------------------------------
+
+    const roleRows = await QueryRoleHelperFunction(StaffUserId);
+
+    const role_name = roleRows[0]?.role_name?.toUpperCase();
+
+    if (!role_name) {
+      return {
+        status: false,
+        message: "User role not found.",
+      };
+    }
+
+    // --------------------------------------------------
+    // GET STAFF HIERARCHY
+    // --------------------------------------------------
+
+    let LineManageStaffId = [];
+
+    if (
+      role_name !== "SUPERADMIN" &&
+      role_name !== "ADMIN"
+    ) {
+      LineManageStaffId =
+        await LineManageStaffIdHelperFunctionForStaff(StaffUserId);
+
+      if (!Array.isArray(LineManageStaffId)) {
+        LineManageStaffId = [];
+      }
+    }
+
+    // --------------------------------------------------
+    // WEEK CALCULATION
+    // Same Monday -> Sunday logic as getTimesheet()
+    // --------------------------------------------------
+
+    const currentDate = new Date();
+
+    const currentDay = currentDate.getUTCDay();
+
+    const daysSinceMonday =
+      currentDay === 0 ? 6 : currentDay - 1;
+
+    const startOfWeek = new Date(currentDate);
+
+    startOfWeek.setUTCDate(
+      currentDate.getUTCDate() -
+        daysSinceMonday +
+        weekOffset * 7
+    );
+
+    startOfWeek.setUTCHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(startOfWeek);
+
+    endOfWeek.setUTCDate(
+      startOfWeek.getUTCDate() + 6
+    );
+
+    endOfWeek.setUTCHours(23, 59, 59, 999);
+
+    const startOfWeekFormatted =
+      startOfWeek.toISOString().slice(0, 10);
+
+    const endOfWeekFormatted =
+      endOfWeek.toISOString().slice(0, 10);
+
+    console.log(
+      "Manager Review Week:",
+      startOfWeekFormatted,
+      "→",
+      endOfWeekFormatted
+    );
+
+    // --------------------------------------------------
+    // STAFF WHERE CONDITION
+    // --------------------------------------------------
+
+    let staffCondition = "";
+
+    if (
+      role_name === "SUPERADMIN" ||
+      role_name === "ADMIN"
+    ) {
+      staffCondition = `
+        s.role_id != 12
+      `;
+    } else {
+      if (LineManageStaffId.length === 0) {
+        return {
+          status: true,
+          message: "Success",
+          data: [],
+          summary: {
+            totalStaff: 0,
+            submitted: 0,
+            saved: 0,
+            missing: 0,
+          },
+          pagination: {
+            total: 0,
+            page,
+            limit,
+            totalPages: 0,
+            search,
+          },
+          week: {
+            start: startOfWeekFormatted,
+            end: endOfWeekFormatted,
+            weekOffset,
+          },
+        };
+      }
+
+      staffCondition = `
+        s.role_id != 12
+        AND s.id IN (${LineManageStaffId.join(",")})
+      `;
+    }
+
+    // --------------------------------------------------
+    // SEARCH CONDITION
+    // --------------------------------------------------
+
+    let searchCondition = "";
+    let searchParams = [];
+
+    if (search) {
+      const likeSearch = `%${search}%`;
+
+      searchCondition = `
+        AND (
+          s.first_name LIKE ?
+          OR s.last_name LIKE ?
+          OR CONCAT(s.first_name, ' ', s.last_name) LIKE ?
+          OR s.email LIKE ?
+          OR s.employee_number LIKE ?
+          OR s.phone LIKE ?
+          OR r.role_name LIKE ?
+        )
+      `;
+
+      searchParams = [
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+        likeSearch,
+      ];
+    }
+
+    // --------------------------------------------------
+    // TIMESHEET AGGREGATION
+    // --------------------------------------------------
+    //
+    // save_date IS NOT NULL = Saved
+    // submit_status = 1     = Submitted
+    //
+    // Hours converted into seconds first.
+    //
+    // --------------------------------------------------
+
+    const timesheetJoin = `
+      LEFT JOIN (
+        SELECT
+          t.staff_id,
+
+          /*
+           * Total hours in seconds
+           */
+          SUM(
+            COALESCE(
+              TIME_TO_SEC(
+                STR_TO_DATE(
+                  NULLIF(
+                    SUBSTRING_INDEX(t.monday_hours, ':', 2),
+                    ''
+                  ),
+                  '%H:%i'
+                )
+              ),
+              0
+            )
+            +
+            COALESCE(
+              TIME_TO_SEC(
+                STR_TO_DATE(
+                  NULLIF(
+                    SUBSTRING_INDEX(t.tuesday_hours, ':', 2),
+                    ''
+                  ),
+                  '%H:%i'
+                )
+              ),
+              0
+            )
+            +
+            COALESCE(
+              TIME_TO_SEC(
+                STR_TO_DATE(
+                  NULLIF(
+                    SUBSTRING_INDEX(t.wednesday_hours, ':', 2),
+                    ''
+                  ),
+                  '%H:%i'
+                )
+              ),
+              0
+            )
+            +
+            COALESCE(
+              TIME_TO_SEC(
+                STR_TO_DATE(
+                  NULLIF(
+                    SUBSTRING_INDEX(t.thursday_hours, ':', 2),
+                    ''
+                  ),
+                  '%H:%i'
+                )
+              ),
+              0
+            )
+            +
+            COALESCE(
+              TIME_TO_SEC(
+                STR_TO_DATE(
+                  NULLIF(
+                    SUBSTRING_INDEX(t.friday_hours, ':', 2),
+                    ''
+                  ),
+                  '%H:%i'
+                )
+              ),
+              0
+            )
+            +
+            COALESCE(
+              TIME_TO_SEC(
+                STR_TO_DATE(
+                  NULLIF(
+                    SUBSTRING_INDEX(t.saturday_hours, ':', 2),
+                    ''
+                  ),
+                  '%H:%i'
+                )
+              ),
+              0
+            )
+            +
+            COALESCE(
+              TIME_TO_SEC(
+                STR_TO_DATE(
+                  NULLIF(
+                    SUBSTRING_INDEX(t.sunday_hours, ':', 2),
+                    ''
+                  ),
+                  '%H:%i'
+                )
+              ),
+              0
+            )
+          ) AS total_seconds,
+
+          /*
+           * At least one submitted row
+           */
+          MAX(
+            CASE
+              WHEN t.submit_status = '1'
+              THEN 1
+              ELSE 0
+            END
+          ) AS has_submitted,
+
+          /*
+           * At least one saved row
+           */
+          MAX(
+            CASE
+              WHEN t.save_date IS NOT NULL
+              THEN 1
+              ELSE 0
+            END
+          ) AS has_saved,
+
+          COUNT(t.id) AS timesheet_count
+
+        FROM timesheet t
+
+        WHERE
+          t.is_deleted = 0
+
+          AND (
+            t.monday_date BETWEEN ? AND ?
+            OR t.tuesday_date BETWEEN ? AND ?
+            OR t.wednesday_date BETWEEN ? AND ?
+            OR t.thursday_date BETWEEN ? AND ?
+            OR t.friday_date BETWEEN ? AND ?
+            OR t.saturday_date BETWEEN ? AND ?
+            OR t.sunday_date BETWEEN ? AND ?
+          )
+
+        GROUP BY t.staff_id
+      ) ts
+
+      ON ts.staff_id = s.id
+    `;
+
+    const weekParams = [
+      startOfWeekFormatted,
+      endOfWeekFormatted,
+
+      startOfWeekFormatted,
+      endOfWeekFormatted,
+
+      startOfWeekFormatted,
+      endOfWeekFormatted,
+
+      startOfWeekFormatted,
+      endOfWeekFormatted,
+
+      startOfWeekFormatted,
+      endOfWeekFormatted,
+
+      startOfWeekFormatted,
+      endOfWeekFormatted,
+
+      startOfWeekFormatted,
+      endOfWeekFormatted,
+    ];
+
+    // --------------------------------------------------
+    // STATUS FILTER
+    // --------------------------------------------------
+
+    let statusCondition = "";
+
+    switch (status) {
+      case "submitted":
+        statusCondition = `
+          AND COALESCE(ts.has_submitted, 0) = 1
+        `;
+        break;
+
+      case "saved":
+        statusCondition = `
+          AND COALESCE(ts.has_submitted, 0) = 0
+          AND COALESCE(ts.has_saved, 0) = 1
+        `;
+        break;
+
+      case "missing":
+        statusCondition = `
+          AND COALESCE(ts.has_submitted, 0) = 0
+          AND COALESCE(ts.has_saved, 0) = 0
+        `;
+        break;
+
+      default:
+        statusCondition = "";
+    }
+
+    // --------------------------------------------------
+    // MAIN QUERY
+    // --------------------------------------------------
+
+    const mainQuery = `
+      SELECT
+        s.id AS staff_id,
+
+        CONCAT(
+          s.first_name,
+          ' ',
+          s.last_name
+        ) AS staff_name,
+
+        s.first_name,
+        s.last_name,
+
+        s.email,
+
+        s.employee_number,
+
+        s.status AS staff_status,
+
+        r.role_name,
+
+        COALESCE(ts.timesheet_count, 0)
+          AS timesheet_count,
+
+        /*
+         * Total hours
+         *
+         * SEC_TO_TIME can return values such as:
+         * 40:30:00
+         *
+         * We only need HH:MM
+         */
+        CASE
+          WHEN COALESCE(ts.total_seconds, 0) = 0
+            THEN '00:00'
+
+          ELSE LEFT(
+            SEC_TO_TIME(
+              ts.total_seconds
+            ),
+            5
+          )
+        END AS total_hours,
+
+        /*
+         * Final status
+         */
+        CASE
+          WHEN COALESCE(ts.has_submitted, 0) = 1
+            THEN 'Submitted'
+
+          WHEN COALESCE(ts.has_saved, 0) = 1
+            THEN 'Saved'
+
+          ELSE 'Missing'
+        END AS timesheet_status,
+
+        COALESCE(ts.has_saved, 0)
+          AS has_saved,
+
+        COALESCE(ts.has_submitted, 0)
+          AS has_submitted
+
+      FROM staffs s
+
+      INNER JOIN roles r
+        ON r.id = s.role_id
+
+      ${timesheetJoin}
+
+      WHERE
+        ${staffCondition}
+
+        ${searchCondition}
+
+        ${statusCondition}
+
+      ORDER BY
+        s.first_name ASC,
+        s.last_name ASC
+
+      LIMIT ? OFFSET ?
+    `;
+
+    const mainParams = [
+      ...weekParams,
+      ...searchParams,
+      limit,
+      offset,
+    ];
+
+    const [rows] = await pool.query(
+      mainQuery,
+      mainParams
+    );
+
+    // --------------------------------------------------
+    // COUNT QUERY
+    // --------------------------------------------------
+
+    const countQuery = `
+      SELECT COUNT(*) AS total
+
+      FROM staffs s
+
+      INNER JOIN roles r
+        ON r.id = s.role_id
+
+      ${timesheetJoin}
+
+      WHERE
+        ${staffCondition}
+
+        ${searchCondition}
+
+        ${statusCondition}
+    `;
+
+    const countParams = [
+      ...weekParams,
+      ...searchParams,
+    ];
+
+    const [countRows] = await pool.query(
+      countQuery,
+      countParams
+    );
+
+    const total =
+      Number(countRows[0]?.total) || 0;
+
+    // --------------------------------------------------
+    // SUMMARY QUERY
+    // --------------------------------------------------
+    //
+    // Summary should always show counts for ALL staff,
+    // irrespective of selected tab.
+    //
+    // --------------------------------------------------
+
+    const summaryQuery = `
+      SELECT
+
+        COUNT(*) AS totalStaff,
+
+        SUM(
+          CASE
+            WHEN COALESCE(ts.has_submitted, 0) = 1
+            THEN 1
+            ELSE 0
+          END
+        ) AS submitted,
+
+        SUM(
+          CASE
+            WHEN COALESCE(ts.has_submitted, 0) = 0
+             AND COALESCE(ts.has_saved, 0) = 1
+            THEN 1
+            ELSE 0
+          END
+        ) AS saved,
+
+        SUM(
+          CASE
+            WHEN COALESCE(ts.has_submitted, 0) = 0
+             AND COALESCE(ts.has_saved, 0) = 0
+            THEN 1
+            ELSE 0
+          END
+        ) AS missing
+
+      FROM staffs s
+
+      INNER JOIN roles r
+        ON r.id = s.role_id
+
+      ${timesheetJoin}
+
+      WHERE
+        ${staffCondition}
+
+        ${searchCondition}
+    `;
+
+    const summaryParams = [
+      ...weekParams,
+      ...searchParams,
+    ];
+
+    const [summaryRows] = await pool.query(
+      summaryQuery,
+      summaryParams
+    );
+
+    const summary = {
+      totalStaff:
+        Number(summaryRows[0]?.totalStaff) || 0,
+
+      submitted:
+        Number(summaryRows[0]?.submitted) || 0,
+
+      saved:
+        Number(summaryRows[0]?.saved) || 0,
+
+      missing:
+        Number(summaryRows[0]?.missing) || 0,
+    };
+
+    // --------------------------------------------------
+    // RESPONSE
+    // --------------------------------------------------
+
+    return {
+      status: true,
+      message: "Manager review data fetched successfully.",
+
+      data: rows,
+
+      summary,
+
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        search,
+      },
+
+      week: {
+        weekOffset,
+        startDate: startOfWeekFormatted,
+        endDate: endOfWeekFormatted,
+      },
+    };
+
+  } catch (error) {
+    console.error(
+      "getManagerReview Error:",
+      error
+    );
+
+    return {
+      status: false,
+      message: "Error fetching manager review data.",
+      error: error.message,
+    };
+  }
+};
+
 module.exports = {
 
   getTimesheet,
@@ -2540,5 +3206,6 @@ module.exports = {
   getStaffHourMinute,
   getTimesheetLogs,
   deleteTimesheetRow,
-  getManagerReviewCount
+  getManagerReviewCount,
+  getManagerReviewData
 };

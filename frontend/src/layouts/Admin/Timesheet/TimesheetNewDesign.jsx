@@ -33,6 +33,7 @@ import {
   getTimesheetLogsData,
   deleteTimesheetRowData,
   getManagerReviewCount,
+  getManagerReviewData,
 } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
 
 import { SAVE_TIMESHEET } from "../../../Services/Timesheet/TimesheetService";
@@ -72,6 +73,27 @@ const TimesheetNewDesign = () => {
   const [savedThisWeek, setSavedThisWeek] = useState(0);
   const [missingLastWeek, setMissingLastWeek] = useState(0);
   const [activeReviewTab, setActiveReviewTab] = useState("all"); // all | submitted | saved | missing
+
+  const [managerReviewData, setManagerReviewData] = useState([]);
+
+  useEffect(() => {
+    fetchManagerReviewData();
+  }, []);
+
+  const fetchManagerReviewData = async () => {
+    try {
+      const req = { weekOffset: weekOffset };
+      const res = await dispatch(getManagerReviewData({ req, authToken: token })).unwrap();
+      if (res.status) {
+        setManagerReviewData(res.data);
+        console.log("res.data", res.data);
+      } else {
+        sweatalert.fire({ icon: "error", title: "Error fetching manager review data" });
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
 
 
@@ -2945,8 +2967,8 @@ const TimesheetNewDesign = () => {
                     </div>
                     <div className="mt-3">
                       <div className="review-empty-state">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9eadb7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                        <p className="mt-2 mb-0" style={{color: "#9eadb7", fontSize: 14}}>Total <b style={{color:"#0c1a24"}}>{managerReviewCount}</b> staff members this week</p>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9eadb7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                        <p className="mt-2 mb-0" style={{ color: "#9eadb7", fontSize: 14 }}>Total <b style={{ color: "#0c1a24" }}>{managerReviewCount}</b> staff members this week</p>
                       </div>
                     </div>
                   </div>
@@ -2962,8 +2984,8 @@ const TimesheetNewDesign = () => {
                     </div>
                     <div className="mt-3">
                       <div className="review-empty-state">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0cb2ef" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                        <p className="mt-2 mb-0" style={{color: "#9eadb7", fontSize: 14}}><b style={{color:"#0cb2ef"}}>{submittedThisWeek}</b> staff submitted their timesheet this week</p>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0cb2ef" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                        <p className="mt-2 mb-0" style={{ color: "#9eadb7", fontSize: 14 }}><b style={{ color: "#0cb2ef" }}>{submittedThisWeek}</b> staff submitted their timesheet this week</p>
                       </div>
                     </div>
                   </div>
@@ -2979,8 +3001,8 @@ const TimesheetNewDesign = () => {
                     </div>
                     <div className="mt-3">
                       <div className="review-empty-state">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#e8930a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg>
-                        <p className="mt-2 mb-0" style={{color: "#9eadb7", fontSize: 14}}><b style={{color:"#e8930a"}}>{savedThisWeek}</b> staff saved draft but have not submitted yet this week</p>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#e8930a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" /><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7" /><path d="M7 3v4a1 1 0 0 0 1 1h7" /></svg>
+                        <p className="mt-2 mb-0" style={{ color: "#9eadb7", fontSize: 14 }}><b style={{ color: "#e8930a" }}>{savedThisWeek}</b> staff saved draft but have not submitted yet this week</p>
                       </div>
                     </div>
                   </div>
@@ -2996,8 +3018,8 @@ const TimesheetNewDesign = () => {
                     </div>
                     <div className="mt-3">
                       <div className="review-empty-state">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#dc3545" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        <p className="mt-2 mb-0" style={{color: "#9eadb7", fontSize: 14}}><b style={{color:"#dc3545"}}>{missingLastWeek}</b> staff did not submit timesheet last week (includes saved drafts)</p>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#dc3545" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                        <p className="mt-2 mb-0" style={{ color: "#9eadb7", fontSize: 14 }}><b style={{ color: "#dc3545" }}>{missingLastWeek}</b> staff did not submit timesheet last week (includes saved drafts)</p>
                       </div>
                     </div>
                   </div>

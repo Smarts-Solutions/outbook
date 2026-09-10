@@ -14,5 +14,6 @@ router.post('/getStaffHourMinute',verifyToken, timeSheetController.getStaffHourM
 router.post('/getTimesheetLogs',verifyToken, timeSheetController.getTimesheetLogs);
 router.post('/deleteTimesheetRow',verifyToken, timeSheetController.deleteTimesheetRow);
 router.post('/getmanagerreviewcount',verifyToken, timeSheetController.getManagerReviewCount);
+router.post('/getManagerReviewData',verifyToken, timeSheetController.getManagerReviewData);
 
 module.exports = router;

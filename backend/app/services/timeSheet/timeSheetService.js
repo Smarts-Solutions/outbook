@@ -27,6 +27,10 @@ const getManagerReviewCount = async (data) => {
   return timeSheetModel.getManagerReviewCount(data);
 }
 
+const getManagerReviewData = async (data) => {
+  return timeSheetModel.getManagerReviewData(data);
+}
+
 module.exports = {
   getTimesheet,
   getTimesheetTaskType,
@@ -34,5 +38,6 @@ module.exports = {
   getStaffHourMinute,
   getTimesheetLogs,
   deleteTimesheetRow,
-  getManagerReviewCount
+  getManagerReviewCount,
+  getManagerReviewData
 };

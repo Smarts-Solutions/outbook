@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { GET_TIMESHEET_TASK_TYPE ,GET_TIMESHEET ,SAVE_TIMESHEET ,GET_STAFF_HOURSMINUTE, GET_TIMESHEET_LOGS, DELETE_TIMESHEET_ROW, GET_MANAGER_REVIEW_COUNT } from "../../../Services/Timesheet/TimesheetService";
+import { GET_TIMESHEET_TASK_TYPE ,GET_TIMESHEET ,SAVE_TIMESHEET ,GET_STAFF_HOURSMINUTE, GET_TIMESHEET_LOGS, DELETE_TIMESHEET_ROW, GET_MANAGER_REVIEW_COUNT, GET_MANAGER_REVIEW_DATA } from "../../../Services/Timesheet/TimesheetService";
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
 export const getTimesheetTaskTypedData = createAsyncThunk("getTimesheetTaskType", async (data) => {
@@ -95,6 +95,21 @@ export const getManagerReviewCount = createAsyncThunk("getmanagerreviewcount", a
             StaffUserId: StaffUserId.id,
         };
         const res = await GET_MANAGER_REVIEW_COUNT(updatedReq, authToken);
+        return res; 
+    } catch (err) {
+        throw err;
+    }
+});
+
+export const getManagerReviewData = createAsyncThunk("getManagerReviewData", async (data) => {
+    try {
+        const { req, authToken } = data;
+        var StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
+        const updatedReq = {
+            ...req,
+            StaffUserId: StaffUserId.id,
+        };
+        const res = await GET_MANAGER_REVIEW_DATA(updatedReq, authToken);
         return res; 
     } catch (err) {
         throw err;
