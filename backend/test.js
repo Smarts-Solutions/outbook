@@ -80,3 +80,81 @@ axios.request(config)
 .catch((error) => {
   console.log(error);
 });
+
+
+
+const staff = [
+  411, 225, 279, 408, 340, 437, 390, 459, 528, 256,
+  309, 470, 207, 150, 486, 302, 446, 22, 181, 559
+];
+
+const data = [
+  {
+    id: null,
+    task_type: "1",
+    customer_id: null,
+    client_id: null,
+    job_id: 12,
+    task_id: 38,
+    job_total_time: null,
+
+    monday_date: "2026-09-07",
+    monday_hours: "1",
+    monday_note: null,
+
+    tuesday_date: "2026-09-08",
+    tuesday_hours: "2",
+    tuesday_note: null,
+
+    wednesday_date: "2026-09-09",
+    wednesday_hours: "3",
+    wednesday_note: null,
+
+    thursday_date: "2026-09-10",
+    thursday_hours: "4",
+    thursday_note: null,
+
+    friday_date: "2026-09-11",
+    friday_hours: "5",
+    friday_note: null,
+
+    saturday_date: null,
+    saturday_hours: null,
+    saturday_note: null,
+
+    sunday_date: null,
+    sunday_hours: null,
+    sunday_note: null,
+
+    remark: null,
+    newRow: 1,
+    editRow: 0,
+    submit_status: "0",
+    staffs_hourminute: "42:30",
+    total_hours: 15
+  }
+];
+
+// for (const staffId of staff.slice(0, 10)) {
+//   const payload = {
+//     staff_id: staffId,
+//     data: data,
+//     deleteRows: [],
+//     weekOffset: 0,
+//     ip: "122.168.114.106",
+//     StaffUserId: staffId
+//   };
+
+//   console.log("Processing Staff:", staffId);
+
+//   // API call
+//   await axios.post(
+//     "YOUR_API_URL",
+//     payload
+//   );
+
+//   console.log("Completed Staff:", staffId);
+// }
+
+
+
