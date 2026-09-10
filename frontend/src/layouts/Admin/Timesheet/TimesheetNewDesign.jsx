@@ -1,27 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import {
-  Trash2,
-  ChevronLeft,
-  ChevronRight,
-  Download,
-  FileAxis3d,
-  Eye,
-  Pencil,
-  Check,
-  Save,
-  CalendarClock,
-  Briefcase,
-  User,
-  SquareCheck,
-  Info,
-  File,
-  ArrowLeft,
-  Plus,
-  Minus,
-  History
-
-} from "lucide-react";
+import { Eye, History } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import Select from "react-select";
@@ -39,6 +18,8 @@ import {
 import { SAVE_TIMESHEET } from "../../../Services/Timesheet/TimesheetService";
 import sweatalert from "sweetalert2";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
+import ReactPaginate from "react-paginate";
+import Datatable from "../../../Components/ExtraComponents/Datatable";
 import TimesheetDatatable from "../../../Components/ExtraComponents/TimesheetDatatable";
 import ResourceDatatable from "../../../Components/ExtraComponents/ResourceDatatable";
 import {
@@ -74,26 +55,17 @@ const TimesheetNewDesign = () => {
   const [missingLastWeek, setMissingLastWeek] = useState(0);
   const [activeReviewTab, setActiveReviewTab] = useState("all"); // all | submitted | saved | missing
 
-  const [managerReviewData, setManagerReviewData] = useState([]);
+  const [managerReviewData, setManagerReviewData] = useState({
+    loading: true,
+    rows: [],
+    pagination: {},
+  });
+  const [managerReviewPage, setManagerReviewPage] = useState(1);
+  // managerReviewPage already hai, bas ye naye add karo:
+  const [managerReviewSearchTerm, setManagerReviewSearchTerm] = useState("");
+  const [managerReviewPageSize, setManagerReviewPageSize] = useState(10);
+  const managerReviewDebounceRef = useRef(null);
 
-  useEffect(() => {
-    fetchManagerReviewData();
-  }, []);
-
-  const fetchManagerReviewData = async () => {
-    try {
-      const req = { weekOffset: weekOffset };
-      const res = await dispatch(getManagerReviewData({ req, authToken: token })).unwrap();
-      if (res.status) {
-        setManagerReviewData(res.data);
-        console.log("res.data", res.data);
-      } else {
-        sweatalert.fire({ icon: "error", title: "Error fetching manager review data" });
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
 
 
@@ -2441,6 +2413,225 @@ const TimesheetNewDesign = () => {
     );
   };
 
+  useEffect(() => {
+    setManagerReviewPage(1);
+    fetchManagerReviewData(activeReviewTab, 1, managerReviewPageSize, managerReviewSearchTerm);
+  }, [activeReviewTab, weekOffset]);
+
+  const fetchManagerReviewData = async (
+    statusTab = activeReviewTab,
+    page = 1,
+    limit = managerReviewPageSize,
+    search = managerReviewSearchTerm
+  ) => {
+    try {
+      setManagerReviewData((prev) => ({ ...prev, loading: true }));
+      const req = {
+        StaffUserId: parseInt(staffDetails.id),
+        weekOffset: weekOffset,
+        status: statusTab,
+        page,
+        limit,
+        search,
+      };
+      const res = await dispatch(getManagerReviewData({ req, authToken: token })).unwrap();
+      if (res.status) {
+        setManagerReviewData({ loading: false, rows: res.data, pagination: res.pagination });
+        if (res.summary) {
+          setManagerReviewCount(res.summary.totalStaff || 0);
+          setSubmittedThisWeek(res.summary.submitted || 0);
+          setSavedThisWeek(res.summary.saved || 0);
+          setMissingLastWeek(res.summary.missing || 0);
+        }
+      } else {
+        setManagerReviewData({ loading: false, rows: [], pagination: {} });
+      }
+    } catch (err) {
+      console.log(err);
+      setManagerReviewData({ loading: false, rows: [], pagination: {} });
+    }
+  };
+
+
+  const handleManagerReviewPageChange = (selected) => {
+    const newPage = selected.selected + 1;
+    setManagerReviewPage(newPage);
+    fetchManagerReviewData(activeReviewTab, newPage, managerReviewPageSize, managerReviewSearchTerm);
+  };
+
+  const handleManagerReviewPageSizeChange = (event) => {
+    const newSize = parseInt(event.target.value, 10);
+    setManagerReviewPageSize(newSize);
+    setManagerReviewPage(1);
+    fetchManagerReviewData(activeReviewTab, 1, newSize, managerReviewSearchTerm);
+  };
+
+  const handleManagerReviewSearchChange = (term) => {
+    setManagerReviewSearchTerm(term);
+    setManagerReviewPage(1);
+    if (managerReviewDebounceRef.current) clearTimeout(managerReviewDebounceRef.current);
+    managerReviewDebounceRef.current = setTimeout(() => {
+      fetchManagerReviewData(activeReviewTab, 1, managerReviewPageSize, term);
+    }, 500);
+  };
+
+  const handleViewStaffTimesheet = (staffId) => {
+    const e = { target: { name: "staff_id", value: staffId } };
+    selectFilterStaffANdWeek(e);
+    document.getElementById("timesheet-tab")?.click();
+  };
+
+  const renderStatusBadge = (status) => {
+    const map = {
+      Submitted: { color: "#0cb2ef", bg: "#e6f7fd" },
+      Saved: { color: "#e8930a", bg: "#fdf3e3" },
+      Missing: { color: "#dc3545", bg: "#fbe9eb" },
+    };
+    const s = map[status] || { color: "#5b6b7a", bg: "#eef2f5" };
+    return (
+      <span
+        className="table-status"
+        style={{ color: s.color, background: s.bg, padding: "2px 10px", borderRadius: "12px", fontSize: "12px", fontWeight: 600 }}
+      >
+        {status}
+      </span>
+    );
+  };
+
+  const managerReviewColumns = [
+    {
+      name: "S.No",
+      selector: (row, index) => (managerReviewPage - 1) * managerReviewPageSize + (index + 1),
+      width: "80px",
+      reorder: false,
+    },
+    {
+      name: "Employee",
+      cell: (row) => <div title={row.staff_name}>{row.staff_name}</div>,
+      selector: (row) => row.staff_name,
+      sortable: true,
+      width: "200px",
+      reorder: false,
+    },
+    {
+      name: "Email",
+      cell: (row) => <div title={row.email}>{row.email}</div>,
+      selector: (row) => row.email,
+      sortable: true,
+      width: "220px",
+      reorder: false,
+    },
+    {
+      name: "Employee ID",
+      selector: (row) => row.employee_number || "-",
+      sortable: true,
+      width: "160px",
+      reorder: false,
+    },
+    {
+      name: "Role",
+      selector: (row) => row.role_name,
+      sortable: true,
+      width: "160px",
+      reorder: false,
+    },
+    {
+      name: "Entries",
+      cell: (row) => <div className="w-100 text-center">{row.timesheet_count}</div>,
+      selector: (row) => row.timesheet_count,
+      sortable: true,
+      width: "105px",
+      reorder: false,
+    },
+    {
+      name: "Total Hours",
+      cell: (row) => <div className="w-100 text-center">{row.total_hours}</div>,
+      selector: (row) => row.total_hours,
+      sortable: true,
+      width: "140px",
+      reorder: false,
+    },
+    {
+      name: "Status",
+      cell: (row) => renderStatusBadge(row.timesheet_status),
+      width: "130px",
+      reorder: false,
+    },
+  ];
+
+  const renderManagerReviewTable = () => (
+    <>
+      <div className="row mb-3 align-items-center">
+        <div className="col-md-4">
+          <input
+            type="text"
+            placeholder="Search Staff..."
+            className="form-control"
+            value={managerReviewSearchTerm}
+            onChange={(e) => handleManagerReviewSearchChange(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="datatable-wrapper" style={{ position: "relative" }}>
+        {managerReviewData.loading && (
+          <div className="overlay">
+            <div className="loader"></div>
+          </div>
+        )}
+
+        {managerReviewData.rows && managerReviewData.rows.length > 0 ? (
+          <>
+            <Datatable
+              columns={managerReviewColumns}
+              data={managerReviewData.rows}
+              filter={false}
+              pagination={false}
+            />
+
+            <ReactPaginate
+              previousLabel={"Previous"}
+              nextLabel={"Next"}
+              breakLabel={"..."}
+              pageCount={Math.ceil((managerReviewData.pagination?.total || 0) / managerReviewPageSize) || 1}
+              marginPagesDisplayed={2}
+              pageRangeDisplayed={5}
+              onPageChange={handleManagerReviewPageChange}
+              containerClassName={"pagination"}
+              activeClassName={"active"}
+              forcePage={managerReviewPage - 1}
+            />
+
+            <select
+              className="perpage-select"
+              value={managerReviewPageSize}
+              onChange={handleManagerReviewPageSizeChange}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </>
+        ) : (
+          !managerReviewData.loading && (
+            <div className="text-center mt-5">
+              <img
+                src="/assets/images/No-data-amico.png"
+                alt="No records available"
+                style={{ width: "250px", height: "auto", objectFit: "contain" }}
+              />
+              <p>No data available.</p>
+            </div>
+          )
+        )}
+      </div>
+    </>
+  );
+
+
+
 
   return (
     <>
@@ -2898,78 +3089,18 @@ const TimesheetNewDesign = () => {
                   <span className="review-tab-badge review-tab-badge--red">{missingLastWeek}</span>
                 </button>
               </div>
-              {/* <div className="timesheet-white-card mt-3">
-                <div className="row">
-                  <div className="col-md-4">
-                    <label className="form-label">Employee</label>
-                    <select className="form-select" >
-                      <option>All</option>
-                      <option>All</option>
-                    </select>
-                  </div>
-                  <div className="col-md-4">
-                    <label className="form-label">Status</label>
-                    <select className="form-select" >
-                      <option>All</option>
-                      <option>All</option>
-                    </select>
-                  </div>
-                  <div className="col-md-4">
-                    <label className="form-label">Task Type</label>
-                    <select className="form-select" >
-                      <option>All</option>
-                      <option>All</option>
-                    </select>
-                  </div>
-                  <div className="col-md-4 mt-3">
-                    <label className="form-label">Customer</label>
-                    <select className="form-select" >
-                      <option>All</option>
-                      <option>All</option>
-                    </select>
-                  </div>
-                  <div className="col-md-4 mt-3">
-                    <label className="form-label">Client</label>
-                    <select className="form-select" >
-                      <option>All</option>
-                      <option>All</option>
-                    </select>
-                  </div>
-                  <div className="col-md-4 mt-3">
-                    <label className="form-label">Job</label>
-                    <select className="form-select" >
-                      <option>All</option>
-                      <option>All</option>
-                    </select>
-                  </div>
-                  <div className="col-md-4 mt-3">
-                    <label className="form-label">Date from</label>
-                    <input type="date" className="form-control" />
-                  </div>
-                  <div className="col-md-4 mt-3">
-                    <label className="form-label">Date to</label>
-                    <input type="date" className="form-control" />
-                  </div>
-                  <div className="mt-3 text-end">
-                    <button type="button" className="btn btn-outline-info fw-bold">Reset filters</button>
-                  </div>
-                </div>
-              </div> */}
-              {/* --- Tab Content Panel --- */}
+
               <div className="timesheet-white-card mt-3">
                 {activeReviewTab === "all" && (
                   <div>
                     <div className="timesheet-table-header-div">
                       <div className="timesheet-table-header-div-left">
                         <div className="tab-title"><h3 className="mt-0">All Staff</h3></div>
-                        <p className="page-subtitle mb-0 mt-2">This week · {managerReviewCount} employees</p>
+
                       </div>
                     </div>
                     <div className="mt-3">
-                      <div className="review-empty-state">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9eadb7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-                        <p className="mt-2 mb-0" style={{ color: "#9eadb7", fontSize: 14 }}>Total <b style={{ color: "#0c1a24" }}>{managerReviewCount}</b> staff members this week</p>
-                      </div>
+                      {renderManagerReviewTable()}
                     </div>
                   </div>
                 )}
@@ -2979,14 +3110,11 @@ const TimesheetNewDesign = () => {
                     <div className="timesheet-table-header-div">
                       <div className="timesheet-table-header-div-left">
                         <div className="tab-title"><h3 className="mt-0">Submitted</h3></div>
-                        <p className="page-subtitle mb-0 mt-2">This week · {submittedThisWeek} staff submitted timesheet</p>
+
                       </div>
                     </div>
                     <div className="mt-3">
-                      <div className="review-empty-state">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0cb2ef" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
-                        <p className="mt-2 mb-0" style={{ color: "#9eadb7", fontSize: 14 }}><b style={{ color: "#0cb2ef" }}>{submittedThisWeek}</b> staff submitted their timesheet this week</p>
-                      </div>
+                      {renderManagerReviewTable()}
                     </div>
                   </div>
                 )}
@@ -2996,14 +3124,11 @@ const TimesheetNewDesign = () => {
                     <div className="timesheet-table-header-div">
                       <div className="timesheet-table-header-div-left">
                         <div className="tab-title"><h3 className="mt-0">Saved Drafts</h3></div>
-                        <p className="page-subtitle mb-0 mt-2">This week · {savedThisWeek} staff saved draft only</p>
+
                       </div>
                     </div>
                     <div className="mt-3">
-                      <div className="review-empty-state">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#e8930a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" /><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7" /><path d="M7 3v4a1 1 0 0 0 1 1h7" /></svg>
-                        <p className="mt-2 mb-0" style={{ color: "#9eadb7", fontSize: 14 }}><b style={{ color: "#e8930a" }}>{savedThisWeek}</b> staff saved draft but have not submitted yet this week</p>
-                      </div>
+                      {renderManagerReviewTable()}
                     </div>
                   </div>
                 )}
@@ -3013,14 +3138,11 @@ const TimesheetNewDesign = () => {
                     <div className="timesheet-table-header-div">
                       <div className="timesheet-table-header-div-left">
                         <div className="tab-title"><h3 className="mt-0">Missing</h3></div>
-                        <p className="page-subtitle mb-0 mt-2">Last week · {missingLastWeek} staff did not submit timesheet</p>
+
                       </div>
                     </div>
                     <div className="mt-3">
-                      <div className="review-empty-state">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#dc3545" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-                        <p className="mt-2 mb-0" style={{ color: "#9eadb7", fontSize: 14 }}><b style={{ color: "#dc3545" }}>{missingLastWeek}</b> staff did not submit timesheet last week (includes saved drafts)</p>
-                      </div>
+                      {renderManagerReviewTable()}
                     </div>
                   </div>
                 )}
@@ -3479,7 +3601,7 @@ const TimesheetNewDesign = () => {
           <div className="modal-body p-3">
             {rowHistoryLogs.length > 0 ? (
               (() => {
-                // Group logs by timesheet_row_id
+
                 const groupedLogs = rowHistoryLogs.reduce((acc, log) => {
                   if (!log.timesheet_row_id || log.timesheet_row_id === "0" || log.timesheet_row_id === 0) return acc;
                   if (!acc[log.timesheet_row_id]) {
@@ -3566,12 +3688,12 @@ const TimesheetNewDesign = () => {
                             <div className="accordion-body p-0">
                               <div className="table-responsive">
                                 {(() => {
-                                  // Group logs by created_at timestamp to form "save events"
+
                                   const saveEvents = [];
                                   const dayKeys = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
                                   const dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-                                  // Group logs that share the same created_at (same save action)
+
                                   const eventMap = {};
                                   group.logs.forEach(log => {
                                     const timeKey = new Date(log.created_at).toISOString();
@@ -3595,14 +3717,14 @@ const TimesheetNewDesign = () => {
                                   });
 
                                   Object.values(eventMap).forEach(ev => saveEvents.push(ev));
-                                  // Sort by created_at descending (newest first)
+
                                   saveEvents.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-                                  // Helper to get short date from weekDays 
+
                                   const getShortDate = (dayKey) => {
                                     const val = weekDays[dayKey];
                                     if (!val) return "";
-                                    // weekDays format: "Mon, 07/09/2026"
+
                                     const parts = val.split(", ");
                                     if (parts.length > 1) {
                                       const dateParts = parts[1].split("/");
@@ -3611,7 +3733,7 @@ const TimesheetNewDesign = () => {
                                     return val;
                                   };
 
-                                  // Helper to format filled_at date/time compactly
+
                                   const formatFilledAt = (dateStr) => {
                                     if (!dateStr) return "";
                                     const d = new Date(dateStr);
