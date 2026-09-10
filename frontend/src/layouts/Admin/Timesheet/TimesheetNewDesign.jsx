@@ -714,7 +714,13 @@ const TimesheetNewDesign = () => {
   };
 
   const handleChangeTaskType = async (e, item, index) => {
-    if (submitStatusAllKey === 1 || timeSheetRows[index]?.submit_status === "1") return;
+    if (
+      submitStatusAllKey === 1 ||
+      timeSheetRows[index]?.submit_status === "1" ||
+      isRowSaved(index)
+    ) {
+      return;
+    }
     try {
       setLoading(true);
       const updatedRows = [...timeSheetRows];
@@ -851,7 +857,13 @@ const TimesheetNewDesign = () => {
   };
 
   const selectCustomerData = async (e, index) => {
-    if (submitStatusAllKey === 1 || timeSheetRows[index]?.submit_status === "1") return;
+    if (
+      submitStatusAllKey === 1 ||
+      timeSheetRows[index]?.submit_status === "1" ||
+      isRowSaved(index)
+    ) {
+      return;
+    }
     try {
       setLoading(true);
       const updatedRows = [...timeSheetRows];
@@ -949,7 +961,13 @@ const TimesheetNewDesign = () => {
   }
 
   const selectClientData = async (e, index) => {
-    if (submitStatusAllKey === 1 || timeSheetRows[index]?.submit_status === "1") return;
+    if (
+      submitStatusAllKey === 1 ||
+      timeSheetRows[index]?.submit_status === "1" ||
+      isRowSaved(index)
+    ) {
+      return;
+    }
     try {
       setLoading(true);
 
@@ -1027,7 +1045,13 @@ const TimesheetNewDesign = () => {
   };
 
   const selectJobData = async (e, task_type, index) => {
-    if (submitStatusAllKey === 1 || timeSheetRows[index]?.submit_status === "1") return;
+    if (
+      submitStatusAllKey === 1 ||
+      timeSheetRows[index]?.submit_status === "1" ||
+      isRowSaved(index)
+    ) {
+      return;
+    }
     try {
       setLoading(true);
       const updatedRows = [...timeSheetRows];
@@ -1085,7 +1109,13 @@ const TimesheetNewDesign = () => {
   };
 
   const selectTaskData = async (e, index) => {
-    if (submitStatusAllKey === 1 || timeSheetRows[index]?.submit_status === "1") return;
+    if (
+      submitStatusAllKey === 1 ||
+      timeSheetRows[index]?.submit_status === "1" ||
+      isRowSaved(index)
+    ) {
+      return;
+    }
     try {
       setLoading(true);
       const updatedRows = [...timeSheetRows];
@@ -2351,6 +2381,10 @@ const TimesheetNewDesign = () => {
 
   const isManagerReviewVisible = ["SUPERADMIN", "ADMIN"].includes(role) || (lineMangerData && lineMangerData.length > 0);
 
+  const isRowSaved = (index) => {
+    return Boolean(timeSheetRows[index]?.id);
+  };
+
   return (
     <>
       <div className="container-fluid mt-4" style={{ position: "relative" }}>
@@ -2682,6 +2716,7 @@ const TimesheetNewDesign = () => {
                     setSelectedRowIndex={setSelectedRowIndex}
                     getTotalHoursFromKey={getTotalHoursFromKey}
                     getGrandTotal={getGrandTotalStr}
+                    isRowSaved={isRowSaved}
                   />
                 </div>
                 <div className="mt-3">

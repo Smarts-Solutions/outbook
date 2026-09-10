@@ -27,7 +27,8 @@ const TimesheetDatatable = ({
     setModalText,
     setSelectedRowIndex,
     getTotalHoursFromKey,
-    getGrandTotal
+    getGrandTotal,
+    isRowSaved
 }) => {
 
     const columns = [
@@ -57,7 +58,11 @@ const TimesheetDatatable = ({
                         ].find(opt => String(opt.value) === String(row.task_type)) || null}
                         isSearchable={false}
                         placeholder="Task Type"
-                        isDisabled={row.submit_status === "1" || staffDetails.id != multipleFilter.staff_id}
+                        isDisabled={
+                            isRowSaved(index) ||
+                            row.submit_status === "1" ||
+                            staffDetails.id != multipleFilter.staff_id
+                        }
                         onChange={(selectedOption) => {
                             const e = { target: { name: "task_type", value: selectedOption?.value || "" } };
                             handleChangeTaskType(e, row, index);
@@ -88,7 +93,12 @@ const TimesheetDatatable = ({
                             value={(row.customerData?.map(item => ({ value: item.id, label: item.trading_name })) || []).find(opt => String(opt.value) === String(row.customer_id)) || (row.customer_name ? { value: row.customer_id, label: row.customer_name } : null)}
                             isSearchable
                             placeholder="Customer"
-                            isDisabled={row.task_type !== "2" || row.submit_status === "1" || staffDetails.id != multipleFilter.staff_id}
+                            isDisabled={
+                                isRowSaved(index) ||
+                                row.task_type !== "2" ||
+                                row.submit_status === "1" ||
+                                staffDetails.id != multipleFilter.staff_id
+                            }
                             onChange={(selectedOption) => {
                                 const e = { target: { name: "customer_id", value: selectedOption?.value || "" } };
                                 selectCustomerData(e, index);
@@ -120,7 +130,12 @@ const TimesheetDatatable = ({
                             value={(row.clientData?.map(item => ({ value: item.id, label: item.trading_name })) || []).find(opt => String(opt.value) === String(row.client_id)) || (row.client_name ? { value: row.client_id, label: row.client_name } : null)}
                             isSearchable
                             placeholder="Client"
-                            isDisabled={row.task_type !== "2" || row.submit_status === "1" || staffDetails.id != multipleFilter.staff_id}
+                            isDisabled={
+                                isRowSaved(index) ||
+                                row.task_type !== "2" ||
+                                row.submit_status === "1" ||
+                                staffDetails.id != multipleFilter.staff_id
+                            }
                             onChange={(selectedOption) => {
                                 const e = { target: { name: "client_id", value: selectedOption?.value || "" } };
                                 selectClientData(e, index);
@@ -144,7 +159,11 @@ const TimesheetDatatable = ({
                         value={(row.jobData?.map(item => ({ value: item.id, label: item.name })) || []).find(opt => String(opt.value) === String(row.job_id)) || ((row.task_type === "1" ? row.internal_name : row.job_name) ? { value: row.job_id, label: row.task_type === "1" ? row.internal_name : row.job_name } : null)}
                         isSearchable
                         placeholder="Job"
-                        isDisabled={row.submit_status === "1" || staffDetails.id != multipleFilter.staff_id}
+                        isDisabled={
+                            isRowSaved(index) ||
+                            row.submit_status === "1" ||
+                            staffDetails.id != multipleFilter.staff_id
+                        }
                         onChange={(selectedOption) => {
                             const e = { target: { name: "job_id", value: selectedOption?.value || "" } };
                             selectJobData(e, row.task_type, index);
@@ -169,7 +188,11 @@ const TimesheetDatatable = ({
                         value={(row.taskData?.map(item => ({ value: item.id, label: item.name })) || []).find(opt => String(opt.value) === String(row.task_id)) || ((row.task_type === "1" ? row.sub_internal_name : row.task_name) ? { value: row.task_id, label: row.task_type === "1" ? row.sub_internal_name : row.task_name } : null)}
                         isSearchable
                         placeholder="Task"
-                        isDisabled={row.submit_status === "1" || staffDetails.id != multipleFilter.staff_id}
+                        isDisabled={
+                            isRowSaved(index) ||
+                            row.submit_status === "1" ||
+                            staffDetails.id != multipleFilter.staff_id
+                        }
                         onChange={(selectedOption) => {
                             const e = { target: { name: "task_id", value: selectedOption?.value || "" } };
                             selectTaskData(e, index);
