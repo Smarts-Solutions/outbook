@@ -5518,3 +5518,114 @@ svg {
   position: sticky;
   z-index: 99 !important;
 }
+
+/* ===== Manager Review Filter Tabs ===== */
+.review-filter-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 2px solid #e8f0f3;
+  padding-bottom: 0;
+  flex-wrap: wrap;
+}
+
+.review-filter-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  outline: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #5d6f7a;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  border-radius: 6px 6px 0 0;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+
+.review-filter-tab-btn:hover:not(.active) {
+  color: #0c1a24;
+  background: #edf7fb;
+}
+
+.review-filter-tab-btn.active {
+  color: #0c1a24;
+  font-weight: 600;
+  border-bottom-color: #0cb2ef;
+  background: #f4fbfe;
+}
+
+/* ===== Review Tab Count Badges ===== */
+.review-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.review-tab-badge--default {
+  background: #e8f0f3;
+  color: #3d5260;
+}
+
+.review-tab-badge--blue {
+  background: #d0f0fc;
+  color: #0780aa;
+}
+
+.review-tab-badge--orange {
+  background: #fdecd1;
+  color: #a05e05;
+}
+
+.review-tab-badge--red {
+  background: #fde0e3;
+  color: #b91c2c;
+}
+
+/* ===== Clickable Stat Cards ===== */
+.review-stat-card {
+  transition: border-color 0.2s, box-shadow 0.2s;
+  border: 2px solid transparent;
+}
+
+.review-stat-card--active {
+  border-color: #0cb2ef;
+  box-shadow: 0 0 0 3px rgba(12,178,239,0.12);
+}
+
+.review-stat-card--blue.review-stat-card--active {
+  border-color: #0cb2ef;
+  box-shadow: 0 0 0 3px rgba(12,178,239,0.12);
+}
+
+.review-stat-card--orange.review-stat-card--active {
+  border-color: #e8930a;
+  box-shadow: 0 0 0 3px rgba(232,147,10,0.12);
+}
+
+.review-stat-card--red.review-stat-card--active {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220,53,69,0.12);
+}
+
+/* ===== Empty state inside tab panel ===== */
+.review-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  text-align: center;
+}

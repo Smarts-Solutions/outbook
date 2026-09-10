@@ -71,6 +71,7 @@ const TimesheetNewDesign = () => {
   const [submittedThisWeek, setSubmittedThisWeek] = useState(0);
   const [savedThisWeek, setSavedThisWeek] = useState(0);
   const [missingLastWeek, setMissingLastWeek] = useState(0);
+  const [activeReviewTab, setActiveReviewTab] = useState("all"); // all | submitted | saved | missing
 
 
 
@@ -2796,31 +2797,84 @@ const TimesheetNewDesign = () => {
                   <button type="button" className="btn btn-outline-info fw-bold"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg> Export filtered</button>
                 </div>
               </div>
-              <div className="row mt-4"> 
-                <div className="col-md-3">
-                  <div className="timesheet-white-card">
+              {/* --- 4 Stat Cards (clickable) --- */}
+              <div className="row mt-4">
+                <div
+                  className="col-md-3"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => setActiveReviewTab("all")}
+                >
+                  <div className={`timesheet-white-card review-stat-card ${activeReviewTab === "all" ? "review-stat-card--active" : ""}`}>
                     <p className="timesheet-white-card-label">Total Staff</p>
                     <p className="timesheet-white-card-value-big">{managerReviewCount}</p>
                   </div>
                 </div>
-                <div className="col-md-3">
-                  <div className="timesheet-white-card">
+                <div
+                  className="col-md-3"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => setActiveReviewTab("submitted")}
+                >
+                  <div className={`timesheet-white-card review-stat-card ${activeReviewTab === "submitted" ? "review-stat-card--active review-stat-card--blue" : ""}`}>
                     <p className="timesheet-white-card-label">Submitted</p>
                     <p className="timesheet-white-card-value-big timesheet-white-card-value-big-blue">{submittedThisWeek}</p>
                   </div>
                 </div>
-                <div className="col-md-3">
-                  <div className="timesheet-white-card">
+                <div
+                  className="col-md-3"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => setActiveReviewTab("saved")}
+                >
+                  <div className={`timesheet-white-card review-stat-card ${activeReviewTab === "saved" ? "review-stat-card--active review-stat-card--orange" : ""}`}>
                     <p className="timesheet-white-card-label">Saved Drafts</p>
                     <p className="timesheet-white-card-value-big">{savedThisWeek}</p>
                   </div>
                 </div>
-                <div className="col-md-3">
-                  <div className="timesheet-white-card">
+                <div
+                  className="col-md-3"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => setActiveReviewTab("missing")}
+                >
+                  <div className={`timesheet-white-card review-stat-card ${activeReviewTab === "missing" ? "review-stat-card--active review-stat-card--red" : ""}`}>
                     <p className="timesheet-white-card-label">Missing</p>
                     <p className="timesheet-white-card-value-big timesheet-white-card-value-big-red">{missingLastWeek}</p>
                   </div>
                 </div>
+              </div>
+
+              {/* --- 4 Filter Tabs Bar --- */}
+              <div className="review-filter-tabs mt-3">
+                <button
+                  type="button"
+                  className={`review-filter-tab-btn ${activeReviewTab === "all" ? "active" : ""}`}
+                  onClick={() => setActiveReviewTab("all")}
+                >
+                  All Staff
+                  <span className="review-tab-badge review-tab-badge--default">{managerReviewCount}</span>
+                </button>
+                <button
+                  type="button"
+                  className={`review-filter-tab-btn ${activeReviewTab === "submitted" ? "active" : ""}`}
+                  onClick={() => setActiveReviewTab("submitted")}
+                >
+                  Submitted
+                  <span className="review-tab-badge review-tab-badge--blue">{submittedThisWeek}</span>
+                </button>
+                <button
+                  type="button"
+                  className={`review-filter-tab-btn ${activeReviewTab === "saved" ? "active" : ""}`}
+                  onClick={() => setActiveReviewTab("saved")}
+                >
+                  Saved Drafts
+                  <span className="review-tab-badge review-tab-badge--orange">{savedThisWeek}</span>
+                </button>
+                <button
+                  type="button"
+                  className={`review-filter-tab-btn ${activeReviewTab === "missing" ? "active" : ""}`}
+                  onClick={() => setActiveReviewTab("missing")}
+                >
+                  Missing
+                  <span className="review-tab-badge review-tab-badge--red">{missingLastWeek}</span>
+                </button>
               </div>
               {/* <div className="timesheet-white-card mt-3">
                 <div className="row">
@@ -2879,33 +2933,75 @@ const TimesheetNewDesign = () => {
                   </div>
                 </div>
               </div> */}
+              {/* --- Tab Content Panel --- */}
               <div className="timesheet-white-card mt-3">
-                <div className="timesheet-table-header-div">
-                  <div className="timesheet-table-header-div-left">
-                    <div className="tab-title"><h3 className="mt-0">Ayesha Khan</h3></div>
-                    <p className="page-subtitle mb-0 mt-2">17 Aug 2026 – 23 Aug 2026 · 5 entries · 36h</p>
+                {activeReviewTab === "all" && (
+                  <div>
+                    <div className="timesheet-table-header-div">
+                      <div className="timesheet-table-header-div-left">
+                        <div className="tab-title"><h3 className="mt-0">All Staff</h3></div>
+                        <p className="page-subtitle mb-0 mt-2">This week · {managerReviewCount} employees</p>
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <div className="review-empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9eadb7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <p className="mt-2 mb-0" style={{color: "#9eadb7", fontSize: 14}}>Total <b style={{color:"#0c1a24"}}>{managerReviewCount}</b> staff members this week</p>
+                      </div>
+                    </div>
                   </div>
-                  {/* <div className="timesheet-table-header-div-right">
-                  <span className="timesheet-table-header-status-approved">Approved</span>
-                  <span className="timesheet-table-header-status-rejected">Rejected</span>
-                  <button className="timesheet-table-header-btn-approve">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
-                    Approve
-                  </button>
-                  <button className="timesheet-table-header-btn-reject">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
-                    Reject
-                  </button>
-                </div> */}
-                </div>
-                <div className="mt-3">
-                  <TimesheetDatatable />
-                </div>
-                <div className="mt-3">
-                  <div className="timesheet-submit-div-left">
-                    <p><b>Final remark:</b> Website revamp frontend in progress.</p>
+                )}
+
+                {activeReviewTab === "submitted" && (
+                  <div>
+                    <div className="timesheet-table-header-div">
+                      <div className="timesheet-table-header-div-left">
+                        <div className="tab-title"><h3 className="mt-0">Submitted</h3></div>
+                        <p className="page-subtitle mb-0 mt-2">This week · {submittedThisWeek} staff submitted timesheet</p>
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <div className="review-empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0cb2ef" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                        <p className="mt-2 mb-0" style={{color: "#9eadb7", fontSize: 14}}><b style={{color:"#0cb2ef"}}>{submittedThisWeek}</b> staff submitted their timesheet this week</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {activeReviewTab === "saved" && (
+                  <div>
+                    <div className="timesheet-table-header-div">
+                      <div className="timesheet-table-header-div-left">
+                        <div className="tab-title"><h3 className="mt-0">Saved Drafts</h3></div>
+                        <p className="page-subtitle mb-0 mt-2">This week · {savedThisWeek} staff saved draft only</p>
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <div className="review-empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#e8930a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg>
+                        <p className="mt-2 mb-0" style={{color: "#9eadb7", fontSize: 14}}><b style={{color:"#e8930a"}}>{savedThisWeek}</b> staff saved draft but have not submitted yet this week</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeReviewTab === "missing" && (
+                  <div>
+                    <div className="timesheet-table-header-div">
+                      <div className="timesheet-table-header-div-left">
+                        <div className="tab-title"><h3 className="mt-0">Missing</h3></div>
+                        <p className="page-subtitle mb-0 mt-2">Last week · {missingLastWeek} staff did not submit timesheet</p>
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <div className="review-empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#dc3545" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <p className="mt-2 mb-0" style={{color: "#9eadb7", fontSize: 14}}><b style={{color:"#dc3545"}}>{missingLastWeek}</b> staff did not submit timesheet last week (includes saved drafts)</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
