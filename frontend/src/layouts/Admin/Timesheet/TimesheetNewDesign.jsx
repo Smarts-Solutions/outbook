@@ -20,6 +20,7 @@ import sweatalert from "sweetalert2";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 import ReactPaginate from "react-paginate";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
+import ManagerReviewDatatable from "../../../Components/ExtraComponents/ManagerReviewDatatable";
 import TimesheetDatatable from "../../../Components/ExtraComponents/TimesheetDatatable";
 import ResourceDatatable from "../../../Components/ExtraComponents/ResourceDatatable";
 import {
@@ -2559,6 +2560,154 @@ const TimesheetNewDesign = () => {
     },
   ];
 
+  // Accordion component to display timesheet when row is expanded
+  const ExpandedComponent = ({ data }) => {
+    const [timesheetData, setTimesheetData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [remark, setRemark] = useState("");
+    const [staffHourMinute, setStaffHourMinute] = useState(null);
+
+    useEffect(() => {
+      const fetchStaffTimesheet = async () => {
+        try {
+          setLoading(true);
+          // Try multiple properties since the exact ID key in Manager Review data might vary
+          const staffId = data.user_id || data.staff_id || data.StaffUserId || data.id;
+          const req = { staff_id: staffId, weekOffset: weekOffset };
+          const res = await dispatch(getTimesheetData({ req, authToken: token })).unwrap();
+
+          if (res.status && res.data) {
+            const rowsWithTotals = res.data.map(row => {
+              const sum =
+                (parseFloat(row.monday_hours) || 0) +
+                (parseFloat(row.tuesday_hours) || 0) +
+                (parseFloat(row.wednesday_hours) || 0) +
+                (parseFloat(row.thursday_hours) || 0) +
+                (parseFloat(row.friday_hours) || 0) +
+                (parseFloat(row.saturday_hours) || 0) +
+                (parseFloat(row.sunday_hours) || 0);
+              return { ...row, total_hours: parseFloat(sum).toFixed(2) };
+            });
+            setTimesheetData(rowsWithTotals);
+            setRemark(res.data[0]?.final_remark || "");
+          } else {
+            setTimesheetData([]);
+            setRemark("");
+          }
+
+          // Fetch hour minute
+          const reqTime = { staff_id: staffId };
+          const resTime = await dispatch(getStaffHourMinute({ req: reqTime, authToken: token })).unwrap();
+          if (resTime?.data?.[0]?.hourminute) {
+            setStaffHourMinute(resTime.data[0].hourminute);
+          }
+        } catch (error) {
+          console.error("Error fetching timesheet for accordion:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchStaffTimesheet();
+    }, [data, weekOffset]);
+
+    const handleViewLog = async () => {
+      try {
+        setLoading(true);
+        const staffId = data.user_id || data.staff_id || data.StaffUserId || data.id;
+        const req = { staff_id: staffId, weekOffset: weekOffset };
+        const res = await dispatch(getTimesheetLogsData({ req, authToken: token })).unwrap();
+        if (res.status) {
+          setRowHistoryLogs(res.data);
+          setIsHistoryModalOpen(true);
+        } else {
+          sweatalert.fire({ icon: "error", title: "Error fetching logs" });
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return (
+      <div className="p-4" style={{ backgroundColor: "#f8f9fa", borderBottom: "1px solid #ddd" }}>
+        <div className="d-flex align-items-center mb-3 gap-3">
+          <h5 className="m-0">Timesheet Details - {data.staff_name}</h5>
+          <button type="button" className="timesheet-table-header-btn" onClick={handleViewLog}>
+            <History size={16} className="me-1" /> View Logs
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="text-center py-4">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        ) : timesheetData.length > 0 ? (
+          <>
+            <div style={{ pointerEvents: "none", opacity: 0.9 }}>
+              <TimesheetDatatable
+                rows={timesheetData}
+                weekDays={weekDays}
+                multipleFilter={{ staff_id: data.staff_id || data.id, week: weekOffset }}
+                staffDetails={{}}
+                isWeekSwitching={false}
+                submitStatusAllKey={data.timesheet_status === "Submitted" ? 1 : 0}
+                handleChangeTaskType={() => { }}
+                selectCustomerData={() => { }}
+                selectClientData={() => { }}
+                selectJobData={() => { }}
+                selectTaskData={() => { }}
+                handleHoursInput={() => { }}
+                handleDeleteRow={() => { }}
+                openHistoryModal={() => { }}
+                setActiveIndex={() => { }}
+                setActiveField={() => { }}
+                activeIndex={null}
+                activeField={null}
+                setIsModalOpen={() => { }}
+                setModalText={() => { }}
+                setSelectedRowIndex={() => { }}
+                getTotalHoursFromKey={(key) => {
+                  let total = 0;
+                  timesheetData.forEach(row => {
+                    total += parseFloat(row[key]) || 0;
+                  });
+                  return total;
+                }}
+                getGrandTotal={() => {
+                  let total = 0;
+                  timesheetData.forEach(row => {
+                    total += parseFloat(row.total_hours) || 0;
+                  });
+                  return total.toFixed(2) + "h";
+                }}
+                isRowSaved={() => true}
+                isRowLocked={() => true}
+              />
+            </div>
+            {remark && (
+              <div className="mt-3">
+                <label className="form-label fw-bold">Final remark (weekly)</label>
+                <textarea
+                  className="form-control"
+                  style={{ minHeight: "60px" }}
+                  value={remark}
+                  disabled
+                  readOnly
+                ></textarea>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="text-center py-3">No timesheet records found.</div>
+        )}
+      </div>
+    );
+  };
+
   const renderManagerReviewTable = () => (
     <>
       <div className="row mb-3 align-items-center">
@@ -2582,11 +2731,15 @@ const TimesheetNewDesign = () => {
 
         {managerReviewData.rows && managerReviewData.rows.length > 0 ? (
           <>
-            <Datatable
+            <ManagerReviewDatatable
               columns={managerReviewColumns}
               data={managerReviewData.rows}
               filter={false}
               pagination={false}
+              expandableRows={true}
+              expandableRowsComponent={ExpandedComponent}
+              expandableRowDisabled={row => row.timesheet_status === "Missing"}
+              expandOnRowClicked={true}
             />
 
             <ReactPaginate
