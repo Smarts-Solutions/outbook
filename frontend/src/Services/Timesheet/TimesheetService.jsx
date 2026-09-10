@@ -100,7 +100,18 @@ export async function DELETE_TIMESHEET_ROW(data) {
   }
 }
 
-
+export async function GET_MANAGER_REVIEW_COUNT(data, authToken) {
+  try {
+    const token = authToken || JSON.parse(localStorage.getItem("token"));
+    const res = await axios.post(`${Config.base_url}getmanagerreviewcount`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
 
 
 

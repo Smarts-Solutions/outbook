@@ -1,5 +1,5 @@
 const pool = require("../config/database");
-const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds, LineManageStaffIdHelperFunction, QueryRoleHelperFunction, buildAssignedJobsTempTable } = require('../utils/helper');
+const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds, LineManageStaffIdHelperFunction, QueryRoleHelperFunction, buildAssignedJobsTempTable, LineManageStaffIdHelperFunctionForStaff } = require('../utils/helper');
 
 
 // SELECT 
@@ -2353,6 +2353,185 @@ const deleteTimesheetRow = async (reqBody) => {
   }
 }
 
+const getManagerReviewCount = async (data) => {
+  const { StaffUserId } = data;
+  console.log("getManagerReviewCount data:", data);
+  console.log("StaffUserId:", StaffUserId);
+  try {
+    const LineManageStaffId =
+      await LineManageStaffIdHelperFunctionForStaff(StaffUserId);
+
+    const roleRows = await QueryRoleHelperFunction(StaffUserId);
+
+    const role_name = roleRows[0]?.role_name?.toUpperCase();
+
+    let staffWhereClause = "";
+    let staffIdList = [];
+
+    if (role_name === "SUPERADMIN" || role_name === "ADMIN") {
+      staffWhereClause = "WHERE s.role_id != 12";
+    } else {
+      if (LineManageStaffId.length > 0) {
+        staffIdList = LineManageStaffId;
+        staffWhereClause = `
+          WHERE s.role_id != 12
+          AND s.id IN (${LineManageStaffId.join(",")})
+        `;
+      } else {
+        staffWhereClause = "WHERE 1 = 0";
+      }
+    }
+
+    // Total staff count
+    const [totalResult] = await pool.query(
+      `SELECT COUNT(*) AS total_staff FROM staffs s ${staffWhereClause}`,
+      []
+    );
+    const total_staff = totalResult[0]?.total_staff || 0;
+
+    // Current week boundaries (Monday-based)
+    const now = new Date();
+    const dayOfWeek = now.getUTCDay(); // 0=Sun
+    const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const thisMonday = new Date(now);
+    thisMonday.setUTCDate(now.getUTCDate() - daysSinceMonday);
+    thisMonday.setUTCHours(0, 0, 0, 0);
+    const thisSunday = new Date(thisMonday);
+    thisSunday.setUTCDate(thisMonday.getUTCDate() + 6);
+    thisSunday.setUTCHours(23, 59, 59, 999);
+
+    const thisWeekStart = thisMonday.toISOString().slice(0, 10);
+    const thisWeekEnd = thisSunday.toISOString().slice(0, 10);
+
+    // Last week boundaries
+    const lastMonday = new Date(thisMonday);
+    lastMonday.setUTCDate(thisMonday.getUTCDate() - 7);
+    const lastSunday = new Date(thisMonday);
+    lastSunday.setUTCDate(thisMonday.getUTCDate() - 1);
+    lastSunday.setUTCHours(23, 59, 59, 999);
+
+    const lastWeekStart = lastMonday.toISOString().slice(0, 10);
+    const lastWeekEnd = lastSunday.toISOString().slice(0, 10);
+
+    // Build a staff-scope subquery for use inside timesheet queries
+    const staffScopeSubquery = staffIdList.length > 0
+      ? `AND t.staff_id IN (${staffIdList.join(",")})`
+      : (role_name === "SUPERADMIN" || role_name === "ADMIN")
+        ? `AND t.staff_id IN (SELECT id FROM staffs WHERE role_id != 12)`
+        : `AND 1=0`;
+
+    // Submitted this week — distinct staff who have submit_status='1' with a date in this week
+    const [submittedResult] = await pool.query(`
+      SELECT COUNT(DISTINCT t.staff_id) AS submitted_count
+      FROM timesheet t
+      WHERE t.is_deleted = 0
+        AND t.submit_status = '1'
+        AND (
+          t.monday_date    BETWEEN ? AND ? OR
+          t.tuesday_date   BETWEEN ? AND ? OR
+          t.wednesday_date BETWEEN ? AND ? OR
+          t.thursday_date  BETWEEN ? AND ? OR
+          t.friday_date    BETWEEN ? AND ? OR
+          t.saturday_date  BETWEEN ? AND ? OR
+          t.sunday_date    BETWEEN ? AND ?
+        )
+        ${staffScopeSubquery}
+    `, [
+      thisWeekStart, thisWeekEnd,
+      thisWeekStart, thisWeekEnd,
+      thisWeekStart, thisWeekEnd,
+      thisWeekStart, thisWeekEnd,
+      thisWeekStart, thisWeekEnd,
+      thisWeekStart, thisWeekEnd,
+      thisWeekStart, thisWeekEnd,
+    ]);
+    const submitted_this_week = submittedResult[0]?.submitted_count || 0;
+
+    // Saved (draft) this week — distinct staff with submit_status='0' and a date in this week
+    const [savedResult] = await pool.query(`
+      SELECT COUNT(DISTINCT t.staff_id) AS saved_count
+      FROM timesheet t
+      WHERE t.is_deleted = 0
+        AND t.submit_status = '0'
+        AND (
+          t.monday_date    BETWEEN ? AND ? OR
+          t.tuesday_date   BETWEEN ? AND ? OR
+          t.wednesday_date BETWEEN ? AND ? OR
+          t.thursday_date  BETWEEN ? AND ? OR
+          t.friday_date    BETWEEN ? AND ? OR
+          t.saturday_date  BETWEEN ? AND ? OR
+          t.sunday_date    BETWEEN ? AND ?
+        )
+        ${staffScopeSubquery}
+    `, [
+      thisWeekStart, thisWeekEnd,
+      thisWeekStart, thisWeekEnd,
+      thisWeekStart, thisWeekEnd,
+      thisWeekStart, thisWeekEnd,
+      thisWeekStart, thisWeekEnd,
+      thisWeekStart, thisWeekEnd,
+      thisWeekStart, thisWeekEnd,
+    ]);
+    const saved_this_week = savedResult[0]?.saved_count || 0;
+
+    // Missing last week — staff who did NOT submit (submit_status='1') last week.
+    // Draft-only or no entry both count as "missing".
+    const [submittedLastWeekResult] = await pool.query(`
+      SELECT DISTINCT t.staff_id
+      FROM timesheet t
+      WHERE t.is_deleted = 0
+        AND t.submit_status = '1'
+        AND (
+          t.monday_date    BETWEEN ? AND ? OR
+          t.tuesday_date   BETWEEN ? AND ? OR
+          t.wednesday_date BETWEEN ? AND ? OR
+          t.thursday_date  BETWEEN ? AND ? OR
+          t.friday_date    BETWEEN ? AND ? OR
+          t.saturday_date  BETWEEN ? AND ? OR
+          t.sunday_date    BETWEEN ? AND ?
+        )
+        ${staffScopeSubquery}
+    `, [
+      lastWeekStart, lastWeekEnd,
+      lastWeekStart, lastWeekEnd,
+      lastWeekStart, lastWeekEnd,
+      lastWeekStart, lastWeekEnd,
+      lastWeekStart, lastWeekEnd,
+      lastWeekStart, lastWeekEnd,
+      lastWeekStart, lastWeekEnd,
+    ]);
+    const submittedLastWeekStaffIds = submittedLastWeekResult.map(r => r.staff_id);
+
+    // Get all in-scope staff ids
+    const [allScopeStaff] = await pool.query(
+      `SELECT id FROM staffs s ${staffWhereClause}`,
+      []
+    );
+    const allScopeStaffIds = allScopeStaff.map(s => s.id);
+    // Missing = total staff minus those who submitted last week
+    const missing_last_week = allScopeStaffIds.filter(id => !submittedLastWeekStaffIds.includes(id)).length;
+
+    return {
+      status: true,
+      message: "Staff count fetched successfully",
+      data: {
+        total_staff,
+        submitted_this_week,
+        saved_this_week,
+        missing_last_week
+      }
+    };
+
+  } catch (error) {
+    console.error("Error in getManagerReviewCount:", error);
+
+    return {
+      status: false,
+      message: "Error fetching staff count."
+    };
+  }
+};
+
 module.exports = {
 
   getTimesheet,
@@ -2360,5 +2539,6 @@ module.exports = {
   saveTimesheet,
   getStaffHourMinute,
   getTimesheetLogs,
-  deleteTimesheetRow
+  deleteTimesheetRow,
+  getManagerReviewCount
 };

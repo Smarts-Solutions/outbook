@@ -31,7 +31,8 @@ import {
   saveTimesheetData,
   getStaffHourMinute,
   getTimesheetLogsData,
-  deleteTimesheetRowData
+  deleteTimesheetRowData,
+  getManagerReviewCount,
 } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
 
 import { SAVE_TIMESHEET } from "../../../Services/Timesheet/TimesheetService";
@@ -65,6 +66,13 @@ const TimesheetNewDesign = () => {
   // history modal state
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [rowHistoryLogs, setRowHistoryLogs] = useState([]);
+  // manager review count state
+  const [managerReviewCount, setManagerReviewCount] = useState(0);
+  const [submittedThisWeek, setSubmittedThisWeek] = useState(0);
+  const [savedThisWeek, setSavedThisWeek] = useState(0);
+  const [missingLastWeek, setMissingLastWeek] = useState(0);
+
+
 
   const openHistoryModal = async () => {
     try {
@@ -225,6 +233,22 @@ const TimesheetNewDesign = () => {
 
   const weekOffSetValue = useRef(0);
   const [submitStatusAllKey, setSubmitStatusAllKey] = useState(0);
+
+  // Get Manager Review Count — defined here so dispatch and token are in scope
+  const fetchManagerReviewCount = async () => {
+    try {
+      const res = await dispatch(getManagerReviewCount({ req: {}, authToken: token })).unwrap();
+      if (res.status) {
+        setManagerReviewCount(res?.data?.total_staff || 0);
+        setSubmittedThisWeek(res?.data?.submitted_this_week || 0);
+        setSavedThisWeek(res?.data?.saved_this_week || 0);
+        setMissingLastWeek(res?.data?.missing_last_week || 0);
+      }
+    } catch (err) {
+      console.log("Manager review count fetch error:", err);
+    }
+  };
+
   const [expandedRows, setExpandedRows] = useState([]);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -446,6 +470,7 @@ const TimesheetNewDesign = () => {
   useEffect(() => {
     staffData();
     GetLineManagerData();
+    fetchManagerReviewCount();
   }, []);
 
   useEffect(() => {
@@ -2230,6 +2255,7 @@ const TimesheetNewDesign = () => {
             ...row,
             id: null,
             submit_status: "0",
+            isCopiedFromPreviousWeek: true,
             monday_date: convertDateFormatForCopy(weekDays.monday),
             tuesday_date: convertDateFormatForCopy(weekDays.tuesday),
             wednesday_date: convertDateFormatForCopy(weekDays.wednesday),
@@ -2384,6 +2410,14 @@ const TimesheetNewDesign = () => {
   const isRowSaved = (index) => {
     return Boolean(timeSheetRows[index]?.id);
   };
+
+  const isRowLocked = (index) => {
+    return (
+      isRowSaved(index) ||
+      timeSheetRows[index]?.isCopiedFromPreviousWeek === true
+    );
+  };
+
 
   return (
     <>
@@ -2717,6 +2751,8 @@ const TimesheetNewDesign = () => {
                     getTotalHoursFromKey={getTotalHoursFromKey}
                     getGrandTotal={getGrandTotalStr}
                     isRowSaved={isRowSaved}
+                    isRowLocked={isRowLocked}
+
                   />
                 </div>
                 <div className="mt-3">
@@ -2760,29 +2796,29 @@ const TimesheetNewDesign = () => {
                   <button type="button" className="btn btn-outline-info fw-bold"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg> Export filtered</button>
                 </div>
               </div>
-              <div className="row mt-4">
+              <div className="row mt-4"> 
                 <div className="col-md-3">
                   <div className="timesheet-white-card">
                     <p className="timesheet-white-card-label">Total Staff</p>
-                    <p className="timesheet-white-card-value-big">48</p>
+                    <p className="timesheet-white-card-value-big">{managerReviewCount}</p>
                   </div>
                 </div>
                 <div className="col-md-3">
                   <div className="timesheet-white-card">
                     <p className="timesheet-white-card-label">Submitted</p>
-                    <p className="timesheet-white-card-value-big timesheet-white-card-value-big-blue">32</p>
+                    <p className="timesheet-white-card-value-big timesheet-white-card-value-big-blue">{submittedThisWeek}</p>
                   </div>
                 </div>
                 <div className="col-md-3">
                   <div className="timesheet-white-card">
                     <p className="timesheet-white-card-label">Saved Drafts</p>
-                    <p className="timesheet-white-card-value-big">12</p>
+                    <p className="timesheet-white-card-value-big">{savedThisWeek}</p>
                   </div>
                 </div>
                 <div className="col-md-3">
                   <div className="timesheet-white-card">
                     <p className="timesheet-white-card-label">Missing</p>
-                    <p className="timesheet-white-card-value-big timesheet-white-card-value-big-red">04</p>
+                    <p className="timesheet-white-card-value-big timesheet-white-card-value-big-red">{missingLastWeek}</p>
                   </div>
                 </div>
               </div>

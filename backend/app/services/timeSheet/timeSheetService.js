@@ -23,11 +23,16 @@ const deleteTimesheetRow = async (data) => {
   return timeSheetModel.deleteTimesheetRow(data);
 }
 
+const getManagerReviewCount = async (data) => {
+  return timeSheetModel.getManagerReviewCount(data);
+}
+
 module.exports = {
   getTimesheet,
   getTimesheetTaskType,
   saveTimesheet,
   getStaffHourMinute,
   getTimesheetLogs,
-  deleteTimesheetRow
+  deleteTimesheetRow,
+  getManagerReviewCount
 };

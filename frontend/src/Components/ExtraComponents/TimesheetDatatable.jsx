@@ -28,7 +28,9 @@ const TimesheetDatatable = ({
     setSelectedRowIndex,
     getTotalHoursFromKey,
     getGrandTotal,
-    isRowSaved
+    isRowSaved,
+    isRowLocked
+
 }) => {
 
     const columns = [
@@ -59,7 +61,7 @@ const TimesheetDatatable = ({
                         isSearchable={false}
                         placeholder="Task Type"
                         isDisabled={
-                            isRowSaved(index) ||
+                            isRowLocked(index) ||
                             row.submit_status === "1" ||
                             staffDetails.id != multipleFilter.staff_id
                         }
@@ -94,7 +96,7 @@ const TimesheetDatatable = ({
                             isSearchable
                             placeholder="Customer"
                             isDisabled={
-                                isRowSaved(index) ||
+                                isRowLocked(index) ||
                                 row.task_type !== "2" ||
                                 row.submit_status === "1" ||
                                 staffDetails.id != multipleFilter.staff_id
@@ -131,7 +133,7 @@ const TimesheetDatatable = ({
                             isSearchable
                             placeholder="Client"
                             isDisabled={
-                                isRowSaved(index) ||
+                                isRowLocked(index) ||
                                 row.task_type !== "2" ||
                                 row.submit_status === "1" ||
                                 staffDetails.id != multipleFilter.staff_id
@@ -160,7 +162,7 @@ const TimesheetDatatable = ({
                         isSearchable
                         placeholder="Job"
                         isDisabled={
-                            isRowSaved(index) ||
+                            isRowLocked(index) ||
                             row.submit_status === "1" ||
                             staffDetails.id != multipleFilter.staff_id
                         }
@@ -189,7 +191,7 @@ const TimesheetDatatable = ({
                         isSearchable
                         placeholder="Task"
                         isDisabled={
-                            isRowSaved(index) ||
+                            isRowLocked(index) ||
                             row.submit_status === "1" ||
                             staffDetails.id != multipleFilter.staff_id
                         }
