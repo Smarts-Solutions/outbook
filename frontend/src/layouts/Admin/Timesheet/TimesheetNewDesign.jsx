@@ -2103,96 +2103,96 @@ const TimesheetNewDesign = () => {
   };
 
   const exportManagerReviewCSV = (rows) => {
-  if (!rows || rows.length === 0) {
-    sweatalert.fire({ icon: "info", title: "No data to export." });
-    return;
-  }
+    if (!rows || rows.length === 0) {
+      sweatalert.fire({ icon: "info", title: "No data to export." });
+      return;
+    }
 
-  setExporting(true);
-  setTimeout(() => {
-    const headers = [
-      "S.No",
-      "Staff",
-      "Email",
-      "Employee ID",
-      "Role",
-      "Line Manager",
-      "Entries",
-      "Entered Hours",
-      "Remaining Hours",
-      "Status",
-    ];
+    setExporting(true);
+    setTimeout(() => {
+      const headers = [
+        "S.No",
+        "Staff",
+        "Email",
+        "Employee ID",
+        "Role",
+        "Line Manager",
+        "Entries",
+        "Entered Hours",
+        "Remaining Hours",
+        "Status",
+      ];
 
-    const getRemainingHours = (row) => {
-      const staffId = row.user_id || row.staff_id || row.StaffUserId || row.id;
-      const staffInfo = staffDataAll?.data?.find((s) => Number(s.id) === Number(staffId));
+      const getRemainingHours = (row) => {
+        const staffId = row.user_id || row.staff_id || row.StaffUserId || row.id;
+        const staffInfo = staffDataAll?.data?.find((s) => Number(s.id) === Number(staffId));
 
-      let allocatedStr = row.staffs_hourminute || staffInfo?.hourminute || "0";
-      let allocated = 0;
-      if (typeof allocatedStr === "string" && allocatedStr.includes(":")) {
-        const [h, m] = allocatedStr.split(":");
-        allocated = parseFloat(h) + parseFloat(m) / 60;
-      } else {
-        allocated = parseFloat(allocatedStr) || 0;
-      }
+        let allocatedStr = row.staffs_hourminute || staffInfo?.hourminute || "0";
+        let allocated = 0;
+        if (typeof allocatedStr === "string" && allocatedStr.includes(":")) {
+          const [h, m] = allocatedStr.split(":");
+          allocated = parseFloat(h) + parseFloat(m) / 60;
+        } else {
+          allocated = parseFloat(allocatedStr) || 0;
+        }
 
-      const total = parseFloat(row.total_hours) || 0;
-      let remaining = allocated - total;
-      if (remaining < 0) remaining = 0;
-      return remaining.toFixed(2);
-    };
+        const total = parseFloat(row.total_hours) || 0;
+        let remaining = allocated - total;
+        if (remaining < 0) remaining = 0;
+        return remaining.toFixed(2);
+      };
 
-    const getLineManagerName = (row) => {
-      const staffId = row.user_id || row.staff_id || row.StaffUserId || row.id;
-      const staffInfo = staffDataAll?.data?.find((s) => Number(s.id) === Number(staffId));
-      return (
-        row.line_manager_name ||
-        row.line_manager ||
-        row.manager_name ||
-        row.manager ||
-        staffInfo?.line_manager_name ||
-        staffInfo?.manager_name ||
-        "-"
-      );
-    };
+      const getLineManagerName = (row) => {
+        const staffId = row.user_id || row.staff_id || row.StaffUserId || row.id;
+        const staffInfo = staffDataAll?.data?.find((s) => Number(s.id) === Number(staffId));
+        return (
+          row.line_manager_name ||
+          row.line_manager ||
+          row.manager_name ||
+          row.manager ||
+          staffInfo?.line_manager_name ||
+          staffInfo?.manager_name ||
+          "-"
+        );
+      };
 
-    const csvRows = rows.map((row, index) => [
-      (managerReviewPage - 1) * managerReviewPageSize + (index + 1),
-      row.staff_name || "",
-      row.email || "",
-      row.employee_number || "-",
-      row.role_name || "",
-      getLineManagerName(row),
-      row.timesheet_count || 0,
-      row.total_hours || 0,
-      getRemainingHours(row),
-      row.timesheet_status || "",
-    ]);
+      const csvRows = rows.map((row, index) => [
+        (managerReviewPage - 1) * managerReviewPageSize + (index + 1),
+        row.staff_name || "",
+        row.email || "",
+        row.employee_number || "-",
+        row.role_name || "",
+        getLineManagerName(row),
+        row.timesheet_count || 0,
+        row.total_hours || 0,
+        getRemainingHours(row),
+        row.timesheet_status || "",
+      ]);
 
-    const csvContent = [headers, ...csvRows]
-      .map((row) =>
-        row
-          .map((cell) => {
-            if (cell === null || cell === undefined) return "";
-            const str = String(cell);
-            if (str.search(/["\r\n,]/) >= 0) {
-              return `"${str.replace(/"/g, '""')}"`;
-            }
-            return str;
-          })
-          .join(",")
-      )
-      .join("\n");
+      const csvContent = [headers, ...csvRows]
+        .map((row) =>
+          row
+            .map((cell) => {
+              if (cell === null || cell === undefined) return "";
+              const str = String(cell);
+              if (str.search(/["\r\n,]/) >= 0) {
+                return `"${str.replace(/"/g, '""')}"`;
+              }
+              return str;
+            })
+            .join(",")
+        )
+        .join("\n");
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    const tabLabel = activeReviewTab.charAt(0).toUpperCase() + activeReviewTab.slice(1);
-    link.download = `ManagerReview_${tabLabel}.csv`;
-    link.click();
-    setExporting(false);
-  }, 100);
-};
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      const tabLabel = activeReviewTab.charAt(0).toUpperCase() + activeReviewTab.slice(1);
+      link.download = `ManagerReview_${tabLabel}.csv`;
+      link.click();
+      setExporting(false);
+    }, 100);
+  };
 
   const handleSingleRemark = (e, item, index) => {
     setRemarkSingleModel(true);
@@ -2751,7 +2751,7 @@ const TimesheetNewDesign = () => {
       cell: (row) => {
         const staffId = row.user_id || row.staff_id || row.StaffUserId || row.id;
         const staffInfo = staffDataAll?.data?.find(s => Number(s.id) === Number(staffId));
-        
+
         let allocatedStr = row.staffs_hourminute || staffInfo?.hourminute || "0";
         let allocated = 0;
         if (typeof allocatedStr === "string" && allocatedStr.includes(":")) {
@@ -2767,7 +2767,7 @@ const TimesheetNewDesign = () => {
         if (remaining < 0) {
           remaining = 0;
         }
-        
+
         return <div className="w-100 text-center">{remaining.toFixed(2)}</div>;
       },
       sortable: true,
@@ -2788,24 +2788,24 @@ const TimesheetNewDesign = () => {
         return (
           <div className="d-flex justify-content-center align-items-center gap-3">
             <span title="View Logs" onClick={(e) => { e.stopPropagation(); handleManagerViewLog(row); }}>
-              <Eye 
-                size={18} 
-                className="cursor-pointer text-primary" 
+              <Eye
+                size={18}
+                className="cursor-pointer text-primary"
               />
             </span>
 
             <span title="Download Timesheet" onClick={(e) => { e.stopPropagation(); handleManagerDownloadTimesheet(row); }}>
-              <Download 
-                size={18} 
-                className="cursor-pointer text-success" 
+              <Download
+                size={18}
+                className="cursor-pointer text-success"
               />
             </span>
 
             {row.timesheet_status === "Submitted" && (
               <span title="View Final Remark" onClick={(e) => { e.stopPropagation(); handleViewManagerRemark(row); }}>
-                <MessageSquare 
-                  size={18} 
-                  className="cursor-pointer text-info" 
+                <MessageSquare
+                  size={18}
+                  className="cursor-pointer text-info"
                 />
               </span>
             )}
@@ -3429,14 +3429,14 @@ const TimesheetNewDesign = () => {
                   }}>Go to Current Week</button>
                 </div>
                 <div className="timesheet-tab-content-header-right">
-                 <button
-  type="button"
-  className="btn btn-outline-info fw-bold"
-  onClick={() => exportManagerReviewCSV(managerReviewData.rows)}
-  disabled={!managerReviewData.rows || managerReviewData.rows.length === 0}
->
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg> Export filtered
-</button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-info fw-bold"
+                    onClick={() => exportManagerReviewCSV(managerReviewData.rows)}
+                    disabled={!managerReviewData.rows || managerReviewData.rows.length === 0}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg> Export filtered
+                  </button>
                 </div>
               </div>
               {/* --- 4 Stat Cards (clickable) --- */}
