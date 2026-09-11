@@ -57,8 +57,7 @@ const ManagerReviewDatatable = ({
           >
             <DataTable
               className={actionColumn ? 'custom-datatable custom-datatable-sticky-action' : 'custom-datatable'}
-              fixedHeader={true}
-              fixedHeaderScrollHeight="500px"
+              fixedHeader={false}
               noHeader
               defaultSortField="JobId"
               defaultSortAsc={false}

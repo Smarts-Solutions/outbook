@@ -4004,7 +4004,7 @@ const TimesheetNewDesign = () => {
                           </h2>
                           <div id={targetId} className={`accordion-collapse collapse ${index === 0 ? 'show' : ''}`} data-bs-parent="#accordionHistoryLog">
                             <div className="accordion-body p-0">
-                              <div className="table-responsive">
+                              <div>
                                 {(() => {
 
                                   const saveEvents = [];
