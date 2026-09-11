@@ -1639,11 +1639,18 @@ const saveTimesheet = async (Timesheet) => {
             const newRowId = insertResult.insertId;
 
             // ---- Add Timesheet Logs for INSERT ----
-            const action_type = Number(row.submit_status) === 1 ? "SUBMIT" : "SAVE";
+            let action_type = Number(row.submit_status) === 1 ? "SUBMIT" : "SAVE";
+            // Check if this row was copied from a previous week without modification
+            if (row.copied_from_week && !row.is_modified) {
+              action_type = "COPIED";
+            }
             const internal_external = parseInt(row.task_type) === 2 ? 2 : 1;
             for (const d of days) {
               if (d.date !== null && d.hours !== null) {
-                const logDesc = `${action_type} entry for ${d.day} with ${d.hours} hours.`;
+                let logDesc = `${action_type} entry for ${d.day} with ${d.hours} hours.`;
+                if (action_type === "COPIED") {
+                  logDesc = `COPIED from ${row.copied_from_week} - ${d.day} with ${d.hours} hours.`;
+                }
                 const logQuery = `
                   INSERT INTO timesheet_logs 
                   (timesheet_row_id, staff_id, action_type, internal_external, customer_id, client_id, job_id, task_id, entry_day, hours_entered, created_at, description)

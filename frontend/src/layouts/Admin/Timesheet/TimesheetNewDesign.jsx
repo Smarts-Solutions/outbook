@@ -394,11 +394,11 @@ const TimesheetNewDesign = () => {
       setWeekOffset(value);
       await GetTimeSheet(value);
     } else if (name === "copy_week") {
-      await getTimeSheetCopyRecord(value);
+      await getTimeSheetCopyRecord(value, e.target.label);
     }
   };
 
-  const getTimeSheetCopyRecord = async (weekOffset) => {
+  const getTimeSheetCopyRecord = async (weekOffset, weekLabel) => {
     try {
       setLoading(true);
       const req = { staff_id: multipleFilter.staff_id, weekOffset: weekOffset };
@@ -407,7 +407,12 @@ const TimesheetNewDesign = () => {
       ).unwrap();
 
       if (res.status) {
-        setCopyTimeSheetRows(res.data);
+        const rowsWithCopiedMeta = res.data.map(row => ({
+          ...row,
+          copied_from_week: weekLabel,
+          is_modified: false
+        }));
+        setCopyTimeSheetRows(rowsWithCopiedMeta);
         setCopyTimeSheetRows((prevRows) =>
           prevRows.map((row) => {
             const sum =
@@ -754,6 +759,7 @@ const TimesheetNewDesign = () => {
     try {
       setLoading(true);
       const updatedRows = [...timeSheetRows];
+      updatedRows[index].is_modified = true;
       updatedRows[index] = {
         ...updatedRows[index],
         task_type: e.target.value,
@@ -897,6 +903,7 @@ const TimesheetNewDesign = () => {
     try {
       setLoading(true);
       const updatedRows = [...timeSheetRows];
+      updatedRows[index].is_modified = true;
       updatedRows[index].jobData = [];
       updatedRows[index].clientData = [];
       updatedRows[index].taskData = [];
@@ -1002,6 +1009,7 @@ const TimesheetNewDesign = () => {
       setLoading(true);
 
       const updatedRows = [...timeSheetRows];
+      updatedRows[index].is_modified = true;
       updatedRows[index].jobData = [];
       updatedRows[index].taskData = [];
 
@@ -1085,6 +1093,7 @@ const TimesheetNewDesign = () => {
     try {
       setLoading(true);
       const updatedRows = [...timeSheetRows];
+      updatedRows[index].is_modified = true;
 
       updatedRows[index].taskData = [];
 
@@ -1149,6 +1158,7 @@ const TimesheetNewDesign = () => {
     try {
       setLoading(true);
       const updatedRows = [...timeSheetRows];
+      updatedRows[index].is_modified = true;
       updatedRows[index].task_id = e.target.value;
       setTimeSheetRows(updatedRows);
 
@@ -1181,6 +1191,7 @@ const TimesheetNewDesign = () => {
       }
 
       const updatedRows = [...timeSheetRows];
+      updatedRows[index].is_modified = true;
       if (updatedRows[index][name] == null) {
         updatedRows[index][name] = "";
         setTimeSheetRows(updatedRows);
@@ -2099,6 +2110,7 @@ const TimesheetNewDesign = () => {
   const handleRemarkSingleText = (e, index) => {
     if (submitStatusAllKey === 1 || timeSheetRows[index]?.submit_status === "1") return;
     const updatedRows = [...timeSheetRows];
+    updatedRows[index].is_modified = true;
     updatedRows[index].remark = e.target.value;
     setTimeSheetRows(updatedRows);
     const rowId = updatedRows[index].id;
@@ -2168,6 +2180,7 @@ const TimesheetNewDesign = () => {
     // console.log("modalText ",modalText);
     // console.log("activeField ",activeField);
     const updatedRows = [...timeSheetRows];
+    updatedRows[selectedRowIndex].is_modified = true;
     let key = activeField + "_note";
     updatedRows[selectedRowIndex][key] = modalText;
     setTimeSheetRows(updatedRows);
@@ -3892,6 +3905,7 @@ const TimesheetNewDesign = () => {
                     target: {
                       name: "copy_week",
                       value: selectedOption.value,
+                      label: selectedOption.label
                     },
                   };
                   selectFilterStaffANdWeek(e);
@@ -3945,6 +3959,16 @@ const TimesheetNewDesign = () => {
                       let displayStatus = latestLog?.action_type || "SAVE";
                       let headerStatusClass = "save-status";
 
+                      // Check if any log has COPIED action_type
+                      const copiedLog = group.logs.find(log => log.action_type === "COPIED");
+                      let copiedFromWeek = null;
+                      if (copiedLog && copiedLog.description) {
+                        const match = copiedLog.description.match(/COPIED from (.+?) -/);
+                        if (match) {
+                          copiedFromWeek = match[1];
+                        }
+                      }
+
                       if (hasSubmitLog || submitStatusAllKey === 1) {
                         if (displayStatus === "DELETE") {
                           headerStatusClass = "delete-status";
@@ -3957,6 +3981,7 @@ const TimesheetNewDesign = () => {
                         if (displayStatus === "UPDATE") headerStatusClass = "update-status";
                         if (displayStatus === "DELETE") headerStatusClass = "delete-status";
                         if (displayStatus === "SAVE") headerStatusClass = "save-status";
+                        if (displayStatus === "COPIED") headerStatusClass = "copied-status";
                       }
 
                       return (
@@ -3971,34 +3996,43 @@ const TimesheetNewDesign = () => {
                               aria-controls={targetId}
                             >
                               <div className="accordion-history-log-btn-div">
-                                <span className="accordion-button-left-text">
-                                  {index + 1}: {details.internal_external == 1 ? "Internal" : "External"}
-                                  {details.internal_external == 2 && details.customer_name ? ` - ${details.customer_name}` : ""}
-                                  {details.internal_external == 2 && details.client_name ? ` - ${details.client_name}` : ""}
-                                </span>
-                                <span className="accordion-button-right-text">
-                                  Job: {(() => {
-                                    if (details.internal_external == 1) {
-                                      return details.internal_name || "N/A";
-                                    } else {
-                                      const currentRow = timeSheetRows.find(r => String(r.id) === String(rowId));
-                                      if (currentRow) {
-                                        if (currentRow.jobData && currentRow.jobData.length > 0) {
-                                          const matched = currentRow.jobData.find(j => String(j.id) === String(details.job_name) || String(j.name) === String(details.job_name));
-                                          if (matched) return matched.name;
+                                <div className="accordion-header-top-row">
+                                  <span className="accordion-button-left-text">
+                                    {index + 1}: {details.internal_external == 1 ? "Internal" : "External"}
+                                    {details.internal_external == 2 && details.customer_name ? ` - ${details.customer_name}` : ""}
+                                    {details.internal_external == 2 && details.client_name ? ` - ${details.client_name}` : ""}
+                                  </span>
+                                  <span className="accordion-button-right-text">
+                                    Job: {(() => {
+                                      if (details.internal_external == 1) {
+                                        return details.internal_name || "N/A";
+                                      } else {
+                                        const currentRow = timeSheetRows.find(r => String(r.id) === String(rowId));
+                                        if (currentRow) {
+                                          if (currentRow.jobData && currentRow.jobData.length > 0) {
+                                            const matched = currentRow.jobData.find(j => String(j.id) === String(details.job_name) || String(j.name) === String(details.job_name));
+                                            if (matched) return matched.name;
+                                          }
+                                          if (currentRow.job_name) return currentRow.job_name;
                                         }
-                                        if (currentRow.job_name) return currentRow.job_name;
+                                        return details.job_name || "N/A";
                                       }
-                                      return details.job_name || "N/A";
-                                    }
-                                  })()} |
-                                  Task: {details.internal_external == 1 ? details.sub_internal_name || "N/A" : details.task_name || "N/A"}
+                                    })()} | Task: {details.internal_external == 1 ? details.sub_internal_name || "N/A" : details.task_name || "N/A"}
+                                  </span>
+                                </div>
+                                <div className="accordion-header-badges-row">
                                   {latestLog && (
-                                    <span className={`table-status ${headerStatusClass} ms-2`} style={{ padding: '2px 8px', marginLeft: '10px' }}>
+                                    <span className={`table-status ${headerStatusClass}`}>
                                       {displayStatus}
                                     </span>
                                   )}
-                                </span>
+                                  {copiedFromWeek && (
+                                    <span className="copied-from-badge">
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
+                                      Copied from: {copiedFromWeek}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </button>
                           </h2>
@@ -4081,6 +4115,7 @@ const TimesheetNewDesign = () => {
                                           if (displayActionType === "SUBMIT") statusClass = "submit-status";
                                           if (displayActionType === "UPDATE") statusClass = "update-status";
                                           if (displayActionType === "DELETE") statusClass = "delete-status";
+                                          if (displayActionType === "COPIED") statusClass = "copied-status";
 
                                           // Since saveEvents is sorted descending by created_at, i === 0 is the latest log
                                           if (i === 0 && (hasSubmitLog || submitStatusAllKey === 1) && displayActionType !== "DELETE") {
