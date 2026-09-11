@@ -3284,6 +3284,36 @@ const TimesheetNewDesign = () => {
                   <h3 className="timesheet-tab-content-heading">Manager Review</h3>
                   <p className="timesheet-tab-content-para">Track, filter and approve team timesheets.</p>
                 </div>
+                <div className="d-flex align-items-center gap-3">
+                  <div className="timesheet-week-div">
+                    <button className="timesheet-week-button" type="button" onClick={() => changeWeek(-1)} disabled={isWeekSwitching}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left size-4" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                    </button>
+                    <div className="timesheet-week-content-div">
+                      <p className="timesheet-week-date">{weekDays?.monday ? `${weekDays.monday} - ${weekDays.sunday}` : ""}</p>
+                      <p className="timesheet-week-text">
+                        {weekOffset === 0
+                          ? "Current Week"
+                          : weekOffset === -1
+                            ? "Previous Week"
+                            : weekOffset < -1
+                              ? `Previous Week -${Math.abs(weekOffset) - 1}`
+                              : weekOffset === 1
+                                ? "Next Week"
+                                : `Next Week +${weekOffset - 1}`}
+                      </p>
+                    </div>
+                    <button className="timesheet-week-button" type="button" onClick={() => changeWeek(1)} disabled={isWeekSwitching}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right size-4" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+                    </button>
+                  </div>
+                  <button type="button" className="btn btn-outline-info fw-bold" onClick={() => {
+                    if (isWeekSwitching || weekOffset === 0) return;
+                    setWeekOffset(0);
+                    weekOffSetValue.current = 0;
+                    GetTimeSheet(0);
+                  }}>Go to Current Week</button>
+                </div>
                 <div className="timesheet-tab-content-header-right">
                   <button type="button" className="btn btn-outline-info fw-bold"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg> Export filtered</button>
                 </div>
