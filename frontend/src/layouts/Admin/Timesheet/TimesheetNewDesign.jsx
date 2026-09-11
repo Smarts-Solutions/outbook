@@ -2608,6 +2608,17 @@ const TimesheetNewDesign = () => {
       reorder: false,
     },
     {
+      name: "Line Manager",
+      selector: (row) => {
+        const staffId = row.user_id || row.staff_id || row.StaffUserId || row.id;
+        const staffInfo = staffDataAll?.data?.find(s => Number(s.id) === Number(staffId));
+        return row.line_manager_name || row.line_manager || row.manager_name || row.manager || staffInfo?.line_manager_name || staffInfo?.manager_name || "-";
+      },
+      sortable: true,
+      width: "160px",
+      reorder: false,
+    },
+    {
       name: "Entries",
       cell: (row) => <div className="w-100 text-center">{row.timesheet_count}</div>,
       selector: (row) => row.timesheet_count,
@@ -2621,6 +2632,34 @@ const TimesheetNewDesign = () => {
       selector: (row) => row.total_hours,
       sortable: true,
       width: "140px",
+      reorder: false,
+    },
+    {
+      name: "Remaining Hours",
+      cell: (row) => {
+        const staffId = row.user_id || row.staff_id || row.StaffUserId || row.id;
+        const staffInfo = staffDataAll?.data?.find(s => Number(s.id) === Number(staffId));
+        
+        let allocatedStr = row.staffs_hourminute || staffInfo?.hourminute || "0";
+        let allocated = 0;
+        if (typeof allocatedStr === "string" && allocatedStr.includes(":")) {
+          const [h, m] = allocatedStr.split(":");
+          allocated = parseFloat(h) + (parseFloat(m) / 60);
+        } else {
+          allocated = parseFloat(allocatedStr) || 0;
+        }
+
+        const total = parseFloat(row.total_hours) || 0;
+        let remaining = allocated - total;
+
+        if (row.timesheet_status === "Submitted" && remaining < 0) {
+          remaining = 0;
+        }
+        
+        return <div className="w-100 text-center">{remaining.toFixed(2)}</div>;
+      },
+      sortable: true,
+      width: "150px",
       reorder: false,
     },
     {
