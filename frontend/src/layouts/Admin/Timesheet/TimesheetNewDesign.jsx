@@ -4074,17 +4074,24 @@ const TimesheetNewDesign = () => {
                                       </thead>
                                       <tbody>
                                         {saveEvents.map((event, i) => {
+                                          let displayActionType = event.action_type;
                                           let statusClass = "save-status";
-                                          if (event.action_type === "SUBMIT") statusClass = "submit-status";
-                                          if (event.action_type === "UPDATE") statusClass = "update-status";
-                                          if (event.action_type === "DELETE") statusClass = "delete-status";
+                                          if (displayActionType === "SUBMIT") statusClass = "submit-status";
+                                          if (displayActionType === "UPDATE") statusClass = "update-status";
+                                          if (displayActionType === "DELETE") statusClass = "delete-status";
+
+                                          // Since saveEvents is sorted descending by created_at, i === 0 is the latest log
+                                          if (i === 0 && (hasSubmitLog || submitStatusAllKey === 1) && displayActionType !== "DELETE") {
+                                            displayActionType = "SUBMIT";
+                                            statusClass = "submit-status";
+                                          }
 
                                           return (
                                             <tr key={i}>
                                               <td style={{ whiteSpace: "nowrap" }}>{event.staff_name}</td>
                                               <td style={{ textAlign: "center" }}>
                                                 <span className={`table-status ${statusClass}`} style={{ padding: '2px 8px', fontSize: '11px' }}>
-                                                  {event.action_type}
+                                                  {displayActionType}
                                                 </span>
                                                 {event.action_type === "DELETE" && (
                                                   <div style={{ fontSize: "10px", color: "#999", lineHeight: "1.2", marginTop: "4px" }}>
