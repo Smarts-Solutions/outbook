@@ -2635,7 +2635,7 @@ const TimesheetNewDesign = () => {
       reorder: false,
     },
     {
-      name: "Total Hours",
+      name: "Entered Hours",
       cell: (row) => <div className="w-100 text-center">{row.total_hours}</div>,
       selector: (row) => row.total_hours,
       sortable: true,
