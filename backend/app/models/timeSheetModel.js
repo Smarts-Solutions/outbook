@@ -2362,14 +2362,11 @@ const deleteTimesheetRow = async (reqBody) => {
 
 const getManagerReviewCount = async (data) => {
   const { StaffUserId } = data;
-  console.log("getManagerReviewCount data:", data);
-  console.log("StaffUserId:", StaffUserId);
   try {
     const LineManageStaffId =
       await LineManageStaffIdHelperFunctionForStaff(StaffUserId);
 
     const roleRows = await QueryRoleHelperFunction(StaffUserId);
-
     const role_name = roleRows[0]?.role_name?.toUpperCase();
 
     let staffWhereClause = "";
@@ -2389,12 +2386,18 @@ const getManagerReviewCount = async (data) => {
       }
     }
 
-    // Total staff count
-    const [totalResult] = await pool.query(
-      `SELECT COUNT(*) AS total_staff FROM staffs s ${staffWhereClause}`,
-      []
-    );
-    const total_staff = totalResult[0]?.total_staff || 0;
+    if (staffWhereClause === "WHERE 1 = 0") {
+      return {
+        status: true,
+        message: "Staff count fetched successfully",
+        data: {
+          total_staff: 0,
+          submitted_this_week: 0,
+          saved_this_week: 0,
+          missing_last_week: 0
+        }
+      };
+    }
 
     // Current week boundaries (Monday-based)
     const now = new Date();
@@ -2420,103 +2423,41 @@ const getManagerReviewCount = async (data) => {
     const lastWeekStart = lastMonday.toISOString().slice(0, 10);
     const lastWeekEnd = lastSunday.toISOString().slice(0, 10);
 
-    // Build a staff-scope subquery for use inside timesheet queries
-    const staffScopeSubquery = staffIdList.length > 0
-      ? `AND t.staff_id IN (${staffIdList.join(",")})`
-      : (role_name === "SUPERADMIN" || role_name === "ADMIN")
-        ? `AND t.staff_id IN (SELECT id FROM staffs WHERE role_id != 12)`
-        : `AND 1=0`;
+    const query = `
+      SELECT 
+        s.id AS staff_id,
+        MAX(CASE WHEN t.submit_status = '1' THEN 1 ELSE 0 END) AS submitted_this_week,
+        MAX(CASE WHEN t.submit_status = '0' THEN 1 ELSE 0 END) AS saved_this_week
+      FROM staffs s
+      LEFT JOIN timesheet t ON s.id = t.staff_id 
+        AND t.is_deleted = 0
+        AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) >= ?
+        AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) <= ?
+      ${staffWhereClause}
+      GROUP BY s.id
+    `;
 
-    // Submitted this week — distinct staff who have submit_status='1' with a date in this week
-    const [submittedResult] = await pool.query(`
-      SELECT COUNT(DISTINCT t.staff_id) AS submitted_count
-      FROM timesheet t
-      WHERE t.is_deleted = 0
-        AND t.submit_status = '1'
-        AND (
-          t.monday_date    BETWEEN ? AND ? OR
-          t.tuesday_date   BETWEEN ? AND ? OR
-          t.wednesday_date BETWEEN ? AND ? OR
-          t.thursday_date  BETWEEN ? AND ? OR
-          t.friday_date    BETWEEN ? AND ? OR
-          t.saturday_date  BETWEEN ? AND ? OR
-          t.sunday_date    BETWEEN ? AND ?
-        )
-        ${staffScopeSubquery}
-    `, [
-      thisWeekStart, thisWeekEnd,
-      thisWeekStart, thisWeekEnd,
-      thisWeekStart, thisWeekEnd,
-      thisWeekStart, thisWeekEnd,
-      thisWeekStart, thisWeekEnd,
-      thisWeekStart, thisWeekEnd,
-      thisWeekStart, thisWeekEnd,
-    ]);
-    const submitted_this_week = submittedResult[0]?.submitted_count || 0;
+    const queryParams = [
+      thisWeekStart, thisWeekEnd
+    ];
 
-    // Saved (draft) this week — distinct staff with submit_status='0' and a date in this week
-    const [savedResult] = await pool.query(`
-      SELECT COUNT(DISTINCT t.staff_id) AS saved_count
-      FROM timesheet t
-      WHERE t.is_deleted = 0
-        AND t.submit_status = '0'
-        AND (
-          t.monday_date    BETWEEN ? AND ? OR
-          t.tuesday_date   BETWEEN ? AND ? OR
-          t.wednesday_date BETWEEN ? AND ? OR
-          t.thursday_date  BETWEEN ? AND ? OR
-          t.friday_date    BETWEEN ? AND ? OR
-          t.saturday_date  BETWEEN ? AND ? OR
-          t.sunday_date    BETWEEN ? AND ?
-        )
-        ${staffScopeSubquery}
-    `, [
-      thisWeekStart, thisWeekEnd,
-      thisWeekStart, thisWeekEnd,
-      thisWeekStart, thisWeekEnd,
-      thisWeekStart, thisWeekEnd,
-      thisWeekStart, thisWeekEnd,
-      thisWeekStart, thisWeekEnd,
-      thisWeekStart, thisWeekEnd,
-    ]);
-    const saved_this_week = savedResult[0]?.saved_count || 0;
+    const [rows] = await pool.query(query, queryParams);
 
-    // Missing last week — staff who did NOT submit (submit_status='1') last week.
-    // Draft-only or no entry both count as "missing".
-    const [submittedLastWeekResult] = await pool.query(`
-      SELECT DISTINCT t.staff_id
-      FROM timesheet t
-      WHERE t.is_deleted = 0
-        AND t.submit_status = '1'
-        AND (
-          t.monday_date    BETWEEN ? AND ? OR
-          t.tuesday_date   BETWEEN ? AND ? OR
-          t.wednesday_date BETWEEN ? AND ? OR
-          t.thursday_date  BETWEEN ? AND ? OR
-          t.friday_date    BETWEEN ? AND ? OR
-          t.saturday_date  BETWEEN ? AND ? OR
-          t.sunday_date    BETWEEN ? AND ?
-        )
-        ${staffScopeSubquery}
-    `, [
-      lastWeekStart, lastWeekEnd,
-      lastWeekStart, lastWeekEnd,
-      lastWeekStart, lastWeekEnd,
-      lastWeekStart, lastWeekEnd,
-      lastWeekStart, lastWeekEnd,
-      lastWeekStart, lastWeekEnd,
-      lastWeekStart, lastWeekEnd,
-    ]);
-    const submittedLastWeekStaffIds = submittedLastWeekResult.map(r => r.staff_id);
+    let total_staff = 0;
+    let submitted_this_week = 0;
+    let saved_this_week = 0;
+    let missing_last_week = 0; // Keeping the variable name 'missing_last_week' as it is mapped to frontend, but it represents 'missing_this_week'
 
-    // Get all in-scope staff ids
-    const [allScopeStaff] = await pool.query(
-      `SELECT id FROM staffs s ${staffWhereClause}`,
-      []
-    );
-    const allScopeStaffIds = allScopeStaff.map(s => s.id);
-    // Missing = total staff minus those who submitted last week
-    const missing_last_week = allScopeStaffIds.filter(id => !submittedLastWeekStaffIds.includes(id)).length;
+    for (let row of rows) {
+      total_staff++;
+      if (row.submitted_this_week === 1) {
+        submitted_this_week++;
+      } else if (row.saved_this_week === 1) {
+        saved_this_week++;
+      } else {
+        missing_last_week++;
+      }
+    }
 
     return {
       status: true,
@@ -2531,7 +2472,6 @@ const getManagerReviewCount = async (data) => {
 
   } catch (error) {
     console.error("Error in getManagerReviewCount:", error);
-
     return {
       status: false,
       message: "Error fetching staff count."
