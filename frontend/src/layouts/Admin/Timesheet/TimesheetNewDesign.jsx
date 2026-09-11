@@ -2586,11 +2586,11 @@ const TimesheetNewDesign = () => {
       reorder: false,
     },
     {
-      name: "Employee",
+      name: "Staff",
       cell: (row) => <div title={row.staff_name}>{row.staff_name}</div>,
       selector: (row) => row.staff_name,
       sortable: true,
-      width: "200px",
+      width: "230px",
       reorder: false,
     },
     {
@@ -2598,7 +2598,7 @@ const TimesheetNewDesign = () => {
       cell: (row) => <div title={row.email}>{row.email}</div>,
       selector: (row) => row.email,
       sortable: true,
-      width: "220px",
+      width: "290px",
       reorder: false,
     },
     {
@@ -2639,7 +2639,7 @@ const TimesheetNewDesign = () => {
       cell: (row) => <div className="w-100 text-center">{row.total_hours}</div>,
       selector: (row) => row.total_hours,
       sortable: true,
-      width: "140px",
+      width: "170px",
       reorder: false,
     },
     {
@@ -2667,7 +2667,7 @@ const TimesheetNewDesign = () => {
         return <div className="w-100 text-center">{remaining.toFixed(2)}</div>;
       },
       sortable: true,
-      width: "150px",
+      width: "190px",
       reorder: false,
     },
     {
@@ -2683,25 +2683,27 @@ const TimesheetNewDesign = () => {
 
         return (
           <div className="d-flex justify-content-center align-items-center gap-3">
-            <Eye 
-              size={18} 
-              className="cursor-pointer text-primary" 
-              title="View Logs" 
-              onClick={(e) => { e.stopPropagation(); handleManagerViewLog(row); }} 
-            />
-            <Download 
-              size={18} 
-              className="cursor-pointer text-success" 
-              title="Download Timesheet" 
-              onClick={(e) => { e.stopPropagation(); handleManagerDownloadTimesheet(row); }} 
-            />
-            {row.timesheet_status === "Submitted" && (
-              <MessageSquare 
+            <span title="View Logs" onClick={(e) => { e.stopPropagation(); handleManagerViewLog(row); }}>
+              <Eye 
                 size={18} 
-                className="cursor-pointer text-info" 
-                title="View Final Remark" 
-                onClick={(e) => { e.stopPropagation(); handleViewManagerRemark(row); }} 
+                className="cursor-pointer text-primary" 
               />
+            </span>
+
+            <span title="Download Timesheet" onClick={(e) => { e.stopPropagation(); handleManagerDownloadTimesheet(row); }}>
+              <Download 
+                size={18} 
+                className="cursor-pointer text-success" 
+              />
+            </span>
+
+            {row.timesheet_status === "Submitted" && (
+              <span title="View Final Remark" onClick={(e) => { e.stopPropagation(); handleViewManagerRemark(row); }}>
+                <MessageSquare 
+                  size={18} 
+                  className="cursor-pointer text-info" 
+                />
+              </span>
             )}
           </div>
         );
