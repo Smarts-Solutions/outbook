@@ -2750,101 +2750,15 @@ const getManagerReviewData = async (data) => {
         SELECT
           t.staff_id,
 
-          /*
-           * Total hours in seconds
-           */
           SUM(
-            COALESCE(
-              TIME_TO_SEC(
-                STR_TO_DATE(
-                  NULLIF(
-                    SUBSTRING_INDEX(t.monday_hours, ':', 2),
-                    ''
-                  ),
-                  '%H:%i'
-                )
-              ),
-              0
-            )
-            +
-            COALESCE(
-              TIME_TO_SEC(
-                STR_TO_DATE(
-                  NULLIF(
-                    SUBSTRING_INDEX(t.tuesday_hours, ':', 2),
-                    ''
-                  ),
-                  '%H:%i'
-                )
-              ),
-              0
-            )
-            +
-            COALESCE(
-              TIME_TO_SEC(
-                STR_TO_DATE(
-                  NULLIF(
-                    SUBSTRING_INDEX(t.wednesday_hours, ':', 2),
-                    ''
-                  ),
-                  '%H:%i'
-                )
-              ),
-              0
-            )
-            +
-            COALESCE(
-              TIME_TO_SEC(
-                STR_TO_DATE(
-                  NULLIF(
-                    SUBSTRING_INDEX(t.thursday_hours, ':', 2),
-                    ''
-                  ),
-                  '%H:%i'
-                )
-              ),
-              0
-            )
-            +
-            COALESCE(
-              TIME_TO_SEC(
-                STR_TO_DATE(
-                  NULLIF(
-                    SUBSTRING_INDEX(t.friday_hours, ':', 2),
-                    ''
-                  ),
-                  '%H:%i'
-                )
-              ),
-              0
-            )
-            +
-            COALESCE(
-              TIME_TO_SEC(
-                STR_TO_DATE(
-                  NULLIF(
-                    SUBSTRING_INDEX(t.saturday_hours, ':', 2),
-                    ''
-                  ),
-                  '%H:%i'
-                )
-              ),
-              0
-            )
-            +
-            COALESCE(
-              TIME_TO_SEC(
-                STR_TO_DATE(
-                  NULLIF(
-                    SUBSTRING_INDEX(t.sunday_hours, ':', 2),
-                    ''
-                  ),
-                  '%H:%i'
-                )
-              ),
-              0
-            )
-          ) AS total_seconds,
+            COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.monday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0) +
+            COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.tuesday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0) +
+            COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.wednesday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0) +
+            COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.thursday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0) +
+            COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.friday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0) +
+            COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.saturday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0) +
+            COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.sunday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0)
+          ) AS total_hours_decimal,
 
           /*
            * At least one submitted row
@@ -2976,22 +2890,9 @@ const getManagerReviewData = async (data) => {
         /*
          * Total hours
          *
-         * SEC_TO_TIME can return values such as:
-         * 40:30:00
-         *
-         * We only need HH:MM
+         * Summed as decimal (e.g., 8.50)
          */
-        CASE
-          WHEN COALESCE(ts.total_seconds, 0) = 0
-            THEN '00:00'
-
-          ELSE LEFT(
-            SEC_TO_TIME(
-              ts.total_seconds
-            ),
-            5
-          )
-        END AS total_hours,
+        ROUND(COALESCE(ts.total_hours_decimal, 0), 2) AS total_hours,
 
         /*
          * Final status
