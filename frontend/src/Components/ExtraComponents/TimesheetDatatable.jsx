@@ -41,7 +41,7 @@ const TimesheetDatatable = ({
         },
         {
             name: 'Task Type',
-            width: '150px',
+            minWidth: '150px',
             cell: (row, index) =>
                 row.isTotal ? null : (
                     <Select
@@ -74,7 +74,7 @@ const TimesheetDatatable = ({
         },
         {
             name: 'Customer',
-            width: '150px',
+            minWidth: '150px',
             cell: (row, index) =>
                 row.isTotal ? null : (
                     row.task_type === "1" ? (
@@ -111,7 +111,7 @@ const TimesheetDatatable = ({
         },
         {
             name: 'Client',
-            width: '150px',
+            minWidth: '150px',
             cell: (row, index) =>
                 row.isTotal ? null : (
                     row.task_type === "1" ? (
@@ -148,7 +148,7 @@ const TimesheetDatatable = ({
         },
         {
             name: 'Job',
-            width: '150px',
+            minWidth: '150px',
             cell: (row, index) =>
                 row.isTotal ? null : (
                     <Select
@@ -175,7 +175,7 @@ const TimesheetDatatable = ({
         },
         {
             name: 'Task',
-            width: '150px',
+            minWidth: '150px',
             cell: (row, index) =>
                 row.isTotal ? (
                     <span className='timesheet-table-strong'>Daily total</span>
@@ -221,7 +221,7 @@ const TimesheetDatatable = ({
                     <span className="d-block">{weekDays && weekDays[day.dateValueKey] ? weekDays[day.dateValueKey].split('/')[0] : day.label}</span>
                 </div>
             ),
-            width: '100px',
+            minWidth: '100px',
             cell: (row, index) =>
                 row.isTotal ? (
                     <span className='timesheet-table-strong'>{getTotalHoursFromKey(day.stateKey)}</span>
@@ -258,7 +258,7 @@ const TimesheetDatatable = ({
 
     columns.push({
         name: 'Total',
-        width: '100px',
+        minWidth: '100px',
         cell: (row) =>
             row.isTotal ? (
                 <span className='timesheet-table-strong'>{getGrandTotal()}</span>
