@@ -3212,7 +3212,7 @@ const TimesheetNewDesign = () => {
               </div>
 
               {/* --- 4 Filter Tabs Bar --- */}
-              <div className="review-filter-tabs mt-3">
+              {/* <div className="review-filter-tabs mt-3">
                 <button
                   type="button"
                   className={`review-filter-tab-btn ${activeReviewTab === "all" ? "active" : ""}`}
@@ -3245,7 +3245,7 @@ const TimesheetNewDesign = () => {
                   Missing
                   <span className="review-tab-badge review-tab-badge--red">{missingLastWeek}</span>
                 </button>
-              </div>
+              </div> */}
 
               <div className="timesheet-white-card mt-3">
                 {activeReviewTab === "all" && (
