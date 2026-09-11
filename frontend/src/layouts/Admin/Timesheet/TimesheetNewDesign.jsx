@@ -2673,7 +2673,7 @@ const TimesheetNewDesign = () => {
         const total = parseFloat(row.total_hours) || 0;
         let remaining = allocated - total;
 
-        if (row.timesheet_status === "Submitted" && remaining < 0) {
+        if (remaining < 0) {
           remaining = 0;
         }
         
