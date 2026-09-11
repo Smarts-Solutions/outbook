@@ -2720,24 +2720,25 @@ const getManagerReviewData = async (data) => {
 
       searchCondition = `
         AND (
-          s.first_name LIKE ?
-          OR s.last_name LIKE ?
-          OR CONCAT(s.first_name, ' ', s.last_name) LIKE ?
-          OR s.email LIKE ?
-          OR s.employee_number LIKE ?
-          OR s.phone LIKE ?
-          OR r.role_name LIKE ?
+          sub.first_name LIKE ?
+          OR sub.last_name LIKE ?
+          OR sub.staff_name LIKE ?
+          OR sub.email LIKE ?
+          OR sub.employee_number LIKE ?
+          OR sub.staff_phone LIKE ?
+          OR sub.role_name LIKE ?
+          OR sub.line_manager_name LIKE ?
+          OR CAST(sub.timesheet_count AS CHAR) LIKE ?
+          OR CAST(sub.total_hours AS CHAR) LIKE ?
+          OR CAST(sub.remaining_hours AS CHAR) LIKE ?
+          OR sub.timesheet_status LIKE ?
         )
       `;
 
       searchParams = [
-        likeSearch,
-        likeSearch,
-        likeSearch,
-        likeSearch,
-        likeSearch,
-        likeSearch,
-        likeSearch,
+        likeSearch, likeSearch, likeSearch, likeSearch, likeSearch,
+        likeSearch, likeSearch, likeSearch, likeSearch, likeSearch,
+        likeSearch, likeSearch
       ];
     }
 
@@ -2871,72 +2872,80 @@ const getManagerReviewData = async (data) => {
     // --------------------------------------------------
 
     const mainQuery = `
-      SELECT
-        s.id AS staff_id,
+      SELECT * FROM (
+        SELECT
+          s.id AS staff_id,
 
-        CONCAT(
+          CONCAT(
+            s.first_name,
+            ' ',
+            s.last_name
+          ) AS staff_name,
+
           s.first_name,
-          ' ',
-          s.last_name
-        ) AS staff_name,
+          s.last_name,
 
-        s.first_name,
-        s.last_name,
+          s.email,
 
-        s.email,
+          s.employee_number,
+          s.phone AS staff_phone,
 
-        s.employee_number,
+          s.status AS staff_status,
 
-        s.status AS staff_status,
+          r.role_name,
 
-        r.role_name,
+          COALESCE(ts.timesheet_count, 0)
+            AS timesheet_count,
 
-        COALESCE(ts.timesheet_count, 0)
-          AS timesheet_count,
+          ROUND(COALESCE(ts.total_hours_decimal, 0), 2) AS total_hours,
 
-        /*
-         * Total hours
-         *
-         * Summed as decimal (e.g., 8.50)
-         */
-        ROUND(COALESCE(ts.total_hours_decimal, 0), 2) AS total_hours,
+          CASE
+            WHEN COALESCE(ts.has_submitted, 0) = 1
+              THEN 'Submitted'
 
-        /*
-         * Final status
-         */
-        CASE
-          WHEN COALESCE(ts.has_submitted, 0) = 1
-            THEN 'Submitted'
+            WHEN COALESCE(ts.has_saved, 0) = 1
+              THEN 'Saved'
 
-          WHEN COALESCE(ts.has_saved, 0) = 1
-            THEN 'Saved'
+            ELSE 'Missing'
+          END AS timesheet_status,
 
-          ELSE 'Missing'
-        END AS timesheet_status,
+          COALESCE(ts.has_saved, 0)
+            AS has_saved,
 
-        COALESCE(ts.has_saved, 0)
-          AS has_saved,
+          COALESCE(ts.has_submitted, 0)
+            AS has_submitted,
+            
+          (SELECT CONCAT(m.first_name, ' ', m.last_name)
+           FROM line_managers lm 
+           JOIN staffs m ON m.id = lm.staff_to 
+           WHERE lm.staff_by = s.id LIMIT 1) AS line_manager_name,
+           
+          s.hourminute AS staffs_hourminute,
+          
+          GREATEST(0, (
+            COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(s.hourminute, ':', 1), ''), ':', '.') AS DECIMAL(10,2)), 0) + 
+            (COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(s.hourminute, ':', -1), ''), ':', '.') AS DECIMAL(10,2)), 0) / 60)
+            - ROUND(COALESCE(ts.total_hours_decimal, 0), 2)
+          )) AS remaining_hours
 
-        COALESCE(ts.has_submitted, 0)
-          AS has_submitted
+        FROM staffs s
 
-      FROM staffs s
+        INNER JOIN roles r
+          ON r.id = s.role_id
 
-      INNER JOIN roles r
-        ON r.id = s.role_id
+        ${timesheetJoin}
 
-      ${timesheetJoin}
+        WHERE
+          ${staffCondition}
 
-      WHERE
-        ${staffCondition}
-
-        ${searchCondition}
-
-        ${statusCondition}
+          ${statusCondition}
+      ) AS sub
+      
+      WHERE 1=1 ${searchCondition}
 
       ORDER BY
-        s.first_name ASC,
-        s.last_name ASC
+        sub.first_name ASC,
+        sub.last_name ASC
 
       LIMIT ? OFFSET ?
     `;
@@ -2958,21 +2967,38 @@ const getManagerReviewData = async (data) => {
     // --------------------------------------------------
 
     const countQuery = `
-      SELECT COUNT(*) AS total
-
-      FROM staffs s
-
-      INNER JOIN roles r
-        ON r.id = s.role_id
-
-      ${timesheetJoin}
-
-      WHERE
-        ${staffCondition}
-
-        ${searchCondition}
-
-        ${statusCondition}
+      SELECT COUNT(*) AS total FROM (
+        SELECT
+          s.id AS staff_id,
+          CONCAT(s.first_name, ' ', s.last_name) AS staff_name,
+          s.first_name,
+          s.last_name,
+          s.email,
+          s.employee_number,
+          s.phone AS staff_phone,
+          r.role_name,
+          COALESCE(ts.timesheet_count, 0) AS timesheet_count,
+          ROUND(COALESCE(ts.total_hours_decimal, 0), 2) AS total_hours,
+          CASE
+            WHEN COALESCE(ts.has_submitted, 0) = 1 THEN 'Submitted'
+            WHEN COALESCE(ts.has_saved, 0) = 1 THEN 'Saved'
+            ELSE 'Missing'
+          END AS timesheet_status,
+          (SELECT CONCAT(m.first_name, ' ', m.last_name)
+           FROM line_managers lm 
+           JOIN staffs m ON m.id = lm.staff_to 
+           WHERE lm.staff_by = s.id LIMIT 1) AS line_manager_name,
+          GREATEST(0, (
+            COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(s.hourminute, ':', 1), ''), ':', '.') AS DECIMAL(10,2)), 0) + 
+            (COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(s.hourminute, ':', -1), ''), ':', '.') AS DECIMAL(10,2)), 0) / 60)
+            - ROUND(COALESCE(ts.total_hours_decimal, 0), 2)
+          )) AS remaining_hours
+        FROM staffs s
+        INNER JOIN roles r ON r.id = s.role_id
+        ${timesheetJoin}
+        WHERE ${staffCondition} ${statusCondition}
+      ) AS sub
+      WHERE 1=1 ${searchCondition}
     `;
 
     const countParams = [
@@ -2999,46 +3025,42 @@ const getManagerReviewData = async (data) => {
 
     const summaryQuery = `
       SELECT
-
         COUNT(*) AS totalStaff,
-
-        SUM(
+        SUM(CASE WHEN sub.timesheet_status = 'Submitted' THEN 1 ELSE 0 END) AS submitted,
+        SUM(CASE WHEN sub.timesheet_status = 'Saved' THEN 1 ELSE 0 END) AS saved,
+        SUM(CASE WHEN sub.timesheet_status = 'Missing' THEN 1 ELSE 0 END) AS missing
+      FROM (
+        SELECT
+          s.id AS staff_id,
+          CONCAT(s.first_name, ' ', s.last_name) AS staff_name,
+          s.first_name,
+          s.last_name,
+          s.email,
+          s.employee_number,
+          s.phone AS staff_phone,
+          r.role_name,
+          COALESCE(ts.timesheet_count, 0) AS timesheet_count,
+          ROUND(COALESCE(ts.total_hours_decimal, 0), 2) AS total_hours,
           CASE
-            WHEN COALESCE(ts.has_submitted, 0) = 1
-            THEN 1
-            ELSE 0
-          END
-        ) AS submitted,
-
-        SUM(
-          CASE
-            WHEN COALESCE(ts.has_submitted, 0) = 0
-             AND COALESCE(ts.has_saved, 0) = 1
-            THEN 1
-            ELSE 0
-          END
-        ) AS saved,
-
-        SUM(
-          CASE
-            WHEN COALESCE(ts.has_submitted, 0) = 0
-             AND COALESCE(ts.has_saved, 0) = 0
-            THEN 1
-            ELSE 0
-          END
-        ) AS missing
-
-      FROM staffs s
-
-      INNER JOIN roles r
-        ON r.id = s.role_id
-
-      ${timesheetJoin}
-
-      WHERE
-        ${staffCondition}
-
-        ${searchCondition}
+            WHEN COALESCE(ts.has_submitted, 0) = 1 THEN 'Submitted'
+            WHEN COALESCE(ts.has_saved, 0) = 1 THEN 'Saved'
+            ELSE 'Missing'
+          END AS timesheet_status,
+          (SELECT CONCAT(m.first_name, ' ', m.last_name)
+           FROM line_managers lm 
+           JOIN staffs m ON m.id = lm.staff_to 
+           WHERE lm.staff_by = s.id LIMIT 1) AS line_manager_name,
+          GREATEST(0, (
+            COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(s.hourminute, ':', 1), ''), ':', '.') AS DECIMAL(10,2)), 0) + 
+            (COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(s.hourminute, ':', -1), ''), ':', '.') AS DECIMAL(10,2)), 0) / 60)
+            - ROUND(COALESCE(ts.total_hours_decimal, 0), 2)
+          )) AS remaining_hours
+        FROM staffs s
+        INNER JOIN roles r ON r.id = s.role_id
+        ${timesheetJoin}
+        WHERE ${staffCondition}
+      ) AS sub
+      WHERE 1=1 ${searchCondition}
     `;
 
     const summaryParams = [

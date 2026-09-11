@@ -49,6 +49,7 @@ const TimesheetNewDesign = () => {
   // history modal state
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [rowHistoryLogs, setRowHistoryLogs] = useState([]);
+  const [historyModalStatus, setHistoryModalStatus] = useState(null);
   // manager review count state
   const [managerReviewCount, setManagerReviewCount] = useState(0);
   const [submittedThisWeek, setSubmittedThisWeek] = useState(0);
@@ -78,6 +79,7 @@ const TimesheetNewDesign = () => {
       const res = await dispatch(getTimesheetLogsData({ req, authToken: token })).unwrap();
       if (res.status) {
         setRowHistoryLogs(res.data);
+        setHistoryModalStatus(submitStatusAllKey === 1 ? "Submitted" : (timeSheetRows.length > 0 && timeSheetRows.some(r => r.id != null) ? "Saved" : "Draft"));
         setIsHistoryModalOpen(true);
       } else {
         sweatalert.fire({ icon: "error", title: "Error fetching logs" });
@@ -2102,14 +2104,28 @@ const TimesheetNewDesign = () => {
     }, 100);
   };
 
-  const exportManagerReviewCSV = (rows) => {
-    if (!rows || rows.length === 0) {
-      sweatalert.fire({ icon: "info", title: "No data to export." });
-      return;
-    }
-
+  const exportManagerReviewCSV = async () => {
     setExporting(true);
-    setTimeout(() => {
+    try {
+      // Fetch all filtered data from backend for bulk export
+      const req = {
+        StaffUserId: parseInt(staffDetails.id),
+        weekOffset: weekOffset,
+        status: activeReviewTab,
+        page: 1,
+        limit: 1000000, // Large number to get all records
+        search: managerReviewSearchTerm,
+      };
+      
+      const res = await dispatch(getManagerReviewData({ req, authToken: token })).unwrap();
+      const rows = res?.data || [];
+
+      if (!rows || rows.length === 0) {
+        sweatalert.fire({ icon: "info", title: "No data to export." });
+        setExporting(false);
+        return;
+      }
+
       const headers = [
         "S.No",
         "Staff",
@@ -2157,7 +2173,7 @@ const TimesheetNewDesign = () => {
       };
 
       const csvRows = rows.map((row, index) => [
-        (managerReviewPage - 1) * managerReviewPageSize + (index + 1),
+        index + 1,
         row.staff_name || "",
         row.email || "",
         row.employee_number || "-",
@@ -2191,7 +2207,11 @@ const TimesheetNewDesign = () => {
       link.download = `ManagerReview_${tabLabel}.csv`;
       link.click();
       setExporting(false);
-    }, 100);
+    } catch (err) {
+      console.error(err);
+      sweatalert.fire({ icon: "error", title: "Export failed." });
+      setExporting(false);
+    }
   };
 
   const handleSingleRemark = (e, item, index) => {
@@ -2623,6 +2643,7 @@ const TimesheetNewDesign = () => {
       const res = await dispatch(getTimesheetLogsData({ req, authToken: token })).unwrap();
       if (res.status) {
         setRowHistoryLogs(res.data);
+        setHistoryModalStatus(row.timesheet_status || "Saved");
         setIsHistoryModalOpen(true);
       } else {
         sweatalert.fire({ icon: "error", title: "Error fetching logs" });
@@ -2945,7 +2966,7 @@ const TimesheetNewDesign = () => {
 
   const renderManagerReviewTable = () => (
     <>
-      <div className="row mb-3 align-items-center">
+      <div className="row mb-3 align-items-center justify-content-between">
         <div className="col-md-4">
           <input
             type="text"
@@ -2954,6 +2975,17 @@ const TimesheetNewDesign = () => {
             value={managerReviewSearchTerm}
             onChange={(e) => handleManagerReviewSearchChange(e.target.value)}
           />
+        </div>
+        <div className="col-md-auto">
+          <button
+            type="button"
+            className="timesheet-table-header-btn"
+            onClick={() => exportManagerReviewCSV()}
+            disabled={exporting || !managerReviewData.rows || managerReviewData.rows.length === 0}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download me-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>
+            {exporting ? "Exporting..." : "Export Filtered"}
+          </button>
         </div>
       </div>
 
@@ -3427,16 +3459,6 @@ const TimesheetNewDesign = () => {
                     weekOffSetValue.current = 0;
                     GetTimeSheet(0);
                   }}>Go to Current Week</button>
-                </div>
-                <div className="timesheet-tab-content-header-right">
-                  <button
-                    type="button"
-                    className="btn btn-outline-info fw-bold"
-                    onClick={() => exportManagerReviewCSV(managerReviewData.rows)}
-                    disabled={!managerReviewData.rows || managerReviewData.rows.length === 0}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg> Export filtered
-                  </button>
                 </div>
               </div>
               {/* --- 4 Stat Cards (clickable) --- */}
@@ -4067,7 +4089,7 @@ const TimesheetNewDesign = () => {
                         }
                       }
 
-                      if (hasSubmitLog || submitStatusAllKey === 1) {
+                      if (historyModalStatus === "Submitted" || historyModalStatus === "SUBMIT") {
                         if (displayStatus === "DELETE") {
                           headerStatusClass = "delete-status";
                         } else {
@@ -4216,7 +4238,7 @@ const TimesheetNewDesign = () => {
                                           if (displayActionType === "COPIED") statusClass = "copied-status";
 
                                           // Since saveEvents is sorted descending by created_at, i === 0 is the latest log
-                                          if (i === 0 && (hasSubmitLog || submitStatusAllKey === 1) && displayActionType !== "DELETE") {
+                                          if (i === 0 && (historyModalStatus === "Submitted" || historyModalStatus === "SUBMIT") && displayActionType !== "DELETE") {
                                             displayActionType = "SUBMIT";
                                             statusClass = "submit-status";
                                           }
