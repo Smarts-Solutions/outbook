@@ -55,6 +55,7 @@ const TimesheetNewDesign = () => {
   const [savedThisWeek, setSavedThisWeek] = useState(0);
   const [missingLastWeek, setMissingLastWeek] = useState(0);
   const [activeReviewTab, setActiveReviewTab] = useState("all"); // all | submitted | saved | missing
+  const [hasFetchedManagerReview, setHasFetchedManagerReview] = useState(false);
 
   const [managerReviewData, setManagerReviewData] = useState({
     loading: true,
@@ -466,8 +467,13 @@ const TimesheetNewDesign = () => {
   useEffect(() => {
     staffData();
     GetLineManagerData();
-    fetchManagerReviewCount();
   }, []);
+
+  useEffect(() => {
+    if (hasFetchedManagerReview) {
+      fetchManagerReviewCount();
+    }
+  }, [hasFetchedManagerReview]);
 
   useEffect(() => {
 
@@ -2418,9 +2424,11 @@ const TimesheetNewDesign = () => {
   };
 
   useEffect(() => {
-    setManagerReviewPage(1);
-    fetchManagerReviewData(activeReviewTab, 1, managerReviewPageSize, managerReviewSearchTerm);
-  }, [activeReviewTab, weekOffset]);
+    if (hasFetchedManagerReview) {
+      setManagerReviewPage(1);
+      fetchManagerReviewData(activeReviewTab, 1, managerReviewPageSize, managerReviewSearchTerm);
+    }
+  }, [activeReviewTab, weekOffset, hasFetchedManagerReview]);
 
   const fetchManagerReviewData = async (
     statusTab = activeReviewTab,
@@ -2928,7 +2936,7 @@ const TimesheetNewDesign = () => {
             </li>
             {isManagerReviewVisible && (
               <li role="presentation">
-                <button id="manager-review-tab" data-bs-toggle="tab" data-bs-target="#manager-review-tab-pane" type="button" role="tab" aria-controls="manager-review-tab-pane" aria-selected="false">Manager Review</button>
+                <button id="manager-review-tab" data-bs-toggle="tab" data-bs-target="#manager-review-tab-pane" type="button" role="tab" aria-controls="manager-review-tab-pane" aria-selected="false" onClick={() => setHasFetchedManagerReview(true)}>Manager Review</button>
               </li>
             )}
             <li role="presentation">
