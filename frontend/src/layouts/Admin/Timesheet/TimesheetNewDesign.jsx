@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import CommonModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { Eye, History } from "lucide-react";
+import { Eye, History, Download, MessageSquare } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import Select from "react-select";
@@ -521,6 +521,9 @@ const TimesheetNewDesign = () => {
   const [remarkModel, setRemarkModel] = useState(false);
   const [remarkSingleModel, setRemarkSingleModel] = useState(false);
   const [remarkSingleIndex, setRemarkSingleIndex] = useState(null);
+
+  const [isManagerRemarkModalOpen, setIsManagerRemarkModalOpen] = useState(false);
+  const [managerRemarkText, setManagerRemarkText] = useState("");
 
   const [timeSheetRows, setTimeSheetRows] = useState([]);
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
@@ -2499,6 +2502,74 @@ const TimesheetNewDesign = () => {
     );
   };
 
+  const handleManagerViewLog = async (row) => {
+    try {
+      setLoading(true);
+      const staffId = row.user_id || row.staff_id || row.StaffUserId || row.id;
+      const req = { staff_id: staffId, weekOffset: weekOffset };
+      const res = await dispatch(getTimesheetLogsData({ req, authToken: token })).unwrap();
+      if (res.status) {
+        setRowHistoryLogs(res.data);
+        setIsHistoryModalOpen(true);
+      } else {
+        sweatalert.fire({ icon: "error", title: "Error fetching logs" });
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleManagerDownloadTimesheet = async (row) => {
+    try {
+      setExporting(true);
+      const staffId = row.user_id || row.staff_id || row.StaffUserId || row.id;
+      const req = { staff_id: staffId, weekOffset: weekOffset };
+      const res = await dispatch(getTimesheetData({ req, authToken: token })).unwrap();
+      if (res.status && res.data && res.data.length > 0) {
+        const rowsWithTotals = res.data.map(r => {
+          const sum =
+            (parseFloat(r.monday_hours) || 0) +
+            (parseFloat(r.tuesday_hours) || 0) +
+            (parseFloat(r.wednesday_hours) || 0) +
+            (parseFloat(r.thursday_hours) || 0) +
+            (parseFloat(r.friday_hours) || 0) +
+            (parseFloat(r.saturday_hours) || 0) +
+            (parseFloat(r.sunday_hours) || 0);
+          return { ...r, total_hours: parseFloat(sum).toFixed(2) };
+        });
+        exportToCSV(rowsWithTotals);
+      } else {
+        sweatalert.fire({ icon: "info", title: "No timesheet data available to download." });
+        setExporting(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setExporting(false);
+    }
+  };
+
+  const handleViewManagerRemark = async (row) => {
+    try {
+      setLoading(true);
+      const staffId = row.user_id || row.staff_id || row.StaffUserId || row.id;
+      const req = { staff_id: staffId, weekOffset: weekOffset };
+      const res = await dispatch(getTimesheetData({ req, authToken: token })).unwrap();
+      if (res.status && res.data && res.data.length > 0) {
+        setManagerRemarkText(res.data[0].final_remark || "No Final Remark Found");
+        setIsManagerRemarkModalOpen(true);
+      } else {
+        setManagerRemarkText("No Final Remark Found");
+        setIsManagerRemarkModalOpen(true);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const managerReviewColumns = [
     {
       name: "S.No",
@@ -2558,6 +2629,39 @@ const TimesheetNewDesign = () => {
       width: "130px",
       reorder: false,
     },
+    {
+      name: "Action",
+      cell: (row) => {
+        if (row.timesheet_status === "Missing") return null;
+
+        return (
+          <div className="d-flex justify-content-center align-items-center gap-3">
+            <Eye 
+              size={18} 
+              className="cursor-pointer text-primary" 
+              title="View Logs" 
+              onClick={(e) => { e.stopPropagation(); handleManagerViewLog(row); }} 
+            />
+            <Download 
+              size={18} 
+              className="cursor-pointer text-success" 
+              title="Download Timesheet" 
+              onClick={(e) => { e.stopPropagation(); handleManagerDownloadTimesheet(row); }} 
+            />
+            {row.timesheet_status === "Submitted" && (
+              <MessageSquare 
+                size={18} 
+                className="cursor-pointer text-info" 
+                title="View Final Remark" 
+                onClick={(e) => { e.stopPropagation(); handleViewManagerRemark(row); }} 
+              />
+            )}
+          </div>
+        );
+      },
+      width: "140px",
+      reorder: false,
+    },
   ];
 
   // Accordion component to display timesheet when row is expanded
@@ -2611,32 +2715,10 @@ const TimesheetNewDesign = () => {
       fetchStaffTimesheet();
     }, [data, weekOffset]);
 
-    const handleViewLog = async () => {
-      try {
-        setLoading(true);
-        const staffId = data.user_id || data.staff_id || data.StaffUserId || data.id;
-        const req = { staff_id: staffId, weekOffset: weekOffset };
-        const res = await dispatch(getTimesheetLogsData({ req, authToken: token })).unwrap();
-        if (res.status) {
-          setRowHistoryLogs(res.data);
-          setIsHistoryModalOpen(true);
-        } else {
-          sweatalert.fire({ icon: "error", title: "Error fetching logs" });
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     return (
       <div className="p-4" style={{ backgroundColor: "#f8f9fa", borderBottom: "1px solid #ddd" }}>
         <div className="d-flex align-items-center mb-3 gap-3">
           <h5 className="m-0">Timesheet Details - {data.staff_name}</h5>
-          <button type="button" className="timesheet-table-header-btn" onClick={handleViewLog}>
-            <History size={16} className="me-1" /> View Logs
-          </button>
         </div>
 
         {loading ? (
@@ -4000,6 +4082,26 @@ const TimesheetNewDesign = () => {
           </div>
         </CommonModal>
       )}
+
+      {/* Manager Review Final Remark Modal */}
+      <CommonModal
+        isOpen={isManagerRemarkModalOpen}
+        backdrop="static"
+        size="lg"
+        cancel_btn={false}
+        btn_2="true"
+        title="Final Remark"
+        hideBtn={true}
+        handleClose={() => setIsManagerRemarkModalOpen(false)}
+      >
+        <div className="modal-body">
+          <div className="row">
+            <div className="col-lg-12">
+              <p>{managerRemarkText || "No Final Remark Found"}</p>
+            </div>
+          </div>
+        </div>
+      </CommonModal>
     </>
   );
 };
