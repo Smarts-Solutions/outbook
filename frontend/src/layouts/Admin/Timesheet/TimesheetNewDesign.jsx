@@ -3125,7 +3125,7 @@ const TimesheetNewDesign = () => {
                   </button>
                   <div className="timesheet-week-content-div">
                     <p className="timesheet-week-date">{weekDays?.monday ? `${weekDays.monday} – ${weekDays.sunday}` : ""}</p>
-                    <p className="timesheet-week-text">
+                    {/* <p className="timesheet-week-text">
                       {weekOffset === 0
                         ? "Current Week"
                         : weekOffset === -1
@@ -3135,7 +3135,7 @@ const TimesheetNewDesign = () => {
                             : weekOffset === 1
                               ? "Next Week"
                               : `Next Week +${weekOffset - 1}`}
-                    </p>
+                    </p> */}
                   </div>
                   <button className="timesheet-week-button" type="button" onClick={() => changeWeek(1)} disabled={isWeekSwitching}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right size-4" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
@@ -3459,7 +3459,7 @@ const TimesheetNewDesign = () => {
                     </button>
                     <div className="timesheet-week-content-div">
                       <p className="timesheet-week-date">{weekDays?.monday ? `${weekDays.monday} - ${weekDays.sunday}` : ""}</p>
-                      <p className="timesheet-week-text">
+                      {/* <p className="timesheet-week-text">
                         {weekOffset === 0
                           ? "Current Week"
                           : weekOffset === -1
@@ -3469,7 +3469,7 @@ const TimesheetNewDesign = () => {
                               : weekOffset === 1
                                 ? "Next Week"
                                 : `Next Week +${weekOffset - 1}`}
-                      </p>
+                      </p> */}
                     </div>
                     <button className="timesheet-week-button" type="button" onClick={() => changeWeek(1)} disabled={isWeekSwitching}>
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right size-4" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
