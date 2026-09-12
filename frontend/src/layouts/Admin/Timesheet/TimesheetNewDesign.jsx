@@ -3452,7 +3452,7 @@ const TimesheetNewDesign = () => {
               <div className="timesheet-tab-content-header">
                 <div className="timesheet-tab-content-header-left">
                   <h3 className="timesheet-tab-content-heading">Manager Review</h3>
-                  <p className="timesheet-tab-content-para">Track, filter and approve team timesheets.</p>
+                  <p className="timesheet-tab-content-para" style={{ textTransform: 'none' }}>Track, review, and filter team timesheets.</p>
                 </div>
                 <div className="d-flex align-items-center gap-3">
                   <div className="timesheet-week-div">
