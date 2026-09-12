@@ -2819,6 +2819,7 @@ const TimesheetNewDesign = () => {
     },
     {
       name: "Action",
+      omit: activeReviewTab === "missing",
       cell: (row) => {
         if (row.timesheet_status === "Missing") return null;
 
