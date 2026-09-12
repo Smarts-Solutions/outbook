@@ -225,7 +225,9 @@ const TimesheetDatatable = ({
             minWidth: '100px',
             cell: (row, index) =>
                 row.isTotal ? (
-                    <span className='timesheet-table-strong'>{getTotalHoursFromKey(day.stateKey)}</span>
+                    <div style={{ paddingLeft: "10px" }}>
+                        <span className='timesheet-table-strong'>{getTotalHoursFromKey(day.stateKey)}</span>
+                    </div>
                 ) : (
                     <div className="d-flex align-items-center">
                         <input
