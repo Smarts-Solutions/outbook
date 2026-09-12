@@ -1,7 +1,5 @@
 import React from 'react';
 import DataTable from 'react-data-table-component';
-import DataTableExtensions from 'react-data-table-component-extensions';
-import 'react-data-table-component-extensions/dist/index.css';
 
 const ManagerReviewDatatable = ({
   columns,
@@ -18,15 +16,6 @@ const ManagerReviewDatatable = ({
 }) => {
   const noDataImage = '/assets/images/No-data-amico.png';
 
-  const handleTableRef = (node) => {
-    if (node) {
-      const searchInput = node.querySelector('.data-table-extensions-filter input');
-      if (searchInput && searchInput.placeholder !== 'Search here') {
-        searchInput.placeholder = 'Search here';
-      }
-    }
-  };
-
   //get last index of columns
   const lastIndex = columns.length - 1;
   let actionColumn = false
@@ -34,8 +23,32 @@ const ManagerReviewDatatable = ({
     actionColumn = true
   }
 
+  const customSort = (rows, selector, direction) => {
+    return [...rows].sort((rowA, rowB) => {
+      let aField = selector(rowA);
+      let bField = selector(rowB);
+      
+      // Fallback for null/undefined
+      if (aField == null) aField = "";
+      if (bField == null) bField = "";
+
+      if (typeof aField === 'string') aField = aField.toLowerCase();
+      if (typeof bField === 'string') bField = bField.toLowerCase();
+
+      let comparison = 0;
+
+      if (aField > bField) {
+        comparison = 1;
+      } else if (aField < bField) {
+        comparison = -1;
+      }
+
+      return direction === 'desc' ? comparison * -1 : comparison;
+    });
+  };
+
   return (
-    <div className="datatable-container" ref={handleTableRef}>
+    <div className="datatable-container">
       {data.length === 0 ? (
         <div className='text-center'>
           <img
@@ -47,20 +60,13 @@ const ManagerReviewDatatable = ({
         </div>
       ) : (
         <div >
-          <DataTableExtensions
-            columns={columns}
-            data={data}
-            export={false}
-            print={false}
-            search={true}
-            filter={filter}
-          >
             <DataTable
+              columns={columns}
+              data={data}
+              sortFunction={customSort}
               className={actionColumn ? 'custom-datatable custom-datatable-sticky-action' : 'custom-datatable'}
               fixedHeader={false}
               noHeader
-              defaultSortField="JobId"
-              defaultSortAsc={false}
               pagination={pagination}
               onColumnOrderChange={cols => console.log(cols)}
               highlightOnHover
@@ -74,7 +80,6 @@ const ManagerReviewDatatable = ({
               expandOnRowClicked={expandOnRowClicked}
               expandableRowsHideExpander={expandableRowsHideExpander}
             />
-          </DataTableExtensions>
         </div>
       )}
     </div>
