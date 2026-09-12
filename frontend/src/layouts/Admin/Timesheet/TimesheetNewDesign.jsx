@@ -2551,7 +2551,7 @@ const TimesheetNewDesign = () => {
   const reqTotalNum = parseInt(reqH || 0) + parseInt(reqM || 0) / 60;
   const progressPercent = reqTotalNum > 0 ? Math.min((totalEnteredHoursNum / reqTotalNum) * 100, 100) : 0;
 
-  const isManagerReviewVisible = ["SUPERADMIN", "ADMIN"].includes(role) || (lineMangerData && lineMangerData.length > 0);
+  const isManagerReviewVisible = ["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role?.toUpperCase()) || (lineMangerData && lineMangerData.length > 0);
 
   const isRowSaved = (index) => {
     return Boolean(timeSheetRows[index]?.id);
@@ -3097,9 +3097,11 @@ const TimesheetNewDesign = () => {
                 <button id="manager-review-tab" data-bs-toggle="tab" data-bs-target="#manager-review-tab-pane" type="button" role="tab" aria-controls="manager-review-tab-pane" aria-selected="false" onClick={() => setHasFetchedManagerReview(true)}>Manager Review</button>
               </li>
             )}
-            <li role="presentation">
-              <button id="mis-dashboard-tab" data-bs-toggle="tab" data-bs-target="#mis-dashboard-tab-pane" type="button" role="tab" aria-controls="mis-dashboard-tab-pane" aria-selected="false">MIS Dashboard</button>
-            </li>
+            {isManagerReviewVisible && (
+              <li role="presentation">
+                <button id="mis-dashboard-tab" data-bs-toggle="tab" data-bs-target="#mis-dashboard-tab-pane" type="button" role="tab" aria-controls="mis-dashboard-tab-pane" aria-selected="false">MIS Dashboard</button>
+              </li>
+            )}
           </ul>
         </div>
 
@@ -3623,7 +3625,8 @@ const TimesheetNewDesign = () => {
             </div>
           )}
 
-          <div className="tab-pane fade" id="mis-dashboard-tab-pane" role="tabpanel" aria-labelledby="mis-dashboard-tab" tabindex="0">
+          {isManagerReviewVisible && (
+            <div className="tab-pane fade" id="mis-dashboard-tab-pane" role="tabpanel" aria-labelledby="mis-dashboard-tab" tabindex="0">
 
             <div className="timesheet-tab-content-header">
               <div className="timesheet-tab-content-header-left">
@@ -3980,9 +3983,8 @@ const TimesheetNewDesign = () => {
                 </div>
               </div>
             </div>
-
-
           </div>
+        )}
         </div>
       </div >
       <CommonModal
