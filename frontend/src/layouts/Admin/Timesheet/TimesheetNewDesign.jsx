@@ -68,7 +68,7 @@ const TimesheetNewDesign = () => {
   const [managerReviewPage, setManagerReviewPage] = useState(1);
   // managerReviewPage already hai, bas ye naye add karo:
   const [managerReviewSearchTerm, setManagerReviewSearchTerm] = useState("");
-  const [managerReviewPageSize, setManagerReviewPageSize] = useState(10);
+  const [managerReviewPageSize, setManagerReviewPageSize] = useState(50);
   const managerReviewDebounceRef = useRef(null);
 
 
@@ -3050,6 +3050,7 @@ const TimesheetNewDesign = () => {
               <option value={20}>20</option>
               <option value={50}>50</option>
               <option value={100}>100</option>
+              <option value={1000000}>All</option>
             </select>
           </>
         ) : (
