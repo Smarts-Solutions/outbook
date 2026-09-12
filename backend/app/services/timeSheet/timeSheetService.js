@@ -31,6 +31,10 @@ const getManagerReviewData = async (data) => {
   return timeSheetModel.getManagerReviewData(data);
 }
 
+const logTimesheetActivity = async (data) => {
+  return timeSheetModel.logTimesheetActivity(data);
+}
+
 module.exports = {
   getTimesheet,
   getTimesheetTaskType,
@@ -39,5 +43,6 @@ module.exports = {
   getTimesheetLogs,
   deleteTimesheetRow,
   getManagerReviewCount,
-  getManagerReviewData
+  getManagerReviewData,
+  logTimesheetActivity
 };

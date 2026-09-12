@@ -2116,7 +2116,7 @@ const TimesheetNewDesign = () => {
         limit: 1000000, // Large number to get all records
         search: managerReviewSearchTerm,
       };
-      
+
       const res = await dispatch(getManagerReviewData({ req, authToken: token })).unwrap();
       const rows = res?.data || [];
 

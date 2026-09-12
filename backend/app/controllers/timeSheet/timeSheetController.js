@@ -185,6 +185,15 @@ const getManagerReviewData = async (req, res) => {
   }
 }
 
+const logTimesheetActivity = async (req, res) => {
+  try {
+    const result = await timeSheetService.logTimesheetActivity(req.body);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   getTimesheet,
   getTimesheetTaskType,
@@ -193,5 +202,6 @@ module.exports = {
   getTimesheetLogs,
   deleteTimesheetRow,
   getManagerReviewCount,
-  getManagerReviewData
+  getManagerReviewData,
+  logTimesheetActivity
 };

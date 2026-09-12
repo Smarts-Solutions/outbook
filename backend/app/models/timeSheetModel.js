@@ -2373,12 +2373,13 @@ const getManagerReviewCount = async (data) => {
     let staffIdList = [];
 
     if (role_name === "SUPERADMIN" || role_name === "ADMIN") {
-      staffWhereClause = "WHERE s.role_id != 12";
+      staffWhereClause = "WHERE s.role_id != 12 AND s.status = '1'";
     } else {
       if (LineManageStaffId.length > 0) {
         staffIdList = LineManageStaffId;
         staffWhereClause = `
           WHERE s.role_id != 12
+          AND s.status = '1'
           AND s.id IN (${LineManageStaffId.join(",")})
         `;
       } else {
@@ -2575,8 +2576,8 @@ const getManagerReviewData = async (data) => {
 
     startOfWeek.setUTCDate(
       currentDate.getUTCDate() -
-        daysSinceMonday +
-        weekOffset * 7
+      daysSinceMonday +
+      weekOffset * 7
     );
 
     startOfWeek.setUTCHours(0, 0, 0, 0);
@@ -2613,7 +2614,7 @@ const getManagerReviewData = async (data) => {
       role_name === "ADMIN"
     ) {
       staffCondition = `
-        s.role_id != 12
+        s.role_id != 12 AND s.status = '1'
       `;
     } else {
       if (LineManageStaffId.length === 0) {
@@ -2644,6 +2645,7 @@ const getManagerReviewData = async (data) => {
 
       staffCondition = `
         s.role_id != 12
+        AND s.status = '1'
         AND s.id IN (${LineManageStaffId.join(",")})
       `;
     }
@@ -3068,6 +3070,56 @@ const getManagerReviewData = async (data) => {
   }
 };
 
+const logTimesheetActivity = async (data) => {
+  try {
+    const payload = data.req ? data.req : data;
+    const { rowId, staff_id, fieldName, oldValue, newValue } = payload;
+
+    if (!rowId || !staff_id || !fieldName) {
+      return { status: false, message: "Missing required fields for logging" };
+    }
+
+    const [rows] = await pool.query('SELECT * FROM timesheet WHERE id = ?', [rowId]);
+    if (rows.length === 0) {
+      return { status: false, message: "Timesheet row not found" };
+    }
+
+    const row = rows[0];
+    const internal_external = parseInt(row.task_type) === 2 ? 2 : 1;
+
+    let entry_day = fieldName.split('_')[0] || '';
+
+    const description = `Changed ${fieldName} from '${oldValue}' to '${newValue}'`;
+
+    const logQuery = `
+      INSERT INTO timesheet_logs 
+      (timesheet_row_id, staff_id, action_type, internal_external, customer_id, client_id, job_id, task_id, entry_day, hours_entered, created_at, description)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)
+    `;
+
+    const logValues = [
+      rowId,
+      staff_id,
+      'UPDATE_FIELD',
+      internal_external,
+      row.customer_id,
+      row.client_id,
+      row.job_id,
+      row.task_id,
+      entry_day,
+      newValue,
+      description
+    ];
+
+    await pool.query(logQuery, logValues);
+
+    return { status: true, message: "Activity logged successfully" };
+  } catch (error) {
+    console.error("logTimesheetActivity Error:", error);
+    return { status: false, message: "Error logging activity", error: error.message };
+  }
+};
+
 module.exports = {
 
   getTimesheet,
@@ -3077,5 +3129,6 @@ module.exports = {
   getTimesheetLogs,
   deleteTimesheetRow,
   getManagerReviewCount,
-  getManagerReviewData
+  getManagerReviewData,
+  logTimesheetActivity
 };

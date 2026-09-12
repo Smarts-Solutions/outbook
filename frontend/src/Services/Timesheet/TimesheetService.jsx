@@ -126,9 +126,16 @@ export async function GET_MANAGER_REVIEW_DATA(data, authToken) {
   }
 }
 
-
-
-
-
-
+export async function LOG_TIMESHEET_ACTIVITY(data) {
+  try {
+    const token = JSON.parse(localStorage.getItem("token"));
+    const res = await axios.post(`${Config.base_url}logTimesheetActivity`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
 

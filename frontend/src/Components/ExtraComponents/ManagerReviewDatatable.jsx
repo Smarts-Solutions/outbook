@@ -3,10 +3,10 @@ import DataTable from 'react-data-table-component';
 import DataTableExtensions from 'react-data-table-component-extensions';
 import 'react-data-table-component-extensions/dist/index.css';
 
-const ManagerReviewDatatable = ({ 
-  columns, 
-  data, 
-  filter, 
+const ManagerReviewDatatable = ({
+  columns,
+  data,
+  filter,
   pagination = true,
   expandableRows,
   expandableRowsComponent,
@@ -30,23 +30,23 @@ const ManagerReviewDatatable = ({
   //get last index of columns
   const lastIndex = columns.length - 1;
   let actionColumn = false
-  if(['actions','action'].includes(columns[lastIndex]?.name?.toLowerCase())) {
-   actionColumn = true
+  if (['actions', 'action'].includes(columns[lastIndex]?.name?.toLowerCase())) {
+    actionColumn = true
   }
 
   return (
     <div className="datatable-container" ref={handleTableRef}>
       {data.length === 0 ? (
         <div className='text-center'>
-          <img 
-            src={noDataImage} 
-            alt="No records available" 
+          <img
+            src={noDataImage}
+            alt="No records available"
             style={{ width: '250px', height: 'auto', objectFit: 'contain' }}
           />
           <p className='fs-16'>There are no records to display</p>
         </div>
       ) : (
-        <div >  
+        <div >
           <DataTableExtensions
             columns={columns}
             data={data}

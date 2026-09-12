@@ -15,5 +15,6 @@ router.post('/getTimesheetLogs',verifyToken, timeSheetController.getTimesheetLog
 router.post('/deleteTimesheetRow',verifyToken, timeSheetController.deleteTimesheetRow);
 router.post('/getmanagerreviewcount',verifyToken, timeSheetController.getManagerReviewCount);
 router.post('/getManagerReviewData',verifyToken, timeSheetController.getManagerReviewData);
+router.post('/logTimesheetActivity',verifyToken, timeSheetController.logTimesheetActivity);
 
 module.exports = router;
