@@ -29,8 +29,9 @@ const TimesheetDatatable = ({
     getTotalHoursFromKey,
     getGrandTotal,
     isRowSaved,
-    isRowLocked
-
+    isRowLocked,
+    setActiveFieldOldValue,
+    handleBlur
 }) => {
 
     const columns = [
@@ -237,6 +238,14 @@ const TimesheetDatatable = ({
                             onFocus={() => {
                                 setActiveIndex(index);
                                 setActiveField(day.dateKey);
+                                if (setActiveFieldOldValue) {
+                                    setActiveFieldOldValue(row[day.stateKey] == null ? "0" : row[day.stateKey]);
+                                }
+                            }}
+                            onBlur={(e) => {
+                                if (handleBlur) {
+                                    handleBlur(e, index, day.stateKey, row);
+                                }
                             }}
                         />
                         {activeIndex === index && activeField === day.dateKey && (

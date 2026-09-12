@@ -13,6 +13,7 @@ import {
   deleteTimesheetRowData,
   getManagerReviewCount,
   getManagerReviewData,
+  logTimesheetActivityData,
 } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
 
 import { SAVE_TIMESHEET } from "../../../Services/Timesheet/TimesheetService";
@@ -34,8 +35,9 @@ import {
 } from "recharts";
 
 const TimesheetNewDesign = () => {
-  const [activeIndex, setActiveIndex] = useState(null); // row
+  const [activeIndex, setActiveIndex] = useState(null); // row index
   const [activeField, setActiveField] = useState(null); // field name
+  const [activeFieldOldValue, setActiveFieldOldValue] = useState("");
 
   // add node state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -1276,6 +1278,20 @@ const TimesheetNewDesign = () => {
 
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleBlur = (e, index, day_name, row) => {
+    const newValue = e.target.value;
+    if (String(activeFieldOldValue) !== String(newValue) && row.id) {
+        const req = {
+            rowId: row.id,
+            staff_id: multipleFilter.staff_id,
+            fieldName: day_name,
+            oldValue: activeFieldOldValue,
+            newValue: newValue
+        };
+        dispatch(logTimesheetActivityData(req));
     }
   };
 
@@ -2923,6 +2939,8 @@ const TimesheetNewDesign = () => {
                 setActiveField={() => { }}
                 activeIndex={null}
                 activeField={null}
+                setActiveFieldOldValue={() => {}}
+                handleBlur={() => {}}
                 setIsModalOpen={() => { }}
                 setModalText={() => { }}
                 setSelectedRowIndex={() => { }}
@@ -3383,6 +3401,8 @@ const TimesheetNewDesign = () => {
                     setActiveField={setActiveField}
                     activeIndex={activeIndex}
                     activeField={activeField}
+                    setActiveFieldOldValue={setActiveFieldOldValue}
+                    handleBlur={handleBlur}
                     setIsModalOpen={setIsModalOpen}
                     setModalText={setModalText}
                     setSelectedRowIndex={setSelectedRowIndex}
