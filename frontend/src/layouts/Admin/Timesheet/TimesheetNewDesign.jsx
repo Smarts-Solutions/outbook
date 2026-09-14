@@ -2778,7 +2778,7 @@ const TimesheetNewDesign = () => {
     {
       name: "Entered Hours",
       cell: (row) => <div className="w-100 text-center">{row.total_hours}</div>,
-      selector: (row) => row.total_hours,
+      selector: (row) => parseFloat(row.total_hours) || 0,
       sortable: true,
       width: "170px",
       reorder: false,
@@ -2807,6 +2807,21 @@ const TimesheetNewDesign = () => {
 
         return <div className="w-100 text-center">{remaining.toFixed(2)}</div>;
       },
+      selector: (row) => {
+        const staffId = row.user_id || row.staff_id || row.StaffUserId || row.id;
+        const staffInfo = staffDataAll?.data?.find(s => Number(s.id) === Number(staffId));
+        let allocatedStr = row.staffs_hourminute || staffInfo?.hourminute || "0";
+        let allocated = 0;
+        if (typeof allocatedStr === "string" && allocatedStr.includes(":")) {
+          const [h, m] = allocatedStr.split(":");
+          allocated = parseFloat(h) + (parseFloat(m) / 60);
+        } else {
+          allocated = parseFloat(allocatedStr) || 0;
+        }
+        const total = parseFloat(row.total_hours) || 0;
+        let remaining = allocated - total;
+        return remaining < 0 ? 0 : remaining;
+      },
       sortable: true,
       width: "190px",
       reorder: false,
@@ -2814,6 +2829,8 @@ const TimesheetNewDesign = () => {
     {
       name: "Status",
       cell: (row) => renderStatusBadge(row.timesheet_status),
+      selector: (row) => row.timesheet_status,
+      sortable: true,
       width: "130px",
       reorder: false,
     },
