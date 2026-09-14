@@ -4184,7 +4184,7 @@ const TimesheetNewDesign = () => {
                                 <div className="accordion-header-badges-row">
                                   {latestLog && (
                                     <span className={`table-status ${headerStatusClass}`}>
-                                      {displayStatus}
+                                      {displayStatus === "UPDATE_FIELD" ? "UNSAVED_CHANGE" : displayStatus}
                                     </span>
                                   )}
                                   {copiedFromWeek && (
@@ -4289,7 +4289,7 @@ const TimesheetNewDesign = () => {
                                               <td style={{ whiteSpace: "nowrap" }}>{event.staff_name}</td>
                                               <td style={{ textAlign: "center" }}>
                                                 <span className={`table-status ${statusClass}`} style={{ padding: '2px 8px', fontSize: '11px' }}>
-                                                  {displayActionType}
+                                                  {displayActionType === "UPDATE_FIELD" ? "UNSAVED_CHANGE" : displayActionType}
                                                 </span>
                                                 {event.action_type === "DELETE" && (
                                                   <div style={{ fontSize: "10px", color: "#999", lineHeight: "1.2", marginTop: "4px" }}>
