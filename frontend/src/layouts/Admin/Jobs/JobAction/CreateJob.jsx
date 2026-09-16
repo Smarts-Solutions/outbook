@@ -8,7 +8,7 @@ import {
   GetOfficerDetails
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
-import { JobType } from "../../../../ReduxStore/Slice/Settings/settingSlice";
+import { JobType, GetSystemSettings } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import { base_url } from "../../../../Utils/Config";
@@ -70,11 +70,54 @@ const CreateJob = () => {
 
   const minDateToday = new Date().toISOString().split("T")[0];
 
+  const [systemSettings, setSystemSettings] = useState({
+    allocated_on_limit: 7,
+    received_on_limit: 7,
+    missing_date_limit: 7,
+  });
+
+  const fetchSystemSettings = async () => {
+    const data = { authToken: token };
+    await dispatch(GetSystemSettings(data))
+      .unwrap()
+      .then((res) => {
+        if (res.status && res.data) {
+          setSystemSettings({
+            allocated_on_limit: res.data.allocated_on_limit ?? 7,
+            received_on_limit: res.data.received_on_limit ?? 7,
+            missing_date_limit: res.data.missing_date_limit ?? 7,
+          });
+        }
+      })
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchSystemSettings();
+  }, []);
+
+  const calculateMinDate = (limitInDays) => {
+    const d = new Date();
+    d.setDate(d.getDate() - parseInt(limitInDays));
+    return d.toISOString().split("T")[0];
+  };
+
+  const minAllocatedDateStr = calculateMinDate(systemSettings.allocated_on_limit);
+  const minReceivedDateStr = calculateMinDate(systemSettings.received_on_limit);
+
   const handleDateBlur = (e) => {
     const { name, value } = e.target;
-    if (["AllocatedOn", "DateReceivedOn", "ExpectedDeliveryDate", "SubmissionDeadline", "CustomerDeadlineDate", "InternalDeadlineDate"].includes(name)) {
+    if (["ExpectedDeliveryDate", "SubmissionDeadline", "CustomerDeadlineDate", "InternalDeadlineDate"].includes(name)) {
       if (value && new Date(value) < new Date(minDateToday)) {
         setJobData(prev => ({ ...prev, [name]: minDateToday }));
+      }
+    } else if (name === "AllocatedOn") {
+      if (value && new Date(value) < new Date(minAllocatedDateStr)) {
+        setJobData(prev => ({ ...prev, [name]: minAllocatedDateStr }));
+      }
+    } else if (name === "DateReceivedOn") {
+      if (value && new Date(value) < new Date(minReceivedDateStr)) {
+        setJobData(prev => ({ ...prev, [name]: minReceivedDateStr }));
       }
     }
   };
@@ -969,10 +1012,10 @@ const CreateJob = () => {
       reviewer: Number(jobData.Reviewer),
       allocated_to: Number(jobData.AllocatedTo),
       allocated_on: jobData.AllocatedOn
-        ? (new Date(jobData.AllocatedOn) < new Date(minDateToday) ? minDateToday : jobData.AllocatedOn)
+        ? (new Date(jobData.AllocatedOn) < new Date(minAllocatedDateStr) ? minAllocatedDateStr : jobData.AllocatedOn)
         : jobData.AllocatedOn,
       date_received_on: jobData.DateReceivedOn
-        ? (new Date(jobData.DateReceivedOn) < new Date(minDateToday) ? minDateToday : jobData.DateReceivedOn)
+        ? (new Date(jobData.DateReceivedOn) < new Date(minReceivedDateStr) ? minReceivedDateStr : jobData.DateReceivedOn)
         : jobData.DateReceivedOn,
       year_end: jobData.YearEnd,
       total_preparation_time: formatTime(
@@ -3096,7 +3139,7 @@ const CreateJob = () => {
                                       }
                                       placeholder="DD-MM-YYYY"
                                       name="AllocatedOn"
-                                      min={minDateToday}
+                                      min={minAllocatedDateStr}
                                       onChange={HandleChange}
                                       onBlur={handleDateBlur}
                                       value={jobData.AllocatedOn || ""}
@@ -3123,7 +3166,7 @@ const CreateJob = () => {
                                       }
                                       placeholder="DD-MM-YYYY"
                                       name="DateReceivedOn"
-                                      min={minDateToday}
+                                      min={minReceivedDateStr}
                                       onChange={HandleChange}
                                       onBlur={handleDateBlur}
                                       value={jobData.DateReceivedOn || minDateToday}

@@ -9,7 +9,7 @@ import {
   GetOfficerDetails
 } from "../../../../ReduxStore/Slice/Customer/CustomerSlice";
 import sweatalert from "sweetalert2";
-import { JobType } from "../../../../ReduxStore/Slice/Settings/settingSlice";
+import { JobType, GetSystemSettings } from "../../../../ReduxStore/Slice/Settings/settingSlice";
 import { ScrollToViewFirstError } from "../../../../Utils/Comman_function";
 import { Modal, Button, Table, Form } from "react-bootstrap";
 import { CreateJobErrorMessage } from "../../../../Utils/Common_Message";
@@ -80,20 +80,55 @@ const EditJob = () => {
   });
   const [BudgetedMinuteError, setBudgetedMinuteError] = useState("");
 
-  const minDateRecivedOn = getJobDetails?.data?.date_received_on ? getJobDetails.data.date_received_on.split("T")[0] : "";
-  const minDateAllocatedOn = getJobDetails?.data?.allocated_on ? getJobDetails.data.allocated_on.split("T")[0] : "";
+  const originalDateReceivedOn = getJobDetails?.data?.date_received_on ? getJobDetails.data.date_received_on.split("T")[0] : "";
+  const originalDateAllocatedOn = getJobDetails?.data?.allocated_on ? getJobDetails.data.allocated_on.split("T")[0] : "";
 
   const minDateToday = new Date().toISOString().split("T")[0];
+
+  const [systemSettings, setSystemSettings] = useState({
+    allocated_on_limit: 0,
+    received_on_limit: 0,
+    missing_date_limit: 0,
+  });
+
+  const fetchSystemSettings = async () => {
+    const data = { authToken: token };
+    await dispatch(GetSystemSettings(data))
+      .unwrap()
+      .then((res) => {
+        if (res.status && res.data) {
+          setSystemSettings({
+            allocated_on_limit: res.data.allocated_on_limit ?? 0,
+            received_on_limit: res.data.received_on_limit ?? 0,
+            missing_date_limit: res.data.missing_date_limit ?? 0,
+          });
+        }
+      })
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchSystemSettings();
+  }, []);
+
+  const calculateMinDate = (limitInDays) => {
+    const d = new Date();
+    d.setDate(d.getDate() - parseInt(limitInDays));
+    return d.toISOString().split("T")[0];
+  };
+
+  const minAllocatedDateStr = calculateMinDate(systemSettings.allocated_on_limit);
+  const minReceivedDateStr = calculateMinDate(systemSettings.received_on_limit);
 
   const handleDateBlur = (e) => {
     const { name, value } = e.target;
     if (name === "AllocatedOn") {
-      if (minDateAllocatedOn && (!value || new Date(value) < new Date(minDateAllocatedOn))) {
-        setJobData(prev => ({ ...prev, AllocatedOn: minDateAllocatedOn }));
+      if (value && new Date(value) < new Date(minAllocatedDateStr) && value !== originalDateAllocatedOn) {
+        setJobData(prev => ({ ...prev, AllocatedOn: minAllocatedDateStr }));
       }
     } else if (name === "DateReceivedOn") {
-      if (minDateRecivedOn && (!value || new Date(value) < new Date(minDateRecivedOn))) {
-        setJobData(prev => ({ ...prev, DateReceivedOn: minDateRecivedOn }));
+      if (value && new Date(value) < new Date(minReceivedDateStr) && value !== originalDateReceivedOn) {
+        setJobData(prev => ({ ...prev, DateReceivedOn: minReceivedDateStr }));
       }
     } else if (["ExpectedDeliveryDate", "SubmissionDeadline", "CustomerDeadlineDate", "InternalDeadlineDate"].includes(name)) {
       if (value && new Date(value) < new Date(minDateToday)) {
@@ -1495,11 +1530,11 @@ const EditJob = () => {
       reviewer: Number(jobData.Reviewer),
       allocated_to: Number(jobData.AllocatedTo),
       allocated_on: jobData.AllocatedOn
-        ? (minDateAllocatedOn && new Date(jobData.AllocatedOn) < new Date(minDateAllocatedOn) ? minDateAllocatedOn : jobData.AllocatedOn)
-        : (minDateAllocatedOn || new Date().toISOString().split("T")[0]),
+        ? (new Date(jobData.AllocatedOn) < new Date(minAllocatedDateStr) && jobData.AllocatedOn !== originalDateAllocatedOn ? minAllocatedDateStr : jobData.AllocatedOn)
+        : (originalDateAllocatedOn || new Date().toISOString().split("T")[0]),
       date_received_on: jobData.DateReceivedOn
-        ? (minDateRecivedOn && new Date(jobData.DateReceivedOn) < new Date(minDateRecivedOn) ? minDateRecivedOn : jobData.DateReceivedOn)
-        : (minDateRecivedOn || new Date().toISOString().split("T")[0]),
+        ? (new Date(jobData.DateReceivedOn) < new Date(minReceivedDateStr) && jobData.DateReceivedOn !== originalDateReceivedOn ? minReceivedDateStr : jobData.DateReceivedOn)
+        : (originalDateReceivedOn || new Date().toISOString().split("T")[0]),
       year_end: jobData.YearEnd,
       total_preparation_time: formatTime(
         PreparationTimne.hours,
@@ -3563,13 +3598,10 @@ const EditJob = () => {
                                       className="form-control mb-3"
                                       placeholder="DD-MM-YYYY"
                                       name="AllocatedOn"
-                                      min={minDateAllocatedOn}
+                                      min={minAllocatedDateStr}
                                       onChange={HandleChange}
                                       onBlur={handleDateBlur}
                                       value={jobData.AllocatedOn || ""}
-                                    // max={
-                                    //   new Date().toISOString().split("T")[0]
-                                    // }
                                     />
                                     {errors["AllocatedOn"] && (
                                       <div className="error-text">
@@ -3588,13 +3620,10 @@ const EditJob = () => {
                                       className="form-control mb-3"
                                       placeholder="DD-MM-YYYY"
                                       name="DateReceivedOn"
-                                      min={minDateRecivedOn}
+                                      min={minReceivedDateStr}
                                       onChange={HandleChange}
                                       onBlur={handleDateBlur}
                                       value={jobData.DateReceivedOn || ""}
-                                    // max={
-                                    //   new Date().toISOString().split("T")[0]
-                                    // }
                                     />
                                     {errors["DateReceivedOn"] && (
                                       <div className="error-text">

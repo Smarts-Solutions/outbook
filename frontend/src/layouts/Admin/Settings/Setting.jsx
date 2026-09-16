@@ -150,9 +150,9 @@ const Setting = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [getShowTabId, setShowTabId] = useState("1");
   const [systemSettings, setSystemSettings] = useState({
-    allocated_on_limit: 7,
-    received_on_limit: 7,
-    missing_date_limit: 7,
+    allocated_on_limit: 0,
+    received_on_limit: 0,
+    missing_date_limit: 0,
   });
 
   const fetchSystemSettings = async () => {
@@ -163,9 +163,9 @@ const Setting = () => {
       .then((res) => {
         if (res.status && res.data) {
           setSystemSettings({
-            allocated_on_limit: res.data.allocated_on_limit || 7,
-            received_on_limit: res.data.received_on_limit || 7,
-            missing_date_limit: res.data.missing_date_limit || 7,
+            allocated_on_limit: res.data.allocated_on_limit ?? 0,
+            received_on_limit: res.data.received_on_limit ?? 0,
+            missing_date_limit: res.data.missing_date_limit ?? 0,
           });
         }
       })
