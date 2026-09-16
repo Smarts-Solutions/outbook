@@ -13,7 +13,9 @@ import {
   InternalApi,
   JobType,
   GETTASKDATA,
-  CustomerContactPersonAccess
+  CustomerContactPersonAccess,
+  GetSystemSettings,
+  UpdateSystemSettings
 } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import Modal from "../../../Components/ExtraComponents/Modals/Modal";
@@ -147,6 +149,53 @@ const Setting = () => {
   const [modalData, setModalData] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [getShowTabId, setShowTabId] = useState("1");
+  const [systemSettings, setSystemSettings] = useState({
+    allocated_on_limit: 7,
+    received_on_limit: 7,
+    missing_date_limit: 7,
+  });
+
+  const fetchSystemSettings = async () => {
+    setLoading(true);
+    const data = { authToken: token };
+    await dispatch(GetSystemSettings(data))
+      .unwrap()
+      .then((res) => {
+        if (res.status && res.data) {
+          setSystemSettings({
+            allocated_on_limit: res.data.allocated_on_limit || 7,
+            received_on_limit: res.data.received_on_limit || 7,
+            missing_date_limit: res.data.missing_date_limit || 7,
+          });
+        }
+      })
+      .finally(() => setLoading(false));
+  };
+
+  const updateSystemSettingsAction = async (req) => {
+    setLoading(true);
+    const data = { req, authToken: token };
+    await dispatch(UpdateSystemSettings(data))
+      .unwrap()
+      .then((res) => {
+        if (res.status) {
+          sweatalert.fire({ title: res.message, icon: "success", timer: 2000 });
+          fetchSystemSettings();
+        } else {
+          sweatalert.fire({ title: res.message, icon: "error", timer: 2000 });
+        }
+      })
+      .catch(() => {
+        sweatalert.fire({ title: "Error", icon: "error", timer: 2000 });
+      })
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    if (getShowTabId === "11") {
+      fetchSystemSettings();
+    }
+  }, [getShowTabId]);
   const [isEdit, setIsEdit] = useState(false);
   const [getCheckList, setCheckList] = useState([]);
   const [getCheckList1, setCheckList1] = useState([]);
@@ -1069,7 +1118,6 @@ const Setting = () => {
                   <i className="ti-pencil" />
                 </button>
               )}
-
               {row?.is_disable == 0 && (
                 <button
                   className="delete-icon"
@@ -1087,6 +1135,40 @@ const Setting = () => {
         },
       ]
       : []),
+  ];
+
+  const columnSystemSettings = [
+    {
+      name: "Setting Name",
+      selector: (row) => row.name,
+      sortable: true,
+      width: "40%",
+    },
+    {
+      name: "Limit (Days)",
+      selector: (row) => row.limit,
+      sortable: true,
+      width: "40%",
+    },
+    ...(showSettingUpdateTab ? [
+      {
+        name: "Actions",
+        cell: (row) => (
+          <div className="d-flex justify-content-start w-100">
+            <button
+              className="edit-icon"
+              onClick={() => handleEdit(row, "11")}
+            >
+              <i className="ti-pencil" />
+            </button>
+          </div>
+        ),
+        ignoreRowClick: true,
+        allowOverflow: true,
+        button: true,
+        width: "20%",
+      }
+    ] : []),
   ];
 
   const columnStatusType = [
@@ -2351,6 +2433,24 @@ const Setting = () => {
         tabStatus: tabStatus,
         id: data.id,
       });
+    } else if (tabStatus === "11") {
+      setModalData({
+        ...modalData,
+        fields: [
+          {
+            type: "text",
+            name: data.key,
+            label: data.name,
+            placeholder: `Enter ${data.name}`,
+            value: data.limit,
+          }
+        ],
+        title: "System Setting",
+        tabStatus: tabStatus,
+        id: 1,
+      });
+      setIsEdit(true);
+      setIsModalOpen(true);
     } else if (tabStatus === "2") {
       setPersonRoleModalData(data);
       setPersonRoleCheckboxState([]);
@@ -2670,6 +2770,10 @@ const Setting = () => {
       case "10":
         InternalData(req);
         break;
+      case "11":
+        // req only contains the updated key, we need to merge it with existing settings
+        updateSystemSettingsAction({ ...systemSettings, ...req });
+        break;
       default:
         break;
     }
@@ -2894,6 +2998,11 @@ const Setting = () => {
       id: "10",
       label: "Internal Job/Project",
       icon: <Lock size={16} className="me-1" />,
+    },
+    {
+      id: "11",
+      label: "Job Date Settings",
+      icon: <Settings size={16} className="me-1" />,
     },
   ];
 
@@ -3508,6 +3617,31 @@ const Setting = () => {
                     filter={true}
                     columns={InternalColumns}
                     data={InternalAllData}
+                  />
+                </div>
+              </div>
+            </div>
+            <div
+              className={`tab-pane fade ${getShowTabId === "11" ? "show active" : ""}`}
+            >
+              <div className="report-data row">
+                <div className="col-lg-6 d-flex align-items-center ">
+                  <div className="tab-title">
+                    <h3 className="mt-0">Job Date Settings</h3>
+                  </div>
+                </div>
+                <div className=" col-lg-6 d-flex justify-content-end align-items-center">
+                </div>
+
+                <div className=" col-lg-12 datatable-wrapper">
+                  <Datatable
+                    filter={true}
+                    columns={columnSystemSettings}
+                    data={[
+                      { id: 1, name: "Allocated Date Limit", limit: systemSettings.allocated_on_limit, key: "allocated_on_limit" },
+                      { id: 2, name: "Missing Date Limit", limit: systemSettings.missing_date_limit, key: "missing_date_limit" },
+                      { id: 3, name: "Received Date Limit", limit: systemSettings.received_on_limit, key: "received_on_limit" },
+                    ]}
                   />
                 </div>
               </div>

@@ -22,8 +22,8 @@ import {
   SUBINTERNALAPI,
   CUSTOMERCONTACTPERSONACCESS,
   GETCUSTOMERACCESSBYID,
-  
-  
+  GET_SYSTEM_SETTINGS,
+  UPDATE_SYSTEM_SETTINGS
 } from "../../../Services/Settings/settingService";
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
@@ -691,6 +691,26 @@ const SettingSlice = createSlice({
       });
        
   },
+});
+
+export const GetSystemSettings = createAsyncThunk("getSystemSettings", async (data) => {
+  try {
+    const { authToken } = data;
+    const res = await GET_SYSTEM_SETTINGS(authToken);
+    return await res;
+  } catch (err) {
+    return err;
+  }
+});
+
+export const UpdateSystemSettings = createAsyncThunk("updateSystemSettings", async (data) => {
+  try {
+    const { req, authToken } = data;
+    const res = await UPDATE_SYSTEM_SETTINGS(req, authToken);
+    return await res;
+  } catch (err) {
+    return err;
+  }
 });
 
 export default SettingSlice;

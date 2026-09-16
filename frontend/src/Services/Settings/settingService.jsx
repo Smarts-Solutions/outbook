@@ -293,5 +293,27 @@ export async function GETCUSTOMERACCESSBYID(data, token) {
         return await err;
     }
 }
- 
- 
+
+export async function GET_SYSTEM_SETTINGS(token) {
+    try {
+        const res = await axios.get(`${Config.base_url}systemSettings/get-system-settings`, {
+            headers: header(token)
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}
+
+export async function UPDATE_SYSTEM_SETTINGS(data, token) {
+    try {
+        const res = await axios.post(`${Config.base_url}systemSettings/update-system-settings`, data, {
+            headers: header(token)
+        })
+        return await res?.data;
+    }
+    catch (err) {
+        return await err;
+    }
+}

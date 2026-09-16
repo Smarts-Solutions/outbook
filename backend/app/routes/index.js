@@ -14,4 +14,5 @@ module.exports = function (app) {
     app.use(require("./customerReport/customerReportRoutes"));
     app.use(require("./customerUsers/customerUserRoutes"));
     app.use("/customTimesheet", require("./customTimesheet/index.js"));
+    app.use("/systemSettings", require("./systemSettings/systemSettingsRoutes"));
 };
