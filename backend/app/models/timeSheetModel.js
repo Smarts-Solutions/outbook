@@ -3394,7 +3394,11 @@ const getMisResourceUtilisation = async (data) => {
       staffWhereClause += ` AND (s.first_name LIKE '%${search}%' OR s.last_name LIKE '%${search}%')`;
     }
 
-    const now = new Date();
+    let now = new Date();
+    if (data.month !== undefined && data.year !== undefined) {
+      now = new Date(Date.UTC(data.year, data.month, 1));
+    }
+    
     const firstOfThisMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
     const day1 = firstOfThisMonth.getUTCDay();
     const daysToMonday1 = day1 === 0 ? 6 : day1 - 1;
