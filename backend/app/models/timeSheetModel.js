@@ -2502,7 +2502,8 @@ const getManagerReviewCount = async (data) => {
     let utilisation = 0;
     let billable_hours = 0;
 
-    let weeksInMonth = Math.round((new Date(thisMonthEnd) - new Date(thisMonthStart)) / (7 * 24 * 60 * 60 * 1000)) + 1;
+    let daysDifference = Math.round((new Date(thisMonthEnd) - new Date(thisMonthStart)) / (24 * 60 * 60 * 1000));
+    let weeksInMonth = Math.round((daysDifference + 1) / 7);
 
     const parseHours = (val) => {
       if (!val) return 0;
