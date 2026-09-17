@@ -2781,9 +2781,10 @@ const TimesheetNewDesign = () => {
     return (
       <text
         x={x + width / 2}
-        y={y - 8}
-        textAnchor="middle"
-        fontSize={12}
+        y={y - 10}
+        textAnchor="start"
+        transform={`rotate(-45 ${x + width / 2} ${y - 10})`}
+        fontSize={11}
         fill="#5b6b7a"
       >
         {value}h
@@ -4009,7 +4010,7 @@ const TimesheetNewDesign = () => {
 
               <div className="row mt-3">
                 <div className="col-lg-7">
-                  <div className="timesheet-white-card">
+                  <div className="timesheet-white-card h-100 d-flex flex-column">
                     <div className="timesheet-table-header-div">
                       <div className="timesheet-table-header-div-left">
                         <div className="tab-title"><h3 className="mt-0">Monthly trend</h3></div>
@@ -4021,9 +4022,12 @@ const TimesheetNewDesign = () => {
                         width: "100%",
                         maxWidth: 720,
                         fontFamily: "sans-serif",
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
                       }}
                     >
-                      <ResponsiveContainer width="100%" height={239}>
+                      <ResponsiveContainer width="100%" height={380}>
                         <BarChart
                           data={graphData}
                           margin={{
@@ -4106,7 +4110,7 @@ const TimesheetNewDesign = () => {
                   </div>
                 </div>
                 <div className="col-lg-5">
-                  <div className="timesheet-white-card">
+                  <div className="timesheet-white-card h-100">
                     <div className="timesheet-table-header-div">
                       <div className="timesheet-table-header-div-left dis">
 
