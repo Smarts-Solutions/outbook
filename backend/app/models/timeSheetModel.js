@@ -3429,7 +3429,8 @@ const getMisResourceUtilisation = async (data) => {
         t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date,
         t.monday_hours, t.tuesday_hours, t.wednesday_hours, t.thursday_hours, t.friday_hours, t.saturday_hours, t.sunday_hours,
         i.name AS internal_name,
-        j.total_time AS job_total_time
+        j.total_time AS job_total_time,
+        j.budgeted_hours AS job_budgeted_hours
       FROM staffs s
       LEFT JOIN roles r ON s.role_id = r.id
       LEFT JOIN timesheet t ON s.id = t.staff_id 
@@ -3504,11 +3505,11 @@ const getMisResourceUtilisation = async (data) => {
         staffMap[row.staff_id].utilisation += rowHours;
       }
 
-      if (String(row.task_type) === '2' && row.job_id && String(row.submit_status) === '1') {
+      if (String(row.task_type) === '2' && row.job_id && (String(row.submit_status) === '1' || String(row.submit_status) === '0')) {
         let jobKey = `${row.staff_id}_${row.job_id}`;
         if (!processedJobs.has(jobKey)) {
           processedJobs.add(jobKey);
-          staffMap[row.staff_id].billable += parseHours(row.job_total_time);
+          staffMap[row.staff_id].billable += parseHours(row.job_budgeted_hours);
         }
       }
     }
