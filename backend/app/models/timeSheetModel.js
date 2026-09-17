@@ -3399,15 +3399,18 @@ const getMisResourceUtilisation = async (data) => {
       now = new Date(Date.UTC(data.year, data.month, 1));
     }
     
-    const firstOfThisMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-    const day1 = firstOfThisMonth.getUTCDay();
-    const daysToMonday1 = day1 === 0 ? 6 : day1 - 1;
-    const thisMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1 - daysToMonday1)).toISOString().slice(0, 10);
+    const getLastSunday = (year, monthIdx) => {
+      let d = new Date(Date.UTC(year, monthIdx + 1, 0));
+      d.setUTCDate(d.getUTCDate() - d.getUTCDay());
+      return d;
+    };
 
-    const firstOfNextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
-    const day2 = firstOfNextMonth.getUTCDay();
-    const daysToMonday2 = day2 === 0 ? 6 : day2 - 1;
-    const thisMonthEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1 - daysToMonday2 - 1)).toISOString().slice(0, 10);
+    const prevMonthLastSunday = getLastSunday(now.getUTCFullYear(), now.getUTCMonth() - 1);
+    prevMonthLastSunday.setUTCDate(prevMonthLastSunday.getUTCDate() + 1);
+    const thisMonthStart = prevMonthLastSunday.toISOString().slice(0, 10);
+
+    const thisMonthLastSunday = getLastSunday(now.getUTCFullYear(), now.getUTCMonth());
+    const thisMonthEnd = thisMonthLastSunday.toISOString().slice(0, 10);
 
     let daysDifference = Math.round((new Date(thisMonthEnd) - new Date(thisMonthStart)) / (24 * 60 * 60 * 1000));
     let weeksInMonth = Math.round((daysDifference + 1) / 7);
@@ -3422,7 +3425,7 @@ const getMisResourceUtilisation = async (data) => {
     } else if (nowMonth === todayMonth) {
         const todayStr = today.toISOString().slice(0, 10);
         const start = new Date(thisMonthStart);
-        const diffDays = Math.floor((new Date(todayStr) - start) / (24 * 60 * 60 * 1000));
+        const diffDays = Math.round((new Date(todayStr) - start) / (24 * 60 * 60 * 1000));
         let weekIdx = Math.floor(diffDays / 7);
         expectedWeeks = weekIdx + 1;
         if (expectedWeeks > weeksInMonth) expectedWeeks = weeksInMonth;
@@ -3440,6 +3443,7 @@ const getMisResourceUtilisation = async (data) => {
         t.task_type,
         t.job_id,
         t.submit_status,
+        t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date,
         t.monday_hours, t.tuesday_hours, t.wednesday_hours, t.thursday_hours, t.friday_hours, t.saturday_hours, t.sunday_hours,
         i.name AS internal_name,
         j.total_time AS job_total_time
@@ -3483,7 +3487,7 @@ const getMisResourceUtilisation = async (data) => {
       if (rowDate) {
         const start = new Date(thisMonthStart);
         const d = new Date(rowDate);
-        const diffDays = Math.floor((d - start) / (24 * 60 * 60 * 1000));
+        const diffDays = Math.round((d - start) / (24 * 60 * 60 * 1000));
         let weekIndex = Math.floor(diffDays / 7);
         
         if (!staffMap[row.staff_id].weeks[weekIndex]) {
@@ -3535,9 +3539,11 @@ const getMisResourceUtilisation = async (data) => {
           const w = staff.weeks[i];
           if (w && w.submitted) {
              totalSubmittedMonth++;
-          } else if (w && w.saved) {
+          }
+          if (w && w.saved) {
              totalSavedMonth++;
-          } else if (i < expectedWeeks) {
+          }
+          if (!(w && w.submitted) && i < expectedWeeks) {
              totalMissingMonth++;
           }
        }
