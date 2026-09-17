@@ -2785,7 +2785,8 @@ const TimesheetNewDesign = () => {
         textAnchor="start"
         transform={`rotate(-45 ${x + width / 2} ${y - 10})`}
         fontSize={11}
-        fill="#5b6b7a"
+        fill="#334155"
+        fontWeight="600"
       >
         {value}h
       </text>
@@ -4059,7 +4060,7 @@ const TimesheetNewDesign = () => {
 
                           <Bar
                             dataKey="total"
-                            fill="#b7d9d4"
+                            fill="#5A998E"
                             barSize={16}
                             radius={[6, 6, 0, 0]}
                           >
@@ -4071,7 +4072,7 @@ const TimesheetNewDesign = () => {
 
                           <Bar
                             dataKey="billable"
-                            fill="#2e6f5e"
+                            fill="#1B4A3D"
                             barSize={16}
                             radius={[6, 6, 0, 0]}
                           >
@@ -4083,7 +4084,7 @@ const TimesheetNewDesign = () => {
 
                           <Bar
                             dataKey="utilization"
-                            fill="#9c6b1a"
+                            fill="#7A5111"
                             barSize={16}
                             radius={[6, 6, 0, 0]}
                           >
@@ -4102,9 +4103,9 @@ const TimesheetNewDesign = () => {
                           paddingLeft: 20,
                         }}
                       >
-                        <LegendDot color="#b7d9d4" label="Total" />
-                        <LegendDot color="#2e6f5e" label="Billable" />
-                        <LegendDot color="#9c6b1a" label="Utilisation" />
+                        <LegendDot color="#5A998E" label="Total" />
+                        <LegendDot color="#1B4A3D" label="Billable" />
+                        <LegendDot color="#7A5111" label="Utilisation" />
                       </div>
                     </div>
                   </div>
