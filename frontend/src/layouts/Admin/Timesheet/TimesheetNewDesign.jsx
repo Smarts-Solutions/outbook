@@ -14,6 +14,7 @@ import {
   getManagerReviewCount,
   getManagerReviewData,
   logTimesheetActivityData,
+  getFollowUpList,
 } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
 
 import { SAVE_TIMESHEET } from "../../../Services/Timesheet/TimesheetService";
@@ -77,6 +78,12 @@ const TimesheetNewDesign = () => {
   const [managerReviewSearchTerm, setManagerReviewSearchTerm] = useState("");
   const [managerReviewPageSize, setManagerReviewPageSize] = useState(50);
   const managerReviewDebounceRef = useRef(null);
+
+  // Follow-Up List State
+  const [followUpList, setFollowUpList] = useState([]);
+  const [followUpPage, setFollowUpPage] = useState(1);
+  const [followUpHasMore, setFollowUpHasMore] = useState(true);
+  const [isFollowUpLoading, setIsFollowUpLoading] = useState(false);
 
 
 
@@ -263,6 +270,42 @@ const TimesheetNewDesign = () => {
       }
     } catch (err) {
       console.error("Manager review count fetch error:", err);
+    }
+  };
+
+  const fetchFollowUpList = async (pageToFetch = 1) => {
+    if (isFollowUpLoading) return;
+    setIsFollowUpLoading(true);
+    try {
+      const res = await dispatch(getFollowUpList({ req: { StaffUserId: 1, page: pageToFetch, limit: 20 }, authToken: token })).unwrap();
+      if (res.status) {
+        if (pageToFetch === 1) {
+          setFollowUpList(res.data || []);
+        } else {
+          setFollowUpList(prev => [...prev, ...(res.data || [])]);
+        }
+        if (res.pagination) {
+          setFollowUpHasMore(pageToFetch < res.pagination.totalPages);
+        } else {
+          setFollowUpHasMore(false);
+        }
+      } else {
+        console.error("Follow-Up list fetch error:", res);
+      }
+    } catch (err) {
+      console.error("Follow-Up list fetch exception:", err);
+    } finally {
+      setIsFollowUpLoading(false);
+    }
+  };
+
+  const handleFollowUpScroll = (e) => {
+    const { scrollHeight, scrollTop, clientHeight } = e.target;
+    const bottom = scrollHeight - scrollTop <= clientHeight + 5;
+    if (bottom && followUpHasMore && !isFollowUpLoading) {
+      const nextPage = followUpPage + 1;
+      setFollowUpPage(nextPage);
+      fetchFollowUpList(nextPage);
     }
   };
 
@@ -496,6 +539,7 @@ const TimesheetNewDesign = () => {
 
   useEffect(() => {
     fetchManagerReviewCount();
+    fetchFollowUpList(1);
   }, []);
 
   useEffect(() => {
@@ -3842,111 +3886,35 @@ const TimesheetNewDesign = () => {
                       <p className="page-subtitle mb-0 mt-2">Employees with missing or unsubmitted weeks this month.</p>
                     </div>
                   </div>
-                  <div className="staff-report-list">
-                    <div className="staff-report-card">
-                      <div>
-                        <div className="staff-name">
-                          Vikas Patel
+                  <div 
+                    className="staff-report-list"
+                    onScroll={handleFollowUpScroll}
+                    style={{ maxHeight: '400px', overflowY: 'auto' }}
+                  >
+                    {followUpList.map((item, idx) => (
+                      <div className="staff-report-card" key={idx}>
+                        <div>
+                          <div className="staff-name">
+                            {item.staff_name}
+                          </div>
+                          <div className="staff-date">
+                            {item.week_label}
+                          </div>
                         </div>
-                        <div className="staff-date">
-                          27 Jul 2026 – 02 Aug 2026
-                        </div>
+                        <span 
+                          className="staff-status"
+                          style={item.status === 'Saved' ? { color: '#26bdf0', backgroundColor: 'rgba(38, 189, 240, 0.1)' } : {}}
+                        >
+                          {item.status}
+                        </span>
                       </div>
-                      <span className="staff-status">
-                        Not started
-                      </span>
-                    </div>
-                    <div className="staff-report-card">
-                      <div>
-                        <div className="staff-name">
-                          Vikas Patel
-                        </div>
-                        <div className="staff-date">
-                          27 Jul 2026 – 02 Aug 2026
-                        </div>
-                      </div>
-                      <span className="staff-status">
-                        Not started
-                      </span>
-                    </div>
-                    <div className="staff-report-card">
-                      <div>
-                        <div className="staff-name">
-                          Vikas Patel
-                        </div>
-                        <div className="staff-date">
-                          27 Jul 2026 – 02 Aug 2026
-                        </div>
-                      </div>
-                      <span className="staff-status">
-                        Not started
-                      </span>
-                    </div>
-                    <div className="staff-report-card">
-                      <div>
-                        <div className="staff-name">
-                          Vikas Patel
-                        </div>
-                        <div className="staff-date">
-                          27 Jul 2026 – 02 Aug 2026
-                        </div>
-                      </div>
-                      <span className="staff-status">
-                        Not started
-                      </span>
-                    </div>
-                    <div className="staff-report-card">
-                      <div>
-                        <div className="staff-name">
-                          Vikas Patel
-                        </div>
-                        <div className="staff-date">
-                          27 Jul 2026 – 02 Aug 2026
-                        </div>
-                      </div>
-                      <span className="staff-status">
-                        Not started
-                      </span>
-                    </div>
-                    <div className="staff-report-card">
-                      <div>
-                        <div className="staff-name">
-                          Vikas Patel
-                        </div>
-                        <div className="staff-date">
-                          27 Jul 2026 – 02 Aug 2026
-                        </div>
-                      </div>
-                      <span className="staff-status">
-                        Not started
-                      </span>
-                    </div>
-                    <div className="staff-report-card">
-                      <div>
-                        <div className="staff-name">
-                          Vikas Patel
-                        </div>
-                        <div className="staff-date">
-                          27 Jul 2026 – 02 Aug 2026
-                        </div>
-                      </div>
-                      <span className="staff-status">
-                        Not started
-                      </span>
-                    </div>
-                    <div className="staff-report-card">
-                      <div>
-                        <div className="staff-name">
-                          Vikas Patel
-                        </div>
-                        <div className="staff-date">
-                          27 Jul 2026 – 02 Aug 2026
-                        </div>
-                      </div>
-                      <span className="staff-status">
-                        Not started
-                      </span>
-                    </div>
+                    ))}
+                    {isFollowUpLoading && (
+                      <div className="text-center p-2 text-muted">Loading...</div>
+                    )}
+                    {!isFollowUpLoading && followUpList.length === 0 && (
+                      <div className="text-center p-4 text-muted">No follow-ups needed!</div>
+                    )}
                   </div>
                 </div>
               </div>

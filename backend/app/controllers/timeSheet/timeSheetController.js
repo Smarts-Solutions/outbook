@@ -194,6 +194,15 @@ const logTimesheetActivity = async (req, res) => {
   }
 }
 
+const getFollowUpList = async (req, res) => {
+  try {
+    const result = await timeSheetService.getFollowUpList(req.body);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   getTimesheet,
   getTimesheetTaskType,
@@ -203,5 +212,6 @@ module.exports = {
   deleteTimesheetRow,
   getManagerReviewCount,
   getManagerReviewData,
+  getFollowUpList,
   logTimesheetActivity
 };

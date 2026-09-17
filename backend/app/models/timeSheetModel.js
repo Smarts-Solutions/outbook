@@ -2496,11 +2496,13 @@ const getManagerReviewCount = async (data) => {
 
     const [monthRows] = await pool.query(monthQuery, [thisMonthStart, thisMonthEnd]);
 
-    let total_hours = 0;
+    let overall_capacity = 0;
+    let filled_hours = 0;
     let leave_hours = 0;
     let utilisation = 0;
     let billable_hours = 0;
-    let available_hours = 0;
+
+    let weeksInMonth = Math.round((new Date(thisMonthEnd) - new Date(thisMonthStart)) / (7 * 24 * 60 * 60 * 1000)) + 1;
 
     const parseHours = (val) => {
       if (!val) return 0;
@@ -2515,9 +2517,9 @@ const getManagerReviewCount = async (data) => {
     for (let row of monthRows) {
       if (!processedStaffs.has(row.staff_id)) {
         processedStaffs.add(row.staff_id);
-        // Calculate monthly available capacity (Assuming hourminute is weekly capacity)
-        let capacity = parseHours(row.hourminute) * 4; 
-        available_hours += capacity;
+        // Calculate monthly available capacity
+        let capacity = parseHours(row.hourminute) * weeksInMonth; 
+        overall_capacity += capacity;
       }
 
       let rowHours = 
@@ -2529,10 +2531,12 @@ const getManagerReviewCount = async (data) => {
         parseHours(row.saturday_hours) + 
         parseHours(row.sunday_hours);
 
-      total_hours += rowHours;
+      filled_hours += rowHours;
 
       if (row.internal_name && row.internal_name.toLowerCase().includes('leave')) {
-        leave_hours += rowHours;
+        if (String(row.submit_status) === '1') {
+          leave_hours += rowHours;
+        }
       }
 
       if (String(row.submit_status) === '1') {
@@ -2546,9 +2550,6 @@ const getManagerReviewCount = async (data) => {
         }
       }
     }
-
-    available_hours = Math.max(0, available_hours - total_hours);
-
     return {
       status: true,
       message: "Staff count fetched successfully",
@@ -2557,9 +2558,9 @@ const getManagerReviewCount = async (data) => {
         submitted_this_week,
         saved_this_week,
         missing_last_week,
-        total_hours: parseFloat(total_hours.toFixed(2)),
+        total_hours: parseFloat(overall_capacity.toFixed(2)),
         leave_hours: parseFloat(leave_hours.toFixed(2)),
-        available_hours: parseFloat(available_hours.toFixed(2)),
+        available_hours: parseFloat((overall_capacity - utilisation).toFixed(2)),
         utilisation: parseFloat(utilisation.toFixed(2)),
         billable_hours: parseFloat(billable_hours.toFixed(2))
       }
@@ -3216,6 +3217,145 @@ const logTimesheetActivity = async (data) => {
   }
 };
 
+const getFollowUpList = async (data) => {
+  try {
+    let { StaffUserId, page = 1, limit = 20 } = data;
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 20;
+
+    if (!StaffUserId) {
+      return { status: false, message: "StaffUserId is required." };
+    }
+
+    const roleRows = await QueryRoleHelperFunction(StaffUserId);
+    const role_name = roleRows[0]?.role_name?.toUpperCase();
+
+    let staffWhereClause = "";
+    if (role_name === "SUPERADMIN" || role_name === "ADMIN") {
+      staffWhereClause = "WHERE s.role_id != 12 AND s.status = '1'";
+    } else {
+      let LineManageStaffId = await LineManageStaffIdHelperFunctionForStaff(StaffUserId);
+      if (!Array.isArray(LineManageStaffId)) LineManageStaffId = [];
+
+      if (LineManageStaffId.length > 0) {
+        staffWhereClause = `
+          WHERE s.role_id != 12
+          AND s.status = '1'
+          AND s.id IN (${LineManageStaffId.join(",")})
+        `;
+      } else {
+        staffWhereClause = "WHERE 1 = 0";
+      }
+    }
+
+    if (staffWhereClause === "WHERE 1 = 0") {
+      return { status: true, data: [], pagination: { total: 0, page, limit, totalPages: 0 } };
+    }
+
+    const now = new Date();
+    const firstOfThisMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const day1 = firstOfThisMonth.getUTCDay();
+    const daysToMonday1 = day1 === 0 ? 6 : day1 - 1;
+    const thisMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1 - daysToMonday1));
+    
+    const firstOfNextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+    const day2 = firstOfNextMonth.getUTCDay();
+    const daysToMonday2 = day2 === 0 ? 6 : day2 - 1;
+    const thisMonthEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1 - daysToMonday2 - 1));
+
+    const weeks = [];
+    let current = new Date(thisMonthStart);
+
+    // Calculate the Monday of the current week to avoid showing future weeks
+    const currentDay = now.getUTCDay();
+    const currentDaysToMonday = currentDay === 0 ? 6 : currentDay - 1;
+    const currentWeekMonday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - currentDaysToMonday));
+
+    while (current <= thisMonthEnd && current <= currentWeekMonday) {
+      let currentEnd = new Date(current);
+      currentEnd.setUTCDate(current.getUTCDate() + 6);
+      weeks.push({
+        start: current.toISOString().slice(0, 10),
+        end: currentEnd.toISOString().slice(0, 10)
+      });
+      current.setUTCDate(current.getUTCDate() + 7);
+    }
+    weeks.reverse();
+
+    const staffQuery = `SELECT s.id AS staff_id, s.first_name, s.last_name FROM staffs s ${staffWhereClause} ORDER BY s.first_name ASC`;
+    const [staffs] = await pool.query(staffQuery);
+
+    if (staffs.length === 0) {
+      return { status: true, data: [], pagination: { total: 0, page, limit, totalPages: 0 } };
+    }
+
+    const tsQuery = `
+      SELECT staff_id, submit_status, COALESCE(monday_date, tuesday_date, wednesday_date, thursday_date, friday_date, saturday_date, sunday_date) AS any_date
+      FROM timesheet
+      WHERE is_deleted = 0
+        AND COALESCE(monday_date, tuesday_date, wednesday_date, thursday_date, friday_date, saturday_date, sunday_date) >= ?
+        AND COALESCE(monday_date, tuesday_date, wednesday_date, thursday_date, friday_date, saturday_date, sunday_date) <= ?
+    `;
+    const [timesheets] = await pool.query(tsQuery, [thisMonthStart.toISOString().slice(0, 10), thisMonthEnd.toISOString().slice(0, 10)]);
+
+    const getMondayOfDate = (dateStr) => {
+      if (!dateStr) return null;
+      let d = new Date(dateStr);
+      let day = d.getDay();
+      let diff = day === 0 ? 6 : day - 1;
+      d.setDate(d.getDate() - diff);
+      let yyyy = d.getFullYear();
+      let mm = String(d.getMonth() + 1).padStart(2, '0');
+      let dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    };
+
+    const tsMap = {};
+    for (let ts of timesheets) {
+      let monday = getMondayOfDate(ts.any_date);
+      if (!monday) continue;
+      if (!tsMap[ts.staff_id]) tsMap[ts.staff_id] = {};
+      if (tsMap[ts.staff_id][monday] === '1') continue;
+      tsMap[ts.staff_id][monday] = String(ts.submit_status);
+    }
+
+    const followUpList = [];
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const formatDate = (isoString) => {
+      const d = new Date(isoString);
+      return `${String(d.getUTCDate()).padStart(2, '0')} ${months[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+    };
+
+    for (let week of weeks) {
+      const weekMonday = week.start;
+      const weekLabel = `${formatDate(week.start)} - ${formatDate(week.end)}`;
+      for (let staff of staffs) {
+        let status = tsMap[staff.staff_id]?.[weekMonday];
+        if (status === '1') continue;
+        followUpList.push({
+          staff_id: staff.staff_id,
+          staff_name: `${staff.first_name} ${staff.last_name}`,
+          week_label: weekLabel,
+          status: status === '0' ? 'Saved' : 'Not Started'
+        });
+      }
+    }
+
+    const total = followUpList.length;
+    const startIndex = (page - 1) * limit;
+    const paginated = followUpList.slice(startIndex, startIndex + limit);
+
+    return {
+      status: true,
+      data: paginated,
+      pagination: { total, page, limit, totalPages: Math.ceil(total / limit) }
+    };
+  } catch (err) {
+    console.error("Error in getFollowUpList:", err);
+    return { status: false, message: "Error fetching follow-up list.", error: err.message };
+  }
+};
+
 module.exports = {
 
   getTimesheet,
@@ -3226,5 +3366,6 @@ module.exports = {
   deleteTimesheetRow,
   getManagerReviewCount,
   getManagerReviewData,
-  logTimesheetActivity
+  logTimesheetActivity,
+  getFollowUpList
 };
