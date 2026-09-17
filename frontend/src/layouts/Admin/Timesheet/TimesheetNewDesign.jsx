@@ -219,6 +219,7 @@ const TimesheetNewDesign = () => {
     if (activeMainTab === "mis-dashboard") {
       fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm);
       fetchMonthlyTrend(activeMisTab);
+      fetchFollowUpList(1);
       setMisPage(1);
     }
   }, [activeMisTab, activeMainTab]);
@@ -766,7 +767,6 @@ const TimesheetNewDesign = () => {
   useEffect(() => {
     if (activeMainTab === "manager-review") {
       fetchManagerReviewCount();
-      fetchFollowUpList(1);
     }
   }, [activeMainTab]);
 
