@@ -3719,24 +3719,6 @@ const TimesheetNewDesign = () => {
                   <p className="timesheet-white-card-value-big timesheet-pending-mis">95h</p>
                 </div>
               </div>
-              <div className="col-md-4 mt-3">
-                <div className="timesheet-white-card">
-                  <p className="timesheet-white-card-label">Productive Share</p>
-                  <p className="timesheet-white-card-value-big timesheet-submitted-mis">36h</p>
-                </div>
-              </div>
-              <div className="col-md-4 mt-3">
-                <div className="timesheet-white-card">
-                  <p className="timesheet-white-card-label">Approved</p>
-                  <p className="timesheet-white-card-value-big timesheet-white-card-value-big-green">39h</p>
-                </div>
-              </div>
-              <div className="col-md-4 mt-3">
-                <div className="timesheet-white-card">
-                  <p className="timesheet-white-card-label">Rejected</p>
-                  <p className="timesheet-white-card-value-big timesheet-white-card-value-big-red">20h</p>
-                </div>
-              </div>
             </div>
 
             <div className="row mt-3">
