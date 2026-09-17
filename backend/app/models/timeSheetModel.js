@@ -3500,7 +3500,7 @@ const getMisResourceUtilisation = async (data) => {
         parseHours(row.sunday_hours);
 
       if (row.internal_name && row.internal_name.toLowerCase().includes('leave')) {
-        if (String(row.submit_status) === '1') {
+        if (String(row.submit_status) === '1' || String(row.submit_status) === '0') {
           staffMap[row.staff_id].leave += rowHours;
         }
       }
