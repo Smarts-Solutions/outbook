@@ -94,6 +94,7 @@ const TimesheetNewDesign = () => {
   const [misTotalRows, setMisTotalRows] = useState(0);
   const [misExporting, setMisExporting] = useState(false);
   const [misMonthOffset, setMisMonthOffset] = useState(0);
+  const [graphData, setGraphData] = useState([]);
   const misDebounceRef = useRef(null);
 
   const getMisSelectedDate = (offset = misMonthOffset) => {
@@ -151,8 +152,62 @@ const TimesheetNewDesign = () => {
     }
   };
 
+  const fetchMonthlyTrend = async (tab = activeMisTab) => {
+    try {
+      const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+      const token = JSON.parse(localStorage.getItem("token"));
+      const d = new Date();
+      const promises = [];
+      for (let i = 5; i >= 0; i--) {
+        const targetDate = new Date(d.getFullYear(), d.getMonth() - i, 1);
+        const req = {
+          StaffUserId: staffDetails?.id,
+          tab: tab,
+          page: 1,
+          limit: 1,
+          search: "",
+          month: targetDate.getMonth(),
+          year: targetDate.getFullYear(),
+        };
+        promises.push(
+          GET_MIS_RESOURCE_UTILISATION(req, token).then((response) => ({
+            targetDate,
+            response,
+          }))
+        );
+      }
+      
+      const results = await Promise.all(promises);
+      const trendData = results.map((res) => {
+        const response = res.response;
+        let total = 0, billable = 0, utilization = 0;
+        if (response && response.summary) {
+          total = response.summary.total_hours || 0;
+          billable = response.summary.billable_hours || 0;
+          utilization = response.summary.utilisation_hours || 0;
+        }
+        
+        const monthString = res.targetDate.toLocaleDateString("en-GB", {
+          month: "short",
+          year: "2-digit",
+        });
+        
+        return {
+          month: monthString,
+          total: total,
+          billable: billable,
+          utilization: utilization,
+        };
+      });
+      setGraphData(trendData);
+    } catch (error) {
+      console.error("Error fetching monthly trend:", error);
+    }
+  };
+
   useEffect(() => {
     fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm);
+    fetchMonthlyTrend(activeMisTab);
     setMisPage(1);
   }, [activeMisTab]);
 
@@ -2700,16 +2755,7 @@ const TimesheetNewDesign = () => {
   console.log("timeSheetRows", timeSheetRows);
 
 
-  const graphData = [
-    { month: "Jan 26", total: 65, billable: 45, leave: 10 },
-    { month: "Feb 26", total: 72, billable: 52, leave: 8 },
-    { month: "Mar 26", total: 80, billable: 60, leave: 12 },
-    { month: "Apr 26", total: 68, billable: 48, leave: 15 },
-    { month: "May 26", total: 85, billable: 65, leave: 7 },
-    { month: "Jun 26", total: 78, billable: 58, leave: 10 },
-  ];
-
-  const renderPercentLabel = ({ x, y, width, value }) => {
+  const renderValueLabel = ({ x, y, width, value }) => {
     if (!value) return null;
 
     return (
@@ -2720,7 +2766,7 @@ const TimesheetNewDesign = () => {
         fontSize={12}
         fill="#5b6b7a"
       >
-        {value}%
+        {value}h
       </text>
     );
   };
@@ -3975,10 +4021,10 @@ const TimesheetNewDesign = () => {
                             }}
                           />
 
-                          <YAxis hide domain={[0, 100]} />
+                          <YAxis hide />
 
                           <Tooltip
-                            formatter={(value, name) => [`${value}%`, name]}
+                            formatter={(value, name) => [`${value}h`, name.charAt(0).toUpperCase() + name.slice(1)]}
                             cursor={{
                               fill: "rgba(0,0,0,0.03)",
                             }}
@@ -3992,7 +4038,7 @@ const TimesheetNewDesign = () => {
                           >
                             <LabelList
                               dataKey="total"
-                              content={renderPercentLabel}
+                              content={renderValueLabel}
                             />
                           </Bar>
 
@@ -4004,19 +4050,19 @@ const TimesheetNewDesign = () => {
                           >
                             <LabelList
                               dataKey="billable"
-                              content={renderPercentLabel}
+                              content={renderValueLabel}
                             />
                           </Bar>
 
                           <Bar
-                            dataKey="leave"
+                            dataKey="utilization"
                             fill="#9c6b1a"
                             barSize={16}
                             radius={[6, 6, 0, 0]}
                           >
                             <LabelList
-                              dataKey="leave"
-                              content={renderPercentLabel}
+                              dataKey="utilization"
+                              content={renderValueLabel}
                             />
                           </Bar>
                         </BarChart>
@@ -4031,7 +4077,7 @@ const TimesheetNewDesign = () => {
                       >
                         <LegendDot color="#b7d9d4" label="Total" />
                         <LegendDot color="#2e6f5e" label="Billable" />
-                        <LegendDot color="#9c6b1a" label="Leave" />
+                        <LegendDot color="#9c6b1a" label="Utilisation" />
                       </div>
                     </div>
                   </div>
