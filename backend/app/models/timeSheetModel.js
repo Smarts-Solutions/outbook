@@ -3412,6 +3412,25 @@ const getMisResourceUtilisation = async (data) => {
     let daysDifference = Math.round((new Date(thisMonthEnd) - new Date(thisMonthStart)) / (24 * 60 * 60 * 1000));
     let weeksInMonth = Math.round((daysDifference + 1) / 7);
 
+    let expectedWeeks = 0;
+    const today = new Date();
+    const nowMonth = now.getUTCFullYear() * 12 + now.getUTCMonth();
+    const todayMonth = today.getUTCFullYear() * 12 + today.getUTCMonth();
+
+    if (nowMonth < todayMonth) {
+        expectedWeeks = weeksInMonth;
+    } else if (nowMonth === todayMonth) {
+        const todayStr = today.toISOString().slice(0, 10);
+        const start = new Date(thisMonthStart);
+        const diffDays = Math.floor((new Date(todayStr) - start) / (24 * 60 * 60 * 1000));
+        let weekIdx = Math.floor(diffDays / 7);
+        expectedWeeks = weekIdx + 1;
+        if (expectedWeeks > weeksInMonth) expectedWeeks = weeksInMonth;
+        if (expectedWeeks < 0) expectedWeeks = 0;
+    } else {
+        expectedWeeks = 0;
+    }
+
     const monthQuery = `
       SELECT 
         s.id AS staff_id,
@@ -3456,7 +3475,26 @@ const getMisResourceUtilisation = async (data) => {
           billable: 0,
           leave: 0,
           utilisation: 0,
+          weeks: {}
         };
+      }
+
+      let rowDate = row.monday_date || row.tuesday_date || row.wednesday_date || row.thursday_date || row.friday_date || row.saturday_date || row.sunday_date;
+      if (rowDate) {
+        const start = new Date(thisMonthStart);
+        const d = new Date(rowDate);
+        const diffDays = Math.floor((d - start) / (24 * 60 * 60 * 1000));
+        let weekIndex = Math.floor(diffDays / 7);
+        
+        if (!staffMap[row.staff_id].weeks[weekIndex]) {
+           staffMap[row.staff_id].weeks[weekIndex] = { submitted: false, saved: false };
+        }
+        if (String(row.submit_status) === '1') {
+           staffMap[row.staff_id].weeks[weekIndex].submitted = true;
+        }
+        if (String(row.submit_status) === '0') {
+           staffMap[row.staff_id].weeks[weekIndex].saved = true;
+        }
       }
 
       let rowHours =
@@ -3487,12 +3525,34 @@ const getMisResourceUtilisation = async (data) => {
       }
     }
 
+    let totalSubmittedMonth = 0;
+    let totalSavedMonth = 0;
+    let totalMissingMonth = 0;
+
+    for (let staffId in staffMap) {
+       let staff = staffMap[staffId];
+       for (let i = 0; i < weeksInMonth; i++) {
+          const w = staff.weeks[i];
+          if (w && w.submitted) {
+             totalSubmittedMonth++;
+          } else if (w && w.saved) {
+             totalSavedMonth++;
+          } else if (i < expectedWeeks) {
+             totalMissingMonth++;
+          }
+       }
+    }
+
     let summary = {
       total_hours: 0,
       billable_hours: 0,
       leave_hours: 0,
       available_hours: 0,
-      utilisation_hours: 0
+      utilisation_hours: 0,
+      total_staff: Object.keys(staffMap).length,
+      submitted: totalSubmittedMonth,
+      saved: totalSavedMonth,
+      missing: totalMissingMonth
     };
 
     let results = Object.values(staffMap).map(staff => {
