@@ -253,6 +253,12 @@ const TimesheetNewDesign = () => {
     fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, newOffset);
   };
 
+  const handleMisCurrentMonth = () => {
+    setMisMonthOffset(0);
+    setMisPage(1);
+    fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, 0);
+  };
+
   const handleMisNextMonth = () => {
     const newOffset = misMonthOffset + 1;
     setMisMonthOffset(newOffset);
@@ -3930,15 +3936,20 @@ const TimesheetNewDesign = () => {
                   <h3 className="timesheet-tab-content-heading">MIS Dashboard</h3>
                   <p className="timesheet-tab-content-para">Submission compliance, billable vs leave hours and resource utilisation.</p>
                 </div>
-                <div className="timesheet-week-div">
-                  <button className="timesheet-week-button" type="button" onClick={handleMisPrevMonth}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left size-4" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
-                  </button>
-                  <div className="timesheet-week-content-div-mis">
-                    <p className="timesheet-week-date">{getMisSelectedDate().toLocaleString('default', { month: 'long', year: 'numeric' })}</p>
+                <div className="timesheet-tab-content-header-right">
+                  <div className="timesheet-week-div">
+                    <button className="timesheet-week-button" type="button" onClick={handleMisPrevMonth}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left size-4" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                    </button>
+                    <div className="timesheet-week-content-div-mis">
+                      <p className="timesheet-week-date">{getMisSelectedDate().toLocaleString('default', { month: 'long', year: 'numeric' })}</p>
+                    </div>
+                    <button className="timesheet-week-button" type="button" onClick={handleMisNextMonth}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right size-4" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+                    </button>
                   </div>
-                  <button className="timesheet-week-button" type="button" onClick={handleMisNextMonth}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right size-4" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+                  <button type="button" className="btn btn-outline-info fw-bold" onClick={handleMisCurrentMonth}>
+                    Go to Current Month
                   </button>
                 </div>
               </div>
