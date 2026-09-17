@@ -185,15 +185,6 @@ const getManagerReviewData = async (req, res) => {
   }
 }
 
-const logTimesheetActivity = async (req, res) => {
-  try {
-    const result = await timeSheetService.logTimesheetActivity(req.body);
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}
-
 const getFollowUpList = async (req, res) => {
   try {
     const result = await timeSheetService.getFollowUpList(req.body);
@@ -202,6 +193,42 @@ const getFollowUpList = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 }
+
+const logTimesheetActivity = async (req, res) => {
+  try {
+    const result = await timeSheetService.logTimesheetActivity(req.body);
+    if (result.status) {
+      return res.status(200).json(result);
+    } else {
+      return res.status(400).json(result);
+    }
+  } catch (error) {
+    console.error("Error in logTimesheetActivity controller:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error.message
+    });
+  }
+};
+
+const getMisResourceUtilisation = async (req, res) => {
+  try {
+    const result = await timeSheetService.getMisResourceUtilisation(req.body);
+    if (result.status) {
+      return res.status(200).json(result);
+    } else {
+      return res.status(400).json(result);
+    }
+  } catch (error) {
+    console.error("Error in getMisResourceUtilisation controller:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error.message
+    });
+  }
+};
 
 module.exports = {
   getTimesheet,
@@ -213,5 +240,6 @@ module.exports = {
   getManagerReviewCount,
   getManagerReviewData,
   getFollowUpList,
-  logTimesheetActivity
+  logTimesheetActivity,
+  getMisResourceUtilisation
 };

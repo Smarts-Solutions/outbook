@@ -17,7 +17,7 @@ import {
   getFollowUpList,
 } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
 
-import { SAVE_TIMESHEET } from "../../../Services/Timesheet/TimesheetService";
+import { SAVE_TIMESHEET, GET_MIS_RESOURCE_UTILISATION } from "../../../Services/Timesheet/TimesheetService";
 import sweatalert from "sweetalert2";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 import ReactPaginate from "react-paginate";
@@ -58,7 +58,7 @@ const TimesheetNewDesign = () => {
   const [submittedThisWeek, setSubmittedThisWeek] = useState(0);
   const [savedThisWeek, setSavedThisWeek] = useState(0);
   const [missingLastWeek, setMissingLastWeek] = useState(0);
-  
+
   const [misTotalHours, setMisTotalHours] = useState(0);
   const [misLeaveHours, setMisLeaveHours] = useState(0);
   const [misAvailableHours, setMisAvailableHours] = useState(0);
@@ -84,6 +84,171 @@ const TimesheetNewDesign = () => {
   const [followUpPage, setFollowUpPage] = useState(1);
   const [followUpHasMore, setFollowUpHasMore] = useState(true);
   const [isFollowUpLoading, setIsFollowUpLoading] = useState(false);
+
+  const [activeMisTab, setActiveMisTab] = useState("employee"); // 'employee' or 'team'
+  const [misData, setMisData] = useState([]);
+  const [isMisLoading, setIsMisLoading] = useState(false);
+  const [misPage, setMisPage] = useState(1);
+  const [misPageSize, setMisPageSize] = useState(10);
+  const [misSearchTerm, setMisSearchTerm] = useState("");
+  const [misTotalRows, setMisTotalRows] = useState(0);
+  const [misExporting, setMisExporting] = useState(false);
+  const [misMonthOffset, setMisMonthOffset] = useState(0);
+  const misDebounceRef = useRef(null);
+
+  const getMisSelectedDate = (offset = misMonthOffset) => {
+    const d = new Date();
+    d.setMonth(d.getMonth() + offset);
+    return d;
+  };
+
+  const fetchMisResourceUtilisation = async (
+    tab = activeMisTab,
+    page = misPage,
+    limit = misPageSize,
+    search = misSearchTerm,
+    monthOffset = misMonthOffset
+  ) => {
+    try {
+      setIsMisLoading(true);
+      const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+      const token = JSON.parse(localStorage.getItem("token"));
+      const d = getMisSelectedDate(monthOffset);
+      const req = {
+        StaffUserId: staffDetails?.id,
+        tab: tab,
+        page: page,
+        limit: limit,
+        search: search,
+        month: d.getMonth(),
+        year: d.getFullYear(),
+      };
+      const response = await GET_MIS_RESOURCE_UTILISATION(req, token);
+      if (response && response.status) {
+        setMisData(response.data);
+        setMisTotalRows(response.pagination?.total || response.total || 0);
+        if (response.summary) {
+          setMisTotalHours(response.summary.total_hours || 0);
+          setMisBillableHours(response.summary.billable_hours || 0);
+          setMisLeaveHours(response.summary.leave_hours || 0);
+          setMisAvailableHours(response.summary.available_hours || 0);
+          setMisUtilisation(response.summary.utilisation_hours || 0);
+        }
+      } else {
+        setMisData([]);
+        setMisTotalRows(0);
+        setMisTotalHours(0);
+        setMisBillableHours(0);
+        setMisLeaveHours(0);
+        setMisAvailableHours(0);
+        setMisUtilisation(0);
+      }
+    } catch (error) {
+      console.error("Error fetching MIS Resource Utilisation:", error);
+      setMisData([]);
+    } finally {
+      setIsMisLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm);
+    setMisPage(1);
+  }, [activeMisTab]);
+
+  const handleMisPageChange = (selected) => {
+    const newPage = selected.selected + 1;
+    setMisPage(newPage);
+    fetchMisResourceUtilisation(activeMisTab, newPage, misPageSize, misSearchTerm);
+  };
+
+  const handleMisPageSizeChange = (event) => {
+    const newSize = parseInt(event.target.value, 10);
+    setMisPageSize(newSize);
+    setMisPage(1);
+    fetchMisResourceUtilisation(activeMisTab, 1, newSize, misSearchTerm, misMonthOffset);
+  };
+
+  const handleMisSearchChange = (term) => {
+    setMisSearchTerm(term);
+    setMisPage(1);
+    if (misDebounceRef.current) clearTimeout(misDebounceRef.current);
+    misDebounceRef.current = setTimeout(() => {
+      fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, term, misMonthOffset);
+    }, 500);
+  };
+
+  const handleMisPrevMonth = () => {
+    const newOffset = misMonthOffset - 1;
+    setMisMonthOffset(newOffset);
+    setMisPage(1);
+    fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, newOffset);
+  };
+
+  const handleMisNextMonth = () => {
+    const newOffset = misMonthOffset + 1;
+    setMisMonthOffset(newOffset);
+    setMisPage(1);
+    fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, newOffset);
+  };
+
+  const exportMisResourceCSV = async () => {
+    try {
+      setMisExporting(true);
+      const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+      const token = localStorage.getItem("token");
+
+      const d = getMisSelectedDate(misMonthOffset);
+      const req = {
+        StaffUserId: staffDetails?.id,
+        tab: activeMisTab,
+        page: 1,
+        limit: 1000000,
+        search: misSearchTerm,
+        month: d.getMonth(),
+        year: d.getFullYear(),
+      };
+
+      const response = await GET_MIS_RESOURCE_UTILISATION(req, token);
+      if (response && response.status && response.data && response.data.length > 0) {
+        const exportData = response.data.map((row, index) => ({
+          "S.No": index + 1,
+          "Employee": row.name,
+          "Total Hours": row.total_hours + "h",
+          "Billable Hours": row.billable_hours + "h",
+          "Leave Hours": row.leave_hours + "h",
+          "Available Hours": row.available_hours + "h",
+          "Utilisation (%)": row.utilisation_pct + "%",
+        }));
+
+        const csvContent = [
+          Object.keys(exportData[0]).join(","),
+          ...exportData.map((row) =>
+            Object.values(row)
+              .map((value) => `"${value}"`)
+              .join(",")
+          ),
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `MIS_Resource_Utilisation_${activeMisTab}.csv`);
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        toast.error("No data available to export");
+      }
+    } catch (error) {
+      console.error("Error exporting MIS Resource Utilisation:", error);
+      toast.error("Failed to export data");
+    } finally {
+      setMisExporting(false);
+    }
+  };
 
 
 
@@ -258,12 +423,6 @@ const TimesheetNewDesign = () => {
         setSubmittedThisWeek(res?.data?.submitted_this_week || 0);
         setSavedThisWeek(res?.data?.saved_this_week || 0);
         setMissingLastWeek(res?.data?.missing_last_week || 0);
-
-        setMisTotalHours(res?.data?.total_hours || 0);
-        setMisLeaveHours(res?.data?.leave_hours || 0);
-        setMisAvailableHours(res?.data?.available_hours || 0);
-        setMisUtilisation(res?.data?.utilisation || 0);
-        setMisBillableHours(res?.data?.billable_hours || 0);
       } else {
         console.error("Manager review count API error:", res);
         sweatalert.fire({ icon: 'error', title: res.message || 'API Error', text: res.error || '' });
@@ -1342,14 +1501,14 @@ const TimesheetNewDesign = () => {
   const handleBlur = (e, index, day_name, row) => {
     const newValue = e.target.value;
     if (String(activeFieldOldValue) !== String(newValue) && row.id) {
-        const req = {
-            rowId: row.id,
-            staff_id: multipleFilter.staff_id,
-            fieldName: day_name,
-            oldValue: activeFieldOldValue,
-            newValue: newValue
-        };
-        dispatch(logTimesheetActivityData(req));
+      const req = {
+        rowId: row.id,
+        staff_id: multipleFilter.staff_id,
+        fieldName: day_name,
+        oldValue: activeFieldOldValue,
+        newValue: newValue
+      };
+      dispatch(logTimesheetActivityData(req));
     }
   };
 
@@ -3015,8 +3174,8 @@ const TimesheetNewDesign = () => {
                 setActiveField={() => { }}
                 activeIndex={null}
                 activeField={null}
-                setActiveFieldOldValue={() => {}}
-                handleBlur={() => {}}
+                setActiveFieldOldValue={() => { }}
+                handleBlur={() => { }}
                 setIsModalOpen={() => { }}
                 setModalText={() => { }}
                 setSelectedRowIndex={() => { }}
@@ -3703,269 +3862,313 @@ const TimesheetNewDesign = () => {
           {isManagerReviewVisible && (
             <div className="tab-pane fade" id="mis-dashboard-tab-pane" role="tabpanel" aria-labelledby="mis-dashboard-tab" tabindex="0">
 
-            <div className="timesheet-tab-content-header">
-              <div className="timesheet-tab-content-header-left">
-                <h3 className="timesheet-tab-content-heading">MIS Dashboard</h3>
-                <p className="timesheet-tab-content-para">Submission compliance, billable vs leave hours and resource utilisation.</p>
-              </div>
-              <div className="timesheet-week-div">
-                <button className="timesheet-week-button" type="button">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left size-4" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
-                </button>
-                <div className="timesheet-week-content-div-mis">
-                  <p className="timesheet-week-date">August 2026</p>
+              <div className="timesheet-tab-content-header">
+                <div className="timesheet-tab-content-header-left">
+                  <h3 className="timesheet-tab-content-heading">MIS Dashboard</h3>
+                  <p className="timesheet-tab-content-para">Submission compliance, billable vs leave hours and resource utilisation.</p>
                 </div>
-                <button className="timesheet-week-button" type="button">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right size-4" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
-                </button>
-              </div>
-            </div>
-
-
-            <div className="row mt-4">
-              <div className="col-md-4">
-                <div className="timesheet-white-card">
-                  <p className="timesheet-white-card-label">Total Employees</p>
-                  <p className="timesheet-white-card-value-big">{managerReviewCount}</p>
-                </div>
-              </div>
-              <div className="col-md-4">
-                <div className="timesheet-white-card">
-                  <p className="timesheet-white-card-label">Timesheets Submitted</p>
-                  <p className="timesheet-white-card-value-big timesheet-submitted-mis">{submittedThisWeek}</p>
-                </div>
-              </div>
-              <div className="col-md-4">
-                <div className="timesheet-white-card">
-                  <p className="timesheet-white-card-label">Missing Timesheets</p>
-                  <p className="timesheet-white-card-value-big timesheet-white-card-value-big-red">{missingLastWeek}</p>
-                </div>
-              </div>
-              <div className="col-md-4 mt-3">
-                <div className="timesheet-white-card">
-                  <p className="timesheet-white-card-label">Pending Approval</p>
-                  <p className="timesheet-white-card-value-big timesheet-pending-mis">36h</p>
-                </div>
-              </div>
-              <div className="col-md-4 mt-3">
-                <div className="timesheet-white-card">
-                  <p className="timesheet-white-card-label">Total Hours</p>
-                  <p className="timesheet-white-card-value-big">{misTotalHours}h</p>
-                </div>
-              </div>
-              <div className="col-md-4 mt-3">
-                <div className="timesheet-white-card">
-                  <p className="timesheet-white-card-label">Billable Hours</p>
-                  <p className="timesheet-white-card-value-big timesheet-white-card-value-big-green">{misBillableHours}h</p>
-                </div>
-              </div>
-              <div className="col-md-4 mt-3">
-                <div className="timesheet-white-card">
-                  <p className="timesheet-white-card-label">Leave Hours</p>
-                  <p className="timesheet-white-card-value-big timesheet-pending-mis">{misLeaveHours}h</p>
-                </div>
-              </div>
-              <div className="col-md-4 mt-3">
-                <div className="timesheet-white-card">
-                  <p className="timesheet-white-card-label">Available Hours</p>
-                  <p className="timesheet-white-card-value-big">{misAvailableHours}h</p>
-                </div>
-              </div>
-              <div className="col-md-4 mt-3">
-                <div className="timesheet-white-card">
-                  <p className="timesheet-white-card-label">Utilisation</p>
-                  <p className="timesheet-white-card-value-big timesheet-pending-mis">{misUtilisation}h</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="row mt-3">
-              <div className="col-lg-7">
-                <div className="timesheet-white-card">
-                  <div className="timesheet-table-header-div">
-                    <div className="timesheet-table-header-div-left">
-                      <div className="tab-title"><h3 className="mt-0">Monthly trend</h3></div>
-                      <p className="page-subtitle mb-0 mt-2">Total, billable and leave hours with utilisation over the last 6 months.</p>
-                    </div>
+                <div className="timesheet-week-div">
+                  <button className="timesheet-week-button" type="button" onClick={handleMisPrevMonth}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left size-4" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                  </button>
+                  <div className="timesheet-week-content-div-mis">
+                    <p className="timesheet-week-date">{getMisSelectedDate().toLocaleString('default', { month: 'long', year: 'numeric' })}</p>
                   </div>
-                  <div
-                    style={{
-                      width: "100%",
-                      maxWidth: 720,
-                      fontFamily: "sans-serif",
-                    }}
-                  >
-                    <ResponsiveContainer width="100%" height={239}>
-                      <BarChart
-                        data={graphData}
-                        margin={{
-                          top: 30,
-                          right: 20,
-                          left: 20,
-                          bottom: 5,
-                        }}
-                        barGap={4}
-                      >
-                        <XAxis
-                          dataKey="month"
-                          axisLine={{ stroke: "#e2e8ee" }}
-                          tickLine={false}
-                          tick={{
-                            fill: "#5b6b7a",
-                            fontSize: 13,
-                          }}
-                        />
+                  <button className="timesheet-week-button" type="button" onClick={handleMisNextMonth}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right size-4" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+                  </button>
+                </div>
+              </div>
 
-                        <YAxis hide domain={[0, 100]} />
 
-                        <Tooltip
-                          formatter={(value, name) => [`${value}%`, name]}
-                          cursor={{
-                            fill: "rgba(0,0,0,0.03)",
-                          }}
-                        />
+              <div className="row mt-4">
+                <div className="col-md-4">
+                  <div className="timesheet-white-card">
+                    <p className="timesheet-white-card-label">Total Employees</p>
+                    <p className="timesheet-white-card-value-big">{managerReviewCount}</p>
+                  </div>
+                </div>
+                <div className="col-md-4">
+                  <div className="timesheet-white-card">
+                    <p className="timesheet-white-card-label">Timesheets Submitted</p>
+                    <p className="timesheet-white-card-value-big timesheet-submitted-mis">{submittedThisWeek}</p>
+                  </div>
+                </div>
+                <div className="col-md-4">
+                  <div className="timesheet-white-card">
+                    <p className="timesheet-white-card-label">Missing Timesheets</p>
+                    <p className="timesheet-white-card-value-big timesheet-white-card-value-big-red">{missingLastWeek}</p>
+                  </div>
+                </div>
+                <div className="col-md-4 mt-3">
+                  <div className="timesheet-white-card">
+                    <p className="timesheet-white-card-label">Pending Approval</p>
+                    <p className="timesheet-white-card-value-big timesheet-pending-mis">36h</p>
+                  </div>
+                </div>
+                <div className="col-md-4 mt-3">
+                  <div className="timesheet-white-card">
+                    <p className="timesheet-white-card-label">Total Hours</p>
+                    <p className="timesheet-white-card-value-big">{misTotalHours}h</p>
+                  </div>
+                </div>
+                <div className="col-md-4 mt-3">
+                  <div className="timesheet-white-card">
+                    <p className="timesheet-white-card-label">Billable Hours</p>
+                    <p className="timesheet-white-card-value-big timesheet-white-card-value-big-green">{misBillableHours}h</p>
+                  </div>
+                </div>
+                <div className="col-md-4 mt-3">
+                  <div className="timesheet-white-card">
+                    <p className="timesheet-white-card-label">Leave Hours</p>
+                    <p className="timesheet-white-card-value-big timesheet-pending-mis">{misLeaveHours}h</p>
+                  </div>
+                </div>
+                <div className="col-md-4 mt-3">
+                  <div className="timesheet-white-card">
+                    <p className="timesheet-white-card-label">Available Hours</p>
+                    <p className="timesheet-white-card-value-big">{misAvailableHours}h</p>
+                  </div>
+                </div>
+                <div className="col-md-4 mt-3">
+                  <div className="timesheet-white-card">
+                    <p className="timesheet-white-card-label">Utilisation</p>
+                    <p className="timesheet-white-card-value-big timesheet-pending-mis">{misUtilisation}h</p>
+                  </div>
+                </div>
+              </div>
 
-                        <Bar
-                          dataKey="total"
-                          fill="#b7d9d4"
-                          barSize={16}
-                          radius={[6, 6, 0, 0]}
-                        >
-                          <LabelList
-                            dataKey="total"
-                            content={renderPercentLabel}
-                          />
-                        </Bar>
-
-                        <Bar
-                          dataKey="billable"
-                          fill="#2e6f5e"
-                          barSize={16}
-                          radius={[6, 6, 0, 0]}
-                        >
-                          <LabelList
-                            dataKey="billable"
-                            content={renderPercentLabel}
-                          />
-                        </Bar>
-
-                        <Bar
-                          dataKey="leave"
-                          fill="#9c6b1a"
-                          barSize={16}
-                          radius={[6, 6, 0, 0]}
-                        >
-                          <LabelList
-                            dataKey="leave"
-                            content={renderPercentLabel}
-                          />
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-
+              <div className="row mt-3">
+                <div className="col-lg-7">
+                  <div className="timesheet-white-card">
+                    <div className="timesheet-table-header-div">
+                      <div className="timesheet-table-header-div-left">
+                        <div className="tab-title"><h3 className="mt-0">Monthly trend</h3></div>
+                        <p className="page-subtitle mb-0 mt-2">Total, billable and leave hours with utilisation over the last 6 months.</p>
+                      </div>
+                    </div>
                     <div
                       style={{
-                        display: "flex",
-                        gap: 20,
-                        paddingLeft: 20,
+                        width: "100%",
+                        maxWidth: 720,
+                        fontFamily: "sans-serif",
                       }}
                     >
-                      <LegendDot color="#b7d9d4" label="Total" />
-                      <LegendDot color="#2e6f5e" label="Billable" />
-                      <LegendDot color="#9c6b1a" label="Leave" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-lg-5">
-                <div className="timesheet-white-card">
-                  <div className="timesheet-table-header-div">
-                    <div className="timesheet-table-header-div-left dis">
-
-                      <div className="tab-title d-flex align-items-center gap-2"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert size-4 text-warning" aria-hidden="true" data-tsd-source="/src/routes/dashboard.tsx:315:13"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><h3 className="mt-0">Follow-up list</h3></div>
-                      <p className="page-subtitle mb-0 mt-2">Employees with missing or unsubmitted weeks this month.</p>
-                    </div>
-                  </div>
-                  <div 
-                    className="staff-report-list"
-                    onScroll={handleFollowUpScroll}
-                    style={{ maxHeight: '400px', overflowY: 'auto' }}
-                  >
-                    {followUpList.map((item, idx) => (
-                      <div className="staff-report-card" key={idx}>
-                        <div>
-                          <div className="staff-name">
-                            {item.staff_name}
-                          </div>
-                          <div className="staff-date">
-                            {item.week_label}
-                          </div>
-                        </div>
-                        <span 
-                          className="staff-status"
-                          style={item.status === 'Saved' ? { color: '#26bdf0', backgroundColor: 'rgba(38, 189, 240, 0.1)' } : {}}
+                      <ResponsiveContainer width="100%" height={239}>
+                        <BarChart
+                          data={graphData}
+                          margin={{
+                            top: 30,
+                            right: 20,
+                            left: 20,
+                            bottom: 5,
+                          }}
+                          barGap={4}
                         >
-                          {item.status}
-                        </span>
-                      </div>
-                    ))}
-                    {isFollowUpLoading && (
-                      <div className="text-center p-2 text-muted">Loading...</div>
-                    )}
-                    {!isFollowUpLoading && followUpList.length === 0 && (
-                      <div className="text-center p-4 text-muted">No follow-ups needed!</div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
+                          <XAxis
+                            dataKey="month"
+                            axisLine={{ stroke: "#e2e8ee" }}
+                            tickLine={false}
+                            tick={{
+                              fill: "#5b6b7a",
+                              fontSize: 13,
+                            }}
+                          />
 
-            <div className="timesheet-white-card mt-3">
-              <div className="timesheet-table-header-div">
-                <div className="timesheet-table-header-div-left">
-                  <div className="tab-title"><h3 className="mt-0">Resource utilisation</h3></div>
-                  <p className="page-subtitle mb-0 mt-2">Billable hours ÷ available hours (net of leave) for August 2026.</p>
+                          <YAxis hide domain={[0, 100]} />
+
+                          <Tooltip
+                            formatter={(value, name) => [`${value}%`, name]}
+                            cursor={{
+                              fill: "rgba(0,0,0,0.03)",
+                            }}
+                          />
+
+                          <Bar
+                            dataKey="total"
+                            fill="#b7d9d4"
+                            barSize={16}
+                            radius={[6, 6, 0, 0]}
+                          >
+                            <LabelList
+                              dataKey="total"
+                              content={renderPercentLabel}
+                            />
+                          </Bar>
+
+                          <Bar
+                            dataKey="billable"
+                            fill="#2e6f5e"
+                            barSize={16}
+                            radius={[6, 6, 0, 0]}
+                          >
+                            <LabelList
+                              dataKey="billable"
+                              content={renderPercentLabel}
+                            />
+                          </Bar>
+
+                          <Bar
+                            dataKey="leave"
+                            fill="#9c6b1a"
+                            barSize={16}
+                            radius={[6, 6, 0, 0]}
+                          >
+                            <LabelList
+                              dataKey="leave"
+                              content={renderPercentLabel}
+                            />
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: 20,
+                          paddingLeft: 20,
+                        }}
+                      >
+                        <LegendDot color="#b7d9d4" label="Total" />
+                        <LegendDot color="#2e6f5e" label="Billable" />
+                        <LegendDot color="#9c6b1a" label="Leave" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-lg-5">
+                  <div className="timesheet-white-card">
+                    <div className="timesheet-table-header-div">
+                      <div className="timesheet-table-header-div-left dis">
+
+                        <div className="tab-title d-flex align-items-center gap-2"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert size-4 text-warning" aria-hidden="true" data-tsd-source="/src/routes/dashboard.tsx:315:13"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><h3 className="mt-0">Follow-up list</h3></div>
+                        <p className="page-subtitle mb-0 mt-2">Employees with missing or unsubmitted weeks this month.</p>
+                      </div>
+                    </div>
+                    <div
+                      className="staff-report-list"
+                      onScroll={handleFollowUpScroll}
+                      style={{ maxHeight: '400px', overflowY: 'auto' }}
+                    >
+                      {followUpList.map((item, idx) => (
+                        <div className="staff-report-card" key={idx}>
+                          <div>
+                            <div className="staff-name">
+                              {item.staff_name}
+                            </div>
+                            <div className="staff-date">
+                              {item.week_label}
+                            </div>
+                          </div>
+                          <span
+                            className="staff-status"
+                            style={item.status === 'Saved' ? { color: '#26bdf0', backgroundColor: 'rgba(38, 189, 240, 0.1)' } : {}}
+                          >
+                            {item.status}
+                          </span>
+                        </div>
+                      ))}
+                      {isFollowUpLoading && (
+                        <div className="text-center p-2 text-muted">Loading...</div>
+                      )}
+                      {!isFollowUpLoading && followUpList.length === 0 && (
+                        <div className="text-center p-4 text-muted">No follow-ups needed!</div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-              <ul className="nav resource-tabs" id="resourceTab" role="tablist">
-                <li role="presentation">
-                  <button className="active" id="employee-tab" data-bs-toggle="tab" data-bs-target="#employee-tab-pane" type="button" role="tab" aria-controls="employee-tab-pane" aria-selected="true">Employee</button>
-                </li>
-                <li role="presentation">
-                  <button id="team-tab" data-bs-toggle="tab" data-bs-target="#team-tab-pane" type="button" role="tab" aria-controls="team-tab-pane" aria-selected="false">Team</button>
-                </li>
-                <li role="presentation">
-                  <button id="department-tab" data-bs-toggle="tab" data-bs-target="#department-tab-pane" type="button" role="tab" aria-controls="department-tab-pane" aria-selected="false">Department</button>
-                </li>
-                <li role="presentation">
-                  <button id="client-tab" data-bs-toggle="tab" data-bs-target="#client-tab-pane" type="button" role="tab" aria-controls="client-tab-pane" aria-selected="false">Client</button>
-                </li>
-              </ul>
-              <div className="tab-content" id="resourceTabContent">
-                <div className="tab-pane fade show active" id="employee-tab-pane" role="tabpanel" aria-labelledby="employee-tab" tabindex="0">
-                  <div className="mt-1">
-                    <ResourceDatatable />
+
+              <div className="timesheet-white-card mt-3">
+                <div className="timesheet-table-header-div">
+                  <div className="timesheet-table-header-div-left w-100 d-flex justify-content-between align-items-center">
+                    <div>
+                      <div className="tab-title"><h3 className="mt-0">Resource utilisation</h3></div>
+                      <p className="page-subtitle mb-0 mt-2">Billable hours ÷ available hours (net of leave) for {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}.</p>
+                    </div>
                   </div>
                 </div>
-                <div className="tab-pane fade" id="team-tab-pane" role="tabpanel" aria-labelledby="team-tab" tabindex="0">
-                  <div className="mt-1">
-                    <ResourceDatatable />
+                <ul className="nav resource-tabs" id="resourceTab" role="tablist">
+                  <li role="presentation">
+                    <button className={`active ${activeMisTab === 'employee' ? 'active' : ''}`} id="employee-tab" data-bs-toggle="tab" data-bs-target="#employee-tab-pane" type="button" role="tab" aria-controls="employee-tab-pane" aria-selected={activeMisTab === 'employee'} onClick={() => setActiveMisTab('employee')}>Employee</button>
+                  </li>
+                  <li role="presentation">
+                    <button className={`${activeMisTab === 'team' ? 'active' : ''}`} id="team-tab" data-bs-toggle="tab" data-bs-target="#team-tab-pane" type="button" role="tab" aria-controls="team-tab-pane" aria-selected={activeMisTab === 'team'} onClick={() => setActiveMisTab('team')}>Team</button>
+                  </li>
+                </ul>
+
+                <div className="row mt-3 mb-3 align-items-center justify-content-between px-3">
+                  <div className="col-md-4">
+                    <input
+                      type="text"
+                      placeholder="Search Staff..."
+                      className="form-control"
+                      value={misSearchTerm}
+                      onChange={(e) => handleMisSearchChange(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-md-auto">
+                    <button
+                      type="button"
+                      className="timesheet-table-header-btn"
+                      onClick={exportMisResourceCSV}
+                      disabled={misExporting || !misData || misData.length === 0}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download me-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>
+                      {misExporting ? "Exporting..." : "Export"}
+                    </button>
                   </div>
                 </div>
-                <div className="tab-pane fade" id="department-tab-pane" role="tabpanel" aria-labelledby="department-tab" tabindex="0">
-                  <div className="mt-1">
-                    <ResourceDatatable />
+
+                <div className="tab-content" id="resourceTabContent">
+                  <div className={`tab-pane fade ${activeMisTab === 'employee' ? 'show active' : ''}`} id="employee-tab-pane" role="tabpanel" aria-labelledby="employee-tab" tabIndex="0">
+                    <div className="datatable-wrapper mt-1" style={{ position: "relative" }}>
+                      {isMisLoading && (
+                        <div className="overlay">
+                          <div className="loader"></div>
+                        </div>
+                      )}
+                      <ResourceDatatable data={misData} loading={isMisLoading} page={misPage} limit={misPageSize} />
+                    </div>
                   </div>
-                </div>
-                <div className="tab-pane fade" id="client-tab-pane" role="tabpanel" aria-labelledby="client-tab" tabindex="0">
-                  <div className="mt-1">
-                    <ResourceDatatable />
+                  <div className={`tab-pane fade ${activeMisTab === 'team' ? 'show active' : ''}`} id="team-tab-pane" role="tabpanel" aria-labelledby="team-tab" tabIndex="0">
+                    <div className="datatable-wrapper mt-1" style={{ position: "relative" }}>
+                      {isMisLoading && (
+                        <div className="overlay">
+                          <div className="loader"></div>
+                        </div>
+                      )}
+                      <ResourceDatatable data={misData} loading={isMisLoading} page={misPage} limit={misPageSize} />
+                    </div>
                   </div>
+                  <ReactPaginate
+                    previousLabel={"Previous"}
+                    nextLabel={"Next"}
+                    breakLabel={"..."}
+                    pageCount={Math.ceil(misTotalRows / misPageSize) || 1}
+                    marginPagesDisplayed={2}
+                    pageRangeDisplayed={5}
+                    onPageChange={handleMisPageChange}
+                    containerClassName={"pagination"}
+                    activeClassName={"active"}
+                    forcePage={misPage - 1}
+                  />
+                  <select
+                    className="perpage-select"
+                    value={misPageSize}
+                    onChange={handleMisPageSizeChange}
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                    <option value={1000000}>All</option>
+                  </select>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
         </div>
       </div >
       <CommonModal

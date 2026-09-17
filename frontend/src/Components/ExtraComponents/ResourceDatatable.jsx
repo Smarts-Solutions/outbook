@@ -1,96 +1,68 @@
 import React from 'react';
 import DataTable from 'react-data-table-component';
 
-const ResourceDatatable = () => {
-    const data = [
-        {
-            id: 1,
-            employee: 'Vikas Patel',
-            total: '39h',
-            billable: '24h',
-            leave: '3h',
-            available: '168h',
-            utilisation: 15,
-        },
-        {
-            id: 2,
-            employee: 'Ayesha Khan',
-            total: '36h',
-            billable: '24h',
-            leave: '0h',
-            available: '168h',
-            utilisation: 14,
-        },
-        {
-            id: 3,
-            employee: 'Rohit Mehra',
-            total: '20h',
-            billable: '14h',
-            leave: '0h',
-            available: '168h',
-            utilisation: 8,
-        },
-        {
-            id: 4,
-            employee: 'Priya Nair',
-            total: '0h',
-            billable: '0h',
-            leave: '0h',
-            available: '168h',
-            utilisation: 0,
-        },
-    ];
-
+const ResourceDatatable = ({ data, loading, page = 1, limit = 10 }) => {
     const columns = [
         {
+            name: 'S.No',
+            selector: (row, index) => (page - 1) * limit + index + 1,
+            sortable: false,
+            width: '80px',
+        },
+        {
             name: 'Employee',
-            selector: row => row.employee,
+            selector: row => row.name,
             sortable: true,
-            width: '230px',
+            width: '270px',
         },
 
         {
-            name: 'Total',
-            selector: row => row.total,
+            name: 'Total Hours',
+            selector: row => row.total_hours,
             sortable: true,
             center: true,
-            width: '100px',
+            width: '150px',
+            cell: row => row.total_hours + 'h'
         },
 
         {
-            name: 'Billable',
+            name: 'Billable Hours',
+            selector: row => row.billable_hours,
             sortable: true,
             center: true,
-            width: '100px',
+            width: '170px',
             cell: row => (
                 <span style={{ color: '#43c752' }}>
-                    {row.billable}
+                    {row.billable_hours}h
                 </span>
             ),
         },
 
         {
-            name: 'Leave',
+            name: 'Leave Hours',
+            selector: row => row.leave_hours,
             sortable: true,
             center: true,
-            width: '100px',
+            width: '150px',
             cell: row => (
                 <span style={{ color: '#a46400' }}>
-                    {row.leave}
+                    {row.leave_hours}h
                 </span>
             ),
         },
 
         {
-            name: 'Available',
-            selector: row => row.available,
+            name: 'Available Hours',
+            selector: row => row.available_hours,
             sortable: true,
             center: true,
-            width: '130px',
+            width: '190px',
+            cell: row => row.available_hours + 'h'
         },
 
         {
             name: 'Utilisation',
+            selector: row => row.utilisation_pct,
             sortable: true,
             width: '300px',
             cell: row => (
@@ -109,7 +81,7 @@ const ResourceDatatable = () => {
                     >
                         <div
                             style={{
-                                width: `${row.utilisation}%`,
+                                width: `${row.utilisation_pct}%`,
                                 height: '100%',
                                 backgroundColor: '#0cb2ef',
                             }}
@@ -123,25 +95,59 @@ const ResourceDatatable = () => {
                             textAlign: 'right',
                         }}
                     >
-                        {row.utilisation}%
+                        {row.utilisation_pct}%
                     </span>
                 </div>
             ),
         },
     ];
 
+    const noDataImage = '/assets/images/No-data-amico.png';
+
+    const customSort = (rows, selector, direction) => {
+        return [...rows].sort((rowA, rowB) => {
+            let aField = selector(rowA);
+            let bField = selector(rowB);
+            
+            // Fallback for null/undefined
+            if (aField == null) aField = "";
+            if (bField == null) bField = "";
+      
+            if (typeof aField === 'string') aField = aField.toLowerCase();
+            if (typeof bField === 'string') bField = bField.toLowerCase();
+      
+            let comparison = 0;
+            if (aField > bField) comparison = 1;
+            else if (aField < bField) comparison = -1;
+      
+            return direction === 'desc' ? comparison * -1 : comparison;
+        });
+    };
+
     return (
         <div className="datatable-container">
-            <DataTable
-                columns={columns}
-                data={data}
-                className="custom-datatable"
-                fixedHeader
-                fixedHeaderScrollHeight="500px"
-                noHeader
-                highlightOnHover
-                responsive
-            />
+            {data.length === 0 && !loading ? (
+                <div className='text-center'>
+                    <img
+                        src={noDataImage}
+                        alt="No records available"
+                        style={{ width: '250px', height: 'auto', objectFit: 'contain' }}
+                    />
+                    <p className='fs-16'>There are no records to display</p>
+                </div>
+            ) : (
+                <DataTable
+                    columns={columns}
+                    data={data}
+                    sortFunction={customSort}
+                    progressPending={loading}
+                    className="custom-datatable"
+                    fixedHeader={false}
+                    noHeader
+                    highlightOnHover
+                    responsive
+                />
+            )}
         </div>
     );
 };

@@ -2519,17 +2519,17 @@ const getManagerReviewCount = async (data) => {
       if (!processedStaffs.has(row.staff_id)) {
         processedStaffs.add(row.staff_id);
         // Calculate monthly available capacity
-        let capacity = parseHours(row.hourminute) * weeksInMonth; 
+        let capacity = parseHours(row.hourminute) * weeksInMonth;
         overall_capacity += capacity;
       }
 
-      let rowHours = 
-        parseHours(row.monday_hours) + 
-        parseHours(row.tuesday_hours) + 
-        parseHours(row.wednesday_hours) + 
-        parseHours(row.thursday_hours) + 
-        parseHours(row.friday_hours) + 
-        parseHours(row.saturday_hours) + 
+      let rowHours =
+        parseHours(row.monday_hours) +
+        parseHours(row.tuesday_hours) +
+        parseHours(row.wednesday_hours) +
+        parseHours(row.thursday_hours) +
+        parseHours(row.friday_hours) +
+        parseHours(row.saturday_hours) +
         parseHours(row.sunday_hours);
 
       filled_hours += rowHours;
@@ -3258,7 +3258,7 @@ const getFollowUpList = async (data) => {
     const day1 = firstOfThisMonth.getUTCDay();
     const daysToMonday1 = day1 === 0 ? 6 : day1 - 1;
     const thisMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1 - daysToMonday1));
-    
+
     const firstOfNextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
     const day2 = firstOfNextMonth.getUTCDay();
     const daysToMonday2 = day2 === 0 ? 6 : day2 - 1;
@@ -3357,6 +3357,198 @@ const getFollowUpList = async (data) => {
   }
 };
 
+const getMisResourceUtilisation = async (data) => {
+  const { StaffUserId, tab, page = 1, limit = 10, search = "" } = data;
+  try {
+    if (!StaffUserId) {
+      return { status: false, message: "StaffUserId is required." };
+    }
+
+    const LineManageStaffId = await LineManageStaffIdHelperFunctionForStaff(StaffUserId);
+    const roleRows = await QueryRoleHelperFunction(StaffUserId);
+    const role_name = roleRows[0]?.role_name?.toUpperCase();
+
+    let staffWhereClause = "";
+    if (role_name === "SUPERADMIN" || role_name === "ADMIN") {
+      staffWhereClause = "WHERE s.role_id != 12 AND s.status = '1'";
+    } else {
+      if (LineManageStaffId.length > 0) {
+        staffWhereClause = `
+          WHERE s.role_id != 12
+          AND s.status = '1'
+          AND s.id IN (${LineManageStaffId.join(",")})
+        `;
+      } else {
+        return { status: true, message: "Fetched successfully", data: [], total: 0 };
+      }
+    }
+
+    // Tab-specific filters
+    if (tab === 'team') {
+      // Show only staff who are line managers for someone
+      staffWhereClause += ` AND s.id IN (SELECT staff_to FROM line_managers)`;
+    }
+
+    // Search filter
+    if (search) {
+      staffWhereClause += ` AND (s.first_name LIKE '%${search}%' OR s.last_name LIKE '%${search}%')`;
+    }
+
+    const now = new Date();
+    const firstOfThisMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const day1 = firstOfThisMonth.getUTCDay();
+    const daysToMonday1 = day1 === 0 ? 6 : day1 - 1;
+    const thisMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1 - daysToMonday1)).toISOString().slice(0, 10);
+
+    const firstOfNextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+    const day2 = firstOfNextMonth.getUTCDay();
+    const daysToMonday2 = day2 === 0 ? 6 : day2 - 1;
+    const thisMonthEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1 - daysToMonday2 - 1)).toISOString().slice(0, 10);
+
+    let daysDifference = Math.round((new Date(thisMonthEnd) - new Date(thisMonthStart)) / (24 * 60 * 60 * 1000));
+    let weeksInMonth = Math.round((daysDifference + 1) / 7);
+
+    const monthQuery = `
+      SELECT 
+        s.id AS staff_id,
+        s.first_name,
+        s.last_name,
+        s.hourminute,
+        t.task_type,
+        t.job_id,
+        t.submit_status,
+        t.monday_hours, t.tuesday_hours, t.wednesday_hours, t.thursday_hours, t.friday_hours, t.saturday_hours, t.sunday_hours,
+        i.name AS internal_name,
+        j.total_time AS job_total_time
+      FROM staffs s
+      LEFT JOIN roles r ON s.role_id = r.id
+      LEFT JOIN timesheet t ON s.id = t.staff_id 
+        AND t.is_deleted = 0
+        AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) >= ?
+        AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) <= ?
+      LEFT JOIN internal i ON t.job_id = i.id AND t.task_type = '1'
+      LEFT JOIN jobs j ON t.job_id = j.id AND t.task_type = '2'
+      ${staffWhereClause}
+    `;
+
+    const [monthRows] = await pool.query(monthQuery, [thisMonthStart, thisMonthEnd]);
+
+    const parseHours = (val) => {
+      if (!val) return 0;
+      let str = String(val).replace(':', '.');
+      let num = parseFloat(str);
+      return isNaN(num) ? 0 : num;
+    };
+
+    let processedJobs = new Set();
+    let staffMap = {};
+
+    for (let row of monthRows) {
+      if (!staffMap[row.staff_id]) {
+        staffMap[row.staff_id] = {
+          id: row.staff_id,
+          name: row.first_name + ' ' + row.last_name,
+          total_capacity: parseHours(row.hourminute) * weeksInMonth,
+          billable: 0,
+          leave: 0,
+          utilisation: 0,
+        };
+      }
+
+      let rowHours =
+        parseHours(row.monday_hours) +
+        parseHours(row.tuesday_hours) +
+        parseHours(row.wednesday_hours) +
+        parseHours(row.thursday_hours) +
+        parseHours(row.friday_hours) +
+        parseHours(row.saturday_hours) +
+        parseHours(row.sunday_hours);
+
+      if (row.internal_name && row.internal_name.toLowerCase().includes('leave')) {
+        if (String(row.submit_status) === '1') {
+          staffMap[row.staff_id].leave += rowHours;
+        }
+      }
+
+      if (String(row.submit_status) === '1') {
+        staffMap[row.staff_id].utilisation += rowHours;
+      }
+
+      if (String(row.task_type) === '2' && row.job_id && String(row.submit_status) === '1') {
+        let jobKey = `${row.staff_id}_${row.job_id}`;
+        if (!processedJobs.has(jobKey)) {
+          processedJobs.add(jobKey);
+          staffMap[row.staff_id].billable += parseHours(row.job_total_time);
+        }
+      }
+    }
+
+    let summary = {
+      total_hours: 0,
+      billable_hours: 0,
+      leave_hours: 0,
+      available_hours: 0,
+      utilisation_hours: 0
+    };
+
+    let results = Object.values(staffMap).map(staff => {
+      let available = Math.max(0, staff.total_capacity - staff.utilisation);
+      let utilisation_pct = staff.total_capacity > 0 ? (staff.utilisation / staff.total_capacity) * 100 : 0;
+
+      summary.total_hours += staff.total_capacity;
+      summary.billable_hours += staff.billable;
+      summary.leave_hours += staff.leave;
+      summary.available_hours += available;
+      summary.utilisation_hours += staff.utilisation;
+
+      return {
+        id: staff.id,
+        name: staff.name,
+        total_hours: parseFloat(staff.total_capacity.toFixed(2)),
+        billable_hours: parseFloat(staff.billable.toFixed(2)),
+        leave_hours: parseFloat(staff.leave.toFixed(2)),
+        available_hours: parseFloat(available.toFixed(2)),
+        utilisation_hours: parseFloat(staff.utilisation.toFixed(2)),
+        utilisation_pct: parseFloat(utilisation_pct.toFixed(2))
+      };
+    });
+
+    summary.total_hours = parseFloat(summary.total_hours.toFixed(2));
+    summary.billable_hours = parseFloat(summary.billable_hours.toFixed(2));
+    summary.leave_hours = parseFloat(summary.leave_hours.toFixed(2));
+    summary.available_hours = parseFloat(summary.available_hours.toFixed(2));
+    summary.utilisation_hours = parseFloat(summary.utilisation_hours.toFixed(2));
+
+    // Sort by name alphabetically (like Manager Review)
+    results.sort((a, b) => {
+      const nameA = a.name ? a.name.toLowerCase() : "";
+      const nameB = b.name ? b.name.toLowerCase() : "";
+      if (nameA < nameB) return -1;
+      if (nameA > nameB) return 1;
+      return 0;
+    });
+
+    // Pagination
+    const offset = (page - 1) * limit;
+    const paginatedResults = results.slice(offset, offset + limit);
+
+    return {
+      status: true,
+      message: "Fetched successfully",
+      data: paginatedResults,
+      total: results.length,
+      summary: summary
+    };
+  } catch (error) {
+    console.error("Error in getMisResourceUtilisation:", error);
+    return {
+      status: false,
+      message: "Error fetching data",
+      error: error.message
+    };
+  }
+};
+
 module.exports = {
 
   getTimesheet,
@@ -3368,5 +3560,6 @@ module.exports = {
   getManagerReviewCount,
   getManagerReviewData,
   logTimesheetActivity,
-  getFollowUpList
+  getFollowUpList,
+  getMisResourceUtilisation
 };

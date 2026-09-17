@@ -36,7 +36,11 @@ const logTimesheetActivity = async (data) => {
 }
 
 const getFollowUpList = async (data) => {
-  return timeSheetModel.getFollowUpList(data);
+  return await timeSheetModel.getFollowUpList(data);
+}
+
+const getMisResourceUtilisation = async (data) => {
+  return await timeSheetModel.getMisResourceUtilisation(data);
 }
 
 module.exports = {
@@ -49,5 +53,6 @@ module.exports = {
   getManagerReviewCount,
   getManagerReviewData,
   logTimesheetActivity,
-  getFollowUpList
+  getFollowUpList,
+  getMisResourceUtilisation
 };

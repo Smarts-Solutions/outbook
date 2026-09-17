@@ -17,5 +17,6 @@ router.post('/getmanagerreviewcount',verifyToken, timeSheetController.getManager
 router.post('/getManagerReviewData',verifyToken, timeSheetController.getManagerReviewData);
 router.post('/getFollowUpList',verifyToken, timeSheetController.getFollowUpList);
 router.post('/logTimesheetActivity',verifyToken, timeSheetController.logTimesheetActivity);
+router.post('/getMisResourceUtilisation',verifyToken, timeSheetController.getMisResourceUtilisation);
 
 module.exports = router;
