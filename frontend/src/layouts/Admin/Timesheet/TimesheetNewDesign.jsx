@@ -3963,12 +3963,7 @@ const TimesheetNewDesign = () => {
                     <p className="timesheet-white-card-value-big timesheet-white-card-value-big-red">{misMissingCount}</p>
                   </div>
                 </div>
-                <div className="col-md-4 mt-3">
-                  <div className="timesheet-white-card">
-                    <p className="timesheet-white-card-label">Pending Approval</p>
-                    <p className="timesheet-white-card-value-big timesheet-pending-mis">36h</p>
-                  </div>
-                </div>
+
                 <div className="col-md-4 mt-3">
                   <div className="timesheet-white-card">
                     <p className="timesheet-white-card-label">Total Hours</p>
