@@ -3415,24 +3415,7 @@ const getMisResourceUtilisation = async (data) => {
     let daysDifference = Math.round((new Date(thisMonthEnd) - new Date(thisMonthStart)) / (24 * 60 * 60 * 1000));
     let weeksInMonth = Math.round((daysDifference + 1) / 7);
 
-    let expectedWeeks = 0;
-    const today = new Date();
-    const nowMonth = now.getUTCFullYear() * 12 + now.getUTCMonth();
-    const todayMonth = today.getUTCFullYear() * 12 + today.getUTCMonth();
-
-    if (nowMonth < todayMonth) {
-        expectedWeeks = weeksInMonth;
-    } else if (nowMonth === todayMonth) {
-        const todayStr = today.toISOString().slice(0, 10);
-        const start = new Date(thisMonthStart);
-        const diffDays = Math.round((new Date(todayStr) - start) / (24 * 60 * 60 * 1000));
-        let weekIdx = Math.floor(diffDays / 7);
-        expectedWeeks = weekIdx + 1;
-        if (expectedWeeks > weeksInMonth) expectedWeeks = weeksInMonth;
-        if (expectedWeeks < 0) expectedWeeks = 0;
-    } else {
-        expectedWeeks = 0;
-    }
+    // expectedWeeks logic removed, using full weeksInMonth for MIS
 
     const monthQuery = `
       SELECT 
@@ -3549,7 +3532,7 @@ const getMisResourceUtilisation = async (data) => {
           if (w && w.saved) {
              totalSavedMonth++;
           }
-          if (!(w && w.submitted) && i < expectedWeeks) {
+          if (!(w && w.submitted)) {
              totalMissingMonth++;
           }
        }
