@@ -3462,7 +3462,13 @@ const getMisResourceUtilisation = async (data) => {
 
     const parseHours = (val) => {
       if (!val) return 0;
-      let str = String(val).replace(':', '.');
+      const str = String(val);
+      if (str.includes(':')) {
+        const parts = str.split(':');
+        const h = parseInt(parts[0], 10) || 0;
+        const m = parseInt(parts[1], 10) || 0;
+        return h + (m / 60);
+      }
       let num = parseFloat(str);
       return isNaN(num) ? 0 : num;
     };
