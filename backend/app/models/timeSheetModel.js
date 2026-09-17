@@ -2424,9 +2424,18 @@ const getManagerReviewCount = async (data) => {
     const lastWeekStart = lastMonday.toISOString().slice(0, 10);
     const lastWeekEnd = lastSunday.toISOString().slice(0, 10);
 
-    // Monthly boundaries
-    const thisMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString().slice(0, 10);
-    const thisMonthEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0)).toISOString().slice(0, 10);
+    // Monthly boundaries (Aligned with weeks)
+    // Month starts on the Monday of the week containing the 1st of this month
+    const firstOfThisMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const day1 = firstOfThisMonth.getUTCDay(); // 0=Sun, 1=Mon, etc.
+    const daysToMonday1 = day1 === 0 ? 6 : day1 - 1;
+    const thisMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1 - daysToMonday1)).toISOString().slice(0, 10);
+
+    // Month ends on the Sunday before the week containing the 1st of next month
+    const firstOfNextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+    const day2 = firstOfNextMonth.getUTCDay();
+    const daysToMonday2 = day2 === 0 ? 6 : day2 - 1;
+    const thisMonthEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1 - daysToMonday2 - 1)).toISOString().slice(0, 10);
 
     const query = `
       SELECT 
