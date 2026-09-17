@@ -3468,6 +3468,7 @@ const getMisResourceUtilisation = async (data) => {
           billable: 0,
           leave: 0,
           utilisation: 0,
+          saved_hours: 0,
           weeks: {}
         };
       }
@@ -3505,7 +3506,7 @@ const getMisResourceUtilisation = async (data) => {
         }
       }
 
-      if (String(row.submit_status) === '1') {
+      if (String(row.submit_status) === '1' || String(row.submit_status) === '0') {
         staffMap[row.staff_id].utilisation += rowHours;
       }
 
