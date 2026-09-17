@@ -57,6 +57,13 @@ const TimesheetNewDesign = () => {
   const [submittedThisWeek, setSubmittedThisWeek] = useState(0);
   const [savedThisWeek, setSavedThisWeek] = useState(0);
   const [missingLastWeek, setMissingLastWeek] = useState(0);
+  
+  const [misTotalHours, setMisTotalHours] = useState(0);
+  const [misLeaveHours, setMisLeaveHours] = useState(0);
+  const [misAvailableHours, setMisAvailableHours] = useState(0);
+  const [misUtilisation, setMisUtilisation] = useState(0);
+  const [misBillableHours, setMisBillableHours] = useState(0);
+
   const [activeReviewTab, setActiveReviewTab] = useState("all"); // all | submitted | saved | missing
   const [hasFetchedManagerReview, setHasFetchedManagerReview] = useState(false);
 
@@ -244,9 +251,18 @@ const TimesheetNewDesign = () => {
         setSubmittedThisWeek(res?.data?.submitted_this_week || 0);
         setSavedThisWeek(res?.data?.saved_this_week || 0);
         setMissingLastWeek(res?.data?.missing_last_week || 0);
+
+        setMisTotalHours(res?.data?.total_hours || 0);
+        setMisLeaveHours(res?.data?.leave_hours || 0);
+        setMisAvailableHours(res?.data?.available_hours || 0);
+        setMisUtilisation(res?.data?.utilisation || 0);
+        setMisBillableHours(res?.data?.billable_hours || 0);
+      } else {
+        console.error("Manager review count API error:", res);
+        sweatalert.fire({ icon: 'error', title: res.message || 'API Error', text: res.error || '' });
       }
     } catch (err) {
-      console.log("Manager review count fetch error:", err);
+      console.error("Manager review count fetch error:", err);
     }
   };
 
@@ -479,10 +495,8 @@ const TimesheetNewDesign = () => {
   }, []);
 
   useEffect(() => {
-    if (hasFetchedManagerReview) {
-      fetchManagerReviewCount();
-    }
-  }, [hasFetchedManagerReview]);
+    fetchManagerReviewCount();
+  }, []);
 
   useEffect(() => {
 
@@ -3668,19 +3682,19 @@ const TimesheetNewDesign = () => {
               <div className="col-md-4">
                 <div className="timesheet-white-card">
                   <p className="timesheet-white-card-label">Total Employees</p>
-                  <p className="timesheet-white-card-value-big">3</p>
+                  <p className="timesheet-white-card-value-big">{managerReviewCount}</p>
                 </div>
               </div>
               <div className="col-md-4">
                 <div className="timesheet-white-card">
                   <p className="timesheet-white-card-label">Timesheets Submitted</p>
-                  <p className="timesheet-white-card-value-big timesheet-submitted-mis">14</p>
+                  <p className="timesheet-white-card-value-big timesheet-submitted-mis">{submittedThisWeek}</p>
                 </div>
               </div>
               <div className="col-md-4">
                 <div className="timesheet-white-card">
                   <p className="timesheet-white-card-label">Missing Timesheets</p>
-                  <p className="timesheet-white-card-value-big timesheet-white-card-value-big-red">95h</p>
+                  <p className="timesheet-white-card-value-big timesheet-white-card-value-big-red">{missingLastWeek}</p>
                 </div>
               </div>
               <div className="col-md-4 mt-3">
@@ -3692,31 +3706,31 @@ const TimesheetNewDesign = () => {
               <div className="col-md-4 mt-3">
                 <div className="timesheet-white-card">
                   <p className="timesheet-white-card-label">Total Hours</p>
-                  <p className="timesheet-white-card-value-big">39h</p>
+                  <p className="timesheet-white-card-value-big">{misTotalHours}h</p>
                 </div>
               </div>
               <div className="col-md-4 mt-3">
                 <div className="timesheet-white-card">
                   <p className="timesheet-white-card-label">Billable Hours</p>
-                  <p className="timesheet-white-card-value-big timesheet-white-card-value-big-green">20h</p>
+                  <p className="timesheet-white-card-value-big timesheet-white-card-value-big-green">{misBillableHours}h</p>
                 </div>
               </div>
               <div className="col-md-4 mt-3">
                 <div className="timesheet-white-card">
                   <p className="timesheet-white-card-label">Leave Hours</p>
-                  <p className="timesheet-white-card-value-big timesheet-pending-mis">3</p>
+                  <p className="timesheet-white-card-value-big timesheet-pending-mis">{misLeaveHours}h</p>
                 </div>
               </div>
               <div className="col-md-4 mt-3">
                 <div className="timesheet-white-card">
                   <p className="timesheet-white-card-label">Available Hours</p>
-                  <p className="timesheet-white-card-value-big">14</p>
+                  <p className="timesheet-white-card-value-big">{misAvailableHours}h</p>
                 </div>
               </div>
               <div className="col-md-4 mt-3">
                 <div className="timesheet-white-card">
                   <p className="timesheet-white-card-label">Utilisation</p>
-                  <p className="timesheet-white-card-value-big timesheet-pending-mis">95h</p>
+                  <p className="timesheet-white-card-value-big timesheet-pending-mis">{misUtilisation}h</p>
                 </div>
               </div>
             </div>

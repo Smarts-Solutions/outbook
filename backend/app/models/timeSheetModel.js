@@ -2424,6 +2424,10 @@ const getManagerReviewCount = async (data) => {
     const lastWeekStart = lastMonday.toISOString().slice(0, 10);
     const lastWeekEnd = lastSunday.toISOString().slice(0, 10);
 
+    // Monthly boundaries
+    const thisMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString().slice(0, 10);
+    const thisMonthEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0)).toISOString().slice(0, 10);
+
     const query = `
       SELECT 
         s.id AS staff_id,
@@ -2460,6 +2464,82 @@ const getManagerReviewCount = async (data) => {
       }
     }
 
+    // New logic for Dashboard Tiles
+    const monthQuery = `
+      SELECT 
+        s.id AS staff_id,
+        s.hourminute,
+        t.task_type,
+        t.job_id,
+        t.submit_status,
+        t.monday_hours, t.tuesday_hours, t.wednesday_hours, t.thursday_hours, t.friday_hours, t.saturday_hours, t.sunday_hours,
+        i.name AS internal_name,
+        j.total_time AS job_total_time
+      FROM staffs s
+      LEFT JOIN timesheet t ON s.id = t.staff_id 
+        AND t.is_deleted = 0
+        AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) >= ?
+        AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) <= ?
+      LEFT JOIN internal i ON t.job_id = i.id AND t.task_type = '1'
+      LEFT JOIN jobs j ON t.job_id = j.id AND t.task_type = '2'
+      ${staffWhereClause}
+    `;
+
+    const [monthRows] = await pool.query(monthQuery, [thisMonthStart, thisMonthEnd]);
+
+    let total_hours = 0;
+    let leave_hours = 0;
+    let utilisation = 0;
+    let billable_hours = 0;
+    let available_hours = 0;
+
+    const parseHours = (val) => {
+      if (!val) return 0;
+      let str = String(val).replace(':', '.');
+      let num = parseFloat(str);
+      return isNaN(num) ? 0 : num;
+    };
+
+    let processedStaffs = new Set();
+    let processedJobs = new Set();
+
+    for (let row of monthRows) {
+      if (!processedStaffs.has(row.staff_id)) {
+        processedStaffs.add(row.staff_id);
+        // Calculate monthly available capacity (Assuming hourminute is weekly capacity)
+        let capacity = parseHours(row.hourminute) * 4; 
+        available_hours += capacity;
+      }
+
+      let rowHours = 
+        parseHours(row.monday_hours) + 
+        parseHours(row.tuesday_hours) + 
+        parseHours(row.wednesday_hours) + 
+        parseHours(row.thursday_hours) + 
+        parseHours(row.friday_hours) + 
+        parseHours(row.saturday_hours) + 
+        parseHours(row.sunday_hours);
+
+      total_hours += rowHours;
+
+      if (row.internal_name && row.internal_name.toLowerCase().includes('leave')) {
+        leave_hours += rowHours;
+      }
+
+      if (String(row.submit_status) === '1') {
+        utilisation += rowHours;
+      }
+
+      if (String(row.task_type) === '2' && row.job_id) {
+        if (!processedJobs.has(row.job_id)) {
+          processedJobs.add(row.job_id);
+          billable_hours += parseHours(row.job_total_time);
+        }
+      }
+    }
+
+    available_hours = Math.max(0, available_hours - total_hours);
+
     return {
       status: true,
       message: "Staff count fetched successfully",
@@ -2467,7 +2547,12 @@ const getManagerReviewCount = async (data) => {
         total_staff,
         submitted_this_week,
         saved_this_week,
-        missing_last_week
+        missing_last_week,
+        total_hours: parseFloat(total_hours.toFixed(2)),
+        leave_hours: parseFloat(leave_hours.toFixed(2)),
+        available_hours: parseFloat(available_hours.toFixed(2)),
+        utilisation: parseFloat(utilisation.toFixed(2)),
+        billable_hours: parseFloat(billable_hours.toFixed(2))
       }
     };
 
@@ -2475,7 +2560,9 @@ const getManagerReviewCount = async (data) => {
     console.error("Error in getManagerReviewCount:", error);
     return {
       status: false,
-      message: "Error fetching staff count."
+      message: "Error fetching staff count.",
+      error: error.message,
+      stack: error.stack
     };
   }
 };
