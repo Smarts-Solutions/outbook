@@ -196,11 +196,14 @@ const TimesheetNewDesign = () => {
       const results = await Promise.all(promises);
       const trendData = results.map((res) => {
         const response = res.response;
-        let total = 0, billable = 0, utilization = 0;
+        let total = 0, billable = 0, utilization = 0, leave = 0, internal = 0, external = 0;
         if (response && response.summary) {
           total = response.summary.total_hours || 0;
           billable = response.summary.billable_hours || 0;
           utilization = response.summary.utilisation_hours || 0;
+          leave = response.summary.leave_hours || 0;
+          internal = response.summary.internal_hours || 0;
+          external = response.summary.external_hours || 0;
         }
         
         const monthString = res.targetDate.toLocaleDateString("en-GB", {
@@ -213,6 +216,9 @@ const TimesheetNewDesign = () => {
           total: total,
           billable: billable,
           utilization: utilization,
+          leave: leave,
+          internal: internal,
+          external: external,
         };
       });
       setGraphData(trendData);
@@ -4113,6 +4119,42 @@ const TimesheetNewDesign = () => {
                               content={renderValueLabel}
                             />
                           </Bar>
+                            
+                          <Bar
+                            dataKey="leave"
+                            fill="#a46400"
+                            barSize={16}
+                            radius={[6, 6, 0, 0]}
+                          >
+                            <LabelList
+                              dataKey="leave"
+                              content={renderValueLabel}
+                            />
+                          </Bar>
+
+                          <Bar
+                            dataKey="internal"
+                            fill="#4a90e2"
+                            barSize={16}
+                            radius={[6, 6, 0, 0]}
+                          >
+                            <LabelList
+                              dataKey="internal"
+                              content={renderValueLabel}
+                            />
+                          </Bar>
+
+                          <Bar
+                            dataKey="external"
+                            fill="#e91e63"
+                            barSize={16}
+                            radius={[6, 6, 0, 0]}
+                          >
+                            <LabelList
+                              dataKey="external"
+                              content={renderValueLabel}
+                            />
+                          </Bar>
                         </BarChart>
                       </ResponsiveContainer>
 
@@ -4120,16 +4162,19 @@ const TimesheetNewDesign = () => {
                         style={{
                           display: "flex",
                           gap: 20,
+                          paddingTop: 10,
                           paddingLeft: 20,
                         }}
                       >
                         <LegendDot color="#5A998E" label="Total" />
                         <LegendDot color="#1B4A3D" label="Billable" />
                         <LegendDot color="#7A5111" label="Utilisation" />
-                      </div>
+                        <LegendDot color="#a46400" label="Leave" />
+                        <LegendDot color="#4a90e2" label="Internal" />
+                        <LegendDot color="#e91e63" label="External" />
+                      </div>         </div>
                     </div>
                   </div>
-                </div>
                 <div className="col-lg-5">
                   <div className="timesheet-white-card h-100">
                     <div className="timesheet-table-header-div">

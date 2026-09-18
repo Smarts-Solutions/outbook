@@ -52,6 +52,32 @@ const ResourceDatatable = ({ data, loading, page = 1, limit = 10 }) => {
         },
 
         {
+            name: 'Internal Hours',
+            selector: row => row.internal_hours,
+            sortable: true,
+            center: true,
+            width: '150px',
+            cell: row => (
+                <span style={{ color: '#4a90e2' }}>
+                    {row.internal_hours}h
+                </span>
+            ),
+        },
+
+        {
+            name: 'External Hours',
+            selector: row => row.external_hours,
+            sortable: true,
+            center: true,
+            width: '150px',
+            cell: row => (
+                <span style={{ color: '#e91e63' }}>
+                    {row.external_hours}h
+                </span>
+            ),
+        },
+
+        {
             name: 'Available Hours',
             selector: row => row.available_hours,
             sortable: true,
