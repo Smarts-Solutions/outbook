@@ -64,6 +64,8 @@ const TimesheetNewDesign = () => {
   const [misAvailableHours, setMisAvailableHours] = useState(0);
   const [misUtilisation, setMisUtilisation] = useState(0);
   const [misBillableHours, setMisBillableHours] = useState(0);
+  const [misInternalHours, setMisInternalHours] = useState(0);
+  const [misExternalHours, setMisExternalHours] = useState(0);
 
   const [activeReviewTab, setActiveReviewTab] = useState("all"); // all | submitted | saved | missing
   const [hasFetchedManagerReview, setHasFetchedManagerReview] = useState(false);
@@ -138,6 +140,8 @@ const TimesheetNewDesign = () => {
           setMisLeaveHours(response.summary.leave_hours || 0);
           setMisAvailableHours(response.summary.available_hours || 0);
           setMisUtilisation(response.summary.utilisation_hours || 0);
+          setMisInternalHours(response.summary.internal_hours || 0);
+          setMisExternalHours(response.summary.external_hours || 0);
           setMisSubmittedCount(response.summary.submitted || 0);
           setMisMissingCount(response.summary.missing || 0);
           setMisTotalStaff(response.summary.total_staff || 0);
@@ -150,6 +154,8 @@ const TimesheetNewDesign = () => {
         setMisLeaveHours(0);
         setMisAvailableHours(0);
         setMisUtilisation(0);
+        setMisInternalHours(0);
+        setMisExternalHours(0);
         setMisSubmittedCount(0);
         setMisMissingCount(0);
         setMisTotalStaff(0);
@@ -4005,6 +4011,18 @@ const TimesheetNewDesign = () => {
                   <div className="timesheet-white-card">
                     <p className="timesheet-white-card-label">Utilisation</p>
                     <p className="timesheet-white-card-value-big timesheet-pending-mis">{misUtilisation}h</p>
+                  </div>
+                </div>
+                <div className="col-md-4 mt-3">
+                  <div className="timesheet-white-card">
+                    <p className="timesheet-white-card-label">Internal Hours</p>
+                    <p className="timesheet-white-card-value-big">{misInternalHours}h</p>
+                  </div>
+                </div>
+                <div className="col-md-4 mt-3">
+                  <div className="timesheet-white-card">
+                    <p className="timesheet-white-card-label">External Hours</p>
+                    <p className="timesheet-white-card-value-big">{misExternalHours}h</p>
                   </div>
                 </div>
               </div>

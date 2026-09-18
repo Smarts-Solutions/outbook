@@ -3463,6 +3463,8 @@ const getMisResourceUtilisation = async (data) => {
           billable: 0,
           leave: 0,
           utilisation: 0,
+          internal_hours: 0,
+          external_hours: 0,
           saved_hours: 0,
           weeks: {}
         };
@@ -3503,6 +3505,12 @@ const getMisResourceUtilisation = async (data) => {
 
       if (String(row.submit_status) === '1' || String(row.submit_status) === '0') {
         staffMap[row.staff_id].utilisation += rowHours;
+
+        if (String(row.task_type) === '1') {
+          staffMap[row.staff_id].internal_hours += rowHours;
+        } else if (String(row.task_type) === '2') {
+          staffMap[row.staff_id].external_hours += rowHours;
+        }
       }
 
       if (String(row.task_type) === '2' && row.job_id && (String(row.submit_status) === '1' || String(row.submit_status) === '0')) {
@@ -3540,6 +3548,8 @@ const getMisResourceUtilisation = async (data) => {
       leave_hours: 0,
       available_hours: 0,
       utilisation_hours: 0,
+      internal_hours: 0,
+      external_hours: 0,
       total_staff: Object.keys(staffMap).length,
       submitted: totalSubmittedMonth,
       saved: totalSavedMonth,
@@ -3555,6 +3565,8 @@ const getMisResourceUtilisation = async (data) => {
       summary.leave_hours += staff.leave;
       summary.available_hours += available;
       summary.utilisation_hours += staff.utilisation;
+      summary.internal_hours += staff.internal_hours;
+      summary.external_hours += staff.external_hours;
 
       return {
         id: staff.id,
@@ -3564,6 +3576,8 @@ const getMisResourceUtilisation = async (data) => {
         leave_hours: parseFloat(staff.leave.toFixed(2)),
         available_hours: parseFloat(available.toFixed(2)),
         utilisation_hours: parseFloat(staff.utilisation.toFixed(2)),
+        internal_hours: parseFloat(staff.internal_hours.toFixed(2)),
+        external_hours: parseFloat(staff.external_hours.toFixed(2)),
         utilisation_pct: parseFloat(utilisation_pct.toFixed(2))
       };
     });
@@ -3573,6 +3587,8 @@ const getMisResourceUtilisation = async (data) => {
     summary.leave_hours = parseFloat(summary.leave_hours.toFixed(2));
     summary.available_hours = parseFloat(summary.available_hours.toFixed(2));
     summary.utilisation_hours = parseFloat(summary.utilisation_hours.toFixed(2));
+    summary.internal_hours = parseFloat(summary.internal_hours.toFixed(2));
+    summary.external_hours = parseFloat(summary.external_hours.toFixed(2));
 
     // Sort by name alphabetically (like Manager Review)
     results.sort((a, b) => {
