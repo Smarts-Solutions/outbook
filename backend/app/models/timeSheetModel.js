@@ -3220,7 +3220,7 @@ const logTimesheetActivity = async (data) => {
 
 const getFollowUpList = async (data) => {
   try {
-    let { StaffUserId, page = 1, limit = 20 } = data;
+    let { StaffUserId, page = 1, limit = 20, search = "" } = data;
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 20;
 
@@ -3247,6 +3247,10 @@ const getFollowUpList = async (data) => {
       } else {
         staffWhereClause = "WHERE 1 = 0";
       }
+    }
+
+    if (search && staffWhereClause !== "WHERE 1 = 0") {
+      staffWhereClause += ` AND (s.first_name LIKE '%${search}%' OR s.last_name LIKE '%${search}%')`;
     }
 
     if (staffWhereClause === "WHERE 1 = 0") {

@@ -86,6 +86,8 @@ const TimesheetNewDesign = () => {
   const [followUpPage, setFollowUpPage] = useState(1);
   const [followUpHasMore, setFollowUpHasMore] = useState(true);
   const [isFollowUpLoading, setIsFollowUpLoading] = useState(false);
+  const [followUpSearchTerm, setFollowUpSearchTerm] = useState("");
+  const followUpDebounceRef = useRef(null);
 
   const [activeMisTab, setActiveMisTab] = useState("employee"); // 'employee' or 'team'
   const [misData, setMisData] = useState([]);
@@ -520,11 +522,11 @@ const TimesheetNewDesign = () => {
     }
   };
 
-  const fetchFollowUpList = async (pageToFetch = 1) => {
+  const fetchFollowUpList = async (pageToFetch = 1, search = followUpSearchTerm) => {
     if (isFollowUpLoading) return;
     setIsFollowUpLoading(true);
     try {
-      const res = await dispatch(getFollowUpList({ req: { StaffUserId: 1, page: pageToFetch, limit: 20 }, authToken: token })).unwrap();
+      const res = await dispatch(getFollowUpList({ req: { StaffUserId: staffDetails?.id || 1, page: pageToFetch, limit: 20, search: search }, authToken: token })).unwrap();
       if (res.status) {
         if (pageToFetch === 1) {
           setFollowUpList(res.data || []);
@@ -552,8 +554,17 @@ const TimesheetNewDesign = () => {
     if (bottom && followUpHasMore && !isFollowUpLoading) {
       const nextPage = followUpPage + 1;
       setFollowUpPage(nextPage);
-      fetchFollowUpList(nextPage);
+      fetchFollowUpList(nextPage, followUpSearchTerm);
     }
+  };
+
+  const handleFollowUpSearchChange = (term) => {
+    setFollowUpSearchTerm(term);
+    setFollowUpPage(1);
+    if (followUpDebounceRef.current) clearTimeout(followUpDebounceRef.current);
+    followUpDebounceRef.current = setTimeout(() => {
+      fetchFollowUpList(1, term);
+    }, 500);
   };
 
   const [expandedRows, setExpandedRows] = useState([]);
@@ -4179,9 +4190,18 @@ const TimesheetNewDesign = () => {
                   <div className="timesheet-white-card h-100">
                     <div className="timesheet-table-header-div">
                       <div className="timesheet-table-header-div-left dis">
-
                         <div className="tab-title d-flex align-items-center gap-2"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert size-4 text-warning" aria-hidden="true" data-tsd-source="/src/routes/dashboard.tsx:315:13"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><h3 className="mt-0">Follow-up list</h3></div>
                         <p className="page-subtitle mb-0 mt-2">Employees with missing or unsubmitted weeks this month.</p>
+                      </div>
+                      <div className="timesheet-table-header-div-right d-flex align-items-center">
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Search staff..."
+                          value={followUpSearchTerm}
+                          onChange={(e) => handleFollowUpSearchChange(e.target.value)}
+                          style={{ maxWidth: '200px' }}
+                        />
                       </div>
                     </div>
                     <div
