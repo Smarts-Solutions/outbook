@@ -2479,6 +2479,7 @@ const TimesheetNewDesign = () => {
         "Saturday Note",
         weekDays.sunday ? dayMonthFormatDate(weekDays.sunday) : "",
         "Sunday Note",
+        "Total Hours",
         "Final Remark",
       ];
 
@@ -2488,6 +2489,16 @@ const TimesheetNewDesign = () => {
         if (String(item.submit_status) === "1") {
           statusText = "Submitted";
         }
+        
+        const totalHours = (
+          parseFloat(item.monday_hours || 0) +
+          parseFloat(item.tuesday_hours || 0) +
+          parseFloat(item.wednesday_hours || 0) +
+          parseFloat(item.thursday_hours || 0) +
+          parseFloat(item.friday_hours || 0) +
+          parseFloat(item.saturday_hours || 0) +
+          parseFloat(item.sunday_hours || 0)
+        ).toFixed(2);
         
         return [
           index + 1,
@@ -2515,6 +2526,7 @@ const TimesheetNewDesign = () => {
           item.saturday_note || "",
           item.sunday_hours || 0,
           item.sunday_note || "",
+          totalHours,
           item.final_remark || "",
         ];
       });
