@@ -2468,6 +2468,7 @@ const TimesheetNewDesign = () => {
         "Line Manager",
         "Entries",
         "Entered Hours",
+        "Average Hours",
         "Remaining Hours",
         "Status",
       ];
@@ -2514,6 +2515,7 @@ const TimesheetNewDesign = () => {
         getLineManagerName(row),
         row.timesheet_count || 0,
         row.total_hours || 0,
+        row.average_hours || 0,
         getRemainingHours(row),
         row.timesheet_status || "",
       ]);
@@ -3089,6 +3091,14 @@ const TimesheetNewDesign = () => {
       name: "Entered Hours",
       cell: (row) => <div className="w-100 text-center">{row.total_hours}</div>,
       selector: (row) => parseFloat(row.total_hours) || 0,
+      sortable: true,
+      width: "170px",
+      reorder: false,
+    },
+    {
+      name: "Average Hours",
+      cell: (row) => <div className="w-100 text-center">{row.average_hours || 0}</div>,
+      selector: (row) => parseFloat(row.average_hours) || 0,
       sortable: true,
       width: "170px",
       reorder: false,

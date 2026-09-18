@@ -2808,6 +2808,24 @@ const getManagerReviewData = async (data) => {
             COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.sunday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0)
           ) AS total_hours_decimal,
 
+          (SUM(
+            COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.monday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0) +
+            COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.tuesday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0) +
+            COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.wednesday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0) +
+            COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.thursday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0) +
+            COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.friday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0) +
+            COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.saturday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0) +
+            COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.sunday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0)
+          ) / NULLIF(
+            (CASE WHEN SUM(COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.monday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0)) > 0 THEN 1 ELSE 0 END) +
+            (CASE WHEN SUM(COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.tuesday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0)) > 0 THEN 1 ELSE 0 END) +
+            (CASE WHEN SUM(COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.wednesday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0)) > 0 THEN 1 ELSE 0 END) +
+            (CASE WHEN SUM(COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.thursday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0)) > 0 THEN 1 ELSE 0 END) +
+            (CASE WHEN SUM(COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.friday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0)) > 0 THEN 1 ELSE 0 END) +
+            (CASE WHEN SUM(COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.saturday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0)) > 0 THEN 1 ELSE 0 END) +
+            (CASE WHEN SUM(COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(t.sunday_hours, ':', 2), ''), ':', '.') AS DECIMAL(10,2)), 0)) > 0 THEN 1 ELSE 0 END)
+          , 0)) AS average_hours,
+
           /*
            * At least one submitted row
            */
@@ -2961,6 +2979,8 @@ const getManagerReviewData = async (data) => {
            WHERE lm.staff_by = s.id LIMIT 1) AS line_manager_name,
            
           s.hourminute AS staffs_hourminute,
+          
+          ROUND(COALESCE(ts.average_hours, 0), 2) AS average_hours,
           
           GREATEST(0, (
             COALESCE(CAST(REPLACE(NULLIF(SUBSTRING_INDEX(s.hourminute, ':', 1), ''), ':', '.') AS DECIMAL(10,2)), 0) + 
