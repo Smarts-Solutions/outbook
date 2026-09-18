@@ -276,7 +276,7 @@ const TimesheetNewDesign = () => {
     try {
       setMisExporting(true);
       const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
-      const token = localStorage.getItem("token");
+      const token = JSON.parse(localStorage.getItem("token"));
 
       const d = getMisSelectedDate(misMonthOffset);
       const req = {
@@ -298,6 +298,8 @@ const TimesheetNewDesign = () => {
           "Billable Hours": row.billable_hours + "h",
           "Leave Hours": row.leave_hours + "h",
           "Available Hours": row.available_hours + "h",
+          "Internal Hours": row.internal_hours + "h",
+          "External Hours": row.external_hours + "h",
           "Utilisation (%)": row.utilisation_pct + "%",
         }));
 
