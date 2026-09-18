@@ -305,9 +305,9 @@ const TimesheetNewDesign = () => {
           "Total Hours": row.total_hours + "h",
           "Billable Hours": row.billable_hours + "h",
           "Leave Hours": row.leave_hours + "h",
-          "Available Hours": row.available_hours + "h",
           "Internal Hours": row.internal_hours + "h",
           "External Hours": row.external_hours + "h",
+          "Available Hours": row.available_hours + "h",
           "Utilisation (%)": row.utilisation_pct + "%",
         }));
 
