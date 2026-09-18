@@ -230,6 +230,24 @@ const getMisResourceUtilisation = async (req, res) => {
   }
 };
 
+const getAllTimesheetDataExport = async (req, res) => {
+  try {
+    const result = await timeSheetService.getAllTimesheetDataExport(req.body);
+    if (result.status) {
+      return res.status(200).json(result);
+    } else {
+      return res.status(400).json(result);
+    }
+  } catch (error) {
+    console.error("Error in getAllTimesheetDataExport controller:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   getTimesheet,
   getTimesheetTaskType,
@@ -241,5 +259,6 @@ module.exports = {
   getManagerReviewData,
   getFollowUpList,
   logTimesheetActivity,
-  getMisResourceUtilisation
+  getMisResourceUtilisation,
+  getAllTimesheetDataExport
 };

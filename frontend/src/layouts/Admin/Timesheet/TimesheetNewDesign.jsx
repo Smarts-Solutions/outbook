@@ -15,6 +15,7 @@ import {
   getManagerReviewData,
   logTimesheetActivityData,
   getFollowUpList,
+  getAllTimesheetDataExport,
 } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
 
 import { SAVE_TIMESHEET, GET_MIS_RESOURCE_UTILISATION } from "../../../Services/Timesheet/TimesheetService";
@@ -863,6 +864,7 @@ const TimesheetNewDesign = () => {
   const [loading, setLoading] = useState(false);
   const [saveAction, setSaveAction] = useState(null);
   const [exporting, setExporting] = useState(false);
+  const [exportAllLoading, setExportAllLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
   const [isWeekSwitching, setIsWeekSwitching] = useState(false);
@@ -2437,6 +2439,110 @@ const TimesheetNewDesign = () => {
     }, 100);
   };
 
+  const exportAllTimesheetsCSV = async () => {
+    setExportAllLoading(true);
+    try {
+      const req = { weekOffset: weekOffset };
+      const res = await dispatch(getAllTimesheetDataExport({ req, authToken: token })).unwrap();
+      
+      const bulkData = res?.data || [];
+      
+      if (!bulkData || bulkData.length === 0) {
+        sweatalert.fire({ icon: "info", title: "No data available for export." });
+        setExportAllLoading(false);
+        return;
+      }
+
+      const headers = [
+        "S.No",
+        "Staff Name",
+        "Employee ID",
+        "Line Manager Name",
+        "Status",
+        "Task Type",
+        "Customer Name",
+        "Client Name",
+        "Job Name",
+        "Job Type",
+        "Task Name",
+        weekDays.monday ? dayMonthFormatDate(weekDays.monday) : "",
+        "Monday Note",
+        weekDays.tuesday ? dayMonthFormatDate(weekDays.tuesday) : "",
+        "Tuesday Note",
+        weekDays.wednesday ? dayMonthFormatDate(weekDays.wednesday) : "",
+        "Wednesday Note",
+        weekDays.thursday ? dayMonthFormatDate(weekDays.thursday) : "",
+        "Thursday Note",
+        weekDays.friday ? dayMonthFormatDate(weekDays.friday) : "",
+        "Friday Note",
+        weekDays.saturday ? dayMonthFormatDate(weekDays.saturday) : "",
+        "Saturday Note",
+        weekDays.sunday ? dayMonthFormatDate(weekDays.sunday) : "",
+        "Sunday Note",
+        "Final Remark",
+      ];
+
+      const rows = bulkData.map((item, index) => {
+        const staffName = item.staff_first_name ? `${item.staff_first_name} ${item.staff_last_name || ""}`.trim() : "Unknown";
+        let statusText = "Saved";
+        if (String(item.submit_status) === "1") {
+          statusText = "Submitted";
+        }
+        
+        return [
+          index + 1,
+          staffName,
+          item.staff_employee_number || "-",
+          item.line_manager_name || "-",
+          statusText,
+          item.task_type === "1" || item.task_type === 1 ? "Internal" : "External",
+          item.customer_name || "No Customer",
+          item.client_name || "No Client",
+          (item.task_type === "1" || item.task_type === 1) ? (item.internal_name || "No Job") : (item.job_name || "No Job"),
+          (item.task_type === "1" || item.task_type === 1) ? " - " : (item.job_type_name || " - "),
+          (item.task_type === "1" || item.task_type === 1) ? (item.sub_internal_name || "No Task") : (item.task_name || "No Task"),
+          item.monday_hours || 0,
+          item.monday_note || "",
+          item.tuesday_hours || 0,
+          item.tuesday_note || "",
+          item.wednesday_hours || 0,
+          item.wednesday_note || "",
+          item.thursday_hours || 0,
+          item.thursday_note || "",
+          item.friday_hours || 0,
+          item.friday_note || "",
+          item.saturday_hours || 0,
+          item.saturday_note || "",
+          item.sunday_hours || 0,
+          item.sunday_note || "",
+          item.final_remark || "",
+        ];
+      });
+
+      const csvContent = [headers, ...rows]
+        .map((row) => row.map(cell => {
+          if (cell === null || cell === undefined) return "";
+          const str = String(cell);
+          if (str.search(/["\r\n,]/) >= 0) {
+            return `"${str.replace(/"/g, '""')}"`;
+          }
+          return str;
+        }).join(","))
+        .join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `All_Timesheets_Data.csv`;
+      link.click();
+      setExportAllLoading(false);
+    } catch (err) {
+      console.error(err);
+      sweatalert.fire({ icon: "error", title: "Export All failed." });
+      setExportAllLoading(false);
+    }
+  };
+
   const exportManagerReviewCSV = async () => {
     setExporting(true);
     try {
@@ -3341,6 +3447,16 @@ const TimesheetNewDesign = () => {
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download me-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>
             {exporting ? "Exporting..." : "Export"}
+          </button>
+          
+          <button 
+            type="button" 
+            className="timesheet-table-header-btn" 
+            disabled={exportAllLoading} 
+            onClick={exportAllTimesheetsCSV}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download me-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg> 
+            {exportAllLoading ? "Exporting..." : "Export All Timesheets"}
           </button>
         </div>
       </div>

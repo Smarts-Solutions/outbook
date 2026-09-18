@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { GET_TIMESHEET_TASK_TYPE ,GET_TIMESHEET ,SAVE_TIMESHEET ,GET_STAFF_HOURSMINUTE, GET_TIMESHEET_LOGS, DELETE_TIMESHEET_ROW, GET_MANAGER_REVIEW_COUNT, GET_MANAGER_REVIEW_DATA, LOG_TIMESHEET_ACTIVITY, GET_FOLLOW_UP_LIST } from "../../../Services/Timesheet/TimesheetService";
+import { GET_TIMESHEET_TASK_TYPE ,GET_TIMESHEET ,SAVE_TIMESHEET ,GET_STAFF_HOURSMINUTE, GET_TIMESHEET_LOGS, DELETE_TIMESHEET_ROW, GET_MANAGER_REVIEW_COUNT, GET_MANAGER_REVIEW_DATA, LOG_TIMESHEET_ACTIVITY, GET_FOLLOW_UP_LIST, GET_ALL_TIMESHEET_DATA_EXPORT } from "../../../Services/Timesheet/TimesheetService";
 const IP_Data = JSON.parse(localStorage.getItem("IP_Data"));
 
 export const getTimesheetTaskTypedData = createAsyncThunk("getTimesheetTaskType", async (data) => {
@@ -129,6 +129,16 @@ export const getFollowUpList = createAsyncThunk("getFollowUpList", async (data) 
     try {
         const { req, authToken } = data;
         const res = await GET_FOLLOW_UP_LIST(req, authToken);
+        return res; 
+    } catch (err) {
+        throw err;
+    }
+});
+
+export const getAllTimesheetDataExport = createAsyncThunk("getAllTimesheetDataExport", async (data) => {
+    try {
+        const { req, authToken } = data;
+        const res = await GET_ALL_TIMESHEET_DATA_EXPORT(req, authToken);
         return res; 
     } catch (err) {
         throw err;

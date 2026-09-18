@@ -3644,6 +3644,132 @@ const getMisResourceUtilisation = async (data) => {
   }
 };
 
+const getAllTimesheetDataExport = async (Timesheet) => {
+  const { weekOffset = 0 } = Timesheet;
+
+  const currentDate = new Date();
+  const currentDay = currentDate.getUTCDay(); // 0=Sun, 1=Mon ... 6=Sat
+  const daysSinceMonday = currentDay === 0 ? 6 : currentDay - 1; // Monday=0, Sunday=6
+  const startOfWeek = new Date(currentDate);
+  startOfWeek.setUTCDate(currentDate.getUTCDate() - daysSinceMonday + weekOffset * 7);
+  startOfWeek.setUTCHours(0, 0, 0, 0);
+
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setUTCDate(startOfWeek.getUTCDate() + 6);
+  endOfWeek.setUTCHours(23, 59, 59, 999);
+
+  const startOfWeekFormatted = startOfWeek.toISOString().slice(0, 10);
+  const endOfWeekFormatted = endOfWeek.toISOString().slice(0, 10);
+
+  if (isNaN(startOfWeek.getTime()) || isNaN(endOfWeek.getTime())) {
+    return { status: false, message: "Invalid weekOffset value." };
+  }
+
+  try {
+    const query = `
+      SELECT 
+        staffs.first_name AS staff_first_name,
+        staffs.last_name AS staff_last_name,
+        staffs.employee_number AS staff_employee_number,
+        (SELECT CONCAT(m.first_name, ' ', m.last_name) FROM line_managers lm JOIN staffs m ON m.id = lm.staff_to WHERE lm.staff_by = staffs.id LIMIT 1) AS line_manager_name,
+        timesheet.id AS id,
+        timesheet.staff_id AS staff_id,
+        timesheet.task_type AS task_type,
+        timesheet.customer_id AS customer_id,
+        timesheet.client_id AS client_id,
+        timesheet.job_id AS job_id,
+        timesheet.task_id AS task_id,
+        DATE_FORMAT(timesheet.monday_date, '%Y-%m-%d') AS monday_date,
+        REPLACE(SUBSTRING_INDEX(timesheet.monday_hours, ':', 2), ':', '.') AS monday_hours,
+        timesheet.monday_note AS monday_note,
+        DATE_FORMAT(timesheet.tuesday_date, '%Y-%m-%d') AS tuesday_date,
+        REPLACE(SUBSTRING_INDEX(timesheet.tuesday_hours, ':', 2), ':', '.') AS tuesday_hours,
+        timesheet.tuesday_note AS tuesday_note,
+        DATE_FORMAT(timesheet.wednesday_date, '%Y-%m-%d') AS wednesday_date,
+        REPLACE(SUBSTRING_INDEX(timesheet.wednesday_hours, ':', 2), ':', '.') AS wednesday_hours,
+        timesheet.wednesday_note AS wednesday_note,
+        DATE_FORMAT(timesheet.thursday_date, '%Y-%m-%d') AS thursday_date,
+        REPLACE(SUBSTRING_INDEX(timesheet.thursday_hours, ':', 2), ':', '.') AS thursday_hours,
+        timesheet.thursday_note AS thursday_note,
+        DATE_FORMAT(timesheet.friday_date, '%Y-%m-%d') AS friday_date,
+        REPLACE(SUBSTRING_INDEX(timesheet.friday_hours, ':', 2), ':', '.') AS friday_hours,
+        timesheet.friday_note AS friday_note,
+        DATE_FORMAT(timesheet.saturday_date, '%Y-%m-%d') AS saturday_date,
+        REPLACE(SUBSTRING_INDEX(timesheet.saturday_hours, ':', 2), ':', '.') AS saturday_hours,
+        timesheet.saturday_note AS saturday_note,
+        DATE_FORMAT(timesheet.sunday_date, '%Y-%m-%d') AS sunday_date,
+        REPLACE(SUBSTRING_INDEX(timesheet.sunday_hours, ':', 2), ':', '.') AS sunday_hours,
+        timesheet.sunday_note AS sunday_note,
+        timesheet.remark AS remark,
+        timesheet.final_remark AS final_remark,
+        timesheet.status AS status,
+        timesheet.submit_status AS submit_status,
+        timesheet.save_date AS save_date,
+        timesheet.submit_date AS submit_date,
+        timesheet.duplicate_entry AS duplicate_entry,
+        timesheet.created_at AS created_at,
+        timesheet.updated_at AS updated_at,
+        internal.name AS internal_name,
+        internal.id AS internal_id,
+        sub_internal.name AS sub_internal_name,
+        sub_internal.id AS sub_internal_id,
+        customers.trading_name AS customer_name,
+        customers.id AS customer_id,
+        clients.trading_name AS client_name,
+        clients.id AS client_id,
+        job_types.type AS job_type_name,
+        job_types.id AS job_type_id,
+        CONCAT(
+          SUBSTRING(customers.trading_name, 1, 3), '_',
+          SUBSTRING(clients.trading_name, 1, 3), '_',
+          SUBSTRING(job_types.type, 1, 4), '_',
+          SUBSTRING(jobs.job_id, 1, 15)
+        ) AS job_name,
+        task.name AS task_name,
+        jobs.total_time AS job_total_time,
+        staffs.hourminute AS staffs_hourminute
+      FROM 
+        timesheet 
+        JOIN staffs ON staffs.id = timesheet.staff_id
+        LEFT JOIN internal ON timesheet.job_id = internal.id AND timesheet.task_type = 1
+        LEFT JOIN sub_internal ON timesheet.task_id = sub_internal.id AND timesheet.task_type = 1
+        LEFT JOIN customers ON customers.id = timesheet.customer_id AND timesheet.task_type = 2
+        LEFT JOIN clients ON clients.id = timesheet.client_id AND timesheet.task_type = 2
+        LEFT JOIN jobs ON jobs.id = timesheet.job_id AND timesheet.task_type = 2
+        LEFT JOIN job_types ON jobs.job_type_id = job_types.id AND timesheet.task_type = 2
+        LEFT JOIN task ON task.id = timesheet.task_id AND timesheet.task_type = 2
+      WHERE 
+        timesheet.is_deleted = 0 AND (
+          timesheet.monday_date    BETWEEN ? AND ? OR
+          timesheet.tuesday_date   BETWEEN ? AND ? OR
+          timesheet.wednesday_date BETWEEN ? AND ? OR
+          timesheet.thursday_date  BETWEEN ? AND ? OR
+          timesheet.friday_date    BETWEEN ? AND ? OR
+          timesheet.saturday_date  BETWEEN ? AND ? OR
+          timesheet.sunday_date    BETWEEN ? AND ?
+        )
+      ORDER BY staffs.first_name ASC, timesheet.id ASC;
+    `;
+
+    const queryParams = [
+      startOfWeekFormatted, endOfWeekFormatted,
+      startOfWeekFormatted, endOfWeekFormatted,
+      startOfWeekFormatted, endOfWeekFormatted,
+      startOfWeekFormatted, endOfWeekFormatted,
+      startOfWeekFormatted, endOfWeekFormatted,
+      startOfWeekFormatted, endOfWeekFormatted,
+      startOfWeekFormatted, endOfWeekFormatted,
+    ];
+
+    let [rows] = await pool.query(query, queryParams);
+    
+    return { status: true, message: "Data fetched successfully.", data: rows };
+  } catch (err) {
+    console.error(err);
+    return { status: false, message: "Error fetching all timesheet data", error: err.message };
+  }
+};
+
 module.exports = {
 
   getTimesheet,
@@ -3656,5 +3782,6 @@ module.exports = {
   getManagerReviewData,
   logTimesheetActivity,
   getFollowUpList,
-  getMisResourceUtilisation
+  getMisResourceUtilisation,
+  getAllTimesheetDataExport
 };
