@@ -321,7 +321,7 @@ const TimesheetNewDesign = () => {
           ),
         ].join("\n");
 
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
         link.setAttribute("href", url);
@@ -2430,7 +2430,7 @@ const TimesheetNewDesign = () => {
         }).join(","))
         .join("\n");
 
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = "TimeSheetData.csv";
@@ -2542,7 +2542,7 @@ const TimesheetNewDesign = () => {
         }).join(","))
         .join("\n");
 
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = `All_Timesheets_Data.csv`;
@@ -2653,7 +2653,7 @@ const TimesheetNewDesign = () => {
         )
         .join("\n");
 
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       const tabLabel = activeReviewTab.charAt(0).toUpperCase() + activeReviewTab.slice(1);
