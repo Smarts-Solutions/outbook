@@ -3463,7 +3463,7 @@ const TimesheetNewDesign = () => {
           
           <button 
             type="button" 
-            className="timesheet-table-header-btn" 
+            className="timesheet-table-header-btn ms-2" 
             disabled={exportAllLoading} 
             onClick={exportAllTimesheetsCSV}
           >
