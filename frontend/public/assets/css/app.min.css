@@ -5677,4 +5677,28 @@ svg {
   justify-content: center;
   padding: 32px 16px;
   text-align: center;
-}
+}
+.custom-datatable-sticky-staff .rdt_TableHeadRow > div:nth-child(1),
+.custom-datatable-sticky-staff .rdt_TableBody .rdt_TableRow > div:nth-child(1) {
+  position: sticky;
+  left: 0;
+  background-color: #fff !important;
+  z-index: 2;
+}
+
+.custom-datatable-sticky-staff .rdt_TableHeadRow > div:nth-child(2),
+.custom-datatable-sticky-staff .rdt_TableBody .rdt_TableRow > div:nth-child(2) {
+  position: sticky;
+  left: 48px; /* Expander width */
+  background-color: #fff !important;
+  z-index: 2;
+}
+
+.custom-datatable-sticky-staff .rdt_TableHeadRow > div:nth-child(3),
+.custom-datatable-sticky-staff .rdt_TableBody .rdt_TableRow > div:nth-child(3) {
+  position: sticky;
+  left: 128px; /* Expander width (48px) + S.No width (80px) */
+  background-color: #fff !important;
+  z-index: 2;
+  box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
+}

@@ -64,7 +64,7 @@ const ManagerReviewDatatable = ({
               columns={columns}
               data={data}
               sortFunction={customSort}
-              className={actionColumn ? 'custom-datatable custom-datatable-sticky-action' : 'custom-datatable'}
+              className={actionColumn ? 'custom-datatable custom-datatable-sticky-action custom-datatable-sticky-staff' : 'custom-datatable custom-datatable-sticky-staff'}
               fixedHeader={false}
               noHeader
               pagination={pagination}
