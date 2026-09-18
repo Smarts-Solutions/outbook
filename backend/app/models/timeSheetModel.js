@@ -2561,7 +2561,7 @@ const getManagerReviewCount = async (data) => {
         missing_last_week,
         total_hours: parseFloat(overall_capacity.toFixed(2)),
         leave_hours: parseFloat(leave_hours.toFixed(2)),
-        available_hours: parseFloat((overall_capacity - utilisation).toFixed(2)),
+        available_hours: parseFloat(Math.max(0, overall_capacity - utilisation).toFixed(2)),
         utilisation: parseFloat(utilisation.toFixed(2)),
         billable_hours: parseFloat(billable_hours.toFixed(2))
       }
