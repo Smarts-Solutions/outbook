@@ -341,9 +341,6 @@ const TimesheetNewDesign = () => {
     }
   };
 
-
-
-
   const openHistoryModal = async () => {
     try {
       setLoading(true);
@@ -489,9 +486,6 @@ const TimesheetNewDesign = () => {
   //     sunday: formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6)),
   //   });
   // }, [weekOffset]);
-
-
-
 
 
 
@@ -694,8 +688,6 @@ const TimesheetNewDesign = () => {
     setLoading(false);
     setIsWeekSwitching(false);
   };
-
-
 
   const selectFilterStaffANdWeek = async (e) => {
     let { name, value } = e.target;
