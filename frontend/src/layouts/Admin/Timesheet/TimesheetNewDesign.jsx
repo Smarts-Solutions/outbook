@@ -2441,7 +2441,7 @@ const TimesheetNewDesign = () => {
   const exportAllTimesheetsCSV = async () => {
     setExportAllLoading(true);
     try {
-      const req = { weekOffset: weekOffset };
+      const req = { weekOffset: weekOffset, StaffUserId: staffDetails?.id };
       const res = await dispatch(getAllTimesheetDataExport({ req, authToken: token })).unwrap();
       
       const bulkData = res?.data || [];

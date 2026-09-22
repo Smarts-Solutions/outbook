@@ -3645,7 +3645,27 @@ const getMisResourceUtilisation = async (data) => {
 };
 
 const getAllTimesheetDataExport = async (Timesheet) => {
-  const { weekOffset = 0 } = Timesheet;
+  const { weekOffset = 0, StaffUserId } = Timesheet;
+
+  let staffFilterClause = "";
+  if (StaffUserId) {
+    const roleRows = await QueryRoleHelperFunction(StaffUserId);
+    const role_name = roleRows[0]?.role_name?.toUpperCase();
+
+    if (role_name && role_name !== "SUPERADMIN" && role_name !== "ADMIN") {
+      let LineManageStaffId = await LineManageStaffIdHelperFunctionForStaff(StaffUserId);
+      
+      if (!Array.isArray(LineManageStaffId)) {
+        LineManageStaffId = [];
+      }
+      
+      if (LineManageStaffId.length === 0) {
+        return { status: true, message: "Data fetched successfully.", data: [] };
+      }
+      
+      staffFilterClause = ` AND timesheet.staff_id IN (${LineManageStaffId.map(id => parseInt(id)).join(',')}) `;
+    }
+  }
 
   const currentDate = new Date();
   const currentDay = currentDate.getUTCDay(); // 0=Sun, 1=Mon ... 6=Sat
@@ -3739,7 +3759,7 @@ const getAllTimesheetDataExport = async (Timesheet) => {
         LEFT JOIN job_types ON jobs.job_type_id = job_types.id AND timesheet.task_type = 2
         LEFT JOIN task ON task.id = timesheet.task_id AND timesheet.task_type = 2
       WHERE 
-        timesheet.is_deleted = 0 AND (
+        timesheet.is_deleted = 0 ${staffFilterClause} AND (
           timesheet.monday_date    BETWEEN ? AND ? OR
           timesheet.tuesday_date   BETWEEN ? AND ? OR
           timesheet.wednesday_date BETWEEN ? AND ? OR
