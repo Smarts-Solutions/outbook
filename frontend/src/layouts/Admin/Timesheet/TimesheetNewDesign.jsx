@@ -4497,9 +4497,9 @@ const TimesheetNewDesign = () => {
                     </div>
                   </div>
                 </div>
-                <ul className="nav resource-tabs" id="resourceTab" role="tablist">
+                <ul className="nav timesheet-tabs" id="resourceTab" role="tablist">
                   <li role="presentation">
-                    <button className={`active ${activeMisTab === 'employee' ? 'active' : ''}`} id="employee-tab" data-bs-toggle="tab" data-bs-target="#employee-tab-pane" type="button" role="tab" aria-controls="employee-tab-pane" aria-selected={activeMisTab === 'employee'} onClick={() => handleMisTabChange('employee')}>Employee</button>
+                    <button className={`${activeMisTab === 'employee' ? 'active' : ''}`} id="employee-tab" data-bs-toggle="tab" data-bs-target="#employee-tab-pane" type="button" role="tab" aria-controls="employee-tab-pane" aria-selected={activeMisTab === 'employee'} onClick={() => handleMisTabChange('employee')}>Employee</button>
                   </li>
                   <li role="presentation">
                     <button className={`${activeMisTab === 'team' ? 'active' : ''}`} id="team-tab" data-bs-toggle="tab" data-bs-target="#team-tab-pane" type="button" role="tab" aria-controls="team-tab-pane" aria-selected={activeMisTab === 'team'} onClick={() => handleMisTabChange('team')}>Team</button>
