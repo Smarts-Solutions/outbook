@@ -109,6 +109,9 @@ const TimesheetNewDesign = () => {
   const [misTotalRows, setMisTotalRows] = useState(0);
   const [misExporting, setMisExporting] = useState(false);
   const [misMonthOffset, setMisMonthOffset] = useState(0);
+  const [misFilterType, setMisFilterType] = useState("month");
+  const [misWeekOffset, setMisWeekOffset] = useState(0);
+  const [misYearOffset, setMisYearOffset] = useState(0);
   const [graphData, setGraphData] = useState([]);
   const misDebounceRef = useRef(null);
   const [activeMainTab, setActiveMainTab] = useState("my-timesheet");
@@ -122,20 +125,40 @@ const TimesheetNewDesign = () => {
     return d;
   };
 
+  const getMisWeekDates = (offset = misWeekOffset) => {
+    const today = new Date();
+    let dayOfWeek = today.getDay();
+    dayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
+
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - (dayOfWeek - 1) + (offset * 7));
+
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    
+    return {
+      start: monday.toISOString().slice(0, 10),
+      end: sunday.toISOString().slice(0, 10)
+    };
+  };
+
   const fetchMisResourceUtilisation = async (
     tab = activeMisTab,
     page = misPage,
     limit = misPageSize,
     search = misSearchTerm,
     monthOffset = misMonthOffset,
-    staffIds = misSelectedStaff.map(opt => opt.value).join(',')
+    staffIds = misSelectedStaff.map(opt => opt.value).join(','),
+    fType = misFilterType,
+    wOffset = misWeekOffset,
+    yOffset = misYearOffset
   ) => {
     if (isMisLoading) return;
     setIsMisLoading(true);
     try {
       const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
       const token = JSON.parse(localStorage.getItem("token"));
-      const d = getMisSelectedDate(monthOffset);
+      
       const req = {
         StaffUserId: staffDetails?.id,
         tab: tab,
@@ -143,9 +166,23 @@ const TimesheetNewDesign = () => {
         limit: limit,
         search: search,
         staffIds: staffIds,
-        month: d.getMonth(),
-        year: d.getFullYear(),
+        filterType: fType,
       };
+
+      if (fType === 'month') {
+        const d = getMisSelectedDate(monthOffset);
+        req.month = d.getMonth();
+        req.year = d.getFullYear();
+      } else if (fType === 'year') {
+        const d = new Date();
+        d.setFullYear(d.getFullYear() + yOffset);
+        req.year = d.getFullYear();
+      } else if (fType === 'week') {
+        const { start, end } = getMisWeekDates(wOffset);
+        req.weekStartDate = start;
+        req.weekEndDate = end;
+      }
+
       const response = await GET_MIS_RESOURCE_UTILISATION(req, token);
       if (response && response.status) {
         setMisData(response.data);
@@ -322,24 +359,38 @@ const TimesheetNewDesign = () => {
     }, 500);
   };
 
-  const handleMisPrevMonth = () => {
-    const newOffset = misMonthOffset - 1;
-    setMisMonthOffset(newOffset);
+  const handleMisPrevPeriod = () => {
+    let mOff = misMonthOffset, wOff = misWeekOffset, yOff = misYearOffset;
+    if (misFilterType === 'month') mOff -= 1;
+    else if (misFilterType === 'week') wOff -= 1;
+    else if (misFilterType === 'year') yOff -= 1;
+    
+    setMisMonthOffset(mOff);
+    setMisWeekOffset(wOff);
+    setMisYearOffset(yOff);
     setMisPage(1);
-    fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, newOffset);
+    fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, mOff, misSelectedStaff.map(opt => opt.value).join(','), misFilterType, wOff, yOff);
   };
 
-  const handleMisCurrentMonth = () => {
+  const handleMisCurrentPeriod = () => {
     setMisMonthOffset(0);
+    setMisWeekOffset(0);
+    setMisYearOffset(0);
     setMisPage(1);
-    fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, 0);
+    fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, 0, misSelectedStaff.map(opt => opt.value).join(','), misFilterType, 0, 0);
   };
 
-  const handleMisNextMonth = () => {
-    const newOffset = misMonthOffset + 1;
-    setMisMonthOffset(newOffset);
+  const handleMisNextPeriod = () => {
+    let mOff = misMonthOffset, wOff = misWeekOffset, yOff = misYearOffset;
+    if (misFilterType === 'month') mOff += 1;
+    else if (misFilterType === 'week') wOff += 1;
+    else if (misFilterType === 'year') yOff += 1;
+    
+    setMisMonthOffset(mOff);
+    setMisWeekOffset(wOff);
+    setMisYearOffset(yOff);
     setMisPage(1);
-    fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, newOffset);
+    fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, mOff, misSelectedStaff.map(opt => opt.value).join(','), misFilterType, wOff, yOff);
   };
 
   const exportMisResourceCSV = async () => {
@@ -348,16 +399,28 @@ const TimesheetNewDesign = () => {
       const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
       const token = JSON.parse(localStorage.getItem("token"));
 
-      const d = getMisSelectedDate(misMonthOffset);
       const req = {
         StaffUserId: staffDetails?.id,
         tab: activeMisTab,
         page: 1,
         limit: 1000000,
         search: misSearchTerm,
-        month: d.getMonth(),
-        year: d.getFullYear(),
+        filterType: misFilterType,
       };
+
+      if (misFilterType === 'month') {
+        const d = getMisSelectedDate(misMonthOffset);
+        req.month = d.getMonth();
+        req.year = d.getFullYear();
+      } else if (misFilterType === 'year') {
+        const d = new Date();
+        d.setFullYear(d.getFullYear() + misYearOffset);
+        req.year = d.getFullYear();
+      } else if (misFilterType === 'week') {
+        const { start, end } = getMisWeekDates(misWeekOffset);
+        req.weekStartDate = start;
+        req.weekEndDate = end;
+      }
 
       const response = await GET_MIS_RESOURCE_UTILISATION(req, token);
       if (response && response.status && response.data && response.data.length > 0) {
@@ -4182,24 +4245,60 @@ const TimesheetNewDesign = () => {
             <div className="tab-pane fade" id="mis-dashboard-tab-pane" role="tabpanel" aria-labelledby="mis-dashboard-tab" tabindex="0">
 
               <div className="timesheet-tab-content-header">
-                <div className="timesheet-tab-content-header-left">
-                  <h3 className="timesheet-tab-content-heading">MIS Dashboard</h3>
-                  <p className="timesheet-tab-content-para">Submission compliance, billable vs leave hours and resource utilisation.</p>
+                <div className="timesheet-tab-content-header-left d-flex align-items-center gap-3">
+                  <div>
+                    <h3 className="timesheet-tab-content-heading">MIS Dashboard</h3>
+                    <p className="timesheet-tab-content-para mb-0">Submission compliance, billable vs leave hours and resource utilisation.</p>
+                  </div>
+                  <div className="ms-3">
+                    <select
+                      className="form-select"
+                      value={misFilterType}
+                      onChange={(e) => {
+                        const newType = e.target.value;
+                        setMisFilterType(newType);
+                        setMisMonthOffset(0);
+                        setMisWeekOffset(0);
+                        setMisYearOffset(0);
+                        setMisPage(1);
+                        fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, 0, misSelectedStaff.map(opt => opt.value).join(','), newType, 0, 0);
+                      }}
+                      style={{ minWidth: '120px' }}
+                    >
+                      <option value="week">Week-wise</option>
+                      <option value="month">Month-wise</option>
+                      <option value="year">Year-wise</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="timesheet-tab-content-header-right">
                   <div className="timesheet-week-div">
-                    <button className="timesheet-week-button" type="button" onClick={handleMisPrevMonth}>
+                    <button className="timesheet-week-button" type="button" onClick={handleMisPrevPeriod}>
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left size-4" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
                     </button>
                     <div className="timesheet-week-content-div-mis">
-                      <p className="timesheet-week-date">{getMisSelectedDate().toLocaleString('default', { month: 'long', year: 'numeric' })}</p>
+                      <p className="timesheet-week-date">
+                        {(() => {
+                          if (misFilterType === 'month') {
+                            return getMisSelectedDate(misMonthOffset).toLocaleString('default', { month: 'long', year: 'numeric' });
+                          } else if (misFilterType === 'year') {
+                            const d = new Date();
+                            return (d.getFullYear() + misYearOffset).toString();
+                          } else if (misFilterType === 'week') {
+                            const { start, end } = getMisWeekDates(misWeekOffset);
+                            const s = new Date(start);
+                            const e = new Date(end);
+                            return `${s.getDate()} ${s.toLocaleString('default', {month:'short'})} - ${e.getDate()} ${e.toLocaleString('default', {month:'short'})} ${e.getFullYear()}`;
+                          }
+                        })()}
+                      </p>
                     </div>
-                    <button className="timesheet-week-button" type="button" onClick={handleMisNextMonth}>
+                    <button className="timesheet-week-button" type="button" onClick={handleMisNextPeriod}>
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right size-4" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
                     </button>
                   </div>
-                  <button type="button" className="btn btn-outline-info fw-bold" onClick={handleMisCurrentMonth}>
-                    Go to Current Month
+                  <button type="button" className="btn btn-outline-info fw-bold" onClick={handleMisCurrentPeriod}>
+                    Go to Current {misFilterType.charAt(0).toUpperCase() + misFilterType.slice(1)}
                   </button>
                 </div>
               </div>
@@ -4366,29 +4465,6 @@ const TimesheetNewDesign = () => {
                             />
                           </Bar>
 
-                          <Bar
-                            dataKey="internal"
-                            fill="#4a90e2"
-                            barSize={16}
-                            radius={[6, 6, 0, 0]}
-                          >
-                            <LabelList
-                              dataKey="internal"
-                              content={renderValueLabel}
-                            />
-                          </Bar>
-
-                          <Bar
-                            dataKey="external"
-                            fill="#e91e63"
-                            barSize={16}
-                            radius={[6, 6, 0, 0]}
-                          >
-                            <LabelList
-                              dataKey="external"
-                              content={renderValueLabel}
-                            />
-                          </Bar>
                         </BarChart>
                       </ResponsiveContainer>
 
@@ -4404,8 +4480,6 @@ const TimesheetNewDesign = () => {
                         <LegendDot color="#1B4A3D" label="Billable" />
                         <LegendDot color="#7A5111" label="Utilisation" />
                         <LegendDot color="#a46400" label="Leave" />
-                        <LegendDot color="#4a90e2" label="Internal" />
-                        <LegendDot color="#e91e63" label="External" />
                       </div>         </div>
                     </div>
                   </div>

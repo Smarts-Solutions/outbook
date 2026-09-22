@@ -3480,23 +3480,50 @@ const getMisResourceUtilisation = async (data) => {
       staffWhereClause += ` AND s.id IN (${staffIds})`;
     }
 
-    let now = new Date();
-    if (data.month !== undefined && data.year !== undefined) {
-      now = new Date(Date.UTC(data.year, data.month, 1));
-    }
-    
+    let thisMonthStart, thisMonthEnd;
+    const filterType = data.filterType || 'month';
     const getLastSunday = (year, monthIdx) => {
       let d = new Date(Date.UTC(year, monthIdx + 1, 0));
       d.setUTCDate(d.getUTCDate() - d.getUTCDay());
       return d;
     };
 
-    const prevMonthLastSunday = getLastSunday(now.getUTCFullYear(), now.getUTCMonth() - 1);
-    prevMonthLastSunday.setUTCDate(prevMonthLastSunday.getUTCDate() + 1);
-    const thisMonthStart = prevMonthLastSunday.toISOString().slice(0, 10);
+    if (filterType === 'month') {
+      let now = new Date();
+      if (data.month !== undefined && data.year !== undefined) {
+        now = new Date(Date.UTC(data.year, data.month, 1));
+      }
+      const prevMonthLastSunday = getLastSunday(now.getUTCFullYear(), now.getUTCMonth() - 1);
+      prevMonthLastSunday.setUTCDate(prevMonthLastSunday.getUTCDate() + 1);
+      thisMonthStart = prevMonthLastSunday.toISOString().slice(0, 10);
 
-    const thisMonthLastSunday = getLastSunday(now.getUTCFullYear(), now.getUTCMonth());
-    const thisMonthEnd = thisMonthLastSunday.toISOString().slice(0, 10);
+      const thisMonthLastSunday = getLastSunday(now.getUTCFullYear(), now.getUTCMonth());
+      thisMonthEnd = thisMonthLastSunday.toISOString().slice(0, 10);
+    } else if (filterType === 'year') {
+      let year = data.year !== undefined ? data.year : new Date().getUTCFullYear();
+      
+      const prevYearLastSunday = getLastSunday(year - 1, 11);
+      prevYearLastSunday.setUTCDate(prevYearLastSunday.getUTCDate() + 1);
+      thisMonthStart = prevYearLastSunday.toISOString().slice(0, 10);
+
+      const thisYearLastSunday = getLastSunday(year, 11);
+      thisMonthEnd = thisYearLastSunday.toISOString().slice(0, 10);
+    } else if (filterType === 'week') {
+      if (data.weekStartDate && data.weekEndDate) {
+         thisMonthStart = data.weekStartDate;
+         thisMonthEnd = data.weekEndDate;
+      } else {
+         let today = new Date();
+         let day = today.getUTCDay() || 7;
+         let monday = new Date(today);
+         monday.setUTCDate(today.getUTCDate() - day + 1);
+         thisMonthStart = monday.toISOString().slice(0, 10);
+         
+         let sunday = new Date(monday);
+         sunday.setUTCDate(monday.getUTCDate() + 6);
+         thisMonthEnd = sunday.toISOString().slice(0, 10);
+      }
+    }
 
     let daysDifference = Math.round((new Date(thisMonthEnd) - new Date(thisMonthStart)) / (24 * 60 * 60 * 1000));
     let weeksInMonth = Math.round((daysDifference + 1) / 7);
