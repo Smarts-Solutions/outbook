@@ -3644,11 +3644,11 @@ const TimesheetNewDesign = () => {
                 }}>Manager Review</button>
               </li>
             )}
-            {isManagerReviewVisible && (
+            {/* {isManagerReviewVisible && (
               <li role="presentation">
                 <button id="mis-dashboard-tab" data-bs-toggle="tab" data-bs-target="#mis-dashboard-tab-pane" type="button" role="tab" aria-controls="mis-dashboard-tab-pane" aria-selected="false" onClick={() => setActiveMainTab("mis-dashboard")}>MIS Dashboard</button>
               </li>
-            )} 
+            )}  */}
           </ul>
         </div>
 
