@@ -3004,10 +3004,11 @@ const TimesheetNewDesign = () => {
     return (
       <text
         x={x + width / 2}
-        y={y - 10}
+        y={y - 8}
         textAnchor="start"
-        transform={`rotate(-45 ${x + width / 2} ${y - 10})`}
-        fontSize={11}
+        alignmentBaseline="middle"
+        transform={`rotate(-90 ${x + width / 2} ${y - 8})`}
+        fontSize={10}
         fill="#334155"
         fontWeight="600"
       >
@@ -4285,7 +4286,7 @@ const TimesheetNewDesign = () => {
                         <BarChart
                           data={graphData}
                           margin={{
-                            top: 30,
+                            top: 60,
                             right: 20,
                             left: 20,
                             bottom: 5,
@@ -4404,20 +4405,20 @@ const TimesheetNewDesign = () => {
                   </div>
                 <div className="col-lg-5">
                   <div className="timesheet-white-card h-100">
-                    <div className="timesheet-table-header-div">
-                      <div className="timesheet-table-header-div-left dis">
+                    <div className="timesheet-table-header-div d-flex flex-column align-items-start gap-3">
+                      <div className="timesheet-table-header-div-left dis w-100">
                         <div className="tab-title d-flex align-items-center gap-2"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert size-4 text-warning" aria-hidden="true" data-tsd-source="/src/routes/dashboard.tsx:315:13"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><h3 className="mt-0">Follow-up list</h3></div>
                         <p className="page-subtitle mb-0 mt-2">Employees with missing or unsubmitted weeks this month.</p>
                       </div>
-                      <div className="timesheet-table-header-div-right d-flex align-items-center">
-                        <div className="d-flex gap-2">
+                      <div className="timesheet-table-header-div-right d-flex align-items-center w-100">
+                        <div className="d-flex gap-2 w-100">
                           <input
                             type="text"
-                            className="form-control"
+                            className="form-control flex-grow-1"
                             placeholder="Search staff..."
                             value={followUpSearchTerm}
                             onChange={(e) => handleFollowUpSearchChange(e.target.value)}
-                            style={{ maxWidth: '200px' }}
+                            style={{ minWidth: '100px', maxWidth: '40%' }}
                           />
                           <Select
                             isMulti
@@ -4441,7 +4442,7 @@ const TimesheetNewDesign = () => {
                               }
                             }}
                             placeholder="Select staff..."
-                            className="basic-multi-select"
+                            className="basic-multi-select flex-grow-1"
                             classNamePrefix="react-select"
                             styles={{
                               container: (base) => ({
