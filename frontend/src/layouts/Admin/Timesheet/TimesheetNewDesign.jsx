@@ -862,6 +862,7 @@ const TimesheetNewDesign = () => {
   const [updateTimeSheetRows, setUpdateTimeSheetRows] = useState([]);
   const [selectedTab, setSelectedTab] = useState("this-week");
   const [loading, setLoading] = useState(false);
+  const isSavingRef = useRef(false);
   const [saveAction, setSaveAction] = useState(null);
   const [exporting, setExporting] = useState(false);
   const [exportAllLoading, setExportAllLoading] = useState(false);
@@ -1603,14 +1604,18 @@ const TimesheetNewDesign = () => {
   const handleBlur = (e, index, day_name, row) => {
     const newValue = e.target.value;
     if (String(activeFieldOldValue) !== String(newValue) && row.id) {
-      const req = {
-        rowId: row.id,
-        staff_id: multipleFilter.staff_id,
-        fieldName: day_name,
-        oldValue: activeFieldOldValue,
-        newValue: newValue
-      };
-      dispatch(logTimesheetActivityData(req));
+      setTimeout(() => {
+        if (!isSavingRef.current) {
+          const req = {
+            rowId: row.id,
+            staff_id: multipleFilter.staff_id,
+            fieldName: day_name,
+            oldValue: activeFieldOldValue,
+            newValue: newValue
+          };
+          dispatch(logTimesheetActivityData(req));
+        }
+      }, 300);
     }
   };
 
@@ -1760,6 +1765,8 @@ const TimesheetNewDesign = () => {
   };
 
   const saveData = async (e, status = 0) => {
+    isSavingRef.current = true;
+    setTimeout(() => { isSavingRef.current = false; }, 2000);
     setSaveAction(status);
     e.preventDefault();
     if (timeSheetRows.length === 0) {
