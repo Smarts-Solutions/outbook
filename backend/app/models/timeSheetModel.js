@@ -1797,6 +1797,24 @@ const saveTimesheet = async (Timesheet) => {
             }
             // ---------------------------------------
 
+            // ---- Add Timesheet Logs for SUBMIT ----
+            if (Number(row.submit_status) === 1 && Number(existData.submit_status) !== 1) {
+              for (const { day, date, hours } of days) {
+                if (hours !== null && hours !== "" && hours !== "0:00" && hours !== "0.00" && hours !== 0 && hours !== ":00") {
+                  const logDesc = `SUBMIT entry for ${day} with ${hours} hours.`;
+                  const logQuery = `
+                    INSERT INTO timesheet_logs 
+                    (timesheet_row_id, staff_id, action_type, internal_external, customer_id, client_id, job_id, task_id, entry_day, hours_entered, created_at, description)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)`;
+                  const logValues = [
+                    row.id, staff_id, "SUBMIT", internal_external, customer_id, client_id, row.job_id, row.task_id, day, hours, logDesc
+                  ];
+                  await pool.query(logQuery, logValues);
+                }
+              }
+            }
+            // ---------------------------------------
+
             if (updateString !== "") {
               if (!checkStringEvent.includes("update")) {
                 checkStringEvent.push("update");
