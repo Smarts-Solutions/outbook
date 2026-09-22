@@ -213,6 +213,15 @@ const TimesheetNewDesign = () => {
     }
   };
 
+  const handleMainTabChange = (tab) => {
+    setActiveMainTab(tab);
+    setWeekOffset(0);
+    setMisMonthOffset(0);
+    if (tab === "manager-review") {
+      setHasFetchedManagerReview(true);
+    }
+  };
+
   const handleMisTabChange = (newTab) => {
     setActiveMisTab(newTab);
     setMisSearchTerm("");
@@ -3634,19 +3643,16 @@ const TimesheetNewDesign = () => {
           </div>
           <ul className="nav timesheet-tabs" id="myTab" role="tablist">
             <li role="presentation">
-              <button className="active" id="timesheet-tab" data-bs-toggle="tab" data-bs-target="#timesheet-tab-pane" type="button" role="tab" aria-controls="timesheet-tab-pane" aria-selected="true" onClick={() => setActiveMainTab("my-timesheet")}>My Timesheet</button>
+              <button className="active" id="timesheet-tab" data-bs-toggle="tab" data-bs-target="#timesheet-tab-pane" type="button" role="tab" aria-controls="timesheet-tab-pane" aria-selected="true" onClick={() => handleMainTabChange("my-timesheet")}>My Timesheet</button>
             </li>
             {isManagerReviewVisible && (
               <li role="presentation">
-                <button id="manager-review-tab" data-bs-toggle="tab" data-bs-target="#manager-review-tab-pane" type="button" role="tab" aria-controls="manager-review-tab-pane" aria-selected="false" onClick={() => {
-                  setHasFetchedManagerReview(true);
-                  setActiveMainTab("manager-review");
-                }}>Manager Review</button>
+                <button id="manager-review-tab" data-bs-toggle="tab" data-bs-target="#manager-review-tab-pane" type="button" role="tab" aria-controls="manager-review-tab-pane" aria-selected="false" onClick={() => handleMainTabChange("manager-review")}>Manager Review</button>
               </li>
             )}
             {isManagerReviewVisible && (
               <li role="presentation">
-                <button id="mis-dashboard-tab" data-bs-toggle="tab" data-bs-target="#mis-dashboard-tab-pane" type="button" role="tab" aria-controls="mis-dashboard-tab-pane" aria-selected="false" onClick={() => setActiveMainTab("mis-dashboard")}>MIS Dashboard</button>
+                <button id="mis-dashboard-tab" data-bs-toggle="tab" data-bs-target="#mis-dashboard-tab-pane" type="button" role="tab" aria-controls="mis-dashboard-tab-pane" aria-selected="false" onClick={() => handleMainTabChange("mis-dashboard")}>MIS Dashboard</button>
               </li>
             )} 
           </ul>
