@@ -2999,11 +2999,11 @@ const Setting = () => {
       label: "Internal Job/Project",
       icon: <Lock size={16} className="me-1" />,
     },
-    {
-      id: "11",
-      label: "Job Date Settings",
-      icon: <Settings size={16} className="me-1" />,
-    },
+    // {
+    //   id: "11",
+    //   label: "Job Date Settings",
+    //   icon: <Settings size={16} className="me-1" />,
+    // },
   ];
 
   useEffect(() => {
