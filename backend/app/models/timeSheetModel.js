@@ -3258,7 +3258,7 @@ const logTimesheetActivity = async (data) => {
 
 const getFollowUpList = async (data) => {
   try {
-    let { StaffUserId, page = 1, limit = 20, search = "" } = data;
+    let { StaffUserId, page = 1, limit = 20, search = "", staffIds = "", isDropdownOptions = false, dropdownSearch = "", dropdownPage = 1 } = data;
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 20;
 
@@ -3287,8 +3287,30 @@ const getFollowUpList = async (data) => {
       }
     }
 
+    let baseStaffWhereClause = staffWhereClause;
+
+    if (isDropdownOptions && staffWhereClause !== "WHERE 1 = 0") {
+      if (dropdownSearch) {
+        baseStaffWhereClause += ` AND (s.first_name LIKE '%${dropdownSearch}%' OR s.last_name LIKE '%${dropdownSearch}%')`;
+      }
+      const dropdownLimit = 20;
+      const offset = (dropdownPage - 1) * dropdownLimit;
+      const dropdownQuery = `SELECT id as value, CONCAT(first_name, ' ', last_name) as label FROM staffs s ${baseStaffWhereClause} ORDER BY first_name ASC LIMIT ${dropdownLimit} OFFSET ${offset}`;
+      const [dropdownOptions] = await pool.execute(dropdownQuery);
+
+      const countQuery = `SELECT COUNT(*) as total FROM staffs s ${baseStaffWhereClause}`;
+      const [[{ total }]] = await pool.execute(countQuery);
+      const hasMore = (offset + dropdownLimit) < total;
+
+      return { status: true, message: "Options fetched", options: dropdownOptions, hasMore };
+    }
+
     if (search && staffWhereClause !== "WHERE 1 = 0") {
       staffWhereClause += ` AND (s.first_name LIKE '%${search}%' OR s.last_name LIKE '%${search}%')`;
+    }
+
+    if (staffIds && staffWhereClause !== "WHERE 1 = 0") {
+      staffWhereClause += ` AND s.id IN (${staffIds})`;
     }
 
     if (staffWhereClause === "WHERE 1 = 0") {
@@ -3400,7 +3422,7 @@ const getFollowUpList = async (data) => {
 };
 
 const getMisResourceUtilisation = async (data) => {
-  const { StaffUserId, tab, page = 1, limit = 10, search = "" } = data;
+  const { StaffUserId, tab, page = 1, limit = 10, search = "", staffIds = "", isDropdownOptions = false, dropdownSearch = "", dropdownPage = 1 } = data;
   try {
     if (!StaffUserId) {
       return { status: false, message: "StaffUserId is required." };
@@ -3431,9 +3453,31 @@ const getMisResourceUtilisation = async (data) => {
       staffWhereClause += ` AND s.id IN (SELECT staff_to FROM line_managers)`;
     }
 
+    let baseStaffWhereClause = staffWhereClause;
+
+    if (isDropdownOptions) {
+      if (dropdownSearch) {
+        baseStaffWhereClause += ` AND (s.first_name LIKE '%${dropdownSearch}%' OR s.last_name LIKE '%${dropdownSearch}%')`;
+      }
+      const dropdownLimit = 20;
+      const offset = (dropdownPage - 1) * dropdownLimit;
+      const dropdownQuery = `SELECT id as value, CONCAT(first_name, ' ', last_name) as label FROM staffs s ${baseStaffWhereClause} ORDER BY first_name ASC LIMIT ${dropdownLimit} OFFSET ${offset}`;
+      const [dropdownOptions] = await pool.execute(dropdownQuery);
+
+      const countQuery = `SELECT COUNT(*) as total FROM staffs s ${baseStaffWhereClause}`;
+      const [[{ total }]] = await pool.execute(countQuery);
+      const hasMore = (offset + dropdownLimit) < total;
+
+      return { status: true, message: "Options fetched", options: dropdownOptions, hasMore };
+    }
+
     // Search filter
     if (search) {
       staffWhereClause += ` AND (s.first_name LIKE '%${search}%' OR s.last_name LIKE '%${search}%')`;
+    }
+
+    if (staffIds) {
+      staffWhereClause += ` AND s.id IN (${staffIds})`;
     }
 
     let now = new Date();

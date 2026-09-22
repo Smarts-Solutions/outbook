@@ -88,6 +88,11 @@ const TimesheetNewDesign = () => {
   const [followUpHasMore, setFollowUpHasMore] = useState(true);
   const [isFollowUpLoading, setIsFollowUpLoading] = useState(false);
   const [followUpSearchTerm, setFollowUpSearchTerm] = useState("");
+  const [followUpSelectedStaff, setFollowUpSelectedStaff] = useState([]);
+  const [followUpStaffOptions, setFollowUpStaffOptions] = useState([]);
+  const [followUpStaffPage, setFollowUpStaffPage] = useState(1);
+  const [followUpStaffHasMore, setFollowUpStaffHasMore] = useState(true);
+  const [followUpStaffSearchTerm, setFollowUpStaffSearchTerm] = useState("");
   const followUpDebounceRef = useRef(null);
 
   const [activeMisTab, setActiveMisTab] = useState("employee"); // 'employee' or 'team'
@@ -96,6 +101,11 @@ const TimesheetNewDesign = () => {
   const [misPage, setMisPage] = useState(1);
   const [misPageSize, setMisPageSize] = useState(10);
   const [misSearchTerm, setMisSearchTerm] = useState("");
+  const [misSelectedStaff, setMisSelectedStaff] = useState([]);
+  const [misStaffOptions, setMisStaffOptions] = useState([]);
+  const [misStaffPage, setMisStaffPage] = useState(1);
+  const [misStaffHasMore, setMisStaffHasMore] = useState(true);
+  const [misStaffSearchTerm, setMisStaffSearchTerm] = useState("");
   const [misTotalRows, setMisTotalRows] = useState(0);
   const [misExporting, setMisExporting] = useState(false);
   const [misMonthOffset, setMisMonthOffset] = useState(0);
@@ -117,10 +127,12 @@ const TimesheetNewDesign = () => {
     page = misPage,
     limit = misPageSize,
     search = misSearchTerm,
-    monthOffset = misMonthOffset
+    monthOffset = misMonthOffset,
+    staffIds = misSelectedStaff.map(opt => opt.value).join(',')
   ) => {
+    if (isMisLoading) return;
+    setIsMisLoading(true);
     try {
-      setIsMisLoading(true);
       const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
       const token = JSON.parse(localStorage.getItem("token"));
       const d = getMisSelectedDate(monthOffset);
@@ -130,12 +142,16 @@ const TimesheetNewDesign = () => {
         page: page,
         limit: limit,
         search: search,
+        staffIds: staffIds,
         month: d.getMonth(),
         year: d.getFullYear(),
       };
       const response = await GET_MIS_RESOURCE_UTILISATION(req, token);
       if (response && response.status) {
         setMisData(response.data);
+        if (response.staffOptions) {
+          setMisStaffOptions(response.staffOptions);
+        }
         setMisTotalRows(response.pagination?.total || response.total || 0);
         if (response.summary) {
           setMisTotalHours(response.summary.total_hours || 0);
@@ -169,6 +185,42 @@ const TimesheetNewDesign = () => {
     } finally {
       setIsMisLoading(false);
     }
+  };
+
+  const fetchMisStaffDropdown = async (tab = activeMisTab, page = 1, search = "", append = false) => {
+    try {
+      const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+      const token = JSON.parse(localStorage.getItem("token"));
+      const req = {
+        StaffUserId: staffDetails?.id,
+        tab: tab,
+        isDropdownOptions: true,
+        dropdownPage: page,
+        dropdownSearch: search,
+      };
+      const response = await GET_MIS_RESOURCE_UTILISATION(req, token);
+      if (response && response.status) {
+        if (append) {
+          setMisStaffOptions(prev => [...prev, ...(response.options || [])]);
+        } else {
+          setMisStaffOptions(response.options || []);
+        }
+        setMisStaffHasMore(response.hasMore);
+        setMisStaffPage(page);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleMisTabChange = (newTab) => {
+    setActiveMisTab(newTab);
+    setMisSearchTerm("");
+    setMisSelectedStaff([]);
+    fetchMisResourceUtilisation(newTab, 1, misPageSize, "", misMonthOffset, "");
+    
+    setMisStaffSearchTerm("");
+    fetchMisStaffDropdown(newTab, 1, "", false);
   };
 
   const fetchMonthlyTrend = async (tab = activeMisTab) => {
@@ -517,11 +569,11 @@ const TimesheetNewDesign = () => {
     }
   };
 
-  const fetchFollowUpList = async (pageToFetch = 1, search = followUpSearchTerm) => {
+  const fetchFollowUpList = async (pageToFetch = 1, search = followUpSearchTerm, staffIds = followUpSelectedStaff.map(opt => opt.value).join(',')) => {
     if (isFollowUpLoading) return;
     setIsFollowUpLoading(true);
     try {
-      const res = await dispatch(getFollowUpList({ req: { StaffUserId: staffDetails?.id || 1, page: pageToFetch, limit: 20, search: search }, authToken: token })).unwrap();
+      const res = await dispatch(getFollowUpList({ req: { StaffUserId: staffDetails?.id || 1, page: pageToFetch, limit: 20, search: search, staffIds: staffIds }, authToken: token })).unwrap();
       if (res.status) {
         if (pageToFetch === 1) {
           setFollowUpList(res.data || []);
@@ -540,6 +592,31 @@ const TimesheetNewDesign = () => {
       console.error("Follow-Up list fetch exception:", err);
     } finally {
       setIsFollowUpLoading(false);
+    }
+  };
+
+  const fetchFollowUpStaffDropdown = async (page = 1, search = "", append = false) => {
+    try {
+      const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
+      const token = JSON.parse(localStorage.getItem("token"));
+      const req = {
+        StaffUserId: staffDetails?.id,
+        isDropdownOptions: true,
+        dropdownPage: page,
+        dropdownSearch: search,
+      };
+      const response = await dispatch(getFollowUpList({ req, authToken: token })).unwrap();
+      if (response && response.status) {
+        if (append) {
+          setFollowUpStaffOptions(prev => [...prev, ...(response.options || [])]);
+        } else {
+          setFollowUpStaffOptions(response.options || []);
+        }
+        setFollowUpStaffHasMore(response.hasMore);
+        setFollowUpStaffPage(page);
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -786,6 +863,8 @@ const TimesheetNewDesign = () => {
   useEffect(() => {
     staffData();
     GetLineManagerData();
+    fetchMisStaffDropdown(activeMisTab, 1, "", false);
+    fetchFollowUpStaffDropdown(1, "", false);
   }, []);
 
   useEffect(() => {
@@ -4331,14 +4410,47 @@ const TimesheetNewDesign = () => {
                         <p className="page-subtitle mb-0 mt-2">Employees with missing or unsubmitted weeks this month.</p>
                       </div>
                       <div className="timesheet-table-header-div-right d-flex align-items-center">
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Search staff..."
-                          value={followUpSearchTerm}
-                          onChange={(e) => handleFollowUpSearchChange(e.target.value)}
-                          style={{ maxWidth: '200px' }}
-                        />
+                        <div className="d-flex gap-2">
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Search staff..."
+                            value={followUpSearchTerm}
+                            onChange={(e) => handleFollowUpSearchChange(e.target.value)}
+                            style={{ maxWidth: '200px' }}
+                          />
+                          <Select
+                            isMulti
+                            options={followUpStaffOptions}
+                            value={followUpSelectedStaff}
+                            onChange={(selected) => {
+                              const sel = selected || [];
+                              setFollowUpSelectedStaff(sel);
+                              setFollowUpPage(1);
+                              fetchFollowUpList(1, followUpSearchTerm, sel.map(opt => opt.value).join(','));
+                            }}
+                            onInputChange={(inputValue, { action }) => {
+                              if (action === "input-change") {
+                                setFollowUpStaffSearchTerm(inputValue);
+                                fetchFollowUpStaffDropdown(1, inputValue, false);
+                              }
+                            }}
+                            onMenuScrollToBottom={() => {
+                              if (followUpStaffHasMore) {
+                                fetchFollowUpStaffDropdown(followUpStaffPage + 1, followUpStaffSearchTerm, true);
+                              }
+                            }}
+                            placeholder="Select staff..."
+                            className="basic-multi-select"
+                            classNamePrefix="react-select"
+                            styles={{
+                              container: (base) => ({
+                                ...base,
+                                minWidth: '150px'
+                              })
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                     <div
@@ -4386,21 +4498,47 @@ const TimesheetNewDesign = () => {
                 </div>
                 <ul className="nav resource-tabs" id="resourceTab" role="tablist">
                   <li role="presentation">
-                    <button className={`active ${activeMisTab === 'employee' ? 'active' : ''}`} id="employee-tab" data-bs-toggle="tab" data-bs-target="#employee-tab-pane" type="button" role="tab" aria-controls="employee-tab-pane" aria-selected={activeMisTab === 'employee'} onClick={() => setActiveMisTab('employee')}>Employee</button>
+                    <button className={`active ${activeMisTab === 'employee' ? 'active' : ''}`} id="employee-tab" data-bs-toggle="tab" data-bs-target="#employee-tab-pane" type="button" role="tab" aria-controls="employee-tab-pane" aria-selected={activeMisTab === 'employee'} onClick={() => handleMisTabChange('employee')}>Employee</button>
                   </li>
                   <li role="presentation">
-                    <button className={`${activeMisTab === 'team' ? 'active' : ''}`} id="team-tab" data-bs-toggle="tab" data-bs-target="#team-tab-pane" type="button" role="tab" aria-controls="team-tab-pane" aria-selected={activeMisTab === 'team'} onClick={() => setActiveMisTab('team')}>Team</button>
+                    <button className={`${activeMisTab === 'team' ? 'active' : ''}`} id="team-tab" data-bs-toggle="tab" data-bs-target="#team-tab-pane" type="button" role="tab" aria-controls="team-tab-pane" aria-selected={activeMisTab === 'team'} onClick={() => handleMisTabChange('team')}>Team</button>
                   </li>
                 </ul>
 
                 <div className="row mt-3 mb-3 align-items-center justify-content-between px-3">
-                  <div className="col-md-4">
+                  <div className="col-md-6 d-flex gap-2">
                     <input
                       type="text"
                       placeholder="Search Staff..."
                       className="form-control"
                       value={misSearchTerm}
                       onChange={(e) => handleMisSearchChange(e.target.value)}
+                      style={{ maxWidth: '200px' }}
+                    />
+                    <Select
+                      isMulti
+                      options={misStaffOptions}
+                      value={misSelectedStaff}
+                      onChange={(selected) => {
+                        const sel = selected || [];
+                        setMisSelectedStaff(sel);
+                        setMisPage(1);
+                        fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, misMonthOffset, sel.map(opt => opt.value).join(','));
+                      }}
+                      onInputChange={(inputValue, { action }) => {
+                        if (action === "input-change") {
+                          setMisStaffSearchTerm(inputValue);
+                          fetchMisStaffDropdown(activeMisTab, 1, inputValue, false);
+                        }
+                      }}
+                      onMenuScrollToBottom={() => {
+                        if (misStaffHasMore) {
+                          fetchMisStaffDropdown(activeMisTab, misStaffPage + 1, misStaffSearchTerm, true);
+                        }
+                      }}
+                      placeholder="Select Staff..."
+                      className="basic-multi-select flex-grow-1"
+                      classNamePrefix="react-select"
                     />
                   </div>
                   <div className="col-md-auto">
