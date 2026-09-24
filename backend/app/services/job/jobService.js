@@ -2,6 +2,9 @@
 const { query } = require('../../config/database');
 const jobModel = require('../../models/jobModel');
 const taskTimeSheetModel = require('../../models/taskTimeSheetModel');
+const otpModel = require('../../models/otpModel');
+const systemSettingsModel = require('../../models/systemSettingsModel');
+const axios = require('axios'); // For SMS API calls
 
 // Job Work .....
 const getAddJobData = async (job) => {
@@ -174,6 +177,49 @@ const getJobTimeLine = async (job) => {
   return jobModel.getJobTimeLine(job);
 };
 
+const sendJobStatusOtp = async (data) => {
+  const { jobId, requestedBy } = data;
+  
+  try {
+    const settings = await systemSettingsModel.getSettings();
+    
+    // Generate a 6-digit random OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Save to database
+    await otpModel.createOtp(jobId, requestedBy, otpCode);
+    
+    // Send SMS via dynamic API (e.g. Twilio or MSG91 structure)
+    // Replace the placeholders with actual API structure based on provider
+    if (settings.sms_api_url && settings.sms_api_key) {
+      /* Example for sending SMS 
+      await axios.post(settings.sms_api_url, {
+        to: settings.manager_otp_number,
+        sender: settings.sms_sender_id,
+        message: `OTP to change Job Status is: ${otpCode}`,
+        key: settings.sms_api_key
+      });
+      */
+      console.log(`Sending SMS to ${settings.manager_otp_number}: OTP is ${otpCode}`);
+    } else {
+      console.log(`No SMS API Configured. OTP is ${otpCode}`);
+    }
+
+    return { status: true, message: "OTP sent successfully." };
+  } catch (error) {
+    return { status: false, message: "Failed to send OTP.", error: error.message };
+  }
+};
+
+const verifyJobStatusOtp = async (data) => {
+  const { jobId, otpCode } = data;
+  try {
+    const result = await otpModel.verifyOtp(jobId, otpCode);
+    return result;
+  } catch (error) {
+    return { status: false, message: "Failed to verify OTP.", error: error.message };
+  }
+};
 
 
 
@@ -197,5 +243,7 @@ module.exports = {
   addJobDocument,
   editDraft,
   getJobTimeLine,
-  uploadDocumentMissingLogAndQuery
+  uploadDocumentMissingLogAndQuery,
+  sendJobStatusOtp,
+  verifyJobStatusOtp
  };

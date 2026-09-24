@@ -153,6 +153,10 @@ const Setting = () => {
     allocated_on_limit: 0,
     received_on_limit: 0,
     missing_date_limit: 0,
+    manager_otp_number: "",
+    sms_api_url: "",
+    sms_api_key: "",
+    sms_sender_id: "",
   });
 
   const fetchSystemSettings = async () => {
@@ -166,6 +170,10 @@ const Setting = () => {
             allocated_on_limit: res.data.allocated_on_limit ?? 0,
             received_on_limit: res.data.received_on_limit ?? 0,
             missing_date_limit: res.data.missing_date_limit ?? 0,
+            manager_otp_number: res.data.manager_otp_number ?? "",
+            sms_api_url: res.data.sms_api_url ?? "",
+            sms_api_key: res.data.sms_api_key ?? "",
+            sms_sender_id: res.data.sms_sender_id ?? "",
           });
         }
       })
@@ -192,7 +200,7 @@ const Setting = () => {
   };
 
   useEffect(() => {
-    if (getShowTabId === "11") {
+    if (getShowTabId === "11" || getShowTabId === "12") {
       fetchSystemSettings();
     }
   }, [getShowTabId]);
@@ -3004,6 +3012,11 @@ const Setting = () => {
       label: "Job Date Settings",
       icon: <Settings size={16} className="me-1" />,
     },
+    {
+      id: "12",
+      label: "SMS & OTP Settings",
+      icon: <Settings size={16} className="me-1" />,
+    },
   ];
 
   useEffect(() => {
@@ -3643,6 +3656,84 @@ const Setting = () => {
                       { id: 3, name: "Received Date Limit", limit: systemSettings.received_on_limit, key: "received_on_limit" },
                     ]}
                   />
+                </div>
+              </div>
+            </div>
+
+            <div
+              className={`tab-pane fade ${getShowTabId === "12" ? "show active" : ""}`}
+            >
+              <div className="report-data row">
+                <div className="col-lg-6 d-flex align-items-center ">
+                  <div className="tab-title">
+                    <h3 className="mt-0">SMS & OTP Settings</h3>
+                  </div>
+                </div>
+                <div className=" col-lg-6 d-flex justify-content-end align-items-center">
+                  <div className="mx-2">
+                  </div>
+                </div>
+
+                <div className="col-lg-12 mt-4 datatable-wrapper">
+                  <div className="row g-3">
+                    <div className="col-md-4">
+                      <label className="form-label fw-bold">Manager Phone Number (To receive OTPs)</label>
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        placeholder="e.g. 9876543210"
+                        maxLength="10"
+                        minLength="10"
+                        value={systemSettings.manager_otp_number}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9]/g, '');
+                          setSystemSettings({...systemSettings, manager_otp_number: value});
+                        }}
+                      />
+                    </div>
+                    <div className="col-md-12 mt-4">
+                      <h5 className="text-dark border-bottom pb-2">SMS Gateway Configurations</h5>
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label">SMS API URL</label>
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        placeholder="e.g. https://api.twilio.com/..."
+                        value={systemSettings.sms_api_url}
+                        onChange={(e) => setSystemSettings({...systemSettings, sms_api_url: e.target.value})}
+                      />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label">SMS API Key / Auth Token</label>
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        placeholder="Enter API Key"
+                        value={systemSettings.sms_api_key}
+                        onChange={(e) => setSystemSettings({...systemSettings, sms_api_key: e.target.value})}
+                      />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label">Sender ID</label>
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        placeholder="e.g. OUTBOK"
+                        value={systemSettings.sms_sender_id}
+                        onChange={(e) => setSystemSettings({...systemSettings, sms_sender_id: e.target.value})}
+                      />
+                    </div>
+                    <div className="col-12 mt-4 text-end d-flex justify-content-end gap-3">
+                      <button 
+                        className="btn btn-outline-success rounded-pill fw-bold px-4"
+                        onClick={() => updateSystemSettingsAction(systemSettings)}
+                        disabled={loading}
+                      >
+                        <Save size={16} className="me-1" /> {loading ? 'Saving...' : 'Save'}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

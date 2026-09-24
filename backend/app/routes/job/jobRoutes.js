@@ -12,6 +12,8 @@ router.post('/jobAdd',verifyToken, jobController.jobAdd);
 router.post('/jobAction',verifyToken, jobController.jobAction);
 router.post('/jobUpdate',verifyToken, jobController.jobUpdate);
 router.post('/updateJobStatus',verifyToken, jobController.updateJobStatus);
+router.post('/sendJobStatusOtp',verifyToken, jobController.sendJobStatusOtp);
+router.post('/verifyJobStatusOtp',verifyToken, jobController.verifyJobStatusOtp);
 
 // JobTimeLine
 router.post('/getJobTimeLine',verifyToken, jobController.getJobTimeLine);

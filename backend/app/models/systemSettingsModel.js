@@ -11,16 +11,24 @@ const getSettings = async () => {
 };
 
 const updateSettings = async (settings) => {
-    const { allocated_on_limit, received_on_limit, missing_date_limit } = settings;
+    const { 
+        allocated_on_limit, 
+        received_on_limit, 
+        missing_date_limit,
+        manager_otp_number,
+        sms_api_url,
+        sms_api_key,
+        sms_sender_id
+    } = settings;
     try {
         const existing = await getSettings();
         if (existing) {
-            const query = `UPDATE system_settings SET allocated_on_limit = ?, received_on_limit = ?, missing_date_limit = ? WHERE id = ?`;
-            const [result] = await pool.execute(query, [allocated_on_limit, received_on_limit, missing_date_limit, existing.id]);
+            const query = `UPDATE system_settings SET allocated_on_limit = ?, received_on_limit = ?, missing_date_limit = ?, manager_otp_number = ?, sms_api_url = ?, sms_api_key = ?, sms_sender_id = ? WHERE id = ?`;
+            const [result] = await pool.execute(query, [allocated_on_limit, received_on_limit, missing_date_limit, manager_otp_number, sms_api_url, sms_api_key, sms_sender_id, existing.id]);
             return result;
         } else {
-            const query = `INSERT INTO system_settings (allocated_on_limit, received_on_limit, missing_date_limit) VALUES (?, ?, ?)`;
-            const [result] = await pool.execute(query, [allocated_on_limit, received_on_limit, missing_date_limit]);
+            const query = `INSERT INTO system_settings (allocated_on_limit, received_on_limit, missing_date_limit, manager_otp_number, sms_api_url, sms_api_key, sms_sender_id) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+            const [result] = await pool.execute(query, [allocated_on_limit, received_on_limit, missing_date_limit, manager_otp_number, sms_api_url, sms_api_key, sms_sender_id]);
             return result;
         }
     } catch (err) {
