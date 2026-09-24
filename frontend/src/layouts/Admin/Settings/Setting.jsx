@@ -154,9 +154,9 @@ const Setting = () => {
     received_on_limit: 0,
     missing_date_limit: 0,
     manager_otp_number: "",
-    sms_api_url: "",
-    sms_api_key: "",
-    sms_sender_id: "",
+    whatsapp_phone_number_id: "",
+    whatsapp_access_token: "",
+    whatsapp_template_name: "",
   });
 
   const fetchSystemSettings = async () => {
@@ -171,9 +171,9 @@ const Setting = () => {
             received_on_limit: res.data.received_on_limit ?? 0,
             missing_date_limit: res.data.missing_date_limit ?? 0,
             manager_otp_number: res.data.manager_otp_number ?? "",
-            sms_api_url: res.data.sms_api_url ?? "",
-            sms_api_key: res.data.sms_api_key ?? "",
-            sms_sender_id: res.data.sms_sender_id ?? "",
+            whatsapp_phone_number_id: res.data.whatsapp_phone_number_id ?? "",
+            whatsapp_access_token: res.data.whatsapp_access_token ?? "",
+            whatsapp_template_name: res.data.whatsapp_template_name ?? "",
           });
         }
       })
@@ -3692,36 +3692,36 @@ const Setting = () => {
                       />
                     </div>
                     <div className="col-md-12 mt-4">
-                      <h5 className="text-dark border-bottom pb-2">SMS Gateway Configurations</h5>
+                      <h5 className="text-dark border-bottom pb-2">WhatsApp Cloud API Configurations</h5>
                     </div>
                     <div className="col-md-4">
-                      <label className="form-label">SMS API URL</label>
+                      <label className="form-label">Phone Number ID</label>
                       <input 
                         type="text" 
                         className="form-control" 
-                        placeholder="e.g. https://api.twilio.com/..."
-                        value={systemSettings.sms_api_url}
-                        onChange={(e) => setSystemSettings({...systemSettings, sms_api_url: e.target.value})}
+                        placeholder="e.g. 10459385..."
+                        value={systemSettings.whatsapp_phone_number_id}
+                        onChange={(e) => setSystemSettings({...systemSettings, whatsapp_phone_number_id: e.target.value})}
                       />
                     </div>
                     <div className="col-md-4">
-                      <label className="form-label">SMS API Key / Auth Token</label>
+                      <label className="form-label">Access Token</label>
                       <input 
                         type="text" 
                         className="form-control" 
-                        placeholder="Enter API Key"
-                        value={systemSettings.sms_api_key}
-                        onChange={(e) => setSystemSettings({...systemSettings, sms_api_key: e.target.value})}
+                        placeholder="EAADXXXX..."
+                        value={systemSettings.whatsapp_access_token}
+                        onChange={(e) => setSystemSettings({...systemSettings, whatsapp_access_token: e.target.value})}
                       />
                     </div>
                     <div className="col-md-4">
-                      <label className="form-label">Sender ID</label>
+                      <label className="form-label">Message Template Name</label>
                       <input 
                         type="text" 
                         className="form-control" 
-                        placeholder="e.g. OUTBOK"
-                        value={systemSettings.sms_sender_id}
-                        onChange={(e) => setSystemSettings({...systemSettings, sms_sender_id: e.target.value})}
+                        placeholder="e.g. job_status_otp"
+                        value={systemSettings.whatsapp_template_name}
+                        onChange={(e) => setSystemSettings({...systemSettings, whatsapp_template_name: e.target.value})}
                       />
                     </div>
                     <div className="col-12 mt-4 text-end d-flex justify-content-end gap-3">

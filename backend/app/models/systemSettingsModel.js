@@ -16,19 +16,19 @@ const updateSettings = async (settings) => {
         received_on_limit, 
         missing_date_limit,
         manager_otp_number,
-        sms_api_url,
-        sms_api_key,
-        sms_sender_id
+        whatsapp_phone_number_id,
+        whatsapp_access_token,
+        whatsapp_template_name
     } = settings;
     try {
         const existing = await getSettings();
         if (existing) {
-            const query = `UPDATE system_settings SET allocated_on_limit = ?, received_on_limit = ?, missing_date_limit = ?, manager_otp_number = ?, sms_api_url = ?, sms_api_key = ?, sms_sender_id = ? WHERE id = ?`;
-            const [result] = await pool.execute(query, [allocated_on_limit, received_on_limit, missing_date_limit, manager_otp_number, sms_api_url, sms_api_key, sms_sender_id, existing.id]);
+            const query = `UPDATE system_settings SET allocated_on_limit = ?, received_on_limit = ?, missing_date_limit = ?, manager_otp_number = ?, whatsapp_phone_number_id = ?, whatsapp_access_token = ?, whatsapp_template_name = ? WHERE id = ?`;
+            const [result] = await pool.execute(query, [allocated_on_limit, received_on_limit, missing_date_limit, manager_otp_number, whatsapp_phone_number_id, whatsapp_access_token, whatsapp_template_name, existing.id]);
             return result;
         } else {
-            const query = `INSERT INTO system_settings (allocated_on_limit, received_on_limit, missing_date_limit, manager_otp_number, sms_api_url, sms_api_key, sms_sender_id) VALUES (?, ?, ?, ?, ?, ?, ?)`;
-            const [result] = await pool.execute(query, [allocated_on_limit, received_on_limit, missing_date_limit, manager_otp_number, sms_api_url, sms_api_key, sms_sender_id]);
+            const query = `INSERT INTO system_settings (allocated_on_limit, received_on_limit, missing_date_limit, manager_otp_number, whatsapp_phone_number_id, whatsapp_access_token, whatsapp_template_name) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+            const [result] = await pool.execute(query, [allocated_on_limit, received_on_limit, missing_date_limit, manager_otp_number, whatsapp_phone_number_id, whatsapp_access_token, whatsapp_template_name]);
             return result;
         }
     } catch (err) {

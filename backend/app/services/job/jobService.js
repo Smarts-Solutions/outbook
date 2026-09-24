@@ -188,21 +188,46 @@ const sendJobStatusOtp = async (data) => {
     
     // Save to database
     await otpModel.createOtp(jobId, requestedBy, otpCode);
-    
-    // Send SMS via dynamic API (e.g. Twilio or MSG91 structure)
-    // Replace the placeholders with actual API structure based on provider
-    if (settings.sms_api_url && settings.sms_api_key) {
-      /* Example for sending SMS 
-      await axios.post(settings.sms_api_url, {
+    // Send OTP via WhatsApp Cloud API
+    if (settings.whatsapp_phone_number_id && settings.whatsapp_access_token && settings.whatsapp_template_name) {
+      const url = `https://graph.facebook.com/v17.0/${settings.whatsapp_phone_number_id}/messages`;
+      
+      const payload = {
+        messaging_product: "whatsapp",
         to: settings.manager_otp_number,
-        sender: settings.sms_sender_id,
-        message: `OTP to change Job Status is: ${otpCode}`,
-        key: settings.sms_api_key
-      });
-      */
-      console.log(`Sending SMS to ${settings.manager_otp_number}: OTP is ${otpCode}`);
+        type: "template",
+        template: {
+          name: settings.whatsapp_template_name,
+          language: {
+            code: "en" // adjust language code if necessary
+          },
+          components: [
+            {
+              type: "body",
+              parameters: [
+                {
+                  type: "text",
+                  text: otpCode
+                }
+              ]
+            }
+          ]
+        }
+      };
+
+      try {
+        await axios.post(url, payload, {
+          headers: {
+            'Authorization': `Bearer ${settings.whatsapp_access_token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log(`WhatsApp OTP sent to ${settings.manager_otp_number}: OTP is ${otpCode}`);
+      } catch (err) {
+        console.error("WhatsApp API Error:", err.response ? err.response.data : err.message);
+      }
     } else {
-      console.log(`No SMS API Configured. OTP is ${otpCode}`);
+      console.log(`WhatsApp API not fully configured. OTP generated is ${otpCode}`);
     }
 
     return { status: true, message: "OTP sent successfully." };
