@@ -4244,15 +4244,17 @@ const TimesheetNewDesign = () => {
           {isManagerReviewVisible && (
             <div className="tab-pane fade" id="mis-dashboard-tab-pane" role="tabpanel" aria-labelledby="mis-dashboard-tab" tabindex="0">
 
-              <div className="timesheet-tab-content-header">
-                <div className="timesheet-tab-content-header-left d-flex align-items-center gap-3">
+              <div className="timesheet-tab-content-header d-flex justify-content-between align-items-center">
+                <div className="timesheet-tab-content-header-left">
                   <div>
                     <h3 className="timesheet-tab-content-heading">MIS Dashboard</h3>
                     <p className="timesheet-tab-content-para mb-0">Submission compliance, billable vs leave hours and resource utilisation.</p>
                   </div>
-                  <div className="ms-3">
+                </div>
+                <div className="timesheet-tab-content-header-right d-flex align-items-center gap-2">
+                  <div>
                     <select
-                      className="form-select"
+                      className="form-select text-info border-info fw-bold bg-transparent cursor-pointer"
                       value={misFilterType}
                       onChange={(e) => {
                         const newType = e.target.value;
@@ -4265,14 +4267,12 @@ const TimesheetNewDesign = () => {
                       }}
                       style={{ minWidth: '120px' }}
                     >
-                      <option value="week">Week-wise</option>
-                      <option value="month">Month-wise</option>
-                      <option value="year">Year-wise</option>
+                      <option value="week" className="text-dark">Week-wise</option>
+                      <option value="month" className="text-dark">Month-wise</option>
+                      <option value="year" className="text-dark">Year-wise</option>
                     </select>
                   </div>
-                </div>
-                <div className="timesheet-tab-content-header-right">
-                  <div className="timesheet-week-div">
+                  <div className="timesheet-week-div m-0">
                     <button className="timesheet-week-button" type="button" onClick={handleMisPrevPeriod}>
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left size-4" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
                     </button>
@@ -4297,7 +4297,7 @@ const TimesheetNewDesign = () => {
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right size-4" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
                     </button>
                   </div>
-                  <button type="button" className="btn btn-outline-info fw-bold" onClick={handleMisCurrentPeriod}>
+                  <button type="button" className="btn btn-outline-info fw-bold text-nowrap m-0" onClick={handleMisCurrentPeriod}>
                     Go to Current {misFilterType.charAt(0).toUpperCase() + misFilterType.slice(1)}
                   </button>
                 </div>
