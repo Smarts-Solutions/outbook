@@ -109,7 +109,7 @@ const TimesheetNewDesign = () => {
   const [misTotalRows, setMisTotalRows] = useState(0);
   const [misExporting, setMisExporting] = useState(false);
   const [misMonthOffset, setMisMonthOffset] = useState(0);
-  const [misFilterType, setMisFilterType] = useState("month");
+  const [misFilterType, setMisFilterType] = useState("week");
   const [misWeekOffset, setMisWeekOffset] = useState(0);
   const [misYearOffset, setMisYearOffset] = useState(0);
   const [graphData, setGraphData] = useState([]);
