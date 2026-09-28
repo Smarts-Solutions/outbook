@@ -267,7 +267,13 @@ const getStaff = async (data) => {
     CASE
         WHEN se.staff_id IS NOT NULL THEN TRUE
         ELSE FALSE
-    END AS is_customer_exist
+    END AS is_customer_exist,
+    (
+        SELECT sor.role_id
+        FROM staff_other_role sor
+        WHERE sor.staff_id = s.id
+        LIMIT 1
+    ) AS staff_other_role_id
     FROM staffs s
     INNER JOIN roles r
         ON s.role_id = r.id
@@ -447,7 +453,13 @@ const getStaffNew = async (data) => {
     CASE
         WHEN se.staff_id IS NOT NULL THEN TRUE
         ELSE FALSE
-    END AS is_customer_exist
+    END AS is_customer_exist,
+    (
+        SELECT sor.role_id
+        FROM staff_other_role sor
+        WHERE sor.staff_id = s.id
+        LIMIT 1
+    ) AS staff_other_role_id
     FROM staffs s
     INNER JOIN roles r
         ON s.role_id = r.id
@@ -876,7 +888,12 @@ const updateStaff = async (staff) => {
   const { id, page, limit, search, ...fields } = staff;
   let email = fields.email;
 
-
+  var other_role_id = null;
+  if(fields.role_id) {
+    let role_ids = fields.role_id;
+    fields.role_id = Array.isArray(role_ids) ? role_ids?.[0] ?? null : role_ids ?? null;
+    other_role_id = Array.isArray(role_ids) ? role_ids?.[1] ?? null : null;
+  }
 
   // Line Manage Code
   let staff_to = fields.staff_to;
@@ -958,6 +975,24 @@ const updateStaff = async (staff) => {
 
 
     const [rows] = await pool.execute(query, values);
+
+    if (fields.role_id !== undefined) {
+      if (other_role_id != null) {
+        const checkOtherRoleQuery = `SELECT 1 FROM staff_other_role WHERE staff_id = ?`;
+        const [checkOtherRole] = await pool.execute(checkOtherRoleQuery, [id]);
+        if (checkOtherRole.length === 0) {
+          const staff_other_role_query = `INSERT INTO staff_other_role (staff_id,role_id) VALUES (?, ?)`;
+          await pool.execute(staff_other_role_query, [id, other_role_id]);
+        } else {
+          const staff_other_role_query = `UPDATE staff_other_role SET role_id = ? WHERE staff_id = ?`;
+          await pool.execute(staff_other_role_query, [other_role_id, id]);
+        }
+      } else {
+         const deleteOtherRoleQuery = `DELETE FROM staff_other_role WHERE staff_id = ?`;
+         await pool.execute(deleteOtherRoleQuery, [id]);
+      }
+    }
+
     if (rows.changedRows) {
       const currentDate = new Date();
       await SatffLogUpdateOperation({

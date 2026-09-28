@@ -825,46 +825,46 @@ const StaffPage = () => {
       disable: false,
       placeholder: "Enter Email",
     },
-    {
-      type: "select1",
-      name: "role",
-      label: "Role",
-      label_size: 12,
-      col_size: 6,
-      options:
-        roleDataAll &&
-        roleDataAll.data.map((data) => {
-          if (formik.values.role_id == data.id) {
-            return { label: data.role_name, value: data.id, selected: true };
-          } else {
-            return { label: data.role_name, value: data.id };
-          }
-        }),
-    },
-
     // {
-    //   type: "reactSelectRole",
+    //   type: "select1",
     //   name: "role",
     //   label: "Role",
     //   label_size: 12,
     //   col_size: 6,
-    //   isMulti: true,
-    //   maxSelection: 2,
-
-    //   fixedRoleId: editStaff
-    //     ? (Array.isArray(editStaffData?.role_id)
-    //       ? editStaffData.role_id[0]
-    //       : editStaffData?.role_id)
-    //     : null,
-
-    //   isEditMode: editStaff,
-
     //   options:
-    //     roleDataAll?.data?.map((data) => ({
-    //       label: data.role_name,
-    //       value: data.id,
-    //     })) || [],
+    //     roleDataAll &&
+    //     roleDataAll.data.map((data) => {
+    //       if (formik.values.role_id == data.id) {
+    //         return { label: data.role_name, value: data.id, selected: true };
+    //       } else {
+    //         return { label: data.role_name, value: data.id };
+    //       }
+    //     }),
     // },
+
+    {
+      type: "reactSelectRole",
+      name: "role",
+      label: "Role",
+      label_size: 12,
+      col_size: 6,
+      isMulti: true,
+      maxSelection: 2,
+
+      fixedRoleId: editStaff
+        ? (Array.isArray(editStaffData?.role_id)
+          ? editStaffData.role_id[0]
+          : editStaffData?.role_id)
+        : null,
+
+      isEditMode: editStaff,
+
+      options:
+        roleDataAll?.data?.map((data) => ({
+          label: data.role_name,
+          value: data.id,
+        })) || [],
+    },
     {
       type: "select1",
       name: "status",
@@ -974,8 +974,8 @@ const StaffPage = () => {
       formik.setFieldValue("last_name", editStaffData.last_name || "null");
       formik.setFieldValue("email", editStaffData.email || "null");
       formik.setFieldValue("phone", editStaffData.phone || null);
-      formik.setFieldValue("role", editStaffData.role_id || "null");
-      // formik.setFieldValue("role", roleIds || []);
+      // formik.setFieldValue("role", editStaffData.role_id || "null");
+      formik.setFieldValue("role", roleIds || []);
       formik.setFieldValue("status", editStaffData.status || "null");
       formik.setFieldValue(
         "employee_number",
@@ -1123,9 +1123,16 @@ const StaffPage = () => {
 
   useEffect(() => {
     const fetchChangedRoleStaff = async () => {
+      let isRoleChanged = false;
+      if (Array.isArray(formik.values.role)) {
+        isRoleChanged = !formik.values.role.includes(Number(editStaffData.role_id)) && !formik.values.role.includes(String(editStaffData.role_id));
+      } else {
+        isRoleChanged = Number(formik.values.role) !== Number(editStaffData.role_id);
+      }
+
       if (
         editStaffData.id !== undefined &&
-        Number(formik.values.role) !== Number(editStaffData.role_id)
+        isRoleChanged
       ) {
         if (Number(editStaffData.role_id) === 3) {
           await getChangedRoleStaff(editStaffData);
