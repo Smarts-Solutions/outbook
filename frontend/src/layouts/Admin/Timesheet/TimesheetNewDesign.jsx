@@ -109,7 +109,7 @@ const TimesheetNewDesign = () => {
   const [misTotalRows, setMisTotalRows] = useState(0);
   const [misExporting, setMisExporting] = useState(false);
   const [misMonthOffset, setMisMonthOffset] = useState(0);
-  const [misFilterType, setMisFilterType] = useState("month");
+  const [misFilterType, setMisFilterType] = useState("week");
   const [misWeekOffset, setMisWeekOffset] = useState(0);
   const [misYearOffset, setMisYearOffset] = useState(0);
   const [graphData, setGraphData] = useState([]);
@@ -370,6 +370,7 @@ const TimesheetNewDesign = () => {
     setMisYearOffset(yOff);
     setMisPage(1);
     fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, mOff, misSelectedStaff.map(opt => opt.value).join(','), misFilterType, wOff, yOff);
+    fetchFollowUpList(1, followUpSearchTerm, followUpSelectedStaff.map(opt => opt.value).join(','), misFilterType, mOff, wOff, yOff);
   };
 
   const handleMisCurrentPeriod = () => {
@@ -378,6 +379,7 @@ const TimesheetNewDesign = () => {
     setMisYearOffset(0);
     setMisPage(1);
     fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, 0, misSelectedStaff.map(opt => opt.value).join(','), misFilterType, 0, 0);
+    fetchFollowUpList(1, followUpSearchTerm, followUpSelectedStaff.map(opt => opt.value).join(','), misFilterType, 0, 0, 0);
   };
 
   const handleMisNextPeriod = () => {
@@ -391,6 +393,7 @@ const TimesheetNewDesign = () => {
     setMisYearOffset(yOff);
     setMisPage(1);
     fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, mOff, misSelectedStaff.map(opt => opt.value).join(','), misFilterType, wOff, yOff);
+    fetchFollowUpList(1, followUpSearchTerm, followUpSelectedStaff.map(opt => opt.value).join(','), misFilterType, mOff, wOff, yOff);
   };
 
   const exportMisResourceCSV = async () => {
@@ -641,11 +644,42 @@ const TimesheetNewDesign = () => {
     }
   };
 
-  const fetchFollowUpList = async (pageToFetch = 1, search = followUpSearchTerm, staffIds = followUpSelectedStaff.map(opt => opt.value).join(',')) => {
+  const fetchFollowUpList = async (
+    pageToFetch = 1,
+    search = followUpSearchTerm,
+    staffIds = followUpSelectedStaff.map(opt => opt.value).join(','),
+    fType = misFilterType,
+    monthOffset = misMonthOffset,
+    wOffset = misWeekOffset,
+    yOffset = misYearOffset
+  ) => {
     if (isFollowUpLoading) return;
     setIsFollowUpLoading(true);
     try {
-      const res = await dispatch(getFollowUpList({ req: { StaffUserId: staffDetails?.id || 1, page: pageToFetch, limit: 20, search: search, staffIds: staffIds }, authToken: token })).unwrap();
+      const req = {
+        StaffUserId: staffDetails?.id || 1,
+        page: pageToFetch,
+        limit: 20,
+        search: search,
+        staffIds: staffIds,
+        filterType: fType,
+      };
+
+      if (fType === 'month') {
+        const d = getMisSelectedDate(monthOffset);
+        req.month = d.getMonth();
+        req.year = d.getFullYear();
+      } else if (fType === 'year') {
+        const d = new Date();
+        d.setFullYear(d.getFullYear() + yOffset);
+        req.year = d.getFullYear();
+      } else if (fType === 'week') {
+        const { start, end } = getMisWeekDates(wOffset);
+        req.weekStartDate = start;
+        req.weekEndDate = end;
+      }
+
+      const res = await dispatch(getFollowUpList({ req, authToken: token })).unwrap();
       if (res.status) {
         if (pageToFetch === 1) {
           setFollowUpList(res.data || []);
@@ -4264,6 +4298,7 @@ const TimesheetNewDesign = () => {
                         setMisYearOffset(0);
                         setMisPage(1);
                         fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, 0, misSelectedStaff.map(opt => opt.value).join(','), newType, 0, 0);
+                        fetchFollowUpList(1, followUpSearchTerm, followUpSelectedStaff.map(opt => opt.value).join(','), newType, 0, 0, 0);
                       }}
                       style={{ minWidth: '120px' }}
                     >
@@ -4307,7 +4342,7 @@ const TimesheetNewDesign = () => {
               <div className="row mt-4">
                 <div className="col-md-4">
                   <div className="timesheet-white-card">
-                    <p className="timesheet-white-card-label">Total Employees</p>
+                    <p className="timesheet-white-card-label">Total Staff</p>
                     <p className="timesheet-white-card-value-big">{misTotalStaff}</p>
                   </div>
                 </div>
@@ -4488,7 +4523,7 @@ const TimesheetNewDesign = () => {
                     <div className="timesheet-table-header-div d-flex flex-column align-items-start gap-3">
                       <div className="timesheet-table-header-div-left dis w-100">
                         <div className="tab-title d-flex align-items-center gap-2"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert size-4 text-warning" aria-hidden="true" data-tsd-source="/src/routes/dashboard.tsx:315:13"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><h3 className="mt-0">Follow-up list</h3></div>
-                        <p className="page-subtitle mb-0 mt-2">Employees with missing or unsubmitted weeks this month.</p>
+                        <p className="page-subtitle mb-0 mt-2">Staff with missing or unsubmitted weeks this month.</p>
                       </div>
                       <div className="timesheet-table-header-div-right d-flex align-items-center w-100">
                         <div className="d-flex gap-2 w-100">
@@ -4577,16 +4612,16 @@ const TimesheetNewDesign = () => {
                     </div>
                   </div>
                 </div>
-                <ul className="nav timesheet-tabs" id="resourceTab" role="tablist">
+                <ul className="nav timesheet-tabs mt-3" id="resourceTab" role="tablist">
                   <li role="presentation">
-                    <button className={`${activeMisTab === 'employee' ? 'active' : ''}`} id="employee-tab" data-bs-toggle="tab" data-bs-target="#employee-tab-pane" type="button" role="tab" aria-controls="employee-tab-pane" aria-selected={activeMisTab === 'employee'} onClick={() => handleMisTabChange('employee')}>Employee</button>
+                    <button className={`${activeMisTab === 'employee' ? 'active' : ''}`} id="employee-tab" data-bs-toggle="tab" data-bs-target="#employee-tab-pane" type="button" role="tab" aria-controls="employee-tab-pane" aria-selected={activeMisTab === 'employee'} onClick={() => handleMisTabChange('employee')}>Staff</button>
                   </li>
                   <li role="presentation">
-                    <button className={`${activeMisTab === 'team' ? 'active' : ''}`} id="team-tab" data-bs-toggle="tab" data-bs-target="#team-tab-pane" type="button" role="tab" aria-controls="team-tab-pane" aria-selected={activeMisTab === 'team'} onClick={() => handleMisTabChange('team')}>Team</button>
+                    <button className={`${activeMisTab === 'team' ? 'active' : ''}`} id="team-tab" data-bs-toggle="tab" data-bs-target="#team-tab-pane" type="button" role="tab" aria-controls="team-tab-pane" aria-selected={activeMisTab === 'team'} onClick={() => handleMisTabChange('team')}>Line Managers</button>
                   </li>
                 </ul>
 
-                <div className="row mt-3 mb-3 align-items-center justify-content-between px-3">
+                <div className="row mt-3 mb-3 align-items-center justify-content-between">
                   <div className="col-md-6 d-flex gap-2">
                     <input
                       type="text"

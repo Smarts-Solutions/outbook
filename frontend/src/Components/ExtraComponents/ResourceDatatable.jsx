@@ -10,7 +10,7 @@ const ResourceDatatable = ({ data, loading, page = 1, limit = 10 }) => {
             width: '80px',
         },
         {
-            name: 'Employee',
+            name: 'Staff',
             selector: row => row.name,
             sortable: true,
             width: '270px',
