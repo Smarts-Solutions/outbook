@@ -3291,7 +3291,7 @@ const getFollowUpList = async (data) => {
 
     if (isDropdownOptions && staffWhereClause !== "WHERE 1 = 0") {
       if (dropdownSearch) {
-        baseStaffWhereClause += ` AND (s.first_name LIKE '%${dropdownSearch}%' OR s.last_name LIKE '%${dropdownSearch}%')`;
+        baseStaffWhereClause += ` AND (s.first_name LIKE '%${dropdownSearch}%' OR s.last_name LIKE '%${dropdownSearch}%' OR CONCAT(s.first_name, ' ', s.last_name) LIKE '%${dropdownSearch}%')`;
       }
       const dropdownLimit = 20;
       const offset = (dropdownPage - 1) * dropdownLimit;
@@ -3306,7 +3306,7 @@ const getFollowUpList = async (data) => {
     }
 
     if (search && staffWhereClause !== "WHERE 1 = 0") {
-      staffWhereClause += ` AND (s.first_name LIKE '%${search}%' OR s.last_name LIKE '%${search}%')`;
+      staffWhereClause += ` AND (s.first_name LIKE '%${search}%' OR s.last_name LIKE '%${search}%' OR CONCAT(s.first_name, ' ', s.last_name) LIKE '%${search}%')`;
     }
 
     if (staffIds && staffWhereClause !== "WHERE 1 = 0") {
@@ -3457,7 +3457,7 @@ const getMisResourceUtilisation = async (data) => {
 
     if (isDropdownOptions) {
       if (dropdownSearch) {
-        baseStaffWhereClause += ` AND (s.first_name LIKE '%${dropdownSearch}%' OR s.last_name LIKE '%${dropdownSearch}%')`;
+        baseStaffWhereClause += ` AND (s.first_name LIKE '%${dropdownSearch}%' OR s.last_name LIKE '%${dropdownSearch}%' OR CONCAT(s.first_name, ' ', s.last_name) LIKE '%${dropdownSearch}%')`;
       }
       const dropdownLimit = 20;
       const offset = (dropdownPage - 1) * dropdownLimit;
@@ -3473,7 +3473,7 @@ const getMisResourceUtilisation = async (data) => {
 
     // Search filter
     if (search) {
-      staffWhereClause += ` AND (s.first_name LIKE '%${search}%' OR s.last_name LIKE '%${search}%')`;
+      staffWhereClause += ` AND (s.first_name LIKE '%${search}%' OR s.last_name LIKE '%${search}%' OR CONCAT(s.first_name, ' ', s.last_name) LIKE '%${search}%')`;
     }
 
     if (staffIds) {
