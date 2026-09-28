@@ -4307,7 +4307,7 @@ const TimesheetNewDesign = () => {
               <div className="row mt-4">
                 <div className="col-md-4">
                   <div className="timesheet-white-card">
-                    <p className="timesheet-white-card-label">Total Employees</p>
+                    <p className="timesheet-white-card-label">Total Staff</p>
                     <p className="timesheet-white-card-value-big">{misTotalStaff}</p>
                   </div>
                 </div>
@@ -4488,7 +4488,7 @@ const TimesheetNewDesign = () => {
                     <div className="timesheet-table-header-div d-flex flex-column align-items-start gap-3">
                       <div className="timesheet-table-header-div-left dis w-100">
                         <div className="tab-title d-flex align-items-center gap-2"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert size-4 text-warning" aria-hidden="true" data-tsd-source="/src/routes/dashboard.tsx:315:13"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><h3 className="mt-0">Follow-up list</h3></div>
-                        <p className="page-subtitle mb-0 mt-2">Employees with missing or unsubmitted weeks this month.</p>
+                        <p className="page-subtitle mb-0 mt-2">Staff with missing or unsubmitted weeks this month.</p>
                       </div>
                       <div className="timesheet-table-header-div-right d-flex align-items-center w-100">
                         <div className="d-flex gap-2 w-100">
@@ -4579,10 +4579,10 @@ const TimesheetNewDesign = () => {
                 </div>
                 <ul className="nav timesheet-tabs" id="resourceTab" role="tablist">
                   <li role="presentation">
-                    <button className={`${activeMisTab === 'employee' ? 'active' : ''}`} id="employee-tab" data-bs-toggle="tab" data-bs-target="#employee-tab-pane" type="button" role="tab" aria-controls="employee-tab-pane" aria-selected={activeMisTab === 'employee'} onClick={() => handleMisTabChange('employee')}>Employee</button>
+                    <button className={`${activeMisTab === 'employee' ? 'active' : ''}`} id="employee-tab" data-bs-toggle="tab" data-bs-target="#employee-tab-pane" type="button" role="tab" aria-controls="employee-tab-pane" aria-selected={activeMisTab === 'employee'} onClick={() => handleMisTabChange('employee')}>Staff</button>
                   </li>
                   <li role="presentation">
-                    <button className={`${activeMisTab === 'team' ? 'active' : ''}`} id="team-tab" data-bs-toggle="tab" data-bs-target="#team-tab-pane" type="button" role="tab" aria-controls="team-tab-pane" aria-selected={activeMisTab === 'team'} onClick={() => handleMisTabChange('team')}>Team</button>
+                    <button className={`${activeMisTab === 'team' ? 'active' : ''}`} id="team-tab" data-bs-toggle="tab" data-bs-target="#team-tab-pane" type="button" role="tab" aria-controls="team-tab-pane" aria-selected={activeMisTab === 'team'} onClick={() => handleMisTabChange('team')}>Line Managers</button>
                   </li>
                 </ul>
 
