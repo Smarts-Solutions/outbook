@@ -4300,7 +4300,7 @@ const TimesheetNewDesign = () => {
                         fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, 0, misSelectedStaff.map(opt => opt.value).join(','), newType, 0, 0);
                         fetchFollowUpList(1, followUpSearchTerm, followUpSelectedStaff.map(opt => opt.value).join(','), newType, 0, 0, 0);
                       }}
-                      style={{ minWidth: '120px' }}
+                      style={{ minWidth: '100px' }}
                     >
                       <option value="week" className="text-dark">Weekly</option>
                       <option value="month" className="text-dark">Monthly</option>
