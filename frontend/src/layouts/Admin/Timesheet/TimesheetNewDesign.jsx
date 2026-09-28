@@ -4302,9 +4302,9 @@ const TimesheetNewDesign = () => {
                       }}
                       style={{ minWidth: '120px' }}
                     >
-                      <option value="week" className="text-dark">Week-wise</option>
-                      <option value="month" className="text-dark">Month-wise</option>
-                      <option value="year" className="text-dark">Year-wise</option>
+                      <option value="week" className="text-dark">Weekly</option>
+                      <option value="month" className="text-dark">Monthly</option>
+                      <option value="year" className="text-dark">Yearly</option>
                     </select>
                   </div>
                   <div className="timesheet-week-div m-0">
