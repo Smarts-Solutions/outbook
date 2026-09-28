@@ -1101,9 +1101,9 @@ const ReusableForm = ({
                           options={field.options}
                           closeMenuOnSelect={false}
                           isSearchable
-                          value={field.options.filter((option) =>
-                            formik.values[field.name]?.includes(option.value)
-                          )}
+                          value={(formik.values[field.name] || [])
+                            .map((val) => field.options.find((option) => option.value == val))
+                            .filter(Boolean)}
                           onChange={(selectedOptions) => {
 
                             const values = selectedOptions
