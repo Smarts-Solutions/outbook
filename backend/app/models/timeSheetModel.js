@@ -3317,21 +3317,57 @@ const getFollowUpList = async (data) => {
       return { status: true, data: [], pagination: { total: 0, page, limit, totalPages: 0 } };
     }
 
-    const now = new Date();
-    const firstOfThisMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-    const day1 = firstOfThisMonth.getUTCDay();
-    const daysToMonday1 = day1 === 0 ? 6 : day1 - 1;
-    const thisMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1 - daysToMonday1));
+    const getLastSunday = (year, monthIdx) => {
+      let d = new Date(Date.UTC(year, monthIdx + 1, 0));
+      d.setUTCDate(d.getUTCDate() - d.getUTCDay());
+      return d;
+    };
 
-    const firstOfNextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
-    const day2 = firstOfNextMonth.getUTCDay();
-    const daysToMonday2 = day2 === 0 ? 6 : day2 - 1;
-    const thisMonthEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1 - daysToMonday2 - 1));
+    let thisMonthStart, thisMonthEnd;
+    const filterType = data.filterType || 'month';
+
+    if (filterType === 'month') {
+      let now = new Date();
+      if (data.month !== undefined && data.year !== undefined) {
+        now = new Date(Date.UTC(data.year, data.month, 1));
+      }
+      const prevMonthLastSunday = getLastSunday(now.getUTCFullYear(), now.getUTCMonth() - 1);
+      prevMonthLastSunday.setUTCDate(prevMonthLastSunday.getUTCDate() + 1);
+      thisMonthStart = new Date(prevMonthLastSunday);
+
+      const thisMonthLastSunday = getLastSunday(now.getUTCFullYear(), now.getUTCMonth());
+      thisMonthEnd = new Date(thisMonthLastSunday);
+    } else if (filterType === 'year') {
+      let year = data.year !== undefined ? data.year : new Date().getUTCFullYear();
+      
+      const prevYearLastSunday = getLastSunday(year - 1, 11);
+      prevYearLastSunday.setUTCDate(prevYearLastSunday.getUTCDate() + 1);
+      thisMonthStart = new Date(prevYearLastSunday);
+
+      const thisYearLastSunday = getLastSunday(year, 11);
+      thisMonthEnd = new Date(thisYearLastSunday);
+    } else if (filterType === 'week') {
+      if (data.weekStartDate && data.weekEndDate) {
+         thisMonthStart = new Date(data.weekStartDate);
+         thisMonthEnd = new Date(data.weekEndDate);
+      } else {
+         let today = new Date();
+         let day = today.getUTCDay() || 7;
+         let monday = new Date(today);
+         monday.setUTCDate(today.getUTCDate() - day + 1);
+         thisMonthStart = new Date(monday);
+         
+         let sunday = new Date(monday);
+         sunday.setUTCDate(monday.getUTCDate() + 6);
+         thisMonthEnd = new Date(sunday);
+      }
+    }
 
     const weeks = [];
     let current = new Date(thisMonthStart);
 
     // Calculate the Monday of the current week to avoid showing future weeks
+    const now = new Date();
     const currentDay = now.getUTCDay();
     const currentDaysToMonday = currentDay === 0 ? 6 : currentDay - 1;
     const currentWeekMonday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - currentDaysToMonday));

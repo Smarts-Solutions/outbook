@@ -370,6 +370,7 @@ const TimesheetNewDesign = () => {
     setMisYearOffset(yOff);
     setMisPage(1);
     fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, mOff, misSelectedStaff.map(opt => opt.value).join(','), misFilterType, wOff, yOff);
+    fetchFollowUpList(1, followUpSearchTerm, followUpSelectedStaff.map(opt => opt.value).join(','), misFilterType, mOff, wOff, yOff);
   };
 
   const handleMisCurrentPeriod = () => {
@@ -378,6 +379,7 @@ const TimesheetNewDesign = () => {
     setMisYearOffset(0);
     setMisPage(1);
     fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, 0, misSelectedStaff.map(opt => opt.value).join(','), misFilterType, 0, 0);
+    fetchFollowUpList(1, followUpSearchTerm, followUpSelectedStaff.map(opt => opt.value).join(','), misFilterType, 0, 0, 0);
   };
 
   const handleMisNextPeriod = () => {
@@ -391,6 +393,7 @@ const TimesheetNewDesign = () => {
     setMisYearOffset(yOff);
     setMisPage(1);
     fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, mOff, misSelectedStaff.map(opt => opt.value).join(','), misFilterType, wOff, yOff);
+    fetchFollowUpList(1, followUpSearchTerm, followUpSelectedStaff.map(opt => opt.value).join(','), misFilterType, mOff, wOff, yOff);
   };
 
   const exportMisResourceCSV = async () => {
@@ -641,11 +644,42 @@ const TimesheetNewDesign = () => {
     }
   };
 
-  const fetchFollowUpList = async (pageToFetch = 1, search = followUpSearchTerm, staffIds = followUpSelectedStaff.map(opt => opt.value).join(',')) => {
+  const fetchFollowUpList = async (
+    pageToFetch = 1,
+    search = followUpSearchTerm,
+    staffIds = followUpSelectedStaff.map(opt => opt.value).join(','),
+    fType = misFilterType,
+    monthOffset = misMonthOffset,
+    wOffset = misWeekOffset,
+    yOffset = misYearOffset
+  ) => {
     if (isFollowUpLoading) return;
     setIsFollowUpLoading(true);
     try {
-      const res = await dispatch(getFollowUpList({ req: { StaffUserId: staffDetails?.id || 1, page: pageToFetch, limit: 20, search: search, staffIds: staffIds }, authToken: token })).unwrap();
+      const req = {
+        StaffUserId: staffDetails?.id || 1,
+        page: pageToFetch,
+        limit: 20,
+        search: search,
+        staffIds: staffIds,
+        filterType: fType,
+      };
+
+      if (fType === 'month') {
+        const d = getMisSelectedDate(monthOffset);
+        req.month = d.getMonth();
+        req.year = d.getFullYear();
+      } else if (fType === 'year') {
+        const d = new Date();
+        d.setFullYear(d.getFullYear() + yOffset);
+        req.year = d.getFullYear();
+      } else if (fType === 'week') {
+        const { start, end } = getMisWeekDates(wOffset);
+        req.weekStartDate = start;
+        req.weekEndDate = end;
+      }
+
+      const res = await dispatch(getFollowUpList({ req, authToken: token })).unwrap();
       if (res.status) {
         if (pageToFetch === 1) {
           setFollowUpList(res.data || []);
@@ -4264,6 +4298,7 @@ const TimesheetNewDesign = () => {
                         setMisYearOffset(0);
                         setMisPage(1);
                         fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, 0, misSelectedStaff.map(opt => opt.value).join(','), newType, 0, 0);
+                        fetchFollowUpList(1, followUpSearchTerm, followUpSelectedStaff.map(opt => opt.value).join(','), newType, 0, 0, 0);
                       }}
                       style={{ minWidth: '120px' }}
                     >
