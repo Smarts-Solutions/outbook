@@ -4531,18 +4531,26 @@ const deleteFilterId = async (Report) => {
 // Staff Work
 const getChangedRoleStaff = async (Report) => {
   const { data } = Report;
-  const { staffData } = data;
+  const { staffData, removedRoles } = data;
 
-  // console.log("Get Changed Role Staff:", staffData);
-  // console.log("Get Changed Role Staff:", staffData.role_id);
+  let rolesToQuery = (removedRoles && removedRoles.length > 0) ? removedRoles : [staffData.role_id];
+  let roles = rolesToQuery.map(r => Number(r));
+  if (roles.length === 0) roles = [Number(staffData.role_id)];
+
+  const placeholders = roles.map(() => '?').join(',');
+
   const query = `
-        SELECT 
+        SELECT DISTINCT
             staffs.id AS staff_id,
             CONCAT(staffs.first_name, ' ', staffs.last_name) AS staff_fullname
         FROM staffs
-        WHERE staffs.id != ? AND (staffs.role_id = ? OR staffs.role_id = 4) AND staffs.status = '1'
+        LEFT JOIN staff_other_role ON staff_other_role.staff_id = staffs.id
+        WHERE staffs.id != ? 
+        AND (staffs.role_id IN (${placeholders}) OR staff_other_role.role_id IN (${placeholders})) 
+        AND staffs.status = '1'
     `;
-  const [result] = await pool.execute(query, [staffData.id, staffData.role_id]);
+  const queryParams = [staffData.id, ...roles, ...roles];
+  const [result] = await pool.execute(query, queryParams);
   return { status: true, message: "Success.", data: result };
 };
 

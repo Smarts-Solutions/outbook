@@ -122,7 +122,7 @@ const createStaff = async (staff) => {
 };
 
 const getStaff = async (data) => {
- 
+
   let { page, limit, search, StaffUserId, line_manager_id } = data;
 
   let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId)
@@ -136,7 +136,7 @@ const getStaff = async (data) => {
   let role_name = rows[0].role_name?.toUpperCase();
 
   let where = "WHERE s.role_id != 12 ";
-  
+
   if (line_manager_id && line_manager_id.length > 0) {
     const ensureArr = (v) => {
       if (Array.isArray(v)) return v.filter(x => !["", null, undefined].includes(x));
@@ -336,8 +336,8 @@ const getStaff = async (data) => {
       `,
       [...searchParams, limit, offset]
     );
-  
-  
+
+
 
     // (
     //         SELECT sor.role_id
@@ -366,7 +366,7 @@ const getStaff = async (data) => {
 
 
 const getStaffNew = async (data) => {
- 
+
   let { page, limit, search, StaffUserId } = data;
 
   let LineManageStaffId = await LineManageStaffIdHelperFunctionForStaff(StaffUserId)
@@ -381,18 +381,18 @@ const getStaffNew = async (data) => {
 
   let where = "";
 
- if (role_name === "SUPERADMIN"|| role_name=="ADMIN") {
+  if (role_name === "SUPERADMIN" || role_name == "ADMIN") {
     where = "WHERE s.role_id != 12";
-} else {
+  } else {
     if (LineManageStaffId.length > 0) {
-        where = `
+      where = `
             WHERE s.role_id != 12
             AND s.id IN (${LineManageStaffId.join(",")})
         `;
     } else {
-        where = "WHERE 1 = 0";
+      where = "WHERE 1 = 0";
     }
-}
+  }
 
   // 🔍 SEARCH CONDITION
   let searchCondition = "";
@@ -522,8 +522,8 @@ const getStaffNew = async (data) => {
       `,
       [...searchParams, limit, offset]
     );
-  
-  
+
+
 
     // (
     //         SELECT sor.role_id
@@ -613,11 +613,11 @@ const getStaffByFilter = async (data) => {
     const lmArr = ensureArr(data.line_manager_id);
     if (lmArr.length > 0) {
       let subordinates = [];
-      for(const lm of lmArr) {
-         let sub = await LineManageStaffIdHelperFunctionForStaff(lm);
-         subordinates.push(...sub, lm);
+      for (const lm of lmArr) {
+        let sub = await LineManageStaffIdHelperFunctionForStaff(lm);
+        subordinates.push(...sub, lm);
       }
-      if(subordinates.length > 0) {
+      if (subordinates.length > 0) {
         subordinates = [...new Set(subordinates)];
         timesheetWhere += ` AND staffs.id IN (${subordinates.map(v => connection.escape(v)).join(',')})`;
       } else {
@@ -885,80 +885,117 @@ const updateStaff1 = async (staff) => {
 
 const updateStaff = async (staff) => {
   // const { id, ...fields } = staff;
-  const { id, page, limit, search, ...fields } = staff;
+  const { id, page, limit, search, transfer_to_staff_id, original_roles, ...fields } = staff;
   let email = fields.email;
 
   var other_role_id = null;
-  if(fields.role_id) {
+  if (fields.role_id) {
     let role_ids = fields.role_id;
     fields.role_id = Array.isArray(role_ids) ? role_ids?.[0] ?? null : role_ids ?? null;
     other_role_id = Array.isArray(role_ids) ? role_ids?.[1] ?? null : null;
   }
 
-  // Line Manage Code
-  let staff_to = fields.staff_to;
-  if (staff_to != "" && staff_to != undefined) {
-    let staff_by_query = `SELECT staff_by FROM line_managers WHERE staff_by = ?`;
-    let [staff_by_result] = await pool.execute(staff_by_query, [id]);
-    if (staff_by_result.length > 0) {
-      // console.log("staff_by_result", staff_by_result);
-      // console.log("staff_to", staff_to);
-      // console.log("staff_by", id);
+  const connection = await pool.getConnection();
+  await connection.beginTransaction();
+  try {
 
-      const staff_to_query = `UPDATE line_managers SET staff_to = ? WHERE staff_by = ?`;
-      const [staff_to_result] = await pool.execute(staff_to_query, [
-        staff_to,
-        id,
-      ]);
+    // Line Manage Code
+    let staff_to = fields.staff_to;
+    if (staff_to != "" && staff_to != undefined) {
+      let staff_by_query = `SELECT staff_by FROM line_managers WHERE staff_by = ?`;
+      let [staff_by_result] = await connection.execute(staff_by_query, [id]);
+      if (staff_by_result.length > 0) {
+        // console.log("staff_by_result", staff_by_result);
+        // console.log("staff_to", staff_to);
+        // console.log("staff_by", id);
+
+        const staff_to_query = `UPDATE line_managers SET staff_to = ? WHERE staff_by = ?`;
+        const [staff_to_result] = await connection.execute(staff_to_query, [
+          staff_to,
+          id,
+        ]);
+      } else {
+        const staff_to_query = `INSERT INTO line_managers (staff_by,staff_to) VALUES (?, ?)`;
+        const [staff_to_result] = await connection.execute(staff_to_query, [
+          id,
+          staff_to,
+        ]);
+      }
     } else {
-      const staff_to_query = `INSERT INTO line_managers (staff_by,staff_to) VALUES (?, ?)`;
-      const [staff_to_result] = await pool.execute(staff_to_query, [
-        id,
-        staff_to,
-      ]);
+      // await pool.execute(`DELETE FROM line_managers WHERE staff_by = ?`, [id]);
+      //  await pool.execute(`DELETE FROM line_managers WHERE staff_by = ?`, [id]);
     }
-  } else {
-    // await pool.execute(`DELETE FROM line_managers WHERE staff_by = ?`, [id]);
-    //  await pool.execute(`DELETE FROM line_managers WHERE staff_by = ?`, [id]);
-  }
-  // End Line Manage Code
+    // End Line Manage Code
 
-  // Exist Email Check
-  const checkQuery = `SELECT 1 FROM staffs WHERE email = ? AND id != ?`;
-  const [check] = await pool.execute(checkQuery, [email, id]);
-  if (check.length > 0) {
-    return { status: false, message: "Email Already Exists." };
-  }
-
-  // Exist Employee Number Check
-  const checkEmployeeNumberQuery = `SELECT 1 FROM staffs WHERE employee_number = ? AND id != ?`;
-  const [checkEmployeeNumber] = await pool.execute(checkEmployeeNumberQuery, [
-    fields.employee_number,
-    id,
-  ]);
-  if (checkEmployeeNumber.length > 0) {
-    return { status: false, message: "Employee Number Already Exists." };
-  }
-  // Create an array to hold the set clauses
-  const setClauses = [];
-  const values = [];
-  // Iterate over the fields and construct the set clauses dynamically
-  for (const [key, value] of Object.entries(fields)) {
-    if (key != "ip" && key != "StaffUserId" && key != "staff_to") {
-      setClauses.push(`${key} = ?`);
-      values.push(value);
+    // Exist Email Check
+    const checkQuery = `SELECT 1 FROM staffs WHERE email = ? AND id != ?`;
+    const [check] = await connection.execute(checkQuery, [email, id]);
+    if (check.length > 0) {
+      await connection.rollback();
+      connection.release();
+      return { status: false, message: "Email Already Exists." };
     }
-  }
-  // Add the id to the values array for the WHERE clause
-  values.push(id);
-  // Construct the final SQL query
-  const query = `
+
+    // Exist Employee Number Check
+    const checkEmployeeNumberQuery = `SELECT 1 FROM staffs WHERE employee_number = ? AND id != ?`;
+    const [checkEmployeeNumber] = await connection.execute(checkEmployeeNumberQuery, [
+      fields.employee_number,
+      id,
+    ]);
+    if (checkEmployeeNumber.length > 0) {
+      await connection.rollback();
+      connection.release();
+      return { status: false, message: "Employee Number Already Exists." };
+    }
+    // Create an array to hold the set clauses
+    const setClauses = [];
+    const values = [];
+    // Iterate over the fields and construct the set clauses dynamically
+    for (const [key, value] of Object.entries(fields)) {
+      if (key != "ip" && key != "StaffUserId" && key != "staff_to") {
+        setClauses.push(`${key} = ?`);
+        values.push(value);
+      }
+    }
+    // Add the id to the values array for the WHERE clause
+    values.push(id);
+    // Construct the final SQL query
+    const query = `
     UPDATE staffs
     SET ${setClauses.join(", ")}
     WHERE id = ?
     `;
-  try {
-    const [[existStatus]] = await pool.execute(
+    // Customer Transfer Logic
+    if (transfer_to_staff_id && original_roles) {
+      let new_roles = [];
+      if (fields.role_id) new_roles.push(Number(fields.role_id));
+      if (other_role_id) new_roles.push(Number(other_role_id));
+
+      let parsed_original_roles = Array.isArray(original_roles) 
+          ? original_roles 
+          : (typeof original_roles === 'string' ? original_roles.split(',').map(Number) : []);
+      const removedRoles = parsed_original_roles.filter(r => !new_roles.includes(Number(r)));
+      console.log("UPDATE_STAFF_TRANSFER:", { transfer_to_staff_id, original_roles, parsed_original_roles, new_roles, removedRoles });
+
+      for (let role of removedRoles) {
+        if ([3, 4, 6].includes(Number(role))) {
+          await connection.execute(`UPDATE jobs SET allocated_to = ? WHERE allocated_to = ?`, [transfer_to_staff_id, id]);
+          await connection.execute(`UPDATE jobs SET account_manager_id = ? WHERE account_manager_id = ?`, [transfer_to_staff_id, id]);
+          await connection.execute(`UPDATE customers SET account_manager_id = ? WHERE account_manager_id = ?`, [transfer_to_staff_id, id]);
+          await connection.execute(`UPDATE IGNORE customer_service_account_managers SET account_manager_id = ? WHERE account_manager_id = ?`, [transfer_to_staff_id, id]);
+          await connection.execute(`UPDATE jobs SET reviewer = ? WHERE reviewer = ?`, [transfer_to_staff_id, id]);
+        }
+      }
+      // Transfer generic allowed staffs
+      await connection.execute(`UPDATE IGNORE job_allowed_staffs SET staff_id = ? WHERE staff_id = ?`, [transfer_to_staff_id, id]);
+      // Transfer Creator and Portfolio ownership
+      await connection.execute(`UPDATE clients SET staff_created_id = ? WHERE staff_created_id = ?`, [transfer_to_staff_id, id]);
+      await connection.execute(`UPDATE customers SET staff_id = ? WHERE staff_id = ?`, [transfer_to_staff_id, id]);
+      await connection.execute(`UPDATE jobs SET staff_created_id = ? WHERE staff_created_id = ?`, [transfer_to_staff_id, id]);
+      await connection.execute(`UPDATE staff_portfolio SET staff_id = ? WHERE staff_id = ?`, [transfer_to_staff_id, id]);
+    }
+
+    const [[existStatus]] = await connection.execute(
       `SELECT status FROM staffs WHERE id = ?`,
       [id]
     );
@@ -974,22 +1011,22 @@ const updateStaff = async (staff) => {
 
 
 
-    const [rows] = await pool.execute(query, values);
+    const [rows] = await connection.execute(query, values);
 
     if (fields.role_id !== undefined) {
       if (other_role_id != null) {
         const checkOtherRoleQuery = `SELECT 1 FROM staff_other_role WHERE staff_id = ?`;
-        const [checkOtherRole] = await pool.execute(checkOtherRoleQuery, [id]);
+        const [checkOtherRole] = await connection.execute(checkOtherRoleQuery, [id]);
         if (checkOtherRole.length === 0) {
           const staff_other_role_query = `INSERT INTO staff_other_role (staff_id,role_id) VALUES (?, ?)`;
-          await pool.execute(staff_other_role_query, [id, other_role_id]);
+          await connection.execute(staff_other_role_query, [id, other_role_id]);
         } else {
           const staff_other_role_query = `UPDATE staff_other_role SET role_id = ? WHERE staff_id = ?`;
-          await pool.execute(staff_other_role_query, [other_role_id, id]);
+          await connection.execute(staff_other_role_query, [other_role_id, id]);
         }
       } else {
-         const deleteOtherRoleQuery = `DELETE FROM staff_other_role WHERE staff_id = ?`;
-         await pool.execute(deleteOtherRoleQuery, [id]);
+        const deleteOtherRoleQuery = `DELETE FROM staff_other_role WHERE staff_id = ?`;
+        await connection.execute(deleteOtherRoleQuery, [id]);
       }
     }
 
@@ -1005,12 +1042,19 @@ const updateStaff = async (staff) => {
         module_id: staff.id,
       });
     }
+    await connection.commit();
+    connection.release();
+
     return {
       status: true,
       message: "staff updated successfully.",
       data: rows.affectedRows,
     };
   } catch (err) {
+    if (connection) {
+      await connection.rollback();
+      connection.release();
+    }
     console.log("Error updating staff:", err);
     return { status: false, message: "Error updating staff" };
   }
@@ -1216,22 +1260,22 @@ const getLineManagerStaff = async (staff) => {
 
   let LineManageStaffId = await LineManageStaffIdHelperFunctionForStaff(StaffUserId);
   const rowsRole = await QueryRoleHelperFunction(StaffUserId);
-  
+
   let role_name = rowsRole[0]?.role_name?.toUpperCase();
 
   let where = "";
 
   if (role_name === "SUPERADMIN") {
-      where = "WHERE s.role_id != 12";
+    where = "WHERE s.role_id != 12";
   } else {
-      if (LineManageStaffId.length > 0) {
-          where = `
+    if (LineManageStaffId.length > 0) {
+      where = `
               WHERE s.role_id != 12
               AND s.id IN (${LineManageStaffId.join(",")})
           `;
-      } else {
-          where = "WHERE 1 = 0";
-      }
+    } else {
+      where = "WHERE 1 = 0";
+    }
   }
 
   try {
@@ -1319,7 +1363,7 @@ const getLineManagerStaff = async (staff) => {
     ORDER BY s.first_name ASC
       `
     );
-  
+
     return {
       status: true,
       message: "Success",
@@ -1372,7 +1416,7 @@ const getMyLineManagers = async (staff_by_id) => {
       FROM staffs
       WHERE staffs.id IN (${LineManageStaffId}) AND staffs.status = '1'
     `;
-    
+
     const [result] = await connection.execute(query);
     return result;
   } catch (err) {

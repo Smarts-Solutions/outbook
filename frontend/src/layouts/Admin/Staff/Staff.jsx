@@ -57,6 +57,7 @@ const StaffPage = () => {
   });
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [assignCustomerData, setAssignCustomerData] = useState([]);
+  const [transferStaffData, setTransferStaffData] = useState(null);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -725,8 +726,9 @@ const StaffPage = () => {
         employee_number: values.employee_number,
         staff_to: values.staff_to,
         created_by: StaffUserId.id,
-        hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"
-          }`,
+        hourminute: `${budgetedHours.hours || "00"}:${budgetedHours.minutes || "00"}`,
+        transfer_to_staff_id: transferStaffData ? (transferStaffData.staff_id || transferStaffData.id) : null,
+        original_roles: [Number(editStaffData.role_id), Number(editStaffData.staff_other_role_id)].filter(r => r),
       };
       if (editStaff) {
         req.id = editStaffData && editStaffData.id;
@@ -753,6 +755,7 @@ const StaffPage = () => {
               setAddStaff(false);
               setEditStaff(false);
               setEditStaffData({});
+              setTransferStaffData(null);
               SetRefresh(!refresh);
               formik.resetForm();
               window.location.reload();
@@ -1095,10 +1098,10 @@ const StaffPage = () => {
     getCustomersName(deleteStaff?.id);
   }, [deleteStaff?.id, token]);
 
-  const getChangedRoleStaff = async (staffData) => {
+  const getChangedRoleStaff = async (staffData, removedRoles) => {
     getCustomersNameChangeRole(staffData.id);
     try {
-      const req = { action: "getChangedRoleStaff", staffData: staffData };
+      const req = { action: "getChangedRoleStaff", staffData: staffData, removedRoles: removedRoles };
       const data = { req: req, authToken: token };
       await dispatch(getAllTaskByStaff(data))
         .unwrap()
@@ -1122,50 +1125,52 @@ const StaffPage = () => {
   };
 
   useEffect(() => {
+    let newRoles = [];
+    if (Array.isArray(formik.values.role)) {
+      newRoles = formik.values.role.map(r => Number(r));
+    } else {
+      newRoles = [Number(formik.values.role)];
+    }
+
+    const originalRoles = [];
+    if (editStaffData.role_id) originalRoles.push(Number(editStaffData.role_id));
+    if (editStaffData.staff_other_role_id) originalRoles.push(Number(editStaffData.staff_other_role_id));
+
+    const removedCustomerRoles = [3, 4, 6].filter(r => originalRoles.includes(r) && !newRoles.includes(r));
+    const isCustomerRoleRemoved = removedCustomerRoles.length > 0;
+
     const fetchChangedRoleStaff = async () => {
-      let newRoles = [];
-      if (Array.isArray(formik.values.role)) {
-        newRoles = formik.values.role.map(r => Number(r));
-      } else {
-        newRoles = [Number(formik.values.role)];
-      }
-
-      const originalRoles = [];
-      if (editStaffData.role_id) originalRoles.push(Number(editStaffData.role_id));
-      if (editStaffData.staff_other_role_id) originalRoles.push(Number(editStaffData.staff_other_role_id));
-
-      const isCustomerRoleRemoved = [3, 4, 6].some(r => originalRoles.includes(r) && !newRoles.includes(r));
-
       if (
-        editStaffData.id !== undefined &&
-        isCustomerRoleRemoved
+        editStaffData.id !== undefined
       ) {
-        await getChangedRoleStaff(editStaffData);
+        await getChangedRoleStaff(editStaffData, removedCustomerRoles);
         setChangeRole(true);
         setEditStaff(false);
       }
     };
-    
-    const originalRoles = [];
-    if (editStaffData.role_id) originalRoles.push(Number(editStaffData.role_id));
-    if (editStaffData.staff_other_role_id) originalRoles.push(Number(editStaffData.staff_other_role_id));
 
     if (
       [3, 4, 6].some(r => originalRoles.includes(r)) &&
       editStaffData.is_customer_exist == 1
     ) {
-      fetchChangedRoleStaff();
+      if (isCustomerRoleRemoved) {
+         if (!transferStaffData) {
+            fetchChangedRoleStaff();
+         }
+      } else {
+         if (transferStaffData) {
+            setTransferStaffData(null);
+         }
+      }
     }
   }, [formik.values.role]);
 
   useEffect(() => {
     const fetchChangedStatusStaff = async () => {
       if (
-        editStaffData.id !== undefined &&
-        formik.values.status === "0" &&
-        editStaffData.status === "1"
+        editStaffData.id !== undefined
       ) {
-        await getChangedRoleStaff(editStaffData);
+        await getChangedRoleStaff(editStaffData, [3, 4, 6].filter(r => originalRoles.includes(r)));
         setChangeStatus(true);
         setEditStaff(false);
       }
@@ -1179,99 +1184,28 @@ const StaffPage = () => {
       [3, 4, 6].some(r => originalRoles.includes(r)) &&
       editStaffData.is_customer_exist == 1
     ) {
-      fetchChangedStatusStaff();
+      if (formik.values.status === "0" && editStaffData.status === "1") {
+         if (!transferStaffData) {
+            fetchChangedStatusStaff();
+         }
+      } else {
+         if (transferStaffData) {
+            setTransferStaffData(null);
+         }
+      }
     }
   }, [formik.values.status]);
 
   const handleChangeRole = async () => {
-    try {
-      setLoading(true);
-      const req = {
-        action: "staffRoleChangeUpdate",
-        editStaffData: editStaffData,
-        updateData: formik.values,
-        selectedStaff: selectedStaff,
-      };
-      const data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then((res) => {
-          if (res.status) {
-            setChangeRole(false);
-            setSelectedStaff(null);
-            formik.resetForm();
-            setEditStaffData({});
-            Swal.fire({
-              title: "Success!",
-              text: "Staff role updated successfully.",
-              icon: "success",
-              confirmButtonText: "OK",
-            });
-            SetRefresh(!refresh);
-          } else {
-            Swal.fire({
-              title: "Error!",
-              text: "Failed to update staff role.",
-              icon: "error",
-              confirmButtonText: "OK",
-            });
-          }
-        })
-        .catch((err) => {
-
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    } catch (error) {
-      console.error("Error fetching staff tasks:", error);
-      setLoading(false);
-    }
+    setTransferStaffData(selectedStaff);
+    setChangeRole(false);
+    setEditStaff(true);
   };
 
   const handleChangeStatusTransfer = async () => {
-    try {
-      setLoading(true);
-      const req = {
-        action: "staffStatusChangeUpdate",
-        editStaffData: editStaffData,
-        updateData: formik.values,
-        selectedStaff: selectedStaff,
-      };
-      const data = { req: req, authToken: token };
-      await dispatch(getAllTaskByStaff(data))
-        .unwrap()
-        .then((res) => {
-          if (res.status) {
-            setChangeStatus(false);
-            setSelectedStaff(null);
-            formik.resetForm();
-            setEditStaffData({});
-            Swal.fire({
-              title: "Success!",
-              text: "Staff status inactivated successfully.",
-              icon: "success",
-              confirmButtonText: "OK",
-            });
-            SetRefresh(!refresh);
-          } else {
-            Swal.fire({
-              title: "Error!",
-              text: "Failed to update staff status.",
-              icon: "error",
-              confirmButtonText: "OK",
-            });
-          }
-        })
-        .catch((err) => {
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    } catch (error) {
-      console.error("Error updating staff status:", error);
-      setLoading(false);
-    }
+    setTransferStaffData(selectedStaff);
+    setChangeStatus(false);
+    setEditStaff(true);
   };
 
   const handleExport = async () => {
@@ -1945,14 +1879,14 @@ const StaffPage = () => {
               classNamePrefix="select"
               placeholder="Choose Staff"
               options={changedRoleStaffData?.map((staff) => ({
-                value: staff.id,
+                value: staff.id || staff.staff_id,
                 label: staff.staff_fullname,
                 staffData: staff,
               }))}
               value={
                 selectedStaff
                   ? {
-                    value: selectedStaff.id,
+                    value: selectedStaff.id || selectedStaff.staff_id,
                     label: selectedStaff.staff_fullname,
                   }
                   : null
@@ -1980,9 +1914,8 @@ const StaffPage = () => {
               onClick={() => {
                 setChangeRole(false);
                 setSelectedStaff(null);
-                formik.resetForm();
-                setEditStaffData({});
-                setChangedRoleStaffData([]);
+                setTransferStaffData(null);
+                setEditStaff(true);
               }}
               className="btn btn-secondary"
             >
@@ -2040,14 +1973,14 @@ const StaffPage = () => {
               classNamePrefix="select"
               placeholder="Choose Staff"
               options={changedRoleStaffData?.map((staff) => ({
-                value: staff.id,
+                value: staff.id || staff.staff_id,
                 label: staff.staff_fullname,
                 staffData: staff,
               }))}
               value={
                 selectedStaff
                   ? {
-                    value: selectedStaff.id,
+                    value: selectedStaff.id || selectedStaff.staff_id,
                     label: selectedStaff.staff_fullname,
                   }
                   : null
@@ -2075,9 +2008,8 @@ const StaffPage = () => {
               onClick={() => {
                 setChangeStatus(false);
                 setSelectedStaff(null);
-                formik.resetForm();
-                setEditStaffData({});
-                setChangedRoleStaffData([]);
+                setTransferStaffData(null);
+                setEditStaff(true);
               }}
               className="btn btn-secondary"
             >
