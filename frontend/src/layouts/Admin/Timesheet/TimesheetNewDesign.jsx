@@ -4577,7 +4577,7 @@ const TimesheetNewDesign = () => {
                     </div>
                   </div>
                 </div>
-                <ul className="nav timesheet-tabs" id="resourceTab" role="tablist">
+                <ul className="nav timesheet-tabs mt-3" id="resourceTab" role="tablist">
                   <li role="presentation">
                     <button className={`${activeMisTab === 'employee' ? 'active' : ''}`} id="employee-tab" data-bs-toggle="tab" data-bs-target="#employee-tab-pane" type="button" role="tab" aria-controls="employee-tab-pane" aria-selected={activeMisTab === 'employee'} onClick={() => handleMisTabChange('employee')}>Staff</button>
                   </li>
@@ -4586,7 +4586,7 @@ const TimesheetNewDesign = () => {
                   </li>
                 </ul>
 
-                <div className="row mt-3 mb-3 align-items-center justify-content-between px-3">
+                <div className="row mt-3 mb-3 align-items-center justify-content-between">
                   <div className="col-md-6 d-flex gap-2">
                     <input
                       type="text"
