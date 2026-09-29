@@ -153,6 +153,10 @@ const Setting = () => {
     allocated_on_limit: 0,
     received_on_limit: 0,
     missing_date_limit: 0,
+    manager_otp_number: "",
+    whatsapp_phone_number_id: "",
+    whatsapp_access_token: "",
+    whatsapp_template_name: ""
   });
 
   const fetchSystemSettings = async () => {
@@ -166,6 +170,10 @@ const Setting = () => {
             allocated_on_limit: res.data.allocated_on_limit ?? 0,
             received_on_limit: res.data.received_on_limit ?? 0,
             missing_date_limit: res.data.missing_date_limit ?? 0,
+            manager_otp_number: res.data.manager_otp_number ?? "",
+            whatsapp_phone_number_id: res.data.whatsapp_phone_number_id ?? "",
+            whatsapp_access_token: res.data.whatsapp_access_token ?? "",
+            whatsapp_template_name: res.data.whatsapp_template_name ?? ""
           });
         }
       })
@@ -3004,6 +3012,11 @@ const Setting = () => {
       label: "Job Date Settings",
       icon: <Settings size={16} className="me-1" />,
     },
+    {
+      id: "12",
+      label: "SMS & OTP Settings",
+      icon: <Settings size={16} className="me-1" />,
+    },
   ];
 
   useEffect(() => {
@@ -3643,6 +3656,88 @@ const Setting = () => {
                       { id: 3, name: "Received Date Limit", limit: systemSettings.received_on_limit, key: "received_on_limit" },
                     ]}
                   />
+                </div>
+              </div>
+            </div>
+
+            {/* Tab 12: SMS & OTP Settings */}
+            <div
+              className={`tab-pane fade ${getShowTabId === "12" ? "show active" : ""}`}
+            >
+              <div className="report-data row">
+                <div className="col-lg-12 d-flex align-items-center mb-4">
+                  <div className="tab-title">
+                    <h3 className="mt-0">SMS & OTP Settings</h3>
+                  </div>
+                </div>
+
+                <div className="col-lg-8">
+                  <div className="card shadow-sm border-0">
+                    <div className="card-body p-4">
+                      <div className="mb-4">
+                        <label className="form-label fw-bold">Manager Phone Number (To receive OTPs)</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="e.g. 919876543210"
+                          value={systemSettings.manager_otp_number}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, "");
+                            setSystemSettings({ ...systemSettings, manager_otp_number: value });
+                          }}
+                        />
+                        <small className="text-muted">Enter country code without + sign (e.g. 91 for India, 44 for UK)</small>
+                      </div>
+
+                      <div className="mb-4">
+                        <label className="form-label fw-bold">WhatsApp Phone Number ID</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="e.g. 123456789012345"
+                          value={systemSettings.whatsapp_phone_number_id}
+                          onChange={(e) => setSystemSettings({ ...systemSettings, whatsapp_phone_number_id: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="mb-4">
+                        <label className="form-label fw-bold">WhatsApp Access Token</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="e.g. EAALx..."
+                          value={systemSettings.whatsapp_access_token}
+                          onChange={(e) => setSystemSettings({ ...systemSettings, whatsapp_access_token: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="mb-4">
+                        <label className="form-label fw-bold">WhatsApp Template Name</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="e.g. job_status_otp"
+                          value={systemSettings.whatsapp_template_name}
+                          onChange={(e) => setSystemSettings({ ...systemSettings, whatsapp_template_name: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="text-end mt-4">
+                        <button
+                          className="btn btn-primary px-4 fw-bold shadow-sm"
+                          onClick={() => updateSystemSettingsAction(systemSettings)}
+                          disabled={loading}
+                        >
+                          {loading ? (
+                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                          ) : (
+                            <Save size={16} className="me-2" />
+                          )}
+                          Save Settings
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import {
   Update_Customer_Status,
   Update_Status,
+  SendJobStatusOtp,
+  VerifyJobStatusOtp
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
@@ -279,8 +281,59 @@ const JobStatus = () => {
     });
   };
 
-  const handleStatusChange = (e, row) => {
+  const handleStatusChange = async (e, row) => {
     const Id = e.target.value;
+    const selectedStatus = statusDataAll.find((s) => Number(s.id) === Number(Id));
+    
+    if (selectedStatus && selectedStatus.name.toLowerCase() === "complete") {
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "You are about to mark this job as Complete. An OTP will be sent to the manager's WhatsApp.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Send OTP",
+        cancelButtonText: "No, cancel",
+      });
+
+      if (result.isConfirmed) {
+        try {
+          const req = { job_id: row.job_id };
+          const res = await dispatch(SendJobStatusOtp({ req, authToken: token })).unwrap();
+          
+          if (res.status) {
+            const { value: otp } = await Swal.fire({
+              title: "Enter OTP",
+              input: "text",
+              inputLabel: res.message || "OTP sent to manager's WhatsApp",
+              inputPlaceholder: "Enter 6-digit OTP",
+              showCancelButton: true,
+              inputValidator: (value) => {
+                if (!value) return "You need to write something!";
+                if (value.length !== 6) return "OTP must be 6 digits!";
+              }
+            });
+
+            if (otp) {
+              const verifyReq = { job_id: row.job_id, otp_code: otp, status_type: Number(Id) };
+              const verifyRes = await dispatch(VerifyJobStatusOtp({ req: verifyReq, authToken: token })).unwrap();
+              
+              if (verifyRes.status) {
+                Swal.fire({ title: "Success", text: verifyRes.message, icon: "success", timer: 1000, showConfirmButton: false });
+                GetLinkedData();
+              } else {
+                Swal.fire({ title: "Error", text: verifyRes.message, icon: "error" });
+              }
+            }
+          } else {
+            Swal.fire({ title: "Error", text: res.message, icon: "error" });
+          }
+        } catch (error) {
+          Swal.fire({ title: "Error", text: "An error occurred while sending OTP.", icon: "error" });
+        }
+      }
+      return;
+    }
+
     Swal.fire({
       title: "Are you sure?",
       text: "Do you want to change the status?",

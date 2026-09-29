@@ -603,6 +603,30 @@ export async function UPDATE_STATUS(data, token) {
   }
 }
 
+export async function SEND_JOB_STATUS_OTP(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}sendJobStatusOtp`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
+export async function VERIFY_JOB_STATUS_OTP(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}verifyJobStatusOtp`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
 export async function getcustomerschecklist(data, token) {
   try {
     const res = await axios.post(`${Config.base_url}getcustomerschecklist`, data, {

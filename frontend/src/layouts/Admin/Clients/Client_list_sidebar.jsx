@@ -6,6 +6,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {
   JobAction,
   Update_Status,
+  SendJobStatusOtp,
+  VerifyJobStatusOtp,
   getAllCustomerDropDown,
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";
@@ -698,8 +700,60 @@ const ClientLists = () => {
     },
   ];
 
-  const handleStatusChange = (e, row) => {
+  const handleStatusChange = async (e, row) => {
     const Id = e.target.value;
+    const selectedStatus = statusDataAll.find((s) => Number(s.id) === Number(Id));
+    
+    if (selectedStatus && selectedStatus.name.toLowerCase() === "complete") {
+      const result = await sweatalert.fire({
+        title: "Are you sure?",
+        text: "You are about to mark this job as Complete. An OTP will be sent to the manager's WhatsApp.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Send OTP",
+        cancelButtonText: "No, cancel",
+      });
+
+      if (result.isConfirmed) {
+        try {
+          const req = { job_id: row.job_id };
+          const res = await dispatch(SendJobStatusOtp({ req, authToken: token })).unwrap();
+          
+          if (res.status) {
+            const { value: otp } = await sweatalert.fire({
+              title: "Enter OTP",
+              input: "text",
+              inputLabel: res.message || "OTP sent to manager's WhatsApp",
+              inputPlaceholder: "Enter 6-digit OTP",
+              showCancelButton: true,
+              inputValidator: (value) => {
+                if (!value) return "You need to write something!";
+                if (value.length !== 6) return "OTP must be 6 digits!";
+              }
+            });
+
+            if (otp) {
+              const verifyReq = { job_id: row.job_id, otp_code: otp, status_type: Number(Id) };
+              const verifyRes = await dispatch(VerifyJobStatusOtp({ req: verifyReq, authToken: token })).unwrap();
+              
+              if (verifyRes.status) {
+                sweatalert.fire({ title: "Success", text: verifyRes.message, icon: "success", timer: 1000, showConfirmButton: false });
+                setStatusId(Id);
+                JobDetails(currentPage, pageSize, searchTerm);
+              } else {
+                sweatalert.fire({ title: "Error", text: verifyRes.message, icon: "error" });
+              }
+            }
+          } else {
+            sweatalert.fire({ title: "Error", text: res.message, icon: "error" });
+          }
+        } catch (error) {
+          sweatalert.fire({ title: "Error", text: "An error occurred while sending OTP.", icon: "error" });
+        }
+      }
+      return;
+    }
+
     sweatalert
       .fire({
         title: "Are you sure?",

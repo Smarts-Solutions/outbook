@@ -2,6 +2,8 @@
 const { query } = require('../../config/database');
 const jobModel = require('../../models/jobModel');
 const taskTimeSheetModel = require('../../models/taskTimeSheetModel');
+const otpModel = require('../../models/otpModel');
+const axios = require('axios');
 
 // Job Work .....
 const getAddJobData = async (job) => {
@@ -174,7 +176,63 @@ const getJobTimeLine = async (job) => {
   return jobModel.getJobTimeLine(job);
 };
 
+const sendJobStatusOtp = async (data) => {
+  try {
+    const { jobId, requestedBy, settings } = data;
+    // Generate a 6-digit random OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    await otpModel.createOtp(jobId, requestedBy, otpCode);
+    // Send OTP via WhatsApp Cloud API
+    if (settings && settings.manager_otp_number && settings.whatsapp_phone_number_id && settings.whatsapp_access_token) {
+      const url = `https://graph.facebook.com/v17.0/${settings.whatsapp_phone_number_id}/messages`;
+      const payload = {
+        messaging_product: "whatsapp",
+        to: settings.manager_otp_number,
+        type: "template",
+        template: {
+          name: settings.whatsapp_template_name || "job_status_otp",
+          language: {
+            code: "en"
+          },
+          components: [
+            {
+              type: "body",
+              parameters: [
+                {
+                  type: "text",
+                  text: otpCode
+                }
+              ]
+            }
+          ]
+        }
+      };
+      const headers = {
+        'Authorization': `Bearer ${settings.whatsapp_access_token}`,
+        'Content-Type': 'application/json'
+      };
+      await axios.post(url, payload, { headers });
+      console.log(`WhatsApp OTP sent to ${settings.manager_otp_number}: OTP is ${otpCode}`);
+    } else {
+      console.log(`WhatsApp API not fully configured. OTP generated is ${otpCode}`);
+    }
 
+    return { status: true, message: "OTP sent successfully." };
+  } catch (error) {
+    return { status: false, message: "Failed to send OTP.", error: error.message };
+  }
+};
+
+const verifyJobStatusOtp = async (data) => {
+  const { jobId, otpCode } = data;
+  try {
+    const result = await otpModel.verifyOtp(jobId, otpCode);
+    return result;
+  } catch (error) {
+    return { status: false, message: "Failed to verify OTP.", error: error.message };
+  }
+};
 
 
 module.exports = {
@@ -197,5 +255,7 @@ module.exports = {
   addJobDocument,
   editDraft,
   getJobTimeLine,
-  uploadDocumentMissingLogAndQuery
+  uploadDocumentMissingLogAndQuery,
+  sendJobStatusOtp,
+  verifyJobStatusOtp
  };

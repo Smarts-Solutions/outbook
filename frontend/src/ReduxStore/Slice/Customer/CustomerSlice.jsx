@@ -30,6 +30,8 @@ import {
   UPDATE_CUSTOMER_STATUS,
   GET_JOB_TIMELINE,
   UPDATE_STATUS,
+  SEND_JOB_STATUS_OTP,
+  VERIFY_JOB_STATUS_OTP,
   getcustomerschecklist,
   get_All_Customer_DropDown,
   delete_Customer,
@@ -687,6 +689,32 @@ export const Update_Status = createAsyncThunk(
       };
       const res = await UPDATE_STATUS(updatedReq, authToken);
       return await res;
+    } catch (err) {
+      throw err;
+    }
+  }
+);
+
+export const SendJobStatusOtp = createAsyncThunk(
+  "sendJobStatusOtp",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      const res = await SEND_JOB_STATUS_OTP(req, authToken);
+      return res;
+    } catch (err) {
+      throw err;
+    }
+  }
+);
+
+export const VerifyJobStatusOtp = createAsyncThunk(
+  "verifyJobStatusOtp",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      const res = await VERIFY_JOB_STATUS_OTP(req, authToken);
+      return res;
     } catch (err) {
       throw err;
     }

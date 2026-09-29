@@ -11,16 +11,24 @@ const getSettings = async () => {
 };
 
 const updateSettings = async (settings) => {
-    const { allocated_on_limit, received_on_limit, missing_date_limit } = settings;
+    const { 
+        allocated_on_limit, 
+        received_on_limit, 
+        missing_date_limit,
+        manager_otp_number,
+        whatsapp_phone_number_id,
+        whatsapp_access_token,
+        whatsapp_template_name 
+    } = settings;
     try {
         const existing = await getSettings();
         if (existing) {
-            const query = `UPDATE system_settings SET allocated_on_limit = ?, received_on_limit = ?, missing_date_limit = ? WHERE id = ?`;
-            const [result] = await pool.execute(query, [allocated_on_limit, received_on_limit, missing_date_limit, existing.id]);
+            const query = `UPDATE system_settings SET allocated_on_limit = ?, received_on_limit = ?, missing_date_limit = ?, manager_otp_number = ?, whatsapp_phone_number_id = ?, whatsapp_access_token = ?, whatsapp_template_name = ? WHERE id = ?`;
+            const [result] = await pool.execute(query, [allocated_on_limit, received_on_limit, missing_date_limit, manager_otp_number, whatsapp_phone_number_id, whatsapp_access_token, whatsapp_template_name, existing.id]);
             return result;
         } else {
-            const query = `INSERT INTO system_settings (allocated_on_limit, received_on_limit, missing_date_limit) VALUES (?, ?, ?)`;
-            const [result] = await pool.execute(query, [allocated_on_limit, received_on_limit, missing_date_limit]);
+            const query = `INSERT INTO system_settings (allocated_on_limit, received_on_limit, missing_date_limit, manager_otp_number, whatsapp_phone_number_id, whatsapp_access_token, whatsapp_template_name) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+            const [result] = await pool.execute(query, [allocated_on_limit, received_on_limit, missing_date_limit, manager_otp_number, whatsapp_phone_number_id, whatsapp_access_token, whatsapp_template_name]);
             return result;
         }
     } catch (err) {
