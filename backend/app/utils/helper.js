@@ -463,6 +463,8 @@ async function LineManageStaffIdHelperFunctionForStaff(staff_id) {
 
 
 async function QueryRoleHelperFunction(staff_id) {
+ 
+
   const QueryRole = `
   SELECT
     staffs.id AS id,
@@ -473,11 +475,14 @@ async function QueryRoleHelperFunction(staff_id) {
   JOIN
     roles ON roles.id = staffs.role_id
   WHERE
-    staffs.id = ${staff_id}
+    staffs.id = ${staff_id} 
   LIMIT 1
   `
+  
+
   const [rows] = await pool.execute(QueryRole);
   return rows;
+
 }
 
 async function JobStatusUpdate(job_id, status_type, status_update_date) {
