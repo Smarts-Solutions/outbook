@@ -99,7 +99,7 @@ const TimesheetNewDesign = () => {
   const [misData, setMisData] = useState([]);
   const [isMisLoading, setIsMisLoading] = useState(false);
   const [misPage, setMisPage] = useState(1);
-  const [misPageSize, setMisPageSize] = useState(10);
+  const [misPageSize, setMisPageSize] = useState(50);
   const [misSearchTerm, setMisSearchTerm] = useState("");
   const [misSelectedStaff, setMisSelectedStaff] = useState([]);
   const [misStaffOptions, setMisStaffOptions] = useState([]);
