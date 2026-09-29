@@ -4450,6 +4450,7 @@ const TimesheetNewDesign = () => {
                             cursor={{
                               fill: "rgba(0,0,0,0.03)",
                             }}
+                            wrapperStyle={{ zIndex: 1000 }}
                           />
 
                           <Bar
@@ -4608,7 +4609,19 @@ const TimesheetNewDesign = () => {
                   <div className="timesheet-table-header-div-left w-100 d-flex justify-content-between align-items-center">
                     <div>
                       <div className="tab-title"><h3 className="mt-0">Resource utilisation</h3></div>
-                      <p className="page-subtitle mb-0 mt-2">Billable hours ÷ available hours (net of leave) for {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}.</p>
+                      <p className="page-subtitle mb-0 mt-2">Billable hours ÷ available hours (net of leave) for {(() => {
+                        if (misFilterType === 'month') {
+                          return getMisSelectedDate(misMonthOffset).toLocaleString('default', { month: 'long', year: 'numeric' });
+                        } else if (misFilterType === 'year') {
+                          const d = new Date();
+                          return (d.getFullYear() + misYearOffset).toString();
+                        } else if (misFilterType === 'week') {
+                          const { start, end } = getMisWeekDates(misWeekOffset);
+                          const s = new Date(start);
+                          const e = new Date(end);
+                          return `${s.getDate()} ${s.toLocaleString('default', {month:'short'})} - ${e.getDate()} ${e.toLocaleString('default', {month:'short'})} ${e.getFullYear()}`;
+                        }
+                      })()}.</p>
                     </div>
                   </div>
                 </div>
