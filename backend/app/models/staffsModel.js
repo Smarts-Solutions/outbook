@@ -992,7 +992,11 @@ const updateStaff = async (staff) => {
       await connection.execute(`UPDATE clients SET staff_created_id = ? WHERE staff_created_id = ?`, [transfer_to_staff_id, id]);
       await connection.execute(`UPDATE customers SET staff_id = ? WHERE staff_id = ?`, [transfer_to_staff_id, id]);
       await connection.execute(`UPDATE jobs SET staff_created_id = ? WHERE staff_created_id = ?`, [transfer_to_staff_id, id]);
-      await connection.execute(`UPDATE staff_portfolio SET staff_id = ? WHERE staff_id = ?`, [transfer_to_staff_id, id]);
+      
+      // Use UPDATE IGNORE to prevent duplicate key errors if the new staff already has the customer in their portfolio
+      await connection.execute(`UPDATE IGNORE staff_portfolio SET staff_id = ? WHERE staff_id = ?`, [transfer_to_staff_id, id]);
+      // Delete remaining ones that couldn't be transferred (because they were duplicates)
+      await connection.execute(`DELETE FROM staff_portfolio WHERE staff_id = ?`, [id]);
     }
 
     const [[existStatus]] = await connection.execute(
