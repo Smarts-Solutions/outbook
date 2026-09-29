@@ -1,4 +1,4 @@
-const { pool } = require('../../config/database');
+const pool = require('../config/database');
 
 const createOtp = async (jobId, requestedBy, otpCode) => {
     const expiresAt = new Date();

@@ -156,7 +156,7 @@ const Setting = () => {
     manager_otp_number: "",
     whatsapp_phone_number_id: "",
     whatsapp_access_token: "",
-    whatsapp_template_name: ""
+    whatsapp_template_name: "",
   });
 
   const fetchSystemSettings = async () => {
@@ -173,7 +173,7 @@ const Setting = () => {
             manager_otp_number: res.data.manager_otp_number ?? "",
             whatsapp_phone_number_id: res.data.whatsapp_phone_number_id ?? "",
             whatsapp_access_token: res.data.whatsapp_access_token ?? "",
-            whatsapp_template_name: res.data.whatsapp_template_name ?? ""
+            whatsapp_template_name: res.data.whatsapp_template_name ?? "",
           });
         }
       })
@@ -200,7 +200,7 @@ const Setting = () => {
   };
 
   useEffect(() => {
-    if (getShowTabId === "11") {
+    if (getShowTabId === "11" || getShowTabId === "12") {
       fetchSystemSettings();
     }
   }, [getShowTabId]);
@@ -3660,82 +3660,78 @@ const Setting = () => {
               </div>
             </div>
 
-            {/* Tab 12: SMS & OTP Settings */}
             <div
               className={`tab-pane fade ${getShowTabId === "12" ? "show active" : ""}`}
             >
               <div className="report-data row">
-                <div className="col-lg-12 d-flex align-items-center mb-4">
+                <div className="col-lg-6 d-flex align-items-center ">
                   <div className="tab-title">
                     <h3 className="mt-0">SMS & OTP Settings</h3>
                   </div>
                 </div>
+                <div className=" col-lg-6 d-flex justify-content-end align-items-center">
+                  <div className="mx-2">
+                  </div>
+                </div>
 
-                <div className="col-lg-8">
-                  <div className="card shadow-sm border-0">
-                    <div className="card-body p-4">
-                      <div className="mb-4">
-                        <label className="form-label fw-bold">Manager Phone Number (To receive OTPs)</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="e.g. 919876543210"
-                          value={systemSettings.manager_otp_number}
-                          onChange={(e) => {
-                            const value = e.target.value.replace(/\D/g, "");
-                            setSystemSettings({ ...systemSettings, manager_otp_number: value });
-                          }}
-                        />
-                        <small className="text-muted">Enter country code without + sign (e.g. 91 for India, 44 for UK)</small>
-                      </div>
-
-                      <div className="mb-4">
-                        <label className="form-label fw-bold">WhatsApp Phone Number ID</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="e.g. 123456789012345"
-                          value={systemSettings.whatsapp_phone_number_id}
-                          onChange={(e) => setSystemSettings({ ...systemSettings, whatsapp_phone_number_id: e.target.value })}
-                        />
-                      </div>
-
-                      <div className="mb-4">
-                        <label className="form-label fw-bold">WhatsApp Access Token</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="e.g. EAALx..."
-                          value={systemSettings.whatsapp_access_token}
-                          onChange={(e) => setSystemSettings({ ...systemSettings, whatsapp_access_token: e.target.value })}
-                        />
-                      </div>
-
-                      <div className="mb-4">
-                        <label className="form-label fw-bold">WhatsApp Template Name</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="e.g. job_status_otp"
-                          value={systemSettings.whatsapp_template_name}
-                          onChange={(e) => setSystemSettings({ ...systemSettings, whatsapp_template_name: e.target.value })}
-                        />
-                      </div>
-
-                      <div className="text-end mt-4">
-                        <button
-                          className="btn btn-primary px-4 fw-bold shadow-sm"
-                          onClick={() => updateSystemSettingsAction(systemSettings)}
-                          disabled={loading}
-                        >
-                          {loading ? (
-                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                          ) : (
-                            <Save size={16} className="me-2" />
-                          )}
-                          Save Settings
-                        </button>
-                      </div>
+                <div className="col-lg-12 mt-4 datatable-wrapper">
+                  <div className="row g-3">
+                    <div className="col-md-4">
+                      <label className="form-label fw-bold">Manager Phone Number (To receive OTPs)</label>
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        placeholder="e.g. 9876543210"
+                        maxLength="10"
+                        minLength="10"
+                        value={systemSettings.manager_otp_number}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9]/g, '');
+                          setSystemSettings({...systemSettings, manager_otp_number: value});
+                        }}
+                      />
+                    </div>
+                    <div className="col-md-12 mt-4">
+                      <h5 className="text-dark border-bottom pb-2">WhatsApp Cloud API Configurations</h5>
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label">Phone Number ID</label>
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        placeholder="e.g. 10459385..."
+                        value={systemSettings.whatsapp_phone_number_id}
+                        onChange={(e) => setSystemSettings({...systemSettings, whatsapp_phone_number_id: e.target.value})}
+                      />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label">Access Token</label>
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        placeholder="EAADXXXX..."
+                        value={systemSettings.whatsapp_access_token}
+                        onChange={(e) => setSystemSettings({...systemSettings, whatsapp_access_token: e.target.value})}
+                      />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label">Message Template Name</label>
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        placeholder="e.g. job_status_otp"
+                        value={systemSettings.whatsapp_template_name}
+                        onChange={(e) => setSystemSettings({...systemSettings, whatsapp_template_name: e.target.value})}
+                      />
+                    </div>
+                    <div className="col-12 mt-4 text-end d-flex justify-content-end gap-3">
+                      <button 
+                        className="btn btn-outline-success rounded-pill fw-bold px-4"
+                        onClick={() => updateSystemSettingsAction(systemSettings)}
+                        disabled={loading}
+                      >
+                        <Save size={16} className="me-1" /> {loading ? 'Saving...' : 'Save'}
+                      </button>
                     </div>
                   </div>
                 </div>
