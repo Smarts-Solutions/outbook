@@ -758,7 +758,7 @@ const StaffPage = () => {
               setTransferStaffData(null);
               SetRefresh(!refresh);
               formik.resetForm();
-              window.location.reload();
+
             }, 1500);
           } else {
             sweatalert.fire({
