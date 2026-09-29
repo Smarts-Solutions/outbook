@@ -4550,6 +4550,9 @@ const TimesheetNewDesign = () => {
                               if (action === "input-change") {
                                 setFollowUpStaffSearchTerm(inputValue);
                                 fetchFollowUpStaffDropdown(1, inputValue, false);
+                              } else if (action === "set-value" || action === "menu-close" || action === "input-blur") {
+                                setFollowUpStaffSearchTerm("");
+                                fetchFollowUpStaffDropdown(1, "", false);
                               }
                             }}
                             onMenuScrollToBottom={() => {
@@ -4658,6 +4661,9 @@ const TimesheetNewDesign = () => {
                         if (action === "input-change") {
                           setMisStaffSearchTerm(inputValue);
                           fetchMisStaffDropdown(activeMisTab, 1, inputValue, false);
+                        } else if (action === "set-value" || action === "menu-close" || action === "input-blur") {
+                          setMisStaffSearchTerm("");
+                          fetchMisStaffDropdown(activeMisTab, 1, "", false);
                         }
                       }}
                       onMenuScrollToBottom={() => {
