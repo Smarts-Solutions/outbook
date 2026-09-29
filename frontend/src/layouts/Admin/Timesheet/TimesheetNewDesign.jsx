@@ -99,7 +99,7 @@ const TimesheetNewDesign = () => {
   const [misData, setMisData] = useState([]);
   const [isMisLoading, setIsMisLoading] = useState(false);
   const [misPage, setMisPage] = useState(1);
-  const [misPageSize, setMisPageSize] = useState(10);
+  const [misPageSize, setMisPageSize] = useState(50);
   const [misSearchTerm, setMisSearchTerm] = useState("");
   const [misSelectedStaff, setMisSelectedStaff] = useState([]);
   const [misStaffOptions, setMisStaffOptions] = useState([]);
@@ -4300,11 +4300,11 @@ const TimesheetNewDesign = () => {
                         fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm, 0, misSelectedStaff.map(opt => opt.value).join(','), newType, 0, 0);
                         fetchFollowUpList(1, followUpSearchTerm, followUpSelectedStaff.map(opt => opt.value).join(','), newType, 0, 0, 0);
                       }}
-                      style={{ minWidth: '120px' }}
+                      style={{ minWidth: '100px' }}
                     >
-                      <option value="week" className="text-dark">Week-wise</option>
-                      <option value="month" className="text-dark">Month-wise</option>
-                      <option value="year" className="text-dark">Year-wise</option>
+                      <option value="week" className="text-dark">Weekly</option>
+                      <option value="month" className="text-dark">Monthly</option>
+                      <option value="year" className="text-dark">Yearly</option>
                     </select>
                   </div>
                   <div className="timesheet-week-div m-0">
@@ -4450,6 +4450,7 @@ const TimesheetNewDesign = () => {
                             cursor={{
                               fill: "rgba(0,0,0,0.03)",
                             }}
+                            wrapperStyle={{ zIndex: 1000 }}
                           />
 
                           <Bar
@@ -4549,6 +4550,9 @@ const TimesheetNewDesign = () => {
                               if (action === "input-change") {
                                 setFollowUpStaffSearchTerm(inputValue);
                                 fetchFollowUpStaffDropdown(1, inputValue, false);
+                              } else if (action === "set-value" || action === "menu-close" || action === "input-blur") {
+                                setFollowUpStaffSearchTerm("");
+                                fetchFollowUpStaffDropdown(1, "", false);
                               }
                             }}
                             onMenuScrollToBottom={() => {
@@ -4608,7 +4612,19 @@ const TimesheetNewDesign = () => {
                   <div className="timesheet-table-header-div-left w-100 d-flex justify-content-between align-items-center">
                     <div>
                       <div className="tab-title"><h3 className="mt-0">Resource utilisation</h3></div>
-                      <p className="page-subtitle mb-0 mt-2">Billable hours ÷ available hours (net of leave) for {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}.</p>
+                      <p className="page-subtitle mb-0 mt-2">Billable hours ÷ available hours (net of leave) for {(() => {
+                        if (misFilterType === 'month') {
+                          return getMisSelectedDate(misMonthOffset).toLocaleString('default', { month: 'long', year: 'numeric' });
+                        } else if (misFilterType === 'year') {
+                          const d = new Date();
+                          return (d.getFullYear() + misYearOffset).toString();
+                        } else if (misFilterType === 'week') {
+                          const { start, end } = getMisWeekDates(misWeekOffset);
+                          const s = new Date(start);
+                          const e = new Date(end);
+                          return `${s.getDate()} ${s.toLocaleString('default', {month:'short'})} - ${e.getDate()} ${e.toLocaleString('default', {month:'short'})} ${e.getFullYear()}`;
+                        }
+                      })()}.</p>
                     </div>
                   </div>
                 </div>
@@ -4645,6 +4661,9 @@ const TimesheetNewDesign = () => {
                         if (action === "input-change") {
                           setMisStaffSearchTerm(inputValue);
                           fetchMisStaffDropdown(activeMisTab, 1, inputValue, false);
+                        } else if (action === "set-value" || action === "menu-close" || action === "input-blur") {
+                          setMisStaffSearchTerm("");
+                          fetchMisStaffDropdown(activeMisTab, 1, "", false);
                         }
                       }}
                       onMenuScrollToBottom={() => {
