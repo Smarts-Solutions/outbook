@@ -19,6 +19,8 @@ import ReactPaginate from "react-paginate";
 import { Download, Plus, Briefcase, User, Phone, Mail } from "lucide-react";
 
 import ExportToExcel from "../../../Components/ExtraComponents/ExportToExcel";
+import axios from "axios";
+import { base_url } from "../../../Utils/Config";
 const ClientList = () => {
   const navigate = useNavigate();
   const cust_id_sidebar = sessionStorage.getItem("cust_id_sidebar");
@@ -297,67 +299,23 @@ const ClientList = () => {
 
   const handleStatusChange = async (e, row) => {
     const Id = e.target.value;
-    const selectedStatus = statusDataAll.find((s) => Number(s.id) === Number(Id));
+    const oldStatusObj = statusDataAll.find((s) => Number(s.id) === Number(row.status_type));
+    const newStatusObj = statusDataAll.find((s) => Number(s.id) === Number(Id));
     
-    if (selectedStatus && selectedStatus.name.toLowerCase() === "complete") {
-      const result = await sweatalert.fire({
-        title: "Are you sure?",
-        text: "You are about to mark this job as Complete. An OTP will be sent to the manager's WhatsApp.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes, Send OTP",
-        cancelButtonText: "No, cancel",
-      });
-
-      if (result.isConfirmed) {
-        try {
-          const req = { job_id: row.job_id };
-          const res = await dispatch(SendJobStatusOtp({ req, authToken: token })).unwrap();
-          
-          if (res.status) {
-            const { value: otp } = await sweatalert.fire({
-              title: "Enter OTP",
-              input: "text",
-              inputLabel: res.message || "OTP sent to manager's WhatsApp",
-              inputPlaceholder: "Enter 6-digit OTP",
-              showCancelButton: true,
-              inputValidator: (value) => {
-                if (!value) return "You need to write something!";
-                if (value.length !== 6) return "OTP must be 6 digits!";
-              }
-            });
-
-            if (otp) {
-              const verifyReq = { job_id: row.job_id, otp_code: otp, status_type: Number(Id) };
-              const verifyRes = await dispatch(VerifyJobStatusOtp({ req: verifyReq, authToken: token })).unwrap();
-              
-              if (verifyRes.status) {
-                sweatalert.fire({ title: "Success", text: verifyRes.message, icon: "success", timer: 1000, showConfirmButton: false });
-                setStatusId(Id);
-
-                if (clientDetailSingle.id) {
-                  GetAllJobList(clientDetailSingle.id, currentPage, pageSize, searchTerm);
-                } else {
-                  GetAllJobListByCustomer(customerDetails.id || "", currentPage, pageSize, searchTerm);
-                }
-              } else {
-                sweatalert.fire({ title: "Error", text: verifyRes.message, icon: "error" });
-              }
-            }
-          } else {
-            sweatalert.fire({ title: "Error", text: res.message, icon: "error" });
-          }
-        } catch (error) {
-          sweatalert.fire({ title: "Error", text: "An error occurred while sending OTP.", icon: "error" });
-        }
-      }
-      return;
-    }
+    // Check if the status NAME includes "completed" (e.g. "Completed - Completed", "Completed - Draft Sent")
+    const isOldStatusCompleted = oldStatusObj && oldStatusObj.name.trim().toLowerCase().includes("completed");
+    const isNewStatusCompleted = newStatusObj && newStatusObj.name.trim().toLowerCase().includes("completed");
+    
+    // Check if "Completed" is involved in either the old or new status
+    const isAdmin = role === "ADMIN" || role === "SUPERADMIN";
+    const isCompletedInvolved = (isOldStatusCompleted || isNewStatusCompleted) ;
 
     sweatalert
       .fire({
         title: "Are you sure?",
-        text: "Do you want to change the status?",
+        text: isCompletedInvolved
+          ? "Are you sure you want to change the status? If yes, an OTP will be sent to your manager."
+          : "Do you want to change the status?",
         icon: "warning",
         showCancelButton: true,
         confirmButtonText: "Yes, change it!",
@@ -365,8 +323,61 @@ const ClientList = () => {
       })
       .then(async (result) => {
         if (result.isConfirmed) {
+          
+          // OTP Logic for changing to or from Completed
+          if (isCompletedInvolved) {
+            // Send OTP
+            try {
+              const sendOtpRes = await axios.post(base_url + "sendJobStatusOtp", {
+                jobId: row.id || row.job_id,
+                requestedBy: JSON.parse(localStorage.getItem("staffDetails"))?.id || 0
+              }, {
+                headers: { Authorization: `Bearer ${token}` }
+              });
+
+              if (!sendOtpRes.data.status) {
+                return sweatalert.fire({ title: "Error", text: sendOtpRes.data.message || "Failed to send OTP", icon: "error" });
+              }
+
+              // OTP Input Popup
+              const { value: otpValue } = await sweatalert.fire({
+                title: "OTP Verification",
+                text: "An OTP has been sent to your manager's WhatsApp. Please enter it below:",
+                input: "text",
+                inputPlaceholder: "Enter OTP",
+                showCancelButton: true,
+                confirmButtonText: "Verify",
+                cancelButtonText: "Cancel",
+                inputValidator: (value) => {
+                  if (!value) {
+                    return "OTP is required!";
+                  }
+                }
+              });
+
+              if (otpValue) {
+                // Verify OTP
+                const verifyOtpRes = await axios.post(base_url + "verifyJobStatusOtp", {
+                  jobId: row.id || row.job_id,
+                  otpCode: otpValue
+                }, {
+                  headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (!verifyOtpRes.data.status) {
+                  return sweatalert.fire({ title: "Error", text: verifyOtpRes.data.message || "Invalid OTP", icon: "error" });
+                }
+              } else {
+                // User cancelled OTP prompt
+                return;
+              }
+            } catch (err) {
+              return sweatalert.fire({ title: "Error", text: "Something went wrong during OTP verification.", icon: "error" });
+            }
+          }
+
           try {
-            const req = { job_id: row.job_id, status_type: Number(Id) };
+            const req = { job_id: row.id || row.job_id, status_type: Number(Id) };
             const res = await dispatch(
               Update_Status({ req, authToken: token }),
             ).unwrap();
