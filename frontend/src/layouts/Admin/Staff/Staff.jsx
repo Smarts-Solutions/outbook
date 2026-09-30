@@ -826,6 +826,18 @@ const StaffPage = () => {
       disable: false,
       placeholder: "Enter Email",
     },
+        {
+      type: "select1",
+      name: "status",
+      label: "Status",
+      label_size: 12,
+      col_size: 6,
+      disable: false,
+      options: [
+        { label: "Active", value: "1" },
+        { label: "Inactive", value: "0" },
+      ],
+    },
     {
       type: "select1",
       name: "role",
@@ -891,18 +903,7 @@ const StaffPage = () => {
     //       value: data.id,
     //     })) || [],
     // },
-    {
-      type: "select1",
-      name: "status",
-      label: "Status",
-      label_size: 12,
-      col_size: 6,
-      disable: false,
-      options: [
-        { label: "Active", value: "1" },
-        { label: "Inactive", value: "0" },
-      ],
-    },
+
     {
       type: "selectSearch",
       name: "staff_to",
