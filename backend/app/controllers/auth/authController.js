@@ -285,27 +285,21 @@ const updateRole = async (req, res) => {
   try {
     let { current_role_id, update_role_id, staff_id, ip, StaffUserId, email } = req.body;
 
-    console.log("current_role_id", current_role_id);
-    console.log("update_role_id", update_role_id);
-    console.log("staff_id", staff_id);
-    console.log("ip", ip);
-    console.log("StaffUserId", StaffUserId);
-
-
-    // // update role id staffs table
-    // await pool.query(
-    //   `UPDATE staffs SET role_id = ? WHERE id = ?`,
-    //   [update_role_id, staff_id]
-    // );
-
-    // // staff_other_role
-    // await pool.query(
-    //   `UPDATE staff_other_role SET role_id = ? WHERE staff_id = ?`,
-    //   [current_role_id, staff_id]
-    // );
-
     const user = await staffModel.getStaffByEmail(email);
     const other_role = await staffModel.getStaffOtherRole(email);
+
+    let current_role_id_status = 0;
+    let change_role_id = null;
+
+    if (Number(user.role_id) !== Number(update_role_id)) {
+      current_role_id_status = 1;
+      change_role_id = update_role_id; // Set the role_id they are switching to
+    }
+
+    await pool.query(
+      "UPDATE staffs SET current_role_id_status = ?, change_role_id = ? WHERE id = ?",
+      [current_role_id_status, change_role_id, staff_id]
+    );
 
     let other_role_id = null;
     if (other_role.length > 0) {
@@ -314,10 +308,13 @@ const updateRole = async (req, res) => {
 
     const data = {
       staffDetails: user,
-      other_role_id: other_role_id
+      other_role_id: other_role_id,
+      current_role_id_status: current_role_id_status,
+      change_role_id: change_role_id,
+      active_role_id: Number(update_role_id)
     }
 
-    return res.send({ status: true, message: "Success..", data });
+    return res.send({ status: true, message: "Role switched successfully.", data });
   } catch (error) {
     return res.send({ status: false, message: error.message });
   }

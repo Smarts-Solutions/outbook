@@ -14,6 +14,7 @@ const Header = () => {
   const dispatch = useDispatch();
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
   const other_role_id = JSON.parse(localStorage.getItem("other_role_id"));
+  const active_role_id = localStorage.getItem("active_role_id") || (staffDetails ? staffDetails.role_id : null);
   const token = JSON.parse(localStorage.getItem("token"));
   const [isMenuEnlarged, setIsMenuEnlarged] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -36,6 +37,8 @@ const Header = () => {
      localStorage.setItem("staffDetails",JSON.stringify(response.data.staffDetails));
      localStorage.setItem("role",JSON.stringify(response.data.staffDetails.role));
      localStorage.setItem("other_role_id", JSON.stringify(response.data.other_role_id));
+     localStorage.setItem("active_role_id", response.data.active_role_id);
+     localStorage.setItem("current_role_id_status", response.data.current_role_id_status);
      window.location.reload();
     }
   };
@@ -262,7 +265,7 @@ const Header = () => {
               </button>
             </li>
            
-           {/* {
+           {
             other_role_id != null ?
               <div className="header-select d-flex">
               <select
@@ -270,14 +273,14 @@ const Header = () => {
                 id="floatingSelect"
                 aria-label="Floating label select example"
                 onChange={(e) => { handleRoleSwitch(e) }}
-                value={staffDetails.role_id}
+                value={active_role_id}
               >
                 <option value={staffDetails.role_id}>{staffDetails.role_name}</option>
                 <option value={other_role_id.other_role_id}>{other_role_id.role_name}</option>
               </select>
             </div>
             :""
-           } */}
+           } 
            
 
 
