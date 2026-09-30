@@ -292,17 +292,17 @@ const updateRole = async (req, res) => {
     console.log("StaffUserId", StaffUserId);
 
 
-    // update role id staffs table
-    await await pool.query(
-      `UPDATE staffs SET role_id = ? WHERE id = ?`,
-      [update_role_id, staff_id]
-    );
+    // // update role id staffs table
+    // await pool.query(
+    //   `UPDATE staffs SET role_id = ? WHERE id = ?`,
+    //   [update_role_id, staff_id]
+    // );
 
-    // staff_other_role
-    await await pool.query(
-      `UPDATE staff_other_role SET role_id = ? WHERE staff_id = ?`,
-      [current_role_id, staff_id]
-    );
+    // // staff_other_role
+    // await pool.query(
+    //   `UPDATE staff_other_role SET role_id = ? WHERE staff_id = ?`,
+    //   [current_role_id, staff_id]
+    // );
 
     const user = await staffModel.getStaffByEmail(email);
     const other_role = await staffModel.getStaffOtherRole(email);
