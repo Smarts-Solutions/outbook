@@ -683,6 +683,7 @@ const StaffPage = () => {
       phone_code: "+44",
       //role: "3",
       role: [],
+      secondary_role: "",
       status: "1",
       staff_to: "",
       employee_number: "",
@@ -720,7 +721,7 @@ const StaffPage = () => {
         email: values.email,
         phone: values.phone,
         phone_code: values.phone_code,
-        role_id: values.role,
+        role_id: values.secondary_role ? [values.role, values.secondary_role] : [values.role],
         status: values.status,
         employee_number: values.employee_number,
         staff_to: values.staff_to,
@@ -828,7 +829,7 @@ const StaffPage = () => {
     {
       type: "select1",
       name: "role",
-      label: "Role",
+      label: "Primary Role",
       label_size: 12,
       col_size: 6,
       options:
@@ -840,6 +841,31 @@ const StaffPage = () => {
             return { label: data.role_name, value: data.id };
           }
         }),
+    },
+    {
+      type: "select1",
+      name: "secondary_role",
+      label: "Secondary Role",
+      star: false,
+      label_size: 12,
+      col_size: 6,
+      options: [
+        { label: "Select Secondary Role", value: "" },
+        ...(roleDataAll
+          ? roleDataAll.data
+              .filter((data) => {
+                const roleLower = data.role_name.toLowerCase();
+                return roleLower !== "account manager" && roleLower !== "processor" && roleLower !== "reviewer";
+              })
+              .map((data) => {
+                if (formik.values.secondary_role == data.id) {
+                  return { label: data.role_name, value: data.id, selected: true };
+                } else {
+                  return { label: data.role_name, value: data.id };
+                }
+              })
+          : []),
+      ],
     },
 
     // {
@@ -975,6 +1001,7 @@ const StaffPage = () => {
       formik.setFieldValue("email", editStaffData.email || "null");
       formik.setFieldValue("phone", editStaffData.phone || null);
       formik.setFieldValue("role", editStaffData.role_id || "null");
+      formik.setFieldValue("secondary_role", editStaffData.staff_other_role_id || "");
       // formik.setFieldValue("role", roleIds || []);
       formik.setFieldValue("status", editStaffData.status || "null");
       formik.setFieldValue(

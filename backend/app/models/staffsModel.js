@@ -90,7 +90,7 @@ const createStaff = async (staff) => {
       ]);
     }
 
-    if (other_role_id != null) {
+    if (other_role_id != null && other_role_id !== "") {
       const other_role_query = `INSERT INTO staff_other_role (staff_id,role_id)
       VALUES (?, ?)
       `;
@@ -264,6 +264,12 @@ const getStaff = async (data) => {
     r.role,
     lm.staff_to,
     CONCAT(m.first_name, ' ', m.last_name) AS line_manager_name,
+    (
+        SELECT sor.role_id
+        FROM staff_other_role sor
+        WHERE sor.staff_id = s.id
+        LIMIT 1
+    ) AS staff_other_role_id,
     CASE
         WHEN se.staff_id IS NOT NULL THEN TRUE
         ELSE FALSE
@@ -444,6 +450,12 @@ const getStaffNew = async (data) => {
     r.role,
     lm.staff_to,
     CONCAT(m.first_name, ' ', m.last_name) AS line_manager_name,
+    (
+        SELECT sor.role_id
+        FROM staff_other_role sor
+        WHERE sor.staff_id = s.id
+        LIMIT 1
+    ) AS staff_other_role_id,
     CASE
         WHEN se.staff_id IS NOT NULL THEN TRUE
         ELSE FALSE
@@ -802,6 +814,10 @@ const updateStaff1 = async (staff) => {
       values.push(value);
     }
   }
+  if (role_id != null) {
+      setClauses.push(`role_id = ?`);
+      values.push(role_id);
+  }
   // Add the id to the values array for the WHERE clause
   values.push(id);
   // Construct the final SQL query
@@ -830,22 +846,18 @@ const updateStaff1 = async (staff) => {
     const [rows] = await pool.execute(query, values);
 
     // other_role_id check is exist 
-    if (other_role_id != null) {
+    if (other_role_id != null && other_role_id !== "") {
       const checkOtherRoleQuery = `SELECT 1 FROM staff_other_role WHERE staff_id = ?`;
       const [checkOtherRole] = await pool.execute(checkOtherRoleQuery, [id]);
       if (checkOtherRole.length === 0) {
         const staff_other_role_query = `INSERT INTO staff_other_role (staff_id,role_id) VALUES (?, ?)`;
-        const [staff_other_role_result] = await pool.execute(staff_other_role_query, [
-          id,
-          other_role_id,
-        ]);
+        await pool.execute(staff_other_role_query, [id, other_role_id]);
       } else {
         const staff_other_role_query = `UPDATE staff_other_role SET role_id = ? WHERE staff_id = ?`;
-        const [staff_other_role_result] = await pool.execute(staff_other_role_query, [
-          other_role_id,
-          id,
-        ]);
+        await pool.execute(staff_other_role_query, [other_role_id, id]);
       }
+    } else {
+      await pool.execute(`DELETE FROM staff_other_role WHERE staff_id = ?`, [id]);
     }
 
     if (rows.changedRows) {
@@ -876,8 +888,12 @@ const updateStaff = async (staff) => {
   const { id, page, limit, search, ...fields } = staff;
   let email = fields.email;
 
-
-
+  let other_role_id = undefined;
+  if (fields.role_id !== undefined) {
+    let role_ids = fields.role_id;
+    fields.role_id = Array.isArray(role_ids) ? role_ids?.[0] ?? null : role_ids ?? null;
+    other_role_id = Array.isArray(role_ids) ? role_ids?.[1] ?? null : null;
+  }
   // Line Manage Code
   let staff_to = fields.staff_to;
   if (staff_to != "" && staff_to != undefined) {
@@ -958,6 +974,20 @@ const updateStaff = async (staff) => {
 
 
     const [rows] = await pool.execute(query, values);
+    
+    if (other_role_id !== undefined) {
+      if (other_role_id != null && other_role_id !== "") {
+        const checkOtherRoleQuery = `SELECT 1 FROM staff_other_role WHERE staff_id = ?`;
+        const [checkOtherRole] = await pool.execute(checkOtherRoleQuery, [id]);
+        if (checkOtherRole.length === 0) {
+          await pool.execute(`INSERT INTO staff_other_role (staff_id,role_id) VALUES (?, ?)`, [id, other_role_id]);
+        } else {
+          await pool.execute(`UPDATE staff_other_role SET role_id = ? WHERE staff_id = ?`, [other_role_id, id]);
+        }
+      } else {
+        await pool.execute(`DELETE FROM staff_other_role WHERE staff_id = ?`, [id]);
+      }
+    }
     if (rows.changedRows) {
       const currentDate = new Date();
       await SatffLogUpdateOperation({

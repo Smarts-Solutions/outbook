@@ -213,7 +213,7 @@ const ReusableForm = ({
                         htmlFor={field.name}
                       >
                         {field.label}
-                        <span className="text-danger">*</span>
+                        {field.star !== false && <span className="text-danger">*</span>}
                       </label>
                       <div
                         className={`col-lg-${title === "addgroup" ? 12 : 12}`}
