@@ -22,7 +22,7 @@ const CustomerLogUpdateOperation = async (logData) => {
     JOIN 
         staffs ON staffs.id = staff_logs.staff_id
     LEFT JOIN 
-        roles ON roles.id = staffs.role_id
+        roles ON roles.id = IF(staffs.current_role_id_status = 1, staffs.change_role_id, staffs.role_id)
     LEFT JOIN 
         customers ON staff_logs.module_name = 'customer' AND staff_logs.module_id = customers.id
     LEFT JOIN 

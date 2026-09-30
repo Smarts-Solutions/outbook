@@ -262,12 +262,12 @@ const getAllCustomerIds = async (StaffUserId, module_type) => {
   const QueryRole = `
   SELECT
     staffs.id AS id,
-    staffs.role_id AS role_id,
+    IF(staffs.current_role_id_status = 1, staffs.change_role_id, staffs.role_id) AS role_id,
     roles.role AS role_name
   FROM
     staffs
   JOIN
-    roles ON roles.id = staffs.role_id
+    roles ON roles.id = IF(staffs.current_role_id_status = 1, staffs.change_role_id, staffs.role_id)
   WHERE
     staffs.id = ${StaffUserId}
   LIMIT 1
@@ -466,12 +466,12 @@ async function QueryRoleHelperFunction(staff_id) {
   const QueryRole = `
   SELECT
     staffs.id AS id,
-    staffs.role_id AS role_id,
+    IF(staffs.current_role_id_status = 1, staffs.change_role_id, staffs.role_id) AS role_id,
     roles.role AS role_name
   FROM
     staffs
   JOIN
-    roles ON roles.id = staffs.role_id
+    roles ON roles.id = IF(staffs.current_role_id_status = 1, staffs.change_role_id, staffs.role_id)
   WHERE
     staffs.id = ${staff_id}
   LIMIT 1
