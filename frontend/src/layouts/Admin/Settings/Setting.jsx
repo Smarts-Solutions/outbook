@@ -3652,8 +3652,8 @@ const Setting = () => {
                     columns={columnSystemSettings}
                     data={[
                       { id: 1, name: "Allocated Date Limit", limit: systemSettings.allocated_on_limit, key: "allocated_on_limit" },
-                      { id: 2, name: "Missing Date Limit", limit: systemSettings.missing_date_limit, key: "missing_date_limit" },
-                      { id: 3, name: "Received Date Limit", limit: systemSettings.received_on_limit, key: "received_on_limit" },
+                      // { id: 2, name: "Missing Date Limit", limit: systemSettings.missing_date_limit, key: "missing_date_limit" },
+                      // { id: 3, name: "Received Date Limit", limit: systemSettings.received_on_limit, key: "received_on_limit" },
                     ]}
                   />
                 </div>
