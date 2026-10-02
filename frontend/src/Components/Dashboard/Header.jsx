@@ -79,12 +79,40 @@ const Header = () => {
   }, []);
 
   const isLoginAuthCheck = async (e) => {
-    const req = { id: staffDetails.id, login_auth_token: token };
+    const req = { id: staffDetails?.id, email: staffDetails?.email, login_auth_token: token };
+    if (!req.id || !req.email) return;
+
     await dispatch(isLoginAuthCheckToken(req))
       .unwrap()
       .then(async (response) => {
         if (response.status == false) {
           LogoutUser();
+        } else if (response.user) {
+          const localOtherRole = JSON.parse(localStorage.getItem("other_role_id"));
+          const localPrimaryRoleId = staffDetails.role_id;
+          
+          const hasPrimaryRoleChanged = Number(localPrimaryRoleId) !== Number(response.user.role_id) || staffDetails.role !== response.user.role;
+          const hasSecondaryRoleChanged = localOtherRole?.other_role_id !== response.other_role_id?.other_role_id;
+
+          if (hasPrimaryRoleChanged || hasSecondaryRoleChanged) {
+            localStorage.setItem("staffDetails",JSON.stringify(response.user));
+            localStorage.setItem("other_role_id", JSON.stringify(response.other_role_id));
+            
+            let newActiveRoleId = localStorage.getItem("active_role_id") || response.user.role_id;
+            if (Number(newActiveRoleId) !== Number(response.user.role_id) && 
+                Number(newActiveRoleId) !== Number(response.other_role_id?.other_role_id)) {
+               newActiveRoleId = response.user.role_id;
+            }
+            localStorage.setItem("active_role_id", newActiveRoleId);
+            
+            let newActiveRoleName = response.user.role;
+            if (Number(newActiveRoleId) === Number(response.other_role_id?.other_role_id)) {
+               newActiveRoleName = response.other_role_id.role_name;
+            }
+            localStorage.setItem("role", JSON.stringify(newActiveRoleName));
+            
+            window.location.reload();
+          }
         }
       })
       .catch((error) => {

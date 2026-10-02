@@ -153,6 +153,15 @@ const isLoginAuthTokenCheck = async (req, res) => {
     const { ...staff } = req.body;
     const data = await authService.isLoginAuthTokenCheck(staff);
     if (data != undefined) {
+      if (staff.email) {
+        const user = await staffModel.getStaffByEmail(staff.email);
+        const other_role = await staffModel.getStaffOtherRole(staff.email);
+        let other_role_id = null;
+        if (other_role && other_role.length > 0) {
+          other_role_id = { other_role_id: other_role[0].other_role_id, role_name: other_role[0].role_name };
+        }
+        return res.send({ status: true, message: "success..", user: user, other_role_id: other_role_id });
+      }
       return res.send({ status: true, message: "success.." });
     } else {
       return res.send({ status: false, message: "token not match" });
