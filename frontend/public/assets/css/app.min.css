@@ -3425,6 +3425,7 @@ button.view-icon,
 button.edit-icon {
   border: 3px solid #0d6efd;
   color: #0d6efd;
+  background: #fff;
 }
 
 button.delete-icon,
