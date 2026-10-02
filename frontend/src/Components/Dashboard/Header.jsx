@@ -34,8 +34,13 @@ const Header = () => {
     const response = await UPDATE_ROLE({ req, authToken: token });
     
     if(response.status){
+     let activeRoleName = response.data.staffDetails.role;
+     if (Number(response.data.active_role_id) === Number(response.data.other_role_id?.other_role_id)) {
+        activeRoleName = response.data.other_role_id.role_name;
+     }
+
      localStorage.setItem("staffDetails",JSON.stringify(response.data.staffDetails));
-     localStorage.setItem("role",JSON.stringify(response.data.staffDetails.role));
+     localStorage.setItem("role",JSON.stringify(activeRoleName));
      localStorage.setItem("other_role_id", JSON.stringify(response.data.other_role_id));
      localStorage.setItem("active_role_id", response.data.active_role_id);
      localStorage.setItem("current_role_id_status", response.data.current_role_id_status);

@@ -106,9 +106,10 @@ const Admin_Route = () => {
         return;
       }
 
+      const activeRoleId = localStorage.getItem("active_role_id") || staffDetails.role_id;
       const response = await dispatch(
         RoleAccess({
-          req: { role_id: staffDetails.role_id, action: "get" },
+          req: { role_id: activeRoleId, action: "get" },
           authToken: token,
         })
       ).unwrap();
