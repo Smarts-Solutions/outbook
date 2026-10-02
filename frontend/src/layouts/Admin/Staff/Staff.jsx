@@ -533,29 +533,38 @@ const StaffPage = () => {
       name: "Actions",
       cell: (row) => {
         return (
-          <>
-            <div className="px-2">
-              {showStaffDeleteTab == true
-                ? row?.is_disable == 0 &&
-                (row.is_customer_exist == 1 ? (
-                  <button
-                    className="delete-icon dropdown-item  w-auto mb-2"
-                    onClick={() => setDeleteStaff(row)}
-                  >
-                    {" "}
-                    <i className="ti-trash text-danger" />
-                  </button>
-                ) : (
-                  <button
-                    className="delete-icon dropdown-item  w-auto mb-2"
-                    onClick={() => handleDeleteIsNotExistCustomer(row)}
-                  >
-                    {" "}
-                    <i className="ti-trash text-danger" />
-                  </button>
-                ))
-                : ""}
-            </div>
+          <div className="d-flex align-items-center">
+            {showStaffUpdateTab == true && (
+              <button
+                className="edit-icon mr-2"
+                onClick={() => {
+                  setEditShowModel(true);
+                  setEditStaff(true);
+                  setEditStaffData(row);
+                }}
+                title="Edit"
+              >
+                <i className="ti-pencil" />
+              </button>
+            )}
+            {showStaffDeleteTab == true
+              ? row?.is_disable == 0 &&
+              (row.is_customer_exist == 1 ? (
+                <button
+                  className="delete-icon mr-2"
+                  onClick={() => setDeleteStaff(row)}
+                >
+                  <i className="ti-trash text-danger" />
+                </button>
+              ) : (
+                <button
+                  className="delete-icon mr-2"
+                  onClick={() => handleDeleteIsNotExistCustomer(row)}
+                >
+                  <i className="ti-trash text-danger" />
+                </button>
+              ))
+              : ""}
 
             {showStaffUpdateTab == true ? (
               <div className="dropdown">
@@ -586,17 +595,6 @@ const StaffPage = () => {
                   <a
                     className="dropdown-item"
                     onClick={() => {
-                      setEditShowModel(true);
-                      setEditStaff(true);
-                      setEditStaffData(row);
-                    }}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <FaBriefcase /> Edit
-                  </a>
-                  <a
-                    className="dropdown-item"
-                    onClick={() => {
                       ServiceData(row);
                       SetCompetancy(true);
                     }}
@@ -618,7 +616,7 @@ const StaffPage = () => {
             ) : (
               ""
             )}
-          </>
+          </div>
         );
       },
       ignoreRowClick: true,
