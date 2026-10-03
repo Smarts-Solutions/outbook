@@ -621,7 +621,7 @@ const StaffPage = () => {
       },
       ignoreRowClick: true,
       allowOverflow: true,
-      button: true,
+      width: "160px",
       reorder: false,
     },
   ];
