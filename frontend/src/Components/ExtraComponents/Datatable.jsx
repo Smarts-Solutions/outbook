@@ -3,7 +3,7 @@ import DataTable from 'react-data-table-component';
 import DataTableExtensions from 'react-data-table-component-extensions';
 import 'react-data-table-component-extensions/dist/index.css';
 
-const Datatable = ({ columns, data, filter, pagination = true, onSort, sortServer = false }) => {
+const Datatable = ({ columns, data, filter ,pagination = true }) => {
   const noDataImage = '/assets/images/No-data-amico.png';
 
   const handleTableRef = (node) => {
@@ -35,27 +35,6 @@ const Datatable = ({ columns, data, filter, pagination = true, onSort, sortServe
           />
           <p className='fs-16'>There are no records to display</p>
         </div>
-      ) : sortServer ? (
-        <div>
-          <DataTable
-            columns={columns}
-            data={data}
-            className={actionColumn ? 'custom-datatable custom-datatable-sticky-action' : 'custom-datatable'}
-            keyField="id"
-            fixedHeader={true}
-            fixedHeaderScrollHeight="500px"
-            noHeader
-            defaultSortField="JobId"
-            defaultSortAsc={false}
-            pagination={pagination}
-            onSort={onSort}
-            sortServer={sortServer}
-            onColumnOrderChange={cols => console.log(cols)}
-            highlightOnHover
-            paginationRowsPerPageOptions={[10, 50, 100]}
-            paginationComponentOptions={{ selectAllRowsItem: true, selectAllRowsItemText: 'All' }}
-          />
-        </div>
       ) : (
         <div >  
           <DataTableExtensions
@@ -75,7 +54,7 @@ const Datatable = ({ columns, data, filter, pagination = true, onSort, sortServe
               noHeader
               defaultSortField="JobId"
               defaultSortAsc={false}
-              pagination={pagination}
+              pagination = {pagination}
               onColumnOrderChange={cols => console.log(cols)}
               highlightOnHover
               paginationRowsPerPageOptions={[10, 50, 100]}

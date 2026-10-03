@@ -237,34 +237,6 @@ const StaffPage = () => {
       });
   };
 
-  const handleSort = React.useCallback((column, sortDirection) => {
-    setLoading(true);
-
-    setTimeout(() => {
-      setStaffDataAll(prev => {
-        if (!prev.data || prev.data.length === 0) {
-          setLoading(false);
-          return prev;
-        }
-
-        const sortedData = [...prev.data].sort((a, b) => {
-          let aField = column.selector ? column.selector(a) : a[column.sortField];
-          let bField = column.selector ? column.selector(b) : b[column.sortField];
-
-          aField = aField ? String(aField).toLowerCase() : "";
-          bField = bField ? String(bField).toLowerCase() : "";
-
-          if (aField > bField) return sortDirection === 'asc' ? 1 : -1;
-          if (aField < bField) return sortDirection === 'asc' ? -1 : 1;
-          return 0;
-        });
-
-        setLoading(false);
-        return { ...prev, data: sortedData };
-      });
-    }, 50);
-  }, []);
-
   const handleDeleteClick = async () => {
     let data = {
       delete_id: deleteStaff.id,
@@ -852,7 +824,7 @@ const StaffPage = () => {
       disable: false,
       placeholder: "Enter Email",
     },
-    {
+        {
       type: "select1",
       name: "status",
       label: "Status",
@@ -891,17 +863,17 @@ const StaffPage = () => {
         { label: "Select Secondary Role", value: "" },
         ...(roleDataAll
           ? roleDataAll.data
-            .filter((data) => {
-              const roleLower = data.role_name.toLowerCase();
-              return roleLower !== "account manager" && roleLower !== "processor" && roleLower !== "reviewer";
-            })
-            .map((data) => {
-              if (formik.values.secondary_role == data.id) {
-                return { label: data.role_name, value: data.id, selected: true };
-              } else {
-                return { label: data.role_name, value: data.id };
-              }
-            })
+              .filter((data) => {
+                const roleLower = data.role_name.toLowerCase();
+                return roleLower !== "account manager" && roleLower !== "processor" && roleLower !== "reviewer";
+              })
+              .map((data) => {
+                if (formik.values.secondary_role == data.id) {
+                  return { label: data.role_name, value: data.id, selected: true };
+                } else {
+                  return { label: data.role_name, value: data.id };
+                }
+              })
           : []),
       ],
     },
@@ -1461,16 +1433,12 @@ const StaffPage = () => {
 
                 {staffDataAll.data && staffDataAll.data.length > 0 ? (
                   <>
-                    {React.useMemo(() => (
-                      <Datatable
-                        columns={columns}
-                        data={staffDataAll.data}
-                        filter={false}
-                        pagination={false}
-                        sortServer={true}
-                        onSort={handleSort}
-                      />
-                    ), [columns, staffDataAll.data, handleSort])}
+                    <Datatable
+                      columns={columns}
+                      data={staffDataAll.data}
+                      filter={false}
+                      pagination={false}
+                    />
 
                     <ReactPaginate
                       previousLabel={"Previous"}
