@@ -239,7 +239,7 @@ const StaffPage = () => {
 
   const handleSort = React.useCallback((column, sortDirection) => {
     setLoading(true);
-    
+
     setTimeout(() => {
       setStaffDataAll(prev => {
         if (!prev.data || prev.data.length === 0) {
@@ -250,7 +250,7 @@ const StaffPage = () => {
         const sortedData = [...prev.data].sort((a, b) => {
           let aField = column.selector ? column.selector(a) : a[column.sortField];
           let bField = column.selector ? column.selector(b) : b[column.sortField];
-          
+
           aField = aField ? String(aField).toLowerCase() : "";
           bField = bField ? String(bField).toLowerCase() : "";
 
@@ -258,7 +258,7 @@ const StaffPage = () => {
           if (aField < bField) return sortDirection === 'asc' ? -1 : 1;
           return 0;
         });
-        
+
         setLoading(false);
         return { ...prev, data: sortedData };
       });
@@ -852,7 +852,7 @@ const StaffPage = () => {
       disable: false,
       placeholder: "Enter Email",
     },
-        {
+    {
       type: "select1",
       name: "status",
       label: "Status",
@@ -891,17 +891,17 @@ const StaffPage = () => {
         { label: "Select Secondary Role", value: "" },
         ...(roleDataAll
           ? roleDataAll.data
-              .filter((data) => {
-                const roleLower = data.role_name.toLowerCase();
-                return roleLower !== "account manager" && roleLower !== "processor" && roleLower !== "reviewer";
-              })
-              .map((data) => {
-                if (formik.values.secondary_role == data.id) {
-                  return { label: data.role_name, value: data.id, selected: true };
-                } else {
-                  return { label: data.role_name, value: data.id };
-                }
-              })
+            .filter((data) => {
+              const roleLower = data.role_name.toLowerCase();
+              return roleLower !== "account manager" && roleLower !== "processor" && roleLower !== "reviewer";
+            })
+            .map((data) => {
+              if (formik.values.secondary_role == data.id) {
+                return { label: data.role_name, value: data.id, selected: true };
+              } else {
+                return { label: data.role_name, value: data.id };
+              }
+            })
           : []),
       ],
     },
