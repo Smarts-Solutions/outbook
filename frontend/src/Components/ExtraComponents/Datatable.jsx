@@ -48,6 +48,7 @@ const Datatable = ({ columns, data, filter ,pagination = true }) => {
             <DataTable
               //className='custom-datatable custom-datatable-sticky-action'
               className={actionColumn ? 'custom-datatable custom-datatable-sticky-action' : 'custom-datatable'}
+              keyField="id"
               fixedHeader={true}
               fixedHeaderScrollHeight="500px"
               noHeader
