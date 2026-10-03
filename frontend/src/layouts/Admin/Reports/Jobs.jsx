@@ -560,77 +560,15 @@ const JobStatus = () => {
     const oldStatusObj = statusDataAll.find((s) => Number(s.id) === Number(row.status_type));
     const newStatusObj = statusDataAll.find((s) => Number(s.id) === Number(Id));
     
-    // Check if the status NAME includes "completed" (e.g. "Completed - Completed", "Completed - Draft Sent")
-    const isOldStatusCompleted = oldStatusObj && oldStatusObj.name.trim().toLowerCase().includes("completed");
-    const isNewStatusCompleted = newStatusObj && newStatusObj.name.trim().toLowerCase().includes("completed");
-    
-    // Check if "Completed" is involved in either the old or new status
-    const isAdmin = role === "ADMIN" || role === "SUPERADMIN";
-    const isCompletedInvolved = (isOldStatusCompleted || isNewStatusCompleted) ;
-
     Swal.fire({
       title: "Are you sure?",
-      text: isCompletedInvolved
-        ? "Are you sure you want to change the status? If yes, an OTP will be sent to your manager."
-        : "Do you want to change the status?",
+      text: "Do you want to change the status?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Yes, change it!",
       cancelButtonText: "No, cancel",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        
-        // OTP Logic for changing to or from Completed
-        if (isCompletedInvolved) {
-          // Send OTP
-          try {
-            const sendOtpRes = await axios.post(base_url + "sendJobStatusOtp", {
-              jobId: row.id || row.job_id,
-              requestedBy: JSON.parse(localStorage.getItem("staffDetails"))?.id || 0
-            }, {
-              headers: { Authorization: `Bearer ${token}` }
-            });
-
-            if (!sendOtpRes.data.status) {
-              return Swal.fire({ title: "Error", text: sendOtpRes.data.message || "Failed to send OTP", icon: "error" });
-            }
-
-            // OTP Input Popup
-            const { value: otpValue } = await Swal.fire({
-              title: "OTP Verification",
-              text: "An OTP has been sent to your manager's WhatsApp. Please enter it below:",
-              input: "text",
-              inputPlaceholder: "Enter OTP",
-              showCancelButton: true,
-              confirmButtonText: "Verify",
-              cancelButtonText: "Cancel",
-              inputValidator: (value) => {
-                if (!value) {
-                  return "OTP is required!";
-                }
-              }
-            });
-
-            if (otpValue) {
-              // Verify OTP
-              const verifyOtpRes = await axios.post(base_url + "verifyJobStatusOtp", {
-                jobId: row.id || row.job_id,
-                otpCode: otpValue
-              }, {
-                headers: { Authorization: `Bearer ${token}` }
-              });
-
-              if (!verifyOtpRes.data.status) {
-                return Swal.fire({ title: "Error", text: verifyOtpRes.data.message || "Invalid OTP", icon: "error" });
-              }
-            } else {
-              // User cancelled OTP prompt
-              return;
-            }
-          } catch (err) {
-            return Swal.fire({ title: "Error", text: "Something went wrong during OTP verification.", icon: "error" });
-          }
-        }
 
         // Proceed to update status
         try {
