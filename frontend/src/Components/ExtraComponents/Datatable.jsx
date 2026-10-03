@@ -130,4 +130,4 @@ const Datatable = ({ columns, data, filter ,pagination = true }) => {
 // };
 
 
-export default Datatable;
+export default React.memo(Datatable);

@@ -451,7 +451,7 @@ const StaffPage = () => {
     { id: "last-year", label: "Last year" },
   ];
 
-  const columns = [
+  const columns = React.useMemo(() => [
     {
       name: "Full Name",
       cell: (row) => (
@@ -624,7 +624,7 @@ const StaffPage = () => {
       width: "160px",
       reorder: false,
     },
-  ];
+  ], [showStaffUpdateTab, showStaffDeleteTab, navigate]);
 
   const GetAllStaffPortfolio = async (row) => {
     let AssignCustomer = [];
