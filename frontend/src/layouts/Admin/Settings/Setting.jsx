@@ -3012,11 +3012,11 @@ const Setting = () => {
       label: "Job Date Settings",
       icon: <Settings size={16} className="me-1" />,
     },
-    {
-      id: "12",
-      label: "SMS & OTP Settings",
-      icon: <Settings size={16} className="me-1" />,
-    },
+    // {
+    //   id: "12",
+    //   label: "SMS & OTP Settings",
+    //   icon: <Settings size={16} className="me-1" />,
+    // },
   ];
 
   useEffect(() => {
