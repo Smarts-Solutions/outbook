@@ -45,8 +45,7 @@ module.exports = (app) => {
     },
 
     {
-       timezone: "Europe/London",
-      // timezone: "Asia/Kolkata",
+      timezone: "Europe/London",
     },
   );
  
