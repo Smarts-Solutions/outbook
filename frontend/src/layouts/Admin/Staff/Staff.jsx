@@ -844,7 +844,9 @@ const StaffPage = () => {
       col_size: 6,
       options:
         roleDataAll &&
-        roleDataAll.data.map((data) => {
+        roleDataAll.data
+          .filter((data) => String(data.id) !== String(formik.values.secondary_role))
+          .map((data) => {
           if (formik.values.role_id == data.id) {
             return { label: data.role_name, value: data.id, selected: true };
           } else {
@@ -865,7 +867,7 @@ const StaffPage = () => {
           ? roleDataAll.data
               .filter((data) => {
                 const roleLower = data.role_name.toLowerCase();
-                return roleLower !== "account manager" && roleLower !== "processor" && roleLower !== "reviewer";
+                return roleLower !== "account manager" && roleLower !== "processor" && roleLower !== "reviewer" && String(data.id) !== String(formik.values.role);
               })
               .map((data) => {
                 if (formik.values.secondary_role == data.id) {
