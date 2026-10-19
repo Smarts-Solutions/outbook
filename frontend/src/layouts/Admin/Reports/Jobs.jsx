@@ -5,7 +5,7 @@ import { useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
-import { Update_Status, SendJobStatusOtp, VerifyJobStatusOtp } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { Update_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 import { Download,ArrowLeft } from "lucide-react";

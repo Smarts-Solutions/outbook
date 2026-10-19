@@ -6,8 +6,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {
   JobAction,
   Update_Status,
-  SendJobStatusOtp,
-  VerifyJobStatusOtp,
   getAllCustomerDropDown,
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { getList } from "../../../ReduxStore/Slice/Settings/settingSlice";

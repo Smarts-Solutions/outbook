@@ -4,8 +4,6 @@ import Datatable from "../../../Components/ExtraComponents/Datatable";
 import {
   JobAction,
   Update_Status,
-  SendJobStatusOtp,
-  VerifyJobStatusOtp,
   getAllCustomerDropDown,
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useNavigate, useLocation } from "react-router-dom";
