@@ -285,6 +285,9 @@ const JobStatus = () => {
 
   const handleStatusChange = async (e, row) => {
     const Id = e.target.value;
+    
+    // OTP functionality commented out temporarily
+    /*
     const oldStatusObj = statusDataAll.find((s) => Number(s.id) === Number(row.status_type));
     const newStatusObj = statusDataAll.find((s) => Number(s.id) === Number(Id));
 
@@ -341,6 +344,7 @@ const JobStatus = () => {
         Swal.fire("Error", "Something went wrong while sending OTP.", "error");
       }
     } else {
+    */
       Swal.fire({
         title: "Are you sure?",
         text: "Do you want to change the status?",
@@ -362,7 +366,7 @@ const JobStatus = () => {
           });
         }
       });
-    }
+    // }
   };
 
   const proceedUpdateStatus = async (Id, row) => {
