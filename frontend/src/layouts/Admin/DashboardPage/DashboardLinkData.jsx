@@ -285,7 +285,7 @@ const JobStatus = () => {
 
   const handleStatusChange = async (e, row) => {
     const Id = e.target.value;
-    
+
     // OTP functionality commented out temporarily
     /*
     const oldStatusObj = statusDataAll.find((s) => Number(s.id) === Number(row.status_type));
@@ -345,27 +345,27 @@ const JobStatus = () => {
       }
     } else {
     */
-      Swal.fire({
-        title: "Are you sure?",
-        text: "Do you want to change the status?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes, change it!",
-        cancelButtonText: "No, cancel",
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          proceedUpdateStatus(Id, row);
-        } else if (result.dismiss === Swal.DismissReason.cancel) {
-          Swal.fire({
-            title: "Cancelled",
-            text: "Status change was not performed",
-            icon: "error",
-            confirmButtonText: "Ok",
-            timer: 1000,
-            timerProgressBar: true,
-          });
-        }
-      });
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to change the status?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, change it!",
+      cancelButtonText: "No, cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        proceedUpdateStatus(Id, row);
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire({
+          title: "Cancelled",
+          text: "Status change was not performed",
+          icon: "error",
+          confirmButtonText: "Ok",
+          timer: 1000,
+          timerProgressBar: true,
+        });
+      }
+    });
     // }
   };
 
@@ -808,6 +808,7 @@ const JobStatus = () => {
                 className="form-select form-control"
                 value={row.status}
                 onChange={(e) => handleChangeStatus(e, row)}
+                disabled={!(getAccessData.update === 1 || role === "SUPERADMIN")}
               >
                 <option value="0" className="text-danger">
                   Inactive

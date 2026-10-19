@@ -118,6 +118,8 @@ const TimesheetNewDesign = () => {
   const [misSubmittedCount, setMisSubmittedCount] = useState(0);
   const [misMissingCount, setMisMissingCount] = useState(0);
   const [misTotalStaff, setMisTotalStaff] = useState(0);
+  const staff_id = JSON.parse(localStorage.getItem("staffDetails"))?.id;
+
 
   const getMisSelectedDate = (offset = misMonthOffset) => {
     const d = new Date();
@@ -3166,7 +3168,7 @@ const TimesheetNewDesign = () => {
   const reqTotalNum = parseInt(reqH || 0) + parseInt(reqM || 0) / 60;
   const progressPercent = reqTotalNum > 0 ? Math.min((totalEnteredHoursNum / reqTotalNum) * 100, 100) : 0;
 
-  const isManagerReviewVisible = ["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role?.toUpperCase()) || (lineMangerData && lineMangerData.length > 0);
+  const isManagerReviewVisible = ["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role?.toUpperCase()) || (lineMangerData && lineMangerData.length > 0) || (staff_id == 622);
 
   const isRowSaved = (index) => {
     return Boolean(timeSheetRows[index]?.id);

@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import Login from "../layouts/Auth/Login";
 import Login1 from "../layouts/Auth/Login1";
+import LoginTesting from "../layouts/Auth/LoginTesting";
 import { jwtDecode } from "jwt-decode";
 
 import Admin_Route from "./Admin_Route";
@@ -39,7 +40,10 @@ const Main_Route = () => {
     }
 
     if (role == null || token == null || staffDetails == null) {
-      if (location.pathname !== "/login1") {
+      if (
+        location.pathname !== "/login1" &&
+        location.pathname !== "/login-testing"
+      ) {
         navigate("/login");
       }
       return;
@@ -123,6 +127,7 @@ const Main_Route = () => {
         <Route path="/admin/*" element={role ? <Admin_Route /> : <Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/login1" element={<Login1 />} />
+        <Route path="/login-testing" element={<LoginTesting />} />
         <Route path="/forgetpassword" element={<ForgetPassword />} />
 
         <Route path="/customer/login" element={<CustomerLogin />} />

@@ -14,7 +14,7 @@ import ReactPaginate from "react-paginate";
 import { convertDate } from "../../../Utils/Comman_function";
 
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { Plus , Download } from "lucide-react";
+import { Plus, Download } from "lucide-react";
 
 const Customer = () => {
   const navigate = useNavigate();
@@ -165,12 +165,12 @@ const Customer = () => {
         </div>
       ),
     },
-{
-  name:"Employee Id",
-  selector: (row) => row.employee_number,
-  cell: (row) => <div title={row.employee_number}>{row.employee_number}</div>,
-  sortable: true,
-},
+    {
+      name: "Employee Id",
+      selector: (row) => row.employee_number,
+      cell: (row) => <div title={row.employee_number}>{row.employee_number}</div>,
+      sortable: true,
+    },
     {
       name: "Created by",
       selector: (row) => row.customer_created_by,
@@ -198,6 +198,7 @@ const Customer = () => {
                 className="form-select form-control"
                 value={row.status}
                 onChange={(e) => handleChangeStatus(e, row)}
+                disabled={!(getAccessData.update === 1 || role === "SUPERADMIN")}
               >
                 <option value="0" className="text-danger">
                   Inactive
@@ -668,7 +669,7 @@ const Customer = () => {
                   to="/admin/addcustomer"
                   className="btn btn-outline-info  fw-bold float-sm-end mt-3 mt-sm-0  border-3"
                 >
-                   <Plus size={16}/> Add Customer
+                  <Plus size={16} /> Add Customer
                 </Link>
               </div>
             ) : (
@@ -678,7 +679,7 @@ const Customer = () => {
                     to="/admin/addcustomer"
                     className="btn btn-outline-info fw-bold float-end border-3"
                   >
-                    <Plus size={16}/> Add Customer
+                    <Plus size={16} /> Add Customer
                   </Link>
                 </div>
               )
@@ -745,7 +746,7 @@ const Customer = () => {
                                 className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
                                 onClick={handleExport}
                               >
-                                    <Download size={16}/>
+                                <Download size={16} />
 
                                 <span>Export Excel</span>
                               </button>
