@@ -178,7 +178,7 @@ const getJobTimeLine = async (job) => {
 
 const sendJobStatusOtp = async (data) => {
   try {
-    const { jobId, requestedBy, settings } = data;
+    const { jobId, requestedBy, settings, jobCodeId, staffName, staffRole, customerName, clientName, newStatus } = data;
     // Generate a 6-digit random OTP
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
     
@@ -186,28 +186,57 @@ const sendJobStatusOtp = async (data) => {
     // Send OTP via WhatsApp Cloud API
     if (settings && settings.manager_otp_number && settings.whatsapp_phone_number_id && settings.whatsapp_access_token) {
       const url = `https://graph.facebook.com/v17.0/${settings.whatsapp_phone_number_id}/messages`;
+      const templateName = settings.whatsapp_template_name || "job_status_otp";
       const payload = {
         messaging_product: "whatsapp",
         to: settings.manager_otp_number,
         type: "template",
         template: {
-          name: settings.whatsapp_template_name || "job_status_otp",
+          name: templateName,
           language: {
-            code: "en"
-          },
-          components: [
-            {
-              type: "body",
-              parameters: [
-                {
-                  type: "text",
-                  text: otpCode
-                }
-              ]
-            }
-          ]
+            code: "en_US"
+          }
         }
       };
+
+      // hello_world template doesn't accept variables. Only add components for other templates.
+      if (templateName !== "hello_world") {
+        payload.template.components = [
+          {
+            type: "body",
+            parameters: [
+              {
+                type: "text",
+                text: staffName || "Staff"
+              },
+              {
+                type: "text",
+                text: staffRole || "Staff Role"
+              },
+              {
+                type: "text",
+                text: customerName || "Unknown Customer"
+              },
+              {
+                type: "text",
+                text: clientName || "Unknown Client"
+              },
+              {
+                type: "text",
+                text: jobCodeId || String(jobId)
+              },
+              {
+                type: "text",
+                text: newStatus || "Status"
+              },
+              {
+                type: "text",
+                text: otpCode
+              }
+            ]
+          }
+        ];
+      }
       const headers = {
         'Authorization': `Bearer ${settings.whatsapp_access_token}`,
         'Content-Type': 'application/json'
@@ -220,7 +249,11 @@ const sendJobStatusOtp = async (data) => {
 
     return { status: true, message: "OTP sent successfully." };
   } catch (error) {
-    return { status: false, message: "Failed to send OTP.", error: error.message };
+    const errorMsg = error.response && error.response.data && error.response.data.error 
+                     ? error.response.data.error.message 
+                     : error.message;
+    console.error("WhatsApp API Error: ", error.response ? error.response.data : error.message);
+    return { status: false, message: "Failed to send OTP.", error: errorMsg };
   }
 };
 

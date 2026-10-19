@@ -3681,9 +3681,7 @@ const Setting = () => {
                       <input 
                         type="text" 
                         className="form-control" 
-                        placeholder="e.g. 9876543210"
-                        maxLength="10"
-                        minLength="10"
+                        placeholder="e.g. 919876543210 (with country code)"
                         value={systemSettings.manager_otp_number}
                         onChange={(e) => {
                           const value = e.target.value.replace(/[^0-9]/g, '');
@@ -3705,6 +3703,16 @@ const Setting = () => {
                       />
                     </div>
                     <div className="col-md-4">
+                      <label className="form-label">WhatsApp Template Name</label>
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        placeholder="e.g. job_status_otp"
+                        value={systemSettings.whatsapp_template_name || ""}
+                        onChange={(e) => setSystemSettings({...systemSettings, whatsapp_template_name: e.target.value})}
+                      />
+                    </div>
+                    <div className="col-md-4">
                       <label className="form-label">Access Token</label>
                       <input 
                         type="text" 
@@ -3714,16 +3722,7 @@ const Setting = () => {
                         onChange={(e) => setSystemSettings({...systemSettings, whatsapp_access_token: e.target.value})}
                       />
                     </div>
-                    <div className="col-md-4">
-                      <label className="form-label">Message Template Name</label>
-                      <input 
-                        type="text" 
-                        className="form-control" 
-                        placeholder="e.g. job_status_otp"
-                        value={systemSettings.whatsapp_template_name}
-                        onChange={(e) => setSystemSettings({...systemSettings, whatsapp_template_name: e.target.value})}
-                      />
-                    </div>
+                
                     <div className="col-12 mt-4 text-end d-flex justify-content-end gap-3">
                       <button 
                         className="btn btn-outline-success rounded-pill fw-bold px-4"

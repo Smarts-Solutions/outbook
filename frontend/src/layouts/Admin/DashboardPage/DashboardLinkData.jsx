@@ -7,12 +7,14 @@ import { useNavigate } from "react-router-dom";
 import {
   Update_Customer_Status,
   Update_Status,
+  SendJobStatusOtp,
+  VerifyJobStatusOtp,
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
-import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
+import { MasterStatusData, GetSystemSettings } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import ReactPaginate from "react-paginate";
-import { Download,ArrowLeft,Plus } from "lucide-react";
+import { Download, ArrowLeft, Plus } from "lucide-react";
 import { base_url } from "../../../Utils/Config";
 import axios from "axios";
 
@@ -281,78 +283,133 @@ const JobStatus = () => {
     });
   };
 
-  const handleStatusChange = (e, row) => {
+  const handleStatusChange = async (e, row) => {
     const Id = e.target.value;
     const oldStatusObj = statusDataAll.find((s) => Number(s.id) === Number(row.status_type));
     const newStatusObj = statusDataAll.find((s) => Number(s.id) === Number(Id));
-    
-    // Check if the status NAME includes "completed" (e.g. "Completed - Completed", "Completed - Draft Sent")
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Do you want to change the status?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, change it!",
-      cancelButtonText: "No, cancel",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
 
-        // Proceed to update status
-        try {
-          const req = { job_id: row.job_id, status_type: Number(Id) };
-          const res = await dispatch(
-            Update_Status({ req, authToken: token }),
-          ).unwrap();
+    const isCompletedStatus = oldStatusObj && oldStatusObj.name.toLowerCase().includes("completed");
 
-          if (res.status) {
-            Swal.fire({
-              title: "Success",
-              text: res.message,
-              icon: "success",
-              timer: 1000,
-              showConfirmButton: false,
-            });
-            GetLinkedData();
-          } else if (res.data === "W") {
-            Swal.fire({
-              title: "Warning",
-              text: res.message,
-              icon: "warning",
-              confirmButtonText: "Ok",
-              timer: 3000,
-              timerProgressBar: true,
-            });
-          } else {
-            Swal.fire({
-              title: "Error",
-              text: res.message,
-              icon: "error",
-              confirmButtonText: "Ok",
-              timer: 1000,
-              timerProgressBar: true,
-            });
+    if (isCompletedStatus) {
+      try {
+        const sysSetRes = await dispatch(GetSystemSettings({ authToken: token })).unwrap();
+        const settings = sysSetRes.data || {};
+        const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
+        const staffName = staffDetails.first_name ? `${staffDetails.first_name} ${staffDetails.last_name || ''}`.trim() : staffDetails.name || "Staff";
+        const staffRole = staffDetails.role || staffDetails.role_name || "Staff Role";
+
+        const otpReq = {
+          action: "send",
+          jobId: row.job_id || row.id,
+          jobCodeId: row.job_code_id || "Unknown Job",
+          staffName: staffName,
+          staffRole: staffRole,
+          customerName: row.customer_name || "Unknown Customer",
+          clientName: row.client_trading_name || "Unknown Client",
+          newStatus: newStatusObj ? newStatusObj.name : "Unknown Status",
+          requestedBy: staffDetails.id || 1,
+          settings: settings
+        };
+        const otpRes = await dispatch(SendJobStatusOtp({ req: otpReq, authToken: token })).unwrap();
+
+        if (otpRes.status) {
+          const { value: otpValue } = await Swal.fire({
+            title: "Enter OTP",
+            input: "text",
+            inputLabel: `An OTP has been sent to the manager's phone.`,
+            inputPlaceholder: "Enter OTP here",
+            showCancelButton: true,
+            inputValidator: (value) => {
+              if (!value) return "You need to write something!";
+            }
+          });
+
+          if (otpValue) {
+            const verifyReq = { action: "verify", jobId: row.job_id || row.id, otpCode: otpValue };
+            const verifyRes = await dispatch(VerifyJobStatusOtp({ req: verifyReq, authToken: token })).unwrap();
+
+            if (verifyRes.status) {
+              proceedUpdateStatus(Id, row);
+            } else {
+              Swal.fire("Error", verifyRes.message || "Invalid OTP", "error");
+            }
           }
-        } catch (error) {
+        } else {
+          Swal.fire("Error", otpRes.message || "Failed to send OTP", "error");
+        }
+      } catch (error) {
+        Swal.fire("Error", "Something went wrong while sending OTP.", "error");
+      }
+    } else {
+      Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to change the status?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, change it!",
+        cancelButtonText: "No, cancel",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          proceedUpdateStatus(Id, row);
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
           Swal.fire({
-            title: "Error",
-            text: "An error occurred while updating the status.",
+            title: "Cancelled",
+            text: "Status change was not performed",
             icon: "error",
             confirmButtonText: "Ok",
             timer: 1000,
             timerProgressBar: true,
           });
         }
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
+      });
+    }
+  };
+
+  const proceedUpdateStatus = async (Id, row) => {
+    try {
+      const req = { job_id: row.job_id, status_type: Number(Id) };
+      const res = await dispatch(
+        Update_Status({ req, authToken: token }),
+      ).unwrap();
+
+      if (res.status) {
         Swal.fire({
-          title: "Cancelled",
-          text: "Status change was not performed",
+          title: "Success",
+          text: res.message,
+          icon: "success",
+          timer: 1000,
+          showConfirmButton: false,
+        });
+        GetLinkedData();
+      } else if (res.data === "W") {
+        Swal.fire({
+          title: "Warning",
+          text: res.message,
+          icon: "warning",
+          confirmButtonText: "Ok",
+          timer: 3000,
+          timerProgressBar: true,
+        });
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: res.message,
           icon: "error",
           confirmButtonText: "Ok",
           timer: 1000,
           timerProgressBar: true,
         });
       }
-    });
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: "An error occurred while updating the status.",
+        icon: "error",
+        confirmButtonText: "Ok",
+        timer: 1000,
+        timerProgressBar: true,
+      });
+    }
   };
 
   const maxManagers = allLinkedData && allLinkedData.length > 0
@@ -1063,64 +1120,64 @@ const JobStatus = () => {
         }));
         downloadCSV(data, "Staff.csv");
       } else {
-            const exportMaxManagers = allData && allData.length > 0
-                ? Math.max(...allData.map((row) => (row.account_managers || []).length))
-                : 0;
-            
-            const data = allData.map((item) => {
-                const status = statusDataAll.find(
-                    (s) => Number(s.id) === Number(item.status_type)
-                );
-                
-                const rowData = {
-                    "Job ID": item.job_code_id || "-",
-                    "Job Priority": item.job_priority
-                        ? item.job_priority.charAt(0).toUpperCase() +
-                        item.job_priority.slice(1).toLowerCase()
-                        : "-",
-                    "Client Name": item.client_trading_name || "-",
-                    "Account Manager": item.account_manager_name || "-",
-                    "Employee ID": item.account_manager_employee_number || "-",
-                };
+        const exportMaxManagers = allData && allData.length > 0
+          ? Math.max(...allData.map((row) => (row.account_managers || []).length))
+          : 0;
 
-                // Add dynamic managers to export
-                for (let i = 0; i < exportMaxManagers; i++) {
-                    const manager = item.account_managers?.[i];
-                    rowData[`Individual Account Manager ${i + 1}`] = manager?.full_name || "-";
-                    rowData[`Employee ID ${i + 1}`] = manager?.employee_number || "-";
-                }
+        const data = allData.map((item) => {
+          const status = statusDataAll.find(
+            (s) => Number(s.id) === Number(item.status_type)
+          );
 
-                // Add remaining fields
-                Object.assign(rowData, {
-                    "Job Type": item.job_type_name || "-",
-                    Status: status ? status.name : "-",
-                    "Client Contact Person":
-                        (item.account_manager_officer_first_name || "") +
-                        " " +
-                        (item.account_manager_officer_last_name || ""),
-                    "Client Job Code": item.client_job_code || "-",
-                    // "Outbook Account Manager":
-                    //     (item.outbooks_acount_manager_first_name || "") +
-                    //     " " +
-                    //     (item.outbooks_acount_manager_last_name || ""),
-                    "Allocated To": item.allocated_first_name
-                        ? item.allocated_first_name + " " + item.allocated_last_name
-                        : "-",
-                    Timesheet:
-                        item.total_hours_status == "1" && item.total_hours
-                            ? item.total_hours.split(":")[0] +
-                            "h " +
-                            item.total_hours.split(":")[1] +
-                            "m"
-                            : "-",
-                    Invoicing: item.invoiced == "1" ? "YES" : "NO",
-                    "Created By": item.job_created_by || "-",
-                    "Created At": item.created_at || "-",
-                });
+          const rowData = {
+            "Job ID": item.job_code_id || "-",
+            "Job Priority": item.job_priority
+              ? item.job_priority.charAt(0).toUpperCase() +
+              item.job_priority.slice(1).toLowerCase()
+              : "-",
+            "Client Name": item.client_trading_name || "-",
+            "Account Manager": item.account_manager_name || "-",
+            "Employee ID": item.account_manager_employee_number || "-",
+          };
 
-                return rowData;
-            });
-            downloadCSV(data, `Jobs_${key || "all"}.csv`);
+          // Add dynamic managers to export
+          for (let i = 0; i < exportMaxManagers; i++) {
+            const manager = item.account_managers?.[i];
+            rowData[`Individual Account Manager ${i + 1}`] = manager?.full_name || "-";
+            rowData[`Employee ID ${i + 1}`] = manager?.employee_number || "-";
+          }
+
+          // Add remaining fields
+          Object.assign(rowData, {
+            "Job Type": item.job_type_name || "-",
+            Status: status ? status.name : "-",
+            "Client Contact Person":
+              (item.account_manager_officer_first_name || "") +
+              " " +
+              (item.account_manager_officer_last_name || ""),
+            "Client Job Code": item.client_job_code || "-",
+            // "Outbook Account Manager":
+            //     (item.outbooks_acount_manager_first_name || "") +
+            //     " " +
+            //     (item.outbooks_acount_manager_last_name || ""),
+            "Allocated To": item.allocated_first_name
+              ? item.allocated_first_name + " " + item.allocated_last_name
+              : "-",
+            Timesheet:
+              item.total_hours_status == "1" && item.total_hours
+                ? item.total_hours.split(":")[0] +
+                "h " +
+                item.total_hours.split(":")[1] +
+                "m"
+                : "-",
+            Invoicing: item.invoiced == "1" ? "YES" : "NO",
+            "Created By": item.job_created_by || "-",
+            "Created At": item.created_at || "-",
+          });
+
+          return rowData;
+        });
+        downloadCSV(data, `Jobs_${key || "all"}.csv`);
       }
     } catch (error) {
       Swal.fire({ title: "Error", text: "Export failed.", icon: "error" });
@@ -1157,7 +1214,7 @@ const JobStatus = () => {
                     className="btn btn-info text-white blue-btn"
                     onClick={() => window.history.back()}
                   >
-                    <ArrowLeft size={16}/> Back
+                    <ArrowLeft size={16} /> Back
                   </div>
 
                   {(role === "SUPERADMIN" ||
@@ -1168,7 +1225,7 @@ const JobStatus = () => {
                           to="/admin/addcustomer"
                           className="btn btn-outline-info fw-bold float-end border-3"
                         >
-                          <Plus size={16}/> Add Customer
+                          <Plus size={16} /> Add Customer
                         </Link>
                       </div>
                     )}
@@ -1179,7 +1236,7 @@ const JobStatus = () => {
                         className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
                         onClick={handleExport}
                       >
-                            <Download size={16}/>
+                        <Download size={16} />
 
                         <span>Export Excel</span>
                       </button>
