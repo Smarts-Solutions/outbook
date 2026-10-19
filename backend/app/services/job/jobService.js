@@ -187,48 +187,30 @@ const sendJobStatusOtp = async (data) => {
     if (settings && settings.manager_otp_number && settings.whatsapp_phone_number_id && settings.whatsapp_access_token) {
       const url = `https://graph.facebook.com/v17.0/${settings.whatsapp_phone_number_id}/messages`;
       const templateName = settings.whatsapp_template_name || "job_status_otp";
-      const payload = {
-        messaging_product: "whatsapp",
-        to: settings.manager_otp_number,
-        type: "template",
-        template: {
-          name: templateName,
-          language: {
-            code: "en_US"
-          }
-        }
-      };
+      
+      // Determine components based on template type
+      let components = [];
+      const isAuthOtpTemplate = templateName === "outbook_message" || templateName.toLowerCase().includes("otp");
 
-      // hello_world template doesn't accept variables. Only add components for other templates.
-      if (templateName !== "hello_world") {
-        payload.template.components = [
+      if (templateName === "hello_world") {
+        components = [];
+      } else if (isAuthOtpTemplate) {
+        // Meta WhatsApp Authentication OTP template structure
+        components = [
           {
             type: "body",
             parameters: [
               {
                 type: "text",
-                text: staffName || "Staff"
-              },
-              {
-                type: "text",
-                text: staffRole || "Staff Role"
-              },
-              {
-                type: "text",
-                text: customerName || "Unknown Customer"
-              },
-              {
-                type: "text",
-                text: clientName || "Unknown Client"
-              },
-              {
-                type: "text",
-                text: jobCodeId || String(jobId)
-              },
-              {
-                type: "text",
-                text: newStatus || "Status"
-              },
+                text: otpCode
+              }
+            ]
+          },
+          {
+            type: "button",
+            sub_type: "url",
+            index: "0",
+            parameters: [
               {
                 type: "text",
                 text: otpCode
@@ -236,13 +218,75 @@ const sendJobStatusOtp = async (data) => {
             ]
           }
         ];
+      } else {
+        // Multi-parameter custom template
+        components = [
+          {
+            type: "body",
+            parameters: [
+              { type: "text", text: staffName || "Staff" },
+              { type: "text", text: staffRole || "Staff Role" },
+              { type: "text", text: customerName || "Unknown Customer" },
+              { type: "text", text: clientName || "Unknown Client" },
+              { type: "text", text: jobCodeId || String(jobId) },
+              { type: "text", text: newStatus || "Status" },
+              { type: "text", text: otpCode }
+            ]
+          }
+        ];
       }
+
       const headers = {
         'Authorization': `Bearer ${settings.whatsapp_access_token}`,
         'Content-Type': 'application/json'
       };
-      await axios.post(url, payload, { headers });
-      console.log(`WhatsApp OTP sent to ${settings.manager_otp_number}: OTP is ${otpCode}`);
+
+      const sendWithPayload = async (langCode, comps) => {
+        const payload = {
+          messaging_product: "whatsapp",
+          to: settings.manager_otp_number,
+          type: "template",
+          template: {
+            name: templateName,
+            language: {
+              code: langCode
+            }
+          }
+        };
+        if (comps && comps.length > 0) {
+          payload.template.components = comps;
+        }
+        return axios.post(url, payload, { headers });
+      };
+
+      try {
+        // First try with 'en' (standard for English templates in Meta)
+        await sendWithPayload("en", components);
+        console.log(`WhatsApp OTP sent to ${settings.manager_otp_number}: OTP is ${otpCode}`);
+      } catch (firstErr) {
+        // If button component failed or rejected, try body-only parameter
+        if (isAuthOtpTemplate && components.length > 1) {
+          try {
+            const bodyOnlyComps = [{ type: "body", parameters: [{ type: "text", text: otpCode }] }];
+            await sendWithPayload("en", bodyOnlyComps);
+            console.log(`WhatsApp OTP sent to ${settings.manager_otp_number} (body-only): OTP is ${otpCode}`);
+            return { status: true, message: "OTP sent successfully." };
+          } catch (retryBodyErr) {
+            // Fallback to en_US
+            try {
+              await sendWithPayload("en_US", components);
+              console.log(`WhatsApp OTP sent to ${settings.manager_otp_number} (en_US): OTP is ${otpCode}`);
+              return { status: true, message: "OTP sent successfully." };
+            } catch (retryLangErr) {
+              throw retryLangErr;
+            }
+          }
+        } else {
+          // Retry with en_US
+          await sendWithPayload("en_US", components);
+          console.log(`WhatsApp OTP sent to ${settings.manager_otp_number} (en_US): OTP is ${otpCode}`);
+        }
+      }
     } else {
       console.log(`WhatsApp API not fully configured. OTP generated is ${otpCode}`);
     }
