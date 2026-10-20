@@ -341,18 +341,20 @@ const Dashboard = () => {
                   <p className="mb-0 page-subtitle">{greeting}</p>
                   <h2 className="page-title mt-1">{staffDetails.role_name}</h2>
                 </div>
-                <div className="col-md-3">
-                  <div className="d-flex justify-content-end">
-                    <button
-                      type="button"
-                      className="btn btn-outline-info fw-bold"
-                      onClick={exportAllActivityLog}
-                      disabled={exporting || !getActiviyLog?.length}
-                    >
-                      <Download size={16} /> Export All
-                    </button>
+                {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && (
+                  <div className="col-md-3">
+                    <div className="d-flex justify-content-end">
+                      <button
+                        type="button"
+                        className="btn btn-outline-info fw-bold"
+                        onClick={exportAllActivityLog}
+                        disabled={exporting || !getActiviyLog?.length}
+                      >
+                        <Download size={16} /> Export All
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

@@ -10,6 +10,7 @@ const DueByReport = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
   const [getDueByReport, setDueByReport] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -345,7 +346,9 @@ const DueByReport = () => {
             </div>
           </div>
           <div className="col-md-5">
-             <ExportToExcel apiData={exportData} fileName={'Due_By_Report'} headers={headers} />
+             {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && (
+               <ExportToExcel apiData={exportData} fileName={'Due_By_Report'} headers={headers} />
+             )}
           </div>
         </div>
         <div className="datatable-wrapper mt-minus">

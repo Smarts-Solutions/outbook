@@ -1807,7 +1807,7 @@ function JobCustomReport() {
 
             {/* get filters Dropdown */}
 
-            {showData && showData.rows && showData.rows.length > 0 && (
+            {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && showData && showData.rows && showData.rows.length > 0 && (
               <div className="col-12 col-sm-5">
                 <div className="d-block d-flex justify-content-sm-end align-items-center mt-3 mt-sm-0">
                   <button

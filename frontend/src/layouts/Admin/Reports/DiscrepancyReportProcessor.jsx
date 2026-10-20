@@ -12,6 +12,7 @@ const DiscrepancyReportProcessor = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
   const [discrepancyReportData, setDiscrepancyReportData] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -133,7 +134,9 @@ const DiscrepancyReportProcessor = () => {
             </div>
           </div>
           <div className='col-md-5'>
-             <ExportToExcel apiData={exportData} fileName={'Discrepancy_Report_Processor'} headers={headers} />
+             {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && (
+               <ExportToExcel apiData={exportData} fileName={'Discrepancy_Report_Processor'} headers={headers} />
+             )}
           </div>
         </div>
 

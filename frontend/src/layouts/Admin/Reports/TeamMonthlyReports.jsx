@@ -7,6 +7,7 @@ import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
 const TeamMonthlyReport = () => {
     const dispatch = useDispatch();
     const token = JSON.parse(localStorage.getItem("token"));
+    const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
     const [getMonthlyReport, setMonthlyReport] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -56,7 +57,9 @@ const TeamMonthlyReport = () => {
               
               </div>
               <div className='col-md-5'>
-                <ExportToExcel apiData={getMonthlyReport} fileName={'Team_Performance_Report'} headers={headers} />
+                {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && (
+                  <ExportToExcel apiData={getMonthlyReport} fileName={'Team_Performance_Report'} headers={headers} />
+                )}
               </div>
             </div>
             <div className='datatable-wrapper mt-minus'>

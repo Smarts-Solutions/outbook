@@ -3638,25 +3638,29 @@ const TimesheetNewDesign = () => {
           />
         </div>
         <div className="col-md-auto">
-          <button
-            type="button"
-            className="timesheet-table-header-btn"
-            onClick={() => exportManagerReviewCSV()}
-            disabled={exporting || !managerReviewData.rows || managerReviewData.rows.length === 0}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download me-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>
-            {exporting ? "Exporting..." : "Export"}
-          </button>
-          
-          <button 
-            type="button" 
-            className="timesheet-table-header-btn ms-2" 
-            disabled={exportAllLoading} 
-            onClick={exportAllTimesheetsCSV}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download me-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg> 
-            {exportAllLoading ? "Exporting..." : "Export All Timesheets"}
-          </button>
+          {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && (
+            <>
+              <button
+                type="button"
+                className="timesheet-table-header-btn"
+                onClick={() => exportManagerReviewCSV()}
+                disabled={exporting || !managerReviewData.rows || managerReviewData.rows.length === 0}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download me-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>
+                {exporting ? "Exporting..." : "Export"}
+              </button>
+              
+              <button 
+                type="button" 
+                className="timesheet-table-header-btn ms-2" 
+                disabled={exportAllLoading} 
+                onClick={exportAllTimesheetsCSV}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download me-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg> 
+                {exportAllLoading ? "Exporting..." : "Export All Timesheets"}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -4034,7 +4038,9 @@ const TimesheetNewDesign = () => {
                     {submitStatusAllKey !== 1 && (
                       <button type="button" className="timesheet-table-header-add-task-btn" onClick={handleAddNewSheet} disabled={isAddingRow || staffDetails.id != multipleFilter.staff_id}><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg> Add task row</button>
                     )}
-                    <button type="button" className="timesheet-table-header-btn" onClick={() => exportToCSV(timeSheetRows)}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg> Export</button>
+                    {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && (
+                      <button type="button" className="timesheet-table-header-btn" onClick={() => exportToCSV(timeSheetRows)}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg> Export</button>
+                    )}
                   </div>
                 </div>
                 <div className="mt-3">
@@ -4679,15 +4685,17 @@ const TimesheetNewDesign = () => {
                     />
                   </div>
                   <div className="col-md-auto">
-                    <button
-                      type="button"
-                      className="timesheet-table-header-btn"
-                      onClick={exportMisResourceCSV}
-                      disabled={misExporting || !misData || misData.length === 0}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download me-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>
-                      {misExporting ? "Exporting..." : "Export"}
-                    </button>
+                    {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && (
+                      <button
+                        type="button"
+                        className="timesheet-table-header-btn"
+                        onClick={exportMisResourceCSV}
+                        disabled={misExporting || !misData || misData.length === 0}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download me-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>
+                        {misExporting ? "Exporting..." : "Export"}
+                      </button>
+                    )}
                   </div>
                 </div>
 

@@ -43,6 +43,7 @@ const ClientList = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
   const [ClientData, setClientData] = useState([]);
   const [getJobDetails, setGetJobDetails] = useState([]);
   const [getCheckList, setCheckList] = useState([]);
@@ -1871,7 +1872,7 @@ const ClientList = () => {
                   </button>
                 )} */}
 
-                {tab.data && tab.data.length > 0 && (
+                {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && tab.data && tab.data.length > 0 && (
                   <button
                     className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"
                     onClick={() => exportByTab(tab.key)}

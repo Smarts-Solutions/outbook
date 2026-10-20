@@ -58,6 +58,7 @@ const Setting = () => {
   const dispatch = useDispatch();
   const tabStatus = useRef("1");
   const role = JSON.parse(localStorage.getItem("role"));
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
   const [showSettingInsertTab, setShowSettingInsertTab] = useState(true);
   const [showSettingUpdateTab, setShowSettingUpdateTab] = useState(true);
   const [showSettingDeleteTab, setSettingDeleteTab] = useState(true);
@@ -3214,7 +3215,7 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  {roleDataAll?.data && roleDataAll.data.length > 0 && (
+                  {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && roleDataAll?.data && roleDataAll.data.length > 0 && (
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={roleDataAll.data.map((data) => ({
@@ -3260,7 +3261,8 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  {personRoleDataAll?.data &&
+                  {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 &&
+                    personRoleDataAll?.data &&
                     personRoleDataAll.data.length > 0 && (
                       <ExportToExcel
                         className="btn btn-outline-info fw-bold float-end border-3 "
@@ -3306,7 +3308,7 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  {statusTypeDataAll?.data?.length > 0 && (
+                  {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && statusTypeDataAll?.data?.length > 0 && (
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={statusTypeDataAll.data.map((data) => ({
@@ -3349,7 +3351,7 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  {serviceDataAll?.data?.length > 0 && (
+                  {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && serviceDataAll?.data?.length > 0 && (
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={serviceDataAll.data.map((data) => ({
@@ -3392,7 +3394,7 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  {clientIndustryDataAll?.data?.length > 0 && (
+                  {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && clientIndustryDataAll?.data?.length > 0 && (
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={clientIndustryDataAll.data.map((data) => ({
@@ -3435,7 +3437,7 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  {countryDataAll?.data?.length > 0 && (
+                  {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && countryDataAll?.data?.length > 0 && (
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={countryDataAll.data.map((data) => ({
@@ -3480,7 +3482,7 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  {incorporationDataAll?.length > 0 && (
+                  {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && incorporationDataAll?.length > 0 && (
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={incorporationDataAll.map((data) => ({
@@ -3523,7 +3525,7 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  {customerSourceDataDataAll?.length > 0 && (
+                  {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && customerSourceDataDataAll?.length > 0 && (
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={customerSourceDataDataAll.map((data) => ({
@@ -3566,7 +3568,7 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  {getCheckList?.length > 0 && (
+                  {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && getCheckList?.length > 0 && (
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={getCheckList.map((data) => ({
@@ -3614,7 +3616,7 @@ const Setting = () => {
                       </button>
                     </div>
                   )}
-                  {InternalAllData?.length > 0 && (
+                  {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && InternalAllData?.length > 0 && (
                     <ExportToExcel
                       className="btn btn-outline-info fw-bold float-end border-3"
                       apiData={InternalAllData.map((data) => ({

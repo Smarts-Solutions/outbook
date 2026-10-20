@@ -25,6 +25,7 @@ const JobStatus = () => {
 
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
   const [allLinkedData, setAllLinkedData] = useState([]);
   const [statusDataAll, setStatusDataAll] = useState([]);
 
@@ -1235,7 +1236,7 @@ const JobStatus = () => {
                       </div>
                     )}
 
-                  {allLinkedData && allLinkedData.length > 0 && (
+                  {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && allLinkedData && allLinkedData.length > 0 && (
                     <div className="ms-2">
                       <button
                         className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"

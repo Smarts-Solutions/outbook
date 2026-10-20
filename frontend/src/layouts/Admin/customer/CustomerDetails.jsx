@@ -1348,7 +1348,7 @@ const CustomerUsers = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Assignments badges */}
             <div className="d-flex gap-2">
               <span className="badge bg-info text-white px-2 py-1.5 rounded-pill d-flex align-items-center" style={{ fontSize: '0.75rem', fontWeight: '600' }}>
@@ -1487,7 +1487,7 @@ const CustomerUsers = () => {
 
                   <div className="tab-content mt-minus-60" id="pills-tabContent">
                     <div className="card-datatable">
-                        <div className="card-datatable position-relative">
+                      <div className="card-datatable position-relative">
 
                         <div className="row mb-3">
                           <div className="col-md-4">

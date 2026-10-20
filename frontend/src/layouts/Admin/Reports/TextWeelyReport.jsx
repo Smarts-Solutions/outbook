@@ -8,7 +8,8 @@ import ExportToExcel from '../../../Components/ExtraComponents/ExportToExcel';
 const SlidingTable = () => {
   const navigate = useNavigate();
   const noDataImage = '/assets/images/No-data-amico.png';
-  const StaffUserId = JSON.parse(localStorage.getItem('staffDetails'))?.id;
+  const staffDetails = JSON.parse(localStorage.getItem('staffDetails') || "{}");
+  const StaffUserId = staffDetails?.id;
   const token = JSON.parse(localStorage.getItem('token'));
   const dispatch = useDispatch();
   const [columns] = useState(generateColumns(52));
@@ -307,7 +308,9 @@ const SlidingTable = () => {
               </button>
             </div>
             <div className='col-md-3'>
-              <ExportToExcel apiData={exportData} fileName={'Weekly_Report'} headers={headers} />
+              {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && (
+                <ExportToExcel apiData={exportData} fileName={'Weekly_Report'} headers={headers} />
+              )}
             </div>
           </div>
         </div>

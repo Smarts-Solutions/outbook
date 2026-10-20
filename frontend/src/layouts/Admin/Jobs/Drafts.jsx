@@ -17,6 +17,7 @@ import { Download, Plus, Eye } from "lucide-react";
 const Drafts = ({ getAccessDataJob, goto }) => {
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
   const location = useLocation();
   const dispatch = useDispatch();
   const [adddraft, setAdddraft] = useState(false);
@@ -502,7 +503,7 @@ const Drafts = ({ getAccessDataJob, goto }) => {
 
         {/* RIGHT */}
         <div className="col-md-4 text-end">
-          {DraftListData && DraftListData.length > 0 && (
+          {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && DraftListData && DraftListData.length > 0 && (
             <button
               className="btn btn-outline-info fw-bold border-3 me-2"
               onClick={handleExport}

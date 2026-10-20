@@ -12,12 +12,13 @@ import { Download,ArrowLeft } from "lucide-react";
 import axios from "axios";
 import { base_url } from "../../../Utils/Config";
 
-const JobStatus = () => {
+const   JobStatus = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
   const [jobsData, setJobsData] = useState([]);
   const [statusDataAll, setStatusDataAll] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -646,7 +647,7 @@ const JobStatus = () => {
                      <ArrowLeft size={16}/> Back
                   </div>
 
-                  {jobsData && jobsData.length > 0 && (
+                  {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && jobsData && jobsData.length > 0 && (
                     <div className="ms-2">
                       <button
                         className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"

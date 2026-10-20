@@ -12,6 +12,7 @@ const MissingTimesheet = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
   const [missingTimesheetReportData, setMissingTimesheetReportData] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -65,7 +66,7 @@ const MissingTimesheet = () => {
           </div>
           <div className='col-md-5'>
             <div className='d-flex justify-content-end'>
-              {exportData && exportData.length > 0 && (
+              {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && exportData && exportData.length > 0 && (
                 <ExportToExcel
                   apiData={exportData}
                   fileName={`Missing_Timesheet_Report`}

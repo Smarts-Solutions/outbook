@@ -1528,7 +1528,8 @@ const ClientLists = () => {
                   <div className="tab-title">
                     <h3 className="mt-0">{tab?.title}</h3>
                   </div>
-                  {(activeTab === "client" || activeTab === "job") &&
+                  {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 &&
+                    (activeTab === "client" || activeTab === "job") &&
                     tab.data &&
                     tab.data.length > 0 && (
                       <div className="col-md-2">

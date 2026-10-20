@@ -478,12 +478,12 @@ const Timesheet = () => {
       if (timeSheetRows.length > 0) {
         const lastObject = timeSheetRows[timeSheetRows.length - 1];
         let missingFields = [];
-        
+
         if (lastObject.task_type === "2") {
           if (!lastObject.customer_id) missingFields.push("Customer");
           if (!lastObject.client_id) missingFields.push("Client");
         }
-        
+
         if (!lastObject.job_id) missingFields.push("Job");
         if (!lastObject.task_id) missingFields.push("Task");
 
@@ -507,93 +507,93 @@ const Timesheet = () => {
         }
       }
 
-    const newSheetRow = {
-      id: null,
-      task_type: null,
-      customer_id: null,
-      client_id: null,
-      job_id: null,
-      task_id: null,
-      job_total_time: null,
-      monday_date: null,
-      monday_hours: null,
-      monday_note: null,
-      tuesday_date: null,
-      tuesday_hours: null,
-      tuesday_note: null,
-      wednesday_date: null,
-      wednesday_hours: null,
-      wednesday_note: null,
-      thursday_date: null,
-      thursday_hours: null,
-      thursday_note: null,
-      friday_date: null,
-      friday_hours: null,
-      friday_note: null,
-      saturday_date: null,
-      saturday_hours: null,
-      saturday_note: null,
-      sunday_date: null,
-      sunday_hours: null,
-      sunday_note: null,
-      remark: null,
-      newRow: 1,
-      editRow: 0,
-      submit_status: "0",
-      customerData: [], // Holds the data for customer dropdown
-      clientData: [], // Holds the data for client dropdown
-      jobData: [], // Holds the data for job dropdown
-      taskData: [], // Holds the data for task dropdown
-    };
-
-    // setTimeSheetRows((prevRows) => [...prevRows, newSheetRow]);
-    let req = { staff_id: multipleFilter.staff_id };
-    const resStaffTime = await dispatch(
-      getStaffHourMinute({ req, authToken: token })
-    ).unwrap();
-    let staffs_hourminute = resStaffTime?.data?.[0]?.hourminute || null;
-
-    setTimeSheetRows((prevRows) => {
-      const updatedRows = [...prevRows, newSheetRow];
-      const newIndex = updatedRows.length - 1; // Index of the newly added row
-      updatedRows[newIndex].task_type = "1";
-      updatedRows[newIndex].staffs_hourminute = staffs_hourminute;
-      setTimeSheetRows(updatedRows);
-      return updatedRows;
-    });
-
-    req = { staff_id: multipleFilter.staff_id, task_type: "1" };
-    const res = await dispatch(
-      getTimesheetTaskTypedData({ req, authToken: token })
-    ).unwrap();
-
-    if (res.status) {
-      let req = {
-        staff_id: multipleFilter.staff_id,
-        task_type: "5",
-        internal_id: res.data[0].id,
+      const newSheetRow = {
+        id: null,
+        task_type: null,
+        customer_id: null,
+        client_id: null,
+        job_id: null,
+        task_id: null,
+        job_total_time: null,
+        monday_date: null,
+        monday_hours: null,
+        monday_note: null,
+        tuesday_date: null,
+        tuesday_hours: null,
+        tuesday_note: null,
+        wednesday_date: null,
+        wednesday_hours: null,
+        wednesday_note: null,
+        thursday_date: null,
+        thursday_hours: null,
+        thursday_note: null,
+        friday_date: null,
+        friday_hours: null,
+        friday_note: null,
+        saturday_date: null,
+        saturday_hours: null,
+        saturday_note: null,
+        sunday_date: null,
+        sunday_hours: null,
+        sunday_note: null,
+        remark: null,
+        newRow: 1,
+        editRow: 0,
+        submit_status: "0",
+        customerData: [], // Holds the data for customer dropdown
+        clientData: [], // Holds the data for client dropdown
+        jobData: [], // Holds the data for job dropdown
+        taskData: [], // Holds the data for task dropdown
       };
-      const res1 = await dispatch(
-        getTimesheetTaskTypedData({ req, authToken: token })
+
+      // setTimeSheetRows((prevRows) => [...prevRows, newSheetRow]);
+      let req = { staff_id: multipleFilter.staff_id };
+      const resStaffTime = await dispatch(
+        getStaffHourMinute({ req, authToken: token })
       ).unwrap();
+      let staffs_hourminute = resStaffTime?.data?.[0]?.hourminute || null;
+
       setTimeSheetRows((prevRows) => {
-        const updatedRows = [...prevRows];
-        const newIndex = updatedRows.length - 1;
+        const updatedRows = [...prevRows, newSheetRow];
+        const newIndex = updatedRows.length - 1; // Index of the newly added row
         updatedRows[newIndex].task_type = "1";
-        updatedRows[newIndex].jobData = res.data;
-        updatedRows[newIndex].job_id = res.data[0].id;
-        updatedRows[newIndex].taskData = res1.data;
-        updatedRows[newIndex].task_id = res1.data[0].id;
+        updatedRows[newIndex].staffs_hourminute = staffs_hourminute;
+        setTimeSheetRows(updatedRows);
         return updatedRows;
       });
 
-      // update record only
+      req = { staff_id: multipleFilter.staff_id, task_type: "1" };
+      const res = await dispatch(
+        getTimesheetTaskTypedData({ req, authToken: token })
+      ).unwrap();
 
-      updateRecordSheet(null, "task_type", "1");
-    } else {
-      // Handle the error case as needed
-      console.log("API call failed:", res);
-    }
+      if (res.status) {
+        let req = {
+          staff_id: multipleFilter.staff_id,
+          task_type: "5",
+          internal_id: res.data[0].id,
+        };
+        const res1 = await dispatch(
+          getTimesheetTaskTypedData({ req, authToken: token })
+        ).unwrap();
+        setTimeSheetRows((prevRows) => {
+          const updatedRows = [...prevRows];
+          const newIndex = updatedRows.length - 1;
+          updatedRows[newIndex].task_type = "1";
+          updatedRows[newIndex].jobData = res.data;
+          updatedRows[newIndex].job_id = res.data[0].id;
+          updatedRows[newIndex].taskData = res1.data;
+          updatedRows[newIndex].task_id = res1.data[0].id;
+          return updatedRows;
+        });
+
+        // update record only
+
+        updateRecordSheet(null, "task_type", "1");
+      } else {
+        // Handle the error case as needed
+        console.log("API call failed:", res);
+      }
     } catch (error) {
       console.log("Error in handleAddNewSheet:", error);
     } finally {
@@ -1225,12 +1225,12 @@ const Timesheet = () => {
     if (timeSheetRows.length > 0) {
       const lastObject = timeSheetRows[timeSheetRows.length - 1];
       let missingFields = [];
-      
+
       if (lastObject.task_type === "2") {
         if (!lastObject.customer_id) missingFields.push("Customer");
         if (!lastObject.client_id) missingFields.push("Client");
       }
-      
+
       if (!lastObject.job_id) missingFields.push("Job");
       if (!lastObject.task_id) missingFields.push("Task");
 
@@ -1421,12 +1421,12 @@ const Timesheet = () => {
     if (timeSheetRows.length > 0) {
       const lastObject = timeSheetRows[timeSheetRows.length - 1];
       let missingFields = [];
-      
+
       if (lastObject.task_type === "2") {
         if (!lastObject.customer_id) missingFields.push("Customer");
         if (!lastObject.client_id) missingFields.push("Client");
       }
-      
+
       if (!lastObject.job_id) missingFields.push("Job");
       if (!lastObject.task_id) missingFields.push("Task");
 
@@ -1768,96 +1768,96 @@ const Timesheet = () => {
 
     setExporting(true);
     setTimeout(() => {
-    // const headers = [
-    //   "Index",
-    //   "Task Type",
-    //   "Customer Name",
-    //   "Client Name",
-    //   "Job Name",
-    //   "Job Type",
-    //   "Task Name",
-    //   weekDays.monday ? dayMonthFormatDate(weekDays.monday) : "",
-    //   //"Monday Hours",
-    //   "Monday Note",
-    //   "Tuesday Hours",
-    //   "Wednesday Hours",
-    //   "Thursday Hours",
-    //   "Friday Hours",
-    //   "Saturday Hours",
-    //   "Remark"
-    // ];
+      // const headers = [
+      //   "Index",
+      //   "Task Type",
+      //   "Customer Name",
+      //   "Client Name",
+      //   "Job Name",
+      //   "Job Type",
+      //   "Task Name",
+      //   weekDays.monday ? dayMonthFormatDate(weekDays.monday) : "",
+      //   //"Monday Hours",
+      //   "Monday Note",
+      //   "Tuesday Hours",
+      //   "Wednesday Hours",
+      //   "Thursday Hours",
+      //   "Friday Hours",
+      //   "Saturday Hours",
+      //   "Remark"
+      // ];
 
-    const headers = [
-      "Index",
-      "Task Type",
-      "Customer Name",
-      "Client Name",
-      "Job Name",
-      "Job Type",
-      "Task Name",
-      weekDays.monday ? dayMonthFormatDate(weekDays.monday) : "",
-      "Monday Note",
-      weekDays.tuesday ? dayMonthFormatDate(weekDays.tuesday) : "",
-      "Tuesday Note",
-      weekDays.wednesday ? dayMonthFormatDate(weekDays.wednesday) : "",
-      "Wednesday Note",
-      weekDays.thursday ? dayMonthFormatDate(weekDays.thursday) : "",
-      "Thursday Note",
-      weekDays.friday ? dayMonthFormatDate(weekDays.friday) : "",
-      "Friday Note",
-      weekDays.saturday ? dayMonthFormatDate(weekDays.saturday) : "",
-      "Saturday Note",
-      "Remark",
-    ];
+      const headers = [
+        "Index",
+        "Task Type",
+        "Customer Name",
+        "Client Name",
+        "Job Name",
+        "Job Type",
+        "Task Name",
+        weekDays.monday ? dayMonthFormatDate(weekDays.monday) : "",
+        "Monday Note",
+        weekDays.tuesday ? dayMonthFormatDate(weekDays.tuesday) : "",
+        "Tuesday Note",
+        weekDays.wednesday ? dayMonthFormatDate(weekDays.wednesday) : "",
+        "Wednesday Note",
+        weekDays.thursday ? dayMonthFormatDate(weekDays.thursday) : "",
+        "Thursday Note",
+        weekDays.friday ? dayMonthFormatDate(weekDays.friday) : "",
+        "Friday Note",
+        weekDays.saturday ? dayMonthFormatDate(weekDays.saturday) : "",
+        "Saturday Note",
+        "Remark",
+      ];
 
-    let total_hours = 0;
-    const rows = timeSheetRows
-      .filter((item) => item.id !== null && item.id !== undefined)
-      .map((item, index) => {
-        total_hours += parseFloat(item.total_hours) || 0;
-        return [
-          index + 1,
-          item.task_type === "1" ? "Internal" : "External",
-          item.customer_name || "No Customer",
-          item.client_name || "No Client",
-          item.task_type === "1"
-            ? item.internal_name || "No Job"
-            : item.job_name || "No Job",
-          item.task_type === "1" ? " - " : item.job_type_name || " - ",
-          item.task_type === "1"
-            ? item.sub_internal_name || "No Task"
-            : item.task_name || "No Task",
-          item.monday_hours || 0,
-          item.monday_note || "",
-          item.tuesday_hours || 0,
-          item.tuesday_note || "",
-          item.wednesday_hours || 0,
-          item.wednesday_note || "",
-          item.thursday_hours || 0,
-          item.thursday_note || "",
-          item.friday_hours || 0,
-          item.friday_note || "",
-          item.saturday_hours || 0,
-          item.saturday_note || "",
-          item.remark || "",
-        ];
-      });
+      let total_hours = 0;
+      const rows = timeSheetRows
+        .filter((item) => item.id !== null && item.id !== undefined)
+        .map((item, index) => {
+          total_hours += parseFloat(item.total_hours) || 0;
+          return [
+            index + 1,
+            item.task_type === "1" ? "Internal" : "External",
+            item.customer_name || "No Customer",
+            item.client_name || "No Client",
+            item.task_type === "1"
+              ? item.internal_name || "No Job"
+              : item.job_name || "No Job",
+            item.task_type === "1" ? " - " : item.job_type_name || " - ",
+            item.task_type === "1"
+              ? item.sub_internal_name || "No Task"
+              : item.task_name || "No Task",
+            item.monday_hours || 0,
+            item.monday_note || "",
+            item.tuesday_hours || 0,
+            item.tuesday_note || "",
+            item.wednesday_hours || 0,
+            item.wednesday_note || "",
+            item.thursday_hours || 0,
+            item.thursday_note || "",
+            item.friday_hours || 0,
+            item.friday_note || "",
+            item.saturday_hours || 0,
+            item.saturday_note || "",
+            item.remark || "",
+          ];
+        });
 
-    const finalRemarkRow = [
-      `Total Weekly Hours : ${total_hours.toFixed(2) || ""}`,
-      `Final Remark: ${timeSheetRows[0].final_remark || ""}`,
-      ...new Array(headers.length - 1).fill(""),
-    ];
+      const finalRemarkRow = [
+        `Total Weekly Hours : ${total_hours.toFixed(2) || ""}`,
+        `Final Remark: ${timeSheetRows[0].final_remark || ""}`,
+        ...new Array(headers.length - 1).fill(""),
+      ];
 
-    const csvContent = [headers, ...rows, finalRemarkRow]
-      .map((row) => row.join(","))
-      .join("\n");
+      const csvContent = [headers, ...rows, finalRemarkRow]
+        .map((row) => row.join(","))
+        .join("\n");
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "TimeSheetData.csv";
-    link.click();
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "TimeSheetData.csv";
+      link.click();
       setExporting(false);
     }, 100);
   };

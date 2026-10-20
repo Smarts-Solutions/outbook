@@ -101,7 +101,7 @@ const JobTimeline = () => {
           <div className="tab-title d-flex align-items-center">
             <h3 className="mb-0">Job Timeline</h3>
 
-            {JobTimelineData && JobTimelineData.length > 0 && (
+            {Number(StaffUserId?.id || StaffUserId?.staff_id) !== 622 && JobTimelineData && JobTimelineData.length > 0 && (
               <button
                 className="btn btn-info d-inline-flex align-items-center gap-2 rounded-pill px-3 py-2 ms-auto"
                 id="btn-export"

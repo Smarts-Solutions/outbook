@@ -14,6 +14,7 @@ import { Download, Plus, Eye } from "lucide-react";
 const TaskTimesheet = ({ getAccessDataJob, goto }) => {
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
   const location = useLocation();
   const dispatch = useDispatch();
   const [addjobtimesheet, setAddjobtimesheet] = useState(false);
@@ -439,7 +440,7 @@ const TaskTimesheet = ({ getAccessDataJob, goto }) => {
                     <Plus size={16} /> Job Timesheet
                   </button>
                 )}
-              {taskTimeData && taskTimeData.length > 0 && (
+              {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && taskTimeData && taskTimeData.length > 0 && (
                 <button
                   className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
                   onClick={handleExport}

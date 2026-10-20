@@ -1405,7 +1405,7 @@ const StaffPage = () => {
                     <Plus size={16} /> Add Staff
                   </button>
                 )}
-                {(staffDataAll?.data?.length > 0 || searchTerm) && (
+                {Number(StaffUserId?.id || StaffUserId?.staff_id) !== 622 && (staffDataAll?.data?.length > 0 || searchTerm) && (
                   <button
                     className="btn btn-outline-info fw-bold border-3"
                     onClick={handleExport}
@@ -1559,16 +1559,18 @@ const StaffPage = () => {
             </div>
 
             {/* Export Button BELOW input */}
-            <div className="col-12 mt-2 d-flex justify-content-end">
-              <button
-                className="btn btn-sm btn-outline-success"
-                onClick={exportPortfolioData}
-                disabled={!assignCustomerData?.length}
-              >
-                <i className="bi bi-file-earmark-excel me-1"></i>
-                Export Portfolio
-              </button>
-            </div>
+            {Number(StaffUserId?.id || StaffUserId?.staff_id) !== 622 && (
+              <div className="col-12 mt-2 d-flex justify-content-end">
+                <button
+                  className="btn btn-sm btn-outline-success"
+                  onClick={exportPortfolioData}
+                  disabled={!assignCustomerData?.length}
+                >
+                  <i className="bi bi-file-earmark-excel me-1"></i>
+                  Export Portfolio
+                </button>
+              </div>
+            )}
 
             {/* Assigned Customers */}
             <div className="col-12 mt-3">

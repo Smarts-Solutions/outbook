@@ -741,7 +741,7 @@ const Customer = () => {
                               <span>Export Excel</span>
                             </button> */}
 
-                            {filteredData1 && filteredData1.length > 0 && (
+                            {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && filteredData1 && filteredData1.length > 0 && (
                               <button
                                 className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-2"
                                 onClick={handleExport}

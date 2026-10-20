@@ -189,6 +189,7 @@ const ClientList = () => {
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
   const role = JSON.parse(localStorage.getItem("role"));
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
   const [customerData, setCustomerData] = useState([]);
   const [activeTab, setActiveTab] = useState("NoOfJobs");
   const [getClientDetails, setClientDetails] = useState({
@@ -1307,7 +1308,7 @@ const ClientList = () => {
                       </li>
                     </ul>
 
-                    {customerData && customerData.length > 0 && (
+                    {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && customerData && customerData.length > 0 && (
                       <div className="col-md-2">
                         <button
                           className="btn btn-outline-info fw-bold float-end border-3 d-inline-flex align-items-center gap-2 lh-1"

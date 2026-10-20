@@ -748,7 +748,7 @@ const MissingLogs = ({ getAccessDataJob, goto }) => {
 
           {/* RIGHT */}
           <div className="col-md-6 text-end d-flex justify-content-end align-items-center gap-2">
-            {getMissingLogListData && getMissingLogListData.length > 0 && (
+            {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && getMissingLogListData && getMissingLogListData.length > 0 && (
               <button
                 className="btn btn-info d-inline-flex align-items-center gap-2 rounded-pill px-3 py-2 ms-auto"
                 onClick={handleExport}

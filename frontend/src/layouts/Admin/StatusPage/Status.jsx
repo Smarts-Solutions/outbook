@@ -31,6 +31,7 @@ const Status = () => {
   const [showModal, setShowModal] = useState(false);
   const [getAccessData, setAccessData] = useState({ insert: 0 });
   const role = JSON.parse(localStorage.getItem("role"));
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
   const [DeleteStatus, setDeleteStatus] = useState(false);
   const [replaceStatue, setReplaceStatue] = useState(null);
   const [JobData, setJobData] = useState([]);
@@ -502,7 +503,7 @@ const Status = () => {
         </div>
         <div className="report-data mt-4 ">
           <div className="d-flex justify-content-end">
-            {statusDataAll && statusDataAll.length > 0 && (
+            {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && statusDataAll && statusDataAll.length > 0 && (
               <button
                 onClick={handleExport}
                 type="button"

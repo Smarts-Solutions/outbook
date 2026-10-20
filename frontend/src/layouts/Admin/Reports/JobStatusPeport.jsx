@@ -10,6 +10,7 @@ import { Download } from "lucide-react";
 const JobStatus = () => {
   const navigate = useNavigate();
   const role = JSON.parse(localStorage.getItem("role"));
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
 
   const dispatch = useDispatch();
   const token = JSON.parse(localStorage.getItem("token"));
@@ -794,7 +795,7 @@ const JobStatus = () => {
         <div className="datatable-wrapper mt-minus">
           <div className="d-flex justify-content-end mb-3">
 
-            {JobStatusData && JobStatusData.length > 0 && (
+            {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && JobStatusData && JobStatusData.length > 0 && (
               <div className="col-md-8 d-flex justify-content-end">
                 <button
                   className="btn btn-outline-info fw-bold border-3"

@@ -9,6 +9,7 @@ const AverageTatReport = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const token = JSON.parse(localStorage.getItem("token"));
+  const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
   const [getAverageTatReport, setAverageTatReport] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -77,7 +78,9 @@ const AverageTatReport = () => {
            
           </div>
           <div className='col-md-5'>
-             <ExportToExcel apiData={getAverageTatReport} fileName={'Average_TAT_Report'} headers={headers} />
+             {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && (
+               <ExportToExcel apiData={getAverageTatReport} fileName={'Average_TAT_Report'} headers={headers} />
+             )}
           </div>
         </div>
         <div className='datatable-wrapper mt-minus'>
