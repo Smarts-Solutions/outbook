@@ -287,8 +287,6 @@ const JobStatus = () => {
   const handleStatusChange = async (e, row) => {
     const Id = e.target.value;
 
-    // OTP functionality commented out temporarily
-    /*
     const oldStatusObj = statusDataAll.find((s) => Number(s.id) === Number(row.status_type));
     const newStatusObj = statusDataAll.find((s) => Number(s.id) === Number(Id));
 
@@ -323,6 +321,14 @@ const JobStatus = () => {
             inputLabel: `An OTP has been sent to the manager's phone.`,
             inputPlaceholder: "Enter OTP here",
             showCancelButton: true,
+            confirmButtonText: "Verify",
+            cancelButtonText: "Cancel",
+            customClass: {
+              popup: "custom-otp-swal-popup",
+              input: "custom-otp-swal-input",
+              confirmButton: "custom-otp-swal-confirm",
+              cancelButton: "custom-otp-swal-cancel",
+            },
             inputValidator: (value) => {
               if (!value) return "You need to write something!";
             }
@@ -345,29 +351,28 @@ const JobStatus = () => {
         Swal.fire("Error", "Something went wrong while sending OTP.", "error");
       }
     } else {
-    */
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Do you want to change the status?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, change it!",
-      cancelButtonText: "No, cancel",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        proceedUpdateStatus(Id, row);
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        Swal.fire({
-          title: "Cancelled",
-          text: "Status change was not performed",
-          icon: "error",
-          confirmButtonText: "Ok",
-          timer: 1000,
-          timerProgressBar: true,
-        });
-      }
-    });
-    // }
+      Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to change the status?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, change it!",
+        cancelButtonText: "No, cancel",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          proceedUpdateStatus(Id, row);
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          Swal.fire({
+            title: "Cancelled",
+            text: "Status change was not performed",
+            icon: "error",
+            confirmButtonText: "Ok",
+            timer: 1000,
+            timerProgressBar: true,
+          });
+        }
+      });
+    }
   };
 
   const proceedUpdateStatus = async (Id, row) => {

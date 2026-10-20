@@ -6,6 +6,8 @@ import Datatable from "../../../Components/ExtraComponents/Datatable";
 import {
   JobAction,
   Update_Status,
+  SendJobStatusOtp,
+  VerifyJobStatusOtp,
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -16,7 +18,7 @@ import {
 import sweatalert from "sweetalert2";
 import Swal from "sweetalert2";
 import Hierarchy from "../../../Components/ExtraComponents/Hierarchy";
-import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
+import { MasterStatusData, GetSystemSettings } from "../../../ReduxStore/Slice/Settings/settingSlice";
 import {
   fetchSiteAndDriveInfo,
   createFolderIfNotExists,
@@ -191,80 +193,145 @@ const ClientList = () => {
       });
   };
 
-  const handleStatusChange = (e, row) => {
+  const handleStatusChange = async (e, row) => {
     const Id = e.target.value;
     const oldStatusObj = statusDataAll.find((s) => Number(s.id) === Number(row.status_type));
     const newStatusObj = statusDataAll.find((s) => Number(s.id) === Number(Id));
     
-    sweatalert
-      .fire({
-        title: "Are you sure?",
-        text: "Do you want to change the status?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes, change it!",
-        cancelButtonText: "No, cancel",
-      })
-      .then(async (result) => {
-        if (result.isConfirmed) {
+    const isCompletedStatus = oldStatusObj && oldStatusObj.name.toLowerCase().includes("completed");
 
-          try {
-            const req = { job_id: row.job_id, status_type: Number(Id) };
-            const res = await dispatch(
-              Update_Status({ req, authToken: token }),
-            ).unwrap();
+    if (isCompletedStatus) {
+      try {
+        const sysSetRes = await dispatch(GetSystemSettings({ authToken: token })).unwrap();
+        const settings = sysSetRes.data || {};
+        const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
+        const staffName = staffDetails.first_name ? `${staffDetails.first_name} ${staffDetails.last_name || ''}`.trim() : staffDetails.name || "Staff";
+        const staffRole = staffDetails.role || staffDetails.role_name || "Staff Role";
 
-            if (res.status) {
-              sweatalert.fire({
-                title: "Success",
-                text: res.message,
-                icon: "success",
-                timer: 1000,
-                showConfirmButton: false,
-              });
+        const otpReq = {
+          action: "send",
+          jobId: row.id || row.job_id,
+          jobCodeId: row.job_code_id || "Unknown Job",
+          staffName: staffName,
+          staffRole: staffRole,
+          customerName: row.customer_name || "Unknown Customer",
+          clientName: row.client_trading_name || "Unknown Client",
+          newStatus: newStatusObj ? newStatusObj.name : "Unknown Status",
+          requestedBy: staffDetails.id || 1,
+          settings: settings,
+        };
+        const otpRes = await dispatch(SendJobStatusOtp({ req: otpReq, authToken: token })).unwrap();
 
-              setStatusId(Id);
-              GetAllJobList();
-            } else if (res.data === "W") {
-              sweatalert.fire({
-                title: "Warning",
-                text: res.message,
-                icon: "warning",
-                confirmButtonText: "Ok",
-                timer: 3000,
-                timerProgressBar: true,
-              });
+        if (otpRes.status) {
+          const { value: otpValue } = await Swal.fire({
+            title: "Enter OTP",
+            input: "text",
+            inputLabel: `An OTP has been sent to the manager's phone.`,
+            inputPlaceholder: "Enter OTP here",
+            showCancelButton: true,
+            confirmButtonText: "Verify",
+            cancelButtonText: "Cancel",
+            customClass: {
+              popup: "custom-otp-swal-popup",
+              input: "custom-otp-swal-input",
+              confirmButton: "custom-otp-swal-confirm",
+              cancelButton: "custom-otp-swal-cancel",
+            },
+            inputValidator: (value) => {
+              if (!value) return "You need to write something!";
+            },
+          });
+
+          if (otpValue) {
+            const verifyReq = { action: "verify", jobId: row.id || row.job_id, otpCode: otpValue };
+            const verifyRes = await dispatch(VerifyJobStatusOtp({ req: verifyReq, authToken: token })).unwrap();
+
+            if (verifyRes.status) {
+              proceedUpdateStatus(Id, row);
             } else {
-              sweatalert.fire({
-                title: "Error",
-                text: res.message,
-                icon: "error",
-                confirmButtonText: "Ok",
-                timer: 1000,
-                timerProgressBar: true,
-              });
+              Swal.fire("Error", verifyRes.message || "Invalid OTP", "error");
             }
-          } catch (error) {
+          }
+        } else {
+          Swal.fire("Error", otpRes.message || "Failed to send OTP", "error");
+        }
+      } catch (error) {
+        Swal.fire("Error", "Something went wrong while sending OTP.", "error");
+      }
+    } else {
+      sweatalert
+        .fire({
+          title: "Are you sure?",
+          text: "Do you want to change the status?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Yes, change it!",
+          cancelButtonText: "No, cancel",
+        })
+        .then(async (result) => {
+          if (result.isConfirmed) {
+            proceedUpdateStatus(Id, row);
+          } else if (result.dismiss === sweatalert.DismissReason.cancel) {
             sweatalert.fire({
-              title: "Error",
-              text: "An error occurred while updating the status.",
+              title: "Cancelled",
+              text: "Status change was not performed",
               icon: "error",
               confirmButtonText: "Ok",
               timer: 1000,
               timerProgressBar: true,
             });
           }
-        } else if (result.dismiss === sweatalert.DismissReason.cancel) {
-          sweatalert.fire({
-            title: "Cancelled",
-            text: "Status change was not performed",
-            icon: "error",
-            confirmButtonText: "Ok",
-            timer: 1000,
-            timerProgressBar: true,
-          });
-        }
+        });
+    }
+  };
+
+  const proceedUpdateStatus = async (Id, row) => {
+    try {
+      const req = { job_id: row.job_id, status_type: Number(Id) };
+      const res = await dispatch(
+        Update_Status({ req, authToken: token }),
+      ).unwrap();
+
+      if (res.status) {
+        sweatalert.fire({
+          title: "Success",
+          text: res.message,
+          icon: "success",
+          timer: 1000,
+          showConfirmButton: false,
+        });
+
+        setStatusId(Id);
+        GetAllJobList();
+      } else if (res.data === "W") {
+        sweatalert.fire({
+          title: "Warning",
+          text: res.message,
+          icon: "warning",
+          confirmButtonText: "Ok",
+          timer: 3000,
+          timerProgressBar: true,
+        });
+      } else {
+        sweatalert.fire({
+          title: "Error",
+          text: res.message,
+          icon: "error",
+          confirmButtonText: "Ok",
+          timer: 1000,
+          timerProgressBar: true,
+        });
+      }
+    } catch (error) {
+      sweatalert.fire({
+        title: "Error",
+        text: "An error occurred while updating the status.",
+        icon: "error",
+        confirmButtonText: "Ok",
+        timer: 1000,
+        timerProgressBar: true,
       });
+    }
   };
 
   const columns = [

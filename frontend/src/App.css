@@ -46,3 +46,62 @@
   margin-top: 4px;
 }
 
+/* Custom SweetAlert OTP Modal Styling */
+.custom-otp-swal-popup {
+  border-radius: 20px !important;
+  padding: 24px 20px !important;
+}
+
+.custom-otp-swal-input {
+  border-radius: 50px !important;
+  border: 1px solid #c9d8e5 !important;
+  padding: 10px 20px !important;
+  font-size: 15px !important;
+  letter-spacing: 2px !important;
+  text-align: center !important;
+  box-shadow: none !important;
+  outline: none !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.custom-otp-swal-input:focus {
+  border-color: #00a4bd !important;
+  box-shadow: 0 0 0 3px rgba(0, 164, 189, 0.15) !important;
+}
+
+.custom-otp-swal-confirm {
+  border-radius: 50px !important;
+  padding: 8px 30px !important;
+  font-weight: 600 !important;
+  background-color: transparent !important;
+  color: #00a4bd !important;
+  border: 1.5px solid #00a4bd !important;
+  box-shadow: none !important;
+  outline: none !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.custom-otp-swal-confirm:hover {
+  background-color: #00a4bd !important;
+  color: #ffffff !important;
+}
+
+.custom-otp-swal-cancel {
+  border-radius: 50px !important;
+  padding: 8px 30px !important;
+  font-weight: 600 !important;
+  background-color: transparent !important;
+  color: #ea5455 !important;
+  border: 1.5px solid #ea5455 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.custom-otp-swal-cancel:hover {
+  background-color: #ea5455 !important;
+  color: #ffffff !important;
+}
+
+
+

@@ -4,8 +4,12 @@ import { Jobs } from "../../../ReduxStore/Slice/Report/ReportSlice";
 import { useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { MasterStatusData } from "../../../ReduxStore/Slice/Settings/settingSlice";
-import { Update_Status } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
+import { MasterStatusData, GetSystemSettings } from "../../../ReduxStore/Slice/Settings/settingSlice";
+import {
+  Update_Status,
+  SendJobStatusOtp,
+  VerifyJobStatusOtp,
+} from "../../../ReduxStore/Slice/Customer/CustomerSlice";
 import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 import { Download,ArrowLeft } from "lucide-react";
@@ -561,72 +565,136 @@ const   JobStatus = () => {
     const oldStatusObj = statusDataAll.find((s) => Number(s.id) === Number(row.status_type));
     const newStatusObj = statusDataAll.find((s) => Number(s.id) === Number(Id));
     
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Do you want to change the status?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, change it!",
-      cancelButtonText: "No, cancel",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
+    const isCompletedStatus = oldStatusObj && oldStatusObj.name.toLowerCase().includes("completed");
 
-        // Proceed to update status
-        try {
-          const req = { job_id: row.id || row.job_id, status_type: Number(Id) };
-          const res = await dispatch(
-            Update_Status({ req, authToken: token }),
-          ).unwrap();
+    if (isCompletedStatus) {
+      try {
+        const sysSetRes = await dispatch(GetSystemSettings({ authToken: token })).unwrap();
+        const settings = sysSetRes.data || {};
+        const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
+        const staffName = staffDetails.first_name ? `${staffDetails.first_name} ${staffDetails.last_name || ''}`.trim() : staffDetails.name || "Staff";
+        const staffRole = staffDetails.role || staffDetails.role_name || "Staff Role";
 
-          if (res.status) {
-            Swal.fire({
-              title: "Success",
-              text: res.message,
-              icon: "success",
-              timer: 1000,
-              showConfirmButton: false,
-            });
-            GetJobs(currentPage, pageSize, searchTerm);
-          } else if (res.data === "W") {
-            Swal.fire({
-              title: "Warning",
-              text: res.message,
-              icon: "warning",
-              confirmButtonText: "Ok",
-              timer: 3000,
-              timerProgressBar: true,
-            });
-          } else {
-            Swal.fire({
-              title: "Error",
-              text: res.message,
-              icon: "error",
-              confirmButtonText: "Ok",
-              timer: 1000,
-              timerProgressBar: true,
-            });
+        const otpReq = {
+          action: "send",
+          jobId: row.id || row.job_id,
+          jobCodeId: row.job_code_id || "Unknown Job",
+          staffName: staffName,
+          staffRole: staffRole,
+          customerName: row.customer_name || "Unknown Customer",
+          clientName: row.client_trading_name || "Unknown Client",
+          newStatus: newStatusObj ? newStatusObj.name : "Unknown Status",
+          requestedBy: staffDetails.id || 1,
+          settings: settings,
+        };
+        const otpRes = await dispatch(SendJobStatusOtp({ req: otpReq, authToken: token })).unwrap();
+
+        if (otpRes.status) {
+          const { value: otpValue } = await Swal.fire({
+            title: "Enter OTP",
+            input: "text",
+            inputLabel: `An OTP has been sent to the manager's phone.`,
+            inputPlaceholder: "Enter OTP here",
+            showCancelButton: true,
+            confirmButtonText: "Verify",
+            cancelButtonText: "Cancel",
+            customClass: {
+              popup: "custom-otp-swal-popup",
+              input: "custom-otp-swal-input",
+              confirmButton: "custom-otp-swal-confirm",
+              cancelButton: "custom-otp-swal-cancel",
+            },
+            inputValidator: (value) => {
+              if (!value) return "You need to write something!";
+            },
+          });
+
+          if (otpValue) {
+            const verifyReq = { action: "verify", jobId: row.id || row.job_id, otpCode: otpValue };
+            const verifyRes = await dispatch(VerifyJobStatusOtp({ req: verifyReq, authToken: token })).unwrap();
+
+            if (verifyRes.status) {
+              proceedUpdateStatus(Id, row);
+            } else {
+              Swal.fire("Error", verifyRes.message || "Invalid OTP", "error");
+            }
           }
-        } catch (error) {
+        } else {
+          Swal.fire("Error", otpRes.message || "Failed to send OTP", "error");
+        }
+      } catch (error) {
+        Swal.fire("Error", "Something went wrong while sending OTP.", "error");
+      }
+    } else {
+      Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to change the status?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, change it!",
+        cancelButtonText: "No, cancel",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          proceedUpdateStatus(Id, row);
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
           Swal.fire({
-            title: "Error",
-            text: "An error occurred while updating the status.",
+            title: "Cancelled",
+            text: "Status change was not performed",
             icon: "error",
             confirmButtonText: "Ok",
             timer: 1000,
             timerProgressBar: true,
           });
         }
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
+      });
+    }
+  };
+
+  const proceedUpdateStatus = async (Id, row) => {
+    try {
+      const req = { job_id: row.id || row.job_id, status_type: Number(Id) };
+      const res = await dispatch(
+        Update_Status({ req, authToken: token }),
+      ).unwrap();
+
+      if (res.status) {
         Swal.fire({
-          title: "Cancelled",
-          text: "Status change was not performed",
+          title: "Success",
+          text: res.message,
+          icon: "success",
+          timer: 1000,
+          showConfirmButton: false,
+        });
+        GetJobs(currentPage, pageSize, searchTerm);
+      } else if (res.data === "W") {
+        Swal.fire({
+          title: "Warning",
+          text: res.message,
+          icon: "warning",
+          confirmButtonText: "Ok",
+          timer: 3000,
+          timerProgressBar: true,
+        });
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: res.message,
           icon: "error",
           confirmButtonText: "Ok",
           timer: 1000,
           timerProgressBar: true,
         });
       }
-    });
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: "An error occurred while updating the status.",
+        icon: "error",
+        confirmButtonText: "Ok",
+        timer: 1000,
+        timerProgressBar: true,
+      });
+    }
   };
 
   return (
