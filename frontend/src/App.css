@@ -50,6 +50,13 @@
 .custom-otp-swal-popup {
   border-radius: 20px !important;
   padding: 24px 20px !important;
+  text-transform: none !important;
+}
+
+.custom-otp-swal-popup .swal2-input-label,
+.custom-otp-swal-popup .swal2-html-container,
+.custom-otp-swal-popup .swal2-content {
+  text-transform: none !important;
 }
 
 .custom-otp-swal-input {

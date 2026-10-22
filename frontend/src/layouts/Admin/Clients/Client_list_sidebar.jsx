@@ -733,7 +733,7 @@ const ClientLists = () => {
           const { value: otpValue } = await Swal.fire({
             title: "Enter OTP",
             input: "text",
-            inputLabel: `An OTP has been sent to the manager's phone.`,
+            inputLabel: `An OTP has been sent to the authorized person's phone to approve changes to this locked job.`,
             inputPlaceholder: "Enter OTP here",
             showCancelButton: true,
             confirmButtonText: "Verify",
