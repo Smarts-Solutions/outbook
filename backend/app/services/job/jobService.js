@@ -183,10 +183,24 @@ const getJobTimeLine = async (job) => {
 const sendJobStatusOtp = async (data) => {
   try {
     const { jobId, requestedBy, settings, jobCodeId, staffName, staffRole, customerName, clientName, newStatus } = data;
+
+    // Check if there is already an active unexpired OTP for this job within 10 minutes
+    const existingOtp = await otpModel.getActiveJobOtp(jobId);
+    if (existingOtp) {
+      const remainingSeconds = Math.max(0, Math.floor((new Date(existingOtp.expires_at).getTime() - Date.now()) / 1000));
+      return {
+        status: true,
+        alreadySent: true,
+        expiresAt: existingOtp.expires_at,
+        remainingSeconds: remainingSeconds,
+        message: "An active OTP was already sent. Please use the existing OTP or wait for the timer to expire.",
+      };
+    }
+
     // Generate a 6-digit random OTP
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
     
-    await otpModel.createOtp(jobId, requestedBy, otpCode);
+    const { expiresAt } = await otpModel.createOtp(jobId, requestedBy, otpCode);
     // Send OTP via WhatsApp Cloud API
     if (settings && settings.manager_otp_number && settings.whatsapp_phone_number_id && settings.whatsapp_access_token) {
       const url = `https://graph.facebook.com/v17.0/${settings.whatsapp_phone_number_id}/messages`;
@@ -295,7 +309,13 @@ const sendJobStatusOtp = async (data) => {
       console.log(`WhatsApp API not fully configured. OTP generated is ${otpCode}`);
     }
 
-    return { status: true, message: "OTP sent successfully." };
+    return {
+      status: true,
+      alreadySent: false,
+      expiresAt: expiresAt,
+      remainingSeconds: 600,
+      message: "OTP sent successfully."
+    };
   } catch (error) {
     const errorMsg = error.response && error.response.data && error.response.data.error 
                      ? error.response.data.error.message 

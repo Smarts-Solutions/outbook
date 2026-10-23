@@ -252,6 +252,74 @@ export const allowedTypes =
     "text/csv", // For .csv
     "application/vnd.ms-excel", // For .xls
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" // For .xlsx
+  ];
 
-  ]
+export const promptJobStatusOtp = async (Swal, initialSeconds = 600, alreadySent = false) => {
+  let timerInterval = null;
+  let remaining = initialSeconds > 0 ? initialSeconds : 600;
+
+  const formatTime = (secs) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
+
+  const statusNote = alreadySent
+    ? "An active OTP was already sent to the authorized person's phone for this job."
+    : "An OTP has been sent to the authorized person's phone to approve changes to this locked job.";
+
+  const result = await Swal.fire({
+    title: "Enter OTP",
+    html: `
+      <div style="font-size: 14px; color: #555; margin-bottom: 12px; line-height: 1.5;">
+        ${statusNote}
+      </div>
+      <div style="margin-bottom: 15px; font-size: 15px; font-weight: 600; color: #0284c7;">
+        OTP Valid for: <span id="swal-otp-timer" style="color: #dc2626; font-size: 16px; font-weight: 700;">${formatTime(remaining)}</span>
+      </div>
+      <input id="swal-otp-input" class="swal2-input custom-otp-swal-input" placeholder="Enter 6-digit OTP" style="margin: 0 auto; text-align: center; letter-spacing: 2px; font-weight: 600; font-size: 18px; max-width: 260px;" autofocus autocomplete="off" maxlength="6" />
+    `,
+    showCancelButton: true,
+    confirmButtonText: "Verify",
+    cancelButtonText: "Cancel",
+    customClass: {
+      popup: "custom-otp-swal-popup",
+      confirmButton: "custom-otp-swal-confirm",
+      cancelButton: "custom-otp-swal-cancel",
+    },
+    didOpen: () => {
+      const inputEl = document.getElementById("swal-otp-input");
+      const timerEl = document.getElementById("swal-otp-timer");
+      if (inputEl) inputEl.focus();
+
+      timerInterval = setInterval(() => {
+        remaining -= 1;
+        if (timerEl) {
+          if (remaining > 0) {
+            timerEl.textContent = formatTime(remaining);
+          } else {
+            timerEl.textContent = "Expired";
+            timerEl.style.color = "#b91c1c";
+            clearInterval(timerInterval);
+          }
+        }
+      }, 1000);
+    },
+    willClose: () => {
+      if (timerInterval) clearInterval(timerInterval);
+    },
+    preConfirm: () => {
+      const inputEl = document.getElementById("swal-otp-input");
+      const val = inputEl ? inputEl.value.trim() : "";
+      if (!val) {
+        Swal.showValidationMessage("Please enter the OTP!");
+        return false;
+      }
+      return val;
+    },
+  });
+
+  return result.value || null;
+};
+
 

@@ -352,7 +352,13 @@ const sendJobStatusOtp = async (req, res) => {
     if (!result.status) {
       return res.status(200).json({ status: false, message: result.message, error: result.error });
     } else {
-      return res.status(200).json({ status: true, message: result.message });
+      return res.status(200).json({
+        status: true,
+        message: result.message,
+        alreadySent: result.alreadySent,
+        remainingSeconds: result.remainingSeconds,
+        expiresAt: result.expiresAt,
+      });
     }
   } catch (error) {
     res.status(500).json({ status: false, message: error.message });

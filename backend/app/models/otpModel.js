@@ -1,5 +1,15 @@
 const pool = require('../config/database');
 
+const getActiveJobOtp = async (jobId) => {
+    const query = `SELECT * FROM job_status_otps WHERE job_id = ? AND is_used = 0 AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1`;
+    try {
+        const [result] = await pool.execute(query, [jobId]);
+        return result.length > 0 ? result[0] : null;
+    } catch (error) {
+        throw error;
+    }
+};
+
 const createOtp = async (jobId, requestedBy, otpCode) => {
     const expiresAt = new Date();
     // Expire OTP in 10 minutes
@@ -8,7 +18,7 @@ const createOtp = async (jobId, requestedBy, otpCode) => {
     const query = `INSERT INTO job_status_otps (job_id, requested_by, otp_code, expires_at) VALUES (?, ?, ?, ?)`;
     try {
         const [result] = await pool.execute(query, [jobId, requestedBy, otpCode, expiresAt]);
-        return result;
+        return { result, expiresAt };
     } catch (error) {
         throw error;
     }
@@ -39,6 +49,7 @@ const verifyOtp = async (jobId, otpCode) => {
 };
 
 module.exports = {
+    getActiveJobOtp,
     createOtp,
     verifyOtp
 };

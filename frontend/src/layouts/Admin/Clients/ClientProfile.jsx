@@ -27,7 +27,7 @@ import {
   SiteUrlFolderPath,
   deleteFileFromFolder,
 } from "../../../Utils/graphAPI";
-import { allowedTypes } from "../../../Utils/Comman_function";
+import { allowedTypes, promptJobStatusOtp } from "../../../Utils/Comman_function";
 import {
   Download,
   ArrowLeft,
@@ -273,24 +273,7 @@ const ClientList = () => {
         const otpRes = await dispatch(SendJobStatusOtp({ req: otpReq, authToken: token })).unwrap();
 
         if (otpRes.status) {
-          const { value: otpValue } = await Swal.fire({
-            title: "Enter OTP",
-            input: "text",
-            inputLabel: `An OTP has been sent to the authorized person's phone to approve changes to this locked job.`,
-            inputPlaceholder: "Enter OTP here",
-            showCancelButton: true,
-            confirmButtonText: "Verify",
-            cancelButtonText: "Cancel",
-            customClass: {
-              popup: "custom-otp-swal-popup",
-              input: "custom-otp-swal-input",
-              confirmButton: "custom-otp-swal-confirm",
-              cancelButton: "custom-otp-swal-cancel",
-            },
-            inputValidator: (value) => {
-              if (!value) return "You need to write something!";
-            },
-          });
+          const otpValue = await promptJobStatusOtp(Swal, otpRes.remainingSeconds || 600, otpRes.alreadySent);
 
           if (otpValue) {
             const verifyReq = { action: "verify", jobId: row.id || row.job_id, otpCode: otpValue };
