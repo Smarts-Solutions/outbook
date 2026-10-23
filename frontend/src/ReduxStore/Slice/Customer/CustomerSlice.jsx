@@ -30,6 +30,7 @@ import {
   UPDATE_CUSTOMER_STATUS,
   GET_JOB_TIMELINE,
   UPDATE_STATUS,
+  VALIDATE_JOB_STATUS,
   SEND_JOB_STATUS_OTP,
   VERIFY_JOB_STATUS_OTP,
   getcustomerschecklist,
@@ -689,6 +690,19 @@ export const Update_Status = createAsyncThunk(
       };
       const res = await UPDATE_STATUS(updatedReq, authToken);
       return await res;
+    } catch (err) {
+      throw err;
+    }
+  }
+);
+
+export const ValidateJobStatus = createAsyncThunk(
+  "validateJobStatus",
+  async (data) => {
+    try {
+      const { req, authToken } = data;
+      const res = await VALIDATE_JOB_STATUS(req, authToken);
+      return res;
     } catch (err) {
       throw err;
     }

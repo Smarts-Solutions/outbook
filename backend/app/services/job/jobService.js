@@ -56,6 +56,10 @@ const updateJobStatus = async(job)=>{
   return jobModel.updateJobStatus(job);
 }
 
+const validateJobStatus = async(job)=>{
+  return jobModel.validateJobStatus(job);
+}
+
 
 // task TimeSheet  Work .....
 const getTaskTimeSheet = async (timeSheet) => {
@@ -318,6 +322,7 @@ module.exports = {
   jobAction,
   jobUpdate,
   updateJobStatus,
+  validateJobStatus,
   getTaskTimeSheet,
   jobTimeSheet,
   addMissingLog,

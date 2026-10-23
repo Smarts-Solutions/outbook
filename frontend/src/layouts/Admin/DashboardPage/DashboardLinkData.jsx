@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Update_Customer_Status,
   Update_Status,
+  ValidateJobStatus,
   SendJobStatusOtp,
   VerifyJobStatusOtp,
 } from "../../../ReduxStore/Slice/Customer/CustomerSlice";
@@ -290,9 +291,58 @@ const JobStatus = () => {
     const oldStatusObj = statusDataAll.find((s) => Number(s.id) === Number(row.status_type));
     const newStatusObj = statusDataAll.find((s) => Number(s.id) === Number(Id));
 
+    // 1. First validate backend conditions (Reviewer, Processor, Draft, Queries, Missing Logs etc.)
+    try {
+      const validateReq = { job_id: row.job_id || row.id, status_type: Number(Id) };
+      const valRes = await dispatch(ValidateJobStatus({ req: validateReq, authToken: token })).unwrap();
+      if (!valRes.status) {
+        if (valRes.data === "W") {
+          Swal.fire({
+            title: "Warning",
+            text: valRes.message,
+            icon: "warning",
+            confirmButtonText: "Ok",
+          });
+        } else {
+          Swal.fire({
+            title: "Error",
+            text: valRes.message || "Cannot change to this status.",
+            icon: "error",
+            confirmButtonText: "Ok",
+          });
+        }
+        return;
+      }
+    } catch (err) {
+      console.log(err);
+    }
+
     const isCompletedStatus = oldStatusObj && oldStatusObj.name.toLowerCase().includes("completed");
 
     if (isCompletedStatus) {
+      // 2. Show 'Are you sure?' confirmation pop up FIRST before sending OTP
+      const confirmResult = await Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to change the status? An OTP will be required to approve changes to this locked job.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, continue!",
+        cancelButtonText: "No, cancel",
+      });
+
+      if (!confirmResult.isConfirmed) {
+        Swal.fire({
+          title: "Cancelled",
+          text: "Status change was not performed",
+          icon: "error",
+          confirmButtonText: "Ok",
+          timer: 1000,
+          timerProgressBar: true,
+        });
+        return;
+      }
+
+      // 3. Send OTP after confirmation
       try {
         const sysSetRes = await dispatch(GetSystemSettings({ authToken: token })).unwrap();
         const settings = sysSetRes.data || {};

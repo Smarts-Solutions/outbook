@@ -603,6 +603,18 @@ export async function UPDATE_STATUS(data, token) {
   }
 }
 
+export async function VALIDATE_JOB_STATUS(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}validateJobStatus`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
 export async function SEND_JOB_STATUS_OTP(data, token) {
   try {
     const res = await axios.post(`${Config.base_url}sendJobStatusOtp`, data, {

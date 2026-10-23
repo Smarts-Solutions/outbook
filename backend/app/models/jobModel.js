@@ -5289,6 +5289,184 @@ ORDER BY
   return { status: true, message: "success.", data: groupedResult };
 };
 
+const validateJobStatus = async (job) => {
+  const { job_id, status_type } = job;
+  try {
+    // only Processing sent one record
+    if ([4, 5, 7, 3].includes(parseInt(status_type))) {
+      const [[ExistAllocatedTo]] = await pool.execute(
+        `SELECT allocated_to FROM jobs WHERE id = ?`,
+        [job_id]
+      );
+
+      if (
+        ["", null, undefined, 0, "0"].includes(ExistAllocatedTo?.allocated_to)
+      ) {
+        return {
+          status: false,
+          message: "Please assign the job to the Processor.",
+          data: "W",
+        };
+      }
+    }
+
+    // only Reviewer sent one record
+    if ([5, 7, 17, 18, 19, 20].includes(parseInt(status_type))) {
+      const [[ExistReviewer]] = await pool.execute(
+        `SELECT reviewer FROM jobs WHERE id = ?`,
+        [job_id]
+      );
+
+      if (["", null, undefined, 0, "0"].includes(ExistReviewer?.reviewer)) {
+        return {
+          status: false,
+          message: "Please assign the job to the reviewer.",
+          data: "W",
+        };
+      }
+    }
+
+    // only Draft sent one record
+    if ([7, 18, 19, 20].includes(parseInt(status_type))) {
+      const [ExistDraft] = await pool.execute(
+        `SELECT job_id FROM drafts WHERE job_id = ?`,
+        [job_id]
+      );
+      if (ExistDraft.length === 0) {
+        return {
+          status: false,
+          message: "Please send the first draft.",
+          data: "W",
+        };
+      }
+    }
+
+    // check draft feedback received yes or no
+    if ([17].includes(parseInt(status_type))) {
+      const [ExistDraftFeedbackYes] = await pool.execute(
+        `SELECT 
+          CASE 
+            WHEN COUNT(*) > 0 THEN TRUE 
+            ELSE FALSE 
+          END AS is_condition_true
+      FROM drafts
+      WHERE job_id = ?
+        AND feedback_received = '1'
+        AND was_it_complete = '0'`,
+        [job_id]
+      );
+
+      const isCondition = ExistDraftFeedbackYes[0]?.is_condition_true;
+      if (isCondition == 0) {
+        return {
+          status: false,
+          message: "Please sent the draft feedback first.",
+          data: "W",
+        };
+      }
+    }
+
+    // only queries sent one record check
+    if ([4].includes(parseInt(status_type))) {
+      const [ExistQueries] = await pool.execute(
+        `SELECT job_id FROM queries WHERE job_id = ?`,
+        [job_id]
+      );
+      if (ExistQueries.length === 0) {
+        return {
+          status: false,
+          message: "Please send the Queries.",
+          data: "W",
+        };
+      }
+    }
+
+    // only missing log sent one record check
+    if ([2].includes(parseInt(status_type))) {
+      const [ExistMissingLogs] = await pool.execute(
+        `SELECT job_id FROM missing_logs WHERE job_id = ?`,
+        [job_id]
+      );
+      if (ExistMissingLogs.length === 0) {
+        return {
+          status: false,
+          message: "Please send Missing Paper Logs.",
+          data: "W",
+        };
+      }
+    }
+
+    if ([6].includes(parseInt(status_type))) {
+      const [ExistDraft] = await pool.execute(
+        `SELECT job_id FROM drafts WHERE job_id = ?`,
+        [job_id]
+      );
+      if (ExistDraft.length === 0) {
+        return {
+          status: false,
+          message: "Please sent first draft.",
+          data: "W",
+        };
+      }
+
+      const [[rowsDraftProcess]] = await pool.execute(
+        `SELECT 
+          CASE
+              WHEN NOT EXISTS (
+                  SELECT 1 
+                  FROM drafts 
+                  WHERE job_id = ? 
+                    AND was_it_complete <> '1'
+              )
+              THEN 1
+              ELSE 0
+          END AS status_check;`,
+        [job_id]
+      );
+
+      if (rowsDraftProcess.status_check === 0) {
+        return {
+          status: false,
+          message: "Please complete the draft.",
+          data: "W",
+        };
+      }
+    } else {
+      //  Missing Log
+      const [ExistMissingLog] = await pool.execute(
+        `SELECT job_id FROM missing_logs WHERE missing_log_reviewed_date IS NULL AND job_id = ? LIMIT 1`,
+        [job_id]
+      );
+
+      if (ExistMissingLog.length > 0) {
+        return {
+          status: false,
+          message: "Please review the missing log.",
+          data: "W",
+        };
+      }
+
+      // Query to
+      const [ExistQuery] = await pool.execute(
+        `SELECT job_id FROM queries WHERE final_query_response_received_date IS NULL AND job_id = ? LIMIT 1`,
+        [job_id]
+      );
+
+      if (ExistQuery.length > 0) {
+        return {
+          status: false,
+          message: "Please review the query.",
+          data: "W",
+        };
+      }
+    }
+
+    return { status: true };
+  } catch (error) {
+    return { status: false, message: error.message };
+  }
+};
+
 const updateJobStatus = async (job) => {
   const { job_id, status_type } = job;
   const [ExistJobData] = await pool.execute(
@@ -6122,6 +6300,7 @@ module.exports = {
   deleteJobById,
   getJobTimeLine,
   updateJobStatus,
+  validateJobStatus,
   GetJobStatus,
   get_jobs_filter,
   copy_job,
