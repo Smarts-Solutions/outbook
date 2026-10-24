@@ -66,7 +66,7 @@ async function runManualCron() {
         LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
         WHERE
         (
-         jobs.status_type NOT IN (6,7,17,18,19,20)
+         jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
          AND EXISTS (
           SELECT 1
           FROM missing_logs 

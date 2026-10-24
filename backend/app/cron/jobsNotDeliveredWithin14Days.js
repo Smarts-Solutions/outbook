@@ -119,7 +119,7 @@ parentPort.on("message", async (rows) => {
         WHERE 
         customers.status = '1' AND DATE(jobs.date_received_on) <= NOW() - INTERVAL 14 DAY
         AND DATE(jobs.date_received_on) <= NOW()
-        AND jobs.status_type NOT IN (6,7,17,18,19,20)
+        AND jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
         GROUP BY jobs.id
         ORDER BY 
           jobs.id DESC;
@@ -341,13 +341,15 @@ async function otherUserDataGet(row) {
         AND (
         DATE(jobs.date_received_on) <= NOW() - INTERVAL 14 DAY
         AND DATE(jobs.date_received_on) <= NOW()
-        AND jobs.status_type NOT IN (6,7,17,18,19,20)
+        AND jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
         )
-        AND assigned_jobs_staff_view.staff_id = ${row?.id}  
         AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
-            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
-          )
+          (assigned_jobs_staff_view.staff_id = ${row?.id} AND (
+              assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+              OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          ))
+          OR jobs.staff_created_id = ${row?.id}
+        )
         GROUP BY jobs.id
         ORDER BY 
           jobs.id DESC;

@@ -67,7 +67,7 @@ module.exports = (app) => {
             FROM staffs
             JOIN roles ON roles.id = staffs.role_id
             LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
-            LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
+            LEFT JOIN jobs ON (jobs.id = assigned_jobs_staff_view.job_id OR jobs.staff_created_id = staffs.id)
             WHERE
             (jobs.status_type = 1 AND jobs.created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)) 
             OR roles.id IN (1, 2, 8)
@@ -103,10 +103,10 @@ module.exports = (app) => {
         FROM 
         staffs
         JOIN roles ON roles.id = staffs.role_id
-        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
-        LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
+            LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
+            LEFT JOIN jobs ON (jobs.id = assigned_jobs_staff_view.job_id OR jobs.staff_created_id = staffs.id)
         WHERE
-        (jobs.expected_delivery_date <> jobs.expected_delivery_date_old) 
+        (jobs.expected_delivery_date <> jobs.expected_delivery_date_old AND jobs.status_type NOT IN (8, 15)) 
         OR roles.id IN (1, 2, 8)
         GROUP BY staffs.id
         ORDER BY 
@@ -143,10 +143,10 @@ module.exports = (app) => {
         staffs
         JOIN roles ON roles.id = staffs.role_id
         LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
-        LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
+        LEFT JOIN jobs ON (jobs.id = assigned_jobs_staff_view.job_id OR jobs.staff_created_id = staffs.id)
         LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
         WHERE 
-        ((jobs.created_at <= NOW() - INTERVAL 2 DAY) AND jobs.status_type NOT IN (2,6,7,17,18,19,20)
+        ((jobs.created_at <= NOW() - INTERVAL 2 DAY) AND jobs.status_type NOT IN (2,6,7,8,15,17,18,19,20)
         AND missing_logs.job_id IS NULL)  OR roles.id IN (1, 2, 8)
         GROUP BY staffs.id
         ORDER BY 
@@ -184,13 +184,13 @@ module.exports = (app) => {
         staffs
         JOIN roles ON roles.id = staffs.role_id
         LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
-        LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
+        LEFT JOIN jobs ON (jobs.id = assigned_jobs_staff_view.job_id OR jobs.staff_created_id = staffs.id)
         LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
         WHERE
         (
         jobs.created_at >= NOW() - INTERVAL 30 DAY
         AND jobs.created_at <= NOW()
-        AND jobs.status_type NOT IN (6,7,17,18,19,20)
+        AND jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
         ) 
         OR roles.id IN (1, 2, 8)
         GROUP BY staffs.id
@@ -229,13 +229,13 @@ module.exports = (app) => {
         staffs
         JOIN roles ON roles.id = staffs.role_id
         LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
-        LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
+        LEFT JOIN jobs ON (jobs.id = assigned_jobs_staff_view.job_id OR jobs.staff_created_id = staffs.id)
         LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
         WHERE
         (
         jobs.date_received_on >= NOW() - INTERVAL 14 DAY
         AND jobs.date_received_on <= NOW()
-        AND jobs.status_type NOT IN (6,7,17,18,19,20)
+        AND jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
         ) 
         OR roles.id IN (1, 2, 8)
         GROUP BY staffs.id
@@ -273,11 +273,11 @@ module.exports = (app) => {
         staffs
         JOIN roles ON roles.id = staffs.role_id
         LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
-        LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
+        LEFT JOIN jobs ON (jobs.id = assigned_jobs_staff_view.job_id OR jobs.staff_created_id = staffs.id)
         LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
         WHERE
         (
-         jobs.status_type NOT IN (6,7,17,18,19,20)
+         jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
          AND EXISTS (
           SELECT 1
           FROM missing_logs 
