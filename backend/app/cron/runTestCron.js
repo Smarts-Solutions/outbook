@@ -1,5 +1,6 @@
 require('dotenv').config({ path: '../../.env' });
 const pool = require('../config/database');
+const { buildAssignedJobsTempTable } = require("../utils/helper");
 const { Worker } = require('worker_threads');
 const { join } = require('path');
 
@@ -52,36 +53,47 @@ async function runManualCron() {
 
     // Run Jobs Not Delivered Missing Paperwork 7 Days
     console.log("Fetching data for Jobs Not Delivered Missing Paperwork 7 Days...");
-    const JobsNotDeliveredMissingPaperwork7Days_query = `
-        SELECT DISTINCT
-        staffs.id AS id,
-        CONCAT(first_name,' ',last_name) AS staff_fullname,
-        staffs.email AS staff_email,
-        roles.role AS staff_role,
-        roles.id AS role_id
-        FROM staffs
-        JOIN roles ON roles.id = staffs.role_id
-        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
-        LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
-        LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
-        WHERE
-        (
-         jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
-         AND EXISTS (
-          SELECT 1
-          FROM missing_logs 
-          WHERE missing_logs.job_id = jobs.id
-            AND missing_logs.status = '1'
-            AND missing_logs.missing_log_reviewed_date <= NOW() - INTERVAL 7 DAY
-        )
-        ) 
-        OR roles.id IN (1, 2, 8)
-        GROUP BY staffs.id
-        ORDER BY staffs.id DESC;
-    `;
-    const [jobsResult] = await pool.execute(JobsNotDeliveredMissingPaperwork7Days_query);
-    console.log(`Found ${jobsResult.length} records. Sending to worker...`);
-    JobsNotDeliveredMissingPaperwork7Days(jobsResult || []);
+    const connection = await pool.getConnection();
+    try {
+      const [activeStaffs] = await connection.execute(
+        "SELECT id FROM staffs WHERE status = '1' AND role_id NOT IN (1, 2, 8)"
+      );
+      const staffIds = activeStaffs.map(s => s.id);
+      await buildAssignedJobsTempTable(connection, staffIds);
+
+      const JobsNotDeliveredMissingPaperwork7Days_query = `
+          SELECT DISTINCT
+          staffs.id AS id,
+          CONCAT(first_name,' ',last_name) AS staff_fullname,
+          staffs.email AS staff_email,
+          roles.role AS staff_role,
+          roles.id AS role_id
+          FROM staffs
+          JOIN roles ON roles.id = staffs.role_id
+          LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.staff_id = staffs.id
+          LEFT JOIN jobs ON (jobs.id = temp_assigned_jobs_staff.job_id OR jobs.staff_created_id = staffs.id)
+          LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
+          WHERE
+          (
+           jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
+           AND EXISTS (
+            SELECT 1
+            FROM missing_logs 
+            WHERE missing_logs.job_id = jobs.id
+              AND missing_logs.status = '1'
+              AND missing_logs.missing_log_reviewed_date <= NOW() - INTERVAL 7 DAY
+          )
+          ) 
+          OR roles.id IN (1, 2, 8)
+          GROUP BY staffs.id
+          ORDER BY staffs.id DESC;
+      `;
+      const [jobsResult] = await connection.execute(JobsNotDeliveredMissingPaperwork7Days_query);
+      console.log(`Found ${jobsResult.length} records. Sending to worker...`);
+      JobsNotDeliveredMissingPaperwork7Days(jobsResult || []);
+    } finally {
+      connection.release();
+    }
 
   } catch (error) {
     console.error("Error executing manual cron:", error);

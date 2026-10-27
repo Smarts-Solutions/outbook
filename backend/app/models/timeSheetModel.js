@@ -2455,64 +2455,18 @@ const getManagerReviewCount = async (data) => {
     const daysToMonday2 = day2 === 0 ? 6 : day2 - 1;
     const thisMonthEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1 - daysToMonday2 - 1)).toISOString().slice(0, 10);
 
-    const query = `
-      SELECT 
-        s.id AS staff_id,
-        MAX(CASE WHEN t.submit_status = '1' THEN 1 ELSE 0 END) AS submitted_this_week,
-        MAX(CASE WHEN t.submit_status = '0' THEN 1 ELSE 0 END) AS saved_this_week
-      FROM staffs s
-      LEFT JOIN timesheet t ON s.id = t.staff_id 
-        AND t.is_deleted = 0
-        AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) >= ?
-        AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) <= ?
-      ${staffWhereClause}
-      GROUP BY s.id
-    `;
+    // Fetch active staffs first (fast index scan)
+    const [staffRows] = await pool.query(
+      `SELECT s.id AS staff_id, s.hourminute FROM staffs s ${staffWhereClause}`
+    );
 
-    const queryParams = [
-      thisWeekStart, thisWeekEnd
-    ];
+    const validStaffIds = staffRows.map(r => r.staff_id);
+    const validStaffSet = new Set(validStaffIds);
 
-    const [rows] = await pool.query(query, queryParams);
-
-    let total_staff = 0;
+    let total_staff = validStaffIds.length;
     let submitted_this_week = 0;
     let saved_this_week = 0;
-    let missing_last_week = 0; // Keeping the variable name 'missing_last_week' as it is mapped to frontend, but it represents 'missing_this_week'
-
-    for (let row of rows) {
-      total_staff++;
-      if (row.submitted_this_week === 1) {
-        submitted_this_week++;
-      } else if (row.saved_this_week === 1) {
-        saved_this_week++;
-      } else {
-        missing_last_week++;
-      }
-    }
-
-    // New logic for Dashboard Tiles
-    const monthQuery = `
-      SELECT 
-        s.id AS staff_id,
-        s.hourminute,
-        t.task_type,
-        t.job_id,
-        t.submit_status,
-        t.monday_hours, t.tuesday_hours, t.wednesday_hours, t.thursday_hours, t.friday_hours, t.saturday_hours, t.sunday_hours,
-        i.name AS internal_name,
-        j.total_time AS job_total_time
-      FROM staffs s
-      LEFT JOIN timesheet t ON s.id = t.staff_id 
-        AND t.is_deleted = 0
-        AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) >= ?
-        AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) <= ?
-      LEFT JOIN internal i ON t.job_id = i.id AND t.task_type = '1'
-      LEFT JOIN jobs j ON t.job_id = j.id AND t.task_type = '2'
-      ${staffWhereClause}
-    `;
-
-    const [monthRows] = await pool.query(monthQuery, [thisMonthStart, thisMonthEnd]);
+    let missing_last_week = 0;
 
     let overall_capacity = 0;
     let filled_hours = 0;
@@ -2530,45 +2484,96 @@ const getManagerReviewCount = async (data) => {
       return isNaN(num) ? 0 : num;
     };
 
-    let processedStaffs = new Set();
-    let processedJobs = new Set();
+    // Calculate overall capacity for all valid staff
+    for (const s of staffRows) {
+      overall_capacity += parseHours(s.hourminute) * weeksInMonth;
+    }
 
-    for (let row of monthRows) {
-      if (!processedStaffs.has(row.staff_id)) {
-        processedStaffs.add(row.staff_id);
-        // Calculate monthly available capacity
-        let capacity = parseHours(row.hourminute) * weeksInMonth;
-        overall_capacity += capacity;
+    if (validStaffIds.length > 0) {
+      // 1. Weekly status query (only for this week, fast)
+      const weeklyQuery = `
+        SELECT 
+          t.staff_id,
+          MAX(CASE WHEN t.submit_status = '1' THEN 1 ELSE 0 END) AS submitted_this_week,
+          MAX(CASE WHEN t.submit_status = '0' THEN 1 ELSE 0 END) AS saved_this_week
+        FROM timesheet t
+        WHERE t.is_deleted = 0
+          AND t.staff_id IN (${validStaffIds.join(',')})
+          AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) >= ?
+          AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) <= ?
+        GROUP BY t.staff_id
+      `;
+
+      const [weekRows] = await pool.query(weeklyQuery, [thisWeekStart, thisWeekEnd]);
+      const weekStatusMap = new Map();
+      for (const w of weekRows) {
+        weekStatusMap.set(w.staff_id, w);
       }
 
-      let rowHours =
-        parseHours(row.monday_hours) +
-        parseHours(row.tuesday_hours) +
-        parseHours(row.wednesday_hours) +
-        parseHours(row.thursday_hours) +
-        parseHours(row.friday_hours) +
-        parseHours(row.saturday_hours) +
-        parseHours(row.sunday_hours);
-
-      filled_hours += rowHours;
-
-      if (row.internal_name && row.internal_name.toLowerCase().includes('leave')) {
-        if (String(row.submit_status) === '1') {
-          leave_hours += rowHours;
+      for (const staffId of validStaffIds) {
+        const w = weekStatusMap.get(staffId);
+        if (w && w.submitted_this_week === 1) {
+          submitted_this_week++;
+        } else if (w && w.saved_this_week === 1) {
+          saved_this_week++;
+        } else {
+          missing_last_week++;
         }
       }
 
-      if (String(row.submit_status) === '1') {
-        utilisation += rowHours;
-      }
+      // 2. Month detail query (only for this month)
+      const monthQuery = `
+        SELECT 
+          t.staff_id,
+          t.task_type,
+          t.job_id,
+          t.submit_status,
+          t.monday_hours, t.tuesday_hours, t.wednesday_hours, t.thursday_hours, t.friday_hours, t.saturday_hours, t.sunday_hours,
+          i.name AS internal_name,
+          j.total_time AS job_total_time
+        FROM timesheet t
+        LEFT JOIN internal i ON t.job_id = i.id AND t.task_type = '1'
+        LEFT JOIN jobs j ON t.job_id = j.id AND t.task_type = '2'
+        WHERE t.is_deleted = 0
+          AND t.staff_id IN (${validStaffIds.join(',')})
+          AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) >= ?
+          AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) <= ?
+      `;
 
-      if (String(row.task_type) === '2' && row.job_id) {
-        if (!processedJobs.has(row.job_id)) {
-          processedJobs.add(row.job_id);
-          billable_hours += parseHours(row.job_total_time);
+      const [monthRows] = await pool.query(monthQuery, [thisMonthStart, thisMonthEnd]);
+
+      let processedJobs = new Set();
+      for (let row of monthRows) {
+        let rowHours =
+          parseHours(row.monday_hours) +
+          parseHours(row.tuesday_hours) +
+          parseHours(row.wednesday_hours) +
+          parseHours(row.thursday_hours) +
+          parseHours(row.friday_hours) +
+          parseHours(row.saturday_hours) +
+          parseHours(row.sunday_hours);
+
+        filled_hours += rowHours;
+
+        if (row.internal_name && row.internal_name.toLowerCase().includes('leave')) {
+          if (String(row.submit_status) === '1') {
+            leave_hours += rowHours;
+          }
+        }
+
+        if (String(row.submit_status) === '1') {
+          utilisation += rowHours;
+        }
+
+        if (String(row.task_type) === '2' && row.job_id) {
+          if (!processedJobs.has(row.job_id)) {
+            processedJobs.add(row.job_id);
+            billable_hours += parseHours(row.job_total_time);
+          }
         }
       }
     }
+
     return {
       status: true,
       message: "Staff count fetched successfully",
@@ -3566,32 +3571,45 @@ const getMisResourceUtilisation = async (data) => {
 
     // expectedWeeks logic removed, using full weeksInMonth for MIS
 
-    const monthQuery = `
+    // 1. Fetch matching staffs (fast indexed query)
+    const staffQuery = `
       SELECT 
         s.id AS staff_id,
         s.first_name,
         s.last_name,
-        s.hourminute,
-        t.task_type,
-        t.job_id,
-        t.submit_status,
-        t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date,
-        t.monday_hours, t.tuesday_hours, t.wednesday_hours, t.thursday_hours, t.friday_hours, t.saturday_hours, t.sunday_hours,
-        i.name AS internal_name,
-        j.total_time AS job_total_time,
-        j.budgeted_hours AS job_budgeted_hours
+        s.hourminute
       FROM staffs s
       LEFT JOIN roles r ON s.role_id = r.id
-      LEFT JOIN timesheet t ON s.id = t.staff_id 
-        AND t.is_deleted = 0
-        AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) >= ?
-        AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) <= ?
-      LEFT JOIN internal i ON t.job_id = i.id AND t.task_type = '1'
-      LEFT JOIN jobs j ON t.job_id = j.id AND t.task_type = '2'
       ${staffWhereClause}
     `;
+    const [staffRows] = await pool.query(staffQuery);
 
-    const [monthRows] = await pool.query(monthQuery, [thisMonthStart, thisMonthEnd]);
+    const validStaffIds = staffRows.map(r => r.staff_id);
+    let monthRows = [];
+
+    if (validStaffIds.length > 0) {
+      // 2. Fetch timesheet data only for valid staffs within the date range
+      const timesheetQuery = `
+        SELECT 
+          t.staff_id,
+          t.task_type,
+          t.job_id,
+          t.submit_status,
+          t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date,
+          t.monday_hours, t.tuesday_hours, t.wednesday_hours, t.thursday_hours, t.friday_hours, t.saturday_hours, t.sunday_hours,
+          i.name AS internal_name,
+          j.total_time AS job_total_time,
+          j.budgeted_hours AS job_budgeted_hours
+        FROM timesheet t
+        LEFT JOIN internal i ON t.job_id = i.id AND t.task_type = '1'
+        LEFT JOIN jobs j ON t.job_id = j.id AND t.task_type = '2'
+        WHERE t.is_deleted = 0
+          AND t.staff_id IN (${validStaffIds.join(',')})
+          AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) >= ?
+          AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) <= ?
+      `;
+      [monthRows] = await pool.query(timesheetQuery, [thisMonthStart, thisMonthEnd]);
+    }
 
     const parseHours = (val) => {
       if (!val) return 0;
@@ -3603,21 +3621,23 @@ const getMisResourceUtilisation = async (data) => {
     let processedJobs = new Set();
     let staffMap = {};
 
+    for (const s of staffRows) {
+      staffMap[s.staff_id] = {
+        id: s.staff_id,
+        name: (s.first_name || '') + ' ' + (s.last_name || ''),
+        total_capacity: parseHours(s.hourminute) * weeksInMonth,
+        billable: 0,
+        leave: 0,
+        utilisation: 0,
+        internal_hours: 0,
+        external_hours: 0,
+        saved_hours: 0,
+        weeks: {}
+      };
+    }
+
     for (let row of monthRows) {
-      if (!staffMap[row.staff_id]) {
-        staffMap[row.staff_id] = {
-          id: row.staff_id,
-          name: row.first_name + ' ' + row.last_name,
-          total_capacity: parseHours(row.hourminute) * weeksInMonth,
-          billable: 0,
-          leave: 0,
-          utilisation: 0,
-          internal_hours: 0,
-          external_hours: 0,
-          saved_hours: 0,
-          weeks: {}
-        };
-      }
+      if (!staffMap[row.staff_id]) continue;
 
       let rowDate = row.monday_date || row.tuesday_date || row.wednesday_date || row.thursday_date || row.friday_date || row.saturday_date || row.sunday_date;
       if (rowDate) {

@@ -570,21 +570,7 @@ const getStaffByFilter = async (data) => {
   ];
 
   const connection = await pool.getConnection();
-  await buildAssignedJobsTempTable(connection, LineManageStaffId);
-  let role_name = rowsRole[0].role_name?.toUpperCase();
-
-  let where = "";
-
-  // if (rowsRole.length > 0 && (role_name === "SUPERADMIN" || role_name === "ADMIN" || role_name === "MANAGEMENT")) {
-  //   where = "WHERE 1=1 AND staffs.role_id != 12";
-  // } else {
-  //   where = `WHERE 1=1 AND staffs.role_id != 12 AND staffs.created_by IN (${LineManageStaffId})`;
-  // }
-
-  where = "WHERE 1=1 AND staffs.role_id != 12";
-
   try {
-
     let timesheetWhere = "timesheet.task_type = '2'";
 
     // Helper: normalize single value or array into a clean array
@@ -660,6 +646,8 @@ const getStaffByFilter = async (data) => {
   } catch (error) {
     console.error("Error in getStaff:", error);
     return { status: false, message: "Error fetching staff." };
+  } finally {
+    connection.release();
   }
 };
 
