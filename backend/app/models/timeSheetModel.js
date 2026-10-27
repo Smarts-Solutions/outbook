@@ -1,4 +1,5 @@
 const pool = require("../config/database");
+const { getCached, setCached, makeKey } = require("../utils/simpleCache");
 const { SatffLogUpdateOperation, JobTaskNameWithId, getAllCustomerIds, LineManageStaffIdHelperFunction, QueryRoleHelperFunction, buildAssignedJobsTempTable, LineManageStaffIdHelperFunctionForStaff } = require('../utils/helper');
 
 
@@ -3262,6 +3263,18 @@ const logTimesheetActivity = async (data) => {
 };
 
 const getFollowUpList = async (data) => {
+  const cacheKey = makeKey('getFollowUpList', data);
+  const cached = getCached(cacheKey);
+  if (cached !== undefined) return cached;
+
+  const result = await _getFollowUpListUncached(data);
+  if (result && result.status) {
+    setCached(cacheKey, result, 45 * 1000);
+  }
+  return result;
+};
+
+const _getFollowUpListUncached = async (data) => {
   try {
     let { StaffUserId, page = 1, limit = 20, search = "", staffIds = "", isDropdownOptions = false, dropdownSearch = "", dropdownPage = 1 } = data;
     page = parseInt(page) || 1;
@@ -3462,7 +3475,22 @@ const getFollowUpList = async (data) => {
   }
 };
 
+// MIS dashboard data is read-mostly reporting data — a short cache avoids
+// re-scanning the (currently unindexed) timesheet table on every tab switch
+// or dashboard reload within the same few seconds.
 const getMisResourceUtilisation = async (data) => {
+  const cacheKey = makeKey('getMisResourceUtilisation', data);
+  const cached = getCached(cacheKey);
+  if (cached !== undefined) return cached;
+
+  const result = await _getMisResourceUtilisationUncached(data);
+  if (result && result.status) {
+    setCached(cacheKey, result, 45 * 1000);
+  }
+  return result;
+};
+
+const _getMisResourceUtilisationUncached = async (data) => {
   const { StaffUserId, tab, page = 1, limit = 10, search = "", staffIds = "", isDropdownOptions = false, dropdownSearch = "", dropdownPage = 1 } = data;
   try {
     if (!StaffUserId) {
@@ -3793,6 +3821,18 @@ const getMisResourceUtilisation = async (data) => {
 // instead of calling getMisResourceUtilisation 6 times (which each re-run the
 // role/line-manager lookup and a full staff+timesheet scan independently).
 const getMisMonthlyTrend = async (data) => {
+  const cacheKey = makeKey('getMisMonthlyTrend', data);
+  const cached = getCached(cacheKey);
+  if (cached !== undefined) return cached;
+
+  const result = await _getMisMonthlyTrendUncached(data);
+  if (result && result.status) {
+    setCached(cacheKey, result, 45 * 1000);
+  }
+  return result;
+};
+
+const _getMisMonthlyTrendUncached = async (data) => {
   const { StaffUserId, tab } = data;
   try {
     if (!StaffUserId) {
