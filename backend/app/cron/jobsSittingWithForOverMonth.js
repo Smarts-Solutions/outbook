@@ -1,5 +1,6 @@
 // Jobs Sitting With Staff For Over Month Report Email Worker
 const pool = require('../config/database');
+const { buildAssignedJobsTempTable } = require("../utils/helper");
 const { parentPort } = require("worker_threads");
 const { commonEmail } = require("../utils/commonEmail");
 const { logEmail } = require("../utils/emailLogger");
@@ -256,8 +257,11 @@ parentPort.on("message", async (rows) => {
 
 
 async function otherUserDataGet(row) {
+  const connection = await pool.getConnection();
+  try {
+    await buildAssignedJobsTempTable(connection, [row.id]);
 
-  const query = `
+    const query = `
         SELECT 
         jobs.id AS id,
         (SELECT MAX(status_update_date) FROM job_status_updation WHERE job_id = jobs.id) AS current_status_date,
@@ -293,16 +297,16 @@ async function otherUserDataGet(row) {
           DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
           DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS job_received_on,
         GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR '| ') AS multiple_staff_names,
-        assigned_jobs_staff_view.source AS assigned_source,
-        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        temp_assigned_jobs_staff.source AS assigned_source,
+        temp_assigned_jobs_staff.service_id_assign AS service_id_assign,
         jobs.service_id AS job_service_id,
-        assigned_jobs_staff_view.staff_id AS assigned_jobs_staff_view_staff_id
+        temp_assigned_jobs_staff.staff_id AS temp_assigned_jobs_staff_id
         FROM 
         jobs
         JOIN staffs AS staffs5 ON jobs.staff_created_id = staffs5.id
         LEFT JOIN 
         job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
-        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = jobs.id
         LEFT JOIN staffs AS staffs4 ON job_allowed_staffs.staff_id = staffs4.id
         LEFT JOIN 
         customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
@@ -333,11 +337,11 @@ async function otherUserDataGet(row) {
         AND jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
         )
         AND (
-          (assigned_jobs_staff_view.staff_id = ${row?.id} AND (
-              assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
-              OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          (temp_assigned_jobs_staff.staff_id = ? AND (
+              temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+              OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
           ))
-          OR jobs.staff_created_id = ${row?.id}
+          OR jobs.staff_created_id = ?
         )
         
         GROUP BY jobs.id
@@ -345,49 +349,52 @@ async function otherUserDataGet(row) {
           jobs.id DESC;
         `;
 
-  const [result] = await pool.execute(query);
+    const [result] = await connection.execute(query, [row?.id, row?.id]);
  
-  let jobDataList = [];
+    let jobDataList = [];
 
-  if (result && result.length > 0) {
-    result?.forEach(val => {
-      jobDataList.push({
-        "Job Id": val.job_code_id || ' - ',
-        "Job Received On": convertDate(val.job_received_on),
-        "Customer Name": val.customer_trading_name || ' - ',
-        "Account Manager": val.account_manager_name || ' - ',
-        "Clients": val.client_trading_name || ' - ',
-        "Service Type": val.service_name || ' - ',
-        "Job Type": val.job_type_name || ' - ',
-        "Status": val.status || ' - ',
-        "Days in Current Status": (() => {
-            if (!val.current_status_date) return "0 Day";
-            const ms = new Date() - new Date(val.current_status_date);
-            if (isNaN(ms) || ms < 0) return "0 Day";
-            const days = Math.floor(ms / (1000 * 60 * 60 * 24));
-            return `${days} Day${days > 1 ? 's' : ''}`;
-        })(),
-        "Allocated To": val.allocated_name || ' - ',
-        "Allocated to (Other)": val.multiple_staff_names || ' - ',
-        "Reviewer Name": val.reviewer_name || ' - ',
-        "Companies House Due Date": convertDate(val.filing_Companies_date),
-        "Internal Deadline": convertDate(val.internal_deadline_date),
-        "Customer Deadline": convertDate(val.customer_deadline_date),
-        "Initial Query Sent Date": convertDate(val.query_sent_date),
-        "Final Query Response Received Date": convertDate(val.final_query_response_received_date),
-        "First Draft Sent": convertDate(val.draft_sent_on),
-        "Final Draft Sent": convertDate(val.final_draft_sent_on),
-        "Created By": val.created_by || " - "
+    if (result && result.length > 0) {
+      result?.forEach(val => {
+        jobDataList.push({
+          "Job Id": val.job_code_id || ' - ',
+          "Job Received On": convertDate(val.job_received_on),
+          "Customer Name": val.customer_trading_name || ' - ',
+          "Account Manager": val.account_manager_name || ' - ',
+          "Clients": val.client_trading_name || ' - ',
+          "Service Type": val.service_name || ' - ',
+          "Job Type": val.job_type_name || ' - ',
+          "Status": val.status || ' - ',
+          "Days in Current Status": (() => {
+              if (!val.current_status_date) return "0 Day";
+              const ms = new Date() - new Date(val.current_status_date);
+              if (isNaN(ms) || ms < 0) return "0 Day";
+              const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+              return `${days} Day${days > 1 ? 's' : ''}`;
+          })(),
+          "Allocated To": val.allocated_name || ' - ',
+          "Allocated to (Other)": val.multiple_staff_names || ' - ',
+          "Reviewer Name": val.reviewer_name || ' - ',
+          "Companies House Due Date": convertDate(val.filing_Companies_date),
+          "Internal Deadline": convertDate(val.internal_deadline_date),
+          "Customer Deadline": convertDate(val.customer_deadline_date),
+          "Initial Query Sent Date": convertDate(val.query_sent_date),
+          "Final Query Response Received Date": convertDate(val.final_query_response_received_date),
+          "First Draft Sent": convertDate(val.draft_sent_on),
+          "Final Draft Sent": convertDate(val.final_draft_sent_on),
+          "Created By": val.created_by || " - "
+        });
       });
-    });
 
-    return { status: true, jobDataList };
-  }
-
-  else {
+      return { status: true, jobDataList };
+    } else {
+      return { status: false };
+    }
+  } catch (error) {
+    console.error("Error in jobsSittingWithForOverMonth otherUserDataGet:", error);
     return { status: false };
+  } finally {
+    connection.release();
   }
-
 }
 
 

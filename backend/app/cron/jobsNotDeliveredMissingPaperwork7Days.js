@@ -1,5 +1,6 @@
 // Jobs Not Delivered After Missing Paperwork 7 Days Report Email Worker
 const pool = require('../config/database');
+const { buildAssignedJobsTempTable } = require("../utils/helper");
 const { parentPort } = require("worker_threads");
 const { commonEmail } = require("../utils/commonEmail");
 const xlsx = require('xlsx');
@@ -304,7 +305,11 @@ parentPort.on("message", async (rows) => {
 
 
 async function otherUserDataGet(row) {
-  const query = `
+  const connection = await pool.getConnection();
+  try {
+    await buildAssignedJobsTempTable(connection, [row.id]);
+
+    const query = `
         SELECT 
         jobs.id AS id,
         (SELECT MAX(status_update_date) FROM job_status_updation WHERE job_id = jobs.id) AS current_status_date,
@@ -340,14 +345,14 @@ async function otherUserDataGet(row) {
         CONCAT(staffs5.first_name, ' ', staffs5.last_name) AS created_by,
         GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR '| ') AS multiple_staff_names,
         CONCAT(staffs6.first_name, ' ', staffs6.last_name) AS missing_log_reviewed_by_name,
-        assigned_jobs_staff_view.source AS assigned_source,
-        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
+        temp_assigned_jobs_staff.source AS assigned_source,
+        temp_assigned_jobs_staff.service_id_assign AS service_id_assign,
         jobs.service_id AS job_service_id,
-        assigned_jobs_staff_view.staff_id AS assigned_jobs_staff_view_staff_id
+        temp_assigned_jobs_staff.staff_id AS temp_assigned_jobs_staff_id
       FROM jobs
         JOIN staffs AS staffs5 ON jobs.staff_created_id = staffs5.id
         LEFT JOIN job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
-        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = jobs.id
         LEFT JOIN staffs AS staffs4 ON job_allowed_staffs.staff_id = staffs4.id
         LEFT JOIN customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
         LEFT JOIN clients ON jobs.client_id = clients.id
@@ -369,27 +374,31 @@ async function otherUserDataGet(row) {
         AND jobs.status_type = 2
         )
         AND (
-          (assigned_jobs_staff_view.staff_id = ${row?.id} AND (
-              assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
-              OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          (temp_assigned_jobs_staff.staff_id = ? AND (
+              temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+              OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
           ))
-          OR jobs.staff_created_id = ${row?.id}
+          OR jobs.staff_created_id = ?
         )
 
       GROUP BY jobs.id
       ORDER BY jobs.id DESC;
         `;
 
-  const [result] = await pool.execute(query);
+    const [result] = await connection.execute(query, [row?.id, row?.id]);
 
-  if (result && result.length > 0) {
-    let report = await generateExcelDataAndBuffer(result);
-    return { status: true, report };
-  } else {
+    if (result && result.length > 0) {
+      let report = await generateExcelDataAndBuffer(result);
+      return { status: true, report };
+    } else {
+      return { status: false };
+    }
+  } catch (error) {
+    console.error("Error in jobsNotDeliveredMissingPaperwork7Days otherUserDataGet:", error);
     return { status: false };
+  } finally {
+    connection.release();
   }
-
-
 }
 
 
