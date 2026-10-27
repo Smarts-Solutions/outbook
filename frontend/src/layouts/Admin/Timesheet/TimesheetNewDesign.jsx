@@ -137,7 +137,7 @@ const TimesheetNewDesign = () => {
 
     const sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
-    
+
     return {
       start: monday.toISOString().slice(0, 10),
       end: sunday.toISOString().slice(0, 10)
@@ -160,7 +160,7 @@ const TimesheetNewDesign = () => {
     try {
       const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
       const token = JSON.parse(localStorage.getItem("token"));
-      
+
       const req = {
         StaffUserId: staffDetails?.id,
         tab: tab,
@@ -266,7 +266,7 @@ const TimesheetNewDesign = () => {
     setMisSearchTerm("");
     setMisSelectedStaff([]);
     fetchMisResourceUtilisation(newTab, 1, misPageSize, "", misMonthOffset, "");
-    
+
     setMisStaffSearchTerm("");
     fetchMisStaffDropdown(newTab, 1, "", false);
   };
@@ -295,7 +295,7 @@ const TimesheetNewDesign = () => {
           }))
         );
       }
-      
+
       const results = await Promise.all(promises);
       const trendData = results.map((res) => {
         const response = res.response;
@@ -308,12 +308,12 @@ const TimesheetNewDesign = () => {
           internal = response.summary.internal_hours || 0;
           external = response.summary.external_hours || 0;
         }
-        
+
         const monthString = res.targetDate.toLocaleDateString("en-GB", {
           month: "short",
           year: "2-digit",
         });
-        
+
         return {
           month: monthString,
           total: total,
@@ -335,6 +335,8 @@ const TimesheetNewDesign = () => {
       fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm);
       fetchMonthlyTrend(activeMisTab);
       fetchFollowUpList(1);
+      fetchMisStaffDropdown(activeMisTab, 1, "", false);
+      fetchFollowUpStaffDropdown(1, "", false);
       setMisPage(1);
     }
   }, [activeMisTab, activeMainTab]);
@@ -366,7 +368,7 @@ const TimesheetNewDesign = () => {
     if (misFilterType === 'month') mOff -= 1;
     else if (misFilterType === 'week') wOff -= 1;
     else if (misFilterType === 'year') yOff -= 1;
-    
+
     setMisMonthOffset(mOff);
     setMisWeekOffset(wOff);
     setMisYearOffset(yOff);
@@ -389,7 +391,7 @@ const TimesheetNewDesign = () => {
     if (misFilterType === 'month') mOff += 1;
     else if (misFilterType === 'week') wOff += 1;
     else if (misFilterType === 'year') yOff += 1;
-    
+
     setMisMonthOffset(mOff);
     setMisWeekOffset(wOff);
     setMisYearOffset(yOff);
@@ -971,8 +973,6 @@ const TimesheetNewDesign = () => {
   useEffect(() => {
     staffData();
     GetLineManagerData();
-    fetchMisStaffDropdown(activeMisTab, 1, "", false);
-    fetchFollowUpStaffDropdown(1, "", false);
   }, []);
 
   useEffect(() => {
@@ -982,7 +982,6 @@ const TimesheetNewDesign = () => {
   }, [activeMainTab]);
 
   useEffect(() => {
-
     GetTimeSheet(0);
     const days = [
       "sunday",
@@ -996,21 +995,6 @@ const TimesheetNewDesign = () => {
     const todays = new Date().getDay();
     setCurrentDay(days[todays]);
   }, [multipleFilter.staff_id]);
-
-  useEffect(() => {
-    GetTimeSheet(weekOffSetValue.current);
-    const days = [
-      "sunday",
-      "monday",
-      "tuesday",
-      "wednesday",
-      "thursday",
-      "friday",
-      "saturday",
-    ];
-    const todays = new Date().getDay();
-    setCurrentDay(days[todays]);
-  }, []);
 
   // Function to handle week change
   // const changeWeek = (offset) => {
@@ -2630,9 +2614,9 @@ const TimesheetNewDesign = () => {
     try {
       const req = { weekOffset: weekOffset, StaffUserId: staffDetails?.id };
       const res = await dispatch(getAllTimesheetDataExport({ req, authToken: token })).unwrap();
-      
+
       const bulkData = res?.data || [];
-      
+
       if (!bulkData || bulkData.length === 0) {
         sweatalert.fire({ icon: "info", title: "No data available for export." });
         setExportAllLoading(false);
@@ -2675,7 +2659,7 @@ const TimesheetNewDesign = () => {
         if (String(item.submit_status) === "1") {
           statusText = "Submitted";
         }
-        
+
         const totalHours = (
           parseFloat(item.monday_hours || 0) +
           parseFloat(item.tuesday_hours || 0) +
@@ -2685,7 +2669,7 @@ const TimesheetNewDesign = () => {
           parseFloat(item.saturday_hours || 0) +
           parseFloat(item.sunday_hours || 0)
         ).toFixed(2);
-        
+
         return [
           index + 1,
           staffName,
@@ -3649,14 +3633,14 @@ const TimesheetNewDesign = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download me-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>
                 {exporting ? "Exporting..." : "Export"}
               </button>
-              
-              <button 
-                type="button" 
-                className="timesheet-table-header-btn ms-2" 
-                disabled={exportAllLoading} 
+
+              <button
+                type="button"
+                className="timesheet-table-header-btn ms-2"
+                disabled={exportAllLoading}
                 onClick={exportAllTimesheetsCSV}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download me-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg> 
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download me-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>
                 {exportAllLoading ? "Exporting..." : "Export All Timesheets"}
               </button>
             </>
@@ -3757,7 +3741,7 @@ const TimesheetNewDesign = () => {
               <li role="presentation">
                 <button id="mis-dashboard-tab" data-bs-toggle="tab" data-bs-target="#mis-dashboard-tab-pane" type="button" role="tab" aria-controls="mis-dashboard-tab-pane" aria-selected="false" onClick={() => handleMainTabChange("mis-dashboard")}>MIS Dashboard</button>
               </li>
-            )} 
+            )}
           </ul>
         </div>
 
@@ -4331,7 +4315,7 @@ const TimesheetNewDesign = () => {
                             const { start, end } = getMisWeekDates(misWeekOffset);
                             const s = new Date(start);
                             const e = new Date(end);
-                            return `${s.getDate()} ${s.toLocaleString('default', {month:'short'})} - ${e.getDate()} ${e.toLocaleString('default', {month:'short'})} ${e.getFullYear()}`;
+                            return `${s.getDate()} ${s.toLocaleString('default', { month: 'short' })} - ${e.getDate()} ${e.toLocaleString('default', { month: 'short' })} ${e.getFullYear()}`;
                           }
                         })()}
                       </p>
@@ -4496,7 +4480,7 @@ const TimesheetNewDesign = () => {
                               content={renderValueLabel}
                             />
                           </Bar>
-                            
+
                           <Bar
                             dataKey="leave"
                             fill="#a46400"
@@ -4525,8 +4509,8 @@ const TimesheetNewDesign = () => {
                         <LegendDot color="#7A5111" label="Utilisation" />
                         <LegendDot color="#a46400" label="Leave" />
                       </div>         </div>
-                    </div>
                   </div>
+                </div>
                 <div className="col-lg-5">
                   <div className="timesheet-white-card h-100">
                     <div className="timesheet-table-header-div d-flex flex-column align-items-start gap-3">
@@ -4630,7 +4614,7 @@ const TimesheetNewDesign = () => {
                           const { start, end } = getMisWeekDates(misWeekOffset);
                           const s = new Date(start);
                           const e = new Date(end);
-                          return `${s.getDate()} ${s.toLocaleString('default', {month:'short'})} - ${e.getDate()} ${e.toLocaleString('default', {month:'short'})} ${e.getFullYear()}`;
+                          return `${s.getDate()} ${s.toLocaleString('default', { month: 'short' })} - ${e.getDate()} ${e.toLocaleString('default', { month: 'short' })} ${e.getFullYear()}`;
                         }
                       })()}.</p>
                     </div>
