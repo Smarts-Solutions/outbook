@@ -53,8 +53,8 @@ module.exports = (app) => {
    // 1 . WIP and To Be Started More Than 7 Days Report Email to Super Admin and Admin and Management Role Staffs
   cron.schedule( "30 8 * * *",async () => {
       ////////-----------Trigger Report Email --------------------//////
-
-     
+      
+    console.log("Cron Job WIP and To Be Started More Than 7 Days Report Email to Super Admin and Admin and Management Role Staffs");    
 
       if (process.env.NODE_APP_INSTANCE === "0") {
         const wipAndToBeStartedMoreThan_7_query = `
@@ -78,12 +78,18 @@ module.exports = (app) => {
           wipAndToBeStartedMoreThan_7_query,
         );
 
+        console.log(
+          "wipAndToBeStartedMoreThan_7_result -- ",
+          wipAndToBeStartedMoreThan_7_result,
+        );
+
         wipAndToBeStartedMoreThan_7(wipAndToBeStartedMoreThan_7_result || []);
       }
  
     }
     , {
-      timezone: "Europe/London"
+     // timezone: "Europe/London"
+      timezone: "Asia/Kolkata"
     }
   );
 
