@@ -158,6 +158,19 @@ export async function GET_MIS_RESOURCE_UTILISATION(data, authToken) {
   }
 }
 
+export async function GET_MIS_MONTHLY_TREND(data, authToken) {
+  try {
+    const token = authToken || JSON.parse(localStorage.getItem("token"));
+    const res = await axios.post(`${Config.base_url}getMisMonthlyTrend`, data, {
+      headers: header(token),
+      data: {},
+    });
+    return await res?.data;
+  } catch (err) {
+    return await err;
+  }
+}
+
 export async function GET_ALL_TIMESHEET_DATA_EXPORT(data, authToken) {
   try {
     const token = authToken || JSON.parse(localStorage.getItem("token"));

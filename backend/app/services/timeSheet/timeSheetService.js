@@ -43,6 +43,10 @@ const getMisResourceUtilisation = async (data) => {
   return await timeSheetModel.getMisResourceUtilisation(data);
 }
 
+const getMisMonthlyTrend = async (data) => {
+  return await timeSheetModel.getMisMonthlyTrend(data);
+}
+
 const getAllTimesheetDataExport = async (data) => {
   return timeSheetModel.getAllTimesheetDataExport(data);
 }
@@ -59,5 +63,6 @@ module.exports = {
   logTimesheetActivity,
   getFollowUpList,
   getMisResourceUtilisation,
+  getMisMonthlyTrend,
   getAllTimesheetDataExport
 };

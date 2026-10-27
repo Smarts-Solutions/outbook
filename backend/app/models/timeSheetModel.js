@@ -3789,6 +3789,195 @@ const getMisResourceUtilisation = async (data) => {
   }
 };
 
+// Computes the last 6 months of MIS summary trend in a single DB round-trip
+// instead of calling getMisResourceUtilisation 6 times (which each re-run the
+// role/line-manager lookup and a full staff+timesheet scan independently).
+const getMisMonthlyTrend = async (data) => {
+  const { StaffUserId, tab } = data;
+  try {
+    if (!StaffUserId) {
+      return { status: false, message: "StaffUserId is required." };
+    }
+
+    const LineManageStaffId = await LineManageStaffIdHelperFunctionForStaff(StaffUserId);
+    const roleRows = await QueryRoleHelperFunction(StaffUserId);
+    const role_name = roleRows[0]?.role_name?.toUpperCase();
+
+    let staffWhereClause = "";
+    if (role_name === "SUPERADMIN" || role_name === "ADMIN") {
+      staffWhereClause = "WHERE s.role_id != 12 AND s.status = '1'";
+    } else {
+      if (LineManageStaffId.length > 0) {
+        staffWhereClause = `
+          WHERE s.role_id != 12
+          AND s.status = '1'
+          AND s.id IN (${LineManageStaffId.join(",")})
+        `;
+      } else {
+        return { status: true, message: "Fetched successfully", trend: [] };
+      }
+    }
+
+    if (tab === 'team') {
+      staffWhereClause += ` AND s.id IN (SELECT staff_to FROM line_managers)`;
+    }
+
+    const getLastSunday = (year, monthIdx) => {
+      let d = new Date(Date.UTC(year, monthIdx + 1, 0));
+      d.setUTCDate(d.getUTCDate() - d.getUTCDay());
+      return d;
+    };
+
+    const now = new Date();
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const targetDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
+
+      const prevMonthLastSunday = getLastSunday(targetDate.getUTCFullYear(), targetDate.getUTCMonth() - 1);
+      prevMonthLastSunday.setUTCDate(prevMonthLastSunday.getUTCDate() + 1);
+      const start = prevMonthLastSunday.toISOString().slice(0, 10);
+
+      const thisMonthLastSunday = getLastSunday(targetDate.getUTCFullYear(), targetDate.getUTCMonth());
+      const end = thisMonthLastSunday.toISOString().slice(0, 10);
+
+      const daysDifference = Math.round((new Date(end) - new Date(start)) / (24 * 60 * 60 * 1000));
+      const weeksInMonth = Math.round((daysDifference + 1) / 7);
+
+      months.push({
+        month: targetDate.toLocaleDateString("en-GB", { month: "short", year: "2-digit", timeZone: "UTC" }),
+        start,
+        end,
+        weeksInMonth
+      });
+    }
+
+    const overallStart = months[0].start;
+    const overallEnd = months[months.length - 1].end;
+
+    const staffQuery = `
+      SELECT s.id AS staff_id, s.hourminute
+      FROM staffs s
+      ${staffWhereClause}
+    `;
+    const [staffRows] = await pool.query(staffQuery);
+
+    const trend = months.map(m => ({
+      month: m.month,
+      total: 0,
+      billable: 0,
+      utilization: 0,
+      leave: 0,
+      internal: 0,
+      external: 0
+    }));
+
+    if (staffRows.length === 0) {
+      return { status: true, message: "Fetched successfully", trend };
+    }
+
+    const parseHours = (val) => {
+      if (!val) return 0;
+      let str = String(val).replace(':', '.');
+      let num = parseFloat(str);
+      return isNaN(num) ? 0 : num;
+    };
+
+    const totalWeeklyCapacity = staffRows.reduce((sum, s) => sum + parseHours(s.hourminute), 0);
+    months.forEach((m, idx) => {
+      trend[idx].total = parseFloat((totalWeeklyCapacity * m.weeksInMonth).toFixed(2));
+    });
+
+    const validStaffIds = staffRows.map(r => r.staff_id);
+    const timesheetQuery = `
+      SELECT
+        t.staff_id,
+        t.task_type,
+        t.job_id,
+        t.submit_status,
+        t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date,
+        t.monday_hours, t.tuesday_hours, t.wednesday_hours, t.thursday_hours, t.friday_hours, t.saturday_hours, t.sunday_hours,
+        i.name AS internal_name,
+        j.budgeted_hours AS job_budgeted_hours
+      FROM timesheet t
+      LEFT JOIN internal i ON t.job_id = i.id AND t.task_type = '1'
+      LEFT JOIN jobs j ON t.job_id = j.id AND t.task_type = '2'
+      WHERE t.is_deleted = 0
+        AND t.staff_id IN (${validStaffIds.join(',')})
+        AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) >= ?
+        AND COALESCE(t.monday_date, t.tuesday_date, t.wednesday_date, t.thursday_date, t.friday_date, t.saturday_date, t.sunday_date) <= ?
+    `;
+    const [rows] = await pool.query(timesheetQuery, [overallStart, overallEnd]);
+
+    const findMonthIndex = (dateStr) => {
+      for (let idx = 0; idx < months.length; idx++) {
+        if (dateStr >= months[idx].start && dateStr <= months[idx].end) return idx;
+      }
+      return -1;
+    };
+
+    const billableSeen = new Set();
+
+    for (const row of rows) {
+      const rowDate = row.monday_date || row.tuesday_date || row.wednesday_date || row.thursday_date || row.friday_date || row.saturday_date || row.sunday_date;
+      if (!rowDate) continue;
+
+      const isCounted = String(row.submit_status) === '1' || String(row.submit_status) === '0';
+      if (!isCounted) continue;
+
+      const dateStr = new Date(rowDate).toISOString().slice(0, 10);
+      const mIdx = findMonthIndex(dateStr);
+      if (mIdx === -1) continue;
+
+      const rowHours =
+        parseHours(row.monday_hours) +
+        parseHours(row.tuesday_hours) +
+        parseHours(row.wednesday_hours) +
+        parseHours(row.thursday_hours) +
+        parseHours(row.friday_hours) +
+        parseHours(row.saturday_hours) +
+        parseHours(row.sunday_hours);
+
+      const bucket = trend[mIdx];
+      bucket.utilization += rowHours;
+
+      if (row.internal_name && row.internal_name.toLowerCase().includes('leave')) {
+        bucket.leave += rowHours;
+      }
+
+      if (String(row.task_type) === '1') {
+        bucket.internal += rowHours;
+      } else if (String(row.task_type) === '2') {
+        bucket.external += rowHours;
+      }
+
+      if (String(row.task_type) === '2' && row.job_id) {
+        const key = `${mIdx}_${row.staff_id}_${row.job_id}`;
+        if (!billableSeen.has(key)) {
+          billableSeen.add(key);
+          bucket.billable += parseHours(row.job_budgeted_hours);
+        }
+      }
+    }
+
+    trend.forEach(bucket => {
+      bucket.billable = parseFloat(bucket.billable.toFixed(2));
+      bucket.utilization = parseFloat(bucket.utilization.toFixed(2));
+      bucket.leave = parseFloat(bucket.leave.toFixed(2));
+      bucket.internal = parseFloat(bucket.internal.toFixed(2));
+      bucket.external = parseFloat(bucket.external.toFixed(2));
+    });
+
+    return { status: true, message: "Fetched successfully", trend };
+  } catch (error) {
+    console.error("Error in getMisMonthlyTrend:", error);
+    return {
+      status: false,
+      message: "Error fetching monthly trend",
+      error: error.message
+    };
+  }
+};
+
 const getAllTimesheetDataExport = async (Timesheet) => {
   const { weekOffset = 0, StaffUserId } = Timesheet;
 
@@ -3948,5 +4137,6 @@ module.exports = {
   logTimesheetActivity,
   getFollowUpList,
   getMisResourceUtilisation,
+  getMisMonthlyTrend,
   getAllTimesheetDataExport
 };
