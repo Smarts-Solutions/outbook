@@ -5817,7 +5817,7 @@ const updateJobStatus = async (job) => {
       `;
     } else if (parseInt(status_type) == 18) {
       query = `
-        UPDATE jobs 
+        UPDATE jobs  
         SET status_type = ?,status_updation_date = NOW(), filing_hmrc_required = '1', filing_hmrc_date = CURDATE() , filing_Companies_required = '1' , filing_Companies_date = CURDATE()
         WHERE id = ?
       `;
