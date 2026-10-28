@@ -10,7 +10,12 @@ import Dashboard from "../layouts/Admin/DashboardPage/Dashboard";
 import DashboardLinkData from "../layouts/Admin/DashboardPage/DashboardLinkData";
 
 import Service from "../layouts/Admin/customer/customer_add_process/Service";
-import BillingOps from "../layouts/Admin/Billing/BillingOps";
+import BillingDashboard from "../layouts/Admin/Billing/BillingDashboard";
+import SubmitBilling from "../layouts/Admin/Billing/SubmitBilling";
+import BillingApprovals from "../layouts/Admin/Billing/BillingApprovals";
+import CreditControl from "../layouts/Admin/Billing/CreditControl";
+import BillingControlCentre from "../layouts/Admin/Billing/BillingControlCentre";
+import MasterData from "../layouts/Admin/Billing/MasterData";
 
 // Customers
 import Customer from "../layouts/Admin/customer/Customer";
@@ -284,7 +289,14 @@ const Admin_Route = () => {
             
               <Route path="/customer" element={<Customer />} />
 
-              <Route path="/billing-ops" element={<BillingOps />} />
+              <Route path="/billing" element={<BillingDashboard />} />
+              <Route path="/billing-ops" element={<BillingDashboard />} />
+              <Route path="/billing/dashboard" element={<BillingDashboard />} />
+              <Route path="/billing/submit" element={<SubmitBilling />} />
+              <Route path="/billing/approvals" element={<BillingApprovals />} />
+              <Route path="/billing/credit-control" element={<CreditControl />} />
+              <Route path="/billing/control-centre" element={<BillingControlCentre />} />
+              <Route path="/billing/master-data" element={<MasterData />} />
               <Route path="/cust_details" element={<CustomerDetails />} />
               
               <Route path="/service" element={<Service />} />

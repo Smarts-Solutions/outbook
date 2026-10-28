@@ -19,6 +19,7 @@ const Sidebar = () => {
       "/admin/reports": false, // For "Reports" dropdown
       "/admin/timesheetReports": false, // For "Time Sheet Reports" dropdown
       "/admin/job/customreport": false, // For "Custom Job Report" dropdown
+      "/admin/billing": false, // For "Billing" dropdown
       "customerReports": false, // For Customer Reports dropdown
     },
   });
@@ -60,6 +61,8 @@ const Sidebar = () => {
         } else {
           allKeys["/admin/reports"] = true;
         }
+      } else if (location.pathname.startsWith("/admin/billing")) {
+        allKeys["/admin/billing"] = true;
       }
 
       return {
@@ -109,6 +112,8 @@ const Sidebar = () => {
         linkPathname === "/admin/ClientLists"
       ) {
         newDropdown["/admin/customer"] = true;
+      } else if (linkPathname.startsWith("/admin/billing")) {
+        newDropdown["/admin/billing"] = true;
       }
 
       return { ...prev, dropdownOpen: newDropdown };
@@ -774,16 +779,16 @@ const Sidebar = () => {
                   </li>
                 )}
 
-                <li className={activeLink === "/admin/billing-ops" ? "active" : ""}>
+                <li className={activeLink && activeLink.startsWith("/admin/billing") ? "active" : ""}>
                   <Link
-                    to="/admin/billing-ops"
+                    to="/admin/billing"
                     aria-expanded="false"
-                    onClick={(e) => handleLinkClick(e, "/admin/billing-ops")}
+                    onClick={(e) => handleLinkClick(e, "/admin/billing")}
                   >
                     <span className="sidebar-icons">
                       <Receipt />
                     </span>
-                    <span>Billing Ops</span>
+                    <span>Billing</span>
                   </Link>
                 </li>
               </>
