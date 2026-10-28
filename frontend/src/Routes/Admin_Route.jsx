@@ -10,6 +10,7 @@ import Dashboard from "../layouts/Admin/DashboardPage/Dashboard";
 import DashboardLinkData from "../layouts/Admin/DashboardPage/DashboardLinkData";
 
 import Service from "../layouts/Admin/customer/customer_add_process/Service";
+import BillingOps from "../layouts/Admin/Billing/BillingOps";
 
 // Customers
 import Customer from "../layouts/Admin/customer/Customer";
@@ -283,6 +284,7 @@ const Admin_Route = () => {
             
               <Route path="/customer" element={<Customer />} />
 
+              <Route path="/billing-ops" element={<BillingOps />} />
               <Route path="/cust_details" element={<CustomerDetails />} />
               
               <Route path="/service" element={<Service />} />

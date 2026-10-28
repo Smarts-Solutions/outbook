@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useCustomerAccess } from "../../Utils/CustomerAccessContext";
-import { Briefcase, ChevronDown, ChevronRight, PieChart, Shield, User, Users, File, FileText, Clock, Clock1, Clock10Icon, Settings, LayoutGrid, UserCog, FileSliders } from "lucide-react";
+import { Briefcase, ChevronDown, ChevronRight, PieChart, Shield, User, Users, File, FileText, Clock, Clock1, Clock10Icon, Settings, LayoutGrid, UserCog, FileSliders, Receipt } from "lucide-react";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -773,6 +773,19 @@ const Sidebar = () => {
                     </Link>
                   </li>
                 )}
+
+                <li className={activeLink === "/admin/billing-ops" ? "active" : ""}>
+                  <Link
+                    to="/admin/billing-ops"
+                    aria-expanded="false"
+                    onClick={(e) => handleLinkClick(e, "/admin/billing-ops")}
+                  >
+                    <span className="sidebar-icons">
+                      <Receipt />
+                    </span>
+                    <span>Billing Ops</span>
+                  </Link>
+                </li>
               </>
             )}
           </ul>
