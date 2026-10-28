@@ -3013,11 +3013,11 @@ const Setting = () => {
       label: "Job Date Settings",
       icon: <Settings size={16} className="me-1" />,
     },
-    // {
-    //   id: "12",
-    //   label: "SMS & OTP Settings",
-    //   icon: <Settings size={16} className="me-1" />,
-    // },
+    {
+      id: "12",
+      label: "SMS & OTP Settings",
+      icon: <Settings size={16} className="me-1" />,
+    },
   ];
 
   useEffect(() => {
@@ -3662,7 +3662,7 @@ const Setting = () => {
               </div>
             </div>
 
-            {/* <div
+            <div
               className={`tab-pane fade ${getShowTabId === "12" ? "show active" : ""}`}
             >
               <div className="report-data row">
@@ -3737,7 +3737,7 @@ const Setting = () => {
                   </div>
                 </div>
               </div>
-            </div> */}
+            </div>
           </div>
         </div>
 
