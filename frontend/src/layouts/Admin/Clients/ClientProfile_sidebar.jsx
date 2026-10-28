@@ -331,73 +331,73 @@ const ClientList = () => {
       console.log(err);
     }
     
-    const isCompletedStatus = oldStatusObj && oldStatusObj.name.toLowerCase().includes("completed");
+    // const isCompletedStatus = oldStatusObj && oldStatusObj.name.toLowerCase().includes("completed");
 
-    if (isCompletedStatus) {
-      // 2. Show 'Are you sure?' confirmation pop up FIRST before sending OTP
-      const confirmResult = await Swal.fire({
-        title: "Are you sure?",
-        text: "Do you want to change the status? An OTP will be required to approve changes to this locked job.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes, continue!",
-        cancelButtonText: "No, cancel",
-      });
+    // if (isCompletedStatus) {
+    //   // 2. Show 'Are you sure?' confirmation pop up FIRST before sending OTP
+    //   const confirmResult = await Swal.fire({
+    //     title: "Are you sure?",
+    //     text: "Do you want to change the status? An OTP will be required to approve changes to this locked job.",
+    //     icon: "warning",
+    //     showCancelButton: true,
+    //     confirmButtonText: "Yes, continue!",
+    //     cancelButtonText: "No, cancel",
+    //   });
 
-      if (!confirmResult.isConfirmed) {
-        Swal.fire({
-          title: "Cancelled",
-          text: "Status change was not performed",
-          icon: "error",
-          confirmButtonText: "Ok",
-          timer: 1000,
-          timerProgressBar: true,
-        });
-        return;
-      }
+    //   if (!confirmResult.isConfirmed) {
+    //     Swal.fire({
+    //       title: "Cancelled",
+    //       text: "Status change was not performed",
+    //       icon: "error",
+    //       confirmButtonText: "Ok",
+    //       timer: 1000,
+    //       timerProgressBar: true,
+    //     });
+    //     return;
+    //   }
 
-      // 3. Send OTP after confirmation
-      try {
-        const sysSetRes = await dispatch(GetSystemSettings({ authToken: token })).unwrap();
-        const settings = sysSetRes.data || {};
-        const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
-        const staffName = staffDetails.first_name ? `${staffDetails.first_name} ${staffDetails.last_name || ''}`.trim() : staffDetails.name || "Staff";
-        const staffRole = staffDetails.role || staffDetails.role_name || "Staff Role";
+    //   // 3. Send OTP after confirmation
+    //   try {
+    //     const sysSetRes = await dispatch(GetSystemSettings({ authToken: token })).unwrap();
+    //     const settings = sysSetRes.data || {};
+    //     const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
+    //     const staffName = staffDetails.first_name ? `${staffDetails.first_name} ${staffDetails.last_name || ''}`.trim() : staffDetails.name || "Staff";
+    //     const staffRole = staffDetails.role || staffDetails.role_name || "Staff Role";
 
-        const otpReq = {
-          action: "send",
-          jobId: row.id || row.job_id,
-          jobCodeId: row.job_code_id || "Unknown Job",
-          staffName: staffName,
-          staffRole: staffRole,
-          customerName: row.customer_name || "Unknown Customer",
-          clientName: row.client_trading_name || "Unknown Client",
-          newStatus: newStatusObj ? newStatusObj.name : "Unknown Status",
-          requestedBy: staffDetails.id || 1,
-          settings: settings,
-        };
-        const otpRes = await dispatch(SendJobStatusOtp({ req: otpReq, authToken: token })).unwrap();
+    //     const otpReq = {
+    //       action: "send",
+    //       jobId: row.id || row.job_id,
+    //       jobCodeId: row.job_code_id || "Unknown Job",
+    //       staffName: staffName,
+    //       staffRole: staffRole,
+    //       customerName: row.customer_name || "Unknown Customer",
+    //       clientName: row.client_trading_name || "Unknown Client",
+    //       newStatus: newStatusObj ? newStatusObj.name : "Unknown Status",
+    //       requestedBy: staffDetails.id || 1,
+    //       settings: settings,
+    //     };
+    //     const otpRes = await dispatch(SendJobStatusOtp({ req: otpReq, authToken: token })).unwrap();
 
-        if (otpRes.status) {
-          const otpValue = await promptJobStatusOtp(Swal, otpRes.remainingSeconds || 600, otpRes.alreadySent);
+    //     if (otpRes.status) {
+    //       const otpValue = await promptJobStatusOtp(Swal, otpRes.remainingSeconds || 600, otpRes.alreadySent);
 
-          if (otpValue) {
-            const verifyReq = { action: "verify", jobId: row.id || row.job_id, otpCode: otpValue };
-            const verifyRes = await dispatch(VerifyJobStatusOtp({ req: verifyReq, authToken: token })).unwrap();
+    //       if (otpValue) {
+    //         const verifyReq = { action: "verify", jobId: row.id || row.job_id, otpCode: otpValue };
+    //         const verifyRes = await dispatch(VerifyJobStatusOtp({ req: verifyReq, authToken: token })).unwrap();
 
-            if (verifyRes.status) {
-              proceedUpdateStatus(Id, row);
-            } else {
-              Swal.fire("Error", verifyRes.message || "Invalid OTP", "error");
-            }
-          }
-        } else {
-          Swal.fire("Error", otpRes.message || "Failed to send OTP", "error");
-        }
-      } catch (error) {
-        Swal.fire("Error", "Something went wrong while sending OTP.", "error");
-      }
-    } else {
+    //         if (verifyRes.status) {
+    //           proceedUpdateStatus(Id, row);
+    //         } else {
+    //           Swal.fire("Error", verifyRes.message || "Invalid OTP", "error");
+    //         }
+    //       }
+    //     } else {
+    //       Swal.fire("Error", otpRes.message || "Failed to send OTP", "error");
+    //     }
+    //   } catch (error) {
+    //     Swal.fire("Error", "Something went wrong while sending OTP.", "error");
+    //   }
+    // } else {
       sweatalert
         .fire({
           title: "Are you sure?",
@@ -421,7 +421,7 @@ const ClientList = () => {
             });
           }
         });
-    }
+    // }
   };
 
   const proceedUpdateStatus = async (Id, row) => {

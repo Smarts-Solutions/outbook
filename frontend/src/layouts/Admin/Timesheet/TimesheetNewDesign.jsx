@@ -18,7 +18,7 @@ import {
   getAllTimesheetDataExport,
 } from "../../../ReduxStore/Slice/Timesheet/TimesheetSlice";
 
-import { SAVE_TIMESHEET, GET_MIS_RESOURCE_UTILISATION } from "../../../Services/Timesheet/TimesheetService";
+import { SAVE_TIMESHEET, GET_MIS_RESOURCE_UTILISATION, GET_MIS_MONTHLY_TREND } from "../../../Services/Timesheet/TimesheetService";
 import sweatalert from "sweetalert2";
 import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 import ReactPaginate from "react-paginate";
@@ -262,83 +262,59 @@ const TimesheetNewDesign = () => {
   };
 
   const handleMisTabChange = (newTab) => {
+    // Just update state here — the mis-dashboard useEffect (keyed on
+    // activeMisTab) already re-fetches everything for the new tab, so
+    // firing these calls here too would duplicate every request.
     setActiveMisTab(newTab);
     setMisSearchTerm("");
     setMisSelectedStaff([]);
-    fetchMisResourceUtilisation(newTab, 1, misPageSize, "", misMonthOffset, "");
-
     setMisStaffSearchTerm("");
-    fetchMisStaffDropdown(newTab, 1, "", false);
   };
 
   const fetchMonthlyTrend = async (tab = activeMisTab) => {
     try {
       const staffDetails = JSON.parse(localStorage.getItem("staffDetails"));
       const token = JSON.parse(localStorage.getItem("token"));
-      const d = new Date();
-      const promises = [];
-      for (let i = 5; i >= 0; i--) {
-        const targetDate = new Date(d.getFullYear(), d.getMonth() - i, 1);
-        const req = {
-          StaffUserId: staffDetails?.id,
-          tab: tab,
-          page: 1,
-          limit: 1,
-          search: "",
-          month: targetDate.getMonth(),
-          year: targetDate.getFullYear(),
-        };
-        promises.push(
-          GET_MIS_RESOURCE_UTILISATION(req, token).then((response) => ({
-            targetDate,
-            response,
-          }))
-        );
+      const req = {
+        StaffUserId: staffDetails?.id,
+        tab: tab,
+      };
+
+      const response = await GET_MIS_MONTHLY_TREND(req, token);
+      if (response && response.status) {
+        setGraphData(response.trend || []);
+      } else {
+        setGraphData([]);
       }
-
-      const results = await Promise.all(promises);
-      const trendData = results.map((res) => {
-        const response = res.response;
-        let total = 0, billable = 0, utilization = 0, leave = 0, internal = 0, external = 0;
-        if (response && response.summary) {
-          total = response.summary.total_hours || 0;
-          billable = response.summary.billable_hours || 0;
-          utilization = response.summary.utilisation_hours || 0;
-          leave = response.summary.leave_hours || 0;
-          internal = response.summary.internal_hours || 0;
-          external = response.summary.external_hours || 0;
-        }
-
-        const monthString = res.targetDate.toLocaleDateString("en-GB", {
-          month: "short",
-          year: "2-digit",
-        });
-
-        return {
-          month: monthString,
-          total: total,
-          billable: billable,
-          utilization: utilization,
-          leave: leave,
-          internal: internal,
-          external: external,
-        };
-      });
-      setGraphData(trendData);
     } catch (error) {
       console.error("Error fetching monthly trend:", error);
     }
   };
 
   useEffect(() => {
-    if (activeMainTab === "mis-dashboard") {
-      fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm);
-      fetchMonthlyTrend(activeMisTab);
-      fetchFollowUpList(1);
-      fetchMisStaffDropdown(activeMisTab, 1, "", false);
-      fetchFollowUpStaffDropdown(1, "", false);
-      setMisPage(1);
-    }
+    if (activeMainTab !== "mis-dashboard") return;
+
+    let cancelled = false;
+    const loadDashboard = async () => {
+      // Sequential (not Promise.all) so these heavy aggregation calls don't
+      // all hit the DB/CPU at the same instant when the tab/dashboard opens.
+      await fetchMisResourceUtilisation(activeMisTab, 1, misPageSize, misSearchTerm);
+      if (cancelled) return;
+      await fetchMonthlyTrend(activeMisTab);
+      if (cancelled) return;
+      await fetchFollowUpList(1);
+      if (cancelled) return;
+      await fetchMisStaffDropdown(activeMisTab, 1, "", false);
+      if (cancelled) return;
+      await fetchFollowUpStaffDropdown(1, "", false);
+    };
+
+    loadDashboard();
+    setMisPage(1);
+
+    return () => {
+      cancelled = true;
+    };
   }, [activeMisTab, activeMainTab]);
 
   const handleMisPageChange = (selected) => {

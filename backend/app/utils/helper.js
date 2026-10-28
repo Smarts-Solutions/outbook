@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const { getCached, setCached, makeKey } = require('./simpleCache');
 const SatffLogUpdateOperation = async (logData) => {
   //console.log("logData ",logData)
   try {
@@ -412,6 +413,10 @@ async function LineManageStaffIdHelperFunction(staff_id) {
 }
 
 async function LineManageStaffIdHelperFunctionForStaff(staff_id) {
+  const cacheKey = makeKey('LineManageStaffIdHelperFunctionForStaff', staff_id);
+  const cached = getCached(cacheKey);
+  if (cached !== undefined) return cached;
+
   try {
   const query = `
     WITH RECURSIVE StaffHierarchy AS (
@@ -441,7 +446,9 @@ async function LineManageStaffIdHelperFunctionForStaff(staff_id) {
   const staffIds = rows.map(row => row.staff_by);
 
   // Remove duplicates (if any)
-  return [...new Set(staffIds)];
+  const result = [...new Set(staffIds)];
+  setCached(cacheKey, result, 2 * 60 * 1000);
+  return result;
 }catch (error) {
         console.error("Hierarchy Error:", error);
         return [staff_id];
@@ -463,6 +470,10 @@ async function LineManageStaffIdHelperFunctionForStaff(staff_id) {
 
 
 async function QueryRoleHelperFunction(staff_id) {
+  const cacheKey = makeKey('QueryRoleHelperFunction', staff_id);
+  const cached = getCached(cacheKey);
+  if (cached !== undefined) return cached;
+
   const QueryRole = `
   SELECT
     staffs.id AS id,
@@ -477,6 +488,7 @@ async function QueryRoleHelperFunction(staff_id) {
   LIMIT 1
   `
   const [rows] = await pool.execute(QueryRole);
+  setCached(cacheKey, rows, 2 * 60 * 1000);
   return rows;
 }
 
