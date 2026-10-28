@@ -1,0 +1,80 @@
+// missingTimesheetReportEmail.js
+const pool = require('../config/database');
+const { parentPort } = require("worker_threads");
+const { missingTimesheetReport } = require("../models/reportModel");
+const { commonEmail } = require("../utils/commonEmail");
+const { logEmail } = require("../utils/emailLogger");
+
+// Missing Timesheet Report Email Worker
+parentPort.on("message", async (rows) => {
+  for (const row of rows) {
+    try {
+      const [[getStaffNameMissingReport]] = await pool.execute(`CALL GetLastWeekMissingTimesheetReport(${row.id})`);
+      // console.log("getStaffNameMissingReport , ", getStaffNameMissingReport);
+      if (getStaffNameMissingReport && getStaffNameMissingReport.length > 0) {
+        let csvContent = "Staff Name,Staff Email\n";
+        // getStaffNameMissingReport?.forEach(val => {
+        //     csvContent += `${val.staff_fullname},${val.staff_email}\n`;
+        // });
+        let processedStaff = new Set();
+        getStaffNameMissingReport?.forEach(val => {
+          if (processedStaff.has(val?.staff_id)) {
+            return;
+          }
+          processedStaff.add(val?.staff_id);
+          csvContent += `${val?.staff_fullname},${val?.staff_email}\n`;
+        });
+
+
+        let toEmail = row.staff_email;
+        let subjectEmail = "Missing Timesheet Report"
+        let htmlEmail = "<h3>Please find the attached Missing Timesheet Report.</h3>"
+        const dynamic_attachment = csvContent;
+        const filename = "MissingTimesheetReport.csv";
+
+        // parentPort.postMessage(`CSV Content for ${row.id}:\n ${csvContent}`);
+
+        const emailSent = await commonEmail(toEmail, subjectEmail, htmlEmail, "", "", dynamic_attachment, filename);
+
+       const csvToJson = (csv) => {
+          const lines = csv.trim().split("\n");
+
+          // header 
+          const headers = lines[0].split(",");
+
+          // data rows 
+          const result = lines.slice(1).map((line) => {
+            const values = line.split(",");
+
+            return {
+              staff_name: values[0],
+              staff_email: values[1],
+            };
+          });
+
+          return result;
+        };
+        const attachmentJson = csvToJson(dynamic_attachment);
+          logEmail({
+            toEmail: toEmail,
+            filename: filename,
+            attachment: attachmentJson,
+            logFileName: "missingTimesheetReportEmail.json",
+          });
+
+
+        if (emailSent) {
+          parentPort.postMessage(`✅ Email sent to: ${row.staff_email}`);
+        } else {
+          parentPort.postMessage(`❌ Failed to send email to: ${row.staff_email}`);
+        }
+      } else {
+        parentPort.postMessage(`ℹ️ No missing timesheet report for ${row.staff_email}`);
+      }
+
+
+    } catch (err) {
+      parentPort.postMessage(`❌ Failed for ${row.id}: ${err.message}`);
+    }
+  }
+});
