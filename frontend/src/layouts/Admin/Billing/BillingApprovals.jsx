@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import BillingHeader from "./BillingHeader";
 import BillingDatatable from "./BillingDatatable";
 import { initialSubmissions } from "./billingMockData";
-import { Check } from "lucide-react";
+import { Check, RotateCcw } from "lucide-react";
 
 const BillingApprovals = () => {
   const [submissions, setSubmissions] = useState(initialSubmissions);
@@ -96,13 +96,14 @@ const BillingApprovals = () => {
       name: "Action",
       cell: (row) =>
         returningId === row.id ? (
-          <div className="d-flex flex-column gap-1 py-1">
+          <div className="d-flex flex-column gap-1 py-1" style={{ minWidth: "160px" }}>
             <input
               type="text"
               className="form-control form-control-sm"
               placeholder="Reason..."
               value={returnNote}
               onChange={(e) => setReturnNote(e.target.value)}
+              autoFocus
             />
             <div className="d-flex gap-1 justify-content-end">
               <button
@@ -122,20 +123,22 @@ const BillingApprovals = () => {
             </div>
           </div>
         ) : (
-          <div className="d-flex gap-1">
+          <div className="d-flex align-items-center gap-2">
             <button
               type="button"
-              className="btn btn-outline-danger btn-sm py-1 px-2 fs-12"
+              className="billing-action-btn billing-action-btn-danger"
+              title="Return"
               onClick={() => {
                 setReturningId(row.id);
                 setReturnNote("");
               }}
             >
-              Return
+              <RotateCcw size={15} />
             </button>
             <button
               type="button"
-              className="btn btn-info text-white btn-sm py-1 px-2 fs-12"
+              className="billing-action-btn billing-action-btn-primary"
+              title={row.status === "Pending Manager Approval" ? "Manager Approve" : "CC Approve"}
               onClick={() =>
                 handleApprove(
                   row.id,
@@ -145,7 +148,7 @@ const BillingApprovals = () => {
                 )
               }
             >
-              {row.status === "Pending Manager Approval" ? "Manager Approve" : "CC Approve"}
+              <Check size={16} />
             </button>
           </div>
         ),
