@@ -117,6 +117,7 @@ parentPort.on("message", async (rows) => {
         LEFT JOIN
         drafts ON drafts.job_id = jobs.id
         WHERE customers.status = '1' AND jobs.expected_delivery_date <> jobs.expected_delivery_date_old
+        AND jobs.status_type NOT IN (8,15)
         GROUP BY jobs.id
         ORDER BY 
           jobs.id DESC;
@@ -174,8 +175,8 @@ parentPort.on("message", async (rows) => {
       try {
         let finalJobData = jobDataList;
 
-        /* 👉 NON ADMIN USER */
-        if (![1, 2, 8].includes(user.role_id)) {
+        /* 👉 NON ADMIN USER (unless they created a matching job, in which case they get the full report) */
+        if (![1, 2, 8].includes(user.role_id) && !user.is_job_creator) {
           const res = await otherUserDataGet(user);
           if (!res.status) return;
           finalJobData = res.jobDataList;
@@ -329,7 +330,7 @@ async function otherUserDataGet(row) {
         LEFT JOIN
         drafts ON drafts.job_id = jobs.id
         WHERE customers.status = '1'
-        AND (jobs.expected_delivery_date <> jobs.expected_delivery_date_old)
+        AND (jobs.expected_delivery_date <> jobs.expected_delivery_date_old AND jobs.status_type NOT IN (8,15))
         AND assigned_jobs_staff_view.staff_id = ${row?.id}  AND (
             assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = assigned_jobs_staff_view.service_id_assign

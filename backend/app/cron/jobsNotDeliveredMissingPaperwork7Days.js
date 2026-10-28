@@ -241,17 +241,14 @@ parentPort.on("message", async (rows) => {
 
         let finalReport = adminReport;
 
-        /* 👉 NON ADMIN USER */
-        if (![1, 2, 8].includes(user.role_id)) {
+        /* 👉 NON ADMIN USER (unless they created a matching job, in which case they get the full report) */
+        if (![1, 2, 8].includes(user.role_id) && !user.is_job_creator) {
           const res = await otherUserDataGet(user);
           if (!res.status) return;
           finalReport = res.report;
         }
 
-        // TODO: REVERT THIS AFTER TESTING
-        // Override email for testing purposes
-        // let toEmail = user.staff_email;
-        let toEmail = "shaktijatpnp09@gmail.com"; // user.staff_email;
+        let toEmail = user.staff_email;
         let subjectEmail = "Alert: Jobs Not Delivered Within 7 Days of Receiving the Missing Paperwork";
         let htmlEmail = `
         <h3>Alert: Jobs Not Delivered Within 7 Days of Receiving the Missing Paperwork</h3>

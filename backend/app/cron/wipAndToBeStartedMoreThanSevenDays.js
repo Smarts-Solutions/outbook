@@ -172,8 +172,8 @@ parentPort.on("message", async (rows) => {
         
         let finalJobData = jobDataList;
 
-        /* 👉 NON ADMIN USER */
-        if (![1, 2, 8].includes(user.role_id)) {
+        /* 👉 NON ADMIN USER (unless they created a matching job, in which case they get the full report) */
+        if (![1, 2, 8].includes(user.role_id) && !user.is_job_creator) {
           const res = await otherUserDataGet(user);
           if (!res.status) return;
           finalJobData = res.jobDataList;

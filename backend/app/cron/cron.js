@@ -63,14 +63,26 @@ module.exports = (app) => {
               CONCAT(first_name,' ',last_name) AS staff_fullname,
               staffs.email AS staff_email,
               roles.role AS staff_role,
-              roles.id AS role_id
+              roles.id AS role_id,
+              EXISTS (
+                SELECT 1 FROM jobs jc
+                WHERE jc.staff_created_id = staffs.id
+                  AND jc.status_type = 1
+                  AND DATE(jc.date_received_on) <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+              ) AS is_job_creator
             FROM staffs
             JOIN roles ON roles.id = staffs.role_id
             LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
             LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
             WHERE
-            (jobs.status_type = 1 AND jobs.created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)) 
+            (jobs.status_type = 1 AND jobs.created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY))
             OR roles.id IN (1, 2, 8)
+            OR EXISTS (
+              SELECT 1 FROM jobs jc
+              WHERE jc.staff_created_id = staffs.id
+                AND jc.status_type = 1
+                AND DATE(jc.date_received_on) <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+            )
             ORDER BY staffs.id DESC;
       `;
 
@@ -94,22 +106,34 @@ module.exports = (app) => {
       if (process.env.NODE_APP_INSTANCE === "0") {
        
       const expectedDeliveryDateChanged_query = `
-        SELECT DISTINCT 
+        SELECT DISTINCT
         staffs.id AS id,
         CONCAT(first_name,' ',last_name) AS staff_fullname,
         staffs.email AS staff_email,
         roles.role AS staff_role,
-        roles.id AS role_id
-        FROM 
+        roles.id AS role_id,
+        EXISTS (
+          SELECT 1 FROM jobs jc
+          WHERE jc.staff_created_id = staffs.id
+            AND jc.expected_delivery_date <> jc.expected_delivery_date_old
+            AND jc.status_type NOT IN (8,15)
+        ) AS is_job_creator
+        FROM
         staffs
         JOIN roles ON roles.id = staffs.role_id
         LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
         LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
         WHERE
-        (jobs.expected_delivery_date <> jobs.expected_delivery_date_old) 
+        (jobs.expected_delivery_date <> jobs.expected_delivery_date_old AND jobs.status_type NOT IN (8,15))
         OR roles.id IN (1, 2, 8)
+        OR EXISTS (
+          SELECT 1 FROM jobs jc
+          WHERE jc.staff_created_id = staffs.id
+            AND jc.expected_delivery_date <> jc.expected_delivery_date_old
+            AND jc.status_type NOT IN (8,15)
+        )
         GROUP BY staffs.id
-        ORDER BY 
+        ORDER BY
           staffs.id DESC;
         `;
 
@@ -138,18 +162,34 @@ module.exports = (app) => {
         CONCAT(first_name,' ',last_name) AS staff_fullname,
         staffs.email AS staff_email,
         roles.role AS staff_role,
-        roles.id AS role_id
-        FROM 
+        roles.id AS role_id,
+        EXISTS (
+          SELECT 1 FROM jobs jc
+          LEFT JOIN missing_logs ml ON jc.id = ml.job_id
+          WHERE jc.staff_created_id = staffs.id
+            AND DATE(jc.date_received_on) < CURDATE() - INTERVAL 2 DAY
+            AND jc.status_type = 2
+            AND ml.job_id IS NULL
+        ) AS is_job_creator
+        FROM
         staffs
         JOIN roles ON roles.id = staffs.role_id
         LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
         LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
         LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
-        WHERE 
-        ((jobs.created_at <= NOW() - INTERVAL 2 DAY) AND jobs.status_type NOT IN (2,6,7,17,18,19,20)
+        WHERE
+        ((jobs.created_at <= NOW() - INTERVAL 2 DAY) AND jobs.status_type NOT IN (2,6,7,8,15,17,18,19,20)
         AND missing_logs.job_id IS NULL)  OR roles.id IN (1, 2, 8)
+        OR EXISTS (
+          SELECT 1 FROM jobs jc
+          LEFT JOIN missing_logs ml ON jc.id = ml.job_id
+          WHERE jc.staff_created_id = staffs.id
+            AND DATE(jc.date_received_on) < CURDATE() - INTERVAL 2 DAY
+            AND jc.status_type = 2
+            AND ml.job_id IS NULL
+        )
         GROUP BY staffs.id
-        ORDER BY 
+        ORDER BY
           staffs.id DESC;
         `;
 
@@ -179,8 +219,14 @@ module.exports = (app) => {
         CONCAT(first_name,' ',last_name) AS staff_fullname,
         staffs.email AS staff_email,
         roles.role AS staff_role,
-        roles.id AS role_id
-        FROM 
+        roles.id AS role_id,
+        EXISTS (
+          SELECT 1 FROM jobs jc
+          WHERE jc.staff_created_id = staffs.id
+            AND jc.date_received_on <= NOW() - INTERVAL 1 MONTH
+            AND jc.status_type NOT IN (6,7,8,15,17,18,19,20)
+        ) AS is_job_creator
+        FROM
         staffs
         JOIN roles ON roles.id = staffs.role_id
         LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
@@ -190,11 +236,17 @@ module.exports = (app) => {
         (
         jobs.created_at >= NOW() - INTERVAL 30 DAY
         AND jobs.created_at <= NOW()
-        AND jobs.status_type NOT IN (6,7,17,18,19,20)
-        ) 
+        AND jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
+        )
         OR roles.id IN (1, 2, 8)
+        OR EXISTS (
+          SELECT 1 FROM jobs jc
+          WHERE jc.staff_created_id = staffs.id
+            AND jc.date_received_on <= NOW() - INTERVAL 1 MONTH
+            AND jc.status_type NOT IN (6,7,8,15,17,18,19,20)
+        )
         GROUP BY staffs.id
-        ORDER BY 
+        ORDER BY
           staffs.id DESC;
         `;
 
@@ -224,8 +276,15 @@ module.exports = (app) => {
         CONCAT(first_name,' ',last_name) AS staff_fullname,
         staffs.email AS staff_email,
         roles.role AS staff_role,
-        roles.id AS role_id
-        FROM 
+        roles.id AS role_id,
+        EXISTS (
+          SELECT 1 FROM jobs jc
+          WHERE jc.staff_created_id = staffs.id
+            AND DATE(jc.date_received_on) <= NOW() - INTERVAL 14 DAY
+            AND DATE(jc.date_received_on) <= NOW()
+            AND jc.status_type NOT IN (6,7,8,15,17,18,19,20)
+        ) AS is_job_creator
+        FROM
         staffs
         JOIN roles ON roles.id = staffs.role_id
         LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
@@ -235,11 +294,18 @@ module.exports = (app) => {
         (
         jobs.date_received_on >= NOW() - INTERVAL 14 DAY
         AND jobs.date_received_on <= NOW()
-        AND jobs.status_type NOT IN (6,7,17,18,19,20)
-        ) 
+        AND jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
+        )
         OR roles.id IN (1, 2, 8)
+        OR EXISTS (
+          SELECT 1 FROM jobs jc
+          WHERE jc.staff_created_id = staffs.id
+            AND DATE(jc.date_received_on) <= NOW() - INTERVAL 14 DAY
+            AND DATE(jc.date_received_on) <= NOW()
+            AND jc.status_type NOT IN (6,7,8,15,17,18,19,20)
+        )
         GROUP BY staffs.id
-        ORDER BY 
+        ORDER BY
           staffs.id DESC;
         `;
 
@@ -268,8 +334,14 @@ module.exports = (app) => {
         CONCAT(first_name,' ',last_name) AS staff_fullname,
         staffs.email AS staff_email,
         roles.role AS staff_role,
-        roles.id AS role_id
-        FROM 
+        roles.id AS role_id,
+        EXISTS (
+          SELECT 1 FROM jobs jc
+          WHERE jc.staff_created_id = staffs.id
+            AND jc.status_type = 2
+            AND jc.status_updation_date < CURDATE() - INTERVAL 7 DAY
+        ) AS is_job_creator
+        FROM
         staffs
         JOIN roles ON roles.id = staffs.role_id
         LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
@@ -277,18 +349,24 @@ module.exports = (app) => {
         LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
         WHERE
         (
-         jobs.status_type NOT IN (6,7,17,18,19,20)
+         jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
          AND EXISTS (
           SELECT 1
-          FROM missing_logs 
+          FROM missing_logs
           WHERE missing_logs.job_id = jobs.id
             AND missing_logs.status = '1'
             AND missing_logs.missing_log_reviewed_date <= NOW() - INTERVAL 7 DAY
         )
-        ) 
+        )
         OR roles.id IN (1, 2, 8)
+        OR EXISTS (
+          SELECT 1 FROM jobs jc
+          WHERE jc.staff_created_id = staffs.id
+            AND jc.status_type = 2
+            AND jc.status_updation_date < CURDATE() - INTERVAL 7 DAY
+        )
         GROUP BY staffs.id
-        ORDER BY 
+        ORDER BY
           staffs.id DESC;
         `;
 

@@ -119,7 +119,7 @@ parentPort.on("message", async (rows) => {
         WHERE 
         customers.status = '1' AND DATE(jobs.date_received_on) <= NOW() - INTERVAL 14 DAY
         AND DATE(jobs.date_received_on) <= NOW()
-        AND jobs.status_type NOT IN (6,7,17,18,19,20)
+        AND jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
         GROUP BY jobs.id
         ORDER BY 
           jobs.id DESC;
@@ -177,8 +177,8 @@ parentPort.on("message", async (rows) => {
 
         let finalJobData = jobDataList;
 
-        /* 👉 NON ADMIN USER */
-        if (![1, 2, 8].includes(user.role_id)) {
+        /* 👉 NON ADMIN USER (unless they created a matching job, in which case they get the full report) */
+        if (![1, 2, 8].includes(user.role_id) && !user.is_job_creator) {
           const res = await otherUserDataGet(user);
           if (!res.status) return;
           finalJobData = res.jobDataList;
@@ -341,7 +341,7 @@ async function otherUserDataGet(row) {
         AND (
         DATE(jobs.date_received_on) <= NOW() - INTERVAL 14 DAY
         AND DATE(jobs.date_received_on) <= NOW()
-        AND jobs.status_type NOT IN (6,7,17,18,19,20)
+        AND jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
         )
         AND assigned_jobs_staff_view.staff_id = ${row?.id}  
         AND (
