@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import BillingHeader from "./BillingHeader";
-import Datatable from "../../../Components/ExtraComponents/Datatable";
+import BillingDatatable from "./BillingDatatable";
 import { initialSubmissions } from "./billingMockData";
 import { Check } from "lucide-react";
 
@@ -32,6 +32,7 @@ const BillingApprovals = () => {
     {
       name: "Submitted By",
       selector: (row) => row.submittedBy,
+      sortable: true,
       cell: (row) => (
         <div>
           <div className="fw-bold">{row.submittedBy}</div>
@@ -42,17 +43,26 @@ const BillingApprovals = () => {
     {
       name: "Client & Practice",
       selector: (row) => row.client,
+      sortable: true,
       cell: (row) => (
         <div>
-          <a style={{ color: "#26bdf0", fontWeight: 500 }}>{row.client}</a>
+          <span className="fw-semibold text-dark">{row.client}</span>
           <div style={{ fontSize: "11px", color: "#6c757d" }}>{row.practice}</div>
         </div>
       ),
     },
-    { name: "Model", selector: (row) => row.model },
+    {
+      name: "Model",
+      selector: (row) => row.model,
+      sortable: true,
+      cell: (row) => (
+        <span className="badge bg-light text-dark border">{row.model}</span>
+      ),
+    },
     {
       name: "Assignment",
       selector: (row) => row.assignmentName,
+      sortable: true,
       cell: (row) => (
         <div>
           <div>{row.assignmentName}</div>
@@ -60,7 +70,7 @@ const BillingApprovals = () => {
         </div>
       ),
     },
-    { name: "Period", selector: (row) => row.periodLabel },
+    { name: "Period", selector: (row) => row.periodLabel, sortable: true },
     {
       name: "Rate / Qty",
       cell: (row) => (
@@ -73,7 +83,13 @@ const BillingApprovals = () => {
     {
       name: "Net Amount",
       selector: (row) => row.net,
-      cell: (row) => <span className="fw-bold">£{row.net.toFixed(2)}</span>,
+      sortable: true,
+      cell: (row) => (
+        <span className="fw-bold">
+          {row.currency === "AUD" ? "AUD " : "£"}
+          {row.net.toFixed(2)}
+        </span>
+      ),
     },
     { name: "Revenue Split", selector: (row) => row.revenueSplit },
     {
@@ -91,14 +107,14 @@ const BillingApprovals = () => {
             <div className="d-flex gap-1 justify-content-end">
               <button
                 type="button"
-                className="btn btn-danger btn-sm py-0 px-2"
+                className="btn btn-danger btn-sm py-0 px-2 fs-12"
                 onClick={() => handleReturnConfirm(row.id)}
               >
                 Return
               </button>
               <button
                 type="button"
-                className="btn btn-secondary btn-sm py-0 px-2"
+                className="btn btn-secondary btn-sm py-0 px-2 fs-12"
                 onClick={() => setReturningId(null)}
               >
                 Cancel
@@ -109,7 +125,7 @@ const BillingApprovals = () => {
           <div className="d-flex gap-1">
             <button
               type="button"
-              className="btn btn-outline-danger btn-sm"
+              className="btn btn-outline-danger btn-sm py-1 px-2 fs-12"
               onClick={() => {
                 setReturningId(row.id);
                 setReturnNote("");
@@ -119,7 +135,7 @@ const BillingApprovals = () => {
             </button>
             <button
               type="button"
-              className="btn btn-info text-white btn-sm"
+              className="btn btn-info text-white btn-sm py-1 px-2 fs-12"
               onClick={() =>
                 handleApprove(
                   row.id,
@@ -136,45 +152,46 @@ const BillingApprovals = () => {
     },
   ];
 
+  const pendingApprovals = submissions.filter(
+    (s) =>
+      s.status === "Pending Manager Approval" ||
+      s.status === "Pending Credit Control Approval"
+  );
+
   return (
     <div>
       <div className="container-fluid">
         <BillingHeader activeTab="approvals" />
 
         <div className="report-data mt-4">
-          <div className="card">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <h5 className="mt-0 mb-0" style={{ fontWeight: 600 }}>
-                  Pending Approvals Queue
-                </h5>
-                <button
-                  type="button"
-                  className="btn btn-outline-info fw-bold btn-sm border-2"
-                  onClick={() => {
-                    setSubmissions((prev) =>
-                      prev.map((s) =>
-                        s.status === "Pending Manager Approval"
-                          ? { ...s, status: "Pending Credit Control Approval" }
-                          : s
-                      )
-                    );
-                  }}
-                >
-                  <Check size={16} /> Approve All (Manager)
-                </button>
-              </div>
-              <div className="datatable-wrapper">
-                <Datatable
-                  columns={approvalsColumns}
-                  data={submissions.filter(
-                    (s) =>
-                      s.status === "Pending Manager Approval" ||
-                      s.status === "Pending Credit Control Approval"
-                  )}
-                  filter={false}
-                />
-              </div>
+          <div className="card border-0 shadow-sm">
+            <div className="card-body p-3">
+              <BillingDatatable
+                title="Pending approvals queue"
+                totalCount={pendingApprovals.length}
+                columns={approvalsColumns}
+                data={pendingApprovals}
+                filter={true}
+                exportFileName="Pending_Billing_Approvals"
+                noDataText="No pending submissions awaiting approval."
+                actionButton={
+                  <button
+                    type="button"
+                    className="btn btn-outline-info fw-bold btn-sm border-2 d-flex align-items-center gap-1"
+                    onClick={() => {
+                      setSubmissions((prev) =>
+                        prev.map((s) =>
+                          s.status === "Pending Manager Approval"
+                            ? { ...s, status: "Pending Credit Control Approval" }
+                            : s
+                        )
+                      );
+                    }}
+                  >
+                    <Check size={16} /> Approve All (Manager)
+                  </button>
+                }
+              />
             </div>
           </div>
         </div>

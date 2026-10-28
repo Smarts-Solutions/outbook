@@ -1,0 +1,178 @@
+.billing-table-wrapper {
+  background: #ffffff;
+  border-radius: 8px;
+}
+
+.billing-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 8px 4px 12px 4px;
+}
+
+.billing-table-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.billing-table-count {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.billing-btn-group {
+  display: inline-flex;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.billing-btn-group .billing-export-btn {
+  border-radius: 0;
+  margin-left: -1px;
+}
+
+.billing-btn-group .billing-export-btn:first-child {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  margin-left: 0;
+}
+
+.billing-btn-group .billing-export-btn:last-child {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.billing-export-btn {
+  background-color: #ffffff;
+  color: #334155;
+  border: 1px solid #d1d5db;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.5;
+}
+
+.billing-export-btn:hover:not(:disabled) {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+  color: #111827;
+  z-index: 1;
+}
+
+.billing-export-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Custom styles for Billing DataTable */
+.billing-datatable .rdt_TableHeadRow {
+  background-color: #f8fafc !important;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 2px solid #e2e8f0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-height: 44px;
+}
+
+.billing-datatable .rdt_TableRow {
+  font-size: 13px;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.15s ease;
+  min-height: 48px;
+}
+
+.billing-datatable .rdt_TableRow:hover {
+  background-color: #f8fafc !important;
+}
+
+/* S.No column badge */
+.sno-badge {
+  font-weight: 600;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.billing-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+.billing-badge-adhoc {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.billing-badge-fte {
+  background-color: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.billing-badge-sharing {
+  background-color: #faf5ff;
+  color: #7e22ce;
+  border: 1px solid #e9d5ff;
+}
+
+.billing-badge-fixed {
+  background-color: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+/* Exact Dashboard Report Card Styling */
+.card.report-card.dashboard-card {
+  height: 120px !important;
+  border: none !important;
+  border-radius: 6px !important;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
+    rgba(60, 64, 67, 0.15) 0px 2px 6px 2px !important;
+  background-color: #ffffff !important;
+  transition: 0.3s linear;
+}
+
+.card.report-card.dashboard-card .card-body {
+  padding: 1.25rem;
+}
+
+.card.report-card.dashboard-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+  line-height: 1.2;
+}
+
+.card.report-card.dashboard-card p {
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  font-weight: 600 !important;
+  color: #1a202c !important;
+}
+
+.card.report-card.dashboard-card img.dashboad-img {
+  width: 55px !important;
+  height: auto;
+  object-fit: contain;
+}
