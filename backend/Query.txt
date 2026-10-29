@@ -76,3 +76,97 @@ LEFT JOIN adhoc_rows a  ON a.cid = k.cid AND a.n = k.n
 LEFT JOIN cp_rows x     ON x.cid = k.cid AND x.n = k.n
 
 ORDER BY k.cid, k.n;
+
+
+_____________________________________________________________________________________
+
+CREATE OR REPLACE VIEW v_customer_engagement_export AS
+WITH base AS (
+    SELECT c.id AS cid, c.trading_name, c.customer_code,
+           em.id AS emid, em.fte_dedicated_staffing, em.percentage_model,
+           em.adhoc_payg_hourly, em.customised_pricing
+    FROM customers c
+    JOIN customer_engagement_model em ON em.customer_id = c.id
+),
+
+fte_rows AS (
+    SELECT b.cid, 1 AS n, 'number_of_accountants' AS lbl, CAST(f.number_of_accountants AS CHAR) AS val
+      FROM base b JOIN customer_engagement_fte f ON f.customer_engagement_model_id = b.emid WHERE b.fte_dedicated_staffing = '1'
+    UNION ALL SELECT b.cid, 2,  'fee_per_accountant',        CAST(f.fee_per_accountant AS CHAR)        FROM base b JOIN customer_engagement_fte f ON f.customer_engagement_model_id = b.emid WHERE b.fte_dedicated_staffing = '1'
+    UNION ALL SELECT b.cid, 3,  'number_of_bookkeepers',     CAST(f.number_of_bookkeepers AS CHAR)     FROM base b JOIN customer_engagement_fte f ON f.customer_engagement_model_id = b.emid WHERE b.fte_dedicated_staffing = '1'
+    UNION ALL SELECT b.cid, 4,  'fee_per_bookkeeper',        CAST(f.fee_per_bookkeeper AS CHAR)        FROM base b JOIN customer_engagement_fte f ON f.customer_engagement_model_id = b.emid WHERE b.fte_dedicated_staffing = '1'
+    UNION ALL SELECT b.cid, 5,  'number_of_payroll_experts', CAST(f.number_of_payroll_experts AS CHAR) FROM base b JOIN customer_engagement_fte f ON f.customer_engagement_model_id = b.emid WHERE b.fte_dedicated_staffing = '1'
+    UNION ALL SELECT b.cid, 6,  'fee_per_payroll_expert',    CAST(f.fee_per_payroll_expert AS CHAR)    FROM base b JOIN customer_engagement_fte f ON f.customer_engagement_model_id = b.emid WHERE b.fte_dedicated_staffing = '1'
+    UNION ALL SELECT b.cid, 7,  'number_of_tax_experts',     CAST(f.number_of_tax_experts AS CHAR)     FROM base b JOIN customer_engagement_fte f ON f.customer_engagement_model_id = b.emid WHERE b.fte_dedicated_staffing = '1'
+    UNION ALL SELECT b.cid, 8,  'fee_per_tax_expert',        CAST(f.fee_per_tax_expert AS CHAR)        FROM base b JOIN customer_engagement_fte f ON f.customer_engagement_model_id = b.emid WHERE b.fte_dedicated_staffing = '1'
+    UNION ALL SELECT b.cid, 9,  'number_of_admin_staff',     CAST(f.number_of_admin_staff AS CHAR)     FROM base b JOIN customer_engagement_fte f ON f.customer_engagement_model_id = b.emid WHERE b.fte_dedicated_staffing = '1'
+    UNION ALL SELECT b.cid, 10, 'fee_per_admin_staff',       CAST(f.fee_per_admin_staff AS CHAR)       FROM base b JOIN customer_engagement_fte f ON f.customer_engagement_model_id = b.emid WHERE b.fte_dedicated_staffing = '1'
+),
+
+pct_rows AS (
+    SELECT b.cid, 1 AS n, 'total_outsourcing' AS lbl, CAST(p.total_outsourcing AS CHAR) AS val
+      FROM base b JOIN customer_engagement_percentage p ON p.customer_engagement_model_id = b.emid WHERE b.percentage_model = '1'
+    UNION ALL SELECT b.cid, 2, 'accountants',     CAST(p.accountants AS CHAR)     FROM base b JOIN customer_engagement_percentage p ON p.customer_engagement_model_id = b.emid WHERE b.percentage_model = '1'
+    UNION ALL SELECT b.cid, 3, 'bookkeepers',     CAST(p.bookkeepers AS CHAR)     FROM base b JOIN customer_engagement_percentage p ON p.customer_engagement_model_id = b.emid WHERE b.percentage_model = '1'
+    UNION ALL SELECT b.cid, 4, 'payroll_experts', CAST(p.payroll_experts AS CHAR) FROM base b JOIN customer_engagement_percentage p ON p.customer_engagement_model_id = b.emid WHERE b.percentage_model = '1'
+    UNION ALL SELECT b.cid, 5, 'tax_experts',     CAST(p.tax_experts AS CHAR)     FROM base b JOIN customer_engagement_percentage p ON p.customer_engagement_model_id = b.emid WHERE b.percentage_model = '1'
+    UNION ALL SELECT b.cid, 6, 'admin_staff',     CAST(p.admin_staff AS CHAR)     FROM base b JOIN customer_engagement_percentage p ON p.customer_engagement_model_id = b.emid WHERE b.percentage_model = '1'
+),
+
+adhoc_rows AS (
+    SELECT b.cid, 1 AS n, 'adhoc_accountants' AS lbl, CAST(a.adhoc_accountants AS CHAR) AS val
+      FROM base b JOIN customer_engagement_adhoc_hourly a ON a.customer_engagement_model_id = b.emid WHERE b.adhoc_payg_hourly = '1'
+    UNION ALL SELECT b.cid, 2, 'adhoc_bookkeepers',     CAST(a.adhoc_bookkeepers AS CHAR)     FROM base b JOIN customer_engagement_adhoc_hourly a ON a.customer_engagement_model_id = b.emid WHERE b.adhoc_payg_hourly = '1'
+    UNION ALL SELECT b.cid, 3, 'adhoc_payroll_experts', CAST(a.adhoc_payroll_experts AS CHAR) FROM base b JOIN customer_engagement_adhoc_hourly a ON a.customer_engagement_model_id = b.emid WHERE b.adhoc_payg_hourly = '1'
+    UNION ALL SELECT b.cid, 4, 'adhoc_tax_experts',     CAST(a.adhoc_tax_experts AS CHAR)     FROM base b JOIN customer_engagement_adhoc_hourly a ON a.customer_engagement_model_id = b.emid WHERE b.adhoc_payg_hourly = '1'
+    UNION ALL SELECT b.cid, 5, 'adhoc_admin_staff',     CAST(a.adhoc_admin_staff AS CHAR)     FROM base b JOIN customer_engagement_adhoc_hourly a ON a.customer_engagement_model_id = b.emid WHERE b.adhoc_payg_hourly = '1'
+),
+
+cp_rows AS (
+    SELECT b.cid,
+           ROW_NUMBER() OVER (PARTITION BY b.cid ORDER BY cp.id) AS n,
+           CONCAT_WS(', ',
+               CONCAT('service_id:', cp.service_id),
+               IF(cp.job_type_id IS NOT NULL, CONCAT('job_type_id:', cp.job_type_id), NULL),
+               CONCAT('minimum_number_of_jobs:', cp.minimum_number_of_jobs),
+               'cost_per_job'
+           ) AS lbl,
+           CAST(cp.cost_per_job AS CHAR) AS val
+    FROM base b
+    JOIN customer_engagement_customised_pricing cp ON cp.customer_engagement_model_id = b.emid
+    WHERE b.customised_pricing = '1'
+),
+
+rownums AS (
+    SELECT cid, n FROM fte_rows
+    UNION SELECT cid, n FROM pct_rows
+    UNION SELECT cid, n FROM adhoc_rows
+    UNION SELECT cid, n FROM cp_rows
+)
+
+SELECT
+    k.cid AS customer_id,
+    k.n   AS row_no,
+    IF(k.n = 1, c.trading_name, '') AS customername,
+    IF(k.n = 1, CONCAT('cust_', UPPER(LEFT(c.trading_name, 3)), '_', c.customer_code), '') AS customercode,
+    f.lbl AS customer_engagement_fte,                f.val AS customer_engagement_fte_value,
+    p.lbl AS customer_engagement_percentage,         p.val AS customer_engagement_percentage_value,
+    a.lbl AS customer_engagement_adhoc_hourly,       a.val AS customer_engagement_adhoc_hourly_value,
+    x.lbl AS customer_engagement_customised_pricing, x.val AS customer_engagement_customised_pricing_value
+FROM rownums k
+JOIN customers c        ON c.id = k.cid
+LEFT JOIN fte_rows f    ON f.cid = k.cid AND f.n = k.n
+LEFT JOIN pct_rows p    ON p.cid = k.cid AND p.n = k.n
+LEFT JOIN adhoc_rows a  ON a.cid = k.cid AND a.n = k.n
+LEFT JOIN cp_rows x     ON x.cid = k.cid AND x.n = k.n;
+
+
+_____________________________________________________________________________________
+
+SELECT customername, customercode,
+       customer_engagement_fte, customer_engagement_fte_value,
+       customer_engagement_percentage, customer_engagement_percentage_value,
+       customer_engagement_adhoc_hourly, customer_engagement_adhoc_hourly_value,
+       customer_engagement_customised_pricing, customer_engagement_customised_pricing_value
+FROM v_customer_engagement_export
+ORDER BY customer_id, row_no;
