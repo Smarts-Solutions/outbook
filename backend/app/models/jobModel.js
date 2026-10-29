@@ -5829,8 +5829,10 @@ const updateJobStatus = async (job) => {
     const [result] = await pool.execute(query, [status_type, job_id]);
 
     if (result.changedRows > 0) {
+      const fromStatus = currentJob?.status_type ?? currentStatusId;
       const [[StatusName]] = await pool.execute(
-        `SELECT  MAX(CASE WHEN id = ${ExistJobData[0].status_type} THEN name END) AS from_status, MAX(CASE WHEN id = ${status_type} THEN name END) AS to_status FROM master_status WHERE id IN (${ExistJobData[0].status_type}, ${status_type})`
+        `SELECT MAX(CASE WHEN id = ? THEN name END) AS from_status, MAX(CASE WHEN id = ? THEN name END) AS to_status FROM master_status WHERE id IN (?, ?)`,
+        [fromStatus, status_type, fromStatus, status_type]
       );
 
       const currentDate = new Date();

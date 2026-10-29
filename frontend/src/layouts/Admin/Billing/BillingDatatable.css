@@ -305,37 +305,3 @@
   border-color: #059669;
 }
 
-.card.report-card.dashboard-card {
-  height: 120px !important;
-  border: none !important;
-  border-radius: 6px !important;
-  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
-    rgba(60, 64, 67, 0.15) 0px 2px 6px 2px !important;
-  background-color: #ffffff !important;
-  transition: 0.3s linear;
-}
-
-.card.report-card.dashboard-card .card-body {
-  padding: 1.25rem;
-}
-
-.card.report-card.dashboard-card h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-top: 1.5rem !important;
-  margin-bottom: 1.5rem !important;
-  line-height: 1.2;
-}
-
-.card.report-card.dashboard-card p {
-  font-size: 12px;
-  letter-spacing: 0.5px;
-  font-weight: 600 !important;
-  color: #1a202c !important;
-}
-
-.card.report-card.dashboard-card img.dashboad-img {
-  width: 55px !important;
-  height: auto;
-  object-fit: contain;
-}
