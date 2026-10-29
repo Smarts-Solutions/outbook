@@ -58,6 +58,8 @@ const Setting = () => {
   const dispatch = useDispatch();
   const tabStatus = useRef("1");
   const role = JSON.parse(localStorage.getItem("role"));
+  const userRoleStr = (role || "").toString().toUpperCase();
+  const isSuperAdminOrAdmin = userRoleStr === "SUPERADMIN" || userRoleStr === "ADMIN";
   const staffDetails = JSON.parse(localStorage.getItem("staffDetails") || "{}");
   const [showSettingInsertTab, setShowSettingInsertTab] = useState(true);
   const [showSettingUpdateTab, setShowSettingUpdateTab] = useState(true);
@@ -3685,6 +3687,7 @@ const Setting = () => {
                         className="form-control" 
                         placeholder="e.g. 919876543210 (with country code)"
                         value={systemSettings.manager_otp_number}
+                        disabled={!isSuperAdminOrAdmin}
                         onChange={(e) => {
                           const value = e.target.value.replace(/[^0-9]/g, '');
                           setSystemSettings({...systemSettings, manager_otp_number: value});
@@ -3701,6 +3704,7 @@ const Setting = () => {
                         className="form-control" 
                         placeholder="e.g. 10459385..."
                         value={systemSettings.whatsapp_phone_number_id}
+                        disabled={!isSuperAdminOrAdmin}
                         onChange={(e) => setSystemSettings({...systemSettings, whatsapp_phone_number_id: e.target.value})}
                       />
                     </div>
@@ -3711,6 +3715,7 @@ const Setting = () => {
                         className="form-control" 
                         placeholder="e.g. job_status_otp"
                         value={systemSettings.whatsapp_template_name || ""}
+                        disabled={!isSuperAdminOrAdmin}
                         onChange={(e) => setSystemSettings({...systemSettings, whatsapp_template_name: e.target.value})}
                       />
                     </div>
@@ -3721,19 +3726,22 @@ const Setting = () => {
                         className="form-control" 
                         placeholder="EAADXXXX..."
                         value={systemSettings.whatsapp_access_token}
+                        disabled={!isSuperAdminOrAdmin}
                         onChange={(e) => setSystemSettings({...systemSettings, whatsapp_access_token: e.target.value})}
                       />
                     </div>
                 
-                    <div className="col-12 mt-4 text-end d-flex justify-content-end gap-3">
-                      <button 
-                        className="btn btn-outline-success rounded-pill fw-bold px-4"
-                        onClick={() => updateSystemSettingsAction(systemSettings)}
-                        disabled={loading}
-                      >
-                        <Save size={16} className="me-1" /> {loading ? 'Saving...' : 'Save'}
-                      </button>
-                    </div>
+                    {isSuperAdminOrAdmin && (
+                      <div className="col-12 mt-4 text-end d-flex justify-content-end gap-3">
+                        <button 
+                          className="btn btn-outline-success rounded-pill fw-bold px-4"
+                          onClick={() => updateSystemSettingsAction(systemSettings)}
+                          disabled={loading}
+                        >
+                          <Save size={16} className="me-1" /> {loading ? 'Saving...' : 'Save'}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
