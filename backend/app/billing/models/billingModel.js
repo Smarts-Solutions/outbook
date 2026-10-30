@@ -464,117 +464,6 @@ const submitBilling = async (payload, submittedByStaffId) => {
         // Dedupe Key for duplicate prevention (Rule 5)
         const dedupeKey = `${client_id}_${service_id}_${period_label}`;
 
-        // Check if submission exists
-        const editSubmissionId = payload.edit_submission_id || payload.submission_id || null;
-
-        if (editSubmissionId) {
-            // Updating existing submission
-            const [existing] = await connection.execute(
-                `SELECT id, status FROM billing_submissions WHERE id = ?`,
-                [editSubmissionId]
-            );
-
-            if (existing.length === 0) {
-                await connection.rollback();
-                return { status: false, message: "Submission to edit was not found." };
-            }
-
-            const updateSubQuery = `
-                UPDATE billing_submissions SET
-                    customer_id = ?,
-                    client_id = ?,
-                    service_id = ?,
-                    job_id = ?,
-                    period_type = ?,
-                    period_date = ?,
-                    period_label = ?,
-                    period_end = ?,
-                    dedupe_key = ?,
-                    engagement_model = ?,
-                    calc_json = ?,
-                    gross_amount = ?,
-                    discount_pct = ?,
-                    discount_amt = ?,
-                    net_amount = ?,
-                    currency = ?,
-                    nomisma_description = ?,
-                    manager_id = ?,
-                    manager_edited = 1,
-                    updated_at = NOW()
-                WHERE id = ?
-            `;
-
-            const updateParams = [
-                customer_id,
-                client_id,
-                service_id,
-                job_id || null,
-                period_type,
-                period_date,
-                period_label,
-                period_end || null,
-                dedupeKey,
-                typeof engagement_model === 'object' ? JSON.stringify(engagement_model) : String(engagement_model),
-                typeof calc_json === 'object' ? JSON.stringify(calc_json) : String(calc_json),
-                gross_amount,
-                discount_pct,
-                discount_amt,
-                net_amount,
-                currency,
-                nomisma_description,
-                finalManagerId,
-                editSubmissionId
-            ];
-
-            await connection.execute(updateSubQuery, updateParams);
-
-            // Update Contributors
-            if (Array.isArray(contributors) && contributors.length > 0) {
-                await connection.execute(
-                    `DELETE FROM billing_submission_contributors WHERE submission_id = ?`,
-                    [editSubmissionId]
-                );
-
-                const contribQuery = `
-                    INSERT INTO billing_submission_contributors (
-                        submission_id,
-                        staff_id,
-                        staff_name,
-                        pct,
-                        amount
-                    ) VALUES (?, ?, ?, ?, ?)
-                `;
-
-                for (const c of contributors) {
-                    const staffId = c.staff_id || c.employeeId || submittedByStaffId;
-                    const staffName = c.name || c.staff_name || 'Contributor';
-                    const pct = parseFloat(c.pct) || 0;
-                    const amount = parseFloat(((net_amount * pct) / 100).toFixed(2));
-
-                    await connection.execute(contribQuery, [
-                        editSubmissionId,
-                        staffId,
-                        staffName,
-                        pct,
-                        amount
-                    ]);
-                }
-            }
-
-            await connection.commit();
-            return {
-                status: true,
-                message: "Billing submission updated successfully.",
-                data: {
-                    submission_id: editSubmissionId,
-                    net_amount,
-                    currency,
-                    period_label,
-                    status: existing[0].status
-                }
-            };
-        }
-
         // Check if live submission already exists (not Returned and not Superseded)
         const [existing] = await connection.execute(
             `SELECT id, status, period_label FROM billing_submissions 
@@ -709,7 +598,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
 };
 
 // 10. Get Submissions for Approvals (Role-Based Filter: Admin sees all, Manager sees assigned customers)
-const getSubmissionsForApprovals = async (staffUserId, status = null) => {
+const getSubmissionsForApprovals = async (staffUserId, status = 'Pending Manager Approval') => {
     try {
         const roleRows = await QueryRoleHelperFunction(staffUserId);
         const role = (roleRows && roleRows.length > 0) ? String(roleRows[0].role_name || '').toUpperCase() : '';
@@ -759,7 +648,7 @@ const getSubmissionsForApprovals = async (staffUserId, status = null) => {
 
         const params = [];
 
-        if (status && status !== 'all' && status !== 'ALL') {
+        if (status) {
             query += ` AND bs.status = ?`;
             params.push(status);
         }
