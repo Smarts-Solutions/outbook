@@ -788,7 +788,7 @@ const Sidebar = () => {
                     <span className="sidebar-icons">
                       <Receipt />
                     </span>
-                    <span>Billing</span>
+                    <span>Billing & Invoice</span>
                   </Link>
                 </li>
               </>

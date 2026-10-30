@@ -1,10 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BillingHeader from "./BillingHeader";
-import { initialMissingEngagements, initialSubmissions, initialInvoices } from "./billingMockData";
 
 const BillingDashboard = () => {
   const navigate = useNavigate();
+
+  // Dashboard values set to 0 initially (ready to connect with dynamic API)
+  const [metrics, setMetrics] = useState({
+    engagementsInScope: 0,
+    unbilledThisMonth: 0,
+    awaitingApproval: 0,
+    returnedEntries: 0,
+    readyToInvoice: 0,
+    outstandingInvoices: 0,
+  });
 
   return (
     <div>
@@ -28,7 +37,7 @@ const BillingDashboard = () => {
                       </p>
                     </div>
                     <div className="col-12 d-flex align-items-center justify-content-between">
-                      <h3 className="my-4">48</h3>
+                      <h3 className="my-4">{metrics.engagementsInScope}</h3>
                       <img
                         className="dashboad-img"
                         src="/assets/images/dashboards/users.png"
@@ -55,7 +64,7 @@ const BillingDashboard = () => {
                       </p>
                     </div>
                     <div className="col-12 d-flex align-items-center justify-content-between">
-                      <h3 className="my-4">{initialMissingEngagements.length}</h3>
+                      <h3 className="my-4">{metrics.unbilledThisMonth}</h3>
                       <img
                         className="dashboad-img"
                         src="/assets/images/dashboards/time-management.png"
@@ -82,15 +91,7 @@ const BillingDashboard = () => {
                       </p>
                     </div>
                     <div className="col-12 d-flex align-items-center justify-content-between">
-                      <h3 className="my-4">
-                        {
-                          initialSubmissions.filter(
-                            (s) =>
-                              s.status === "Pending Manager Approval" ||
-                              s.status === "Pending Credit Control Approval"
-                          ).length
-                        }
-                      </h3>
+                      <h3 className="my-4">{metrics.awaitingApproval}</h3>
                       <img
                         className="dashboad-img"
                         src="/assets/images/dashboards/pending.png"
@@ -117,9 +118,7 @@ const BillingDashboard = () => {
                       </p>
                     </div>
                     <div className="col-12 d-flex align-items-center justify-content-between">
-                      <h3 className="my-4">
-                        {initialSubmissions.filter((s) => s.status === "Returned").length}
-                      </h3>
+                      <h3 className="my-4">{metrics.returnedEntries}</h3>
                       <img
                         className="dashboad-img"
                         src="/assets/images/dashboards/suitcase.png"
@@ -146,9 +145,7 @@ const BillingDashboard = () => {
                       </p>
                     </div>
                     <div className="col-12 d-flex align-items-center justify-content-between">
-                      <h3 className="my-4">
-                        {initialSubmissions.filter((s) => s.status === "Approved").length}
-                      </h3>
+                      <h3 className="my-4">{metrics.readyToInvoice}</h3>
                       <img
                         className="dashboad-img"
                         src="/assets/images/dashboards/handshake.png"
@@ -175,9 +172,7 @@ const BillingDashboard = () => {
                       </p>
                     </div>
                     <div className="col-12 d-flex align-items-center justify-content-between">
-                      <h3 className="my-4">
-                        {initialInvoices.filter((i) => !i.paidDate).length}
-                      </h3>
+                      <h3 className="my-4">{metrics.outstandingInvoices}</h3>
                       <img
                         className="dashboad-img"
                         src="/assets/images/dashboards/teamwork.png"

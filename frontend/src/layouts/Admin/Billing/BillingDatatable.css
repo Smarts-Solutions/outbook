@@ -77,36 +77,59 @@
   cursor: not-allowed;
 }
 
-/* Custom styles for Billing DataTable */
+/* Custom styles for Billing DataTable matching Outbooks theme */
+.billing-datatable {
+  font-family: "Inter", sans-serif !important;
+}
+
 .billing-datatable .rdt_TableHeadRow {
-  background-color: #f8fafc !important;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 2px solid #e2e8f0;
-  font-size: 12px;
-  font-weight: 700;
-  color: #475569;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  background-color: transparent !important;
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+  border-radius: 5px;
+  margin-bottom: 5px;
+  box-shadow: 2px 2px 1px #333547;
   min-height: 44px;
 }
 
+.billing-datatable .rdt_TableCol {
+  color: #000;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: "Inter", sans-serif !important;
+  padding: 10px 14px;
+}
+
+.billing-datatable .rdt_TableCell {
+  font-size: 13.5px;
+  color: #4b4b4b;
+  font-family: "Inter", sans-serif !important;
+  padding: 10px 14px;
+  white-space: normal;
+}
+
 .billing-datatable .rdt_TableRow {
-  font-size: 13px;
-  color: #334155;
-  border-bottom: 1px solid #f1f5f9;
+  font-size: 13.5px;
+  color: #4b4b4b;
+  font-weight: 400;
+  border: none !important;
+  border-radius: 5px;
+  margin: 3px 0;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
   transition: background-color 0.15s ease;
-  min-height: 48px;
+  min-height: 52px;
 }
 
 .billing-datatable .rdt_TableRow:hover {
   background-color: #f8fafc !important;
+  z-index: 9;
 }
 
 /* S.No column badge */
 .sno-badge {
-  font-weight: 600;
-  color: #64748b;
-  font-size: 12px;
+  font-weight: 500;
+  color: #4b4b4b;
+  font-size: 13.5px;
 }
 
 .billing-badge {
