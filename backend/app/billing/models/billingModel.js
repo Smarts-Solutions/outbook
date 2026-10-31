@@ -402,22 +402,51 @@ const getJobTypesByService = async (serviceId = null) => {
     }
 };
 
-// 8. Get Services from existing jobs for a given client
+// 8. Get Services from existing jobs for a given client with latest year end date
 const getServicesByClient = async (clientId) => {
     try {
         if (!clientId) {
             return { status: true, data: [] };
         }
         const query = `
-            SELECT DISTINCT 
+            SELECT 
                 s.id AS service_id, 
-                s.name AS service_name
+                s.name AS service_name,
+                (
+                    SELECT COALESCE(
+                        DATE_FORMAT(j2.Year_Ending_id_1, '%Y-%m-%d'),
+                        DATE_FORMAT(j2.Audit_Year_Ending_id_27, '%Y-%m-%d'),
+                        CASE 
+                            WHEN j2.year_end IS NOT NULL AND j2.year_end != '' AND j2.year_end != '0000-00-00' THEN j2.year_end
+                            WHEN j2.Year_id_2 IS NOT NULL AND j2.Year_id_2 != '' THEN CONCAT(j2.Year_id_2, '-12-31')
+                            WHEN j2.Year_id_32 IS NOT NULL AND j2.Year_id_32 != '' THEN CONCAT(j2.Year_id_32, '-12-31')
+                            WHEN j2.Year_id_33 IS NOT NULL AND j2.Year_id_33 != '' THEN CONCAT(j2.Year_id_33, '-12-31')
+                            WHEN j2.Year_id_28 IS NOT NULL AND j2.Year_id_28 != '' THEN CONCAT(j2.Year_id_28, '-12-31')
+                            ELSE NULL
+                        END
+                    )
+                    FROM jobs j2
+                    WHERE j2.client_id = ? 
+                      AND j2.service_id = s.id
+                      AND (
+                          (j2.Year_Ending_id_1 IS NOT NULL AND j2.Year_Ending_id_1 != '0000-00-00')
+                          OR (j2.Audit_Year_Ending_id_27 IS NOT NULL AND j2.Audit_Year_Ending_id_27 != '0000-00-00')
+                          OR (j2.year_end IS NOT NULL AND j2.year_end != '' AND j2.year_end != '0000-00-00')
+                          OR (j2.Year_id_2 IS NOT NULL AND j2.Year_id_2 != '')
+                          OR (j2.Year_id_32 IS NOT NULL AND j2.Year_id_32 != '')
+                          OR (j2.Year_id_33 IS NOT NULL AND j2.Year_id_33 != '')
+                          OR (j2.Year_id_28 IS NOT NULL AND j2.Year_id_28 != '')
+                      )
+                    ORDER BY j2.id DESC
+                    LIMIT 1
+                ) AS latest_year_end
             FROM jobs j
             JOIN services s ON j.service_id = s.id
             WHERE j.client_id = ?
+            GROUP BY s.id, s.name
             ORDER BY s.name ASC
         `;
-        const [rows] = await pool.execute(query, [clientId]);
+        const [rows] = await pool.execute(query, [clientId, clientId]);
         return { status: true, data: rows };
     } catch (error) {
         console.error("Error fetching services by client:", error);

@@ -517,6 +517,7 @@ export const SubmitBilling = () => {
           const formatted = res.data.map((s) => ({
             value: s.service_id,
             label: s.service_name,
+            latest_year_end: s.latest_year_end || null,
           }));
           if (editData?.service_id && !formatted.some(s => s.value === editData.service_id)) {
             formatted.unshift({
@@ -527,9 +528,22 @@ export const SubmitBilling = () => {
           setServicesList(formatted);
           if (editData?.service_id) {
             const foundService = formatted.find(s => s.value === editData.service_id);
-            if (foundService) setSelectedService(foundService);
+            if (foundService) {
+              setSelectedService(foundService);
+              if (!editData.period_type && foundService.latest_year_end) {
+                setPeriodType("Year End");
+                setRawDateValue(foundService.latest_year_end);
+                setPeriodDate(formatPeriodDate("Year End", foundService.latest_year_end));
+              }
+            }
           } else if (formatted.length === 1) {
-            setSelectedService(formatted[0]);
+            const singleService = formatted[0];
+            setSelectedService(singleService);
+            if (singleService.latest_year_end) {
+              setPeriodType("Year End");
+              setRawDateValue(singleService.latest_year_end);
+              setPeriodDate(formatPeriodDate("Year End", singleService.latest_year_end));
+            }
           }
         } else {
           if (editData?.service_id) {
@@ -582,7 +596,7 @@ export const SubmitBilling = () => {
     if (type === "Quarter") {
       return val;
     }
-    if (type === "One-Off") {
+    if (type === "One-Off" || type === "Year End") {
       // val is "YYYY-MM-DD"
       const d = new Date(val);
       if (!isNaN(d.getTime())) {
@@ -1264,7 +1278,14 @@ export const SubmitBilling = () => {
                         isDisabled={!selectedClient || loadingServices}
                         options={servicesList}
                         value={selectedService}
-                        onChange={(selected) => setSelectedService(selected)}
+                        onChange={(selected) => {
+                          setSelectedService(selected);
+                          if (selected?.latest_year_end) {
+                            setPeriodType("Year End");
+                            setRawDateValue(selected.latest_year_end);
+                            setPeriodDate(formatPeriodDate("Year End", selected.latest_year_end));
+                          }
+                        }}
                         placeholder={
                           !selectedClient
                             ? "Select client first..."
@@ -1308,9 +1329,14 @@ export const SubmitBilling = () => {
                             const val = getTodayDateValue();
                             setRawDateValue(val);
                             setPeriodDate(formatPeriodDate("One-Off", val));
+                          } else if (newType === "Year End") {
+                            const val = selectedService?.latest_year_end || getTodayDateValue();
+                            setRawDateValue(val);
+                            setPeriodDate(formatPeriodDate("Year End", val));
                           }
                         }}
                       >
+                        <option value="Year End">Year End</option>
                         <option value="Month">Month</option>
                         <option value="Week">Week</option>
                         <option value="Quarter">Quarter</option>
@@ -1372,6 +1398,18 @@ export const SubmitBilling = () => {
                             return options;
                           })()}
                         </select>
+                      )}
+
+                      {periodType === "Year End" && (
+                        <input
+                          type="date"
+                          className="form-control shadow-sm rounded-pill"
+                          value={rawDateValue || getTodayDateValue()}
+                          onChange={(e) => {
+                            setRawDateValue(e.target.value);
+                            setPeriodDate(formatPeriodDate("Year End", e.target.value));
+                          }}
+                        />
                       )}
 
                       {periodType === "One-Off" && (
