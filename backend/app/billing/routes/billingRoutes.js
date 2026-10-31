@@ -40,6 +40,7 @@ router.get('/getSubmissionsForApprovals', verifyToken, billingController.getSubm
 
 router.post('/managerApprove', verifyToken, billingController.managerApproveSubmission);
 router.post('/managerReturn', verifyToken, billingController.managerReturnSubmission);
+router.post('/managerReject', verifyToken, billingController.managerRejectSubmission);
 router.post('/managerEdit', verifyToken, billingController.managerEditSubmission);
 
 module.exports = router;

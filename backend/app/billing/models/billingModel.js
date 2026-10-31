@@ -579,7 +579,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
         const [existing] = await connection.execute(
             `SELECT id, status, period_label FROM billing_submissions 
              WHERE dedupe_key = ? 
-             AND status NOT IN ('Returned', 'Superseded') 
+             AND status NOT IN ('Returned', 'Rejected', 'Superseded') 
              LIMIT 1`,
             [dedupeKey]
         );
@@ -900,6 +900,36 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote) 
     }
 };
 
+// 12.1 Manager Reject Action
+const managerRejectSubmission = async (submissionId, managerUserId, reason = '') => {
+    try {
+        const [result] = await pool.execute(
+            `UPDATE billing_submissions 
+             SET status = 'Rejected',
+                 return_note = ?,
+                 returned_by = ?,
+                 returned_at = NOW()
+             WHERE id = ? AND status = 'Pending Manager Approval'`,
+            [reason ? reason.trim() : 'Rejected by Manager', managerUserId, submissionId]
+        );
+
+        if (result.affectedRows === 0) {
+            return {
+                status: false,
+                message: "Submission not found or already processed."
+            };
+        }
+
+        return {
+            status: true,
+            message: "Submission rejected successfully."
+        };
+    } catch (error) {
+        console.error("Error rejecting submission:", error);
+        return { status: false, message: error.message };
+    }
+};
+
 // 13. Manager Edit Submission Action
 const managerEditSubmission = async (submissionId, managerUserId, editData) => {
     const connection = await pool.getConnection();
@@ -1034,5 +1064,6 @@ module.exports = {
     getSubmissionsForApprovals,
     managerApproveSubmission,
     managerReturnSubmission,
+    managerRejectSubmission,
     managerEditSubmission
 };

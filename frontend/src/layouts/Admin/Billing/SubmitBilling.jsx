@@ -3,17 +3,27 @@ import Select from 'react-select';
 import { getActiveCustomersBilling, getCustomerEngagementDetailsBilling, getClientsByCustomerBilling, getJobsBilling, getServicesBilling, getJobTypesBilling, getServicesByClientBilling, submitBillingApi } from '../../../Services/Billing/BillingService';
 import { Steps } from 'antd';
 const { Step } = Steps;
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import BillingHeader from "./BillingHeader";
 import { Plus, Trash2, ArrowLeft, ArrowRight } from "lucide-react";
 import sweatalert from "sweetalert2";
 
 export const SubmitBilling = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const editData = location.state?.editSubmission || null;
+  const [editSubmissionId, setEditSubmissionId] = useState(editData?.id || null);
   const [submitStep, setSubmitStep] = useState(1);
 
   // Form State
-  const [practice, setPractice] = useState(null);
+  const [practice, setPractice] = useState(
+    editData?.customer_id
+      ? {
+          value: editData.customer_id,
+          label: editData.customer_name || ("Customer #" + editData.customer_id),
+        }
+      : null
+  );
   const [customersList, setCustomersList] = useState([]);
   const [loadingCustomers, setLoadingCustomers] = useState(false);
   const [engagement, setEngagement] = useState("alpha_adhoc");
@@ -33,6 +43,7 @@ export const SubmitBilling = () => {
 
   // Track previous practice & client to avoid resetting states when going back/forth steps
   const prevPracticeIdRef = useRef(null);
+  const prevEngPracticeIdRef = useRef(null);
   const prevClientIdRef = useRef(null);
 
   // Function to load customers with pagination & search
@@ -114,15 +125,17 @@ export const SubmitBilling = () => {
     searchValue = "",
     pageNo = 1,
     append = false,
-  }) => {
-    if (!practice || !practice.value) {
+    customerId = null,
+  } = {}) => {
+    const custId = customerId || practice?.value || editData?.customer_id;
+    if (!custId) {
       setClientsList([]);
       return;
     }
     try {
       setLoadingClients(true);
       const payload = {
-        customer_id: practice.value,
+        customer_id: custId,
         search: searchValue,
         page: pageNo,
         limit: 20,
@@ -139,6 +152,15 @@ export const SubmitBilling = () => {
 
         setClientsList((prev) => {
           const combined = append ? [...prev, ...formatted] : formatted;
+          // Keep pre-selected client if present in state/editData
+          if (editData?.client_id && !combined.some((x) => x.value === editData.client_id)) {
+            combined.unshift({
+              value: editData.client_id,
+              label: editData.client_name || ("Client #" + editData.client_id),
+              client_id: editData.client_id,
+              customer_id: editData.customer_id,
+            });
+          }
           const unique = Array.from(
             new Map(combined.map((item) => [item.value, item])).values()
           );
@@ -148,7 +170,20 @@ export const SubmitBilling = () => {
         setClientHasMore(res.data.length === 20);
         setClientPage(pageNo);
       } else {
-        if (!append) setClientsList([]);
+        if (!append) {
+          if (editData?.client_id) {
+            setClientsList([
+              {
+                value: editData.client_id,
+                label: editData.client_name || ("Client #" + editData.client_id),
+                client_id: editData.client_id,
+                customer_id: editData.customer_id,
+              },
+            ]);
+          } else {
+            setClientsList([]);
+          }
+        }
         setClientHasMore(false);
       }
     } catch (err) {
@@ -170,16 +205,52 @@ export const SubmitBilling = () => {
     }, 400);
   };
 
-  const [clientsList, setClientsList] = useState([]);
-  const [selectedClient, setSelectedClient] = useState(null);
+  const [clientsList, setClientsList] = useState(
+    editData?.client_id
+      ? [
+          {
+            value: editData.client_id,
+            label: editData.client_name || ("Client #" + editData.client_id),
+            client_id: editData.client_id,
+            customer_id: editData.customer_id,
+          },
+        ]
+      : []
+  );
+  const [selectedClient, setSelectedClient] = useState(
+    editData?.client_id
+      ? {
+          value: editData.client_id,
+          label: editData.client_name || ("Client #" + editData.client_id),
+          client_id: editData.client_id,
+          customer_id: editData.customer_id,
+        }
+      : null
+  );
   const [loadingClients, setLoadingClients] = useState(false);
 
   const [jobsList, setJobsList] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
   const [loadingJobs, setLoadingJobs] = useState(false);
 
-  const [servicesList, setServicesList] = useState([]);
-  const [selectedService, setSelectedService] = useState(null);
+  const [servicesList, setServicesList] = useState(
+    editData?.service_id
+      ? [
+          {
+            value: editData.service_id,
+            label: editData.service_name || ("Service #" + editData.service_id),
+          },
+        ]
+      : []
+  );
+  const [selectedService, setSelectedService] = useState(
+    editData?.service_id
+      ? {
+          value: editData.service_id,
+          label: editData.service_name || ("Service #" + editData.service_id),
+        }
+      : null
+  );
   const [loadingServices, setLoadingServices] = useState(false);
 
   const [jobTypesList, setJobTypesList] = useState([]);
@@ -188,21 +259,114 @@ export const SubmitBilling = () => {
   useEffect(() => {
     fetchCustomersPaginated({ searchValue: "", pageNo: 1, append: false });
   }, []);
+  // Populate form when navigating from Edit button
+  useEffect(() => {
+    if (!editData) return;
+    setEditSubmissionId(editData.id);
+
+    // 1. Practice / Customer
+    if (editData.customer_id) {
+      setPractice({
+        value: editData.customer_id,
+        label: editData.customer_name || ("Customer #" + editData.customer_id),
+      });
+    }
+
+    // 2. Client
+    if (editData.client_id) {
+      const clientObj = {
+        value: editData.client_id,
+        label: editData.client_name || ("Client #" + editData.client_id),
+        client_id: editData.client_id,
+        customer_id: editData.customer_id,
+      };
+      setSelectedClient(clientObj);
+      setClientsList([clientObj]);
+      prevClientIdRef.current = editData.client_id;
+    }
+
+    // 3. Service
+    if (editData.service_id) {
+      const serviceObj = {
+        value: editData.service_id,
+        label: editData.service_name || ("Service #" + editData.service_id),
+      };
+      setSelectedService(serviceObj);
+      setServicesList([serviceObj]);
+    }
+
+    // 4. Job
+    if (editData.job_id) {
+      setSelectedJob({
+        value: editData.job_id,
+        label: editData.job_name || ("Job #" + editData.job_id),
+      });
+    }
+
+    // 5. Period
+    if (editData.period_type) setPeriodType(editData.period_type);
+    if (editData.period_date) setPeriodDate(editData.period_date);
+
+    // 6. Discount & Breakdown from calc_json
+    if (editData.discount_pct) setDiscountPct(String(editData.discount_pct));
+
+    let parsedCalc = editData.calc_json;
+    if (typeof parsedCalc === 'string') {
+      try {
+        parsedCalc = JSON.parse(parsedCalc);
+      } catch (e) {}
+    }
+
+    if (parsedCalc && typeof parsedCalc === 'object') {
+      if (parsedCalc.adhoc) {
+        if (parsedCalc.adhoc.role) setAdhocRole(parsedCalc.adhoc.role);
+        if (parsedCalc.adhoc.hours != null) setAdhocHours(String(parsedCalc.adhoc.hours));
+      }
+      if (parsedCalc.fte) {
+        if (parsedCalc.fte.accountants != null) setFteAccountantQty(String(parsedCalc.fte.accountants));
+        if (parsedCalc.fte.bookkeepers != null) setFteBookkeeperQty(String(parsedCalc.fte.bookkeepers));
+        if (parsedCalc.fte.payroll != null) setFtePayrollQty(String(parsedCalc.fte.payroll));
+        if (parsedCalc.fte.tax != null) setFteTaxQty(String(parsedCalc.fte.tax));
+        if (parsedCalc.fte.admin != null) setFteAdminQty(String(parsedCalc.fte.admin));
+      }
+      if (parsedCalc.percentage && parsedCalc.percentage.base != null) {
+        setPercentageBaseAmount(String(parsedCalc.percentage.base));
+      }
+      if (parsedCalc.customised && parsedCalc.customised.count != null) {
+        setCustomJobsCount(String(parsedCalc.customised.count));
+      }
+    }
+
+    // 7. Contributors
+    if (Array.isArray(editData.contributors) && editData.contributors.length > 0) {
+      setContributors(
+        editData.contributors.map((c, i) => ({
+          id: c.id || (Date.now() + i),
+          staff_id: c.staff_id,
+          name: c.staff_name || c.name || 'Contributor',
+          pct: parseFloat(c.pct) || 0,
+        }))
+      );
+    }
+  }, [editData]);
+
 
   // Fetch Customer Engagement Models when practice changes
   useEffect(() => {
     if (!practice || !practice.value) {
-      prevPracticeIdRef.current = null;
+      prevEngPracticeIdRef.current = null;
       setEngagementModels([]);
       setSelectedEngagement([]);
       setCustomerMeta(null);
       return;
     }
 
-    // Only refetch and auto-reset selectedEngagement if the customer actually changed
-    if (prevPracticeIdRef.current === practice.value) {
+    // Only refetch if the customer actually changed
+    if (prevEngPracticeIdRef.current === practice.value) {
       return;
     }
+
+    prevEngPracticeIdRef.current = practice.value;
 
     const fetchEngagement = async () => {
       try {
@@ -239,21 +403,35 @@ export const SubmitBilling = () => {
           console.log("Formatted models:", formatted);
           setEngagementModels(formatted);
 
-          // Auto-select if only single engagement model exists
-          if (formatted.length === 1) {
+          // Auto-select model or match editData engagement_model
+          if (editData && editData.engagement_model) {
+            const editModelNames = String(editData.engagement_model).toLowerCase();
+            const matched = formatted.filter(f => 
+              editModelNames.includes((f.value || '').toLowerCase()) || 
+              editModelNames.includes((f.model?.label || '').toLowerCase())
+            );
+            if (matched.length > 0) {
+              setSelectedEngagement(matched);
+            } else if (formatted.length === 1) {
+              setSelectedEngagement(formatted[0]);
+            } else {
+              // If not matched directly by string, default to available models or first
+              setSelectedEngagement(formatted);
+            }
+          } else if (formatted.length === 1) {
             setSelectedEngagement(formatted[0]);
           } else {
-            setSelectedEngagement(null);
+            setSelectedEngagement(formatted);
           }
         } else {
           setEngagementModels([]);
-          setSelectedEngagement(null);
+          setSelectedEngagement([]);
           setCustomerMeta(null);
         }
       } catch (err) {
         console.error("Error fetching engagement models:", err);
         setEngagementModels([]);
-        setSelectedEngagement(null);
+        setSelectedEngagement([]);
       } finally {
         setLoadingEngagement(false);
       }
@@ -283,24 +461,31 @@ export const SubmitBilling = () => {
       return;
     }
 
-    // Only reset downstream client/services if customer actually changed!
+    // If customer has not changed, do nothing
     if (prevPracticeIdRef.current === practice.value) {
       return;
     }
 
+    // Check if this is initial editData load
+    const isInitialEdit = editData && editData.customer_id === practice.value && !prevPracticeIdRef.current;
     prevPracticeIdRef.current = practice.value;
-    setSelectedClient(null);
-    setJobsList([]);
-    setSelectedJob(null);
-    setServicesList([]);
-    setSelectedService(null);
-    setJobTypesList([]);
-    setSelectedJobType(null);
+
+    if (!isInitialEdit) {
+      // User manually picked another customer -> reset child selections
+      setSelectedClient(null);
+      setJobsList([]);
+      setSelectedJob(null);
+      setServicesList([]);
+      setSelectedService(null);
+      setJobTypesList([]);
+      setSelectedJobType(null);
+    }
+
     setClientPage(1);
     setClientSearch("");
     setClientHasMore(true);
 
-    fetchClientsPaginated({ searchValue: "", pageNo: 1, append: false });
+    fetchClientsPaginated({ customerId: practice.value, searchValue: "", pageNo: 1, append: false });
   }, [practice]);
 
   // 2. Fetch Services STRICTLY from the Selected Client's existing jobs
@@ -333,12 +518,30 @@ export const SubmitBilling = () => {
             value: s.service_id,
             label: s.service_name,
           }));
+          if (editData?.service_id && !formatted.some(s => s.value === editData.service_id)) {
+            formatted.unshift({
+              value: editData.service_id,
+              label: editData.service_name || ("Service #" + editData.service_id),
+            });
+          }
           setServicesList(formatted);
-          if (formatted.length === 1) {
+          if (editData?.service_id) {
+            const foundService = formatted.find(s => s.value === editData.service_id);
+            if (foundService) setSelectedService(foundService);
+          } else if (formatted.length === 1) {
             setSelectedService(formatted[0]);
           }
         } else {
-          setServicesList([]);
+          if (editData?.service_id) {
+            setServicesList([
+              {
+                value: editData.service_id,
+                label: editData.service_name || ("Service #" + editData.service_id),
+              },
+            ]);
+          } else {
+            setServicesList([]);
+          }
         }
       } catch (err) {
         console.error("Error fetching client services:", err);
@@ -351,11 +554,76 @@ export const SubmitBilling = () => {
     fetchClientServices();
   }, [selectedClient]);
 
+  // Format helper for dynamic calendar / period dates
+  const formatPeriodDate = (type, val) => {
+    if (!val) return "";
+    const months = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    if (type === "Month") {
+      // val is "YYYY-MM"
+      const parts = val.split("-");
+      if (parts.length === 2) {
+        const y = parts[0];
+        const m = parseInt(parts[1], 10) - 1;
+        return `${months[m] || ""} ${y}`.trim();
+      }
+      return val;
+    }
+    if (type === "Week") {
+      // val is "YYYY-Www"
+      const parts = val.split("-W");
+      if (parts.length === 2) {
+        return `Week ${parts[1]}, ${parts[0]}`;
+      }
+      return val;
+    }
+    if (type === "Quarter") {
+      return val;
+    }
+    if (type === "One-Off") {
+      // val is "YYYY-MM-DD"
+      const d = new Date(val);
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+      }
+      return val;
+    }
+    return val;
+  };
+
+  const getTodayMonthValue = () => {
+    const d = new Date();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    return `${d.getFullYear()}-${m}`;
+  };
+
+  const getTodayDateValue = () => {
+    const d = new Date();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${d.getFullYear()}-${m}-${day}`;
+  };
+
+  const getTodayWeekValue = () => {
+    const d = new Date();
+    const oneJan = new Date(d.getFullYear(), 0, 1);
+    const numberOfDays = Math.floor((d - oneJan) / (24 * 60 * 60 * 1000));
+    const week = Math.ceil((d.getDay() + 1 + numberOfDays) / 7);
+    return `${d.getFullYear()}-W${String(week).padStart(2, "0")}`;
+  };
+
   // Step 2 Form State
   const [assignmentName, setAssignmentName] = useState("");
   const [workType, setWorkType] = useState("Yearend");
-  const [periodType, setPeriodType] = useState("Month");
-  const [periodDate, setPeriodDate] = useState("September 2026");
+  const [periodType, setPeriodType] = useState(editData?.period_type || "Month");
+  const [periodDate, setPeriodDate] = useState(
+    editData?.period_date || formatPeriodDate("Month", getTodayMonthValue())
+  );
+  const [rawDateValue, setRawDateValue] = useState(
+    editData?.period_type === "Month" ? getTodayMonthValue() : ""
+  );
 
   // Step 3 Multi-Model Dynamic Form States
   const [submitting, setSubmitting] = useState(false);
@@ -599,7 +867,14 @@ export const SubmitBilling = () => {
       // Detailed calc json breakdown
       const calcBreakdown = {
         adhoc: adhocModelData ? { role: adhocRole, rate: adhocRate, hours: adhocHoursNum, total: adhocTotal } : null,
-        fte: fteModelData ? { total: fteTotal } : null,
+        fte: fteModelData ? {
+          total: fteTotal,
+          accountants: fteAccountantQty !== "" ? fteAccountantQty : fteModelData.details.number_of_accountants,
+          bookkeepers: fteBookkeeperQty !== "" ? fteBookkeeperQty : fteModelData.details.number_of_bookkeepers,
+          payroll: ftePayrollQty !== "" ? ftePayrollQty : fteModelData.details.number_of_payroll_experts,
+          tax: fteTaxQty !== "" ? fteTaxQty : fteModelData.details.number_of_tax_experts,
+          admin: fteAdminQty !== "" ? fteAdminQty : fteModelData.details.number_of_admin_staff,
+        } : null,
         percentage: percentageModelData ? { base: baseAmountNum, pct: percentageOutsourceVal, total: percentageTotal } : null,
         customised: customisedModelData ? { service: selectedService.label, costPerJob: customCostPerJob, count: customJobsCountNum, total: customTotal } : null,
         grossAmount: grossAmount,
@@ -639,8 +914,8 @@ export const SubmitBilling = () => {
       if (res && res.status) {
         await sweatalert.fire({
           icon: "success",
-          title: "Billing Submitted!",
-          text: `Billing of £${netAmount.toFixed(2)} submitted successfully. Sent to ${customerMeta?.account_manager || "Account Manager"} for approval.`,
+          title: editSubmissionId ? "Billing Updated!" : "Billing Submitted!",
+          text: editSubmissionId ? `Billing of £${netAmount.toFixed(2)} updated successfully.` : `Billing of £${netAmount.toFixed(2)} submitted successfully. Sent to ${customerMeta?.account_manager || "Account Manager"} for approval.`,
           confirmButtonColor: "#26bdf0",
         });
         navigate("/admin/billing/approvals");
@@ -864,137 +1139,7 @@ export const SubmitBilling = () => {
                     </div>
                   </div>
 
-                  <div className="mb-4">
-                    {/* Engagement Model Details Summary Box (Supports Multi-Select) */}
-                    {(() => {
-                      const activeEngagements = Array.isArray(selectedEngagement)
-                        ? selectedEngagement
-                        : selectedEngagement?.model
-                          ? [selectedEngagement]
-                          : [];
 
-                      return activeEngagements.map((engItem, engIdx) => {
-                        const model = engItem.model;
-                        if (!model) return null;
-
-                        return (
-                          <div className="card pricing-box mt-3 border shadow-sm" key={engIdx}>
-                            <div className="card-header step-card-header card-header-light-blue d-flex justify-content-between align-items-center py-2 px-3" style={{ backgroundColor: "#eaf3fa", borderBottom: "1px solid #d2e4f3" }}>
-                              <p className="office-name card-title fs-6 mb-0 fw-semibold text-dark">
-                                {model.label}
-                              </p>
-                              {customerMeta?.account_manager && (
-                                <span className="badge bg-white text-dark border px-2 py-1">
-                                  Manager: {customerMeta.account_manager || "—"}
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="card-body p-3">
-                              {/* 1. Adhoc / PAYG / Hourly Layout */}
-                              {model.model_type === "Adhoc" && (
-                                <div className="row">
-                                  {[
-                                    { label: "Accountants", val: model.details.adhoc_accountants },
-                                    { label: "Bookkeepers", val: model.details.adhoc_bookkeepers },
-                                    { label: "Payroll Experts", val: model.details.adhoc_payroll_experts },
-                                    { label: "Tax Experts", val: model.details.adhoc_tax_experts },
-                                    { label: "Admin/Other Staff", val: model.details.adhoc_admin_staff },
-                                  ].map((item, idx) => (
-                                    <div className="col-md-4 col-sm-6 mb-3" key={idx}>
-                                      <label className="form-label text-muted small mb-1 fw-medium">{item.label}</label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        readOnly
-                                        value={item.val ? `£ ${parseFloat(item.val).toFixed(2)}` : "—"}
-                                        placeholder="Fee Per Hour"
-                                        style={{
-                                          backgroundColor: item.val ? "#ffffff" : "#f8f9fa",
-                                          fontWeight: item.val ? "600" : "normal",
-                                          color: item.val ? "#26bdf0" : "#888",
-                                          borderRadius: "6px"
-                                        }}
-                                      />
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-
-                              {/* 2. FTE / Dedicated Staffing Layout */}
-                              {model.model_type === "FTE" && (
-                                <div className="row">
-                                  {[
-                                    { label: "Accountants", count: model.details.number_of_accountants, fee: model.details.fee_per_accountant },
-                                    { label: "Bookkeepers", count: model.details.number_of_bookkeepers, fee: model.details.fee_per_bookkeeper },
-                                    { label: "Payroll Experts", count: model.details.number_of_payroll_experts, fee: model.details.fee_per_payroll_expert },
-                                    { label: "Tax Experts", count: model.details.number_of_tax_experts, fee: model.details.fee_per_tax_expert },
-                                    { label: "Admin Staff", count: model.details.number_of_admin_staff, fee: model.details.fee_per_admin_staff },
-                                  ].map((item, idx) => (
-                                    <div className="col-md-4 col-sm-6 mb-3" key={idx}>
-                                      <label className="form-label text-muted small mb-1 fw-medium">{item.label}</label>
-                                      <div className="input-group">
-                                        <span className="input-group-text bg-light text-muted small">Qty: {item.count || 0}</span>
-                                        <input
-                                          type="text"
-                                          className="form-control"
-                                          readOnly
-                                          value={item.fee ? `£ ${parseFloat(item.fee).toFixed(2)}` : "—"}
-                                          style={{ fontWeight: "600", color: "#26bdf0" }}
-                                        />
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-
-                              {/* 3. Percentage Model Layout */}
-                              {model.model_type === "Percentage" && (
-                                <div className="row">
-                                  <div className="col-md-6 mb-3">
-                                    <label className="form-label text-muted small mb-1 fw-medium">Total Outsourcing Percentage</label>
-                                    <input
-                                      type="text"
-                                      className="form-control fw-bold"
-                                      readOnly
-                                      value={model.details.total_outsourcing ? `${model.details.total_outsourcing}%` : "—"}
-                                      style={{ color: "#26bdf0", borderRadius: "6px" }}
-                                    />
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* 4. Customised Pricing Layout */}
-                              {model.model_type === "Customised" && (
-                                <div className="table-responsive">
-                                  <table className="table table-bordered table-sm mb-0">
-                                    <thead className="table-light">
-                                      <tr>
-                                        <th>Service</th>
-                                        <th>Job Type</th>
-                                        <th>Min Jobs</th>
-                                        <th>Cost Per Job</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {model.details.map((item, idx) => (
-                                        <tr key={idx}>
-                                          <td>{item.service_name || "—"}</td>
-                                          <td>{item.job_type_name || "—"}</td>
-                                          <td>{item.minimum_number_of_jobs || "—"}</td>
-                                          <td className="fw-bold text-info">£ {parseFloat(item.cost_per_job || 0).toFixed(2)}</td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      });
-                    })()}
-                  </div>
 
                   {/* Actions Bar for Step 1 */}
                   <div className="d-flex align-items-center justify-content-end pt-4 mt-3 border-top">
@@ -1137,12 +1282,34 @@ export const SubmitBilling = () => {
                   <div className="row g-4 mb-4">
                     <div className="col-lg-6 col-md-6">
                       <label className="form-label text-muted small mb-1 fw-medium">
-                        Billing period
+                        Billing Period
                       </label>
                       <select
                         className="form-select shadow-sm rounded-pill"
                         value={periodType}
-                        onChange={(e) => setPeriodType(e.target.value)}
+                        onChange={(e) => {
+                          const newType = e.target.value;
+                          setPeriodType(newType);
+                          if (newType === "Month") {
+                            const val = getTodayMonthValue();
+                            setRawDateValue(val);
+                            setPeriodDate(formatPeriodDate("Month", val));
+                          } else if (newType === "Week") {
+                            const val = getTodayWeekValue();
+                            setRawDateValue(val);
+                            setPeriodDate(formatPeriodDate("Week", val));
+                          } else if (newType === "Quarter") {
+                            const currentYear = new Date().getFullYear();
+                            const currentQuarter = Math.floor(new Date().getMonth() / 3) + 1;
+                            const defaultQ = `Q${currentQuarter} ${currentYear}`;
+                            setRawDateValue(defaultQ);
+                            setPeriodDate(defaultQ);
+                          } else if (newType === "One-Off") {
+                            const val = getTodayDateValue();
+                            setRawDateValue(val);
+                            setPeriodDate(formatPeriodDate("One-Off", val));
+                          }
+                        }}
                       >
                         <option value="Month">Month</option>
                         <option value="Week">Week</option>
@@ -1153,15 +1320,71 @@ export const SubmitBilling = () => {
 
                     <div className="col-lg-6 col-md-6">
                       <label className="form-label text-muted small mb-1 fw-medium">
-                        Period Date
+                        Period Date {periodDate ? `(${periodDate})` : ""}
                       </label>
-                      <input
-                        type="text"
-                        className="form-control shadow-sm rounded-pill"
-                        value={periodDate}
-                        onChange={(e) => setPeriodDate(e.target.value)}
-                      />
+                      {periodType === "Month" && (
+                        <input
+                          type="month"
+                          className="form-control shadow-sm rounded-pill"
+                          value={rawDateValue || getTodayMonthValue()}
+                          onChange={(e) => {
+                            setRawDateValue(e.target.value);
+                            setPeriodDate(formatPeriodDate("Month", e.target.value));
+                          }}
+                        />
+                      )}
 
+                      {periodType === "Week" && (
+                        <input
+                          type="week"
+                          className="form-control shadow-sm rounded-pill"
+                          value={rawDateValue || getTodayWeekValue()}
+                          onChange={(e) => {
+                            setRawDateValue(e.target.value);
+                            setPeriodDate(formatPeriodDate("Week", e.target.value));
+                          }}
+                        />
+                      )}
+
+                      {periodType === "Quarter" && (
+                        <select
+                          className="form-select shadow-sm rounded-pill"
+                          value={periodDate}
+                          onChange={(e) => {
+                            setPeriodDate(e.target.value);
+                            setRawDateValue(e.target.value);
+                          }}
+                        >
+                          {(() => {
+                            const currentYear = new Date().getFullYear();
+                            const years = [currentYear - 1, currentYear, currentYear + 1];
+                            const options = [];
+                            years.forEach((yr) => {
+                              ["Q1", "Q2", "Q3", "Q4"].forEach((q) => {
+                                const qLabel = `${q} ${yr}`;
+                                options.push(
+                                  <option key={qLabel} value={qLabel}>
+                                    {qLabel}
+                                  </option>
+                                );
+                              });
+                            });
+                            return options;
+                          })()}
+                        </select>
+                      )}
+
+                      {periodType === "One-Off" && (
+                        <input
+                          type="date"
+                          className="form-control shadow-sm rounded-pill"
+                          value={rawDateValue || getTodayDateValue()}
+                          onChange={(e) => {
+                            setRawDateValue(e.target.value);
+                            setPeriodDate(formatPeriodDate("One-Off", e.target.value));
+                          }}
+                        />
+                      )}
                     </div>
                   </div>
 
@@ -1246,7 +1469,7 @@ export const SubmitBilling = () => {
                                 Number of Hours
                               </label>
                               <input
-                                type="number"
+                                type="number" onWheel={(e) => e.target.blur()}
                                 min="0"
                                 step="0.5"
                                 className="form-control shadow-sm rounded-pill"
@@ -1302,7 +1525,7 @@ export const SubmitBilling = () => {
                                     <td>Accountants</td>
                                     <td>
                                       <input
-                                        type="number"
+                                        type="number" onWheel={(e) => e.target.blur()}
                                         min="0"
                                         className="form-control form-control-sm text-center"
                                         placeholder={fteModelData.details.number_of_accountants}
@@ -1321,7 +1544,7 @@ export const SubmitBilling = () => {
                                     <td>Bookkeepers</td>
                                     <td>
                                       <input
-                                        type="number"
+                                        type="number" onWheel={(e) => e.target.blur()}
                                         min="0"
                                         className="form-control form-control-sm text-center"
                                         placeholder={fteModelData.details.number_of_bookkeepers}
@@ -1340,7 +1563,7 @@ export const SubmitBilling = () => {
                                     <td>Payroll Experts</td>
                                     <td>
                                       <input
-                                        type="number"
+                                        type="number" onWheel={(e) => e.target.blur()}
                                         min="0"
                                         className="form-control form-control-sm text-center"
                                         placeholder={fteModelData.details.number_of_payroll_experts}
@@ -1359,7 +1582,7 @@ export const SubmitBilling = () => {
                                     <td>Tax Experts</td>
                                     <td>
                                       <input
-                                        type="number"
+                                        type="number" onWheel={(e) => e.target.blur()}
                                         min="0"
                                         className="form-control form-control-sm text-center"
                                         placeholder={fteModelData.details.number_of_tax_experts}
@@ -1378,7 +1601,7 @@ export const SubmitBilling = () => {
                                     <td>Admin Staff</td>
                                     <td>
                                       <input
-                                        type="number"
+                                        type="number" onWheel={(e) => e.target.blur()}
                                         min="0"
                                         className="form-control form-control-sm text-center"
                                         placeholder={fteModelData.details.number_of_admin_staff}
@@ -1422,7 +1645,7 @@ export const SubmitBilling = () => {
                                 Base Invoice / Turnover Value (£)
                               </label>
                               <input
-                                type="number"
+                                type="number" onWheel={(e) => e.target.blur()}
                                 min="0"
                                 className="form-control shadow-sm rounded-pill"
                                 placeholder="e.g. 10000"
@@ -1502,7 +1725,7 @@ export const SubmitBilling = () => {
                                 Completed Jobs
                               </label>
                               <input
-                                type="number"
+                                type="number" onWheel={(e) => e.target.blur()}
                                 min="0"
                                 className="form-control shadow-sm rounded-pill"
                                 placeholder="e.g. 5"
@@ -1548,7 +1771,7 @@ export const SubmitBilling = () => {
                             </label>
                             <div className="position-relative">
                               <input
-                                type="number"
+                                type="number" onWheel={(e) => e.target.blur()}
                                 min="0"
                                 max="100"
                                 step="any"
@@ -1681,7 +1904,7 @@ export const SubmitBilling = () => {
                           </div>
                           <div className="col-3">
                             <input
-                              type="number"
+                              type="number" onWheel={(e) => e.target.blur()}
                               className="form-control form-control-sm text-end"
                               value={c.pct}
                               onChange={(e) =>
@@ -1761,7 +1984,7 @@ export const SubmitBilling = () => {
                       disabled={grandTotal <= 0 || totalAllocation !== 100 || submitting}
                       onClick={handleSubmit}
                     >
-                      {submitting ? "Submitting..." : "Submit for approval"}
+                      {submitting ? "Saving..." : editSubmissionId ? "Update Billing" : "Submit for approval"}
                     </button>
                   </div>
                 </div>

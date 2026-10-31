@@ -304,6 +304,31 @@ const managerReturnSubmission = async (req, res) => {
     }
 };
 
+// 12.1 Manager Reject Controller
+const managerRejectSubmission = async (req, res) => {
+    try {
+        const staffUserId = req.body?.StaffUserId || req.userId || req.user?.id || null;
+        const submissionId = req.body?.submission_id || req.params?.id || null;
+        const reason = req.body?.reason || req.body?.return_note || 'Rejected by Manager';
+
+        if (!submissionId) {
+            return res.status(400).json({ status: false, message: "submission_id is required" });
+        }
+
+        const result = await billingModel.managerRejectSubmission(submissionId, staffUserId, reason);
+        if (!result.status) {
+            return res.status(400).json({ status: false, message: result.message });
+        }
+
+        return res.status(200).json({
+            status: true,
+            message: result.message
+        });
+    } catch (error) {
+        return res.status(500).json({ status: false, message: error.message });
+    }
+};
+
 // 13. Manager Edit Submission Controller
 const managerEditSubmission = async (req, res) => {
     try {
@@ -343,5 +368,6 @@ module.exports = {
     getSubmissionsForApprovals,
     managerApproveSubmission,
     managerReturnSubmission,
+    managerRejectSubmission,
     managerEditSubmission
 };

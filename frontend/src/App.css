@@ -112,3 +112,17 @@
 
 
 
+
+/* Disable number input spin buttons and wheel behavior styling */
+input[type="number"].no-spin::-webkit-inner-spin-button,
+input[type="number"].no-spin::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"].no-spin,
+input[type="number"] {
+  -moz-appearance: textfield;
+}

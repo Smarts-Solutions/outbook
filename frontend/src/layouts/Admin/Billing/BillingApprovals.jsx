@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import BillingHeader from "./BillingHeader";
 import BillingDatatable from "./BillingDatatable";
 import {
@@ -13,6 +14,8 @@ import { Check, CheckCheck, Eye, RotateCcw, Edit, X } from "lucide-react";
 import sweatalert from "sweetalert2";
 
 const BillingApprovals = () => {
+  const navigate = useNavigate();
+  const [statusFilter, setStatusFilter] = useState("all");
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [returningId, setReturningId] = useState(null);
@@ -46,7 +49,7 @@ const BillingApprovals = () => {
       setLoading(true);
       const payload = {
         StaffUserId: staffDetails?.id || null,
-        status: "Pending Manager Approval",
+        status: "all",
       };
       const res = await getSubmissionsForApprovalsApi(payload, getAuthToken());
       if (res && res.status && Array.isArray(res.data)) {
@@ -186,18 +189,9 @@ const BillingApprovals = () => {
     }
   };
 
-  // Open Edit Modal for Approver / Manager
+  // Open Edit in Submit Billing screen
   const openEditModal = (row) => {
-    setEditingSubmission(row);
-    setEditGross(row.gross_amount || row.net_amount || "0");
-    setEditDiscountPct(row.discount_pct || "0");
-    setEditReason("");
-    const clonedContribs = (row.contributors || []).map((c) => ({
-      staff_id: c.staff_id,
-      staff_name: c.staff_name,
-      pct: parseFloat(c.pct) || 0,
-    }));
-    setEditContributors(clonedContribs);
+    navigate("/admin/billing/submit", { state: { editSubmission: row } });
   };
 
   // Save Manager Edits
@@ -434,6 +428,34 @@ const BillingApprovals = () => {
       ),
     },
     {
+      name: "Status",
+      selector: (row) => row.status,
+      sortable: true,
+      minWidth: "130px",
+      cell: (row) => {
+        const st = (row.status || "").toLowerCase();
+        if (st.includes("approved")) {
+          return (
+            <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1">
+              <Check size={13} /> Approved
+            </span>
+          );
+        }
+        if (st.includes("return")) {
+          return (
+            <span className="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1">
+              <RotateCcw size={13} /> Returned
+            </span>
+          );
+        }
+        return (
+          <span className="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 fw-semibold">
+            Pending
+          </span>
+        );
+      },
+    },
+    {
       name: "Actions",
       minWidth: "200px",
       ignoreRowClick: true,
@@ -479,38 +501,42 @@ const BillingApprovals = () => {
               <i className="ti-eye text-primary" />
             </button>
 
-            {/* Edit Option for Approver / Manager */}
+            {/* Edit in Submit Billing Screen */}
             <button
               type="button"
               className="edit-icon rounded-pills border-warning"
-              title="Edit Figures & Discount"
+              title="Edit Submission"
               onClick={() => openEditModal(row)}
             >
               <i className="ti-pencil-alt text-warning" />
             </button>
 
             {/* Manager Approve */}
-            <button
-              type="button"
-              className="add-icon rounded-pills"
-              title="Approve Submission"
-              onClick={() => handleApprove(row.id)}
-            >
-              <i className="ti-check text-success" />
-            </button>
+            {row.status !== "Approved" && (
+              <button
+                type="button"
+                className="add-icon rounded-pills"
+                title="Approve Submission"
+                onClick={() => handleApprove(row.id)}
+              >
+                <i className="ti-check text-success" />
+              </button>
+            )}
 
             {/* Return for correction */}
-            <button
-              type="button"
-              className="delete-icon"
-              title="Return for correction"
-              onClick={() => {
-                setReturningId(row.id);
-                setReturnNote("");
-              }}
-            >
-              <i className="ti-back-left text-danger" />
-            </button>
+            {row.status === "Pending Manager Approval" && (
+              <button
+                type="button"
+                className="delete-icon rounded-pills"
+                title="Return for correction"
+                onClick={() => {
+                  setReturningId(row.id);
+                  setReturnNote("");
+                }}
+              >
+                <i className="ti-back-left text-danger" />
+              </button>
+            )}
           </div>
         ),
     },
@@ -540,13 +566,33 @@ const BillingApprovals = () => {
               </p>
             </div>
             {submissions.length > 0 && (
-              <div className="d-flex gap-2">
+              <div className="d-flex align-items-center gap-2 flex-wrap">
+                <div className="btn-group btn-group-sm bg-white p-1 rounded-pill border">
+                  {[
+                    { id: "all", label: "All" },
+                    { id: "pending", label: "Pending" },
+                    { id: "approved", label: "Approved" },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      className={`btn btn-sm rounded-pill px-3 py-1 fw-medium ${
+                        statusFilter === tab.id
+                          ? "btn-info text-white shadow-xs"
+                          : "btn-light text-dark border-0 bg-transparent"
+                      }`}
+                      onClick={() => setStatusFilter(tab.id)}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
                 <button
                   type="button"
                   className="btn btn-outline-info rounded-pill px-3 py-1 fw-semibold d-flex align-items-center gap-1"
                   onClick={handleApproveAll}
                 >
-                  <CheckCheck size={16} /> Approve All ({submissions.length})
+                  <CheckCheck size={16} /> Approve All
                 </button>
               </div>
             )}
@@ -554,7 +600,13 @@ const BillingApprovals = () => {
 
           <BillingDatatable
             columns={approvalsColumns}
-            data={submissions}
+            data={statusFilter === "all" ? submissions : submissions.filter(s => {
+              const st = (s.status || "").toLowerCase();
+              if (statusFilter === "pending") return st.includes("pending");
+              if (statusFilter === "approved") return st.includes("approved");
+              if (statusFilter === "returned") return st.includes("return");
+              return true;
+            })}
             loading={loading}
             title="Submissions Awaiting Manager Approval"
             exportFileName="Submissions_Awaiting_Approval"
@@ -565,7 +617,9 @@ const BillingApprovals = () => {
       {/* Snapshot / Details Modal */}
       <CommanModal
         isOpen={!!viewDetailsModal}
+        handleClose={() => setViewDetailsModal(null)}
         setIsOpen={() => setViewDetailsModal(null)}
+        hideFooter={true}
         title="Billing Submission Details & Snapshot"
         size="lg"
       >
@@ -726,7 +780,7 @@ const BillingApprovals = () => {
                   Gross Billable Amount (£)
                 </label>
                 <input
-                  type="number"
+                  type="number" onWheel={(e) => e.target.blur()}
                   min="0"
                   step="0.01"
                   className="form-control rounded-pill"
@@ -742,7 +796,7 @@ const BillingApprovals = () => {
                 </label>
                 <div className="position-relative">
                   <input
-                    type="number"
+                    type="number" onWheel={(e) => e.target.blur()}
                     min="0"
                     max="100"
                     step="any"
@@ -792,7 +846,7 @@ const BillingApprovals = () => {
                     <div className="col-md-4">
                       <div className="input-group input-group-sm">
                         <input
-                          type="number"
+                          type="number" onWheel={(e) => e.target.blur()}
                           min="0"
                           max="100"
                           className="form-control"

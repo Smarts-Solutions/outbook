@@ -146,6 +146,19 @@ export async function managerReturnSubmissionApi(data, token) {
   }
 }
 
+
+// 12.1 Manager Reject Submission
+export async function managerRejectSubmissionApi(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}billing/managerReject`, data, {
+      headers: header(token),
+    });
+    return res?.data;
+  } catch (err) {
+    return err?.response?.data || { status: false, message: err.message };
+  }
+}
+
 // 13. Manager Edit Submission
 export async function managerEditSubmissionApi(data, token) {
   try {
