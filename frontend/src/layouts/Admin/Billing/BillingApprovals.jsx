@@ -431,9 +431,16 @@ const BillingApprovals = () => {
       name: "Status",
       selector: (row) => row.status,
       sortable: true,
-      minWidth: "130px",
+      minWidth: "160px",
       cell: (row) => {
         const st = (row.status || "").toLowerCase();
+        if (st.includes("credit control")) {
+          return (
+            <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1">
+              <Check size={13} /> Sent to Credit Control
+            </span>
+          );
+        }
         if (st.includes("approved")) {
           return (
             <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1">
@@ -501,18 +508,20 @@ const BillingApprovals = () => {
               <i className="ti-eye text-primary" />
             </button>
 
-            {/* Edit in Submit Billing Screen */}
-            <button
-              type="button"
-              className="edit-icon rounded-pills border-warning"
-              title="Edit Submission"
-              onClick={() => openEditModal(row)}
-            >
-              <i className="ti-pencil-alt text-warning" />
-            </button>
+            {/* Edit in Submit Billing Screen (Only when Pending Manager Approval) */}
+            {row.status === "Pending Manager Approval" && (
+              <button
+                type="button"
+                className="edit-icon rounded-pills border-warning"
+                title="Edit Submission"
+                onClick={() => openEditModal(row)}
+              >
+                <i className="ti-pencil-alt text-warning" />
+              </button>
+            )}
 
             {/* Manager Approve */}
-            {row.status !== "Approved" && (
+            {row.status === "Pending Manager Approval" && (
               <button
                 type="button"
                 className="add-icon rounded-pills"
@@ -602,8 +611,8 @@ const BillingApprovals = () => {
             columns={approvalsColumns}
             data={statusFilter === "all" ? submissions : submissions.filter(s => {
               const st = (s.status || "").toLowerCase();
-              if (statusFilter === "pending") return st.includes("pending");
-              if (statusFilter === "approved") return st.includes("approved");
+              if (statusFilter === "pending") return st === "pending manager approval" || st === "pending";
+              if (statusFilter === "approved") return st.includes("approved") || st.includes("credit control");
               if (statusFilter === "returned") return st.includes("return");
               return true;
             })}
