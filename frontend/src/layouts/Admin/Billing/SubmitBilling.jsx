@@ -917,7 +917,8 @@ export const SubmitBilling = () => {
         net_amount: netAmount,
         currency: "GBP",
         nomisma_description: nomismaDescription,
-        manager_id: customerMeta?.account_manager_id || null,
+        // Backend will resolve staff's Line Manager automatically based on staff hierarchy
+        manager_id: null,
         contributors: contributors.map((c) => ({
           staff_id: c.staff_id || staffDetails?.id || 1,
           staff_name: c.name,
@@ -931,7 +932,7 @@ export const SubmitBilling = () => {
         await sweatalert.fire({
           icon: "success",
           title: editSubmissionId ? "Billing Updated!" : "Billing Submitted!",
-          text: editSubmissionId ? `Billing of £${netAmount.toFixed(2)} updated successfully.` : `Billing of £${netAmount.toFixed(2)} submitted successfully. Sent to ${customerMeta?.account_manager || "Account Manager"} for approval.`,
+          text: editSubmissionId ? `Billing of £${netAmount.toFixed(2)} updated successfully.` : `Billing of £${netAmount.toFixed(2)} submitted successfully. Sent to your Line Manager for approval.`,
           confirmButtonColor: "#26bdf0",
         });
         navigate("/admin/billing/approvals");

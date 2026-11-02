@@ -623,14 +623,25 @@ const submitBilling = async (payload, submittedByStaffId) => {
             };
         }
 
-        // If manager_id is not passed, lookup from customer's account_manager_id
+        // Determine Line Manager for submittedByStaffId
+        // Staff A -> Staff A's Line Manager (from line_managers table where staff_by = submittedByStaffId)
+        // If Staff A has a line manager (staff_to), assign manager_id to that line manager.
+        // Fallback: If not assigned in line_managers, check customer's account_manager_id or customer's staff_id
         if (!finalManagerId) {
-            const [custRows] = await connection.execute(
-                `SELECT account_manager_id, staff_id FROM customers WHERE id = ? LIMIT 1`,
-                [customer_id]
+            const [lmRows] = await connection.execute(
+                `SELECT staff_to FROM line_managers WHERE staff_by = ? LIMIT 1`,
+                [submittedByStaffId]
             );
-            if (custRows.length > 0) {
-                finalManagerId = custRows[0].account_manager_id || custRows[0].staff_id || null;
+            if (lmRows.length > 0 && lmRows[0].staff_to) {
+                finalManagerId = lmRows[0].staff_to;
+            } else {
+                const [custRows] = await connection.execute(
+                    `SELECT account_manager_id, staff_id FROM customers WHERE id = ? LIMIT 1`,
+                    [customer_id]
+                );
+                if (custRows.length > 0) {
+                    finalManagerId = custRows[0].account_manager_id || custRows[0].staff_id || null;
+                }
             }
         }
 
@@ -797,9 +808,15 @@ const getSubmissionsForApprovals = async (staffUserId, status = null) => {
             params.push(status);
         }
 
-        // If not Admin/Super Admin, filter strictly for this Account Manager
+        // If not Admin/Super Admin, filter for submissions where this staff is the assigned Line Manager (or direct manager)
         if (!isAdmin) {
-            query += ` AND (bs.manager_id = ? OR c.account_manager_id = ?)`;
+            query += ` AND (
+                bs.manager_id = ? 
+                OR EXISTS (
+                    SELECT 1 FROM line_managers lm 
+                    WHERE lm.staff_to = ? AND lm.staff_by = bs.submitted_by
+                )
+            )`;
             params.push(staffUserId, staffUserId);
         }
 
@@ -862,7 +879,13 @@ const managerApproveSubmission = async (submissionId, managerUserId) => {
             const allParams = [managerUserId];
 
             if (!isAdmin) {
-                allQuery += ` AND (bs.manager_id = ? OR c.account_manager_id = ?)`;
+                allQuery += ` AND (
+                    bs.manager_id = ? 
+                    OR EXISTS (
+                        SELECT 1 FROM line_managers lm 
+                        WHERE lm.staff_to = ? AND lm.staff_by = bs.submitted_by
+                    )
+                )`;
                 allParams.push(managerUserId, managerUserId);
             }
 

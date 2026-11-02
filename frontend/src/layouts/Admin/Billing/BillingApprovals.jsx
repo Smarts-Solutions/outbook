@@ -548,7 +548,7 @@ const BillingApprovals = () => {
               <h5 className="fw-bold mb-1 text-dark">
                 {isAdmin
                   ? "Manager Approvals Queue (All Teams)"
-                  : "Awaiting Your Approval (Your Customers)"}
+                  : "Awaiting Your Approval (Your Team Submissions)"}
               </h5>
               <p className="text-muted small mb-0">
                 Review and approve billing submissions entered by team members before they go to Credit Control.
