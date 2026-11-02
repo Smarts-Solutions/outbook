@@ -148,44 +148,54 @@ const BillingApprovals = () => {
     }
   };
 
-  const handleReturnConfirm = async (id) => {
-    if (!returnNote.trim()) {
-      sweatalert.fire({
-        icon: "warning",
-        title: "Reason Required",
-        text: "Please provide a reason or note explaining why this submission is being returned.",
-        confirmButtonColor: "#26bdf0",
-      });
-      return;
-    }
+  const handleReturnClick = async (row) => {
+    const { value: text, isConfirmed } = await sweatalert.fire({
+      title: "Revert / Return Submission",
+      html: `<p class="text-muted small mb-2">Please enter the reason or message for returning this billing entry for <b>${row.client_name || "this client"}</b>:</p>`,
+      input: "textarea",
+      inputPlaceholder: "Enter reason / message for revert...",
+      inputAttributes: {
+        "aria-label": "Enter reason or message",
+        rows: 3,
+      },
+      showCancelButton: true,
+      confirmButtonText: "Confirm Revert",
+      confirmButtonColor: "#f06548",
+      cancelButtonText: "Cancel",
+      inputValidator: (value) => {
+        if (!value || !value.trim()) {
+          return "Please enter a message explaining why this billing is being reverted!";
+        }
+      },
+    });
 
-    try {
-      const payload = {
-        StaffUserId: staffDetails?.id || null,
-        submission_id: id,
-        return_note: returnNote.trim(),
-      };
-      const res = await managerReturnSubmissionApi(payload, getAuthToken());
-      if (res && res.status) {
-        sweatalert.fire({
-          icon: "success",
-          title: "Returned!",
-          text: "Submission returned for correction.",
-          confirmButtonColor: "#26bdf0",
-        });
-        setReturningId(null);
-        setReturnNote("");
-        fetchApprovalsData();
-      } else {
-        sweatalert.fire({
-          icon: "error",
-          title: "Failed",
-          text: res?.message || "Could not return submission.",
-          confirmButtonColor: "#26bdf0",
-        });
+    if (isConfirmed && text) {
+      try {
+        const payload = {
+          StaffUserId: staffDetails?.id || null,
+          submission_id: row.id,
+          return_note: text.trim(),
+        };
+        const res = await managerReturnSubmissionApi(payload, getAuthToken());
+        if (res && res.status) {
+          sweatalert.fire({
+            icon: "success",
+            title: "Reverted!",
+            text: "Billing submission has been reverted with your note.",
+            confirmButtonColor: "#26bdf0",
+          });
+          fetchApprovalsData();
+        } else {
+          sweatalert.fire({
+            icon: "error",
+            title: "Failed",
+            text: res?.message || "Could not revert submission.",
+            confirmButtonColor: "#26bdf0",
+          });
+        }
+      } catch (err) {
+        console.error("Return error:", err);
       }
-    } catch (err) {
-      console.error("Return error:", err);
     }
   };
 
@@ -464,90 +474,59 @@ const BillingApprovals = () => {
     },
     {
       name: "Actions",
-      minWidth: "200px",
+      minWidth: "160px",
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      cell: (row) =>
-        returningId === row.id ? (
-          <div className="d-flex flex-column gap-1 py-2" style={{ minWidth: "180px" }}>
-            <input
-              type="text"
-              className="form-control form-control-sm"
-              placeholder="Reason for return..."
-              value={returnNote}
-              onChange={(e) => setReturnNote(e.target.value)}
-              autoFocus
-            />
-            <div className="d-flex gap-1 justify-content-end">
-              <button
-                type="button"
-                className="btn btn-danger btn-sm py-1 px-2 fs-12 rounded-pill"
-                onClick={() => handleReturnConfirm(row.id)}
-              >
-                Confirm Return
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm py-1 px-2 fs-12 rounded-pill"
-                onClick={() => setReturningId(null)}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="d-flex align-items-center justify-content-start gap-1">
-            {/* View Snapshot / Details Modal */}
+      cell: (row) => (
+        <div className="d-flex align-items-center justify-content-start gap-1">
+          {/* View Snapshot / Details Modal */}
+          <button
+            type="button"
+            className="view-icon rounded-pills border-primary"
+            title="View Calculation Snapshot"
+            onClick={() => setViewDetailsModal(row)}
+          >
+            <i className="ti-eye text-primary" />
+          </button>
+
+          {/* Edit in Submit Billing Screen (Only when Pending Manager Approval) */}
+          {row.status === "Pending Manager Approval" && (
             <button
               type="button"
-              className="view-icon rounded-pills border-primary"
-              title="View Calculation Snapshot"
-              onClick={() => setViewDetailsModal(row)}
+              className="edit-icon rounded-pills border-warning"
+              title="Edit Submission"
+              onClick={() => openEditModal(row)}
             >
-              <i className="ti-eye text-primary" />
+              <i className="ti-pencil-alt text-warning" />
             </button>
+          )}
 
-            {/* Edit in Submit Billing Screen (Only when Pending Manager Approval) */}
-            {row.status === "Pending Manager Approval" && (
-              <button
-                type="button"
-                className="edit-icon rounded-pills border-warning"
-                title="Edit Submission"
-                onClick={() => openEditModal(row)}
-              >
-                <i className="ti-pencil-alt text-warning" />
-              </button>
-            )}
+          {/* Manager Approve */}
+          {row.status === "Pending Manager Approval" && (
+            <button
+              type="button"
+              className="add-icon rounded-pills"
+              title="Approve Submission"
+              onClick={() => handleApprove(row.id)}
+            >
+              <i className="ti-check text-success" />
+            </button>
+          )}
 
-            {/* Manager Approve */}
-            {row.status === "Pending Manager Approval" && (
-              <button
-                type="button"
-                className="add-icon rounded-pills"
-                title="Approve Submission"
-                onClick={() => handleApprove(row.id)}
-              >
-                <i className="ti-check text-success" />
-              </button>
-            )}
-
-            {/* Return for correction */}
-            {row.status === "Pending Manager Approval" && (
-              <button
-                type="button"
-                className="delete-icon rounded-pills"
-                title="Return for correction"
-                onClick={() => {
-                  setReturningId(row.id);
-                  setReturnNote("");
-                }}
-              >
-                <i className="ti-back-left text-danger" />
-              </button>
-            )}
-          </div>
-        ),
+          {/* Return / Revert for correction with message */}
+          {row.status === "Pending Manager Approval" && (
+            <button
+              type="button"
+              className="delete-icon rounded-pills"
+              title="Revert / Return for correction"
+              onClick={() => handleReturnClick(row)}
+            >
+              <i className="ti-back-left text-danger" />
+            </button>
+          )}
+        </div>
+      ),
     },
   ];
 
@@ -735,6 +714,16 @@ const BillingApprovals = () => {
                     </span>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Revert / Return Note if available */}
+            {viewDetailsModal.return_note && (
+              <div className="alert alert-danger py-2 px-3 mt-3 mb-0">
+                <div className="fw-bold fs-13 mb-1">
+                  <i className="ti-back-left me-1"></i> Revert / Return Reason:
+                </div>
+                <div className="small text-dark">{viewDetailsModal.return_note}</div>
               </div>
             )}
 

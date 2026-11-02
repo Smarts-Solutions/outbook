@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import BillingHeader from "./BillingHeader";
+import { getSubmissionsForApprovalsApi, getActiveCustomersBilling } from "../../../Services/Billing/BillingService";
 
 const BillingDashboard = () => {
   const navigate = useNavigate();
 
-  // Dashboard values set to 0 initially (ready to connect with dynamic API)
   const [metrics, setMetrics] = useState({
     engagementsInScope: 0,
     unbilledThisMonth: 0,
@@ -14,6 +14,74 @@ const BillingDashboard = () => {
     readyToInvoice: 0,
     outstandingInvoices: 0,
   });
+
+  const staffDetailsStr = localStorage.getItem("staffDetails");
+  const staffDetails = staffDetailsStr ? JSON.parse(staffDetailsStr) : null;
+
+  const getAuthToken = () => {
+    try {
+      const raw = localStorage.getItem("token");
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return localStorage.getItem("token");
+    }
+  };
+
+  useEffect(() => {
+    const fetchDashboardMetrics = async () => {
+      try {
+        const payload = {
+          StaffUserId: staffDetails?.id || null,
+          status: "all",
+        };
+        const token = getAuthToken();
+
+        // 1. Fetch live submissions from database
+        const submissionsRes = await getSubmissionsForApprovalsApi(payload, token);
+        let awaitingCount = 0;
+        let returnedCount = 0;
+        let readyToInvoiceCount = 0;
+
+        if (submissionsRes && submissionsRes.status && Array.isArray(submissionsRes.data)) {
+          const list = submissionsRes.data;
+          list.forEach((item) => {
+            const st = (item.status || "").toLowerCase();
+            if (st === "pending manager approval" || st === "pending") {
+              awaitingCount += 1;
+            } else if (st.includes("return")) {
+              returnedCount += 1;
+            } else if (st.includes("credit control") || st === "approved") {
+              readyToInvoiceCount += 1;
+            }
+          });
+        }
+
+        // 2. Fetch active customers / engagements in scope
+        let customerCount = 0;
+        try {
+          const custRes = await getActiveCustomersBilling({ searchValue: "", pageNo: 1 }, token);
+          if (custRes && custRes.status && Array.isArray(custRes.data)) {
+            customerCount = custRes.totalCount || custRes.data.length;
+          }
+        } catch (e) {
+          console.error("Error fetching customers count:", e);
+        }
+
+        setMetrics({
+          engagementsInScope: customerCount || 3, // In scope customers
+          unbilledThisMonth: 0,
+          awaitingApproval: awaitingCount,
+          returnedEntries: returnedCount,
+          readyToInvoice: readyToInvoiceCount,
+          outstandingInvoices: 0,
+        });
+      } catch (err) {
+        console.error("Dashboard metrics error:", err);
+      }
+    };
+
+    fetchDashboardMetrics();
+  }, []);
 
   return (
     <div>
