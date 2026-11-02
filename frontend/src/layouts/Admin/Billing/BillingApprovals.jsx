@@ -474,7 +474,8 @@ const BillingApprovals = () => {
     },
     {
       name: "Actions",
-      minWidth: "160px",
+      minWidth: "220px",
+      width: "220px",
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
