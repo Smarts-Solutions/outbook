@@ -494,6 +494,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
         const dedupeKey = `${client_id}_${service_id}_${period_label}`;
 
         // Check if submission exists
+        let finalManagerId = manager_id;
         const editSubmissionId = payload.edit_submission_id || payload.submission_id || null;
 
         if (editSubmissionId) {
@@ -623,7 +624,6 @@ const submitBilling = async (payload, submittedByStaffId) => {
         }
 
         // If manager_id is not passed, lookup from customer's account_manager_id
-        let finalManagerId = manager_id;
         if (!finalManagerId) {
             const [custRows] = await connection.execute(
                 `SELECT account_manager_id, staff_id FROM customers WHERE id = ? LIMIT 1`,

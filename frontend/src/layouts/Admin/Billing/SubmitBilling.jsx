@@ -900,6 +900,8 @@ export const SubmitBilling = () => {
 
       const payload = {
         StaffUserId: staffDetails?.id || null,
+        edit_submission_id: editSubmissionId || null,
+        submission_id: editSubmissionId || null,
         customer_id: practice.value,
         client_id: selectedClient.value,
         service_id: selectedService.value,
