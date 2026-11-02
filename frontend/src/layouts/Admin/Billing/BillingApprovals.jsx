@@ -554,37 +554,7 @@ const BillingApprovals = () => {
                 Review and approve billing submissions entered by team members before they go to Credit Control.
               </p>
             </div>
-            {submissions.length > 0 && (
-              <div className="d-flex align-items-center gap-2 flex-wrap">
-                <div className="btn-group btn-group-sm bg-white p-1 rounded-pill border">
-                  {[
-                    { id: "all", label: "All" },
-                    { id: "pending", label: "Pending" },
-                    { id: "approved", label: "Approved" },
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      className={`btn btn-sm rounded-pill px-3 py-1 fw-medium ${
-                        statusFilter === tab.id
-                          ? "btn-info text-white shadow-xs"
-                          : "btn-light text-dark border-0 bg-transparent"
-                      }`}
-                      onClick={() => setStatusFilter(tab.id)}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  className="btn btn-outline-info rounded-pill px-3 py-1 fw-semibold d-flex align-items-center gap-1"
-                  onClick={handleApproveAll}
-                >
-                  <CheckCheck size={16} /> Approve All
-                </button>
-              </div>
-            )}
+
           </div>
 
           <BillingDatatable
