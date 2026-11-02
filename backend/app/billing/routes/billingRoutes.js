@@ -31,6 +31,10 @@ router.get('/getJobTypes', verifyToken, billingController.getJobTypes);
 router.post('/getServicesByClient', verifyToken, billingController.getServicesByClient);
 router.get('/getServicesByClient', verifyToken, billingController.getServicesByClient);
 
+// Timesheet Contributors API (Staff who worked on Customer + Client + Service)
+router.post('/getTimesheetContributors', verifyToken, billingController.getTimesheetContributors);
+router.get('/getTimesheetContributors', verifyToken, billingController.getTimesheetContributors);
+
 // Submit Billing API (Creates submission + revenue split contributors)
 router.post('/submitBilling', verifyToken, billingController.submitBilling);
 

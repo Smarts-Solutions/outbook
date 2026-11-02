@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Select from 'react-select';
-import { getActiveCustomersBilling, getCustomerEngagementDetailsBilling, getClientsByCustomerBilling, getJobsBilling, getServicesBilling, getJobTypesBilling, getServicesByClientBilling, submitBillingApi } from '../../../Services/Billing/BillingService';
+import { getActiveCustomersBilling, getCustomerEngagementDetailsBilling, getClientsByCustomerBilling, getJobsBilling, getServicesBilling, getJobTypesBilling, getServicesByClientBilling, getTimesheetContributorsBilling, submitBillingApi } from '../../../Services/Billing/BillingService';
 import { Steps } from 'antd';
 const { Step } = Steps;
 import { useNavigate, useLocation } from "react-router-dom";
@@ -344,7 +344,9 @@ export const SubmitBilling = () => {
           id: c.id || (Date.now() + i),
           staff_id: c.staff_id,
           name: c.staff_name || c.name || 'Contributor',
-          pct: parseFloat(c.pct) || 0,
+          mode: c.amount && !c.pct ? "flat" : "pct",
+          pct: c.pct != null ? String(c.pct) : "",
+          amount: c.amount != null ? String(c.amount) : "",
         }))
       );
     }
@@ -661,10 +663,83 @@ export const SubmitBilling = () => {
   // 5. Discount % state (Optional percentage discount applied on Gross Amount)
   const [discountPct, setDiscountPct] = useState("");
 
-  // Contributors State
-  const [contributors, setContributors] = useState([
-    { id: 1, name: "Ravi Manager", pct: 100 },
-  ]);
+  // Contributors State & Staff Options from Timesheet
+  const [contributors, setContributors] = useState([]);
+  const [timesheetStaffList, setTimesheetStaffList] = useState([]);
+  const [loadingContributors, setLoadingContributors] = useState(false);
+
+  // Fetch timesheet staff when practice, selectedClient or selectedService changes
+  useEffect(() => {
+    // If editing existing submission and contributors already populated from editData, preserve them
+    if (editData && Array.isArray(editData.contributors) && editData.contributors.length > 0) {
+      return;
+    }
+
+    const fetchTimesheetStaff = async () => {
+      if (!practice?.value || !selectedClient?.value) {
+        setTimesheetStaffList([]);
+        return;
+      }
+
+      try {
+        setLoadingContributors(true);
+        const payload = {
+          customer_id: practice.value,
+          client_id: selectedClient.value,
+          service_id: selectedService?.value || null,
+          period_date: periodDate || null,
+        };
+
+        const res = await getTimesheetContributorsBilling(payload, getAuthToken());
+        if (res && res.status) {
+          const list = (res.data && res.data.length > 0) 
+            ? res.data 
+            : (res.fallbackStaff && res.fallbackStaff.length > 0 ? res.fallbackStaff : []);
+
+          setTimesheetStaffList(list);
+
+          // If timesheet staff found, list them with blank percentage/flat share
+          if (res.data && res.data.length > 0) {
+            const newContributors = res.data.map((item, idx) => ({
+              id: Date.now() + idx,
+              staff_id: item.staff_id,
+              name: item.staff_name,
+              total_hours: item.total_hours,
+              mode: null, // "pct" or "flat"
+              pct: "",
+              amount: "",
+            }));
+
+            setContributors(newContributors);
+          } else {
+            // Fallback: Current logged in user as default contributor
+            const currentStaff = staffDetails ? {
+              id: Date.now(),
+              staff_id: staffDetails.id,
+              name: `${staffDetails.first_name || ''} ${staffDetails.last_name || ''}`.trim() || "Staff",
+              mode: null,
+              pct: "",
+              amount: "",
+            } : {
+              id: 1,
+              staff_id: 1,
+              name: list[0]?.staff_name || "Contributor",
+              mode: null,
+              pct: "",
+              amount: "",
+            };
+            setContributors([currentStaff]);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching timesheet contributors:", err);
+      } finally {
+        setLoadingContributors(false);
+      }
+    };
+
+    fetchTimesheetStaff();
+  }, [practice, selectedClient, selectedService, periodDate]);
 
   const engagementsData = {
     alpha_adhoc: {
@@ -783,15 +858,48 @@ export const SubmitBilling = () => {
   const discountAmt = (grossAmount * discountPctNum) / 100;
   const netAmount = Math.max(0, grossAmount - discountAmt);
 
-  const totalAllocation = contributors.reduce(
-    (acc, curr) => acc + (parseFloat(curr.pct) || 0),
-    0
+  // Calculate total allocated percentage & amount across all contributors
+  // Net Amount is the basis (£ netAmount)
+  const computeContributorValues = (c, net) => {
+    if (c.mode === "pct" && c.pct !== "") {
+      const p = parseFloat(c.pct) || 0;
+      const amt = net > 0 ? (net * p) / 100 : 0;
+      return { pct: p, amount: amt };
+    }
+    if (c.mode === "flat" && c.amount !== "") {
+      const amt = parseFloat(c.amount) || 0;
+      const p = net > 0 ? (amt / net) * 100 : 0;
+      return { pct: p, amount: amt };
+    }
+    return { pct: 0, amount: 0 };
+  };
+
+  // Total allocated percentage (rounded to 2 decimal places)
+  const totalAllocatedPct = parseFloat(
+    contributors.reduce((acc, c) => acc + computeContributorValues(c, netAmount).pct, 0).toFixed(2)
   );
 
+  // Total allocated flat amount (£)
+  const totalAllocatedAmt = parseFloat(
+    contributors.reduce((acc, c) => acc + computeContributorValues(c, netAmount).amount, 0).toFixed(2)
+  );
+
+  // Remaining available amount and percentage
+  const remainingAmt = Math.max(0, parseFloat((netAmount - totalAllocatedAmt).toFixed(2)));
+  const remainingPct = Math.max(0, parseFloat((100 - totalAllocatedPct).toFixed(2)));
+
   const handleAddContributor = () => {
+    const firstAvailable = timesheetStaffList[0] || {};
     setContributors([
       ...contributors,
-      { id: Date.now(), name: "Priya Sharma", pct: 0 },
+      {
+        id: Date.now(),
+        staff_id: firstAvailable.staff_id || null,
+        name: firstAvailable.staff_name || "",
+        mode: null,
+        pct: "",
+        amount: "",
+      },
     ]);
   };
 
@@ -801,7 +909,74 @@ export const SubmitBilling = () => {
 
   const handleContributorChange = (id, field, value) => {
     setContributors(
-      contributors.map((c) => (c.id === id ? { ...c, [field]: value } : c))
+      contributors.map((c) => {
+        if (c.id !== id) return c;
+        if (field === "staff_id") {
+          const selectedObj = timesheetStaffList.find((s) => String(s.staff_id) === String(value));
+          return {
+            ...c,
+            staff_id: Number(value),
+            name: selectedObj?.staff_name || c.name,
+            total_hours: selectedObj?.total_hours || null,
+          };
+        }
+
+        // Percentage Input Change
+        if (field === "pct") {
+          if (value === "") {
+            return { ...c, mode: null, pct: "", amount: "" };
+          }
+          let numVal = parseFloat(value);
+          if (isNaN(numVal) || numVal < 0) numVal = 0;
+
+          // Compute max percentage this row can take: (100 - sum of other rows' pct)
+          const otherPct = contributors
+            .filter((item) => item.id !== id)
+            .reduce((acc, item) => acc + computeContributorValues(item, netAmount).pct, 0);
+          const maxAllowedPct = Math.max(0, parseFloat((100 - otherPct).toFixed(2)));
+
+          if (numVal > maxAllowedPct) {
+            numVal = maxAllowedPct;
+          }
+
+          const calculatedAmt = netAmount > 0 ? parseFloat(((netAmount * numVal) / 100).toFixed(2)) : 0;
+          return {
+            ...c,
+            mode: "pct",
+            pct: String(numVal),
+            amount: calculatedAmt > 0 ? String(calculatedAmt) : "",
+          };
+        }
+
+        // Flat Amount Input Change
+        if (field === "amount") {
+          if (value === "") {
+            return { ...c, mode: null, pct: "", amount: "" };
+          }
+          let numVal = parseFloat(value);
+          if (isNaN(numVal) || numVal < 0) numVal = 0;
+
+          // Compute max flat amount this row can take: (netAmount - sum of other rows' amount)
+          const otherAmt = contributors
+            .filter((item) => item.id !== id)
+            .reduce((acc, item) => acc + computeContributorValues(item, netAmount).amount, 0);
+          const maxAllowedAmt = Math.max(0, parseFloat((netAmount - otherAmt).toFixed(2)));
+
+          if (numVal > maxAllowedAmt) {
+            numVal = maxAllowedAmt;
+          }
+
+          const calculatedPct = netAmount > 0 ? parseFloat(((numVal / netAmount) * 100).toFixed(2)) : 0;
+          return {
+            ...c,
+            mode: "flat",
+            amount: String(numVal),
+            pct: calculatedPct > 0 ? String(calculatedPct) : "",
+          };
+        }
+
+        return { ...c, [field]: value };
+      })
     );
   };
 
@@ -848,11 +1023,11 @@ export const SubmitBilling = () => {
       return;
     }
 
-    if (totalAllocation !== 100) {
+    if (Math.abs(totalAllocatedPct - 100) > 0.05) {
       sweatalert.fire({
         icon: "warning",
-        title: "Revenue Allocation",
-        text: "Revenue split across contributors must total exactly 100%.",
+        title: "Revenue Allocation Incomplete",
+        text: `Revenue split across contributors must total exactly 100% (or £${netAmount.toFixed(2)}). Currently allocated: ${totalAllocatedPct}% (£${totalAllocatedAmt.toFixed(2)}).`,
         confirmButtonColor: "#26bdf0",
       });
       return;
@@ -919,11 +1094,15 @@ export const SubmitBilling = () => {
         nomisma_description: nomismaDescription,
         // Backend will resolve staff's Line Manager automatically based on staff hierarchy
         manager_id: null,
-        contributors: contributors.map((c) => ({
-          staff_id: c.staff_id || staffDetails?.id || 1,
-          staff_name: c.name,
-          pct: parseFloat(c.pct) || 0,
-        })),
+        contributors: contributors.map((c) => {
+          const vals = computeContributorValues(c, netAmount);
+          return {
+            staff_id: c.staff_id || staffDetails?.id || 1,
+            staff_name: c.name,
+            pct: parseFloat(vals.pct.toFixed(2)) || 0,
+            amount: parseFloat(vals.amount.toFixed(2)) || 0,
+          };
+        }),
       };
 
       const res = await submitBillingApi(payload, token);
@@ -1917,57 +2096,108 @@ export const SubmitBilling = () => {
                           Revenue split — who worked on this?
                         </h6>
                         <small className="text-muted" style={{ fontSize: "12px" }}>
-                          Assign the billed amount across contributors
+                          Contributors who logged timesheet in last month for this customer, client & service
                         </small>
                       </div>
 
                       <div className="row g-2 mb-2 text-muted small fw-medium">
-                        <div className="col-8">Contributor</div>
-                        <div className="col-3">% share</div>
+                        <div className="col-5">Contributor</div>
+                        <div className="col-3 text-center">% Share</div>
+                        <div className="col-3 text-center">Flat Amount (£)</div>
                         <div className="col-1"></div>
                       </div>
 
-                      {contributors.map((c) => (
-                        <div key={c.id} className="row g-2 align-items-center mb-2">
-                          <div className="col-8">
-                            <select
-                              className="form-select form-select-sm"
-                              value={c.name}
-                              onChange={(e) =>
-                                handleContributorChange(c.id, "name", e.target.value)
-                              }
-                            >
-                              <option value="Ravi Manager">Ravi Manager</option>
-                              <option value="Priya Sharma">Priya Sharma</option>
-                              <option value="Rahul Verma">Rahul Verma</option>
-                              <option value="David Smith">David Smith</option>
-                            </select>
-                          </div>
-                          <div className="col-3">
-                            <input
-                              type="number" onWheel={(e) => e.target.blur()}
-                              className="form-control form-control-sm text-end"
-                              value={c.pct}
-                              onChange={(e) =>
-                                handleContributorChange(c.id, "pct", e.target.value)
-                              }
-                            />
-                          </div>
-                          <div className="col-1 text-center">
-                            {contributors.length > 1 && (
-                              <button
-                                type="button"
-                                className="btn btn-link text-danger p-0"
-                                onClick={() => handleRemoveContributor(c.id)}
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            )}
-                          </div>
+                      {loadingContributors ? (
+                        <div className="py-2 text-center text-muted small">
+                          <span className="spinner-border spinner-border-sm me-2 text-info" role="status" />
+                          Checking logged timesheets for this customer, client & service...
                         </div>
-                      ))}
+                      ) : (
+                        contributors.map((c) => (
+                          <div key={c.id} className="row g-2 align-items-center mb-2">
+                            {/* Contributor Select */}
+                            <div className="col-5">
+                              <select
+                                className="form-select form-select-sm"
+                                value={c.staff_id || ""}
+                                onChange={(e) =>
+                                  handleContributorChange(c.id, "staff_id", e.target.value)
+                                }
+                              >
+                                <option value="" disabled>Select Staff / Contributor</option>
+                                {timesheetStaffList.map((st) => (
+                                  <option key={st.staff_id} value={st.staff_id}>
+                                    {st.staff_name} {st.total_hours != null ? `(${st.total_hours} hrs logged)` : ""}
+                                  </option>
+                                ))}
+                                {c.staff_id && !timesheetStaffList.some(st => String(st.staff_id) === String(c.staff_id)) && (
+                                  <option value={c.staff_id}>
+                                    {c.name} {c.total_hours ? `(${c.total_hours} hrs)` : ""}
+                                  </option>
+                                )}
+                              </select>
+                            </div>
 
-                      <div className="mt-2">
+                            {/* Percentage Share Input */}
+                            <div className="col-3">
+                              <div className="input-group input-group-sm">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="100"
+                                  step="any"
+                                  onWheel={(e) => e.target.blur()}
+                                  className={`form-control form-control-sm text-end ${c.mode === "flat" ? "bg-light text-muted" : ""}`}
+                                  value={c.pct}
+                                  placeholder="0"
+                                  disabled={c.mode === "flat"}
+                                  title={c.mode === "flat" ? "Calculated from Flat Amount. Clear Flat to enter %." : "Enter percentage share"}
+                                  onChange={(e) =>
+                                    handleContributorChange(c.id, "pct", e.target.value)
+                                  }
+                                />
+                                <span className="input-group-text py-0 px-2">%</span>
+                              </div>
+                            </div>
+
+                            {/* Flat Amount Input */}
+                            <div className="col-3">
+                              <div className="input-group input-group-sm">
+                                <span className="input-group-text py-0 px-2">£</span>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="any"
+                                  onWheel={(e) => e.target.blur()}
+                                  className={`form-control form-control-sm text-end ${c.mode === "pct" ? "bg-light text-muted" : ""}`}
+                                  value={c.amount}
+                                  placeholder="0.00"
+                                  disabled={c.mode === "pct"}
+                                  title={c.mode === "pct" ? "Calculated from % Share. Clear % to enter Flat £." : "Enter flat amount in £"}
+                                  onChange={(e) =>
+                                    handleContributorChange(c.id, "amount", e.target.value)
+                                  }
+                                />
+                              </div>
+                            </div>
+
+                            {/* Remove Contributor Button */}
+                            <div className="col-1 text-center">
+                              {contributors.length > 1 && (
+                                <button
+                                  type="button"
+                                  className="btn btn-link text-danger p-0"
+                                  onClick={() => handleRemoveContributor(c.id)}
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+
+                      <div className="mt-2 d-flex justify-content-between align-items-center">
                         <button
                           type="button"
                           className="btn btn-outline-info btn-sm fw-semibold"
@@ -1975,16 +2205,23 @@ export const SubmitBilling = () => {
                         >
                           <Plus size={14} className="me-1" /> Add contributor
                         </button>
+
+                        {/* Remaining allocation indicator */}
+                        {netAmount > 0 && (
+                          <span className="small text-muted">
+                            Remaining: <strong className={remainingAmt === 0 ? "text-success" : "text-primary"}>£{remainingAmt.toFixed(2)} ({remainingPct}%)</strong>
+                          </span>
+                        )}
                       </div>
 
                       <div className="mt-3 pt-2 border-top d-flex justify-content-between align-items-center small">
                         <span className="text-muted">Total allocated:</span>
                         <span
                           className={`fw-bold ${
-                            totalAllocation === 100 ? "text-success" : "text-danger"
+                            Math.abs(totalAllocatedPct - 100) <= 0.05 ? "text-success" : "text-danger"
                           }`}
                         >
-                          {totalAllocation}% {totalAllocation === 100 && "✓"}
+                          £{totalAllocatedAmt.toFixed(2)} of £{netAmount.toFixed(2)} ({totalAllocatedPct}% {Math.abs(totalAllocatedPct - 100) <= 0.05 ? "✓" : "— must be 100%"})
                         </span>
                       </div>
                     </div>

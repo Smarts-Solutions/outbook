@@ -28,16 +28,13 @@ export const BillingHeader = ({ activeTab }) => {
 
   // Role-based visibility:
   // 1. Admin & Super Admin: All 6 tabs
-  // 2. Account Manager (Manager/Approver): Approvals tab (no Submit Billing tab)
-  // 3. Team Member / Processor / Other: My Dashboard, Submit Billing
+  // 2. Staff / Account Manager / Line Manager:
+  //    - Can submit billing (Submit Billing tab available for everyone with billing access)
+  //    - Approvals tab available for managers/approvers or admins
   const tabsList = allTabs.filter((tab) => {
     if (isAdmin) return true;
-    if (isAccountManager) {
-      // Approver / Account Manager should NOT see Submit Billing tab
-      return tab.id === "dashboard" || tab.id === "approvals";
-    }
-    // General Staff / Processor / Team Member
-    return tab.id === "dashboard" || tab.id === "submit";
+    // Every staff/manager can view My Dashboard, Submit Billing, and Approvals
+    return tab.id === "dashboard" || tab.id === "submit" || tab.id === "approvals";
   });
 
   return (
@@ -58,15 +55,13 @@ export const BillingHeader = ({ activeTab }) => {
               >
                 <Download size={16} /> Export Excel
               </button>
-              {(!isAccountManager || isAdmin) && (
-                <button
-                  type="button"
-                  className="btn btn-info text-white d-flex align-items-center gap-1"
-                  onClick={() => navigate("/admin/billing/submit")}
-                >
-                  <Plus size={16} /> Add Billing
-                </button>
-              )}
+              <button
+                type="button"
+                className="btn btn-info text-white d-flex align-items-center gap-1"
+                onClick={() => navigate("/admin/billing/submit")}
+              >
+                <Plus size={16} /> Add Billing
+              </button>
             </div>
           </div>
         </div>

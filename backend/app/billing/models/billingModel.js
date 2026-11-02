@@ -454,6 +454,94 @@ const getServicesByClient = async (clientId) => {
     }
 };
 
+
+// 8.1 Get Timesheet Contributors (Staff who filled/submitted timesheets in LAST MONTH for this Customer + Client + Service)
+const getTimesheetContributors = async (customerId, clientId, serviceId, periodDate = null) => {
+    try {
+        if (!customerId || !clientId) {
+            return { status: true, data: [] };
+        }
+
+        // Determine date range for "Last Month"
+        // If periodDate (e.g. 'YYYY-MM') is passed from step 2, use that month;
+        // otherwise default strictly to last calendar month relative to CURDATE()
+        let startDateExpr = `DATE_SUB(DATE_SUB(CURDATE(), INTERVAL DAY(CURDATE())-1 DAY), INTERVAL 1 MONTH)`;
+        let endDateExpr = `LAST_DAY(DATE_SUB(DATE_SUB(CURDATE(), INTERVAL DAY(CURDATE())-1 DAY), INTERVAL 1 MONTH))`;
+        const dateParams = [];
+
+        if (periodDate && String(periodDate).match(/^\d{4}-\d{2}$/)) {
+            startDateExpr = `?`;
+            endDateExpr = `LAST_DAY(?)`;
+            dateParams.push(`${periodDate}-01`, `${periodDate}-01`);
+        }
+
+        let whereClause = `
+            (ts.customer_id = ? OR j.customer_id = ?)
+            AND (ts.client_id = ? OR j.client_id = ?)
+            AND ts.is_deleted = 0
+            AND (
+                (ts.monday_date >= ${startDateExpr} AND ts.monday_date <= ${endDateExpr})
+                OR (ts.sunday_date >= ${startDateExpr} AND ts.sunday_date <= ${endDateExpr})
+                OR (ts.save_date >= ${startDateExpr} AND ts.save_date <= ${endDateExpr})
+                OR (ts.submit_date >= ${startDateExpr} AND ts.submit_date <= ${endDateExpr})
+            )
+        `;
+        const params = [customerId, customerId, clientId, clientId, ...dateParams, ...dateParams, ...dateParams, ...dateParams];
+
+        if (serviceId) {
+            whereClause += ` AND j.service_id = ?`;
+            params.push(serviceId);
+        }
+
+        const query = `
+            SELECT 
+                ts.staff_id,
+                CONCAT(s.first_name, ' ', s.last_name) AS staff_name,
+                s.email AS staff_email,
+                ROUND(
+                    COALESCE(
+                        SUM(
+                            COALESCE(ts.monday_hours, 0) + 
+                            COALESCE(ts.tuesday_hours, 0) + 
+                            COALESCE(ts.wednesday_hours, 0) + 
+                            COALESCE(ts.thursday_hours, 0) + 
+                            COALESCE(ts.friday_hours, 0) + 
+                            COALESCE(ts.saturday_hours, 0) + 
+                            COALESCE(ts.sunday_hours, 0)
+                        ), 0
+                    ), 2
+                ) AS total_hours
+            FROM timesheet ts
+            LEFT JOIN jobs j ON ts.job_id = j.id
+            JOIN staffs s ON ts.staff_id = s.id
+            WHERE ${whereClause}
+            GROUP BY ts.staff_id, s.first_name, s.last_name, s.email
+            HAVING total_hours > 0
+            ORDER BY total_hours DESC, staff_name ASC
+        `;
+
+        const [rows] = await pool.execute(query, params);
+
+        // Also fetch active staff fallback list if no timesheet rows found
+        let allActiveStaff = [];
+        if (rows.length === 0) {
+            const [staffRows] = await pool.execute(
+                `SELECT id AS staff_id, CONCAT(first_name, ' ', last_name) AS staff_name FROM staffs WHERE status = 1 ORDER BY first_name ASC LIMIT 50`
+            );
+            allActiveStaff = staffRows;
+        }
+
+        return {
+            status: true,
+            data: rows,
+            fallbackStaff: allActiveStaff
+        };
+    } catch (error) {
+        console.error("Error fetching timesheet contributors:", error);
+        return { status: false, message: error.message };
+    }
+};
+
 // 9. Submit Billing (with Duplicate Prevention & Contributors Split Transaction)
 const submitBilling = async (payload, submittedByStaffId) => {
     const connection = await pool.getConnection();
@@ -579,7 +667,9 @@ const submitBilling = async (payload, submittedByStaffId) => {
                     const staffId = c.staff_id || c.employeeId || submittedByStaffId;
                     const staffName = c.name || c.staff_name || 'Contributor';
                     const pct = parseFloat(c.pct) || 0;
-                    const amount = parseFloat(((net_amount * pct) / 100).toFixed(2));
+                    const amount = (c.amount !== undefined && c.amount !== null && c.amount !== '')
+                        ? parseFloat(c.amount) || 0
+                        : parseFloat(((net_amount * pct) / 100).toFixed(2));
 
                     await connection.execute(contribQuery, [
                         editSubmissionId,
@@ -713,7 +803,9 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 const staffId = c.staff_id || c.employeeId || submittedByStaffId;
                 const staffName = c.name || c.staff_name || 'Contributor';
                 const pct = parseFloat(c.pct) || 0;
-                const amount = parseFloat(((net_amount * pct) / 100).toFixed(2));
+                const amount = (c.amount !== undefined && c.amount !== null && c.amount !== '')
+                    ? parseFloat(c.amount) || 0
+                    : parseFloat(((net_amount * pct) / 100).toFixed(2));
 
                 await connection.execute(contribQuery, [
                     submissionId,
@@ -1183,6 +1275,7 @@ module.exports = {
     getAllActiveServices,
     getJobTypesByService,
     getServicesByClient,
+    getTimesheetContributors,
     submitBilling,
     getSubmissionsForApprovals,
     managerApproveSubmission,

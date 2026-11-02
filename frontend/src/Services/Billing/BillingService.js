@@ -98,6 +98,19 @@ export async function getServicesByClientBilling(data, token) {
   }
 }
 
+
+// 8.1 Get Timesheet Contributors (Staff who logged timesheets on Customer + Client + Service)
+export async function getTimesheetContributorsBilling(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}billing/getTimesheetContributors`, data, {
+      headers: header(token),
+    });
+    return res?.data;
+  } catch (err) {
+    return err?.response?.data || { status: false, message: err.message };
+  }
+}
+
 // 9. Submit Billing (creates live submission and contributors)
 export async function submitBillingApi(data, token) {
   try {

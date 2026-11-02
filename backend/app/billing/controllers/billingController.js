@@ -188,6 +188,30 @@ const getServicesByClient = async (req, res) => {
     }
 };
 
+
+// 8.1 Get Timesheet Contributors Controller
+const getTimesheetContributors = async (req, res) => {
+    try {
+        const customerId = req.body?.customer_id || req.query?.customer_id || null;
+        const clientId = req.body?.client_id || req.query?.client_id || null;
+        const serviceId = req.body?.service_id || req.query?.service_id || null;
+        const periodDate = req.body?.period_date || req.query?.period_date || null;
+
+        const result = await billingModel.getTimesheetContributors(customerId, clientId, serviceId, periodDate);
+        if (!result.status) {
+            return res.status(500).json({ status: false, message: result.message });
+        }
+        return res.status(200).json({
+            status: true,
+            message: "Timesheet contributors fetched successfully",
+            data: result.data,
+            fallbackStaff: result.fallbackStaff || []
+        });
+    } catch (error) {
+        return res.status(500).json({ status: false, message: error.message });
+    }
+};
+
 // 9. Submit Billing Controller
 const submitBilling = async (req, res) => {
     try {
@@ -418,6 +442,7 @@ module.exports = {
     getServices,
     getJobTypes,
     getServicesByClient,
+    getTimesheetContributors,
     submitBilling,
     getSubmissionsForApprovals,
     managerApproveSubmission,
