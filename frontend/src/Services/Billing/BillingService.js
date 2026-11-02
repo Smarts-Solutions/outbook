@@ -170,3 +170,27 @@ export async function managerEditSubmissionApi(data, token) {
     return err?.response?.data || { status: false, message: err.message };
   }
 }
+
+// 14. Credit Control - Mark Submission as Billed (Generate Invoice)
+export async function markSubmissionBilledApi(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}billing/markSubmissionBilled`, data, {
+      headers: header(token),
+    });
+    return res?.data;
+  } catch (err) {
+    return err?.response?.data || { status: false, message: err.message };
+  }
+}
+
+// 15. Credit Control - Record or Clear Payment for Invoiced Submission
+export async function recordInvoicePaymentApi(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}billing/recordInvoicePayment`, data, {
+      headers: header(token),
+    });
+    return res?.data;
+  } catch (err) {
+    return err?.response?.data || { status: false, message: err.message };
+  }
+}

@@ -776,7 +776,11 @@ const getSubmissionsForApprovals = async (staffUserId, status = null) => {
                 bs.manager_changes_json,
                 bs.return_note,
                 bs.returned_by,
-                bs.returned_at
+                bs.returned_at,
+                bs.nomisma_bill_number,
+                bs.nomisma_bill_date,
+                bs.due_date,
+                bs.paid_date
             FROM billing_submissions bs
             LEFT JOIN customers c ON bs.customer_id = c.id
             LEFT JOIN clients cl ON bs.client_id = cl.id
@@ -1080,6 +1084,73 @@ const managerEditSubmission = async (submissionId, managerUserId, editData) => {
     }
 };
 
+
+// 14. Mark Submission as Billed (Generate Invoice in billing_submissions)
+const markSubmissionBilled = async (submissionId, staffUserId, billNumber, billDate, dueDate = null) => {
+    try {
+        if (!billNumber || !billNumber.trim()) {
+            return { status: false, message: 'Bill number is required.' };
+        }
+        if (!billDate) {
+            return { status: false, message: 'Bill date is required.' };
+        }
+
+        const calculatedDueDate = dueDate || new Date(new Date(billDate).getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+        const [result] = await pool.execute(
+            `UPDATE billing_submissions 
+             SET status = 'Invoiced',
+                 nomisma_bill_number = ?,
+                 nomisma_bill_date = ?,
+                 due_date = ?,
+                 cc_approved_by = ?,
+                 cc_approved_at = NOW(),
+                 updated_at = NOW()
+             WHERE id = ? AND status IN ('Pending Credit Control Approval', 'Approved')`,
+            [billNumber.trim(), billDate, calculatedDueDate, staffUserId, submissionId]
+        );
+
+        if (result.affectedRows === 0) {
+            return { status: false, message: 'Submission not found or already billed/processed.' };
+        }
+
+        return {
+            status: true,
+            message: 'Bill generated and marked as invoiced successfully.',
+            data: { submission_id: submissionId, bill_number: billNumber.trim(), bill_date: billDate, due_date: calculatedDueDate }
+        };
+    } catch (error) {
+        console.error('Error marking submission as billed:', error);
+        return { status: false, message: error.message };
+    }
+};
+
+// 15. Record or Clear Payment for Invoiced Submission
+const recordInvoicePayment = async (submissionId, staffUserId, paidDate = null) => {
+    try {
+        const [result] = await pool.execute(
+            `UPDATE billing_submissions 
+             SET paid_date = ?,
+                 updated_at = NOW()
+             WHERE id = ? AND status = 'Invoiced'`,
+            [paidDate || null, submissionId]
+        );
+
+        if (result.affectedRows === 0) {
+            return { status: false, message: 'Invoiced submission not found.' };
+        }
+
+        return {
+            status: true,
+            message: paidDate ? 'Payment recorded successfully.' : 'Payment cleared.',
+            data: { submission_id: submissionId, paid_date: paidDate }
+        };
+    } catch (error) {
+        console.error('Error updating payment status:', error);
+        return { status: false, message: error.message };
+    }
+};
+
 module.exports = {
     getActiveCustomers,
     getActiveClients,
@@ -1094,5 +1165,7 @@ module.exports = {
     managerApproveSubmission,
     managerReturnSubmission,
     managerRejectSubmission,
-    managerEditSubmission
+    managerEditSubmission,
+    markSubmissionBilled,
+    recordInvoicePayment
 };

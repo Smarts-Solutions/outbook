@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
 import BillingHeader from "./BillingHeader";
 import BillingDatatable from "./BillingDatatable";
-import { initialInvoices } from "./billingMockData";
-import { getSubmissionsForApprovalsApi } from "../../../Services/Billing/BillingService";
+import { getSubmissionsForApprovalsApi, markSubmissionBilledApi, recordInvoicePaymentApi } from "../../../Services/Billing/BillingService";
 import { convertDate1 } from "../../../Utils/Comman_function";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { Check, Eye, FileText, ArrowUpRight } from "lucide-react";
+import { Check, Eye, FileText, CheckCircle, Undo2 } from "lucide-react";
 import sweatalert from "sweetalert2";
 
 const CreditControl = () => {
-  const [invoices, setInvoices] = useState(initialInvoices);
+  const [invoices, setInvoices] = useState([]);
   const [readyToInvoiceList, setReadyToInvoiceList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [viewDetailsModal, setViewDetailsModal] = useState(null);
@@ -36,18 +35,41 @@ const CreditControl = () => {
       };
       const res = await getSubmissionsForApprovalsApi(payload, getAuthToken());
       if (res && res.status && Array.isArray(res.data)) {
-        // Submissions that are approved by manager and sent to credit control
+        // 1. Ready To Invoice: manager approved entries waiting to be billed
         const approvedForCredit = res.data.filter((s) => {
           const st = (s.status || "").toLowerCase();
-          return st.includes("credit control") || st === "approved";
+          return st === "pending credit control approval" || st === "approved";
         });
         setReadyToInvoiceList(approvedForCredit);
+
+        // 2. Invoiced Register: entries that have been billed / invoiced
+        const invoicedList = res.data
+          .filter((s) => (s.status || "").toLowerCase() === "invoiced")
+          .map((s) => {
+            const today = new Date().toISOString().split("T")[0];
+            const isOverdue = !s.paid_date && s.due_date && s.due_date < today;
+            return {
+              id: s.id,
+              practice: s.customer_name || `Customer #${s.customer_id}`,
+              client: s.client_name || `Client #${s.client_id}`,
+              number: s.nomisma_bill_number || `INV-${s.id}`,
+              billDate: s.nomisma_bill_date || (s.submitted_at ? convertDate1(s.submitted_at) : "-"),
+              dueDate: s.due_date || "-",
+              amount: parseFloat(s.net_amount || 0),
+              currency: s.currency || "GBP",
+              paidDate: s.paid_date || null,
+              status: s.paid_date ? "Paid" : isOverdue ? "Overdue" : "Outstanding",
+            };
+          });
+        setInvoices(invoicedList);
       } else {
         setReadyToInvoiceList([]);
+        setInvoices([]);
       }
     } catch (err) {
       console.error("Error fetching credit control submissions:", err);
       setReadyToInvoiceList([]);
+      setInvoices([]);
     } finally {
       setLoading(false);
     }
@@ -75,28 +97,144 @@ const CreditControl = () => {
     );
   };
 
-  const handleGenerateBill = (row) => {
-    const invNumber = `INV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
-    const newInv = {
-      id: Date.now(),
-      practice: row.customer_name || row.practice,
-      client: row.client_name || row.client,
-      number: invNumber,
-      billDate: new Date().toISOString().split("T")[0],
-      dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-      amount: parseFloat(row.net_amount || row.net || 0),
-      currency: row.currency || "GBP",
-      paidDate: null,
-      daysLate: 0,
-      status: "Outstanding",
-    };
-    setInvoices([newInv, ...invoices]);
-    sweatalert.fire({
-      icon: "success",
-      title: "Bill Generated!",
-      text: `Invoice #${invNumber} raised for £${parseFloat(row.net_amount || row.net || 0).toFixed(2)}.`,
+  // Generate Bill Modal (prompts for Bill Number and Bill Date)
+  const handleGenerateBill = async (row) => {
+    const today = new Date().toISOString().split("T")[0];
+    const defaultBillNum = `INV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const { value: formValues, isConfirmed } = await sweatalert.fire({
+      title: "Generate Bill / Raise Invoice",
+      html: `
+        <div class="text-start fs-13 mb-3">
+          <div class="mb-1"><strong>Client:</strong> ${row.client_name || "Client"}</div>
+          <div class="mb-1"><strong>Customer:</strong> ${row.customer_name || "Customer"}</div>
+          <div class="mb-2"><strong>Net Amount:</strong> £${parseFloat(row.net_amount || 0).toFixed(2)}</div>
+        </div>
+        <div class="text-start mb-2">
+          <label class="form-label small fw-bold mb-1">Bill / Invoice Number *</label>
+          <input id="swal-bill-num" class="form-control form-control-sm" value="${defaultBillNum}" placeholder="e.g. INV-2026-0912" />
+        </div>
+        <div class="text-start">
+          <label class="form-label small fw-bold mb-1">Bill Date *</label>
+          <input id="swal-bill-date" type="date" class="form-control form-control-sm" value="${today}" />
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Raise & Save Invoice",
       confirmButtonColor: "#26bdf0",
+      cancelButtonText: "Cancel",
+      preConfirm: () => {
+        const billNumber = document.getElementById("swal-bill-num").value;
+        const billDate = document.getElementById("swal-bill-date").value;
+        if (!billNumber || !billNumber.trim()) {
+          sweatalert.showValidationMessage("Please enter a valid Bill Number!");
+          return false;
+        }
+        if (!billDate) {
+          sweatalert.showValidationMessage("Please select a Bill Date!");
+          return false;
+        }
+        return { billNumber: billNumber.trim(), billDate };
+      },
     });
+
+    if (isConfirmed && formValues) {
+      try {
+        const payload = {
+          StaffUserId: staffDetails?.id || null,
+          submission_id: row.id,
+          billNumber: formValues.billNumber,
+          billDate: formValues.billDate,
+        };
+
+        const res = await markSubmissionBilledApi(payload, getAuthToken());
+        if (res && res.status) {
+          sweatalert.fire({
+            icon: "success",
+            title: "Invoice Raised!",
+            text: `Invoice #${formValues.billNumber} generated successfully and moved to Invoice Register.`,
+            confirmButtonColor: "#26bdf0",
+          });
+          fetchCreditControlSubmissions();
+        } else {
+          sweatalert.fire({
+            icon: "error",
+            title: "Failed",
+            text: res?.message || "Could not raise invoice.",
+            confirmButtonColor: "#26bdf0",
+          });
+        }
+      } catch (err) {
+        console.error("Generate bill error:", err);
+      }
+    }
+  };
+
+  // Toggle Payment (Mark Paid / Undo)
+  const handlePaymentToggle = async (row) => {
+    try {
+      const isCurrentlyPaid = !!row.paidDate;
+      const today = new Date().toISOString().split("T")[0];
+
+      if (!isCurrentlyPaid) {
+        const { value: paidDate, isConfirmed } = await sweatalert.fire({
+          title: "Record Payment",
+          html: `<p class="text-muted small mb-2">Marking Invoice <b>#${row.number}</b> as Paid. Select payment date:</p>`,
+          input: "date",
+          inputValue: today,
+          showCancelButton: true,
+          confirmButtonText: "Confirm Payment",
+          confirmButtonColor: "#0ab39c",
+        });
+
+        if (isConfirmed && paidDate) {
+          const payload = {
+            StaffUserId: staffDetails?.id || null,
+            submission_id: row.id,
+            paidDate: paidDate,
+          };
+          const res = await recordInvoicePaymentApi(payload, getAuthToken());
+          if (res && res.status) {
+            sweatalert.fire({
+              icon: "success",
+              title: "Payment Recorded!",
+              text: `Invoice #${row.number} marked as Paid.`,
+              confirmButtonColor: "#26bdf0",
+            });
+            fetchCreditControlSubmissions();
+          }
+        }
+      } else {
+        const confirm = await sweatalert.fire({
+          title: "Undo Payment?",
+          text: `Mark Invoice #${row.number} back to Outstanding?`,
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonText: "Yes, Undo",
+          confirmButtonColor: "#f06548",
+        });
+
+        if (confirm.isConfirmed) {
+          const payload = {
+            StaffUserId: staffDetails?.id || null,
+            submission_id: row.id,
+            paidDate: null,
+          };
+          const res = await recordInvoicePaymentApi(payload, getAuthToken());
+          if (res && res.status) {
+            sweatalert.fire({
+              icon: "success",
+              title: "Payment Cleared",
+              text: `Invoice #${row.number} status reverted to Outstanding.`,
+              confirmButtonColor: "#26bdf0",
+            });
+            fetchCreditControlSubmissions();
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Payment toggle error:", err);
+    }
   };
 
   // Ready To Invoice Datatable Columns matching Approvals standard
@@ -358,36 +496,18 @@ const CreditControl = () => {
         row.paidDate ? (
           <button
             type="button"
-            className="btn btn-secondary btn-sm py-1 px-3 fs-12 rounded-pill"
-            onClick={() =>
-              setInvoices(
-                invoices.map((i) =>
-                  i.id === row.id ? { ...i, paidDate: null, status: "Outstanding" } : i
-                )
-              )
-            }
+            className="btn btn-secondary btn-sm py-1 px-3 fs-12 rounded-pill d-flex align-items-center gap-1"
+            onClick={() => handlePaymentToggle(row)}
           >
-            Undo
+            <Undo2 size={13} /> Undo
           </button>
         ) : (
           <button
             type="button"
-            className="btn btn-outline-success btn-sm py-1 px-3 fs-12 rounded-pill"
-            onClick={() =>
-              setInvoices(
-                invoices.map((i) =>
-                  i.id === row.id
-                    ? {
-                        ...i,
-                        paidDate: new Date().toISOString().split("T")[0],
-                        status: "Paid",
-                      }
-                    : i
-                )
-              )
-            }
+            className="btn btn-outline-success btn-sm py-1 px-3 fs-12 rounded-pill d-flex align-items-center gap-1"
+            onClick={() => handlePaymentToggle(row)}
           >
-            Mark Paid
+            <CheckCircle size={13} /> Mark Paid
           </button>
         ),
     },

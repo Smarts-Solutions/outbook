@@ -43,4 +43,8 @@ router.post('/managerReturn', verifyToken, billingController.managerReturnSubmis
 router.post('/managerReject', verifyToken, billingController.managerRejectSubmission);
 router.post('/managerEdit', verifyToken, billingController.managerEditSubmission);
 
+// Credit Control & Invoicing APIs
+router.post('/markSubmissionBilled', verifyToken, billingController.markSubmissionBilled);
+router.post('/recordInvoicePayment', verifyToken, billingController.recordInvoicePayment);
+
 module.exports = router;

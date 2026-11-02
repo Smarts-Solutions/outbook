@@ -355,6 +355,60 @@ const managerEditSubmission = async (req, res) => {
     }
 };
 
+// 14. Mark Submission as Billed Controller
+const markSubmissionBilled = async (req, res) => {
+    try {
+        const staffUserId = req.body?.StaffUserId || req.userId || req.user?.id || null;
+        const submissionId = req.body?.submission_id || req.params?.id || null;
+        const billNumber = req.body?.bill_number || req.body?.billNumber || '';
+        const billDate = req.body?.bill_date || req.body?.billDate || '';
+        const dueDate = req.body?.due_date || req.body?.dueDate || null;
+
+        if (!submissionId) {
+            return res.status(400).json({ status: false, message: "submission_id is required" });
+        }
+
+        const result = await billingModel.markSubmissionBilled(submissionId, staffUserId, billNumber, billDate, dueDate);
+        if (!result.status) {
+            return res.status(400).json({ status: false, message: result.message });
+        }
+
+        return res.status(200).json({
+            status: true,
+            message: result.message,
+            data: result.data
+        });
+    } catch (error) {
+        return res.status(500).json({ status: false, message: error.message });
+    }
+};
+
+// 15. Record Invoice Payment Controller
+const recordInvoicePayment = async (req, res) => {
+    try {
+        const staffUserId = req.body?.StaffUserId || req.userId || req.user?.id || null;
+        const submissionId = req.body?.submission_id || req.params?.id || null;
+        const paidDate = req.body?.paid_date || req.body?.paidDate || null;
+
+        if (!submissionId) {
+            return res.status(400).json({ status: false, message: "submission_id is required" });
+        }
+
+        const result = await billingModel.recordInvoicePayment(submissionId, staffUserId, paidDate);
+        if (!result.status) {
+            return res.status(400).json({ status: false, message: result.message });
+        }
+
+        return res.status(200).json({
+            status: true,
+            message: result.message,
+            data: result.data
+        });
+    } catch (error) {
+        return res.status(500).json({ status: false, message: error.message });
+    }
+};
+
 module.exports = {
     getActiveCustomers,
     getActiveClients,
@@ -369,5 +423,7 @@ module.exports = {
     managerApproveSubmission,
     managerReturnSubmission,
     managerRejectSubmission,
-    managerEditSubmission
+    managerEditSubmission,
+    markSubmissionBilled,
+    recordInvoicePayment
 };
