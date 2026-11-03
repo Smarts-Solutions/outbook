@@ -388,7 +388,7 @@ export const SubmitBilling = () => {
 
         console.log("Fetching engagement for customer:", practice.value);
         const res = await getCustomerEngagementDetailsBilling(
-          { customer_id: practice.value },
+          { customer_id: practice.value, StaffUserId: staffDetails?.id },
           token
         );
 
@@ -1371,9 +1371,9 @@ export const SubmitBilling = () => {
                         </div>
 
                         <div className="col-lg-3 col-md-6">
-                          <span className="text-muted d-block mb-1">Account manager</span>
+                          <span className="text-muted d-block mb-1">Line Manager</span>
                           <span className="fw-semibold text-dark fs-6">
-                            {customerMeta?.account_manager || "—"}
+                            {customerMeta?.line_manager || customerMeta?.account_manager || "—"}
                           </span>
                         </div>
 
@@ -2236,7 +2236,7 @@ export const SubmitBilling = () => {
                       fontSize: "13px",
                     }}
                   >
-                    On submit, this goes to <strong>{customerMeta?.account_manager || "Account Manager"}</strong> for approval,
+                    On submit, this goes to <strong>{customerMeta?.line_manager || customerMeta?.account_manager || "Line Manager"}</strong> for approval,
                     then to Credit Control.
                   </div>
 
@@ -2252,7 +2252,7 @@ export const SubmitBilling = () => {
                     <button
                       type="button"
                       className="btn btn-info text-white px-4 py-2 fw-semibold rounded-pill shadow-sm"
-                      disabled={grandTotal <= 0 || totalAllocation !== 100 || submitting}
+                      disabled={grandTotal <= 0 || Math.abs(totalAllocatedPct - 100) > 0.05 || submitting}
                       onClick={handleSubmit}
                     >
                       {submitting ? "Saving..." : editSubmissionId ? "Update Billing" : "Submit for approval"}

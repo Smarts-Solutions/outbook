@@ -69,7 +69,8 @@ const getCustomerEngagementDetails = async (req, res) => {
             });
         }
 
-        const result = await billingModel.getCustomerEngagementDetails(customerId);
+        const staffUserId = req.body?.StaffUserId || req.query?.StaffUserId || req.userId || null;
+        const result = await billingModel.getCustomerEngagementDetails(customerId, staffUserId);
         if (!result.status) {
             return res.status(500).json({
                 status: false,

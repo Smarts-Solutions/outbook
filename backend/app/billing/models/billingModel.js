@@ -124,7 +124,7 @@ const getActiveClients = async (customerId = null) => {
 };
 
 // 3. Get Customer Engagement Models with full details
-const getCustomerEngagementDetails = async (customerId) => {
+const getCustomerEngagementDetails = async (customerId, staffUserId = null) => {
     try {
         if (!customerId) {
             return { status: false, message: "Customer ID is required" };
@@ -195,8 +195,28 @@ const getCustomerEngagementDetails = async (customerId) => {
             };
         }
 
-        const firstRow = rows[0];
-        const lineManager = (firstRow.staff_line_manager || firstRow.am_line_manager || '').trim() || null;
+                const firstRow = rows[0];
+        let lineManager = null;
+
+        // 1. Priority: If staffUserId is provided, fetch their direct line manager from line_managers table
+        if (staffUserId) {
+            const [userLmRows] = await pool.execute(
+                `SELECT CONCAT(s.first_name, ' ', s.last_name) AS manager_name 
+                 FROM line_managers lm 
+                 JOIN staffs s ON lm.staff_to = s.id 
+                 WHERE lm.staff_by = ? LIMIT 1`,
+                [staffUserId]
+            );
+            if (userLmRows.length > 0 && userLmRows[0].manager_name) {
+                lineManager = userLmRows[0].manager_name.trim();
+            }
+        }
+
+        // 2. Fallback: Staff's line manager assigned to this customer, or Account Manager's line manager
+        if (!lineManager) {
+            lineManager = (firstRow.staff_line_manager || firstRow.am_line_manager || '').trim() || null;
+        }
+
         const accountManager = firstRow.account_manager_firstname 
             ? `${firstRow.account_manager_firstname} ${firstRow.account_manager_lastname || ''}`.trim() 
             : null;
