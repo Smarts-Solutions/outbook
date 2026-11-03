@@ -908,7 +908,7 @@ export const SubmitBilling = () => {
           };
         }
 
-        // Percentage Input Change
+        // Percentage Input Change (Freely editable by user)
         if (field === "pct") {
           if (value === "") {
             return { ...c, mode: null, pct: "", amount: "" };
@@ -916,26 +916,16 @@ export const SubmitBilling = () => {
           let numVal = parseFloat(value);
           if (isNaN(numVal) || numVal < 0) numVal = 0;
 
-          // Compute max percentage this row can take: (100 - sum of other rows' pct)
-          const otherPct = contributors
-            .filter((item) => item.id !== id)
-            .reduce((acc, item) => acc + computeContributorValues(item, netAmount).pct, 0);
-          const maxAllowedPct = Math.max(0, parseFloat((100 - otherPct).toFixed(2)));
-
-          if (numVal > maxAllowedPct) {
-            numVal = maxAllowedPct;
-          }
-
           const calculatedAmt = netAmount > 0 ? parseFloat(((netAmount * numVal) / 100).toFixed(2)) : 0;
           return {
             ...c,
             mode: "pct",
-            pct: String(numVal),
+            pct: value,
             amount: calculatedAmt > 0 ? String(calculatedAmt) : "",
           };
         }
 
-        // Flat Amount Input Change
+        // Flat Amount Input Change (Freely editable by user)
         if (field === "amount") {
           if (value === "") {
             return { ...c, mode: null, pct: "", amount: "" };
@@ -943,21 +933,11 @@ export const SubmitBilling = () => {
           let numVal = parseFloat(value);
           if (isNaN(numVal) || numVal < 0) numVal = 0;
 
-          // Compute max flat amount this row can take: (netAmount - sum of other rows' amount)
-          const otherAmt = contributors
-            .filter((item) => item.id !== id)
-            .reduce((acc, item) => acc + computeContributorValues(item, netAmount).amount, 0);
-          const maxAllowedAmt = Math.max(0, parseFloat((netAmount - otherAmt).toFixed(2)));
-
-          if (numVal > maxAllowedAmt) {
-            numVal = maxAllowedAmt;
-          }
-
           const calculatedPct = netAmount > 0 ? parseFloat(((numVal / netAmount) * 100).toFixed(2)) : 0;
           return {
             ...c,
             mode: "flat",
-            amount: String(numVal),
+            amount: value,
             pct: calculatedPct > 0 ? String(calculatedPct) : "",
           };
         }
@@ -1980,8 +1960,7 @@ export const SubmitBilling = () => {
                               <input
                                 type="number" onWheel={(e) => e.target.blur()}
                                 min="0"
-                                max="100"
-                                step="any"
+                                  step="any"
                                 className="form-control shadow-sm rounded-pill pe-4"
                                 placeholder="e.g. 10"
                                 value={discountPct}
@@ -2199,10 +2178,20 @@ export const SubmitBilling = () => {
                           </button>
                         )}
 
-                        {/* Remaining allocation indicator */}
+                        {/* Remaining / Over-allocated indicator */}
                         {netAmount > 0 && (
-                          <span className="small text-muted">
-                            Remaining: <strong className={remainingAmt === 0 ? "text-success" : "text-primary"}>£{remainingAmt.toFixed(2)} ({remainingPct}%)</strong>
+                          <span className="small">
+                            {totalAllocatedPct > 100 ? (
+                              <span className="text-danger fw-bold">
+                                ⚠ Over-allocated by: £{(totalAllocatedAmt - netAmount).toFixed(2)} ({(totalAllocatedPct - 100).toFixed(2)}%)
+                              </span>
+                            ) : (
+                              <span className="text-muted">
+                                Remaining: <strong className={Math.abs(remainingPct) <= 0.05 ? "text-success" : "text-primary"}>
+                                  £{remainingAmt.toFixed(2)} ({remainingPct}%)
+                                </strong>
+                              </span>
+                            )}
                           </span>
                         )}
                       </div>
@@ -2214,9 +2203,14 @@ export const SubmitBilling = () => {
                             Math.abs(totalAllocatedPct - 100) <= 0.05 ? "text-success" : "text-danger"
                           }`}
                         >
-                          £{totalAllocatedAmt.toFixed(2)} of £{netAmount.toFixed(2)} ({totalAllocatedPct}% {Math.abs(totalAllocatedPct - 100) <= 0.05 ? "✓" : "— must be 100%"})
+                          £{totalAllocatedAmt.toFixed(2)} of £{netAmount.toFixed(2)} ({totalAllocatedPct}% {Math.abs(totalAllocatedPct - 100) <= 0.05 ? "✓" : totalAllocatedPct > 100 ? "⚠ Exceeds 100% — must be 100%" : "— must be 100%"})
                         </span>
                       </div>
+                      {totalAllocatedPct > 100 && (
+                        <div className="alert alert-danger py-1 px-2 mt-2 mb-0 small text-center fw-medium">
+                          Total allocation exceeds 100%. Please adjust percentages or flat amounts before submitting.
+                        </div>
+                      )}
                     </div>
                   </div>
 
