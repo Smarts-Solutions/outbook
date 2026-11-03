@@ -692,15 +692,12 @@ export const SubmitBilling = () => {
 
         const res = await getTimesheetContributorsBilling(payload, getAuthToken());
         if (res && res.status) {
-          const list = (res.data && res.data.length > 0) 
-            ? res.data 
-            : (res.fallbackStaff && res.fallbackStaff.length > 0 ? res.fallbackStaff : []);
-
+          const list = (res.data && Array.isArray(res.data)) ? res.data : [];
           setTimesheetStaffList(list);
 
           // If timesheet staff found, list them with blank percentage/flat share
-          if (res.data && res.data.length > 0) {
-            const newContributors = res.data.map((item, idx) => ({
+          if (list.length > 0) {
+            const newContributors = list.map((item, idx) => ({
               id: Date.now() + idx,
               staff_id: item.staff_id,
               name: item.staff_name,
@@ -712,23 +709,8 @@ export const SubmitBilling = () => {
 
             setContributors(newContributors);
           } else {
-            // Fallback: Current logged in user as default contributor
-            const currentStaff = staffDetails ? {
-              id: Date.now(),
-              staff_id: staffDetails.id,
-              name: `${staffDetails.first_name || ''} ${staffDetails.last_name || ''}`.trim() || "Staff",
-              mode: null,
-              pct: "",
-              amount: "",
-            } : {
-              id: 1,
-              staff_id: 1,
-              name: list[0]?.staff_name || "Contributor",
-              mode: null,
-              pct: "",
-              amount: "",
-            };
-            setContributors([currentStaff]);
+            // No staff filled timesheet for this service in this period
+            setContributors([]);
           }
         }
       } catch (err) {
@@ -889,13 +871,18 @@ export const SubmitBilling = () => {
   const remainingPct = Math.max(0, parseFloat((100 - totalAllocatedPct).toFixed(2)));
 
   const handleAddContributor = () => {
-    const firstAvailable = timesheetStaffList[0] || {};
+    // Find first staff from timesheet list that is not yet selected in contributors
+    const unselected = timesheetStaffList.find(
+      (ts) => !contributors.some((c) => String(c.staff_id) === String(ts.staff_id))
+    ) || timesheetStaffList[0] || {};
+
     setContributors([
       ...contributors,
       {
         id: Date.now(),
-        staff_id: firstAvailable.staff_id || null,
-        name: firstAvailable.staff_name || "",
+        staff_id: unselected.staff_id || null,
+        name: unselected.staff_name || "",
+        total_hours: unselected.total_hours || null,
         mode: null,
         pct: "",
         amount: "",
@@ -2112,6 +2099,10 @@ export const SubmitBilling = () => {
                           <span className="spinner-border spinner-border-sm me-2 text-info" role="status" />
                           Checking logged timesheets for this customer, client & service...
                         </div>
+                      ) : contributors.length === 0 ? (
+                        <div className="py-3 px-3 text-center bg-light rounded text-muted small border mb-2">
+                          <span className="fw-semibold text-secondary">No timesheet entries found</span> for this client & service in the selected period.
+                        </div>
                       ) : (
                         contributors.map((c) => (
                           <div key={c.id} className="row g-2 align-items-center mb-2">
@@ -2198,13 +2189,15 @@ export const SubmitBilling = () => {
                       )}
 
                       <div className="mt-2 d-flex justify-content-between align-items-center">
-                        <button
-                          type="button"
-                          className="btn btn-outline-info btn-sm fw-semibold"
-                          onClick={handleAddContributor}
-                        >
-                          <Plus size={14} className="me-1" /> Add contributor
-                        </button>
+                        {(contributors.length < timesheetStaffList.length) && (
+                          <button
+                            type="button"
+                            className="btn btn-outline-info btn-sm fw-semibold"
+                            onClick={handleAddContributor}
+                          >
+                            <Plus size={14} className="me-1" /> Add contributor
+                          </button>
+                        )}
 
                         {/* Remaining allocation indicator */}
                         {netAmount > 0 && (

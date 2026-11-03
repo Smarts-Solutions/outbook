@@ -522,19 +522,10 @@ const getTimesheetContributors = async (customerId, clientId, serviceId, periodD
 
         const [rows] = await pool.execute(query, params);
 
-        // Also fetch active staff fallback list if no timesheet rows found
-        let allActiveStaff = [];
-        if (rows.length === 0) {
-            const [staffRows] = await pool.execute(
-                `SELECT id AS staff_id, CONCAT(first_name, ' ', last_name) AS staff_name FROM staffs WHERE status = 1 ORDER BY first_name ASC LIMIT 50`
-            );
-            allActiveStaff = staffRows;
-        }
-
         return {
             status: true,
             data: rows,
-            fallbackStaff: allActiveStaff
+            fallbackStaff: []
         };
     } catch (error) {
         console.error("Error fetching timesheet contributors:", error);
