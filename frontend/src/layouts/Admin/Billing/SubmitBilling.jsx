@@ -1081,7 +1081,7 @@ export const SubmitBilling = () => {
           text: editSubmissionId ? `Billing of £${netAmount.toFixed(2)} updated successfully.` : `Billing of £${netAmount.toFixed(2)} submitted successfully. Sent to your Line Manager for approval.`,
           confirmButtonColor: "#26bdf0",
         });
-        navigate("/admin/billing/approvals");
+        navigate("/admin/billing/dashboard");
       } else if (res && res.isDuplicate) {
         sweatalert.fire({
           icon: "error",
