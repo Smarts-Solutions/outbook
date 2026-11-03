@@ -114,7 +114,7 @@ export const BillingHeader = ({ activeTab }) => {
     if (isAdmin) return true;
     if (tab.id === "dashboard") return true;
     if (tab.id === "submit") return canCreateJob;
-    if (tab.id === "approvals") return canApprove;
+    if (tab.id === "approvals") return canApprove || canCreateJob;
     return false;
   });
 

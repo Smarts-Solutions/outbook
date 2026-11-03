@@ -911,16 +911,17 @@ const getSubmissionsForApprovals = async (staffUserId, status = null) => {
             params.push(status);
         }
 
-        // If not Admin/Super Admin, filter for submissions where this staff is the assigned Line Manager (or direct manager)
+        // If not Admin/Super Admin, filter for submissions where this staff is the submitter OR assigned Line Manager (or direct manager)
         if (!isAdmin) {
             query += ` AND (
-                bs.manager_id = ? 
+                bs.submitted_by = ?
+                OR bs.manager_id = ? 
                 OR EXISTS (
                     SELECT 1 FROM line_managers lm 
                     WHERE lm.staff_to = ? AND lm.staff_by = bs.submitted_by
                 )
             )`;
-            params.push(staffUserId, staffUserId);
+            params.push(staffUserId, staffUserId, staffUserId);
         }
 
         query += ` ORDER BY bs.id DESC`;

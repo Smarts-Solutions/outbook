@@ -479,55 +479,64 @@ const BillingApprovals = () => {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      cell: (row) => (
-        <div className="d-flex align-items-center justify-content-start gap-1">
-          {/* View Snapshot / Details Modal */}
-          <button
-            type="button"
-            className="view-icon rounded-pills border-primary"
-            title="View Calculation Snapshot"
-            onClick={() => setViewDetailsModal(row)}
-          >
-            <i className="ti-eye text-primary" />
-          </button>
+      cell: (row) => {
+        const currentStaffId = Number(staffDetails?.id);
+        const isSubmitter = Number(row.submitted_by) === currentStaffId;
+        const isDesignatedManager = Number(row.manager_id) === currentStaffId;
+        // User can take manager actions (Approve, Edit, Return) if they are Admin OR the designated Line Manager for this submission.
+        // If they are just the submitter (and not admin / not designated manager), they ONLY get the View button.
+        const canManage = isAdmin || (isDesignatedManager && !isSubmitter) || (isAdmin && isSubmitter);
 
-          {/* Edit in Submit Billing Screen (Only when Pending Manager Approval) */}
-          {row.status === "Pending Manager Approval" && (
+        return (
+          <div className="d-flex align-items-center justify-content-start gap-1">
+            {/* View Snapshot / Details Modal (Visible to Submitter, Manager, and Admin) */}
             <button
               type="button"
-              className="edit-icon rounded-pills border-warning"
-              title="Edit Submission"
-              onClick={() => openEditModal(row)}
+              className="view-icon rounded-pills border-primary"
+              title="View Calculation Snapshot"
+              onClick={() => setViewDetailsModal(row)}
             >
-              <i className="ti-pencil-alt text-warning" />
+              <i className="ti-eye text-primary" />
             </button>
-          )}
 
-          {/* Manager Approve */}
-          {row.status === "Pending Manager Approval" && (
-            <button
-              type="button"
-              className="add-icon rounded-pills"
-              title="Approve Submission"
-              onClick={() => handleApprove(row.id)}
-            >
-              <i className="ti-check text-success" />
-            </button>
-          )}
+            {/* Edit in Submit Billing Screen (Only when Pending Manager Approval and user has management rights) */}
+            {canManage && row.status === "Pending Manager Approval" && (
+              <button
+                type="button"
+                className="edit-icon rounded-pills border-warning"
+                title="Edit Submission"
+                onClick={() => openEditModal(row)}
+              >
+                <i className="ti-pencil-alt text-warning" />
+              </button>
+            )}
 
-          {/* Return / Revert for correction with message */}
-          {row.status === "Pending Manager Approval" && (
-            <button
-              type="button"
-              className="delete-icon rounded-pills"
-              title="Revert / Return for correction"
-              onClick={() => handleReturnClick(row)}
-            >
-              <i className="ti-back-left text-danger" />
-            </button>
-          )}
-        </div>
-      ),
+            {/* Manager Approve (Only when user has management rights) */}
+            {canManage && row.status === "Pending Manager Approval" && (
+              <button
+                type="button"
+                className="add-icon rounded-pills"
+                title="Approve Submission"
+                onClick={() => handleApprove(row.id)}
+              >
+                <i className="ti-check text-success" />
+              </button>
+            )}
+
+            {/* Return / Revert for correction with message (Only when user has management rights) */}
+            {canManage && row.status === "Pending Manager Approval" && (
+              <button
+                type="button"
+                className="delete-icon rounded-pills"
+                title="Revert / Return for correction"
+                onClick={() => handleReturnClick(row)}
+              >
+                <i className="ti-back-left text-danger" />
+              </button>
+            )}
+          </div>
+        );
+      },
     },
   ];
 
