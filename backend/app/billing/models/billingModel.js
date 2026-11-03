@@ -1326,6 +1326,66 @@ const checkApproverAccess = async (staffUserId) => {
     }
 };
 
+
+// 17. Get Billing Dashboard Counts (Submitted, Approved, Credit Control, Returned)
+const getBillingDashboardMetrics = async (staffUserId) => {
+    try {
+        let isAdmin = false;
+        if (staffUserId) {
+            const roleRows = await QueryRoleHelperFunction(staffUserId);
+            const role = (roleRows && roleRows.length > 0) ? String(roleRows[0].role_name || '').toUpperCase() : '';
+            const roleId = Number(roleRows[0]?.role_id);
+            isAdmin = ['SUPERADMIN', 'ADMIN', 'SUPER ADMIN'].includes(role) || roleId === 1 || roleId === 2;
+        }
+
+        let baseWhere = '1 = 1';
+        const params = [];
+
+        // If not admin: show metrics for submissions submitted by user, or managed by user (their team)
+        if (!isAdmin && staffUserId) {
+            baseWhere += ` AND (
+                bs.submitted_by = ?
+                OR bs.manager_id = ?
+                OR EXISTS (
+                    SELECT 1 FROM line_managers lm 
+                    WHERE lm.staff_to = ? AND lm.staff_by = bs.submitted_by
+                )
+            )`;
+            params.push(staffUserId, staffUserId, staffUserId);
+        }
+
+        const query = `
+            SELECT 
+                COUNT(*) AS total_submitted,
+                SUM(CASE WHEN bs.status IN ('Pending Credit Control Approval', 'Approved', 'Invoiced') THEN 1 ELSE 0 END) AS total_approved,
+                SUM(CASE WHEN bs.status = 'Pending Credit Control Approval' THEN 1 ELSE 0 END) AS pending_credit_control,
+                SUM(CASE WHEN bs.status = 'Returned' THEN 1 ELSE 0 END) AS total_returned,
+                SUM(CASE WHEN bs.status = 'Pending Manager Approval' THEN 1 ELSE 0 END) AS pending_manager_approval,
+                SUM(CASE WHEN bs.status = 'Invoiced' THEN 1 ELSE 0 END) AS total_invoiced
+            FROM billing_submissions bs
+            WHERE ${baseWhere}
+        `;
+
+        const [rows] = await pool.execute(query, params);
+        const data = rows[0] || {};
+
+        return {
+            status: true,
+            data: {
+                totalSubmitted: Number(data.total_submitted) || 0,
+                totalApproved: Number(data.total_approved) || 0,
+                pendingCreditControl: Number(data.pending_credit_control) || 0,
+                totalReturned: Number(data.total_returned) || 0,
+                pendingManagerApproval: Number(data.pending_manager_approval) || 0,
+                totalInvoiced: Number(data.total_invoiced) || 0
+            }
+        };
+    } catch (error) {
+        console.error('Error fetching billing dashboard metrics:', error);
+        return { status: false, message: error.message };
+    }
+};
+
 module.exports = {
     getActiveCustomers,
     getActiveClients,
@@ -1344,5 +1404,6 @@ module.exports = {
     managerEditSubmission,
     markSubmissionBilled,
     recordInvoicePayment,
-    checkApproverAccess
+    checkApproverAccess,
+    getBillingDashboardMetrics
 };

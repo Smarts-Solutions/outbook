@@ -55,4 +55,8 @@ router.post('/recordInvoicePayment', verifyToken, billingController.recordInvoic
 router.post('/checkApproverAccess', verifyToken, billingController.checkApproverAccess);
 router.get('/checkApproverAccess', verifyToken, billingController.checkApproverAccess);
 
+
+router.post('/getBillingDashboardMetrics', verifyToken, billingController.getBillingDashboardMetrics);
+router.get('/getBillingDashboardMetrics', verifyToken, billingController.getBillingDashboardMetrics);
+
 module.exports = router;

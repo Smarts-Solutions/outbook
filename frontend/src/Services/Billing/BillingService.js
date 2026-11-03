@@ -219,3 +219,15 @@ export async function checkApproverAccessApi(data, token) {
     return err?.response?.data || { status: false, message: err.message };
   }
 }
+
+// 17. Get Billing Dashboard Metrics (Submitted, Approved, Credit Control, Returned)
+export async function getBillingDashboardMetricsApi(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}billing/getBillingDashboardMetrics`, data, {
+      headers: header(token),
+    });
+    return res?.data;
+  } catch (err) {
+    return err?.response?.data || { status: false, message: err.message };
+  }
+}

@@ -458,6 +458,31 @@ const checkApproverAccess = async (req, res) => {
     }
 };
 
+
+// 17. Get Billing Dashboard Metrics Controller
+const getBillingDashboardMetrics = async (req, res) => {
+    try {
+        const staffUserId = req.body?.StaffUserId || req.userId || null;
+        const result = await billingModel.getBillingDashboardMetrics(staffUserId);
+
+        if (!result.status) {
+            return res.status(500).json({
+                status: false,
+                message: result.message || "Failed to fetch dashboard metrics"
+            });
+        }
+
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error("Error in getBillingDashboardMetrics controller:", error);
+        return res.status(500).json({
+            status: false,
+            message: "Internal server error",
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     getActiveCustomers,
     getActiveClients,
@@ -476,5 +501,6 @@ module.exports = {
     managerEditSubmission,
     markSubmissionBilled,
     recordInvoicePayment,
-    checkApproverAccess
+    checkApproverAccess,
+    getBillingDashboardMetrics
 };
