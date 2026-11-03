@@ -15,12 +15,37 @@ export const BillingHeader = ({ activeTab }) => {
   // Super Admin (1) / Admin (2)
   const isAdmin = roleId === 1 || roleId === 2 || roleName.includes("admin") || roleName.includes("superadmin");
 
-  // State to check whether current logged-in user is a Line Manager
-  // Defaults to true only for admins; for others, check dynamically via API
+  // Read job create permission from localStorage accessData if present
+  const checkJobCreateFromLocal = () => {
+    if (isAdmin) return true;
+    try {
+      const accessData = JSON.parse(localStorage.getItem("accessData") || "[]");
+      const jobPerm = accessData.find((item) => item.permission_name === "job");
+      if (jobPerm && Array.isArray(jobPerm.items)) {
+        const insertItem = jobPerm.items.find((it) => it.type === "insert");
+        if (insertItem !== undefined) {
+          return insertItem.is_assigned === 1 || insertItem.is_assigned === true;
+        }
+      }
+    } catch (e) {
+      // fallback
+    }
+    return false;
+  };
+
+  // State: Can current user approve (is Line Manager)
   const [canApprove, setCanApprove] = useState(() => {
     if (isAdmin) return true;
     const cached = sessionStorage.getItem(`is_line_manager_${staffDetails?.id}`);
     return cached === "true";
+  });
+
+  // State: Can current user create job / submit billing
+  const [canCreateJob, setCanCreateJob] = useState(() => {
+    if (isAdmin) return true;
+    const cached = sessionStorage.getItem(`can_create_job_${staffDetails?.id}`);
+    if (cached !== null) return cached === "true";
+    return checkJobCreateFromLocal();
   });
 
   const getAuthToken = () => {
@@ -35,27 +60,33 @@ export const BillingHeader = ({ activeTab }) => {
   useEffect(() => {
     if (isAdmin) {
       setCanApprove(true);
+      setCanCreateJob(true);
       return;
     }
 
     let isMounted = true;
-    const verifyApproverRole = async () => {
+    const verifyUserPermissions = async () => {
       try {
         const token = getAuthToken();
         const payload = { StaffUserId: staffDetails?.id };
         const res = await checkApproverAccessApi(payload, token);
         if (res && res.status && isMounted) {
           const isManager = Boolean(res.can_approve || res.is_line_manager);
+          const hasJobCreate = Boolean(res.can_create_job);
+
           setCanApprove(isManager);
+          setCanCreateJob(hasJobCreate);
+
           sessionStorage.setItem(`is_line_manager_${staffDetails?.id}`, String(isManager));
+          sessionStorage.setItem(`can_create_job_${staffDetails?.id}`, String(hasJobCreate));
         }
       } catch (err) {
-        console.error("Error verifying line manager status:", err);
+        console.error("Error verifying billing permissions:", err);
       }
     };
 
     if (staffDetails?.id) {
-      verifyApproverRole();
+      verifyUserPermissions();
     }
 
     return () => {
@@ -75,12 +106,13 @@ export const BillingHeader = ({ activeTab }) => {
   // Role & Hierarchy based visibility:
   // 1. Admin & Super Admin: All 6 tabs
   // 2. Staff / User:
-  //    - "My Dashboard" & "Submit Billing" are visible to all staff with billing access.
-  //    - "Approvals" tab is ONLY visible if the staff is a Line Manager (or Admin).
-  //      If the staff is not anyone's line manager, Approvals tab is HIDDEN.
+  //    - "My Dashboard": Always visible
+  //    - "Submit Billing": Only visible if user has job create permission (`canCreateJob`)
+  //    - "Approvals": Only visible if user is a Line Manager (`canApprove`)
   const tabsList = allTabs.filter((tab) => {
     if (isAdmin) return true;
-    if (tab.id === "dashboard" || tab.id === "submit") return true;
+    if (tab.id === "dashboard") return true;
+    if (tab.id === "submit") return canCreateJob;
     if (tab.id === "approvals") return canApprove;
     return false;
   });
@@ -103,13 +135,15 @@ export const BillingHeader = ({ activeTab }) => {
               >
                 <Download size={16} /> Export Excel
               </button>
-              <button
-                type="button"
-                className="btn btn-info text-white d-flex align-items-center gap-1"
-                onClick={() => navigate("/admin/billing/submit")}
-              >
-                <Plus size={16} /> Add Billing
-              </button>
+              {(canCreateJob || isAdmin) && (
+                <button
+                  type="button"
+                  className="btn btn-info text-white d-flex align-items-center gap-1"
+                  onClick={() => navigate("/admin/billing/submit")}
+                >
+                  <Plus size={16} /> Add Billing
+                </button>
+              )}
             </div>
           </div>
         </div>

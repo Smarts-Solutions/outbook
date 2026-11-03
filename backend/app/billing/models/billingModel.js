@@ -1267,11 +1267,17 @@ const recordInvoicePayment = async (submissionId, staffUserId, paidDate = null) 
 };
 
 
-// 16. Check if a Staff User is a Line Manager (or Admin) to view Approvals Tab
+// 16. Check User Billing Permissions (can_create_job / can_submit_billing, is_line_manager, can_approve, is_admin)
 const checkApproverAccess = async (staffUserId) => {
     try {
         if (!staffUserId) {
-            return { status: true, is_line_manager: false, is_admin: false, can_approve: false };
+            return {
+                status: true,
+                is_line_manager: false,
+                is_admin: false,
+                can_approve: false,
+                can_create_job: false
+            };
         }
 
         const roleRows = await QueryRoleHelperFunction(staffUserId);
@@ -1284,22 +1290,35 @@ const checkApproverAccess = async (staffUserId) => {
                 status: true,
                 is_line_manager: true,
                 is_admin: true,
-                can_approve: true
+                can_approve: true,
+                can_create_job: true
             };
         }
 
-        // Check if this staffUserId is configured as staff_to in line_managers (i.e. has subordinates)
+        // 1. Check if user is a Line Manager (has subordinates where staff_to = staffUserId)
         const [lmRows] = await pool.execute(
             'SELECT 1 FROM line_managers WHERE staff_to = ? LIMIT 1',
             [staffUserId]
         );
         const isLineManager = lmRows.length > 0;
 
+        // 2. Check if user has permission to create job (permission_name = 'job' and type = 'insert')
+        const [jobPermRows] = await pool.execute(
+            `SELECT 1 
+              FROM role_permissions rp
+              JOIN permissions p ON rp.permission_id = p.id
+              WHERE rp.role_id = ? AND p.permission_name = 'job' AND p.type = 'insert'
+              LIMIT 1`,
+            [roleId]
+        );
+        const canCreateJob = jobPermRows.length > 0;
+
         return {
             status: true,
             is_line_manager: isLineManager,
             is_admin: false,
-            can_approve: isLineManager
+            can_approve: isLineManager,
+            can_create_job: canCreateJob
         };
     } catch (error) {
         console.error('Error in checkApproverAccess:', error);
