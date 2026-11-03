@@ -51,4 +51,8 @@ router.post('/managerEdit', verifyToken, billingController.managerEditSubmission
 router.post('/markSubmissionBilled', verifyToken, billingController.markSubmissionBilled);
 router.post('/recordInvoicePayment', verifyToken, billingController.recordInvoicePayment);
 
+
+router.post('/checkApproverAccess', verifyToken, billingController.checkApproverAccess);
+router.get('/checkApproverAccess', verifyToken, billingController.checkApproverAccess);
+
 module.exports = router;

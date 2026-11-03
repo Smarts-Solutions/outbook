@@ -433,6 +433,31 @@ const recordInvoicePayment = async (req, res) => {
     }
 };
 
+
+// 16. Check Approver Access Controller (Line Manager or Admin)
+const checkApproverAccess = async (req, res) => {
+    try {
+        const staffUserId = req.body?.StaffUserId || req.userId || null;
+        const result = await billingModel.checkApproverAccess(staffUserId);
+
+        if (!result.status) {
+            return res.status(500).json({
+                status: false,
+                message: result.message || "Failed to check approver access"
+            });
+        }
+
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error("Error in checkApproverAccess controller:", error);
+        return res.status(500).json({
+            status: false,
+            message: "Internal server error",
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     getActiveCustomers,
     getActiveClients,
@@ -450,5 +475,6 @@ module.exports = {
     managerRejectSubmission,
     managerEditSubmission,
     markSubmissionBilled,
-    recordInvoicePayment
+    recordInvoicePayment,
+    checkApproverAccess
 };

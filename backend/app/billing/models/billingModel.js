@@ -1266,6 +1266,47 @@ const recordInvoicePayment = async (submissionId, staffUserId, paidDate = null) 
     }
 };
 
+
+// 16. Check if a Staff User is a Line Manager (or Admin) to view Approvals Tab
+const checkApproverAccess = async (staffUserId) => {
+    try {
+        if (!staffUserId) {
+            return { status: true, is_line_manager: false, is_admin: false, can_approve: false };
+        }
+
+        const roleRows = await QueryRoleHelperFunction(staffUserId);
+        const role = (roleRows && roleRows.length > 0) ? String(roleRows[0].role_name || '').toUpperCase() : '';
+        const roleId = Number(roleRows[0]?.role_id);
+        const isAdmin = ['SUPERADMIN', 'ADMIN', 'SUPER ADMIN'].includes(role) || roleId === 1 || roleId === 2;
+
+        if (isAdmin) {
+            return {
+                status: true,
+                is_line_manager: true,
+                is_admin: true,
+                can_approve: true
+            };
+        }
+
+        // Check if this staffUserId is configured as staff_to in line_managers (i.e. has subordinates)
+        const [lmRows] = await pool.execute(
+            'SELECT 1 FROM line_managers WHERE staff_to = ? LIMIT 1',
+            [staffUserId]
+        );
+        const isLineManager = lmRows.length > 0;
+
+        return {
+            status: true,
+            is_line_manager: isLineManager,
+            is_admin: false,
+            can_approve: isLineManager
+        };
+    } catch (error) {
+        console.error('Error in checkApproverAccess:', error);
+        return { status: false, message: error.message };
+    }
+};
+
 module.exports = {
     getActiveCustomers,
     getActiveClients,
@@ -1283,5 +1324,6 @@ module.exports = {
     managerRejectSubmission,
     managerEditSubmission,
     markSubmissionBilled,
-    recordInvoicePayment
+    recordInvoicePayment,
+    checkApproverAccess
 };

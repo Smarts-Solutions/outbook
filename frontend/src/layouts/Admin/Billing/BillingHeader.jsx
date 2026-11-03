@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Download, Plus } from "lucide-react";
+import { checkApproverAccessApi } from "../../../Services/Billing/BillingService";
 
 export const BillingHeader = ({ activeTab }) => {
   const navigate = useNavigate();
@@ -11,11 +12,56 @@ export const BillingHeader = ({ activeTab }) => {
   const roleId = Number(staffDetails?.role_id);
   const roleName = (staffDetails?.role_name || "").toLowerCase();
 
-  // Role Checks
   // Super Admin (1) / Admin (2)
   const isAdmin = roleId === 1 || roleId === 2 || roleName.includes("admin") || roleName.includes("superadmin");
-  // Account Manager (4) -> Manager / Approver
-  const isAccountManager = roleId === 4 || roleName.includes("account manager");
+
+  // State to check whether current logged-in user is a Line Manager
+  // Defaults to true only for admins; for others, check dynamically via API
+  const [canApprove, setCanApprove] = useState(() => {
+    if (isAdmin) return true;
+    const cached = sessionStorage.getItem(`is_line_manager_${staffDetails?.id}`);
+    return cached === "true";
+  });
+
+  const getAuthToken = () => {
+    try {
+      const raw = localStorage.getItem("token");
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return localStorage.getItem("token");
+    }
+  };
+
+  useEffect(() => {
+    if (isAdmin) {
+      setCanApprove(true);
+      return;
+    }
+
+    let isMounted = true;
+    const verifyApproverRole = async () => {
+      try {
+        const token = getAuthToken();
+        const payload = { StaffUserId: staffDetails?.id };
+        const res = await checkApproverAccessApi(payload, token);
+        if (res && res.status && isMounted) {
+          const isManager = Boolean(res.can_approve || res.is_line_manager);
+          setCanApprove(isManager);
+          sessionStorage.setItem(`is_line_manager_${staffDetails?.id}`, String(isManager));
+        }
+      } catch (err) {
+        console.error("Error verifying line manager status:", err);
+      }
+    };
+
+    if (staffDetails?.id) {
+      verifyApproverRole();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [staffDetails?.id, isAdmin]);
 
   const allTabs = [
     { id: "dashboard", path: "/admin/billing/dashboard", label: "My Dashboard" },
@@ -26,15 +72,17 @@ export const BillingHeader = ({ activeTab }) => {
     { id: "master", path: "/admin/billing/master-data", label: "Master Data" },
   ];
 
-  // Role-based visibility:
+  // Role & Hierarchy based visibility:
   // 1. Admin & Super Admin: All 6 tabs
-  // 2. Staff / Account Manager / Line Manager:
-  //    - Can submit billing (Submit Billing tab available for everyone with billing access)
-  //    - Approvals tab available for managers/approvers or admins
+  // 2. Staff / User:
+  //    - "My Dashboard" & "Submit Billing" are visible to all staff with billing access.
+  //    - "Approvals" tab is ONLY visible if the staff is a Line Manager (or Admin).
+  //      If the staff is not anyone's line manager, Approvals tab is HIDDEN.
   const tabsList = allTabs.filter((tab) => {
     if (isAdmin) return true;
-    // Every staff/manager can view My Dashboard, Submit Billing, and Approvals
-    return tab.id === "dashboard" || tab.id === "submit" || tab.id === "approvals";
+    if (tab.id === "dashboard" || tab.id === "submit") return true;
+    if (tab.id === "approvals") return canApprove;
+    return false;
   });
 
   return (

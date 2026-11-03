@@ -207,3 +207,15 @@ export async function recordInvoicePaymentApi(data, token) {
     return err?.response?.data || { status: false, message: err.message };
   }
 }
+
+// 16. Check Approver Access (Line Manager or Admin)
+export async function checkApproverAccessApi(data, token) {
+  try {
+    const res = await axios.post(`${Config.base_url}billing/checkApproverAccess`, data, {
+      headers: header(token),
+    });
+    return res?.data;
+  } catch (err) {
+    return err?.response?.data || { status: false, message: err.message };
+  }
+}
