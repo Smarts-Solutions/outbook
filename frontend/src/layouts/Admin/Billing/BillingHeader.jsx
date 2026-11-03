@@ -99,12 +99,13 @@ export const BillingHeader = ({ activeTab }) => {
     { id: "submit", path: "/admin/billing/submit", label: "Submit Billing" },
     { id: "approvals", path: "/admin/billing/approvals", label: "Approvals" },
     { id: "credit", path: "/admin/billing/credit-control", label: "Credit Control" },
-    { id: "control", path: "/admin/billing/control-centre", label: "Billing Control Centre" },
-    { id: "master", path: "/admin/billing/master-data", label: "Master Data" },
+    // Temporarily commented out as not needed right now:
+    // { id: "control", path: "/admin/billing/control-centre", label: "Billing Control Centre" },
+    // { id: "master", path: "/admin/billing/master-data", label: "Master Data" },
   ];
 
   // Role & Hierarchy based visibility:
-  // 1. Admin & Super Admin: All 6 tabs
+  // 1. Admin & Super Admin: All active tabs (Dashboard, Submit, Approvals, Credit Control)
   // 2. Staff / User:
   //    - "My Dashboard": Always visible
   //    - "Submit Billing": Only visible if user has job create permission (`canCreateJob`)
