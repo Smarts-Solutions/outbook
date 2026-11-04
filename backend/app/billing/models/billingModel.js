@@ -589,6 +589,18 @@ const submitBilling = async (payload, submittedByStaffId) => {
             };
         }
 
+        // Strict 100% Contributor Validation
+        if (Array.isArray(contributors) && contributors.length > 0) {
+            const totalAllocPct = contributors.reduce((sum, c) => sum + (parseFloat(c.pct) || 0), 0);
+            if (Math.abs(totalAllocPct - 100) > 0.1) {
+                await connection.rollback();
+                return {
+                    status: false,
+                    message: `Contributor allocation must equal exactly 100%. Currently allocated: ${totalAllocPct.toFixed(2)}%.`
+                };
+            }
+        }
+
         // Dedupe Key for duplicate prevention (Rule 5)
         const dedupeKey = `${client_id}_${service_id}_${period_label}`;
 

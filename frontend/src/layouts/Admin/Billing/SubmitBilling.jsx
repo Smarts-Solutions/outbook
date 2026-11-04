@@ -43,6 +43,7 @@ export const SubmitBilling = () => {
 
   // Track previous practice & client to avoid resetting states when going back/forth steps
   const prevPracticeIdRef = useRef(null);
+  const prevNetAmountRef = useRef(null);
   const prevEngPracticeIdRef = useRef(null);
   const prevClientIdRef = useRef(null);
 
@@ -870,7 +871,67 @@ export const SubmitBilling = () => {
   const remainingAmt = Math.max(0, parseFloat((netAmount - totalAllocatedAmt).toFixed(2)));
   const remainingPct = Math.max(0, parseFloat((100 - totalAllocatedPct).toFixed(2)));
 
-  const handleAddContributor = () => {
+    // Distribute equally across current contributors
+  const handleDistributeEqually = () => {
+    if (!contributors || contributors.length === 0) return;
+    const count = contributors.length;
+    const equalPct = parseFloat((100 / count).toFixed(2));
+    
+    // Distribute percentages so they sum to exactly 100%
+    setContributors(
+      contributors.map((c, idx) => {
+        let p = equalPct;
+        if (idx === count - 1) {
+          p = parseFloat((100 - equalPct * (count - 1)).toFixed(2));
+        }
+        const amt = netAmount > 0 ? parseFloat(((netAmount * p) / 100).toFixed(2)) : 0;
+        return {
+          ...c,
+          mode: "pct",
+          pct: String(p),
+          amount: amt > 0 ? String(amt) : "",
+        };
+      })
+    );
+  };
+
+  // Synchronize contributors when netAmount changes (e.g. hours, rates or discounts change)
+  useEffect(() => {
+    if (prevNetAmountRef.current === null) {
+      prevNetAmountRef.current = netAmount;
+      return;
+    }
+    if (prevNetAmountRef.current === netAmount) {
+      return;
+    }
+    prevNetAmountRef.current = netAmount;
+
+    // When netAmount changes:
+    // Any contributor in 'pct' mode must have their amount updated to match new netAmount!
+    // Any contributor in 'flat' mode has their fixed amount, so their pct is updated to match new netAmount.
+    setContributors((prev) =>
+      prev.map((c) => {
+        if (c.mode === "pct" && c.pct !== "") {
+          const p = parseFloat(c.pct) || 0;
+          const amt = netAmount > 0 ? parseFloat(((netAmount * p) / 100).toFixed(2)) : 0;
+          return {
+            ...c,
+            amount: amt > 0 ? String(amt) : "",
+          };
+        } else if (c.mode === "flat" && c.amount !== "") {
+          const amt = parseFloat(c.amount) || 0;
+          const p = netAmount > 0 ? parseFloat(((amt / netAmount) * 100).toFixed(2)) : 0;
+          return {
+            ...c,
+            pct: p > 0 ? String(p) : "",
+          };
+        }
+        return c;
+      })
+    );
+  }, [netAmount]);
+
+const handleAddContributor = () => {
     // Find first staff from timesheet list that is not yet selected in contributors
     const unselected = timesheetStaffList.find(
       (ts) => !contributors.some((c) => String(c.staff_id) === String(ts.staff_id))
@@ -2057,13 +2118,25 @@ export const SubmitBilling = () => {
                   {/* Revenue Split Section */}
                   <div className="card border mb-4">
                     <div className="card-body p-3">
-                      <div className="mb-3">
-                        <h6 className="fw-bold text-dark mb-0">
-                          Revenue split — who worked on this?
-                        </h6>
-                        <small className="text-muted" style={{ fontSize: "12px" }}>
-                          Contributors who logged timesheet in last month for this customer, client & service
-                        </small>
+                      <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <div>
+                          <h6 className="fw-bold text-dark mb-0">
+                            Revenue split — who worked on this?
+                          </h6>
+                          <small className="text-muted" style={{ fontSize: "12px" }}>
+                            Contributors who logged timesheet in last month for this customer, client & service
+                          </small>
+                        </div>
+                        {contributors.length > 1 && (
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-primary fw-medium rounded-pill px-3 shadow-sm"
+                            onClick={handleDistributeEqually}
+                            title="Distribute 100% equally among all selected contributors"
+                          >
+                            ⚡ Distribute Equally
+                          </button>
+                        )}
                       </div>
 
                       <div className="row g-2 mb-2 text-muted small fw-medium">
@@ -2118,7 +2191,7 @@ export const SubmitBilling = () => {
                                   step="any"
                                   onWheel={(e) => e.target.blur()}
                                   className={`form-control form-control-sm text-end ${c.mode === "flat" ? "bg-light text-muted" : ""}`}
-                                  value={c.pct}
+                                  value={c.mode === "flat" ? (c.amount !== "" && netAmount > 0 ? String(parseFloat(((parseFloat(c.amount) / netAmount) * 100).toFixed(2))) : "") : c.pct}
                                   placeholder="0"
                                   disabled={c.mode === "flat"}
                                   title={c.mode === "flat" ? "Calculated from Flat Amount. Clear Flat to enter %." : "Enter percentage share"}
@@ -2140,7 +2213,7 @@ export const SubmitBilling = () => {
                                   step="any"
                                   onWheel={(e) => e.target.blur()}
                                   className={`form-control form-control-sm text-end ${c.mode === "pct" ? "bg-light text-muted" : ""}`}
-                                  value={c.amount}
+                                  value={c.mode === "pct" ? (c.pct !== "" && netAmount > 0 ? String(parseFloat(((netAmount * parseFloat(c.pct)) / 100).toFixed(2))) : "") : c.amount}
                                   placeholder="0.00"
                                   disabled={c.mode === "pct"}
                                   title={c.mode === "pct" ? "Calculated from % Share. Clear % to enter Flat £." : "Enter flat amount in £"}
