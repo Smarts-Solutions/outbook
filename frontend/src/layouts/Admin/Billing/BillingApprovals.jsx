@@ -10,7 +10,7 @@ import {
 } from "../../../Services/Billing/BillingService";
 import { convertDate1 } from "../../../Utils/Comman_function";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { Check, CheckCheck, Eye, RotateCcw, Edit, X } from "lucide-react";
+import { Check, CheckCheck, Eye, RotateCcw, Edit, X, Clock } from "lucide-react";
 import sweatalert from "sweetalert2";
 
 const BillingApprovals = () => {
@@ -289,7 +289,8 @@ const BillingApprovals = () => {
       name: "Submitted By",
       selector: (row) => row.submitted_by_name,
       sortable: true,
-      minWidth: "150px",
+      minWidth: "130px",
+      width: "140px",
       cell: (row) => (
         <div title={row.submitted_by_name || `Staff #${row.submitted_by}`}>
           {row.submitted_by_name || `Staff #${row.submitted_by}`}
@@ -300,7 +301,8 @@ const BillingApprovals = () => {
       name: "Customer Name",
       selector: (row) => row.customer_name,
       sortable: true,
-      minWidth: "170px",
+      minWidth: "140px",
+      width: "160px",
       cell: (row) => (
         <div
           title={row.customer_name || `Customer #${row.customer_id}`}
@@ -314,7 +316,8 @@ const BillingApprovals = () => {
       name: "Client Name",
       selector: (row) => row.client_name,
       sortable: true,
-      minWidth: "170px",
+      minWidth: "140px",
+      width: "160px",
       cell: (row) => (
         <div
           title={row.client_name || `Client #${row.client_id}`}
@@ -328,7 +331,8 @@ const BillingApprovals = () => {
       name: "Service Name",
       selector: (row) => row.service_name,
       sortable: true,
-      minWidth: "160px",
+      minWidth: "130px",
+      width: "150px",
       cell: (row) => (
         <div
           title={row.service_name || "Service"}
@@ -342,7 +346,8 @@ const BillingApprovals = () => {
       name: "Period",
       selector: (row) => row.period_label,
       sortable: true,
-      minWidth: "130px",
+      minWidth: "100px",
+      width: "115px",
       cell: (row) => (
         <span className="badge bg-light text-dark border">
           {row.period_label || "-"}
@@ -353,7 +358,8 @@ const BillingApprovals = () => {
       name: "Model",
       selector: (row) => row.engagement_model,
       sortable: true,
-      minWidth: "170px",
+      minWidth: "110px",
+      width: "125px",
       cell: (row) => (
         <div className="py-2">
           {renderModelBadges(row.engagement_model)}
@@ -361,10 +367,11 @@ const BillingApprovals = () => {
       ),
     },
     {
-      name: "Account Manager",
+      name: "Line Manager",
       selector: (row) => row.manager_name,
       sortable: true,
-      minWidth: "150px",
+      minWidth: "130px",
+      width: "140px",
       cell: (row) => (
         <div title={row.manager_name || "-"}>
           {row.manager_name || "-"}
@@ -375,7 +382,8 @@ const BillingApprovals = () => {
       name: "Gross Amount",
       selector: (row) => row.gross_amount,
       sortable: true,
-      minWidth: "120px",
+      minWidth: "105px",
+      width: "115px",
       cell: (row) => (
         <span className="text-dark">
           £{parseFloat(row.gross_amount || row.net_amount || 0).toFixed(2)}
@@ -386,7 +394,8 @@ const BillingApprovals = () => {
       name: "Discount",
       selector: (row) => row.discount_pct,
       sortable: true,
-      minWidth: "110px",
+      minWidth: "85px",
+      width: "95px",
       cell: (row) => {
         const pct = parseFloat(row.discount_pct) || 0;
         return pct > 0 ? (
@@ -402,7 +411,8 @@ const BillingApprovals = () => {
       name: "Net Amount",
       selector: (row) => row.net_amount,
       sortable: true,
-      minWidth: "120px",
+      minWidth: "105px",
+      width: "115px",
       cell: (row) => (
         <span className="fw-bold text-info fs-6">
           £{parseFloat(row.net_amount || 0).toFixed(2)}
@@ -411,7 +421,8 @@ const BillingApprovals = () => {
     },
     {
       name: "Revenue Split",
-      minWidth: "160px",
+      minWidth: "140px",
+      width: "160px",
       cell: (row) => {
         const list = row.contributors || [];
         if (!list.length) return <span className="text-muted small">—</span>;
@@ -430,7 +441,8 @@ const BillingApprovals = () => {
       name: "Created At",
       selector: (row) => row.submitted_at,
       sortable: true,
-      minWidth: "120px",
+      minWidth: "100px",
+      width: "110px",
       cell: (row) => (
         <div title={row.submitted_at} className="text-muted">
           {convertDate1(row.submitted_at)}
@@ -441,41 +453,42 @@ const BillingApprovals = () => {
       name: "Status",
       selector: (row) => row.status,
       sortable: true,
-      minWidth: "160px",
+      minWidth: "140px",
+      width: "160px",
       cell: (row) => {
         const st = (row.status || "").toLowerCase();
         if (st.includes("credit control")) {
           return (
-            <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1">
+            <span className="badge rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs" style={{ backgroundColor: "#e0f2fe", color: "#0369a1", border: "1px solid #bae6fd", fontSize: "12px" }}>
               <Check size={13} /> Sent to Credit Control
             </span>
           );
         }
         if (st.includes("approved")) {
           return (
-            <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1">
+            <span className="badge rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs" style={{ backgroundColor: "#dcfce7", color: "#15803d", border: "1px solid #bbf7d0", fontSize: "12px" }}>
               <Check size={13} /> Approved
             </span>
           );
         }
         if (st.includes("return")) {
           return (
-            <span className="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1">
+            <span className="badge rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs" style={{ backgroundColor: "#fef3c7", color: "#b45309", border: "1px solid #fde68a", fontSize: "12px" }}>
               <RotateCcw size={13} /> Returned
             </span>
           );
         }
         return (
-          <span className="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 fw-semibold">
-            Pending
+          <span className="badge rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs" style={{ backgroundColor: "#e0f7fa", color: "#00838f", border: "1px solid #b2ebf2", fontSize: "12px" }}>
+            <Clock size={13} /> Pending Manager Approval
           </span>
         );
       },
     },
     {
       name: "Actions",
-      minWidth: "220px",
-      width: "220px",
+      minWidth: "130px",
+      width: "140px",
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
@@ -564,6 +577,30 @@ const BillingApprovals = () => {
               </p>
             </div>
 
+            {/* Quick Status Filter Pills */}
+            <div className="d-flex align-items-center gap-2 flex-wrap">
+              <div className="btn-group btn-group-sm bg-white p-1 rounded-pill border shadow-xs">
+                {[
+                  { id: "all", label: "All" },
+                  { id: "pending", label: "Pending" },
+                  { id: "approved", label: "Approved / CC" },
+                  { id: "returned", label: "Returned" },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    className={`btn btn-sm rounded-pill px-3 py-1 fw-semibold transition-all ${
+                      statusFilter === tab.id
+                        ? "btn-info text-white shadow-xs"
+                        : "btn-light text-secondary border-0 bg-transparent"
+                    }`}
+                    onClick={() => setStatusFilter(tab.id)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           <BillingDatatable
