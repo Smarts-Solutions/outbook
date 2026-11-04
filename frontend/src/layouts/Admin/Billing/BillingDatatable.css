@@ -82,28 +82,6 @@
   font-family: "Inter", sans-serif !important;
 }
 
-/* Ensure sticky action column stays cleanly on top without overlapping other columns */
-.custom-datatable-sticky-action .rdt_TableHeadRow .rdt_TableCol:last-child {
-  position: sticky !important;
-  right: 0 !important;
-  background: #ffffff !important;
-  z-index: 10 !important;
-  box-shadow: -4px 0 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-.custom-datatable-sticky-action .rdt_TableBody .rdt_TableRow .rdt_TableCell:last-child {
-  position: sticky !important;
-  right: 0 !important;
-  background: #ffffff !important;
-  z-index: 8 !important;
-  box-shadow: -4px 0 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-.custom-datatable-sticky-action .rdt_TableBody .rdt_TableRow:hover .rdt_TableCell:last-child {
-  background: #f8fafc !important;
-  z-index: 10 !important;
-}
-
 .billing-datatable .rdt_TableHeadRow {
   background-color: transparent !important;
   border-top: 0 !important;
@@ -116,17 +94,17 @@
 
 .billing-datatable .rdt_TableCol {
   color: #000;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   font-family: "Inter", sans-serif !important;
-  padding: 8px 10px;
+  padding: 10px 14px;
 }
 
 .billing-datatable .rdt_TableCell {
-  font-size: 12.5px;
+  font-size: 13.5px;
   color: #4b4b4b;
   font-family: "Inter", sans-serif !important;
-  padding: 8px 10px;
+  padding: 10px 14px;
   white-space: normal;
 }
 
@@ -350,32 +328,3 @@
   border-color: #059669;
 }
 
-
-
-/* Custom compact scrollbar for billing datatable */
-.billing-datatable .rdt_TableBody::-webkit-scrollbar,
-.billing-table-wrapper .rdt_Table::-webkit-scrollbar,
-.billing-table-wrapper .datatable-container::-webkit-scrollbar {
-  height: 6px !important;
-  width: 6px !important;
-}
-
-.billing-datatable .rdt_TableBody::-webkit-scrollbar-track,
-.billing-table-wrapper .rdt_Table::-webkit-scrollbar-track,
-.billing-table-wrapper .datatable-container::-webkit-scrollbar-track {
-  background: #f1f5f9 !important;
-  border-radius: 4px;
-}
-
-.billing-datatable .rdt_TableBody::-webkit-scrollbar-thumb,
-.billing-table-wrapper .rdt_Table::-webkit-scrollbar-thumb,
-.billing-table-wrapper .datatable-container::-webkit-scrollbar-thumb {
-  background: #cbd5e1 !important;
-  border-radius: 4px;
-}
-
-.billing-datatable .rdt_TableBody::-webkit-scrollbar-thumb:hover,
-.billing-table-wrapper .rdt_Table::-webkit-scrollbar-thumb:hover,
-.billing-table-wrapper .datatable-container::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8 !important;
-}
