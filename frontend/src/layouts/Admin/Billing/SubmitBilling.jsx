@@ -1511,12 +1511,12 @@ const handleAddContributor = () => {
                   <div className="card bg-light border mb-4">
                     <div className="card-body p-3">
                       <div className="row g-3" style={{ fontSize: "13px" }}>
-                        <div className="col-lg-3 col-md-6">
+                        <div className="col-lg-3 col-md-4 col-sm-6">
                           <span className="text-muted d-block mb-1">Customer</span>
                           <span className="fw-bold text-dark fs-6">{practice?.label || selectedEngData.client}</span>
                         </div>
 
-                        <div className="col-lg-3 col-md-6">
+                        <div className="col-lg-3 col-md-4 col-sm-6">
                           <span className="text-muted d-block mb-1">Engagement Model</span>
                           <div className="d-flex flex-wrap gap-1">
                             {Array.isArray(selectedEngagement) && selectedEngagement.length > 0 ? (
@@ -1537,14 +1537,21 @@ const handleAddContributor = () => {
                           </div>
                         </div>
 
-                        <div className="col-lg-3 col-md-6">
+                        <div className="col-lg-2 col-md-4 col-sm-6">
+                          <span className="text-muted d-block mb-1">Account Manager</span>
+                          <span className="fw-semibold text-dark fs-6">
+                            {customerMeta?.account_manager || "—"}
+                          </span>
+                        </div>
+
+                        <div className="col-lg-2 col-md-4 col-sm-6">
                           <span className="text-muted d-block mb-1">Line Manager</span>
                           <span className="fw-semibold text-dark fs-6">
                             {customerMeta?.line_manager || customerMeta?.account_manager || "—"}
                           </span>
                         </div>
 
-                        <div className="col-lg-3 col-md-6">
+                        <div className="col-lg-2 col-md-4 col-sm-6">
                           <span className="text-muted d-block mb-1">Currency</span>
                           <span className="fw-semibold text-dark fs-6">{selectedEngData.currency}</span>
                         </div>
