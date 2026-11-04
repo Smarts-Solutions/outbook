@@ -427,17 +427,6 @@ const BillingApprovals = () => {
       },
     },
     {
-      name: "Created At",
-      selector: (row) => row.submitted_at,
-      sortable: true,
-      minWidth: "120px",
-      cell: (row) => (
-        <div title={row.submitted_at} className="text-muted">
-          {convertDate1(row.submitted_at)}
-        </div>
-      ),
-    },
-    {
       name: "Status",
       selector: (row) => row.status,
       sortable: true,
@@ -471,6 +460,17 @@ const BillingApprovals = () => {
           </span>
         );
       },
+    },
+    {
+      name: "Created At",
+      selector: (row) => row.submitted_at,
+      sortable: true,
+      minWidth: "120px",
+      cell: (row) => (
+        <div title={row.submitted_at} className="text-muted">
+          {convertDate1(row.submitted_at)}
+        </div>
+      ),
     },
     {
       name: "Actions",
