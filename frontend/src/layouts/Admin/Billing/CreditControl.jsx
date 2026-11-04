@@ -53,8 +53,8 @@ const CreditControl = () => {
               practice: s.customer_name || `Customer #${s.customer_id}`,
               client: s.client_name || `Client #${s.client_id}`,
               number: s.nomisma_bill_number || `INV-${s.id}`,
-              billDate: s.nomisma_bill_date || (s.submitted_at ? convertDate1(s.submitted_at) : "-"),
-              dueDate: s.due_date || "-",
+              billDate: s.nomisma_bill_date ? convertDate1(s.nomisma_bill_date) : (s.submitted_at ? convertDate1(s.submitted_at) : "-"),
+              dueDate: s.due_date ? convertDate1(s.due_date) : "-",
               amount: parseFloat(s.net_amount || 0),
               currency: s.currency || "GBP",
               paidDate: s.paid_date || null,
@@ -440,15 +440,17 @@ const CreditControl = () => {
       name: "Bill Date",
       selector: (row) => row.billDate,
       sortable: true,
-      minWidth: "120px",
-      cell: (row) => <div className="text-muted">{row.billDate}</div>,
+      minWidth: "110px",
+      width: "120px",
+      cell: (row) => <div className="text-muted">{row.billDate ? convertDate1(row.billDate) : "-"}</div>,
     },
     {
       name: "Due Date",
       selector: (row) => row.dueDate,
       sortable: true,
-      minWidth: "120px",
-      cell: (row) => <div className="text-muted">{row.dueDate}</div>,
+      minWidth: "110px",
+      width: "120px",
+      cell: (row) => <div className="text-muted">{row.dueDate ? convertDate1(row.dueDate) : "-"}</div>,
     },
     {
       name: "Amount",
@@ -466,24 +468,25 @@ const CreditControl = () => {
       name: "Status",
       selector: (row) => row.status,
       sortable: true,
-      minWidth: "130px",
+      minWidth: "120px",
+      width: "130px",
       cell: (row) => {
         if (row.paidDate) {
           return (
-            <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-semibold">
-              Paid
+            <span className="badge rounded-pill px-3 py-1 fw-semibold shadow-xs" style={{ backgroundColor: "#dcfce7", color: "#15803d", border: "1px solid #bbf7d0", fontSize: "11.5px" }}>
+              ✓ Paid
             </span>
           );
         }
         if (row.status === "Overdue") {
           return (
-            <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 fw-semibold">
-              Overdue
+            <span className="badge rounded-pill px-3 py-1 fw-semibold shadow-xs" style={{ backgroundColor: "#fee2e2", color: "#b91c1c", border: "1px solid #fca5a5", fontSize: "11.5px" }}>
+              ⚠ Overdue
             </span>
           );
         }
         return (
-          <span className="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 fw-semibold">
+          <span className="badge rounded-pill px-3 py-1 fw-semibold shadow-xs" style={{ backgroundColor: "#fef3c7", color: "#b45309", border: "1px solid #fde68a", fontSize: "11.5px" }}>
             Outstanding
           </span>
         );
