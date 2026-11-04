@@ -433,6 +433,13 @@ const BillingApprovals = () => {
       minWidth: "160px",
       cell: (row) => {
         const st = (row.status || "").toLowerCase();
+        if (st === "invoiced") {
+          return (
+            <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1">
+              <CheckCheck size={13} /> Invoiced
+            </span>
+          );
+        }
         if (st.includes("credit control")) {
           return (
             <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1">
