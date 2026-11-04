@@ -816,19 +816,19 @@ export const SubmitBilling = () => {
   const calculateFteTotal = () => {
     if (!fteModelData?.details) return 0;
     const d = fteModelData.details;
-    const accQty = fteAccountantQty !== "" ? parseFloat(fteAccountantQty) || 0 : parseFloat(d.number_of_accountants) || 0;
+    const accQty = parseFloat(fteAccountantQty) || 0;
     const accFee = parseFloat(d.fee_per_accountant) || 0;
 
-    const bkQty = fteBookkeeperQty !== "" ? parseFloat(fteBookkeeperQty) || 0 : parseFloat(d.number_of_bookkeepers) || 0;
+    const bkQty = parseFloat(fteBookkeeperQty) || 0;
     const bkFee = parseFloat(d.fee_per_bookkeeper) || 0;
 
-    const prQty = ftePayrollQty !== "" ? parseFloat(ftePayrollQty) || 0 : parseFloat(d.number_of_payroll_experts) || 0;
+    const prQty = parseFloat(ftePayrollQty) || 0;
     const prFee = parseFloat(d.fee_per_payroll_expert) || 0;
 
-    const txQty = fteTaxQty !== "" ? parseFloat(fteTaxQty) || 0 : parseFloat(d.number_of_tax_experts) || 0;
+    const txQty = parseFloat(fteTaxQty) || 0;
     const txFee = parseFloat(d.fee_per_tax_expert) || 0;
 
-    const adQty = fteAdminQty !== "" ? parseFloat(fteAdminQty) || 0 : parseFloat(d.number_of_admin_staff) || 0;
+    const adQty = parseFloat(fteAdminQty) || 0;
     const adFee = parseFloat(d.fee_per_admin_staff) || 0;
 
     return (accQty * accFee) + (bkQty * bkFee) + (prQty * prFee) + (txQty * txFee) + (adQty * adFee);
@@ -841,16 +841,23 @@ export const SubmitBilling = () => {
   const percentageTotal = (baseAmountNum * percentageOutsourceVal) / 100;
 
   // 4. Customised Pricing Amount (matches selectedService)
-  const getCustomCostPerJob = () => {
-    if (!customisedModelData?.details || !Array.isArray(customisedModelData.details)) return 0;
-    if (selectedService?.value) {
-      const match = customisedModelData.details.find((c) => String(c.service_id) === String(selectedService.value));
-      if (match) return parseFloat(match.cost_per_job) || 0;
+  const getCustomPricingDetails = () => {
+    if (!customisedModelData?.details || !Array.isArray(customisedModelData.details)) {
+      return { costPerJob: 0, minJobs: 0 };
     }
-    // Default to first item if not matched
-    return parseFloat(customisedModelData.details[0]?.cost_per_job) || 0;
+    let match = null;
+    if (selectedService?.value) {
+      match = customisedModelData.details.find((c) => String(c.service_id) === String(selectedService.value));
+    }
+    if (!match) {
+      match = customisedModelData.details[0];
+    }
+    return {
+      costPerJob: parseFloat(match?.cost_per_job) || 0,
+      minJobs: parseFloat(match?.minimum_number_of_jobs) || 0,
+    };
   };
-  const customCostPerJob = getCustomCostPerJob();
+  const { costPerJob: customCostPerJob, minJobs: customMinJobs } = getCustomPricingDetails();
   const customJobsCountNum = parseFloat(customJobsCount) || 0;
   const customTotal = customJobsCountNum * customCostPerJob;
 
@@ -1077,6 +1084,99 @@ const handleAddContributor = () => {
       return;
     }
 
+    // --- ENGAGEMENT MODEL VALIDATIONS ---
+
+    // 1. FTE Resource Agreement Caps Validation
+    if (fteModelData && fteModelData.details) {
+      const fteChecks = [
+        {
+          label: "Accountants",
+          val: parseFloat(fteAccountantQty) || 0,
+          limit: parseFloat(fteModelData.details.number_of_accountants) || 0,
+        },
+        {
+          label: "Bookkeepers",
+          val: parseFloat(fteBookkeeperQty) || 0,
+          limit: parseFloat(fteModelData.details.number_of_bookkeepers) || 0,
+        },
+        {
+          label: "Payroll Experts",
+          val: parseFloat(ftePayrollQty) || 0,
+          limit: parseFloat(fteModelData.details.number_of_payroll_experts) || 0,
+        },
+        {
+          label: "Tax Experts",
+          val: parseFloat(fteTaxQty) || 0,
+          limit: parseFloat(fteModelData.details.number_of_tax_experts) || 0,
+        },
+        {
+          label: "Admin Staff",
+          val: parseFloat(fteAdminQty) || 0,
+          limit: parseFloat(fteModelData.details.number_of_admin_staff) || 0,
+        },
+      ];
+
+      for (const check of fteChecks) {
+        if (check.limit > 0 && check.val > check.limit) {
+          sweatalert.fire({
+            icon: "warning",
+            title: "Agreement Limit Exceeded",
+            text: `Cannot bill ${check.val} ${check.label}. The customer agreement allows a maximum of ${check.limit} ${check.label}.`,
+            confirmButtonColor: "#26bdf0",
+          });
+          return;
+        }
+        if (check.val < 0) {
+          sweatalert.fire({
+            icon: "warning",
+            title: "Invalid Quantity",
+            text: `${check.label} quantity cannot be negative.`,
+            confirmButtonColor: "#26bdf0",
+          });
+          return;
+        }
+      }
+    }
+
+    // 2. Customised Pricing Minimum Jobs Validation
+    if (customisedModelData && customMinJobs > 0) {
+      if (customJobsCountNum < customMinJobs) {
+        sweatalert.fire({
+          icon: "warning",
+          title: "Minimum Jobs Not Met",
+          text: `Completed jobs (${customJobsCountNum}) cannot be less than the agreed minimum of ${customMinJobs} jobs.`,
+          confirmButtonColor: "#26bdf0",
+        });
+        return;
+      }
+    }
+
+    // 3. Adhoc Hours Validation
+    if (adhocModelData) {
+      if (adhocHoursNum < 0) {
+        sweatalert.fire({
+          icon: "warning",
+          title: "Invalid Hours",
+          text: "Adhoc hours cannot be negative.",
+          confirmButtonColor: "#26bdf0",
+        });
+        return;
+      }
+    }
+
+    // 4. Percentage Turnover Validation
+    if (percentageModelData) {
+      if (baseAmountNum < 0) {
+        sweatalert.fire({
+          icon: "warning",
+          title: "Invalid Base Amount",
+          text: "Turnover / Base amount cannot be negative.",
+          confirmButtonColor: "#26bdf0",
+        });
+        return;
+      }
+    }
+
     if (Math.abs(totalAllocatedPct - 100) > 0.05) {
       sweatalert.fire({
         icon: "warning",
@@ -1112,11 +1212,11 @@ const handleAddContributor = () => {
         adhoc: adhocModelData ? { role: adhocRole, rate: adhocRate, hours: adhocHoursNum, total: adhocTotal } : null,
         fte: fteModelData ? {
           total: fteTotal,
-          accountants: fteAccountantQty !== "" ? fteAccountantQty : fteModelData.details.number_of_accountants,
-          bookkeepers: fteBookkeeperQty !== "" ? fteBookkeeperQty : fteModelData.details.number_of_bookkeepers,
-          payroll: ftePayrollQty !== "" ? ftePayrollQty : fteModelData.details.number_of_payroll_experts,
-          tax: fteTaxQty !== "" ? fteTaxQty : fteModelData.details.number_of_tax_experts,
-          admin: fteAdminQty !== "" ? fteAdminQty : fteModelData.details.number_of_admin_staff,
+          accountants: fteAccountantQty !== "" ? parseFloat(fteAccountantQty) || 0 : 0,
+          bookkeepers: fteBookkeeperQty !== "" ? parseFloat(fteBookkeeperQty) || 0 : 0,
+          payroll: ftePayrollQty !== "" ? parseFloat(ftePayrollQty) || 0 : 0,
+          tax: fteTaxQty !== "" ? parseFloat(fteTaxQty) || 0 : 0,
+          admin: fteAdminQty !== "" ? parseFloat(fteAdminQty) || 0 : 0,
         } : null,
         percentage: percentageModelData ? { base: baseAmountNum, pct: percentageOutsourceVal, total: percentageTotal } : null,
         customised: customisedModelData ? { service: selectedService.label, costPerJob: customCostPerJob, count: customJobsCountNum, total: customTotal } : null,
@@ -1798,96 +1898,156 @@ const handleAddContributor = () => {
                               <tbody>
                                 {fteModelData.details.number_of_accountants > 0 && (
                                   <tr>
-                                    <td>Accountants</td>
+                                    <td>
+                                      Accountants
+                                      <div className="small text-muted" style={{ fontSize: "11px" }}>
+                                        Max agreed: {fteModelData.details.number_of_accountants}
+                                      </div>
+                                    </td>
                                     <td>
                                       <input
                                         type="number" onWheel={(e) => e.target.blur()}
                                         min="0"
-                                        className="form-control form-control-sm text-center"
-                                        placeholder={fteModelData.details.number_of_accountants}
+                                        max={fteModelData.details.number_of_accountants}
+                                        className={`form-control form-control-sm text-center ${
+                                          (parseFloat(fteAccountantQty) || 0) > parseFloat(fteModelData.details.number_of_accountants) ? "is-invalid border-danger text-danger fw-bold" : ""
+                                        }`}
                                         value={fteAccountantQty}
                                         onChange={(e) => setFteAccountantQty(e.target.value)}
                                       />
+                                      {(parseFloat(fteAccountantQty) || 0) > parseFloat(fteModelData.details.number_of_accountants) && (
+                                        <div className="text-danger small mt-1" style={{ fontSize: "11px" }}>
+                                          Exceeds max ({fteModelData.details.number_of_accountants})
+                                        </div>
+                                      )}
                                     </td>
                                     <td>£ {parseFloat(fteModelData.details.fee_per_accountant || 0).toFixed(2)}</td>
                                     <td className="fw-bold">
-                                      £ {((fteAccountantQty !== "" ? parseFloat(fteAccountantQty) || 0 : parseFloat(fteModelData.details.number_of_accountants) || 0) * (parseFloat(fteModelData.details.fee_per_accountant) || 0)).toFixed(2)}
+                                      £ {((parseFloat(fteAccountantQty) || 0) * (parseFloat(fteModelData.details.fee_per_accountant) || 0)).toFixed(2)}
                                     </td>
                                   </tr>
                                 )}
                                 {fteModelData.details.number_of_bookkeepers > 0 && (
                                   <tr>
-                                    <td>Bookkeepers</td>
+                                    <td>
+                                      Bookkeepers
+                                      <div className="small text-muted" style={{ fontSize: "11px" }}>
+                                        Max agreed: {fteModelData.details.number_of_bookkeepers}
+                                      </div>
+                                    </td>
                                     <td>
                                       <input
                                         type="number" onWheel={(e) => e.target.blur()}
                                         min="0"
-                                        className="form-control form-control-sm text-center"
-                                        placeholder={fteModelData.details.number_of_bookkeepers}
+                                        max={fteModelData.details.number_of_bookkeepers}
+                                        className={`form-control form-control-sm text-center ${
+                                          (parseFloat(fteBookkeeperQty) || 0) > parseFloat(fteModelData.details.number_of_bookkeepers) ? "is-invalid border-danger text-danger fw-bold" : ""
+                                        }`}
                                         value={fteBookkeeperQty}
                                         onChange={(e) => setFteBookkeeperQty(e.target.value)}
                                       />
+                                      {(parseFloat(fteBookkeeperQty) || 0) > parseFloat(fteModelData.details.number_of_bookkeepers) && (
+                                        <div className="text-danger small mt-1" style={{ fontSize: "11px" }}>
+                                          Exceeds max ({fteModelData.details.number_of_bookkeepers})
+                                        </div>
+                                      )}
                                     </td>
                                     <td>£ {parseFloat(fteModelData.details.fee_per_bookkeeper || 0).toFixed(2)}</td>
                                     <td className="fw-bold">
-                                      £ {((fteBookkeeperQty !== "" ? parseFloat(fteBookkeeperQty) || 0 : parseFloat(fteModelData.details.number_of_bookkeepers) || 0) * (parseFloat(fteModelData.details.fee_per_bookkeeper) || 0)).toFixed(2)}
+                                      £ {((parseFloat(fteBookkeeperQty) || 0) * (parseFloat(fteModelData.details.fee_per_bookkeeper) || 0)).toFixed(2)}
                                     </td>
                                   </tr>
                                 )}
                                 {fteModelData.details.number_of_payroll_experts > 0 && (
                                   <tr>
-                                    <td>Payroll Experts</td>
+                                    <td>
+                                      Payroll Experts
+                                      <div className="small text-muted" style={{ fontSize: "11px" }}>
+                                        Max agreed: {fteModelData.details.number_of_payroll_experts}
+                                      </div>
+                                    </td>
                                     <td>
                                       <input
                                         type="number" onWheel={(e) => e.target.blur()}
                                         min="0"
-                                        className="form-control form-control-sm text-center"
-                                        placeholder={fteModelData.details.number_of_payroll_experts}
+                                        max={fteModelData.details.number_of_payroll_experts}
+                                        className={`form-control form-control-sm text-center ${
+                                          (parseFloat(ftePayrollQty) || 0) > parseFloat(fteModelData.details.number_of_payroll_experts) ? "is-invalid border-danger text-danger fw-bold" : ""
+                                        }`}
                                         value={ftePayrollQty}
                                         onChange={(e) => setFtePayrollQty(e.target.value)}
                                       />
+                                      {(parseFloat(ftePayrollQty) || 0) > parseFloat(fteModelData.details.number_of_payroll_experts) && (
+                                        <div className="text-danger small mt-1" style={{ fontSize: "11px" }}>
+                                          Exceeds max ({fteModelData.details.number_of_payroll_experts})
+                                        </div>
+                                      )}
                                     </td>
                                     <td>£ {parseFloat(fteModelData.details.fee_per_payroll_expert || 0).toFixed(2)}</td>
                                     <td className="fw-bold">
-                                      £ {((ftePayrollQty !== "" ? parseFloat(ftePayrollQty) || 0 : parseFloat(fteModelData.details.number_of_payroll_experts) || 0) * (parseFloat(fteModelData.details.fee_per_payroll_expert) || 0)).toFixed(2)}
+                                      £ {((parseFloat(ftePayrollQty) || 0) * (parseFloat(fteModelData.details.fee_per_payroll_expert) || 0)).toFixed(2)}
                                     </td>
                                   </tr>
                                 )}
                                 {fteModelData.details.number_of_tax_experts > 0 && (
                                   <tr>
-                                    <td>Tax Experts</td>
+                                    <td>
+                                      Tax Experts
+                                      <div className="small text-muted" style={{ fontSize: "11px" }}>
+                                        Max agreed: {fteModelData.details.number_of_tax_experts}
+                                      </div>
+                                    </td>
                                     <td>
                                       <input
                                         type="number" onWheel={(e) => e.target.blur()}
                                         min="0"
-                                        className="form-control form-control-sm text-center"
-                                        placeholder={fteModelData.details.number_of_tax_experts}
+                                        max={fteModelData.details.number_of_tax_experts}
+                                        className={`form-control form-control-sm text-center ${
+                                          (parseFloat(fteTaxQty) || 0) > parseFloat(fteModelData.details.number_of_tax_experts) ? "is-invalid border-danger text-danger fw-bold" : ""
+                                        }`}
                                         value={fteTaxQty}
                                         onChange={(e) => setFteTaxQty(e.target.value)}
                                       />
+                                      {(parseFloat(fteTaxQty) || 0) > parseFloat(fteModelData.details.number_of_tax_experts) && (
+                                        <div className="text-danger small mt-1" style={{ fontSize: "11px" }}>
+                                          Exceeds max ({fteModelData.details.number_of_tax_experts})
+                                        </div>
+                                      )}
                                     </td>
                                     <td>£ {parseFloat(fteModelData.details.fee_per_tax_expert || 0).toFixed(2)}</td>
                                     <td className="fw-bold">
-                                      £ {((fteTaxQty !== "" ? parseFloat(fteTaxQty) || 0 : parseFloat(fteModelData.details.number_of_tax_experts) || 0) * (parseFloat(fteModelData.details.fee_per_tax_expert) || 0)).toFixed(2)}
+                                      £ {((parseFloat(fteTaxQty) || 0) * (parseFloat(fteModelData.details.fee_per_tax_expert) || 0)).toFixed(2)}
                                     </td>
                                   </tr>
                                 )}
                                 {fteModelData.details.number_of_admin_staff > 0 && (
                                   <tr>
-                                    <td>Admin Staff</td>
+                                    <td>
+                                      Admin Staff
+                                      <div className="small text-muted" style={{ fontSize: "11px" }}>
+                                        Max agreed: {fteModelData.details.number_of_admin_staff}
+                                      </div>
+                                    </td>
                                     <td>
                                       <input
                                         type="number" onWheel={(e) => e.target.blur()}
                                         min="0"
-                                        className="form-control form-control-sm text-center"
-                                        placeholder={fteModelData.details.number_of_admin_staff}
+                                        max={fteModelData.details.number_of_admin_staff}
+                                        className={`form-control form-control-sm text-center ${
+                                          (parseFloat(fteAdminQty) || 0) > parseFloat(fteModelData.details.number_of_admin_staff) ? "is-invalid border-danger text-danger fw-bold" : ""
+                                        }`}
                                         value={fteAdminQty}
                                         onChange={(e) => setFteAdminQty(e.target.value)}
                                       />
+                                      {(parseFloat(fteAdminQty) || 0) > parseFloat(fteModelData.details.number_of_admin_staff) && (
+                                        <div className="text-danger small mt-1" style={{ fontSize: "11px" }}>
+                                          Exceeds max ({fteModelData.details.number_of_admin_staff})
+                                        </div>
+                                      )}
                                     </td>
                                     <td>£ {parseFloat(fteModelData.details.fee_per_admin_staff || 0).toFixed(2)}</td>
                                     <td className="fw-bold">
-                                      £ {((fteAdminQty !== "" ? parseFloat(fteAdminQty) || 0 : parseFloat(fteModelData.details.number_of_admin_staff) || 0) * (parseFloat(fteModelData.details.fee_per_admin_staff) || 0)).toFixed(2)}
+                                      £ {((parseFloat(fteAdminQty) || 0) * (parseFloat(fteModelData.details.fee_per_admin_staff) || 0)).toFixed(2)}
                                     </td>
                                   </tr>
                                 )}
@@ -1998,16 +2158,23 @@ const handleAddContributor = () => {
                             </div>
                             <div className="col-md-2">
                               <label className="form-label text-muted small mb-1 fw-medium">
-                                Completed Jobs
+                                Completed Jobs {customMinJobs > 0 && <span className="text-secondary">(Min: {customMinJobs})</span>}
                               </label>
                               <input
                                 type="number" onWheel={(e) => e.target.blur()}
-                                min="0"
-                                className="form-control shadow-sm rounded-pill"
-                                placeholder="e.g. 5"
+                                min={customMinJobs || 0}
+                                className={`form-control shadow-sm rounded-pill ${
+                                  customJobsCount !== "" && customMinJobs > 0 && customJobsCountNum < customMinJobs ? "is-invalid border-danger text-danger fw-bold" : ""
+                                }`}
+                                placeholder={customMinJobs > 0 ? `Min: ${customMinJobs}` : "e.g. 5"}
                                 value={customJobsCount}
                                 onChange={(e) => setCustomJobsCount(e.target.value)}
                               />
+                              {customJobsCount !== "" && customMinJobs > 0 && customJobsCountNum < customMinJobs && (
+                                <div className="text-danger small mt-1" style={{ fontSize: "11px" }}>
+                                  Minimum {customMinJobs} required
+                                </div>
+                              )}
                             </div>
                             <div className="col-md-3">
                               <label className="form-label text-muted small mb-1 fw-medium">

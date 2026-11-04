@@ -601,6 +601,64 @@ const submitBilling = async (payload, submittedByStaffId) => {
             }
         }
 
+        // Strict Engagement Model Caps Validation
+        if (calc_json && typeof calc_json === 'object') {
+            // 1. FTE Resource Agreement Limits
+            if (calc_json.fte) {
+                const [fteRows] = await connection.execute(
+                    `SELECT f.* FROM customer_engagement_fte f
+                     JOIN customer_engagement_model m ON f.customer_engagement_model_id = m.id
+                     WHERE m.customer_id = ? LIMIT 1`,
+                    [customer_id]
+                );
+
+                if (fteRows.length > 0) {
+                    const fteAgreement = fteRows[0];
+                    const rolesToCheck = [
+                        { key: 'accountants', label: 'Accountants', limit: fteAgreement.number_of_accountants },
+                        { key: 'bookkeepers', label: 'Bookkeepers', limit: fteAgreement.number_of_bookkeepers },
+                        { key: 'payroll', label: 'Payroll Experts', limit: fteAgreement.number_of_payroll_experts },
+                        { key: 'tax', label: 'Tax Experts', limit: fteAgreement.number_of_tax_experts },
+                        { key: 'admin', label: 'Admin Staff', limit: fteAgreement.number_of_admin_staff },
+                    ];
+
+                    for (const role of rolesToCheck) {
+                        const submittedVal = parseFloat(calc_json.fte[role.key]) || 0;
+                        const agreedLimit = parseFloat(role.limit) || 0;
+                        if (submittedVal > agreedLimit) {
+                            await connection.rollback();
+                            return {
+                                status: false,
+                                message: `FTE limit exceeded: Cannot bill ${submittedVal} ${role.label}. The customer agreement allows a maximum of ${agreedLimit}.`
+                            };
+                        }
+                    }
+                }
+            }
+
+            // 2. Customised Pricing Minimum Jobs Validation
+            if (calc_json.customised && service_id) {
+                const [customRows] = await connection.execute(
+                    `SELECT cp.* FROM customer_engagement_customised_pricing cp
+                     JOIN customer_engagement_model m ON cp.customer_engagement_model_id = m.id
+                     WHERE m.customer_id = ? AND cp.service_id = ? LIMIT 1`,
+                    [customer_id, service_id]
+                );
+
+                if (customRows.length > 0) {
+                    const minJobs = parseFloat(customRows[0].minimum_number_of_jobs) || 0;
+                    const submittedJobs = parseFloat(calc_json.customised.count) || 0;
+                    if (minJobs > 0 && submittedJobs < minJobs) {
+                        await connection.rollback();
+                        return {
+                            status: false,
+                            message: `Customised Pricing minimum not met: Completed jobs (${submittedJobs}) cannot be less than the agreed minimum of ${minJobs} jobs.`
+                        };
+                    }
+                }
+            }
+        }
+
         // Dedupe Key for duplicate prevention (Rule 5)
         const dedupeKey = `${client_id}_${service_id}_${period_label}`;
 
