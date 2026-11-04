@@ -453,14 +453,44 @@ export const SubmitBilling = () => {
     }
   };
 
+  // Reset Step 3 (Calculations, Hours, Quantities, Contributors)
+  const resetStep3States = () => {
+    setAdhocHours("");
+    setFteAccountantQty("");
+    setFteBookkeeperQty("");
+    setFtePayrollQty("");
+    setFteTaxQty("");
+    setFteAdminQty("");
+    setPercentageBaseAmount("");
+    setCustomJobsCount("");
+    setDiscountPct("");
+    setContributors([]);
+    setTimesheetStaffList([]);
+  };
+
+  // Reset Step 2 (Client, Service, Period) & Step 3
+  const resetStep2And3States = () => {
+    setSelectedClient(null);
+    setSelectedService(null);
+    setServicesList([]);
+    setJobsList([]);
+    setSelectedJob(null);
+    setJobTypesList([]);
+    setSelectedJobType(null);
+    setAssignmentName("");
+    setPeriodType("Month");
+    const defaultM = getTodayMonthValue();
+    setRawDateValue(defaultM);
+    setPeriodDate(formatPeriodDate("Month", defaultM));
+    resetStep3States();
+  };
+
   // 1. Fetch Clients and Reset children when Customer (practice) changes
   useEffect(() => {
     if (!practice || !practice.value) {
       prevPracticeIdRef.current = null;
       setClientsList([]);
-      setSelectedClient(null);
-      setServicesList([]);
-      setSelectedService(null);
+      resetStep2And3States();
       return;
     }
 
@@ -474,14 +504,8 @@ export const SubmitBilling = () => {
     prevPracticeIdRef.current = practice.value;
 
     if (!isInitialEdit) {
-      // User manually picked another customer -> reset child selections
-      setSelectedClient(null);
-      setJobsList([]);
-      setSelectedJob(null);
-      setServicesList([]);
-      setSelectedService(null);
-      setJobTypesList([]);
-      setSelectedJobType(null);
+      // User manually picked another customer -> completely reset Step 2 and Step 3
+      resetStep2And3States();
     }
 
     setClientPage(1);
@@ -497,6 +521,7 @@ export const SubmitBilling = () => {
       prevClientIdRef.current = null;
       setServicesList([]);
       setSelectedService(null);
+      resetStep3States();
       return;
     }
 
@@ -507,6 +532,7 @@ export const SubmitBilling = () => {
 
     prevClientIdRef.current = selectedClient.value;
     setSelectedService(null);
+    resetStep3States();
 
     // Fetch services strictly belonging to this client's jobs
     const fetchClientServices = async () => {
@@ -1445,6 +1471,7 @@ const handleAddContributor = () => {
                         onChange={(selected) => {
                           setSelectedClient(selected);
                           setSelectedService(null);
+                          resetStep3States();
                         }}
                         onInputChange={(val, actionMeta) => handleClientSearch(val, actionMeta)}
                         onMenuScrollToBottom={() => {
@@ -1490,6 +1517,7 @@ const handleAddContributor = () => {
                         value={selectedService}
                         onChange={(selected) => {
                           setSelectedService(selected);
+                          resetStep3States();
                           if (selected?.latest_year_end) {
                             setPeriodType("Year End");
                             setRawDateValue(selected.latest_year_end);
