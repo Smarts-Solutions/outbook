@@ -2505,7 +2505,7 @@ const handleAddContributor = () => {
                       fontSize: "13px",
                     }}
                   >
-                    On submit, this goes to <strong>{customerMeta?.line_manager || customerMeta?.account_manager || "Line Manager"}</strong> for approval,
+                    On submit, this goes to <strong>{customerMeta?.account_manager || customerMeta?.line_manager || "Account Manager"}</strong> for approval,
                     then to Credit Control.
                   </div>
 

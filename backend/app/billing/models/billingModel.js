@@ -553,6 +553,35 @@ const getTimesheetContributors = async (customerId, clientId, serviceId, periodD
     }
 };
 
+// Helper: Recursively fetch all subordinate staff IDs managed under managerStaffId (direct and indirect hierarchy)
+const getSubordinateStaffIds = async (managerStaffId) => {
+    if (!managerStaffId) return [];
+    try {
+        const visited = new Set();
+        let currentLevel = [Number(managerStaffId)];
+        while (currentLevel.length > 0) {
+            const placeholders = currentLevel.map(() => '?').join(',');
+            const [rows] = await pool.execute(
+                `SELECT staff_by FROM line_managers WHERE staff_to IN (${placeholders})`,
+                currentLevel
+            );
+            const nextLevel = [];
+            for (const r of rows) {
+                const subId = Number(r.staff_by);
+                if (subId && !visited.has(subId)) {
+                    visited.add(subId);
+                    nextLevel.push(subId);
+                }
+            }
+            currentLevel = nextLevel;
+        }
+        return Array.from(visited);
+    } catch (err) {
+        console.error('Error in getSubordinateStaffIds:', err);
+        return [];
+    }
+};
+
 // 9. Submit Billing (with Duplicate Prevention & Contributors Split Transaction)
 const submitBilling = async (payload, submittedByStaffId) => {
     const connection = await pool.getConnection();
@@ -794,24 +823,26 @@ const submitBilling = async (payload, submittedByStaffId) => {
             };
         }
 
-        // Determine Line Manager for submittedByStaffId
-        // Staff A -> Staff A's Line Manager (from line_managers table where staff_by = submittedByStaffId)
-        // If Staff A has a line manager (staff_to), assign manager_id to that line manager.
-        // Fallback: If not assigned in line_managers, check customer's account_manager_id or customer's staff_id
+        // Determine Primary Manager / Approver:
+        // 1. Primary: Selected Customer's Account Manager (customers.account_manager_id)
+        // 2. Fallback: Submitter's direct Line Manager (from line_managers table where staff_by = submittedByStaffId)
+        // 3. Fallback: Customer's staff_id
         if (!finalManagerId) {
-            const [lmRows] = await connection.execute(
-                `SELECT staff_to FROM line_managers WHERE staff_by = ? LIMIT 1`,
-                [submittedByStaffId]
+            const [custRows] = await connection.execute(
+                `SELECT account_manager_id, staff_id FROM customers WHERE id = ? LIMIT 1`,
+                [customer_id]
             );
-            if (lmRows.length > 0 && lmRows[0].staff_to) {
-                finalManagerId = lmRows[0].staff_to;
+            if (custRows.length > 0 && custRows[0].account_manager_id) {
+                finalManagerId = custRows[0].account_manager_id;
             } else {
-                const [custRows] = await connection.execute(
-                    `SELECT account_manager_id, staff_id FROM customers WHERE id = ? LIMIT 1`,
-                    [customer_id]
+                const [lmRows] = await connection.execute(
+                    `SELECT staff_to FROM line_managers WHERE staff_by = ? LIMIT 1`,
+                    [submittedByStaffId]
                 );
-                if (custRows.length > 0) {
-                    finalManagerId = custRows[0].account_manager_id || custRows[0].staff_id || null;
+                if (lmRows.length > 0 && lmRows[0].staff_to) {
+                    finalManagerId = lmRows[0].staff_to;
+                } else if (custRows.length > 0) {
+                    finalManagerId = custRows[0].staff_id || null;
                 }
             }
         }
@@ -981,17 +1012,32 @@ const getSubmissionsForApprovals = async (staffUserId, status = null) => {
             params.push(status);
         }
 
-        // If not Admin/Super Admin, filter for submissions where this staff is the submitter OR assigned Line Manager (or direct manager)
+        // If not Admin/Super Admin, filter by Hierarchy:
+        // Staff can see submissions if:
+        // 1) Staff is the submitter
+        // 2) Staff is the customer's Account Manager or assigned manager_id
+        // 3) Staff is in the upper Line Manager hierarchy of the customer's Account Manager, manager_id, or submitter
         if (!isAdmin) {
-            query += ` AND (
-                bs.submitted_by = ?
-                OR bs.manager_id = ? 
-                OR EXISTS (
-                    SELECT 1 FROM line_managers lm 
-                    WHERE lm.staff_to = ? AND lm.staff_by = bs.submitted_by
-                )
-            )`;
-            params.push(staffUserId, staffUserId, staffUserId);
+            const subordinateStaffIds = await getSubordinateStaffIds(staffUserId);
+            if (subordinateStaffIds.length > 0) {
+                const subPlaceholders = subordinateStaffIds.map(() => '?').join(',');
+                query += ` AND (
+                    bs.submitted_by = ?
+                    OR bs.manager_id = ?
+                    OR c.account_manager_id = ?
+                    OR bs.submitted_by IN (${subPlaceholders})
+                    OR bs.manager_id IN (${subPlaceholders})
+                    OR c.account_manager_id IN (${subPlaceholders})
+                )`;
+                params.push(staffUserId, staffUserId, staffUserId, ...subordinateStaffIds, ...subordinateStaffIds, ...subordinateStaffIds);
+            } else {
+                query += ` AND (
+                    bs.submitted_by = ?
+                    OR bs.manager_id = ?
+                    OR c.account_manager_id = ?
+                )`;
+                params.push(staffUserId, staffUserId, staffUserId);
+            }
         }
 
         query += ` ORDER BY bs.id DESC`;
@@ -1053,14 +1099,26 @@ const managerApproveSubmission = async (submissionId, managerUserId) => {
             const allParams = [managerUserId];
 
             if (!isAdmin) {
-                allQuery += ` AND (
-                    bs.manager_id = ? 
-                    OR EXISTS (
-                        SELECT 1 FROM line_managers lm 
-                        WHERE lm.staff_to = ? AND lm.staff_by = bs.submitted_by
-                    )
-                )`;
-                allParams.push(managerUserId, managerUserId);
+                const subordinateStaffIds = await getSubordinateStaffIds(managerUserId);
+                if (subordinateStaffIds.length > 0) {
+                    const subPlaceholders = subordinateStaffIds.map(() => '?').join(',');
+                    allQuery += ` AND (
+                        bs.manager_id = ?
+                        OR c.account_manager_id = ?
+                        OR bs.submitted_by = ?
+                        OR bs.submitted_by IN (${subPlaceholders})
+                        OR bs.manager_id IN (${subPlaceholders})
+                        OR c.account_manager_id IN (${subPlaceholders})
+                    )`;
+                    allParams.push(managerUserId, managerUserId, managerUserId, ...subordinateStaffIds, ...subordinateStaffIds, ...subordinateStaffIds);
+                } else {
+                    allQuery += ` AND (
+                        bs.manager_id = ?
+                        OR c.account_manager_id = ?
+                        OR bs.submitted_by = ?
+                    )`;
+                    allParams.push(managerUserId, managerUserId, managerUserId);
+                }
             }
 
             const [allResult] = await pool.execute(allQuery, allParams);
@@ -1378,11 +1436,16 @@ const checkApproverAccess = async (staffUserId) => {
         }
 
         // 1. Check if user is a Line Manager (has subordinates where staff_to = staffUserId)
+        // or is designated as an Account Manager for any customer
         const [lmRows] = await pool.execute(
             'SELECT 1 FROM line_managers WHERE staff_to = ? LIMIT 1',
             [staffUserId]
         );
-        const isLineManager = lmRows.length > 0;
+        const [amRows] = await pool.execute(
+            'SELECT 1 FROM customers WHERE account_manager_id = ? LIMIT 1',
+            [staffUserId]
+        );
+        const isLineManager = lmRows.length > 0 || amRows.length > 0;
 
         // 2. Check if user has permission to create job (permission_name = 'job' and type = 'insert')
         const [jobPermRows] = await pool.execute(
@@ -1423,17 +1486,28 @@ const getBillingDashboardMetrics = async (staffUserId) => {
         let baseWhere = '1 = 1';
         const params = [];
 
-        // If not admin: show metrics for submissions submitted by user, or managed by user (their team)
+        // If not admin: show metrics for submissions submitted by user, or managed in hierarchy
         if (!isAdmin && staffUserId) {
-            baseWhere += ` AND (
-                bs.submitted_by = ?
-                OR bs.manager_id = ?
-                OR EXISTS (
-                    SELECT 1 FROM line_managers lm 
-                    WHERE lm.staff_to = ? AND lm.staff_by = bs.submitted_by
-                )
-            )`;
-            params.push(staffUserId, staffUserId, staffUserId);
+            const subordinateStaffIds = await getSubordinateStaffIds(staffUserId);
+            if (subordinateStaffIds.length > 0) {
+                const subPlaceholders = subordinateStaffIds.map(() => '?').join(',');
+                baseWhere += ` AND (
+                    bs.submitted_by = ?
+                    OR bs.manager_id = ?
+                    OR c.account_manager_id = ?
+                    OR bs.submitted_by IN (${subPlaceholders})
+                    OR bs.manager_id IN (${subPlaceholders})
+                    OR c.account_manager_id IN (${subPlaceholders})
+                )`;
+                params.push(staffUserId, staffUserId, staffUserId, ...subordinateStaffIds, ...subordinateStaffIds, ...subordinateStaffIds);
+            } else {
+                baseWhere += ` AND (
+                    bs.submitted_by = ?
+                    OR bs.manager_id = ?
+                    OR c.account_manager_id = ?
+                )`;
+                params.push(staffUserId, staffUserId, staffUserId);
+            }
         }
 
         const query = `
@@ -1445,6 +1519,7 @@ const getBillingDashboardMetrics = async (staffUserId) => {
                 SUM(CASE WHEN bs.status = 'Pending Manager Approval' THEN 1 ELSE 0 END) AS pending_manager_approval,
                 SUM(CASE WHEN bs.status = 'Invoiced' THEN 1 ELSE 0 END) AS total_invoiced
             FROM billing_submissions bs
+            LEFT JOIN customers c ON bs.customer_id = c.id
             WHERE ${baseWhere}
         `;
 
