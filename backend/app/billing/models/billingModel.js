@@ -665,7 +665,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 }
             }
 
-            // 2. Customised Pricing Minimum Jobs Validation
+            // 2. Customised Pricing Max Jobs Validation
             if (calc_json.customised && service_id) {
                 const [customRows] = await connection.execute(
                     `SELECT cp.* FROM customer_engagement_customised_pricing cp
@@ -675,13 +675,13 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 );
 
                 if (customRows.length > 0) {
-                    const minJobs = parseFloat(customRows[0].minimum_number_of_jobs) || 0;
+                    const maxJobs = parseFloat(customRows[0].minimum_number_of_jobs) || 0;
                     const submittedJobs = parseFloat(calc_json.customised.count) || 0;
-                    if (minJobs > 0 && submittedJobs < minJobs) {
+                    if (maxJobs > 0 && submittedJobs > maxJobs) {
                         await connection.rollback();
                         return {
                             status: false,
-                            message: `Customised Pricing minimum not met: Completed jobs (${submittedJobs}) cannot be less than the agreed minimum of ${minJobs} jobs.`
+                            message: `Customised Pricing maximum exceeded: Completed jobs (${submittedJobs}) cannot be greater than the agreed limit of ${maxJobs} jobs.`
                         };
                     }
                 }

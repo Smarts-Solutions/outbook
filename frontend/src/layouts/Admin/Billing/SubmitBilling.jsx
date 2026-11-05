@@ -843,7 +843,7 @@ export const SubmitBilling = () => {
   // 4. Customised Pricing Amount (matches selectedService)
   const getCustomPricingDetails = () => {
     if (!customisedModelData?.details || !Array.isArray(customisedModelData.details)) {
-      return { costPerJob: 0, minJobs: 0 };
+      return { costPerJob: 0, maxJobs: 0 };
     }
     let match = null;
     if (selectedService?.value) {
@@ -854,10 +854,10 @@ export const SubmitBilling = () => {
     }
     return {
       costPerJob: parseFloat(match?.cost_per_job) || 0,
-      minJobs: parseFloat(match?.minimum_number_of_jobs) || 0,
+      maxJobs: parseFloat(match?.minimum_number_of_jobs) || 0,
     };
   };
-  const { costPerJob: customCostPerJob, minJobs: customMinJobs } = getCustomPricingDetails();
+  const { costPerJob: customCostPerJob, maxJobs: customMaxJobs } = getCustomPricingDetails();
   const customJobsCountNum = parseFloat(customJobsCount) || 0;
   const customTotal = customJobsCountNum * customCostPerJob;
 
@@ -1138,13 +1138,13 @@ const handleAddContributor = () => {
       }
     }
 
-    // 2. Customised Pricing Minimum Jobs Validation
-    if (customisedModelData && customMinJobs > 0) {
-      if (customJobsCountNum < customMinJobs) {
+    // 2. Customised Pricing Max Jobs Validation
+    if (customisedModelData && customMaxJobs > 0) {
+      if (customJobsCountNum > customMaxJobs) {
         sweatalert.fire({
           icon: "warning",
-          title: "Minimum Jobs Not Met",
-          text: `Completed jobs (${customJobsCountNum}) cannot be less than the agreed minimum of ${customMinJobs} jobs.`,
+          title: "Maximum Jobs Exceeded",
+          text: `Completed jobs (${customJobsCountNum}) cannot be greater than the agreed limit of ${customMaxJobs} jobs.`,
           confirmButtonColor: "#26bdf0",
         });
         return;
@@ -2165,21 +2165,22 @@ const handleAddContributor = () => {
                             </div>
                             <div className="col-md-2">
                               <label className="form-label text-muted small mb-1 fw-medium">
-                                Completed Jobs {customMinJobs > 0 && <span className="text-secondary">(Min: {customMinJobs})</span>}
+                                Completed Jobs {customMaxJobs > 0 && <span className="text-secondary">(Max: {customMaxJobs})</span>}
                               </label>
                               <input
                                 type="number" onWheel={(e) => e.target.blur()}
-                                min={customMinJobs || 0}
+                                min="0"
+                                max={customMaxJobs > 0 ? customMaxJobs : undefined}
                                 className={`form-control shadow-sm rounded-pill ${
-                                  customJobsCount !== "" && customMinJobs > 0 && customJobsCountNum < customMinJobs ? "is-invalid border-danger text-danger fw-bold" : ""
+                                  customJobsCount !== "" && customMaxJobs > 0 && customJobsCountNum > customMaxJobs ? "is-invalid border-danger text-danger fw-bold" : ""
                                 }`}
-                                placeholder={customMinJobs > 0 ? `Min: ${customMinJobs}` : "e.g. 5"}
+                                placeholder={customMaxJobs > 0 ? `Max: ${customMaxJobs}` : "e.g. 5"}
                                 value={customJobsCount}
                                 onChange={(e) => setCustomJobsCount(e.target.value)}
                               />
-                              {customJobsCount !== "" && customMinJobs > 0 && customJobsCountNum < customMinJobs && (
+                              {customJobsCount !== "" && customMaxJobs > 0 && customJobsCountNum > customMaxJobs && (
                                 <div className="text-danger small mt-1" style={{ fontSize: "11px" }}>
-                                  Minimum {customMinJobs} required
+                                  Maximum {customMaxJobs} allowed
                                 </div>
                               )}
                             </div>
