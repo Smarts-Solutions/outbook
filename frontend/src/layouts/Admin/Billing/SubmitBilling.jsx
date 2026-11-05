@@ -1249,8 +1249,8 @@ const handleAddContributor = () => {
         net_amount: netAmount,
         currency: "GBP",
         nomisma_description: nomismaDescription,
-        // Backend will resolve staff's Line Manager automatically based on staff hierarchy
-        manager_id: null,
+        // Keep existing manager_id if editing an existing submission, or backend will resolve staff's Line Manager
+        manager_id: editData?.manager_id || null,
         contributors: contributors.map((c) => {
           const vals = computeContributorValues(c, netAmount);
           return {

@@ -495,9 +495,17 @@ const BillingApprovals = () => {
         const currentStaffId = Number(staffDetails?.id);
         const isSubmitter = Number(row.submitted_by) === currentStaffId;
         const isDesignatedManager = Number(row.manager_id) === currentStaffId;
-        // User can take manager actions (Approve, Edit, Return) if they are Admin OR the designated Line Manager for this submission.
-        // If they are just the submitter (and not admin / not designated manager), they ONLY get the View button.
-        const canManage = isAdmin || (isDesignatedManager && !isSubmitter) || (isAdmin && isSubmitter);
+        const isAccountManager = Number(row.account_manager_id) === currentStaffId;
+        // User can take manager actions (Approve, Edit, Return) if they are Admin, designated manager, account manager,
+        // or in the manager hierarchy chain (row.can_manage flag from backend).
+        // If a user is purely the submitter without management authority, they only see the View button.
+        const canManage = Boolean(
+          isAdmin ||
+          row.can_manage === 1 ||
+          row.can_manage === true ||
+          isDesignatedManager ||
+          isAccountManager
+        );
 
         return (
           <div className="d-flex align-items-center justify-content-start gap-1">

@@ -698,13 +698,22 @@ const submitBilling = async (payload, submittedByStaffId) => {
         if (editSubmissionId) {
             // Updating existing submission
             const [existing] = await connection.execute(
-                `SELECT id, status FROM billing_submissions WHERE id = ?`,
+                `SELECT id, status, manager_id, submitted_by FROM billing_submissions WHERE id = ?`,
                 [editSubmissionId]
             );
 
             if (existing.length === 0) {
                 await connection.rollback();
                 return { status: false, message: "Submission to edit was not found." };
+            }
+
+            // Preserve manager_id and original submitter if not provided
+            if (!finalManagerId) {
+                finalManagerId = existing[0].manager_id;
+            }
+            if (!finalManagerId) {
+                // If still null, try finding customer account manager or staff's manager
+                finalManagerId = await getDesignatedManagerForSubmission(connection, customer_id, existing[0].submitted_by || staff_user_id);
             }
 
             const updateSubQuery = `
@@ -964,6 +973,7 @@ const getSubmissionsForApprovals = async (staffUserId, status = null) => {
                 bs.id,
                 bs.customer_id,
                 c.trading_name AS customer_name,
+                c.account_manager_id,
                 bs.client_id,
                 cl.trading_name AS client_name,
                 bs.service_id,
@@ -1012,13 +1022,9 @@ const getSubmissionsForApprovals = async (staffUserId, status = null) => {
             params.push(status);
         }
 
-        // If not Admin/Super Admin, filter by Hierarchy:
-        // Staff can see submissions if:
-        // 1) Staff is the submitter
-        // 2) Staff is the customer's Account Manager or assigned manager_id
-        // 3) Staff is in the upper Line Manager hierarchy of the customer's Account Manager, manager_id, or submitter
+        let subordinateStaffIds = [];
         if (!isAdmin) {
-            const subordinateStaffIds = await getSubordinateStaffIds(staffUserId);
+            subordinateStaffIds = await getSubordinateStaffIds(staffUserId);
             if (subordinateStaffIds.length > 0) {
                 const subPlaceholders = subordinateStaffIds.map(() => '?').join(',');
                 query += ` AND (
@@ -1067,6 +1073,20 @@ const getSubmissionsForApprovals = async (staffUserId, status = null) => {
                     r.calc_json = typeof r.calc_json === 'string' ? JSON.parse(r.calc_json) : r.calc_json;
                 } catch (e) {
                     // keep as is
+                }
+
+                // Compute whether the requesting user has manager rights to Approve / Edit / Return
+                const isSubmitter = Number(r.submitted_by) === Number(staffUserId);
+                const isAssignedMgr = Number(r.manager_id) === Number(staffUserId);
+                const isAcctMgr = Number(r.account_manager_id) === Number(staffUserId);
+                const isUpperMgr = subordinateStaffIds.includes(Number(r.manager_id)) ||
+                                   subordinateStaffIds.includes(Number(r.submitted_by)) ||
+                                   subordinateStaffIds.includes(Number(r.account_manager_id));
+
+                if (isAdmin || isAssignedMgr || isAcctMgr || isUpperMgr) {
+                    r.can_manage = 1;
+                } else {
+                    r.can_manage = 0;
                 }
             });
         }
