@@ -93,6 +93,19 @@
 }
 
 .billing-datatable .rdt_TableCol {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: normal !important;
+}
+
+.billing-datatable .rdt_TableCol > div {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+.billing-datatable .rdt_TableCol {
   color: #000;
   font-size: 14px;
   font-weight: 600;

@@ -289,9 +289,9 @@ const BillingApprovals = () => {
       name: "Submitted By",
       selector: (row) => row.submitted_by_name,
       sortable: true,
-      minWidth: "150px",
+      minWidth: "160px",
       cell: (row) => (
-        <div title={row.submitted_by_name || `Staff #${row.submitted_by}`}>
+        <div title={row.submitted_by_name || `Staff #${row.submitted_by}`} className="text-break py-1">
           {row.submitted_by_name || `Staff #${row.submitted_by}`}
         </div>
       ),
@@ -300,11 +300,11 @@ const BillingApprovals = () => {
       name: "Customer Name",
       selector: (row) => row.customer_name,
       sortable: true,
-      minWidth: "170px",
+      minWidth: "180px",
       cell: (row) => (
         <div
           title={row.customer_name || `Customer #${row.customer_id}`}
-          style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+          className="text-break py-1"
         >
           {row.customer_name || `Customer #${row.customer_id}`}
         </div>
@@ -314,11 +314,11 @@ const BillingApprovals = () => {
       name: "Client Name",
       selector: (row) => row.client_name,
       sortable: true,
-      minWidth: "170px",
+      minWidth: "180px",
       cell: (row) => (
         <div
           title={row.client_name || `Client #${row.client_id}`}
-          style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+          className="text-break py-1"
         >
           {row.client_name || `Client #${row.client_id}`}
         </div>
@@ -328,11 +328,11 @@ const BillingApprovals = () => {
       name: "Service Name",
       selector: (row) => row.service_name,
       sortable: true,
-      minWidth: "160px",
+      minWidth: "170px",
       cell: (row) => (
         <div
           title={row.service_name || "Service"}
-          style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+          className="text-break py-1"
         >
           {row.service_name || "Service"}
         </div>
@@ -364,9 +364,9 @@ const BillingApprovals = () => {
       name: "Account Manager",
       selector: (row) => row.manager_name,
       sortable: true,
-      minWidth: "150px",
+      minWidth: "160px",
       cell: (row) => (
-        <div title={row.manager_name || "-"}>
+        <div title={row.manager_name || "-"} className="text-break py-1">
           {row.manager_name || "-"}
         </div>
       ),
@@ -375,9 +375,9 @@ const BillingApprovals = () => {
       name: "Gross Amount",
       selector: (row) => row.gross_amount,
       sortable: true,
-      minWidth: "120px",
+      minWidth: "130px",
       cell: (row) => (
-        <span className="text-dark">
+        <span className="text-dark fw-semibold">
           £{parseFloat(row.gross_amount || row.net_amount || 0).toFixed(2)}
         </span>
       ),
@@ -402,7 +402,7 @@ const BillingApprovals = () => {
       name: "Net Amount",
       selector: (row) => row.net_amount,
       sortable: true,
-      minWidth: "120px",
+      minWidth: "130px",
       cell: (row) => (
         <span className="fw-bold text-info fs-6">
           £{parseFloat(row.net_amount || 0).toFixed(2)}
@@ -411,15 +411,20 @@ const BillingApprovals = () => {
     },
     {
       name: "Revenue Split",
-      minWidth: "160px",
+      minWidth: "220px",
       cell: (row) => {
         const list = row.contributors || [];
         if (!list.length) return <span className="text-muted small">—</span>;
         return (
-          <div className="small py-2">
+          <div className="small py-2 d-flex flex-wrap gap-1">
             {list.map((c, i) => (
-              <span key={i} className="badge bg-white text-dark border me-1 mb-1 fw-normal">
-                {c.staff_name} ({parseFloat(c.pct).toFixed(0)}%)
+              <span
+                key={i}
+                className="badge bg-white text-dark border fw-normal text-wrap text-start text-break"
+                style={{ lineHeight: "1.4", padding: "5px 8px", maxWidth: "100%" }}
+                title={`${c.staff_name} (${parseFloat(c.pct).toFixed(0)}%)`}
+              >
+                {c.staff_name} <span className="fw-semibold text-primary">({parseFloat(c.pct).toFixed(0)}%)</span>
               </span>
             ))}
           </div>
@@ -430,7 +435,7 @@ const BillingApprovals = () => {
       name: "Status",
       selector: (row) => row.status,
       sortable: true,
-      minWidth: "160px",
+      minWidth: "170px",
       cell: (row) => {
         const st = (row.status || "").toLowerCase();
         if (st === "invoiced") {
