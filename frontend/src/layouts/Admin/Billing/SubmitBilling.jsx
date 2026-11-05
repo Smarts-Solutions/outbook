@@ -722,17 +722,20 @@ export const SubmitBilling = () => {
           const list = (res.data && Array.isArray(res.data)) ? res.data : [];
           setTimesheetStaffList(list);
 
-          // If timesheet staff found, list them with blank percentage/flat share
+          // By default, add only the first contributor (user can add more via "Add contributor")
           if (list.length > 0) {
-            const newContributors = list.map((item, idx) => ({
-              id: Date.now() + idx,
-              staff_id: item.staff_id,
-              name: item.staff_name,
-              total_hours: item.total_hours,
-              mode: null, // "pct" or "flat"
-              pct: "",
-              amount: "",
-            }));
+            const first = list[0];
+            const newContributors = [
+              {
+                id: Date.now(),
+                staff_id: first.staff_id,
+                name: first.staff_name,
+                total_hours: first.total_hours,
+                mode: null, // "pct" or "flat"
+                pct: "",
+                amount: "",
+              },
+            ];
 
             setContributors(newContributors);
           } else {
