@@ -49,12 +49,13 @@ const CreditControl = () => {
             const today = new Date().toISOString().split("T")[0];
             const isOverdue = !s.paid_date && s.due_date && s.due_date < today;
             return {
+              ...s,
               id: s.id,
               practice: s.customer_name || `Customer #${s.customer_id}`,
               client: s.client_name || `Client #${s.client_id}`,
               number: s.nomisma_bill_number || `INV-${s.id}`,
-              billDate: s.nomisma_bill_date ? convertDate1(s.nomisma_bill_date) : (s.submitted_at ? convertDate1(s.submitted_at) : "-"),
-              dueDate: s.due_date ? convertDate1(s.due_date) : "-",
+              billDate: s.nomisma_bill_date || s.submitted_at || null,
+              dueDate: s.due_date || null,
               amount: parseFloat(s.net_amount || 0),
               currency: s.currency || "GBP",
               paidDate: s.paid_date || null,
@@ -496,25 +497,47 @@ const CreditControl = () => {
     },
     {
       name: "Action",
-      minWidth: "120px",
-      cell: (row) =>
-        row.paidDate ? (
+      minWidth: "180px",
+      width: "180px",
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+      cell: (row) => (
+        <div className="d-flex align-items-center justify-content-start gap-2 text-nowrap">
+          {/* View Details / Snapshot Button */}
           <button
             type="button"
-            className="btn btn-secondary btn-sm py-1 px-3 fs-12 rounded-pill d-flex align-items-center gap-1"
-            onClick={() => handlePaymentToggle(row)}
+            className="view-icon rounded-pills border-primary flex-shrink-0"
+            title="View Details"
+            onClick={() => setViewDetailsModal(row)}
           >
-            <Undo2 size={13} /> Undo
+            <i className="ti-eye text-primary" />
           </button>
-        ) : (
-          <button
-            type="button"
-            className="btn btn-outline-success btn-sm py-1 px-3 fs-12 rounded-pill d-flex align-items-center gap-1"
-            onClick={() => handlePaymentToggle(row)}
-          >
-            <CheckCircle size={13} /> Mark Paid
-          </button>
-        ),
+
+          {/* Mark Paid / Undo Button */}
+          {row.paidDate ? (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm py-1 px-3 fs-12 rounded-pill d-inline-flex align-items-center gap-1 shadow-xs fw-medium text-nowrap"
+              style={{ whiteSpace: "nowrap" }}
+              onClick={() => handlePaymentToggle(row)}
+              title="Undo Paid status"
+            >
+              <Undo2 size={13} className="flex-shrink-0" /> Undo
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-sm btn-success text-white py-1 px-3 fs-12 rounded-pill shadow-xs d-inline-flex align-items-center gap-1 fw-medium text-nowrap"
+              style={{ whiteSpace: "nowrap" }}
+              onClick={() => handlePaymentToggle(row)}
+              title="Mark Invoice as Paid"
+            >
+              <CheckCircle size={13} className="flex-shrink-0" /> Mark Paid
+            </button>
+          )}
+        </div>
+      ),
     },
   ];
 
