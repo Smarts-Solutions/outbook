@@ -456,11 +456,11 @@ export const SubmitBilling = () => {
   // Reset Step 3 (Calculations, Hours, Quantities, Contributors)
   const resetStep3States = () => {
     setAdhocHours("");
-    setFteAccountantQty("");
-    setFteBookkeeperQty("");
-    setFtePayrollQty("");
-    setFteTaxQty("");
-    setFteAdminQty("");
+    setFteAccountantQty("0");
+    setFteBookkeeperQty("0");
+    setFtePayrollQty("0");
+    setFteTaxQty("0");
+    setFteAdminQty("0");
     setPercentageBaseAmount("");
     setCustomJobsCount("");
     setDiscountPct("");
@@ -675,11 +675,11 @@ export const SubmitBilling = () => {
   const [adhocHours, setAdhocHours] = useState("");
 
   // 2. FTE states: Quantity / Count overrides if needed (default from customer agreement)
-  const [fteAccountantQty, setFteAccountantQty] = useState("");
-  const [fteBookkeeperQty, setFteBookkeeperQty] = useState("");
-  const [ftePayrollQty, setFtePayrollQty] = useState("");
-  const [fteTaxQty, setFteTaxQty] = useState("");
-  const [fteAdminQty, setFteAdminQty] = useState("");
+  const [fteAccountantQty, setFteAccountantQty] = useState("0");
+  const [fteBookkeeperQty, setFteBookkeeperQty] = useState("0");
+  const [ftePayrollQty, setFtePayrollQty] = useState("0");
+  const [fteTaxQty, setFteTaxQty] = useState("0");
+  const [fteAdminQty, setFteAdminQty] = useState("0");
 
   // 3. Percentage Model state: Base Invoice/Turnover amount
   const [percentageBaseAmount, setPercentageBaseAmount] = useState("");
