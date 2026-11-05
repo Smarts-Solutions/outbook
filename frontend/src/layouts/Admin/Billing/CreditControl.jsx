@@ -377,16 +377,17 @@ const CreditControl = () => {
     },
     {
       name: "Actions",
-      minWidth: "160px",
+      minWidth: "190px",
+      width: "190px",
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
       cell: (row) => (
-        <div className="d-flex align-items-center justify-content-start gap-2">
+        <div className="d-flex align-items-center justify-content-start gap-2 text-nowrap">
           {/* View Snapshot / Details Modal */}
           <button
             type="button"
-            className="view-icon rounded-pills border-primary"
+            className="view-icon rounded-pills border-primary flex-shrink-0"
             title="View Details"
             onClick={() => setViewDetailsModal(row)}
           >
@@ -396,10 +397,11 @@ const CreditControl = () => {
           {/* Raise Bill Button */}
           <button
             type="button"
-            className="btn btn-sm btn-info text-white py-1 px-3 fs-12 rounded-pill shadow-xs d-flex align-items-center gap-1 fw-medium"
+            className="btn btn-sm btn-info text-white py-1 px-3 fs-12 rounded-pill shadow-xs d-inline-flex align-items-center gap-1 fw-medium text-nowrap"
+            style={{ whiteSpace: "nowrap" }}
             onClick={() => handleGenerateBill(row)}
           >
-            <FileText size={13} /> Generate Bill
+            <FileText size={13} className="flex-shrink-0" /> Generate Bill
           </button>
         </div>
       ),
