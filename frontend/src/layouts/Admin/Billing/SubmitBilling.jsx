@@ -722,7 +722,7 @@ export const SubmitBilling = () => {
           const list = (res.data && Array.isArray(res.data)) ? res.data : [];
           setTimesheetStaffList(list);
 
-          // By default, add only the first contributor (user can add more via "Add contributor")
+          // By default, add only the first contributor (user can add remaining via "Add contributor")
           if (list.length > 0) {
             const first = list[0];
             const newContributors = [
@@ -730,7 +730,7 @@ export const SubmitBilling = () => {
                 id: Date.now(),
                 staff_id: first.staff_id,
                 name: first.staff_name,
-                total_hours: first.total_hours,
+                total_hours: first.total_hours || null,
                 mode: null, // "pct" or "flat"
                 pct: "",
                 amount: "",
@@ -739,7 +739,7 @@ export const SubmitBilling = () => {
 
             setContributors(newContributors);
           } else {
-            // No staff filled timesheet for this service in this period
+            // No staff found for this client & service
             setContributors([]);
           }
         }
@@ -2330,7 +2330,7 @@ const handleAddContributor = () => {
                             Revenue split — who worked on this?
                           </h6>
                           <small className="text-muted" style={{ fontSize: "12px" }}>
-                            Contributors who logged timesheet in last month for this customer, client & service
+                            Assigned staff (Reviewer, Allocated To, Allocated To Other) and staff who logged timesheet
                           </small>
                         </div>
                         {contributors.length > 1 && (
@@ -2355,36 +2355,25 @@ const handleAddContributor = () => {
                       {loadingContributors ? (
                         <div className="py-2 text-center text-muted small">
                           <span className="spinner-border spinner-border-sm me-2 text-info" role="status" />
-                          Checking logged timesheets for this customer, client & service...
+                          Checking assigned staff and timesheets for this customer, client & service...
                         </div>
                       ) : contributors.length === 0 ? (
                         <div className="py-3 px-3 text-center bg-light rounded text-muted small border mb-2">
-                          <span className="fw-semibold text-secondary">No timesheet entries found</span> for this client & service in the selected period.
+                          <span className="fw-semibold text-secondary">No assigned staff or timesheet entries found</span> for this client & service.
                         </div>
                       ) : (
                         contributors.map((c) => (
                           <div key={c.id} className="row g-2 align-items-center mb-2">
-                            {/* Contributor Select */}
+                            {/* Contributor Name (Fixed label, no focus, no click) */}
                             <div className="col-5">
-                              <select
-                                className="form-select form-select-sm"
-                                value={c.staff_id || ""}
-                                onChange={(e) =>
-                                  handleContributorChange(c.id, "staff_id", e.target.value)
-                                }
-                              >
-                                <option value="" disabled>Select Staff / Contributor</option>
-                                {timesheetStaffList.map((st) => (
-                                  <option key={st.staff_id} value={st.staff_id}>
-                                    {st.staff_name} {st.total_hours != null ? `(${st.total_hours} hrs logged)` : ""}
-                                  </option>
-                                ))}
-                                {c.staff_id && !timesheetStaffList.some(st => String(st.staff_id) === String(c.staff_id)) && (
-                                  <option value={c.staff_id}>
-                                    {c.name} {c.total_hours ? `(${c.total_hours} hrs)` : ""}
-                                  </option>
-                                )}
-                              </select>
+                              <input
+                                type="text"
+                                className="form-control form-control-sm bg-light fw-medium text-dark"
+                                readOnly
+                                tabIndex={-1}
+                                style={{ pointerEvents: "none", userSelect: "none" }}
+                                value={c.name || "Staff"}
+                              />
                             </div>
 
                             {/* Percentage Share Input */}

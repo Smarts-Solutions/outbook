@@ -475,18 +475,17 @@ const getServicesByClient = async (clientId) => {
 };
 
 
-// 8.1 Get Timesheet Contributors (Staff who filled/submitted timesheets in LAST MONTH for this Customer + Client + Service)
+// 8.1 Get Timesheet & Job Contributors (Staff assigned as Reviewer, Allocated To, Allocated To Other in jobs + Staff who logged timesheets in current/selected period)
 const getTimesheetContributors = async (customerId, clientId, serviceId, periodDate = null) => {
     try {
         if (!customerId || !clientId) {
             return { status: true, data: [] };
         }
 
-        // Determine date range for "Last Month"
-        // If periodDate (e.g. 'YYYY-MM') is passed from step 2, use that month;
-        // otherwise default strictly to last calendar month relative to CURDATE()
-        let startDateExpr = `DATE_SUB(DATE_SUB(CURDATE(), INTERVAL DAY(CURDATE())-1 DAY), INTERVAL 1 MONTH)`;
-        let endDateExpr = `LAST_DAY(DATE_SUB(DATE_SUB(CURDATE(), INTERVAL DAY(CURDATE())-1 DAY), INTERVAL 1 MONTH))`;
+        // Current Month / Selected period date range
+        // Default to current month if periodDate not supplied
+        let startDateExpr = `DATE_FORMAT(CURDATE(), '%Y-%m-01')`;
+        let endDateExpr = `LAST_DAY(CURDATE())`;
         const dateParams = [];
 
         if (periodDate && String(periodDate).match(/^\d{4}-\d{2}$/)) {
@@ -495,52 +494,78 @@ const getTimesheetContributors = async (customerId, clientId, serviceId, periodD
             dateParams.push(`${periodDate}-01`, `${periodDate}-01`);
         }
 
-        let whereClause = `
-            (ts.customer_id = ? OR j.customer_id = ?)
-            AND (ts.client_id = ? OR j.client_id = ?)
-            AND ts.is_deleted = 0
-            AND (
-                (ts.monday_date >= ${startDateExpr} AND ts.monday_date <= ${endDateExpr})
-                OR (ts.sunday_date >= ${startDateExpr} AND ts.sunday_date <= ${endDateExpr})
-                OR (ts.save_date >= ${startDateExpr} AND ts.save_date <= ${endDateExpr})
-                OR (ts.submit_date >= ${startDateExpr} AND ts.submit_date <= ${endDateExpr})
-            )
-        `;
-        const params = [customerId, customerId, clientId, clientId, ...dateParams, ...dateParams, ...dateParams, ...dateParams];
-
+        let serviceFilterJobs = '';
+        const jobParams = [customerId, clientId];
         if (serviceId) {
-            whereClause += ` AND j.service_id = ?`;
-            params.push(serviceId);
+            serviceFilterJobs = ` AND j.service_id = ?`;
+            jobParams.push(serviceId);
         }
 
+        // 1) Assigned staff from matching jobs:
+        // - Reviewer (j.reviewer)
+        // - Allocated To (j.allocated_to)
+        // - Allocated to (Other) (job_allowed_staffs.staff_id)
+        // 2) Timesheet staff who logged timesheets for these jobs in the month
         const query = `
-            SELECT 
-                ts.staff_id,
+            SELECT DISTINCT
+                s.id AS staff_id,
                 CONCAT(s.first_name, ' ', s.last_name) AS staff_name,
-                s.email AS staff_email,
-                ROUND(
-                    COALESCE(
-                        SUM(
-                            COALESCE(ts.monday_hours, 0) + 
-                            COALESCE(ts.tuesday_hours, 0) + 
-                            COALESCE(ts.wednesday_hours, 0) + 
-                            COALESCE(ts.thursday_hours, 0) + 
-                            COALESCE(ts.friday_hours, 0) + 
-                            COALESCE(ts.saturday_hours, 0) + 
-                            COALESCE(ts.sunday_hours, 0)
-                        ), 0
-                    ), 2
-                ) AS total_hours
-            FROM timesheet ts
-            LEFT JOIN jobs j ON ts.job_id = j.id
-            JOIN staffs s ON ts.staff_id = s.id
-            WHERE ${whereClause}
-            GROUP BY ts.staff_id, s.first_name, s.last_name, s.email
-            HAVING total_hours > 0
-            ORDER BY total_hours DESC, staff_name ASC
+                s.email AS staff_email
+            FROM staffs s
+            WHERE s.id IN (
+                -- Reviewer from jobs
+                SELECT j.reviewer
+                FROM jobs j
+                WHERE j.customer_id = ? AND j.client_id = ? ${serviceFilterJobs}
+                  AND j.reviewer IS NOT NULL AND j.reviewer > 0
+
+                UNION
+
+                -- Allocated To from jobs
+                SELECT j.allocated_to
+                FROM jobs j
+                WHERE j.customer_id = ? AND j.client_id = ? ${serviceFilterJobs}
+                  AND j.allocated_to IS NOT NULL AND j.allocated_to > 0
+
+                UNION
+
+                -- Allocated To (Other) from job_allowed_staffs
+                SELECT jas.staff_id
+                FROM job_allowed_staffs jas
+                JOIN jobs j ON jas.job_id = j.id
+                WHERE j.customer_id = ? AND j.client_id = ? ${serviceFilterJobs}
+                  AND jas.staff_id IS NOT NULL AND jas.staff_id > 0
+
+                UNION
+
+                -- Staff who logged timesheet in current/selected month for this customer, client & service
+                SELECT ts.staff_id
+                FROM timesheet ts
+                LEFT JOIN jobs j ON ts.job_id = j.id
+                WHERE (ts.customer_id = ? OR j.customer_id = ?)
+                  AND (ts.client_id = ? OR j.client_id = ?)
+                  AND ts.is_deleted = 0
+                  ${serviceId ? 'AND (ts.service_id = ? OR j.service_id = ?)' : ''}
+                  AND (
+                      (ts.monday_date >= ${startDateExpr} AND ts.monday_date <= ${endDateExpr})
+                      OR (ts.sunday_date >= ${startDateExpr} AND ts.sunday_date <= ${endDateExpr})
+                      OR (ts.save_date >= ${startDateExpr} AND ts.save_date <= ${endDateExpr})
+                      OR (ts.submit_date >= ${startDateExpr} AND ts.submit_date <= ${endDateExpr})
+                  )
+            )
+            ORDER BY staff_name ASC
         `;
 
-        const [rows] = await pool.execute(query, params);
+        const fullParams = [
+            ...jobParams, // for reviewer
+            ...jobParams, // for allocated_to
+            ...jobParams, // for allocated_to_other
+            customerId, customerId, clientId, clientId,
+            ...(serviceId ? [serviceId, serviceId] : []),
+            ...dateParams, ...dateParams, ...dateParams, ...dateParams
+        ];
+
+        const [rows] = await pool.execute(query, fullParams);
 
         return {
             status: true,
@@ -548,7 +573,7 @@ const getTimesheetContributors = async (customerId, clientId, serviceId, periodD
             fallbackStaff: []
         };
     } catch (error) {
-        console.error("Error fetching timesheet contributors:", error);
+        console.error("Error fetching timesheet & job contributors:", error);
         return { status: false, message: error.message };
     }
 };
