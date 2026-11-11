@@ -10,7 +10,7 @@ import {
 } from "../../../Services/Billing/BillingService";
 import { convertDate1 } from "../../../Utils/Comman_function";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { Check, CheckCheck, Eye, RotateCcw, Edit, X } from "lucide-react";
+import { Check, CheckCheck, Eye, RotateCcw, Edit, X, Clock } from "lucide-react";
 import sweatalert from "sweetalert2";
 
 const BillingApprovals = () => {
@@ -411,6 +411,7 @@ const BillingApprovals = () => {
     },
     {
       name: "Revenue Split",
+      selector: (row) => (row.contributors || []).map((c) => `${c.staff_name} (${parseFloat(c.pct).toFixed(0)}%)`).join(", "),
       minWidth: "220px",
       cell: (row) => {
         const list = row.contributors || [];
@@ -440,35 +441,58 @@ const BillingApprovals = () => {
         const st = (row.status || "").toLowerCase();
         if (st === "invoiced") {
           return (
-            <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1">
-              <CheckCheck size={13} /> Invoiced
+            <span className="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 fw-bold d-inline-flex align-items-center gap-1" style={{ fontSize: "12.5px" }}>
+              <CheckCheck size={14} /> Invoiced
             </span>
           );
         }
         if (st.includes("credit control")) {
           return (
-            <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1">
-              <Check size={13} /> Sent to Credit Control
+            <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 fw-bold d-inline-flex align-items-center gap-1" style={{ fontSize: "12.5px" }}>
+              <Check size={14} /> Sent to Credit Control
             </span>
           );
         }
         if (st.includes("approved")) {
           return (
-            <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1">
-              <Check size={13} /> Approved
+            <span className="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 fw-bold d-inline-flex align-items-center gap-1" style={{ fontSize: "12.5px" }}>
+              <Check size={14} /> Approved
             </span>
           );
         }
         if (st.includes("return")) {
           return (
-            <span className="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1">
-              <RotateCcw size={13} /> Returned
+            <span
+              className="badge px-3 py-1 fw-bold d-inline-flex align-items-center gap-1 shadow-sm"
+              style={{
+                backgroundColor: "#fff8e6",
+                color: "#b76e00",
+                border: "1px solid #ffd591",
+                fontSize: "12.5px",
+              }}
+            >
+              <RotateCcw size={14} /> Returned
+            </span>
+          );
+        }
+        if (st.includes("reject")) {
+          return (
+            <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1 fw-bold d-inline-flex align-items-center gap-1" style={{ fontSize: "12.5px" }}>
+              Rejected
             </span>
           );
         }
         return (
-          <span className="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 fw-semibold">
-            Pending
+          <span
+            className="badge px-3 py-1 fw-bold d-inline-flex align-items-center gap-1 shadow-sm"
+            style={{
+              backgroundColor: "#e6f7ff",
+              color: "#0070ba",
+              border: "1px solid #91d5ff",
+              fontSize: "12.5px",
+            }}
+          >
+            <Clock size={14} /> Pending Manager Approval
           </span>
         );
       },
@@ -613,86 +637,210 @@ const BillingApprovals = () => {
       >
         {viewDetailsModal && (
           <div className="p-3">
-            {/* Meta Header */}
-            <div className="row g-2 mb-3 pb-3 border-bottom">
-              <div className="col-md-6">
-                <span className="text-muted small d-block">Customer</span>
-                <strong className="text-dark">{viewDetailsModal.customer_name || "-"}</strong>
-              </div>
-              <div className="col-md-6">
-                <span className="text-muted small d-block">Client</span>
-                <strong className="text-dark">{viewDetailsModal.client_name || "-"}</strong>
-              </div>
-              <div className="col-md-6">
-                <span className="text-muted small d-block">Service</span>
-                <span className="fw-medium text-dark">{viewDetailsModal.service_name || "-"}</span>
-              </div>
-              <div className="col-md-6">
-                <span className="text-muted small d-block">Billing Period</span>
-                <span className="badge bg-light text-dark border">
-                  {viewDetailsModal.period_label || "-"}
-                </span>
-              </div>
-              <div className="col-12 mt-2">
-                <span className="text-muted small d-block">Nomisma Line</span>
-                <code className="text-dark bg-light px-2 py-1 rounded d-block border">
-                  {viewDetailsModal.nomisma_description || "-"}
-                </code>
+            {/* Meta Information Card */}
+            <div
+              className="p-3 rounded-3 mb-3 border"
+              style={{ backgroundColor: "#f8fafd", borderColor: "#e2ecf5" }}
+            >
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <span className="text-muted small text-uppercase fw-semibold" style={{ fontSize: "11px", letterSpacing: "0.5px" }}>
+                    Customer / Practice
+                  </span>
+                  <div className="fw-bold text-dark fs-14 mt-1">
+                    {viewDetailsModal.customer_name || "-"}
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <span className="text-muted small text-uppercase fw-semibold" style={{ fontSize: "11px", letterSpacing: "0.5px" }}>
+                    Client
+                  </span>
+                  <div className="fw-bold text-dark fs-14 mt-1">
+                    {viewDetailsModal.client_name || "-"}
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <span className="text-muted small text-uppercase fw-semibold" style={{ fontSize: "11px", letterSpacing: "0.5px" }}>
+                    Service
+                  </span>
+                  <div className="fw-semibold text-dark fs-13 mt-1">
+                    {viewDetailsModal.service_name || "-"}
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <span className="text-muted small text-uppercase fw-semibold" style={{ fontSize: "11px", letterSpacing: "0.5px" }}>
+                    Billing Period
+                  </span>
+                  <div className="mt-1">
+                    <span className="badge bg-white text-primary border px-2 py-1 fw-bold fs-12">
+                      {viewDetailsModal.period_label || "-"}
+                    </span>
+                  </div>
+                </div>
+                <div className="col-12">
+                  <span className="text-muted small text-uppercase fw-semibold" style={{ fontSize: "11px", letterSpacing: "0.5px" }}>
+                    Nomisma Line
+                  </span>
+                  <div
+                    className="p-2 rounded mt-1 border text-dark fw-medium fs-12"
+                    style={{ backgroundColor: "#ffffff" }}
+                  >
+                    {viewDetailsModal.nomisma_description || "-"}
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Breakdown per model if structured */}
             {viewDetailsModal.calc_json && typeof viewDetailsModal.calc_json === "object" ? (
               <div className="mb-3">
-                <h6 className="fw-bold text-dark mb-2">Calculation Breakdown</h6>
-                <div className="table-responsive">
-                  <table className="table table-bordered table-sm align-middle mb-0">
-                    <thead className="table-light">
+                <div className="d-flex align-items-center justify-content-between mb-2">
+                  <h6 className="fw-bold text-dark mb-0 fs-14">Calculation Breakdown</h6>
+                </div>
+                <div className="table-responsive rounded border">
+                  <table className="table table-sm align-middle mb-0">
+                    <thead style={{ backgroundColor: "#f1f5f9" }}>
                       <tr>
-                        <th>Model</th>
-                        <th>Details</th>
-                        <th className="text-end">Subtotal (£)</th>
+                        <th className="py-2 px-3 text-secondary text-uppercase" style={{ fontSize: "11.5px", width: "170px" }}>Model</th>
+                        <th className="py-2 px-3 text-secondary text-uppercase" style={{ fontSize: "11.5px" }}>Details</th>
+                        <th className="py-2 px-3 text-secondary text-uppercase text-end" style={{ fontSize: "11.5px", width: "130px" }}>Subtotal (£)</th>
                       </tr>
                     </thead>
                     <tbody>
                       {viewDetailsModal.calc_json.adhoc && (
                         <tr>
-                          <td><span className="badge bg-primary text-white">Adhoc / Hourly</span></td>
-                          <td>
-                            {viewDetailsModal.calc_json.adhoc.role || "Standard"} — {viewDetailsModal.calc_json.adhoc.hours || 0} hrs @ £{parseFloat(viewDetailsModal.calc_json.adhoc.rate || 0).toFixed(2)}/hr
+                          <td className="px-3 py-2">
+                            <span
+                              className="badge px-2 py-1 fw-bold"
+                              style={{
+                                backgroundColor: "#e8f1fc",
+                                color: "#0d5ca8",
+                                border: "1px solid #b6d4f7",
+                                fontSize: "11.5px",
+                              }}
+                            >
+                              Adhoc / Hourly
+                            </span>
                           </td>
-                          <td className="text-end fw-semibold">
+                          <td className="px-3 py-2 text-dark fs-13">
+                            <span className="fw-semibold text-capitalize">
+                              {(viewDetailsModal.calc_json.adhoc.role || "Standard").replace(/_/g, " ")}
+                            </span>
+                            <span className="text-muted mx-1">—</span>
+                            <span>{viewDetailsModal.calc_json.adhoc.hours || 0} hrs @ £{parseFloat(viewDetailsModal.calc_json.adhoc.rate || 0).toFixed(2)}/hr</span>
+                          </td>
+                          <td className="px-3 py-2 text-end fw-bold text-dark fs-13">
                             £{parseFloat(viewDetailsModal.calc_json.adhoc.total || 0).toFixed(2)}
                           </td>
                         </tr>
                       )}
                       {viewDetailsModal.calc_json.fte && (
                         <tr>
-                          <td><span className="badge bg-success text-white">FTE Staffing</span></td>
-                          <td>Fixed FTE allocation fee</td>
-                          <td className="text-end fw-semibold">
+                          <td className="px-3 py-2">
+                            <span
+                              className="badge px-2 py-1 fw-bold"
+                              style={{
+                                backgroundColor: "#eaf7ee",
+                                color: "#137333",
+                                border: "1px solid #b7e1cd",
+                                fontSize: "11.5px",
+                              }}
+                            >
+                              FTE Staffing
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 text-dark fs-13">
+                            {(() => {
+                              const roles = [
+                                { label: "Accountants", qty: viewDetailsModal.calc_json.fte.accountants },
+                                { label: "Bookkeepers", qty: viewDetailsModal.calc_json.fte.bookkeepers },
+                                { label: "Payroll", qty: viewDetailsModal.calc_json.fte.payroll },
+                                { label: "Tax", qty: viewDetailsModal.calc_json.fte.tax },
+                                { label: "Admin", qty: viewDetailsModal.calc_json.fte.admin },
+                              ].filter((r) => r.qty > 0);
+
+                              if (roles.length > 0) {
+                                return (
+                                  <span>
+                                    {roles.map((r, idx) => (
+                                      <span key={idx} className="badge bg-light text-dark border me-1">
+                                        {r.label}: <strong>{r.qty}</strong>
+                                      </span>
+                                    ))}
+                                  </span>
+                                );
+                              }
+                              return <span className="text-muted">Dedicated FTE Resource Allocation</span>;
+                            })()}
+                          </td>
+                          <td className="px-3 py-2 text-end fw-bold text-dark fs-13">
                             £{parseFloat(viewDetailsModal.calc_json.fte.total || 0).toFixed(2)}
                           </td>
                         </tr>
                       )}
                       {viewDetailsModal.calc_json.percentage && (
                         <tr>
-                          <td><span className="badge bg-info text-white">Percentage Model</span></td>
-                          <td>
-                            Base: £{parseFloat(viewDetailsModal.calc_json.percentage.base || 0).toFixed(2)} @ {viewDetailsModal.calc_json.percentage.pct || 0}%
+                          <td className="px-3 py-2">
+                            <span
+                              className="badge px-2 py-1 fw-bold"
+                              style={{
+                                backgroundColor: "#e1f5fe",
+                                color: "#0277bd",
+                                border: "1px solid #81d4fa",
+                                fontSize: "11.5px",
+                              }}
+                            >
+                              Percentage Model
+                            </span>
                           </td>
-                          <td className="text-end fw-semibold">
+                          <td className="px-3 py-2 text-dark fs-13">
+                            {Array.isArray(viewDetailsModal.calc_json.percentage.items) && viewDetailsModal.calc_json.percentage.items.length > 0 ? (
+                              <div className="d-flex flex-column gap-1">
+                                {viewDetailsModal.calc_json.percentage.items
+                                  .filter((it) => it.base > 0 || it.subtotal > 0)
+                                  .map((it, idx) => (
+                                    <div key={idx} className="d-flex justify-content-between align-items-center">
+                                      <span className="fw-medium">{it.label || it.key}:</span>
+                                      <span className="text-muted small">
+                                        Base £{parseFloat(it.base || 0).toFixed(2)} @ {it.pct}% = £{parseFloat(it.subtotal || 0).toFixed(2)}
+                                      </span>
+                                    </div>
+                                  ))}
+                              </div>
+                            ) : (
+                              <span>
+                                Base: £{parseFloat(viewDetailsModal.calc_json.percentage.base || 0).toFixed(2)} @ {viewDetailsModal.calc_json.percentage.pct || 0}%
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2 text-end fw-bold text-dark fs-13">
                             £{parseFloat(viewDetailsModal.calc_json.percentage.total || 0).toFixed(2)}
                           </td>
                         </tr>
                       )}
                       {viewDetailsModal.calc_json.customised && (
                         <tr>
-                          <td><span className="badge bg-warning text-dark">Customised Pricing</span></td>
-                          <td>
-                            {viewDetailsModal.calc_json.customised.count || 0} jobs @ £{parseFloat(viewDetailsModal.calc_json.customised.costPerJob || 0).toFixed(2)}/job
+                          <td className="px-3 py-2">
+                            <span
+                              className="badge px-2 py-1 fw-bold"
+                              style={{
+                                backgroundColor: "#fff4e5",
+                                color: "#b76e00",
+                                border: "1px solid #ffd599",
+                                fontSize: "11.5px",
+                              }}
+                            >
+                              Customised Pricing
+                            </span>
                           </td>
-                          <td className="text-end fw-semibold">
+                          <td className="px-3 py-2 text-dark fs-13">
+                            <span>
+                              <strong>{viewDetailsModal.calc_json.customised.count || 0}</strong> {Number(viewDetailsModal.calc_json.customised.count) === 1 ? "Job" : "Jobs"}
+                              <span className="text-muted mx-1">@</span>
+                              £{parseFloat(viewDetailsModal.calc_json.customised.costPerJob || 0).toFixed(2)}/Job
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 text-end fw-bold text-dark fs-13">
                             £{parseFloat(viewDetailsModal.calc_json.customised.total || 0).toFixed(2)}
                           </td>
                         </tr>
@@ -706,48 +854,77 @@ const BillingApprovals = () => {
             {/* Revenue Split / Contributors */}
             {viewDetailsModal.contributors && viewDetailsModal.contributors.length > 0 && (
               <div className="mb-3">
-                <h6 className="fw-bold text-dark mb-2">Revenue Allocation</h6>
-                <div className="d-flex flex-wrap gap-2">
-                  {viewDetailsModal.contributors.map((c, i) => (
-                    <span key={i} className="badge bg-white text-dark border px-2 py-1">
-                      {c.staff_name} — <strong>{parseFloat(c.pct).toFixed(0)}%</strong> (£{((parseFloat(viewDetailsModal.net_amount || 0) * parseFloat(c.pct)) / 100).toFixed(2)})
-                    </span>
-                  ))}
+                <h6 className="fw-bold text-dark mb-2 fs-14">Revenue Allocation</h6>
+                <div className="table-responsive rounded border">
+                  <table className="table table-sm align-middle mb-0">
+                    <thead style={{ backgroundColor: "#f8fafc" }}>
+                      <tr>
+                        <th className="py-2 px-3 text-secondary text-uppercase" style={{ fontSize: "11px" }}>Contributor / Staff</th>
+                        <th className="py-2 px-3 text-secondary text-uppercase text-center" style={{ fontSize: "11px", width: "120px" }}>Share %</th>
+                        <th className="py-2 px-3 text-secondary text-uppercase text-end" style={{ fontSize: "11px", width: "140px" }}>Allocated Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {viewDetailsModal.contributors.map((c, i) => {
+                        const contributorPct = parseFloat(c.pct || 0);
+                        const netAmt = parseFloat(viewDetailsModal.net_amount || 0);
+                        const contributorAmt = parseFloat(c.amount || 0) || ((netAmt * contributorPct) / 100);
+                        return (
+                          <tr key={i}>
+                            <td className="px-3 py-2 fw-semibold text-dark fs-13">
+                              {c.staff_name}
+                            </td>
+                            <td className="px-3 py-2 text-center">
+                              <span className="badge bg-light text-primary border px-2 py-1 fw-bold">
+                                {contributorPct.toFixed(contributorPct % 1 === 0 ? 0 : 2)}%
+                              </span>
+                            </td>
+                            <td className="px-3 py-2 text-end fw-bold text-dark fs-13">
+                              £{contributorAmt.toFixed(2)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}
 
             {/* Revert / Return Note if available */}
             {viewDetailsModal.return_note && (
-              <div className="alert alert-danger py-2 px-3 mt-3 mb-0">
-                <div className="fw-bold fs-13 mb-1">
-                  <i className="ti-back-left me-1"></i> Revert / Return Reason:
+              <div className="alert alert-danger py-2 px-3 mb-3 border-danger shadow-sm">
+                <div className="fw-bold fs-13 mb-1 d-flex align-items-center gap-1 text-danger">
+                  <RotateCcw size={14} /> Revert / Return Note:
                 </div>
                 <div className="small text-dark">{viewDetailsModal.return_note}</div>
               </div>
             )}
 
-            {/* Grand Total & Discount Footer */}
-            <div className="bg-light rounded p-3 mt-3">
-              <div className="d-flex justify-content-between align-items-center mb-1">
-                <span className="text-muted small">Gross Billable Amount:</span>
-                <span className="fw-semibold text-dark">
+            {/* Grand Total & Discount Card */}
+            <div
+              className="rounded-3 p-3 border"
+              style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0" }}
+            >
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <span className="text-secondary small fw-medium">Gross Billable Amount:</span>
+                <span className="fw-semibold text-dark fs-14">
                   £{parseFloat(viewDetailsModal.gross_amount || viewDetailsModal.net_amount || 0).toFixed(2)}
                 </span>
               </div>
               {parseFloat(viewDetailsModal.discount_pct || 0) > 0 && (
-                <div className="d-flex justify-content-between align-items-center mb-1 text-danger">
-                  <span className="small">
+                <div className="d-flex justify-content-between align-items-center mb-2 text-danger">
+                  <span className="small fw-medium">
                     Discount ({parseFloat(viewDetailsModal.discount_pct)}%):
                   </span>
-                  <span className="fw-semibold">
+                  <span className="fw-semibold fs-14">
                     - £{parseFloat(viewDetailsModal.discount_amt || 0).toFixed(2)}
                   </span>
                 </div>
               )}
               <div className="d-flex justify-content-between align-items-center pt-2 border-top mt-2">
                 <span className="fw-bold text-dark fs-15">Net Billable Amount:</span>
-                <span className="fs-5 fw-bold text-info">
+                <span className="fs-4 fw-bold text-info">
                   £{parseFloat(viewDetailsModal.net_amount || 0).toFixed(2)}
                 </span>
               </div>

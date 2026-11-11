@@ -422,52 +422,256 @@ const getJobTypesByService = async (serviceId = null) => {
     }
 };
 
-// 8. Get Services from existing jobs for a given client with latest year end date
+// Helper function to extract period type and period date/value from a job row's Other Data
+const extractJobPeriodInfo = (job) => {
+    if (!job) return null;
+    const sId = Number(job.service_id);
+
+    // 1. Service 4: Personal Tax Return -> Tax Year
+    if (sId === 4 && job.Tax_Year_id_4 && String(job.Tax_Year_id_4).trim()) {
+        return {
+            period_type: "Tax Year",
+            period_date: String(job.Tax_Year_id_4).trim(),
+            raw_value: String(job.Tax_Year_id_4).trim()
+        };
+    }
+
+    // 2. Service 1 (Accounts Production) or Service 27 (Audit) -> Year Ending
+    if ((sId === 1 || sId === 27) && (job.Year_Ending_id_1 || job.Audit_Year_Ending_id_27 || job.year_end)) {
+        const d = job.Year_Ending_id_1 || job.Audit_Year_Ending_id_27 || job.year_end;
+        if (d && d !== '0000-00-00') {
+            const strDate = typeof d === 'object' && d.toISOString ? d.toISOString().split('T')[0] : String(d).split('T')[0];
+            return {
+                period_type: "Year End",
+                period_date: strDate,
+                raw_value: strDate
+            };
+        }
+    }
+
+    // 3. Service 2 (Bookkeeping) & Service 32 (Aus - Bookkeeping)
+    if (sId === 2 || sId === 32) {
+        const freq = (sId === 2 ? job.Bookkeeping_Frequency_id_2 : job.Period_id_32) || '';
+        if (freq === 'Daily' && (job.Day_Date_id_2 || job.Day_Date_id_32)) {
+            const d = job.Day_Date_id_2 || job.Day_Date_id_32;
+            const strDate = typeof d === 'object' && d.toISOString ? d.toISOString().split('T')[0] : String(d).split('T')[0];
+            return { period_type: "Daily", period_date: strDate, raw_value: strDate };
+        }
+        if (freq === 'Weekly') {
+            const w = job.Week_id_2 || job.Week_id_32;
+            const m = job.Week_Month_id_2 || job.Week_Month_id_32;
+            const y = job.Week_Year_id_2 || job.Week_Year_id_32;
+            if (w || m || y) {
+                const label = [w, m, y].filter(Boolean).join(', ');
+                return { period_type: "Weekly", period_date: label, raw_value: label };
+            }
+        }
+        if (freq === 'Fortnightly' || freq === 'Fortnight') {
+            const fn = job.Fortnight_id_2 || job.Fortnight_id_32;
+            const m = job.Fortnight_Month_id_2 || job.Fortnight_Month_id_32;
+            const y = job.Fortnight_Year_id_2 || job.Fortnight_Year_id_32;
+            if (fn || m || y) {
+                const label = [fn, m, y].filter(Boolean).join(', ');
+                return { period_type: "Fortnightly", period_date: label, raw_value: label };
+            }
+        }
+        if (freq === 'Monthly') {
+            const m = job.Month_id_2 || job.Month_id_32;
+            const y = job.Month_Year_id_2 || job.Month_Year_id_32;
+            if (m || y) {
+                const label = [m, y].filter(Boolean).join(' ');
+                return { period_type: "Monthly", period_date: label, raw_value: label };
+            }
+        }
+        if (freq === 'Quarterly') {
+            const q = job.Quarter_id_2 || job.Quarter_id_32;
+            const y = job.Quarter_Year_id_2 || job.Quarter_Year_id_32;
+            if (q || y) {
+                const label = [q, y].filter(Boolean).join(' ');
+                return { period_type: "Quarterly", period_date: label, raw_value: label };
+            }
+        }
+        if (freq === 'Yearly' && (job.Year_id_2 || job.Year_id_32)) {
+            const y = String(job.Year_id_2 || job.Year_id_32).trim();
+            if (y) return { period_type: "Yearly", period_date: y, raw_value: y };
+        }
+        if (freq === 'Other' && (job.Other_FromDate_id_2 || job.Other_ToDate_id_2 || job.Other_FromDate_id_32 || job.Other_ToDate_id_32)) {
+            const fromD = job.Other_FromDate_id_2 || job.Other_FromDate_id_32;
+            const toD = job.Other_ToDate_id_2 || job.Other_ToDate_id_32;
+            const strFrom = fromD ? (typeof fromD === 'object' && fromD.toISOString ? fromD.toISOString().split('T')[0] : String(fromD).split('T')[0]) : '';
+            const strTo = toD ? (typeof toD === 'object' && toD.toISOString ? toD.toISOString().split('T')[0] : String(toD).split('T')[0]) : '';
+            const label = `${strFrom} to ${strTo}`.trim();
+            if (label) return { period_type: "Other", period_date: label, raw_value: label };
+        }
+    }
+
+    // 4. Service 3 (Payroll) & Service 31 (Aus - Payroll)
+    if (sId === 3 || sId === 31) {
+        const freq = (sId === 3 ? job.Payroll_Frequency_id_3 : job.Payroll_Frequency_id_31) || '';
+        if (freq === 'Weekly') {
+            const w = job.Payroll_Week_id_3 || job.Payroll_Week_id_31;
+            const m = job.Payroll_Week_Month_id_3 || job.Payroll_Week_Month_id_31;
+            const y = job.Payroll_Week_Year_id_3 || job.Payroll_Week_Year_id_31;
+            if (w || m || y) {
+                const label = [w, m, y].filter(Boolean).join(', ');
+                return { period_type: "Weekly", period_date: label, raw_value: label };
+            }
+        }
+        if (freq === 'Fortnightly') {
+            const fn = job.Payroll_Fortnight_id_3 || job.Payroll_Fortnight_id_31;
+            const m = job.Payroll_Fortnight_Month_id_3 || job.Payroll_Fortnight_Month_id_31;
+            const y = job.Payroll_Fortnight_Year_id_3 || job.Payroll_Fortnight_Year_id_31;
+            if (fn || m || y) {
+                const label = [fn, m, y].filter(Boolean).join(', ');
+                return { period_type: "Fortnightly", period_date: label, raw_value: label };
+            }
+        }
+        if (freq === 'Monthly') {
+            const m = job.Payroll_Month_id_3 || job.Payroll_Month_id_31;
+            const y = job.Payroll_Month_Year_id_3 || job.Payroll_Month_Year_id_31;
+            if (m || y) {
+                const label = [m, y].filter(Boolean).join(' ');
+                return { period_type: "Monthly", period_date: label, raw_value: label };
+            }
+        }
+        if (freq === 'Quarterly') {
+            const q = job.Payroll_Quarter_id_3 || job.Payroll_Quarter_id_31;
+            const y = job.Payroll_Quarter_Year_id_3 || job.Payroll_Quarter_Year_id_31;
+            if (q || y) {
+                const label = [q, y].filter(Boolean).join(' ');
+                return { period_type: "Quarterly", period_date: label, raw_value: label };
+            }
+        }
+        if (freq === 'Yearly' && (job.Payroll_Year_id_3 || job.Payroll_Year_id_31)) {
+            const y = String(job.Payroll_Year_id_3 || job.Payroll_Year_id_31).trim();
+            if (y) return { period_type: "Yearly", period_date: y, raw_value: y };
+        }
+    }
+
+    // 5. Service 8 (VAT Returns)
+    if (sId === 8 && (job.Period_Ending_Date_id_8 || job.Filing_Date_id_8)) {
+        const d = job.Period_Ending_Date_id_8 || job.Filing_Date_id_8;
+        const strDate = typeof d === 'object' && d.toISOString ? d.toISOString().split('T')[0] : String(d).split('T')[0];
+        const freq = job.Filing_Frequency_id_8 ? String(job.Filing_Frequency_id_8).trim() : 'Period Ending';
+        return {
+            period_type: freq,
+            period_date: strDate,
+            raw_value: strDate
+        };
+    }
+
+    // 6. Service 6 (Management Accounts)
+    if (sId === 6 && (job.Management_Accounts_FromDate_id_6 || job.Management_Accounts_ToDate_id_6)) {
+        const fromD = job.Management_Accounts_FromDate_id_6;
+        const toD = job.Management_Accounts_ToDate_id_6;
+        const strFrom = fromD ? (typeof fromD === 'object' && fromD.toISOString ? fromD.toISOString().split('T')[0] : String(fromD).split('T')[0]) : '';
+        const strTo = toD ? (typeof toD === 'object' && toD.toISOString ? toD.toISOString().split('T')[0] : String(toD).split('T')[0]) : '';
+        const label = `${strFrom} to ${strTo}`.trim();
+        const freq = job.Management_Accounts_Frequency_id_6 ? String(job.Management_Accounts_Frequency_id_6).trim() : 'Management Accounts';
+        return {
+            period_type: freq,
+            period_date: label,
+            raw_value: label
+        };
+    }
+
+    // 7. Aus - SMSF (28) & Compliance (33)
+    if ((sId === 28 || sId === 33) && (job.Year_id_28 || job.Year_id_33)) {
+        const y = String(job.Year_id_28 || job.Year_id_33).trim();
+        if (y) return { period_type: "Year", period_date: y, raw_value: y };
+    }
+
+    // Fallback: Check if generic year_end column has value
+    if (job.year_end && String(job.year_end).trim() && job.year_end !== '0000-00-00') {
+        const strVal = String(job.year_end).trim();
+        return {
+            period_type: "Year End",
+            period_date: strVal,
+            raw_value: strVal
+        };
+    }
+
+    return null;
+};
+
+// 8. Get Services from existing jobs for a given client with dynamic period types and dates
 const getServicesByClient = async (clientId) => {
     try {
         if (!clientId) {
             return { status: true, data: [] };
         }
+
+        // Fetch all jobs for this client ordered latest to oldest
         const query = `
             SELECT 
-                s.id AS service_id, 
-                s.name AS service_name,
-                (
-                    SELECT COALESCE(
-                        DATE_FORMAT(j2.Year_Ending_id_1, '%Y-%m-%d'),
-                        DATE_FORMAT(j2.Audit_Year_Ending_id_27, '%Y-%m-%d'),
-                        CASE 
-                            WHEN j2.year_end IS NOT NULL AND j2.year_end != '' AND j2.year_end != '0000-00-00' THEN j2.year_end
-                            WHEN j2.Year_id_2 IS NOT NULL AND j2.Year_id_2 != '' THEN CONCAT(j2.Year_id_2, '-12-31')
-                            WHEN j2.Year_id_32 IS NOT NULL AND j2.Year_id_32 != '' THEN CONCAT(j2.Year_id_32, '-12-31')
-                            WHEN j2.Year_id_33 IS NOT NULL AND j2.Year_id_33 != '' THEN CONCAT(j2.Year_id_33, '-12-31')
-                            WHEN j2.Year_id_28 IS NOT NULL AND j2.Year_id_28 != '' THEN CONCAT(j2.Year_id_28, '-12-31')
-                            ELSE NULL
-                        END
-                    )
-                    FROM jobs j2
-                    WHERE j2.client_id = ? 
-                      AND j2.service_id = s.id
-                      AND (
-                          (j2.Year_Ending_id_1 IS NOT NULL AND j2.Year_Ending_id_1 != '0000-00-00')
-                          OR (j2.Audit_Year_Ending_id_27 IS NOT NULL AND j2.Audit_Year_Ending_id_27 != '0000-00-00')
-                          OR (j2.year_end IS NOT NULL AND j2.year_end != '' AND j2.year_end != '0000-00-00')
-                          OR (j2.Year_id_2 IS NOT NULL AND j2.Year_id_2 != '')
-                          OR (j2.Year_id_32 IS NOT NULL AND j2.Year_id_32 != '')
-                          OR (j2.Year_id_33 IS NOT NULL AND j2.Year_id_33 != '')
-                          OR (j2.Year_id_28 IS NOT NULL AND j2.Year_id_28 != '')
-                      )
-                    ORDER BY j2.id DESC
-                    LIMIT 1
-                ) AS latest_year_end
+                j.*,
+                s.name AS service_name
             FROM jobs j
             JOIN services s ON j.service_id = s.id
             WHERE j.client_id = ?
-            GROUP BY s.id, s.name
-            ORDER BY s.name ASC
+            ORDER BY j.id DESC
         `;
-        const [rows] = await pool.execute(query, [clientId, clientId]);
-        return { status: true, data: rows };
+        const [jobs] = await pool.execute(query, [clientId]);
+
+        // Group jobs by service_id and extract distinct period options
+        const serviceMap = new Map();
+
+        for (const job of jobs) {
+            const sId = job.service_id;
+            const periodInfo = extractJobPeriodInfo(job);
+
+            // If this job has no Other Data period/date, skip this job
+            if (!periodInfo || !periodInfo.period_type || !periodInfo.period_date) {
+                continue;
+            }
+
+            if (!serviceMap.has(sId)) {
+                serviceMap.set(sId, {
+                    service_id: sId,
+                    service_name: job.service_name,
+                    latest_period_type: periodInfo.period_type,
+                    latest_period_date: periodInfo.period_date,
+                    // Structure: { [period_type]: [period_date1, period_date2, ...] }
+                    period_types: {},
+                    period_options: [] // flat list of { period_type, period_date, job_id }
+                });
+            }
+
+            const sObj = serviceMap.get(sId);
+            const pType = periodInfo.period_type;
+            const pDate = periodInfo.period_date;
+
+            if (!sObj.period_types[pType]) {
+                sObj.period_types[pType] = [];
+            }
+            if (!sObj.period_types[pType].includes(pDate)) {
+                sObj.period_types[pType].push(pDate);
+            }
+
+            sObj.period_options.push({
+                job_id: job.id,
+                period_type: pType,
+                period_date: pDate
+            });
+        }
+
+        // Only return services that have at least one valid period/date from their jobs!
+        const result = Array.from(serviceMap.values()).map(s => ({
+            service_id: s.service_id,
+            service_name: s.service_name,
+            latest_period_type: s.latest_period_type,
+            latest_period_date: s.latest_period_date,
+            period_types: Object.keys(s.period_types).map(typeKey => ({
+                type: typeKey,
+                dates: s.period_types[typeKey]
+            })),
+            latest_year_end: s.latest_period_date
+        }));
+
+        // Sort by service name ascending
+        result.sort((a, b) => a.service_name.localeCompare(b.service_name));
+
+        return { status: true, data: result };
     } catch (error) {
         console.error("Error fetching services by client:", error);
         return { status: false, message: error.message };
@@ -475,18 +679,17 @@ const getServicesByClient = async (clientId) => {
 };
 
 
-// 8.1 Get Timesheet Contributors (Staff who filled/submitted timesheets in LAST MONTH for this Customer + Client + Service)
+// 8.1 Get Timesheet & Job Contributors (Staff assigned as Reviewer, Allocated To, Allocated To Other in jobs + Staff who logged timesheets in current/selected period)
 const getTimesheetContributors = async (customerId, clientId, serviceId, periodDate = null) => {
     try {
         if (!customerId || !clientId) {
             return { status: true, data: [] };
         }
 
-        // Determine date range for "Last Month"
-        // If periodDate (e.g. 'YYYY-MM') is passed from step 2, use that month;
-        // otherwise default strictly to last calendar month relative to CURDATE()
-        let startDateExpr = `DATE_SUB(DATE_SUB(CURDATE(), INTERVAL DAY(CURDATE())-1 DAY), INTERVAL 1 MONTH)`;
-        let endDateExpr = `LAST_DAY(DATE_SUB(DATE_SUB(CURDATE(), INTERVAL DAY(CURDATE())-1 DAY), INTERVAL 1 MONTH))`;
+        // Current Month / Selected period date range
+        // Default to current month if periodDate not supplied
+        let startDateExpr = `DATE_FORMAT(CURDATE(), '%Y-%m-01')`;
+        let endDateExpr = `LAST_DAY(CURDATE())`;
         const dateParams = [];
 
         if (periodDate && String(periodDate).match(/^\d{4}-\d{2}$/)) {
@@ -495,52 +698,78 @@ const getTimesheetContributors = async (customerId, clientId, serviceId, periodD
             dateParams.push(`${periodDate}-01`, `${periodDate}-01`);
         }
 
-        let whereClause = `
-            (ts.customer_id = ? OR j.customer_id = ?)
-            AND (ts.client_id = ? OR j.client_id = ?)
-            AND ts.is_deleted = 0
-            AND (
-                (ts.monday_date >= ${startDateExpr} AND ts.monday_date <= ${endDateExpr})
-                OR (ts.sunday_date >= ${startDateExpr} AND ts.sunday_date <= ${endDateExpr})
-                OR (ts.save_date >= ${startDateExpr} AND ts.save_date <= ${endDateExpr})
-                OR (ts.submit_date >= ${startDateExpr} AND ts.submit_date <= ${endDateExpr})
-            )
-        `;
-        const params = [customerId, customerId, clientId, clientId, ...dateParams, ...dateParams, ...dateParams, ...dateParams];
-
+        let serviceFilterJobs = '';
+        const jobParams = [customerId, clientId];
         if (serviceId) {
-            whereClause += ` AND j.service_id = ?`;
-            params.push(serviceId);
+            serviceFilterJobs = ` AND j.service_id = ?`;
+            jobParams.push(serviceId);
         }
 
+        // 1) Assigned staff from matching jobs:
+        // - Reviewer (j.reviewer)
+        // - Allocated To (j.allocated_to)
+        // - Allocated to (Other) (job_allowed_staffs.staff_id)
+        // 2) Timesheet staff who logged timesheets for these jobs in the month
         const query = `
-            SELECT 
-                ts.staff_id,
+            SELECT DISTINCT
+                s.id AS staff_id,
                 CONCAT(s.first_name, ' ', s.last_name) AS staff_name,
-                s.email AS staff_email,
-                ROUND(
-                    COALESCE(
-                        SUM(
-                            COALESCE(ts.monday_hours, 0) + 
-                            COALESCE(ts.tuesday_hours, 0) + 
-                            COALESCE(ts.wednesday_hours, 0) + 
-                            COALESCE(ts.thursday_hours, 0) + 
-                            COALESCE(ts.friday_hours, 0) + 
-                            COALESCE(ts.saturday_hours, 0) + 
-                            COALESCE(ts.sunday_hours, 0)
-                        ), 0
-                    ), 2
-                ) AS total_hours
-            FROM timesheet ts
-            LEFT JOIN jobs j ON ts.job_id = j.id
-            JOIN staffs s ON ts.staff_id = s.id
-            WHERE ${whereClause}
-            GROUP BY ts.staff_id, s.first_name, s.last_name, s.email
-            HAVING total_hours > 0
-            ORDER BY total_hours DESC, staff_name ASC
+                s.email AS staff_email
+            FROM staffs s
+            WHERE s.id IN (
+                -- Reviewer from jobs
+                SELECT j.reviewer
+                FROM jobs j
+                WHERE j.customer_id = ? AND j.client_id = ? ${serviceFilterJobs}
+                  AND j.reviewer IS NOT NULL AND j.reviewer > 0
+
+                UNION
+
+                -- Allocated To from jobs
+                SELECT j.allocated_to
+                FROM jobs j
+                WHERE j.customer_id = ? AND j.client_id = ? ${serviceFilterJobs}
+                  AND j.allocated_to IS NOT NULL AND j.allocated_to > 0
+
+                UNION
+
+                -- Allocated To (Other) from job_allowed_staffs
+                SELECT jas.staff_id
+                FROM job_allowed_staffs jas
+                JOIN jobs j ON jas.job_id = j.id
+                WHERE j.customer_id = ? AND j.client_id = ? ${serviceFilterJobs}
+                  AND jas.staff_id IS NOT NULL AND jas.staff_id > 0
+
+                UNION
+
+                -- Staff who logged timesheet in current/selected month for this customer, client & service
+                SELECT ts.staff_id
+                FROM timesheet ts
+                LEFT JOIN jobs j ON ts.job_id = j.id
+                WHERE (ts.customer_id = ? OR j.customer_id = ?)
+                  AND (ts.client_id = ? OR j.client_id = ?)
+                  AND ts.is_deleted = 0
+                  ${serviceId ? 'AND j.service_id = ?' : ''}
+                  AND (
+                      (ts.monday_date >= ${startDateExpr} AND ts.monday_date <= ${endDateExpr})
+                      OR (ts.sunday_date >= ${startDateExpr} AND ts.sunday_date <= ${endDateExpr})
+                      OR (ts.save_date >= ${startDateExpr} AND ts.save_date <= ${endDateExpr})
+                      OR (ts.submit_date >= ${startDateExpr} AND ts.submit_date <= ${endDateExpr})
+                  )
+            )
+            ORDER BY staff_name ASC
         `;
 
-        const [rows] = await pool.execute(query, params);
+        const fullParams = [
+            ...jobParams, // for reviewer
+            ...jobParams, // for allocated_to
+            ...jobParams, // for allocated_to_other
+            customerId, customerId, clientId, clientId,
+            ...(serviceId ? [serviceId] : []),
+            ...dateParams, ...dateParams, ...dateParams, ...dateParams
+        ];
+
+        const [rows] = await pool.execute(query, fullParams);
 
         return {
             status: true,
@@ -548,7 +777,7 @@ const getTimesheetContributors = async (customerId, clientId, serviceId, periodD
             fallbackStaff: []
         };
     } catch (error) {
-        console.error("Error fetching timesheet contributors:", error);
+        console.error("Error fetching timesheet & job contributors:", error);
         return { status: false, message: error.message };
     }
 };

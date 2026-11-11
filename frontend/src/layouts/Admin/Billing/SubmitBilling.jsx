@@ -462,6 +462,7 @@ export const SubmitBilling = () => {
     setFteTaxQty("0");
     setFteAdminQty("0");
     setPercentageBaseAmount("");
+    setPercentageBaseAmounts({});
     setCustomJobsCount("");
     setDiscountPct("");
     setContributors([]);
@@ -532,6 +533,9 @@ export const SubmitBilling = () => {
 
     prevClientIdRef.current = selectedClient.value;
     setSelectedService(null);
+    setPeriodType("");
+    setPeriodDate("");
+    setRawDateValue("");
     resetStep3States();
 
     // Fetch services strictly belonging to this client's jobs
@@ -546,33 +550,42 @@ export const SubmitBilling = () => {
           const formatted = res.data.map((s) => ({
             value: s.service_id,
             label: s.service_name,
+            latest_period_type: s.latest_period_type || null,
+            latest_period_date: s.latest_period_date || null,
+            period_types: Array.isArray(s.period_types) ? s.period_types : [],
             latest_year_end: s.latest_year_end || null,
           }));
           if (editData?.service_id && !formatted.some(s => s.value === editData.service_id)) {
             formatted.unshift({
               value: editData.service_id,
               label: editData.service_name || ("Service #" + editData.service_id),
+              period_types: [],
             });
           }
           setServicesList(formatted);
+
+          // Auto-select service and its latest period / date from jobs
+          const applyServicePeriods = (srv) => {
+            if (!srv) return;
+            setSelectedService(srv);
+            if (editData?.period_type && editData?.period_date) {
+              setPeriodType(editData.period_type);
+              setRawDateValue(editData.period_date);
+              setPeriodDate(editData.period_date);
+            } else if (srv.latest_period_type && srv.latest_period_date) {
+              setPeriodType(srv.latest_period_type);
+              setRawDateValue(srv.latest_period_date);
+              setPeriodDate(srv.latest_period_date);
+            }
+          };
+
           if (editData?.service_id) {
             const foundService = formatted.find(s => s.value === editData.service_id);
             if (foundService) {
-              setSelectedService(foundService);
-              if (!editData.period_type && foundService.latest_year_end) {
-                setPeriodType("Year End");
-                setRawDateValue(foundService.latest_year_end);
-                setPeriodDate(formatPeriodDate("Year End", foundService.latest_year_end));
-              }
+              applyServicePeriods(foundService);
             }
           } else if (formatted.length === 1) {
-            const singleService = formatted[0];
-            setSelectedService(singleService);
-            if (singleService.latest_year_end) {
-              setPeriodType("Year End");
-              setRawDateValue(singleService.latest_year_end);
-              setPeriodDate(formatPeriodDate("Year End", singleService.latest_year_end));
-            }
+            applyServicePeriods(formatted[0]);
           }
         } else {
           if (editData?.service_id) {
@@ -681,7 +694,8 @@ export const SubmitBilling = () => {
   const [fteTaxQty, setFteTaxQty] = useState("0");
   const [fteAdminQty, setFteAdminQty] = useState("0");
 
-  // 3. Percentage Model state: Base Invoice/Turnover amount
+  // 3. Percentage Model state: Base amounts for each percentage category
+  const [percentageBaseAmounts, setPercentageBaseAmounts] = useState({});
   const [percentageBaseAmount, setPercentageBaseAmount] = useState("");
 
   // 4. Customised Pricing state: Completed number of jobs
@@ -722,7 +736,7 @@ export const SubmitBilling = () => {
           const list = (res.data && Array.isArray(res.data)) ? res.data : [];
           setTimesheetStaffList(list);
 
-          // By default, add only the first contributor (user can add more via "Add contributor")
+          // By default, add only the first contributor (user can add remaining via "Add contributor")
           if (list.length > 0) {
             const first = list[0];
             const newContributors = [
@@ -730,7 +744,7 @@ export const SubmitBilling = () => {
                 id: Date.now(),
                 staff_id: first.staff_id,
                 name: first.staff_name,
-                total_hours: first.total_hours,
+                total_hours: first.total_hours || null,
                 mode: null, // "pct" or "flat"
                 pct: "",
                 amount: "",
@@ -739,7 +753,7 @@ export const SubmitBilling = () => {
 
             setContributors(newContributors);
           } else {
-            // No staff filled timesheet for this service in this period
+            // No staff found for this client & service
             setContributors([]);
           }
         }
@@ -838,10 +852,41 @@ export const SubmitBilling = () => {
   };
   const fteTotal = calculateFteTotal();
 
-  // 3. Percentage Amount
-  const percentageOutsourceVal = parseFloat(percentageModelData?.details?.total_outsourcing) || 0;
-  const baseAmountNum = parseFloat(percentageBaseAmount) || 0;
-  const percentageTotal = (baseAmountNum * percentageOutsourceVal) / 100;
+  // 3. Percentage Amount across all configured fields
+  const getPercentageModelFields = () => {
+    if (!percentageModelData?.details) return [];
+    const d = percentageModelData.details;
+    const allDefs = [
+      { key: "total_outsourcing", label: "Total Outsourcing" },
+      { key: "accountants", label: "Accountants" },
+      { key: "bookkeepers", label: "Bookkeepers" },
+      { key: "payroll_experts", label: "Payroll Experts" },
+      { key: "tax_experts", label: "Tax Experts" },
+      { key: "admin_staff", label: "Admin/Other Staff" },
+    ];
+    // Filter only those fields where percentage value is entered / exists
+    return allDefs
+      .map((def) => {
+        const val = parseFloat(d[def.key]);
+        return {
+          ...def,
+          pct: !isNaN(val) && val > 0 ? val : null,
+        };
+      })
+      .filter((item) => item.pct !== null);
+  };
+
+  const percentageFieldsList = getPercentageModelFields();
+
+  const calculatePercentageTotal = () => {
+    if (percentageFieldsList.length === 0) return 0;
+    return percentageFieldsList.reduce((acc, f) => {
+      const baseVal = parseFloat(percentageBaseAmounts[f.key]) || 0;
+      return acc + (baseVal * f.pct) / 100;
+    }, 0);
+  };
+
+  const percentageTotal = calculatePercentageTotal();
 
   // 4. Customised Pricing Amount (matches selectedService)
   const getCustomPricingDetails = () => {
@@ -882,32 +927,61 @@ export const SubmitBilling = () => {
   const computeContributorValues = (c, net) => {
     if (c.mode === "pct" && c.pct !== "") {
       const p = parseFloat(c.pct) || 0;
-      const amt = net > 0 ? (net * p) / 100 : 0;
+      const amt = net > 0 ? parseFloat(((net * p) / 100).toFixed(2)) : 0;
       return { pct: p, amount: amt };
     }
     if (c.mode === "flat" && c.amount !== "") {
       const amt = parseFloat(c.amount) || 0;
-      const p = net > 0 ? (amt / net) * 100 : 0;
+      const p = net > 0 ? parseFloat(((amt / net) * 100).toFixed(2)) : 0;
       return { pct: p, amount: amt };
     }
     return { pct: 0, amount: 0 };
   };
 
-  // Total allocated percentage (rounded to 2 decimal places)
-  const totalAllocatedPct = parseFloat(
-    contributors.reduce((acc, c) => acc + computeContributorValues(c, netAmount).pct, 0).toFixed(2)
-  );
+  // Exact penny-balanced calculation of contributor values
+  const getBalancedContributors = (list, net) => {
+    if (!list || list.length === 0 || net <= 0) return { list: [], totalAmt: 0, totalPct: 0, remAmt: 0, remPct: 0 };
 
-  // Total allocated flat amount (£)
-  const totalAllocatedAmt = parseFloat(
-    contributors.reduce((acc, c) => acc + computeContributorValues(c, netAmount).amount, 0).toFixed(2)
-  );
+    let totalPct = 0;
+    let totalAmt = 0;
 
-  // Remaining available amount and percentage
-  const remainingAmt = Math.max(0, parseFloat((netAmount - totalAllocatedAmt).toFixed(2)));
-  const remainingPct = Math.max(0, parseFloat((100 - totalAllocatedPct).toFixed(2)));
+    const values = list.map((c) => {
+      const v = computeContributorValues(c, net);
+      totalPct += v.pct;
+      totalAmt += v.amount;
+      return { ...c, calculatedPct: v.pct, calculatedAmt: v.amount };
+    });
 
-    // Distribute equally across current contributors
+    totalPct = parseFloat(totalPct.toFixed(2));
+    totalAmt = parseFloat(totalAmt.toFixed(2));
+
+    // If total percentage is strictly 100%, guarantee sum of amounts exactly equals netAmount (no 1 penny mismatch)
+    if (totalPct === 100) {
+      totalAmt = net;
+    }
+
+    const remAmt = parseFloat(Math.max(0, net - totalAmt).toFixed(2));
+    const remPct = parseFloat(Math.max(0, 100 - totalPct).toFixed(2));
+
+    return {
+      list: values,
+      totalAmt,
+      totalPct,
+      remAmt,
+      remPct,
+    };
+  };
+
+  const balanced = getBalancedContributors(contributors, netAmount);
+  const totalAllocatedPct = balanced.totalPct;
+  const totalAllocatedAmt = balanced.totalAmt;
+  const remainingAmt = balanced.remAmt;
+  const remainingPct = balanced.remPct;
+
+  // Check if exactly 100% and exact net amount is distributed (0.00001 mismatch not allowed)
+  const isFullyAllocated = netAmount > 0 && totalAllocatedPct === 100 && Math.abs(totalAllocatedAmt - netAmount) < 0.001;
+
+  // Distribute equally across current contributors
   const handleDistributeEqually = () => {
     if (!contributors || contributors.length === 0) return;
     const count = contributors.length;
@@ -942,9 +1016,6 @@ export const SubmitBilling = () => {
     }
     prevNetAmountRef.current = netAmount;
 
-    // When netAmount changes:
-    // Any contributor in 'pct' mode must have their amount updated to match new netAmount!
-    // Any contributor in 'flat' mode has their fixed amount, so their pct is updated to match new netAmount.
     setContributors((prev) =>
       prev.map((c) => {
         if (c.mode === "pct" && c.pct !== "") {
@@ -967,7 +1038,7 @@ export const SubmitBilling = () => {
     );
   }, [netAmount]);
 
-const handleAddContributor = () => {
+  const handleAddContributor = () => {
     // Find first staff from timesheet list that is not yet selected in contributors
     const unselected = timesheetStaffList.find(
       (ts) => !contributors.some((c) => String(c.staff_id) === String(ts.staff_id))
@@ -992,8 +1063,8 @@ const handleAddContributor = () => {
   };
 
   const handleContributorChange = (id, field, value) => {
-    setContributors(
-      contributors.map((c) => {
+    setContributors((prevContribs) => {
+      const updated = prevContribs.map((c) => {
         if (c.id !== id) return c;
         if (field === "staff_id") {
           const selectedObj = timesheetStaffList.find((s) => String(s.staff_id) === String(value));
@@ -1040,8 +1111,42 @@ const handleAddContributor = () => {
         }
 
         return { ...c, [field]: value };
-      })
-    );
+      });
+
+      // Exact Penny Balancing:
+      // If the sum of entered percentages is exactly 100%, ensure the sum of amounts exactly equals netAmount
+      // by adjusting the rounding difference (e.g. ±£0.01) on the currently edited row or last row
+      if (netAmount > 0) {
+        let currentTotalPct = 0;
+        let currentTotalAmt = 0;
+        updated.forEach((c) => {
+          const vals = computeContributorValues(c, netAmount);
+          currentTotalPct += vals.pct;
+          currentTotalAmt += vals.amount;
+        });
+
+        currentTotalPct = parseFloat(currentTotalPct.toFixed(2));
+        currentTotalAmt = parseFloat(currentTotalAmt.toFixed(2));
+
+        if (Math.abs(currentTotalPct - 100) < 0.001) {
+          const diff = parseFloat((netAmount - currentTotalAmt).toFixed(2));
+          if (Math.abs(diff) > 0 && Math.abs(diff) <= 0.05) {
+            // Find row to adjust penny difference
+            const targetIndex = updated.findIndex((c) => c.id === id);
+            const adjustIndex = targetIndex >= 0 ? targetIndex : updated.length - 1;
+            if (adjustIndex >= 0 && updated[adjustIndex].amount !== "") {
+              const adjustedAmt = parseFloat((parseFloat(updated[adjustIndex].amount) + diff).toFixed(2));
+              updated[adjustIndex] = {
+                ...updated[adjustIndex],
+                amount: String(adjustedAmt),
+              };
+            }
+          }
+        }
+      }
+
+      return updated;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -1142,8 +1247,17 @@ const handleAddContributor = () => {
     }
 
     // 2. Customised Pricing Max Jobs Validation
-    if (customisedModelData && customMaxJobs > 0) {
-      if (customJobsCountNum > customMaxJobs) {
+    if (customisedModelData) {
+      if (customJobsCount !== "" && (!Number.isInteger(Number(customJobsCount)) || Number(customJobsCount) < 0)) {
+        sweatalert.fire({
+          icon: "warning",
+          title: "Invalid Completed Jobs",
+          text: "Completed jobs must be a whole positive integer (no decimal points allowed).",
+          confirmButtonColor: "#26bdf0",
+        });
+        return;
+      }
+      if (customMaxJobs > 0 && customJobsCountNum > customMaxJobs) {
         sweatalert.fire({
           icon: "warning",
           title: "Maximum Jobs Exceeded",
@@ -1169,22 +1283,25 @@ const handleAddContributor = () => {
 
     // 4. Percentage Turnover Validation
     if (percentageModelData) {
-      if (baseAmountNum < 0) {
-        sweatalert.fire({
-          icon: "warning",
-          title: "Invalid Base Amount",
-          text: "Turnover / Base amount cannot be negative.",
-          confirmButtonColor: "#26bdf0",
-        });
-        return;
+      for (const field of percentageFieldsList) {
+        const val = parseFloat(percentageBaseAmounts[field.key]) || 0;
+        if (val < 0) {
+          sweatalert.fire({
+            icon: "warning",
+            title: "Invalid Base Amount",
+            text: `Base value for ${field.label} cannot be negative.`,
+            confirmButtonColor: "#26bdf0",
+          });
+          return;
+        }
       }
     }
 
-    if (Math.abs(totalAllocatedPct - 100) > 0.05) {
+    if (!isFullyAllocated) {
       sweatalert.fire({
         icon: "warning",
         title: "Revenue Allocation Incomplete",
-        text: `Revenue split across contributors must total exactly 100% (or £${netAmount.toFixed(2)}). Currently allocated: ${totalAllocatedPct}% (£${totalAllocatedAmt.toFixed(2)}).`,
+        text: `Revenue split across contributors must total exactly 100% (£${netAmount.toFixed(2)}). Currently allocated: ${totalAllocatedPct}% (£${totalAllocatedAmt.toFixed(2)}). Remaining: £${remainingAmt.toFixed(2)} (${remainingPct}%).`,
         confirmButtonColor: "#26bdf0",
       });
       return;
@@ -1221,7 +1338,16 @@ const handleAddContributor = () => {
           tax: fteTaxQty !== "" ? parseFloat(fteTaxQty) || 0 : 0,
           admin: fteAdminQty !== "" ? parseFloat(fteAdminQty) || 0 : 0,
         } : null,
-        percentage: percentageModelData ? { base: baseAmountNum, pct: percentageOutsourceVal, total: percentageTotal } : null,
+        percentage: percentageModelData ? {
+          items: percentageFieldsList.map((f) => ({
+            key: f.key,
+            label: f.label,
+            pct: f.pct,
+            base: parseFloat(percentageBaseAmounts[f.key]) || 0,
+            subtotal: ((parseFloat(percentageBaseAmounts[f.key]) || 0) * f.pct) / 100,
+          })),
+          total: percentageTotal,
+        } : null,
         customised: customisedModelData ? { service: selectedService.label, costPerJob: customCostPerJob, count: customJobsCountNum, total: customTotal } : null,
         grossAmount: grossAmount,
         discountPct: discountPctNum,
@@ -1628,7 +1754,11 @@ const handleAddContributor = () => {
                         onChange={(selected) => {
                           setSelectedService(selected);
                           resetStep3States();
-                          if (selected?.latest_year_end) {
+                          if (selected?.latest_period_type && selected?.latest_period_date) {
+                            setPeriodType(selected.latest_period_type);
+                            setRawDateValue(selected.latest_period_date);
+                            setPeriodDate(selected.latest_period_date);
+                          } else if (selected?.latest_year_end) {
                             setPeriodType("Year End");
                             setRawDateValue(selected.latest_year_end);
                             setPeriodDate(formatPeriodDate("Year End", selected.latest_year_end));
@@ -1648,131 +1778,84 @@ const handleAddContributor = () => {
                   </div>
 
                   {/* Billing Period row */}
-                  <div className="row g-4 mb-4">
-                    <div className="col-lg-6 col-md-6">
-                      <label className="form-label text-muted small mb-1 fw-medium">
-                        Billing Period
-                      </label>
-                      <select
-                        className="form-select shadow-sm rounded-pill"
-                        value={periodType}
-                        onChange={(e) => {
-                          const newType = e.target.value;
-                          setPeriodType(newType);
-                          if (newType === "Month") {
-                            const val = getTodayMonthValue();
-                            setRawDateValue(val);
-                            setPeriodDate(formatPeriodDate("Month", val));
-                          } else if (newType === "Week") {
-                            const val = getTodayWeekValue();
-                            setRawDateValue(val);
-                            setPeriodDate(formatPeriodDate("Week", val));
-                          } else if (newType === "Quarter") {
-                            const currentYear = new Date().getFullYear();
-                            const currentQuarter = Math.floor(new Date().getMonth() / 3) + 1;
-                            const defaultQ = `Q${currentQuarter} ${currentYear}`;
-                            setRawDateValue(defaultQ);
-                            setPeriodDate(defaultQ);
-                          } else if (newType === "One-Off") {
-                            const val = getTodayDateValue();
-                            setRawDateValue(val);
-                            setPeriodDate(formatPeriodDate("One-Off", val));
-                          } else if (newType === "Year End") {
-                            const val = selectedService?.latest_year_end || getTodayDateValue();
-                            setRawDateValue(val);
-                            setPeriodDate(formatPeriodDate("Year End", val));
-                          }
-                        }}
-                      >
-                        <option value="Year End">Year End</option>
-                        <option value="Month">Month</option>
-                        <option value="Week">Week</option>
-                        <option value="Quarter">Quarter</option>
-                        <option value="One-Off">One-Off</option>
-                      </select>
-                    </div>
+                  {(() => {
+                    const isServiceSelected = Boolean(selectedService && selectedService.value);
+                    const availablePeriodTypes = selectedService?.period_types && selectedService.period_types.length > 0
+                      ? selectedService.period_types
+                      : [];
+                    const currentTypeObj = availablePeriodTypes.find((pt) => pt.type === periodType);
+                    const availableDates = currentTypeObj ? currentTypeObj.dates : [];
+                    const hasJobPeriods = availablePeriodTypes.length > 0;
 
-                    <div className="col-lg-6 col-md-6">
-                      <label className="form-label text-muted small mb-1 fw-medium">
-                        Period Date {periodDate ? `(${periodDate})` : ""}
-                      </label>
-                      {periodType === "Month" && (
-                        <input
-                          type="month"
-                          className="form-control shadow-sm rounded-pill"
-                          value={rawDateValue || getTodayMonthValue()}
-                          onChange={(e) => {
-                            setRawDateValue(e.target.value);
-                            setPeriodDate(formatPeriodDate("Month", e.target.value));
-                          }}
-                        />
-                      )}
+                    return (
+                      <div className="row g-4 mb-4">
+                        {/* 1. Billing Period Dropdown */}
+                        <div className="col-lg-6 col-md-6">
+                          <label className="form-label text-muted small mb-1 fw-medium">
+                            Billing Period
+                          </label>
+                          <select
+                            className="form-select shadow-sm rounded-pill"
+                            disabled={!isServiceSelected || !hasJobPeriods}
+                            value={periodType || ""}
+                            onChange={(e) => {
+                              const newType = e.target.value;
+                              setPeriodType(newType);
+                              const foundTypeObj = availablePeriodTypes.find((pt) => pt.type === newType);
+                              if (foundTypeObj && foundTypeObj.dates && foundTypeObj.dates.length > 0) {
+                                const firstVal = foundTypeObj.dates[0];
+                                setRawDateValue(firstVal);
+                                setPeriodDate(firstVal);
+                              } else {
+                                setRawDateValue("");
+                                setPeriodDate("");
+                              }
+                            }}
+                          >
+                            {!isServiceSelected ? (
+                              <option value="">Please select a service first</option>
+                            ) : !hasJobPeriods ? (
+                              <option value="">No Billing Period Found</option>
+                            ) : (
+                              availablePeriodTypes.map((pt) => (
+                                <option key={pt.type} value={pt.type}>
+                                  {pt.type}
+                                </option>
+                              ))
+                            )}
+                          </select>
+                        </div>
 
-                      {periodType === "Week" && (
-                        <input
-                          type="week"
-                          className="form-control shadow-sm rounded-pill"
-                          value={rawDateValue || getTodayWeekValue()}
-                          onChange={(e) => {
-                            setRawDateValue(e.target.value);
-                            setPeriodDate(formatPeriodDate("Week", e.target.value));
-                          }}
-                        />
-                      )}
-
-                      {periodType === "Quarter" && (
-                        <select
-                          className="form-select shadow-sm rounded-pill"
-                          value={periodDate}
-                          onChange={(e) => {
-                            setPeriodDate(e.target.value);
-                            setRawDateValue(e.target.value);
-                          }}
-                        >
-                          {(() => {
-                            const currentYear = new Date().getFullYear();
-                            const years = [currentYear - 1, currentYear, currentYear + 1];
-                            const options = [];
-                            years.forEach((yr) => {
-                              ["Q1", "Q2", "Q3", "Q4"].forEach((q) => {
-                                const qLabel = `${q} ${yr}`;
-                                options.push(
-                                  <option key={qLabel} value={qLabel}>
-                                    {qLabel}
-                                  </option>
-                                );
-                              });
-                            });
-                            return options;
-                          })()}
-                        </select>
-                      )}
-
-                      {periodType === "Year End" && (
-                        <input
-                          type="date"
-                          className="form-control shadow-sm rounded-pill"
-                          value={rawDateValue || getTodayDateValue()}
-                          onChange={(e) => {
-                            setRawDateValue(e.target.value);
-                            setPeriodDate(formatPeriodDate("Year End", e.target.value));
-                          }}
-                        />
-                      )}
-
-                      {periodType === "One-Off" && (
-                        <input
-                          type="date"
-                          className="form-control shadow-sm rounded-pill"
-                          value={rawDateValue || getTodayDateValue()}
-                          onChange={(e) => {
-                            setRawDateValue(e.target.value);
-                            setPeriodDate(formatPeriodDate("One-Off", e.target.value));
-                          }}
-                        />
-                      )}
-                    </div>
-                  </div>
+                        {/* 2. Period Date / Values Dropdown (Always Dropdown, Non-editable) */}
+                        <div className="col-lg-6 col-md-6">
+                          <label className="form-label text-muted small mb-1 fw-medium">
+                            Period Date {periodDate ? `(${periodDate})` : ""}
+                          </label>
+                          <select
+                            className="form-select shadow-sm rounded-pill"
+                            disabled={!isServiceSelected || !hasJobPeriods || availableDates.length === 0}
+                            value={periodDate || ""}
+                            onChange={(e) => {
+                              setPeriodDate(e.target.value);
+                              setRawDateValue(e.target.value);
+                            }}
+                          >
+                            {!isServiceSelected ? (
+                              <option value="">Please select a service first</option>
+                            ) : availableDates.length === 0 ? (
+                              <option value="">No dates available</option>
+                            ) : (
+                              availableDates.map((dVal) => (
+                                <option key={dVal} value={dVal}>
+                                  {dVal}
+                                </option>
+                              ))
+                            )}
+                          </select>
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {/* Actions Bar for Step 2 */}
                   <div className="d-flex align-items-center justify-content-between pt-4 mt-4 border-top">
@@ -2080,49 +2163,72 @@ const handleAddContributor = () => {
                           style={{ backgroundColor: "#eaf3fa", borderBottom: "1px solid #d2e4f3" }}
                         >
                           <span className="fw-semibold text-dark">
-                            Percentage Model — Figures
+                            Percentage Model — Breakdown
                           </span>
                           <span className="badge bg-white text-info border">Percentage Model</span>
                         </div>
                         <div className="card-body p-3">
-                          <div className="row g-3 align-items-end">
-                            <div className="col-md-5">
-                              <label className="form-label text-muted small mb-1 fw-medium">
-                                Base Invoice / Turnover Value (£)
-                              </label>
-                              <input
-                                type="number" onWheel={(e) => e.target.blur()}
-                                min="0"
-                                className="form-control shadow-sm rounded-pill"
-                                placeholder="e.g. 10000"
-                                value={percentageBaseAmount}
-                                onChange={(e) => setPercentageBaseAmount(e.target.value)}
-                              />
+                          {percentageFieldsList.length === 0 ? (
+                            <div className="text-muted small py-2">
+                              No percentage figures defined in customer agreement.
                             </div>
-                            <div className="col-md-3">
-                              <label className="form-label text-muted small mb-1 fw-medium">
-                                Agreed Percentage
-                              </label>
-                              <input
-                                type="text"
-                                className="form-control bg-light fw-bold"
-                                readOnly
-                                value={`${percentageOutsourceVal}%`}
-                                style={{ borderRadius: "50px" }}
-                              />
+                          ) : (
+                            <div className="table-responsive">
+                              <table className="table table-bordered table-sm mb-2 align-middle">
+                                <thead className="table-light">
+                                  <tr>
+                                    <th>Role / Category</th>
+                                    <th style={{ width: "130px" }} className="text-center">Agreed %</th>
+                                    <th style={{ width: "220px" }}>Base Value (£)</th>
+                                    <th style={{ width: "150px" }}>Billable Total</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {percentageFieldsList.map((f) => {
+                                    const baseVal = percentageBaseAmounts[f.key] || "";
+                                    const baseNum = parseFloat(baseVal) || 0;
+                                    const rowSubtotal = (baseNum * f.pct) / 100;
+                                    return (
+                                      <tr key={f.key}>
+                                        <td className="fw-medium text-dark">{f.label}</td>
+                                        <td className="text-center">
+                                          <span className="badge bg-light text-primary border px-3 py-1 fw-bold fs-12">
+                                            {f.pct}%
+                                          </span>
+                                        </td>
+                                        <td>
+                                          <div className="input-group input-group-sm">
+                                            <span className="input-group-text py-0 px-2 bg-light text-muted">£</span>
+                                            <input
+                                              type="number"
+                                              min="0"
+                                              step="any"
+                                              onWheel={(e) => e.target.blur()}
+                                              className="form-control form-control-sm"
+                                              placeholder="e.g. 10000"
+                                              value={baseVal}
+                                              onChange={(e) =>
+                                                setPercentageBaseAmounts({
+                                                  ...percentageBaseAmounts,
+                                                  [f.key]: e.target.value,
+                                                })
+                                              }
+                                            />
+                                          </div>
+                                        </td>
+                                        <td className="fw-bold text-dark">
+                                          £ {rowSubtotal.toFixed(2)}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
                             </div>
-                            <div className="col-md-4">
-                              <label className="form-label text-muted small mb-1 fw-medium">
-                                Percentage Subtotal
-                              </label>
-                              <input
-                                type="text"
-                                className="form-control bg-light fw-bold text-info"
-                                readOnly
-                                value={`£ ${percentageTotal.toFixed(2)}`}
-                                style={{ borderRadius: "50px" }}
-                              />
-                            </div>
+                          )}
+                          <div className="d-flex justify-content-end align-items-center gap-2 pt-2">
+                            <span className="text-muted fw-medium">Percentage Subtotal:</span>
+                            <span className="fs-6 fw-bold text-info">£ {percentageTotal.toFixed(2)}</span>
                           </div>
                         </div>
                       </div>
@@ -2171,15 +2277,27 @@ const handleAddContributor = () => {
                                 Completed Jobs {customMaxJobs > 0 && <span className="text-secondary">(Max: {customMaxJobs})</span>}
                               </label>
                               <input
-                                type="number" onWheel={(e) => e.target.blur()}
+                                type="number"
+                                onWheel={(e) => e.target.blur()}
                                 min="0"
+                                step="1"
                                 max={customMaxJobs > 0 ? customMaxJobs : undefined}
                                 className={`form-control shadow-sm rounded-pill ${
                                   customJobsCount !== "" && customMaxJobs > 0 && customJobsCountNum > customMaxJobs ? "is-invalid border-danger text-danger fw-bold" : ""
                                 }`}
                                 placeholder={customMaxJobs > 0 ? `Max: ${customMaxJobs}` : "e.g. 5"}
                                 value={customJobsCount}
-                                onChange={(e) => setCustomJobsCount(e.target.value)}
+                                onKeyDown={(e) => {
+                                  // Disallow decimal point, e, +, -
+                                  if (e.key === "." || e.key === "e" || e.key === "E" || e.key === "+" || e.key === "-") {
+                                    e.preventDefault();
+                                  }
+                                }}
+                                onChange={(e) => {
+                                  // Clean input strictly to digits only
+                                  const cleanVal = e.target.value.replace(/[^0-9]/g, "");
+                                  setCustomJobsCount(cleanVal);
+                                }}
                               />
                               {customJobsCount !== "" && customMaxJobs > 0 && customJobsCountNum > customMaxJobs && (
                                 <div className="text-danger small mt-1" style={{ fontSize: "11px" }}>
@@ -2330,7 +2448,7 @@ const handleAddContributor = () => {
                             Revenue split — who worked on this?
                           </h6>
                           <small className="text-muted" style={{ fontSize: "12px" }}>
-                            Contributors who logged timesheet in last month for this customer, client & service
+                            Assigned staff (Reviewer, Allocated To, Allocated To Other) and staff who logged timesheet
                           </small>
                         </div>
                         {contributors.length > 1 && (
@@ -2355,36 +2473,25 @@ const handleAddContributor = () => {
                       {loadingContributors ? (
                         <div className="py-2 text-center text-muted small">
                           <span className="spinner-border spinner-border-sm me-2 text-info" role="status" />
-                          Checking logged timesheets for this customer, client & service...
+                          Checking assigned staff and timesheets for this customer, client & service...
                         </div>
                       ) : contributors.length === 0 ? (
                         <div className="py-3 px-3 text-center bg-light rounded text-muted small border mb-2">
-                          <span className="fw-semibold text-secondary">No timesheet entries found</span> for this client & service in the selected period.
+                          <span className="fw-semibold text-secondary">No assigned staff or timesheet entries found</span> for this client & service.
                         </div>
                       ) : (
                         contributors.map((c) => (
                           <div key={c.id} className="row g-2 align-items-center mb-2">
-                            {/* Contributor Select */}
+                            {/* Contributor Name (Fixed label, no focus, no click) */}
                             <div className="col-5">
-                              <select
-                                className="form-select form-select-sm"
-                                value={c.staff_id || ""}
-                                onChange={(e) =>
-                                  handleContributorChange(c.id, "staff_id", e.target.value)
-                                }
-                              >
-                                <option value="" disabled>Select Staff / Contributor</option>
-                                {timesheetStaffList.map((st) => (
-                                  <option key={st.staff_id} value={st.staff_id}>
-                                    {st.staff_name} {st.total_hours != null ? `(${st.total_hours} hrs logged)` : ""}
-                                  </option>
-                                ))}
-                                {c.staff_id && !timesheetStaffList.some(st => String(st.staff_id) === String(c.staff_id)) && (
-                                  <option value={c.staff_id}>
-                                    {c.name} {c.total_hours ? `(${c.total_hours} hrs)` : ""}
-                                  </option>
-                                )}
-                              </select>
+                              <input
+                                type="text"
+                                className="form-control form-control-sm bg-light fw-medium text-dark"
+                                readOnly
+                                tabIndex={-1}
+                                style={{ pointerEvents: "none", userSelect: "none" }}
+                                value={c.name || "Staff"}
+                              />
                             </div>
 
                             {/* Percentage Share Input */}
@@ -2459,14 +2566,18 @@ const handleAddContributor = () => {
 
                         {/* Remaining / Over-allocated indicator */}
                         {netAmount > 0 && (
-                          <span className="small">
+                          <span style={{ fontSize: "14px" }}>
                             {totalAllocatedPct > 100 ? (
                               <span className="text-danger fw-bold">
                                 ⚠ Over-allocated by: £{(totalAllocatedAmt - netAmount).toFixed(2)} ({(totalAllocatedPct - 100).toFixed(2)}%)
                               </span>
                             ) : (
-                              <span className="text-muted">
-                                Remaining: <strong className={Math.abs(remainingPct) <= 0.05 ? "text-success" : "text-primary"}>
+                              <span className="text-muted fw-medium">
+                                Remaining:{" "}
+                                <strong
+                                  style={{ fontSize: "15px" }}
+                                  className={isFullyAllocated ? "text-success" : "text-danger"}
+                                >
                                   £{remainingAmt.toFixed(2)} ({remainingPct}%)
                                 </strong>
                               </span>
@@ -2475,19 +2586,27 @@ const handleAddContributor = () => {
                         )}
                       </div>
 
-                      <div className="mt-3 pt-2 border-top d-flex justify-content-between align-items-center small">
-                        <span className="text-muted">Total allocated:</span>
+                      <div className="mt-3 pt-2 border-top d-flex justify-content-between align-items-center">
+                        <span className="text-muted fw-semibold" style={{ fontSize: "14px" }}>
+                          Total Allocated:
+                        </span>
                         <span
                           className={`fw-bold ${
-                            Math.abs(totalAllocatedPct - 100) <= 0.05 ? "text-success" : "text-danger"
+                            isFullyAllocated ? "text-success" : "text-danger"
                           }`}
+                          style={{ fontSize: "15px" }}
                         >
-                          £{totalAllocatedAmt.toFixed(2)} of £{netAmount.toFixed(2)} ({totalAllocatedPct}% {Math.abs(totalAllocatedPct - 100) <= 0.05 ? "✓" : totalAllocatedPct > 100 ? "⚠ Exceeds 100% — must be 100%" : "— must be 100%"})
+                          £{totalAllocatedAmt.toFixed(2)} of £{netAmount.toFixed(2)} ({totalAllocatedPct}% {isFullyAllocated ? "✓" : totalAllocatedPct > 100 ? "⚠ Exceeds 100% — must be 100%" : "— must be 100%"})
                         </span>
                       </div>
                       {totalAllocatedPct > 100 && (
                         <div className="alert alert-danger py-1 px-2 mt-2 mb-0 small text-center fw-medium">
                           Total allocation exceeds 100%. Please adjust percentages or flat amounts before submitting.
+                        </div>
+                      )}
+                      {totalAllocatedPct < 100 && netAmount > 0 && totalAllocatedPct > 0 && (
+                        <div className="alert alert-warning py-1 px-2 mt-2 mb-0 small text-center fw-medium">
+                          Revenue allocation incomplete ({totalAllocatedPct}% of 100%). Remaining {remainingPct}% (£{remainingAmt.toFixed(2)}) must be allocated.
                         </div>
                       )}
                     </div>
@@ -2525,7 +2644,7 @@ const handleAddContributor = () => {
                     <button
                       type="button"
                       className="btn btn-info text-white px-4 py-2 fw-semibold rounded-pill shadow-sm"
-                      disabled={grandTotal <= 0 || Math.abs(totalAllocatedPct - 100) > 0.05 || submitting}
+                      disabled={grandTotal <= 0 || !isFullyAllocated || submitting}
                       onClick={handleSubmit}
                     >
                       {submitting ? "Saving..." : editSubmissionId ? "Update Billing" : "Submit for approval"}
