@@ -462,6 +462,7 @@ export const SubmitBilling = () => {
     setFteTaxQty("0");
     setFteAdminQty("0");
     setPercentageBaseAmount("");
+    setPercentageBaseAmounts({});
     setCustomJobsCount("");
     setDiscountPct("");
     setContributors([]);
@@ -693,7 +694,8 @@ export const SubmitBilling = () => {
   const [fteTaxQty, setFteTaxQty] = useState("0");
   const [fteAdminQty, setFteAdminQty] = useState("0");
 
-  // 3. Percentage Model state: Base Invoice/Turnover amount
+  // 3. Percentage Model state: Base amounts for each percentage category
+  const [percentageBaseAmounts, setPercentageBaseAmounts] = useState({});
   const [percentageBaseAmount, setPercentageBaseAmount] = useState("");
 
   // 4. Customised Pricing state: Completed number of jobs
@@ -850,10 +852,41 @@ export const SubmitBilling = () => {
   };
   const fteTotal = calculateFteTotal();
 
-  // 3. Percentage Amount
-  const percentageOutsourceVal = parseFloat(percentageModelData?.details?.total_outsourcing) || 0;
-  const baseAmountNum = parseFloat(percentageBaseAmount) || 0;
-  const percentageTotal = (baseAmountNum * percentageOutsourceVal) / 100;
+  // 3. Percentage Amount across all configured fields
+  const getPercentageModelFields = () => {
+    if (!percentageModelData?.details) return [];
+    const d = percentageModelData.details;
+    const allDefs = [
+      { key: "total_outsourcing", label: "Total Outsourcing" },
+      { key: "accountants", label: "Accountants" },
+      { key: "bookkeepers", label: "Bookkeepers" },
+      { key: "payroll_experts", label: "Payroll Experts" },
+      { key: "tax_experts", label: "Tax Experts" },
+      { key: "admin_staff", label: "Admin/Other Staff" },
+    ];
+    // Filter only those fields where percentage value is entered / exists
+    return allDefs
+      .map((def) => {
+        const val = parseFloat(d[def.key]);
+        return {
+          ...def,
+          pct: !isNaN(val) && val > 0 ? val : null,
+        };
+      })
+      .filter((item) => item.pct !== null);
+  };
+
+  const percentageFieldsList = getPercentageModelFields();
+
+  const calculatePercentageTotal = () => {
+    if (percentageFieldsList.length === 0) return 0;
+    return percentageFieldsList.reduce((acc, f) => {
+      const baseVal = parseFloat(percentageBaseAmounts[f.key]) || 0;
+      return acc + (baseVal * f.pct) / 100;
+    }, 0);
+  };
+
+  const percentageTotal = calculatePercentageTotal();
 
   // 4. Customised Pricing Amount (matches selectedService)
   const getCustomPricingDetails = () => {
@@ -1233,7 +1266,16 @@ const handleAddContributor = () => {
           tax: fteTaxQty !== "" ? parseFloat(fteTaxQty) || 0 : 0,
           admin: fteAdminQty !== "" ? parseFloat(fteAdminQty) || 0 : 0,
         } : null,
-        percentage: percentageModelData ? { base: baseAmountNum, pct: percentageOutsourceVal, total: percentageTotal } : null,
+        percentage: percentageModelData ? {
+          items: percentageFieldsList.map((f) => ({
+            key: f.key,
+            label: f.label,
+            pct: f.pct,
+            base: parseFloat(percentageBaseAmounts[f.key]) || 0,
+            subtotal: ((parseFloat(percentageBaseAmounts[f.key]) || 0) * f.pct) / 100,
+          })),
+          total: percentageTotal,
+        } : null,
         customised: customisedModelData ? { service: selectedService.label, costPerJob: customCostPerJob, count: customJobsCountNum, total: customTotal } : null,
         grossAmount: grossAmount,
         discountPct: discountPctNum,
@@ -2049,49 +2091,72 @@ const handleAddContributor = () => {
                           style={{ backgroundColor: "#eaf3fa", borderBottom: "1px solid #d2e4f3" }}
                         >
                           <span className="fw-semibold text-dark">
-                            Percentage Model — Figures
+                            Percentage Model — Breakdown
                           </span>
                           <span className="badge bg-white text-info border">Percentage Model</span>
                         </div>
                         <div className="card-body p-3">
-                          <div className="row g-3 align-items-end">
-                            <div className="col-md-5">
-                              <label className="form-label text-muted small mb-1 fw-medium">
-                                Base Invoice / Turnover Value (£)
-                              </label>
-                              <input
-                                type="number" onWheel={(e) => e.target.blur()}
-                                min="0"
-                                className="form-control shadow-sm rounded-pill"
-                                placeholder="e.g. 10000"
-                                value={percentageBaseAmount}
-                                onChange={(e) => setPercentageBaseAmount(e.target.value)}
-                              />
+                          {percentageFieldsList.length === 0 ? (
+                            <div className="text-muted small py-2">
+                              No percentage figures defined in customer agreement.
                             </div>
-                            <div className="col-md-3">
-                              <label className="form-label text-muted small mb-1 fw-medium">
-                                Agreed Percentage
-                              </label>
-                              <input
-                                type="text"
-                                className="form-control bg-light fw-bold"
-                                readOnly
-                                value={`${percentageOutsourceVal}%`}
-                                style={{ borderRadius: "50px" }}
-                              />
+                          ) : (
+                            <div className="table-responsive">
+                              <table className="table table-bordered table-sm mb-2 align-middle">
+                                <thead className="table-light">
+                                  <tr>
+                                    <th>Role / Category</th>
+                                    <th style={{ width: "130px" }} className="text-center">Agreed %</th>
+                                    <th style={{ width: "220px" }}>Base Value (£)</th>
+                                    <th style={{ width: "150px" }}>Billable Total</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {percentageFieldsList.map((f) => {
+                                    const baseVal = percentageBaseAmounts[f.key] || "";
+                                    const baseNum = parseFloat(baseVal) || 0;
+                                    const rowSubtotal = (baseNum * f.pct) / 100;
+                                    return (
+                                      <tr key={f.key}>
+                                        <td className="fw-medium text-dark">{f.label}</td>
+                                        <td className="text-center">
+                                          <span className="badge bg-light text-primary border px-3 py-1 fw-bold fs-12">
+                                            {f.pct}%
+                                          </span>
+                                        </td>
+                                        <td>
+                                          <div className="input-group input-group-sm">
+                                            <span className="input-group-text py-0 px-2 bg-light text-muted">£</span>
+                                            <input
+                                              type="number"
+                                              min="0"
+                                              step="any"
+                                              onWheel={(e) => e.target.blur()}
+                                              className="form-control form-control-sm"
+                                              placeholder="e.g. 10000"
+                                              value={baseVal}
+                                              onChange={(e) =>
+                                                setPercentageBaseAmounts({
+                                                  ...percentageBaseAmounts,
+                                                  [f.key]: e.target.value,
+                                                })
+                                              }
+                                            />
+                                          </div>
+                                        </td>
+                                        <td className="fw-bold text-dark">
+                                          £ {rowSubtotal.toFixed(2)}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
                             </div>
-                            <div className="col-md-4">
-                              <label className="form-label text-muted small mb-1 fw-medium">
-                                Percentage Subtotal
-                              </label>
-                              <input
-                                type="text"
-                                className="form-control bg-light fw-bold text-info"
-                                readOnly
-                                value={`£ ${percentageTotal.toFixed(2)}`}
-                                style={{ borderRadius: "50px" }}
-                              />
-                            </div>
+                          )}
+                          <div className="d-flex justify-content-end align-items-center gap-2 pt-2">
+                            <span className="text-muted fw-medium">Percentage Subtotal:</span>
+                            <span className="fs-6 fw-bold text-info">£ {percentageTotal.toFixed(2)}</span>
                           </div>
                         </div>
                       </div>
