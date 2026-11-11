@@ -130,21 +130,6 @@ export const BillingHeader = ({ activeTab }) => {
           </div>
           <div className="col-12 col-sm-6">
             <div className="d-flex justify-content-sm-end align-items-center gap-2 mt-3 mt-sm-0">
-              <button
-                type="button"
-                className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-1"
-              >
-                <Download size={16} /> Export Excel
-              </button>
-              {(canCreateJob || isAdmin) && (
-                <button
-                  type="button"
-                  className="btn btn-info text-white d-flex align-items-center gap-1"
-                  onClick={() => navigate("/admin/billing/submit")}
-                >
-                  <Plus size={16} /> Add Billing
-                </button>
-              )}
             </div>
           </div>
         </div>

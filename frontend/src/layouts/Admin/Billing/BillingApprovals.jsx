@@ -411,6 +411,7 @@ const BillingApprovals = () => {
     },
     {
       name: "Revenue Split",
+      selector: (row) => (row.contributors || []).map((c) => `${c.staff_name} (${parseFloat(c.pct).toFixed(0)}%)`).join(", "),
       minWidth: "220px",
       cell: (row) => {
         const list = row.contributors || [];

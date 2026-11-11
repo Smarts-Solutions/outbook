@@ -448,14 +448,6 @@ const CreditControl = () => {
       cell: (row) => <div className="text-muted">{row.billDate ? convertDate1(row.billDate) : "-"}</div>,
     },
     {
-      name: "Due Date",
-      selector: (row) => row.dueDate,
-      sortable: true,
-      minWidth: "110px",
-      width: "120px",
-      cell: (row) => <div className="text-muted">{row.dueDate ? convertDate1(row.dueDate) : "-"}</div>,
-    },
-    {
       name: "Amount",
       selector: (row) => row.amount,
       sortable: true,
