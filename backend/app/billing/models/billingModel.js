@@ -1,4 +1,5 @@
 const pool = require('../../config/database');
+const { commonEmail } = require('../../utils/commonEmail');
 const { 
     LineManageStaffIdHelperFunction, 
     QueryRoleHelperFunction, 
@@ -1425,6 +1426,109 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote) 
                 status: false,
                 message: "Submission not found or already processed."
             };
+        }
+
+        // Fetch details to send email notification to the submitter
+        try {
+            const [subDetails] = await pool.execute(
+                `SELECT 
+                    bs.id,
+                    bs.period_label,
+                    bs.net_amount,
+                    bs.currency,
+                    bs.engagement_model,
+                    c.trading_name AS customer_name,
+                    cl.trading_name AS client_name,
+                    s.name AS service_name,
+                    st_sub.email AS submitter_email,
+                    CONCAT(st_sub.first_name, ' ', st_sub.last_name) AS submitter_name,
+                    CONCAT(st_mgr.first_name, ' ', st_mgr.last_name) AS manager_name
+                 FROM billing_submissions bs
+                 LEFT JOIN customers c ON bs.customer_id = c.id
+                 LEFT JOIN clients cl ON bs.client_id = cl.id
+                 LEFT JOIN services s ON bs.service_id = s.id
+                 LEFT JOIN staffs st_sub ON bs.submitted_by = st_sub.id
+                 LEFT JOIN staffs st_mgr ON st_mgr.id = ?
+                 WHERE bs.id = ?`,
+                [managerUserId, submissionId]
+            );
+
+            if (subDetails && subDetails.length > 0) {
+                const item = subDetails[0];
+                // For testing/now: send all return emails to specified addresses
+                const toEmail = "shaktijatpnp09@gmail.com, vikaspnpinfotech@gmail.com";
+                const customerName = item.customer_name || 'Customer';
+                const periodLabel = item.period_label || 'Current Period';
+                const managerName = item.manager_name || 'Approving Manager';
+                const submitterName = item.submitter_name || 'Team Member';
+                const actualSubmitterEmail = item.submitter_email || 'N/A';
+                const note = returnNote.trim();
+
+                const subjectEmail = `Billing Submission Returned - ${customerName}`;
+                const htmlEmail = `
+                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; color: #1e293b; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                        <!-- Header with Outbooks Primary Cyan/Teal Brand Color -->
+                        <div style="background: linear-gradient(135deg, #00a4bd 0%, #26bdf0 100%); padding: 22px 24px; color: #ffffff;">
+                            <h2 style="margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.3px; color: #ffffff;">Outbooks Billing</h2>
+                            <p style="margin: 4px 0 0 0; font-size: 13px; color: #e0f7fa;">Billing Submission Returned</p>
+                        </div>
+
+                        <!-- Body Content -->
+                        <div style="padding: 24px;">
+                            <p style="margin: 0 0 14px 0; font-size: 15px;">Hi <strong>${submitterName}</strong>,</p>
+                            <p style="margin: 0 0 18px 0; color: #475569;">
+                                Your billing submission has been returned for review/correction by <strong>${managerName}</strong>.
+                            </p>
+                            
+                            <!-- Reason Box -->
+                            <div style="background-color: #fff1f2; border-left: 4px solid #f43f5e; border-radius: 6px; padding: 14px 16px; margin: 18px 0;">
+                                <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #e11d48; margin-bottom: 4px;">Return Reason / Note:</div>
+                                <div style="color: #334155; font-size: 14px; font-weight: 500; white-space: pre-wrap;">${note}</div>
+                            </div>
+
+                            <!-- Details Table (Cleaned up: No Submission ID, Period, Engagement Model, Amount) -->
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; background-color: #f8fafc; border-radius: 8px; overflow: hidden; border: 1px solid #f1f5f9;">
+                                <tr>
+                                    <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; color: #64748b; width: 32%;">Submitted By:</td>
+                                    <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #0f172a;">${submitterName} <span style="font-size: 12px; font-weight: normal; color: #64748b;">(${actualSubmitterEmail})</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; color: #64748b;">Customer:</td>
+                                    <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #0f172a;">${customerName}</td>
+                                </tr>
+                                ${item.client_name ? `
+                                <tr>
+                                    <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; color: #64748b;">Client:</td>
+                                    <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #0f172a;">${item.client_name}</td>
+                                </tr>` : ''}
+                                ${item.service_name ? `
+                                <tr>
+                                    <td style="padding: 10px 14px; color: #64748b;">Service:</td>
+                                    <td style="padding: 10px 14px; font-weight: 600; color: #0f172a;">${item.service_name}</td>
+                                </tr>` : ''}
+                            </table>
+
+                            <p style="margin: 22px 0 0 0; color: #475569; font-size: 13.5px;">
+                                Please visit the <strong>Submit Billing</strong> tab to make the required updates and submit again.
+                            </p>
+                        </div>
+
+                        <!-- Footer -->
+                        <div style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 14px 24px; text-align: center;">
+                            <p style="margin: 0; font-size: 12px; color: #94a3b8;">
+                                Outbooks Billing System • Automated Notification
+                            </p>
+                        </div>
+                    </div>
+                `;
+
+                // Send email asynchronously so that API response remains fast
+                commonEmail(toEmail, subjectEmail, htmlEmail)
+                    .then(() => console.log(`[Billing Email] Return notification email sent to ${toEmail} for submission #${submissionId}`))
+                    .catch((mailErr) => console.error(`[Billing Email] Failed to send return email to ${toEmail}:`, mailErr));
+            }
+        } catch (emailQueryErr) {
+            console.error("[Billing Email] Error fetching submitter details for email notification:", emailQueryErr);
         }
 
         return {
