@@ -927,32 +927,61 @@ export const SubmitBilling = () => {
   const computeContributorValues = (c, net) => {
     if (c.mode === "pct" && c.pct !== "") {
       const p = parseFloat(c.pct) || 0;
-      const amt = net > 0 ? (net * p) / 100 : 0;
+      const amt = net > 0 ? parseFloat(((net * p) / 100).toFixed(2)) : 0;
       return { pct: p, amount: amt };
     }
     if (c.mode === "flat" && c.amount !== "") {
       const amt = parseFloat(c.amount) || 0;
-      const p = net > 0 ? (amt / net) * 100 : 0;
+      const p = net > 0 ? parseFloat(((amt / net) * 100).toFixed(2)) : 0;
       return { pct: p, amount: amt };
     }
     return { pct: 0, amount: 0 };
   };
 
-  // Total allocated percentage (rounded to 2 decimal places)
-  const totalAllocatedPct = parseFloat(
-    contributors.reduce((acc, c) => acc + computeContributorValues(c, netAmount).pct, 0).toFixed(2)
-  );
+  // Exact penny-balanced calculation of contributor values
+  const getBalancedContributors = (list, net) => {
+    if (!list || list.length === 0 || net <= 0) return { list: [], totalAmt: 0, totalPct: 0, remAmt: 0, remPct: 0 };
 
-  // Total allocated flat amount (£)
-  const totalAllocatedAmt = parseFloat(
-    contributors.reduce((acc, c) => acc + computeContributorValues(c, netAmount).amount, 0).toFixed(2)
-  );
+    let totalPct = 0;
+    let totalAmt = 0;
 
-  // Remaining available amount and percentage
-  const remainingAmt = Math.max(0, parseFloat((netAmount - totalAllocatedAmt).toFixed(2)));
-  const remainingPct = Math.max(0, parseFloat((100 - totalAllocatedPct).toFixed(2)));
+    const values = list.map((c) => {
+      const v = computeContributorValues(c, net);
+      totalPct += v.pct;
+      totalAmt += v.amount;
+      return { ...c, calculatedPct: v.pct, calculatedAmt: v.amount };
+    });
 
-    // Distribute equally across current contributors
+    totalPct = parseFloat(totalPct.toFixed(2));
+    totalAmt = parseFloat(totalAmt.toFixed(2));
+
+    // If total percentage is strictly 100%, guarantee sum of amounts exactly equals netAmount (no 1 penny mismatch)
+    if (totalPct === 100) {
+      totalAmt = net;
+    }
+
+    const remAmt = parseFloat(Math.max(0, net - totalAmt).toFixed(2));
+    const remPct = parseFloat(Math.max(0, 100 - totalPct).toFixed(2));
+
+    return {
+      list: values,
+      totalAmt,
+      totalPct,
+      remAmt,
+      remPct,
+    };
+  };
+
+  const balanced = getBalancedContributors(contributors, netAmount);
+  const totalAllocatedPct = balanced.totalPct;
+  const totalAllocatedAmt = balanced.totalAmt;
+  const remainingAmt = balanced.remAmt;
+  const remainingPct = balanced.remPct;
+
+  // Check if exactly 100% and exact net amount is distributed (0.00001 mismatch not allowed)
+  const isFullyAllocated = netAmount > 0 && totalAllocatedPct === 100 && Math.abs(totalAllocatedAmt - netAmount) < 0.001;
+
+  // Distribute equally across current contributors
   const handleDistributeEqually = () => {
     if (!contributors || contributors.length === 0) return;
     const count = contributors.length;
@@ -987,9 +1016,6 @@ export const SubmitBilling = () => {
     }
     prevNetAmountRef.current = netAmount;
 
-    // When netAmount changes:
-    // Any contributor in 'pct' mode must have their amount updated to match new netAmount!
-    // Any contributor in 'flat' mode has their fixed amount, so their pct is updated to match new netAmount.
     setContributors((prev) =>
       prev.map((c) => {
         if (c.mode === "pct" && c.pct !== "") {
@@ -1012,7 +1038,7 @@ export const SubmitBilling = () => {
     );
   }, [netAmount]);
 
-const handleAddContributor = () => {
+  const handleAddContributor = () => {
     // Find first staff from timesheet list that is not yet selected in contributors
     const unselected = timesheetStaffList.find(
       (ts) => !contributors.some((c) => String(c.staff_id) === String(ts.staff_id))
@@ -1037,8 +1063,8 @@ const handleAddContributor = () => {
   };
 
   const handleContributorChange = (id, field, value) => {
-    setContributors(
-      contributors.map((c) => {
+    setContributors((prevContribs) => {
+      const updated = prevContribs.map((c) => {
         if (c.id !== id) return c;
         if (field === "staff_id") {
           const selectedObj = timesheetStaffList.find((s) => String(s.staff_id) === String(value));
@@ -1085,8 +1111,42 @@ const handleAddContributor = () => {
         }
 
         return { ...c, [field]: value };
-      })
-    );
+      });
+
+      // Exact Penny Balancing:
+      // If the sum of entered percentages is exactly 100%, ensure the sum of amounts exactly equals netAmount
+      // by adjusting the rounding difference (e.g. ±£0.01) on the currently edited row or last row
+      if (netAmount > 0) {
+        let currentTotalPct = 0;
+        let currentTotalAmt = 0;
+        updated.forEach((c) => {
+          const vals = computeContributorValues(c, netAmount);
+          currentTotalPct += vals.pct;
+          currentTotalAmt += vals.amount;
+        });
+
+        currentTotalPct = parseFloat(currentTotalPct.toFixed(2));
+        currentTotalAmt = parseFloat(currentTotalAmt.toFixed(2));
+
+        if (Math.abs(currentTotalPct - 100) < 0.001) {
+          const diff = parseFloat((netAmount - currentTotalAmt).toFixed(2));
+          if (Math.abs(diff) > 0 && Math.abs(diff) <= 0.05) {
+            // Find row to adjust penny difference
+            const targetIndex = updated.findIndex((c) => c.id === id);
+            const adjustIndex = targetIndex >= 0 ? targetIndex : updated.length - 1;
+            if (adjustIndex >= 0 && updated[adjustIndex].amount !== "") {
+              const adjustedAmt = parseFloat((parseFloat(updated[adjustIndex].amount) + diff).toFixed(2));
+              updated[adjustIndex] = {
+                ...updated[adjustIndex],
+                amount: String(adjustedAmt),
+              };
+            }
+          }
+        }
+      }
+
+      return updated;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -1225,11 +1285,11 @@ const handleAddContributor = () => {
       }
     }
 
-    if (Math.abs(totalAllocatedPct - 100) > 0.05) {
+    if (!isFullyAllocated) {
       sweatalert.fire({
         icon: "warning",
         title: "Revenue Allocation Incomplete",
-        text: `Revenue split across contributors must total exactly 100% (or £${netAmount.toFixed(2)}). Currently allocated: ${totalAllocatedPct}% (£${totalAllocatedAmt.toFixed(2)}).`,
+        text: `Revenue split across contributors must total exactly 100% (£${netAmount.toFixed(2)}). Currently allocated: ${totalAllocatedPct}% (£${totalAllocatedAmt.toFixed(2)}). Remaining: £${remainingAmt.toFixed(2)} (${remainingPct}%).`,
         confirmButtonColor: "#26bdf0",
       });
       return;
@@ -2502,15 +2562,20 @@ const handleAddContributor = () => {
                         <span className="text-muted">Total allocated:</span>
                         <span
                           className={`fw-bold ${
-                            Math.abs(totalAllocatedPct - 100) <= 0.05 ? "text-success" : "text-danger"
+                            isFullyAllocated ? "text-success" : "text-danger"
                           }`}
                         >
-                          £{totalAllocatedAmt.toFixed(2)} of £{netAmount.toFixed(2)} ({totalAllocatedPct}% {Math.abs(totalAllocatedPct - 100) <= 0.05 ? "✓" : totalAllocatedPct > 100 ? "⚠ Exceeds 100% — must be 100%" : "— must be 100%"})
+                          £{totalAllocatedAmt.toFixed(2)} of £{netAmount.toFixed(2)} ({totalAllocatedPct}% {isFullyAllocated ? "✓" : totalAllocatedPct > 100 ? "⚠ Exceeds 100% — must be 100%" : "— must be 100%"})
                         </span>
                       </div>
                       {totalAllocatedPct > 100 && (
                         <div className="alert alert-danger py-1 px-2 mt-2 mb-0 small text-center fw-medium">
                           Total allocation exceeds 100%. Please adjust percentages or flat amounts before submitting.
+                        </div>
+                      )}
+                      {totalAllocatedPct < 100 && netAmount > 0 && totalAllocatedPct > 0 && (
+                        <div className="alert alert-warning py-1 px-2 mt-2 mb-0 small text-center fw-medium">
+                          Revenue allocation incomplete ({totalAllocatedPct}% of 100%). Remaining {remainingPct}% (£{remainingAmt.toFixed(2)}) must be allocated.
                         </div>
                       )}
                     </div>
@@ -2548,7 +2613,7 @@ const handleAddContributor = () => {
                     <button
                       type="button"
                       className="btn btn-info text-white px-4 py-2 fw-semibold rounded-pill shadow-sm"
-                      disabled={grandTotal <= 0 || Math.abs(totalAllocatedPct - 100) > 0.05 || submitting}
+                      disabled={grandTotal <= 0 || !isFullyAllocated || submitting}
                       onClick={handleSubmit}
                     >
                       {submitting ? "Saving..." : editSubmissionId ? "Update Billing" : "Submit for approval"}
