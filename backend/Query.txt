@@ -289,3 +289,24 @@ LEFT JOIN fte_rows f    ON f.cid = k.cid AND f.n = k.n
 LEFT JOIN pct_rows p    ON p.cid = k.cid AND p.n = k.n
 LEFT JOIN adhoc_rows a  ON a.cid = k.cid AND a.n = k.n
 LEFT JOIN cp_rows x     ON x.cid = k.cid AND x.n = k.n;
+
+
+-----------------------
+
+SELECT
+    customername,
+    customercode,
+    leadmanagername,
+    status,
+    all_service_name,
+    all_service_type,
+    customer_engagement_fte,
+    customer_engagement_fte_value,
+    customer_engagement_percentage,
+    customer_engagement_percentage_value,
+    customer_engagement_adhoc_hourly,
+    customer_engagement_adhoc_hourly_value,
+    customer_engagement_customised_pricing,
+    customer_engagement_customised_pricing_value
+FROM v_customer_engagement_export1
+ORDER BY customer_id, row_no;
