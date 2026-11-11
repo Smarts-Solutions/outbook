@@ -709,7 +709,15 @@ const BillingApprovals = () => {
                       {viewDetailsModal.calc_json.adhoc && (
                         <tr>
                           <td className="px-3 py-2">
-                            <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 fw-bold" style={{ fontSize: "11.5px" }}>
+                            <span
+                              className="badge px-2 py-1 fw-bold"
+                              style={{
+                                backgroundColor: "#e8f1fc",
+                                color: "#0d5ca8",
+                                border: "1px solid #b6d4f7",
+                                fontSize: "11.5px",
+                              }}
+                            >
                               Adhoc / Hourly
                             </span>
                           </td>
@@ -728,7 +736,15 @@ const BillingApprovals = () => {
                       {viewDetailsModal.calc_json.fte && (
                         <tr>
                           <td className="px-3 py-2">
-                            <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold" style={{ fontSize: "11.5px" }}>
+                            <span
+                              className="badge px-2 py-1 fw-bold"
+                              style={{
+                                backgroundColor: "#eaf7ee",
+                                color: "#137333",
+                                border: "1px solid #b7e1cd",
+                                fontSize: "11.5px",
+                              }}
+                            >
                               FTE Staffing
                             </span>
                           </td>
@@ -764,7 +780,15 @@ const BillingApprovals = () => {
                       {viewDetailsModal.calc_json.percentage && (
                         <tr>
                           <td className="px-3 py-2">
-                            <span className="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 fw-bold" style={{ fontSize: "11.5px" }}>
+                            <span
+                              className="badge px-2 py-1 fw-bold"
+                              style={{
+                                backgroundColor: "#e1f5fe",
+                                color: "#0277bd",
+                                border: "1px solid #81d4fa",
+                                fontSize: "11.5px",
+                              }}
+                            >
                               Percentage Model
                             </span>
                           </td>
@@ -796,7 +820,15 @@ const BillingApprovals = () => {
                       {viewDetailsModal.calc_json.customised && (
                         <tr>
                           <td className="px-3 py-2">
-                            <span className="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 fw-bold" style={{ fontSize: "11.5px" }}>
+                            <span
+                              className="badge px-2 py-1 fw-bold"
+                              style={{
+                                backgroundColor: "#fff4e5",
+                                color: "#b76e00",
+                                border: "1px solid #ffd599",
+                                fontSize: "11.5px",
+                              }}
+                            >
                               Customised Pricing
                             </span>
                           </td>
