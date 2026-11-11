@@ -532,6 +532,9 @@ export const SubmitBilling = () => {
 
     prevClientIdRef.current = selectedClient.value;
     setSelectedService(null);
+    setPeriodType("");
+    setPeriodDate("");
+    setRawDateValue("");
     resetStep3States();
 
     // Fetch services strictly belonging to this client's jobs
@@ -1662,6 +1665,7 @@ const handleAddContributor = () => {
 
                   {/* Billing Period row */}
                   {(() => {
+                    const isServiceSelected = Boolean(selectedService && selectedService.value);
                     const availablePeriodTypes = selectedService?.period_types && selectedService.period_types.length > 0
                       ? selectedService.period_types
                       : [];
@@ -1671,175 +1675,69 @@ const handleAddContributor = () => {
 
                     return (
                       <div className="row g-4 mb-4">
+                        {/* 1. Billing Period Dropdown */}
                         <div className="col-lg-6 col-md-6">
                           <label className="form-label text-muted small mb-1 fw-medium">
                             Billing Period
                           </label>
-                          {hasJobPeriods ? (
-                            <select
-                              className="form-select shadow-sm rounded-pill"
-                              value={periodType}
-                              onChange={(e) => {
-                                const newType = e.target.value;
-                                setPeriodType(newType);
-                                const foundTypeObj = availablePeriodTypes.find((pt) => pt.type === newType);
-                                if (foundTypeObj && foundTypeObj.dates && foundTypeObj.dates.length > 0) {
-                                  const firstVal = foundTypeObj.dates[0];
-                                  setRawDateValue(firstVal);
-                                  setPeriodDate(firstVal);
-                                } else {
-                                  setRawDateValue("");
-                                  setPeriodDate("");
-                                }
-                              }}
-                            >
-                              {availablePeriodTypes.map((pt) => (
+                          <select
+                            className="form-select shadow-sm rounded-pill"
+                            disabled={!isServiceSelected || !hasJobPeriods}
+                            value={periodType || ""}
+                            onChange={(e) => {
+                              const newType = e.target.value;
+                              setPeriodType(newType);
+                              const foundTypeObj = availablePeriodTypes.find((pt) => pt.type === newType);
+                              if (foundTypeObj && foundTypeObj.dates && foundTypeObj.dates.length > 0) {
+                                const firstVal = foundTypeObj.dates[0];
+                                setRawDateValue(firstVal);
+                                setPeriodDate(firstVal);
+                              } else {
+                                setRawDateValue("");
+                                setPeriodDate("");
+                              }
+                            }}
+                          >
+                            {!isServiceSelected ? (
+                              <option value="">Please select a service first</option>
+                            ) : !hasJobPeriods ? (
+                              <option value="">No Billing Period Found</option>
+                            ) : (
+                              availablePeriodTypes.map((pt) => (
                                 <option key={pt.type} value={pt.type}>
                                   {pt.type}
                                 </option>
-                              ))}
-                            </select>
-                          ) : (
-                            <select
-                              className="form-select shadow-sm rounded-pill"
-                              value={periodType}
-                              onChange={(e) => {
-                                const newType = e.target.value;
-                                setPeriodType(newType);
-                                if (newType === "Month") {
-                                  const val = getTodayMonthValue();
-                                  setRawDateValue(val);
-                                  setPeriodDate(formatPeriodDate("Month", val));
-                                } else if (newType === "Week") {
-                                  const val = getTodayWeekValue();
-                                  setRawDateValue(val);
-                                  setPeriodDate(formatPeriodDate("Week", val));
-                                } else if (newType === "Quarter") {
-                                  const currentYear = new Date().getFullYear();
-                                  const currentQuarter = Math.floor(new Date().getMonth() / 3) + 1;
-                                  const defaultQ = `Q${currentQuarter} ${currentYear}`;
-                                  setRawDateValue(defaultQ);
-                                  setPeriodDate(defaultQ);
-                                } else if (newType === "One-Off") {
-                                  const val = getTodayDateValue();
-                                  setRawDateValue(val);
-                                  setPeriodDate(formatPeriodDate("One-Off", val));
-                                } else if (newType === "Year End") {
-                                  const val = selectedService?.latest_year_end || getTodayDateValue();
-                                  setRawDateValue(val);
-                                  setPeriodDate(formatPeriodDate("Year End", val));
-                                }
-                              }}
-                            >
-                              <option value="Year End">Year End</option>
-                              <option value="Month">Month</option>
-                              <option value="Week">Week</option>
-                              <option value="Quarter">Quarter</option>
-                              <option value="One-Off">One-Off</option>
-                            </select>
-                          )}
+                              ))
+                            )}
+                          </select>
                         </div>
 
+                        {/* 2. Period Date / Values Dropdown (Always Dropdown, Non-editable) */}
                         <div className="col-lg-6 col-md-6">
                           <label className="form-label text-muted small mb-1 fw-medium">
                             Period Date {periodDate ? `(${periodDate})` : ""}
                           </label>
-
-                          {hasJobPeriods && availableDates.length > 0 ? (
-                            <select
-                              className="form-select shadow-sm rounded-pill"
-                              value={periodDate}
-                              onChange={(e) => {
-                                setPeriodDate(e.target.value);
-                                setRawDateValue(e.target.value);
-                              }}
-                            >
-                              {availableDates.map((dVal) => (
+                          <select
+                            className="form-select shadow-sm rounded-pill"
+                            disabled={!isServiceSelected || !hasJobPeriods || availableDates.length === 0}
+                            value={periodDate || ""}
+                            onChange={(e) => {
+                              setPeriodDate(e.target.value);
+                              setRawDateValue(e.target.value);
+                            }}
+                          >
+                            {!isServiceSelected ? (
+                              <option value="">Please select a service first</option>
+                            ) : availableDates.length === 0 ? (
+                              <option value="">No dates available</option>
+                            ) : (
+                              availableDates.map((dVal) => (
                                 <option key={dVal} value={dVal}>
                                   {dVal}
                                 </option>
-                              ))}
-                            </select>
-                          ) : (
-                            <>
-                              {periodType === "Month" && (
-                                <input
-                                  type="month"
-                                  className="form-control shadow-sm rounded-pill"
-                                  value={rawDateValue || getTodayMonthValue()}
-                                  onChange={(e) => {
-                                    setRawDateValue(e.target.value);
-                                    setPeriodDate(formatPeriodDate("Month", e.target.value));
-                                  }}
-                                />
-                              )}
-
-                              {periodType === "Week" && (
-                                <input
-                                  type="week"
-                                  className="form-control shadow-sm rounded-pill"
-                                  value={rawDateValue || getTodayWeekValue()}
-                                  onChange={(e) => {
-                                    setRawDateValue(e.target.value);
-                                    setPeriodDate(formatPeriodDate("Week", e.target.value));
-                                  }}
-                                />
-                              )}
-
-                              {periodType === "Quarter" && (
-                                <select
-                                  className="form-select shadow-sm rounded-pill"
-                                  value={periodDate}
-                                  onChange={(e) => {
-                                    setPeriodDate(e.target.value);
-                                    setRawDateValue(e.target.value);
-                                  }}
-                                >
-                                  {(() => {
-                                    const currentYear = new Date().getFullYear();
-                                    const years = [currentYear - 1, currentYear, currentYear + 1];
-                                    const options = [];
-                                    years.forEach((yr) => {
-                                      ["Q1", "Q2", "Q3", "Q4"].forEach((q) => {
-                                        const qLabel = `${q} ${yr}`;
-                                        options.push(
-                                          <option key={qLabel} value={qLabel}>
-                                            {qLabel}
-                                          </option>
-                                        );
-                                      });
-                                    });
-                                    return options;
-                                  })()}
-                                </select>
-                              )}
-
-                              {(periodType === "Year End" || periodType === "One-Off" || periodType === "Daily") && (
-                                <input
-                                  type="date"
-                                  className="form-control shadow-sm rounded-pill"
-                                  value={rawDateValue || getTodayDateValue()}
-                                  onChange={(e) => {
-                                    setRawDateValue(e.target.value);
-                                    setPeriodDate(formatPeriodDate(periodType, e.target.value));
-                                  }}
-                                />
-                              )}
-
-                              {periodType !== "Month" && periodType !== "Week" && periodType !== "Quarter" && periodType !== "Year End" && periodType !== "One-Off" && periodType !== "Daily" && (
-                                <input
-                                  type="text"
-                                  className="form-control shadow-sm rounded-pill"
-                                  placeholder="Enter period date / tax year"
-                                  value={periodDate}
-                                  onChange={(e) => {
-                                    setPeriodDate(e.target.value);
-                                    setRawDateValue(e.target.value);
-                                  }}
-                                />
-                              )}
-                            </>
-                          )}
+                              ))
+                            )}
+                          </select>
                         </div>
                       </div>
                     );
