@@ -749,7 +749,7 @@ const getTimesheetContributors = async (customerId, clientId, serviceId, periodD
                 WHERE (ts.customer_id = ? OR j.customer_id = ?)
                   AND (ts.client_id = ? OR j.client_id = ?)
                   AND ts.is_deleted = 0
-                  ${serviceId ? 'AND (ts.service_id = ? OR j.service_id = ?)' : ''}
+                  ${serviceId ? 'AND j.service_id = ?' : ''}
                   AND (
                       (ts.monday_date >= ${startDateExpr} AND ts.monday_date <= ${endDateExpr})
                       OR (ts.sunday_date >= ${startDateExpr} AND ts.sunday_date <= ${endDateExpr})
@@ -765,7 +765,7 @@ const getTimesheetContributors = async (customerId, clientId, serviceId, periodD
             ...jobParams, // for allocated_to
             ...jobParams, // for allocated_to_other
             customerId, customerId, clientId, clientId,
-            ...(serviceId ? [serviceId, serviceId] : []),
+            ...(serviceId ? [serviceId] : []),
             ...dateParams, ...dateParams, ...dateParams, ...dateParams
         ];
 

@@ -1247,8 +1247,17 @@ export const SubmitBilling = () => {
     }
 
     // 2. Customised Pricing Max Jobs Validation
-    if (customisedModelData && customMaxJobs > 0) {
-      if (customJobsCountNum > customMaxJobs) {
+    if (customisedModelData) {
+      if (customJobsCount !== "" && (!Number.isInteger(Number(customJobsCount)) || Number(customJobsCount) < 0)) {
+        sweatalert.fire({
+          icon: "warning",
+          title: "Invalid Completed Jobs",
+          text: "Completed jobs must be a whole positive integer (no decimal points allowed).",
+          confirmButtonColor: "#26bdf0",
+        });
+        return;
+      }
+      if (customMaxJobs > 0 && customJobsCountNum > customMaxJobs) {
         sweatalert.fire({
           icon: "warning",
           title: "Maximum Jobs Exceeded",
@@ -1274,14 +1283,17 @@ export const SubmitBilling = () => {
 
     // 4. Percentage Turnover Validation
     if (percentageModelData) {
-      if (baseAmountNum < 0) {
-        sweatalert.fire({
-          icon: "warning",
-          title: "Invalid Base Amount",
-          text: "Turnover / Base amount cannot be negative.",
-          confirmButtonColor: "#26bdf0",
-        });
-        return;
+      for (const field of percentageFieldsList) {
+        const val = parseFloat(percentageBaseAmounts[field.key]) || 0;
+        if (val < 0) {
+          sweatalert.fire({
+            icon: "warning",
+            title: "Invalid Base Amount",
+            text: `Base value for ${field.label} cannot be negative.`,
+            confirmButtonColor: "#26bdf0",
+          });
+          return;
+        }
       }
     }
 
@@ -2265,15 +2277,27 @@ export const SubmitBilling = () => {
                                 Completed Jobs {customMaxJobs > 0 && <span className="text-secondary">(Max: {customMaxJobs})</span>}
                               </label>
                               <input
-                                type="number" onWheel={(e) => e.target.blur()}
+                                type="number"
+                                onWheel={(e) => e.target.blur()}
                                 min="0"
+                                step="1"
                                 max={customMaxJobs > 0 ? customMaxJobs : undefined}
                                 className={`form-control shadow-sm rounded-pill ${
                                   customJobsCount !== "" && customMaxJobs > 0 && customJobsCountNum > customMaxJobs ? "is-invalid border-danger text-danger fw-bold" : ""
                                 }`}
                                 placeholder={customMaxJobs > 0 ? `Max: ${customMaxJobs}` : "e.g. 5"}
                                 value={customJobsCount}
-                                onChange={(e) => setCustomJobsCount(e.target.value)}
+                                onKeyDown={(e) => {
+                                  // Disallow decimal point, e, +, -
+                                  if (e.key === "." || e.key === "e" || e.key === "E" || e.key === "+" || e.key === "-") {
+                                    e.preventDefault();
+                                  }
+                                }}
+                                onChange={(e) => {
+                                  // Clean input strictly to digits only
+                                  const cleanVal = e.target.value.replace(/[^0-9]/g, "");
+                                  setCustomJobsCount(cleanVal);
+                                }}
                               />
                               {customJobsCount !== "" && customMaxJobs > 0 && customJobsCountNum > customMaxJobs && (
                                 <div className="text-danger small mt-1" style={{ fontSize: "11px" }}>
@@ -2542,14 +2566,18 @@ export const SubmitBilling = () => {
 
                         {/* Remaining / Over-allocated indicator */}
                         {netAmount > 0 && (
-                          <span className="small">
+                          <span style={{ fontSize: "14px" }}>
                             {totalAllocatedPct > 100 ? (
                               <span className="text-danger fw-bold">
                                 ⚠ Over-allocated by: £{(totalAllocatedAmt - netAmount).toFixed(2)} ({(totalAllocatedPct - 100).toFixed(2)}%)
                               </span>
                             ) : (
-                              <span className="text-muted">
-                                Remaining: <strong className={Math.abs(remainingPct) <= 0.05 ? "text-success" : "text-primary"}>
+                              <span className="text-muted fw-medium">
+                                Remaining:{" "}
+                                <strong
+                                  style={{ fontSize: "15px" }}
+                                  className={isFullyAllocated ? "text-success" : "text-danger"}
+                                >
                                   £{remainingAmt.toFixed(2)} ({remainingPct}%)
                                 </strong>
                               </span>
@@ -2558,12 +2586,15 @@ export const SubmitBilling = () => {
                         )}
                       </div>
 
-                      <div className="mt-3 pt-2 border-top d-flex justify-content-between align-items-center small">
-                        <span className="text-muted">Total allocated:</span>
+                      <div className="mt-3 pt-2 border-top d-flex justify-content-between align-items-center">
+                        <span className="text-muted fw-semibold" style={{ fontSize: "14px" }}>
+                          Total Allocated:
+                        </span>
                         <span
                           className={`fw-bold ${
                             isFullyAllocated ? "text-success" : "text-danger"
                           }`}
+                          style={{ fontSize: "15px" }}
                         >
                           £{totalAllocatedAmt.toFixed(2)} of £{netAmount.toFixed(2)} ({totalAllocatedPct}% {isFullyAllocated ? "✓" : totalAllocatedPct > 100 ? "⚠ Exceeds 100% — must be 100%" : "— must be 100%"})
                         </span>

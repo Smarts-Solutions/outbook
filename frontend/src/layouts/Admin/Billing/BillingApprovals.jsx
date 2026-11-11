@@ -10,7 +10,7 @@ import {
 } from "../../../Services/Billing/BillingService";
 import { convertDate1 } from "../../../Utils/Comman_function";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { Check, CheckCheck, Eye, RotateCcw, Edit, X } from "lucide-react";
+import { Check, CheckCheck, Eye, RotateCcw, Edit, X, Clock } from "lucide-react";
 import sweatalert from "sweetalert2";
 
 const BillingApprovals = () => {
@@ -440,35 +440,58 @@ const BillingApprovals = () => {
         const st = (row.status || "").toLowerCase();
         if (st === "invoiced") {
           return (
-            <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1">
-              <CheckCheck size={13} /> Invoiced
+            <span className="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 fw-bold d-inline-flex align-items-center gap-1" style={{ fontSize: "12.5px" }}>
+              <CheckCheck size={14} /> Invoiced
             </span>
           );
         }
         if (st.includes("credit control")) {
           return (
-            <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1">
-              <Check size={13} /> Sent to Credit Control
+            <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 fw-bold d-inline-flex align-items-center gap-1" style={{ fontSize: "12.5px" }}>
+              <Check size={14} /> Sent to Credit Control
             </span>
           );
         }
         if (st.includes("approved")) {
           return (
-            <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1">
-              <Check size={13} /> Approved
+            <span className="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 fw-bold d-inline-flex align-items-center gap-1" style={{ fontSize: "12.5px" }}>
+              <Check size={14} /> Approved
             </span>
           );
         }
         if (st.includes("return")) {
           return (
-            <span className="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1">
-              <RotateCcw size={13} /> Returned
+            <span
+              className="badge px-3 py-1 fw-bold d-inline-flex align-items-center gap-1 shadow-sm"
+              style={{
+                backgroundColor: "#fff8e6",
+                color: "#b76e00",
+                border: "1px solid #ffd591",
+                fontSize: "12.5px",
+              }}
+            >
+              <RotateCcw size={14} /> Returned
+            </span>
+          );
+        }
+        if (st.includes("reject")) {
+          return (
+            <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1 fw-bold d-inline-flex align-items-center gap-1" style={{ fontSize: "12.5px" }}>
+              Rejected
             </span>
           );
         }
         return (
-          <span className="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 fw-semibold">
-            Pending
+          <span
+            className="badge px-3 py-1 fw-bold d-inline-flex align-items-center gap-1 shadow-sm"
+            style={{
+              backgroundColor: "#e6f7ff",
+              color: "#0070ba",
+              border: "1px solid #91d5ff",
+              fontSize: "12.5px",
+            }}
+          >
+            <Clock size={14} /> Pending Manager Approval
           </span>
         );
       },
