@@ -406,6 +406,22 @@ export const SubmitBilling = () => {
           console.log("Formatted models:", formatted);
           setEngagementModels(formatted);
 
+          // Auto-select initial adhoc role if available
+          const adhocItem = models.find((m) => m.model_type === "Adhoc");
+          if (adhocItem && adhocItem.details) {
+            const adhocKeys = [
+              "adhoc_bookkeepers",
+              "adhoc_accountants",
+              "adhoc_payroll_experts",
+              "adhoc_tax_experts",
+              "adhoc_admin_staff",
+            ];
+            const firstValidRole = adhocKeys.find((k) => parseFloat(adhocItem.details[k]) > 0);
+            if (firstValidRole) {
+              setAdhocRole(firstValidRole);
+            }
+          }
+
           // Auto-select model or match editData engagement_model
           if (editData && editData.engagement_model) {
             const editModelNames = String(editData.engagement_model).toLowerCase();
@@ -822,7 +838,21 @@ export const SubmitBilling = () => {
   // 1. Adhoc Amount
   const getAdhocHourlyRate = () => {
     if (!adhocModelData?.details) return 0;
-    const rateVal = adhocModelData.details[adhocRole];
+    // Check currently selected role, or fallback to first available role with a rate
+    let rateVal = adhocModelData.details[adhocRole];
+    if ((rateVal === null || rateVal === undefined || rateVal === "") || parseFloat(rateVal) === 0) {
+      const allAdhocKeys = [
+        "adhoc_bookkeepers",
+        "adhoc_accountants",
+        "adhoc_payroll_experts",
+        "adhoc_tax_experts",
+        "adhoc_admin_staff",
+      ];
+      const validKey = allAdhocKeys.find((k) => parseFloat(adhocModelData.details[k]) > 0);
+      if (validKey) {
+        rateVal = adhocModelData.details[validKey];
+      }
+    }
     return parseFloat(rateVal) || 0;
   };
   const adhocRate = getAdhocHourlyRate();
