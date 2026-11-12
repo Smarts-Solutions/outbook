@@ -268,17 +268,27 @@ const BillingApprovals = () => {
   const renderModelBadges = (modelStr) => {
     if (!modelStr) return <span className="badge bg-light text-dark border">—</span>;
     const parts = modelStr.split(",").map((p) => p.trim()).filter(Boolean);
+    if (!parts.length) return <span className="badge bg-light text-dark border">—</span>;
+
+    // Show 1 badge, and if more, show +X more badge
     return (
-      <div className="d-flex flex-wrap gap-1">
-        {parts.map((part, idx) => (
+      <div className="d-flex align-items-center gap-1 flex-wrap">
+        <span
+          className="badge bg-white text-dark border px-2 py-1 shadow-xs fw-medium text-truncate text-start"
+          style={{ fontSize: "11px", maxWidth: "160px" }}
+          title={parts[0]}
+        >
+          {parts[0]}
+        </span>
+        {parts.length > 1 && (
           <span
-            key={idx}
-            className="badge bg-white text-dark border px-2 py-1 shadow-xs fw-medium text-wrap"
-            style={{ fontSize: "11px", whiteSpace: "normal", textAlign: "left" }}
+            className="badge bg-light text-muted border px-2 py-1 fw-semibold cursor-pointer"
+            style={{ fontSize: "10.5px" }}
+            title={parts.slice(1).join("\n")}
           >
-            {part}
+            +{parts.length - 1} more
           </span>
-        ))}
+        )}
       </div>
     );
   };
@@ -416,18 +426,28 @@ const BillingApprovals = () => {
       cell: (row) => {
         const list = row.contributors || [];
         if (!list.length) return <span className="text-muted small">—</span>;
+        
+        // Show 1 contributor badge, and if more, show +X more badge
+        const first = list[0];
         return (
-          <div className="small py-2 d-flex flex-wrap gap-1">
-            {list.map((c, i) => (
+          <div className="d-flex align-items-center gap-1 flex-wrap">
+            <span
+              className="badge bg-white text-dark border fw-normal text-truncate text-start"
+              style={{ lineHeight: "1.4", padding: "4px 8px", fontSize: "11.5px", maxWidth: "160px" }}
+              title={`${first.staff_name} (${parseFloat(first.pct).toFixed(0)}%)`}
+            >
+              {first.staff_name} <span className="fw-semibold text-primary">({parseFloat(first.pct).toFixed(0)}%)</span>
+            </span>
+            {list.length > 1 && (
               <span
-                key={i}
-                className="badge bg-white text-dark border fw-normal text-wrap text-start text-break"
-                style={{ lineHeight: "1.4", padding: "5px 8px", maxWidth: "100%" }}
-                title={`${c.staff_name} (${parseFloat(c.pct).toFixed(0)}%)`}
+                className="badge bg-light text-muted border px-2 py-1 fw-semibold cursor-pointer"
+                style={{ fontSize: "11px" }}
+                title={list.slice(1).map((c) => `${c.staff_name} (${parseFloat(c.pct).toFixed(0)}%)`).join("\n")}
+                onClick={() => setViewDetailsModal(row)}
               >
-                {c.staff_name} <span className="fw-semibold text-primary">({parseFloat(c.pct).toFixed(0)}%)</span>
+                +{list.length - 1} more
               </span>
-            ))}
+            )}
           </div>
         );
       },
@@ -436,26 +456,26 @@ const BillingApprovals = () => {
       name: "Status",
       selector: (row) => row.status,
       sortable: true,
-      minWidth: "170px",
+      minWidth: "200px",
       cell: (row) => {
         const st = (row.status || "").toLowerCase();
         if (st === "invoiced") {
           return (
-            <span className="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 fw-bold d-inline-flex align-items-center gap-1" style={{ fontSize: "12.5px" }}>
+            <span className="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 fw-bold d-inline-flex align-items-center gap-1 text-nowrap" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
               <CheckCheck size={14} /> Invoiced
             </span>
           );
         }
         if (st.includes("credit control")) {
           return (
-            <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 fw-bold d-inline-flex align-items-center gap-1" style={{ fontSize: "12.5px" }}>
+            <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 fw-bold d-inline-flex align-items-center gap-1 text-nowrap" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
               <Check size={14} /> Sent to Credit Control
             </span>
           );
         }
         if (st.includes("approved")) {
           return (
-            <span className="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 fw-bold d-inline-flex align-items-center gap-1" style={{ fontSize: "12.5px" }}>
+            <span className="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 fw-bold d-inline-flex align-items-center gap-1 text-nowrap" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
               <Check size={14} /> Approved
             </span>
           );
@@ -463,12 +483,13 @@ const BillingApprovals = () => {
         if (st.includes("return")) {
           return (
             <span
-              className="badge px-3 py-1 fw-bold d-inline-flex align-items-center gap-1 shadow-sm"
+              className="badge px-3 py-1 fw-bold d-inline-flex align-items-center gap-1 shadow-sm text-nowrap"
               style={{
                 backgroundColor: "#fff8e6",
                 color: "#b76e00",
                 border: "1px solid #ffd591",
-                fontSize: "12.5px",
+                fontSize: "12px",
+                whiteSpace: "nowrap"
               }}
             >
               <RotateCcw size={14} /> Returned
@@ -477,19 +498,20 @@ const BillingApprovals = () => {
         }
         if (st.includes("reject")) {
           return (
-            <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1 fw-bold d-inline-flex align-items-center gap-1" style={{ fontSize: "12.5px" }}>
+            <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1 fw-bold d-inline-flex align-items-center gap-1 text-nowrap" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
               Rejected
             </span>
           );
         }
         return (
           <span
-            className="badge px-3 py-1 fw-bold d-inline-flex align-items-center gap-1 shadow-sm"
+            className="badge px-3 py-1 fw-bold d-inline-flex align-items-center gap-1 shadow-sm text-nowrap"
             style={{
               backgroundColor: "#e6f7ff",
               color: "#0070ba",
               border: "1px solid #91d5ff",
-              fontSize: "12.5px",
+              fontSize: "12px",
+              whiteSpace: "nowrap"
             }}
           >
             <Clock size={14} /> Pending Manager Approval
@@ -501,9 +523,9 @@ const BillingApprovals = () => {
       name: "Created At",
       selector: (row) => row.submitted_at,
       sortable: true,
-      minWidth: "120px",
+      minWidth: "140px",
       cell: (row) => (
-        <div title={row.submitted_at} className="text-muted">
+        <div title={row.submitted_at} className="text-muted text-nowrap" style={{ whiteSpace: "nowrap" }}>
           {convertDate1(row.submitted_at)}
         </div>
       ),

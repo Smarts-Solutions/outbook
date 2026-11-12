@@ -341,3 +341,24 @@
   border-color: #059669;
 }
 
+
+/* Ensure sticky actions column has clean background and boundary shadow on scroll */
+.custom-datatable-sticky-action .rdt_TableHeadRow .rdt_TableCol:last-child {
+  position: sticky;
+  right: 0;
+  background: #ffffff !important;
+  box-shadow: -3px 0 6px rgba(0, 0, 0, 0.05);
+  z-index: 10;
+}
+
+.custom-datatable-sticky-action .rdt_TableBody .rdt_TableRow .rdt_TableCell:last-child {
+  position: sticky;
+  right: 0;
+  background: #ffffff !important;
+  box-shadow: -3px 0 6px rgba(0, 0, 0, 0.05);
+  z-index: 5;
+}
+
+.custom-datatable-sticky-action .rdt_TableBody .rdt_TableRow:hover .rdt_TableCell:last-child {
+  background: #f8fafc !important;
+}
