@@ -456,7 +456,7 @@ const BillingApprovals = () => {
       name: "Status",
       selector: (row) => row.status,
       sortable: true,
-      minWidth: "200px",
+      minWidth: "260px",
       cell: (row) => {
         const st = (row.status || "").toLowerCase();
         if (st === "invoiced") {
@@ -523,9 +523,9 @@ const BillingApprovals = () => {
       name: "Created At",
       selector: (row) => row.submitted_at,
       sortable: true,
-      minWidth: "140px",
+      minWidth: "160px",
       cell: (row) => (
-        <div title={row.submitted_at} className="text-muted text-nowrap" style={{ whiteSpace: "nowrap" }}>
+        <div title={row.submitted_at} className="text-muted text-nowrap ps-2" style={{ whiteSpace: "nowrap" }}>
           {convertDate1(row.submitted_at)}
         </div>
       ),
