@@ -1079,36 +1079,38 @@ export const SubmitBilling = () => {
           };
         }
 
-        // Percentage Input Change (Freely editable by user)
+        // Percentage Input Change (Freely editable by user, capped at 100%)
         if (field === "pct") {
           if (value === "") {
             return { ...c, mode: null, pct: "", amount: "" };
           }
           let numVal = parseFloat(value);
           if (isNaN(numVal) || numVal < 0) numVal = 0;
+          if (numVal > 100) numVal = 100;
 
           const calculatedAmt = netAmount > 0 ? parseFloat(((netAmount * numVal) / 100).toFixed(2)) : 0;
           return {
             ...c,
             mode: "pct",
-            pct: value,
+            pct: String(numVal),
             amount: calculatedAmt > 0 ? String(calculatedAmt) : "",
           };
         }
 
-        // Flat Amount Input Change (Freely editable by user)
+        // Flat Amount Input Change (Freely editable by user, capped at netAmount)
         if (field === "amount") {
           if (value === "") {
             return { ...c, mode: null, pct: "", amount: "" };
           }
           let numVal = parseFloat(value);
           if (isNaN(numVal) || numVal < 0) numVal = 0;
+          if (netAmount > 0 && numVal > netAmount) numVal = netAmount;
 
           const calculatedPct = netAmount > 0 ? parseFloat(((numVal / netAmount) * 100).toFixed(2)) : 0;
           return {
             ...c,
             mode: "flat",
-            amount: value,
+            amount: String(numVal),
             pct: calculatedPct > 0 ? String(calculatedPct) : "",
           };
         }
@@ -1307,6 +1309,25 @@ export const SubmitBilling = () => {
         text: `Revenue split across contributors must total exactly 100% (£${netAmount.toFixed(2)}). Currently allocated: ${totalAllocatedPct}% (£${totalAllocatedAmt.toFixed(2)}). Remaining: £${remainingAmt.toFixed(2)} (${remainingPct}%).`,
         confirmButtonColor: "#26bdf0",
       });
+      return;
+    }
+
+    // Confirmation Popup before submission
+    const isFullDiscount = discountPctNum === 100;
+    const confirmResult = await sweatalert.fire({
+      icon: isFullDiscount ? "warning" : "question",
+      title: isFullDiscount ? "100% Discount Applied" : (editSubmissionId ? "Update Billing?" : "Submit Billing?"),
+      text: isFullDiscount
+        ? "You are applying a 100% discount to this bill. Are you sure you want to submit it?"
+        : (editSubmissionId ? "Are you sure you want to update this billing submission?" : "Are you sure you want to submit this billing for approval?"),
+      showCancelButton: true,
+      confirmButtonText: isFullDiscount ? "Yes, Submit with 100% Discount" : (editSubmissionId ? "Yes, Update" : "Yes, Submit"),
+      cancelButtonText: "Cancel",
+      confirmButtonColor: isFullDiscount ? "#ea5455" : "#26bdf0",
+      cancelButtonColor: "#6c757d",
+    });
+
+    if (!confirmResult.isConfirmed) {
       return;
     }
 
@@ -2347,11 +2368,26 @@ export const SubmitBilling = () => {
                               <input
                                 type="number" onWheel={(e) => e.target.blur()}
                                 min="0"
+                                max="100"
                                 step="any"
                                 className="form-control shadow-sm rounded-pill pe-4"
                                 placeholder="e.g. 10"
                                 value={discountPct}
-                                onChange={(e) => setDiscountPct(e.target.value)}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  if (val === "") {
+                                    setDiscountPct("");
+                                    return;
+                                  }
+                                  const num = parseFloat(val);
+                                  if (num > 100) {
+                                    setDiscountPct("100");
+                                  } else if (num < 0) {
+                                    setDiscountPct("0");
+                                  } else {
+                                    setDiscountPct(val);
+                                  }
+                                }}
                               />
                               <span
                                 className="position-absolute end-0 top-50 translate-middle-y me-3 text-muted fw-bold"

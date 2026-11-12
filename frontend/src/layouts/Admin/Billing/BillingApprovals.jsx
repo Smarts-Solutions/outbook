@@ -999,7 +999,21 @@ const BillingApprovals = () => {
                     step="any"
                     className="form-control rounded-pill pe-4"
                     value={editDiscountPct}
-                    onChange={(e) => setEditDiscountPct(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "") {
+                        setEditDiscountPct("");
+                        return;
+                      }
+                      const num = parseFloat(val);
+                      if (num > 100) {
+                        setEditDiscountPct("100");
+                      } else if (num < 0) {
+                        setEditDiscountPct("0");
+                      } else {
+                        setEditDiscountPct(val);
+                      }
+                    }}
                   />
                   <span
                     className="position-absolute end-0 top-50 translate-middle-y me-3 text-muted fw-bold"
@@ -1050,9 +1064,15 @@ const BillingApprovals = () => {
                           value={c.pct}
                           onChange={(e) => {
                             const val = e.target.value;
+                            let numVal = val;
+                            if (val !== "") {
+                              const parsed = parseFloat(val);
+                              if (parsed > 100) numVal = "100";
+                              else if (parsed < 0) numVal = "0";
+                            }
                             setEditContributors((prev) =>
                               prev.map((item, i) =>
-                                i === idx ? { ...item, pct: val } : item
+                                i === idx ? { ...item, pct: numVal } : item
                               )
                             );
                           }}
