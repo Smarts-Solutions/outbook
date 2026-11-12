@@ -848,8 +848,8 @@ const submitBilling = async (payload, submittedByStaffId) => {
             };
         }
 
-        // Strict 100% Contributor Validation
-        if (Array.isArray(contributors) && contributors.length > 0) {
+        // Strict 100% Contributor Validation (Only enforced when net_amount > 0)
+        if (Number(net_amount) > 0 && Array.isArray(contributors) && contributors.length > 0) {
             const totalAllocPct = contributors.reduce((sum, c) => sum + (parseFloat(c.pct) || 0), 0);
             if (Math.abs(totalAllocPct - 100) > 0.1) {
                 await connection.rollback();

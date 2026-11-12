@@ -978,8 +978,11 @@ export const SubmitBilling = () => {
   const remainingAmt = balanced.remAmt;
   const remainingPct = balanced.remPct;
 
-  // Check if exactly 100% and exact net amount is distributed (supports 100% discount where netAmount === 0)
-  const isFullyAllocated = totalAllocatedPct === 100 && (netAmount === 0 || Math.abs(totalAllocatedAmt - netAmount) < 0.001);
+  // Check if exactly 100% and exact net amount is distributed
+  // If 100% discount is applied (netAmount === 0), contributor allocation is not required (£0 billable)
+  const isFullyAllocated = netAmount === 0 
+    ? true 
+    : (totalAllocatedPct === 100 && Math.abs(totalAllocatedAmt - netAmount) < 0.001);
 
   // Distribute equally across current contributors
   const handleDistributeEqually = () => {
@@ -1377,13 +1380,18 @@ export const SubmitBilling = () => {
         nomisma_description: nomismaDescription,
         // Keep existing manager_id if editing an existing submission, or backend will resolve staff's Line Manager
         manager_id: editData?.manager_id || null,
-        contributors: contributors.map((c) => {
+        contributors: contributors.map((c, idx) => {
           const vals = computeContributorValues(c, netAmount);
+          // If netAmount is 0 (100% discount), ensure total pct sums to 100% across contributors so backend validation passes
+          let defaultPct = vals.pct;
+          if (netAmount === 0 && totalAllocatedPct === 0) {
+            defaultPct = idx === 0 ? 100 : 0;
+          }
           return {
             staff_id: c.staff_id || staffDetails?.id || 1,
             staff_name: c.name,
-            pct: parseFloat(vals.pct.toFixed(2)) || 0,
-            amount: parseFloat(vals.amount.toFixed(2)) || 0,
+            pct: parseFloat(defaultPct.toFixed(2)) || 0,
+            amount: 0,
           };
         }),
       };
