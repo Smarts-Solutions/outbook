@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Download, Plus } from "lucide-react";
-import { checkApproverAccessApi } from "../../../Services/Billing/BillingService";
+import { checkApproverAccessApi, getSubmissionsForApprovalsApi } from "../../../Services/Billing/BillingService";
 
 export const BillingHeader = ({ activeTab }) => {
   const navigate = useNavigate();
+
+  // Tab counts state for Approvals and Credit Control
+  const [tabCounts, setTabCounts] = useState({
+    approvals: 0,
+    credit: 0,
+  });
 
   // Get logged-in user role
   const staffDetailsStr = localStorage.getItem("staffDetails");
@@ -94,14 +100,48 @@ export const BillingHeader = ({ activeTab }) => {
     };
   }, [staffDetails?.id, isAdmin]);
 
+  // Fetch total counts for Approvals (total submissions in table) and Credit Control (ready to invoice)
+  useEffect(() => {
+    let isMounted = true;
+    const fetchCounts = async () => {
+      try {
+        const token = getAuthToken();
+        const payload = {
+          StaffUserId: staffDetails?.id || null,
+          status: "all",
+        };
+        const res = await getSubmissionsForApprovalsApi(payload, token);
+        if (res && res.status && Array.isArray(res.data) && isMounted) {
+          // Approvals tab shows all submissions in the approvals queue
+          const approvalsTotal = res.data.length;
+
+          // Credit control tab shows pending credit control / approved waiting for billing
+          const creditPending = res.data.filter((s) => {
+            const st = (s.status || "").toLowerCase();
+            return st === "pending credit control approval" || st === "approved";
+          }).length;
+
+          setTabCounts({
+            approvals: approvalsTotal,
+            credit: creditPending,
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching billing tab counts:", err);
+      }
+    };
+
+    fetchCounts();
+    return () => {
+      isMounted = false;
+    };
+  }, [staffDetails?.id, activeTab]);
+
   const allTabs = [
     { id: "dashboard", path: "/admin/billing/dashboard", label: "My Dashboard" },
     { id: "submit", path: "/admin/billing/submit", label: "Submit Billing" },
-    { id: "approvals", path: "/admin/billing/approvals", label: "Approvals" },
-    { id: "credit", path: "/admin/billing/credit-control", label: "Credit Control" },
-    // Temporarily commented out as not needed right now:
-    // { id: "control", path: "/admin/billing/control-centre", label: "Billing Control Centre" },
-    // { id: "master", path: "/admin/billing/master-data", label: "Master Data" },
+    { id: "approvals", path: "/admin/billing/approvals", label: "Approvals", count: tabCounts.approvals },
+    { id: "credit", path: "/admin/billing/credit-control", label: "Credit Control", count: tabCounts.credit },
   ];
 
   // Role & Hierarchy based visibility:
@@ -149,7 +189,7 @@ export const BillingHeader = ({ activeTab }) => {
                     role="tab"
                     onClick={() => navigate(tab.path)}
                   >
-                    {tab.label}
+                    {tab.label} {typeof tab.count === "number" && tab.count > 0 ? `(${tab.count})` : ""}
                   </button>
                 </li>
               ))}
