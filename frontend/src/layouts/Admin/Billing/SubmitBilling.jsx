@@ -1999,11 +1999,23 @@ export const SubmitBilling = () => {
                               <input
                                 type="number" onWheel={(e) => e.target.blur()}
                                 min="0"
-                                step="0.5"
+                                step="any"
                                 className="form-control shadow-sm rounded-pill"
                                 placeholder="e.g. 15"
                                 value={adhocHours}
-                                onChange={(e) => setAdhocHours(e.target.value)}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  if (val === "") {
+                                    setAdhocHours("");
+                                    return;
+                                  }
+                                  const num = parseFloat(val);
+                                  if (num < 0) {
+                                    setAdhocHours("0");
+                                  } else {
+                                    setAdhocHours(val);
+                                  }
+                                }}
                               />
                             </div>
 

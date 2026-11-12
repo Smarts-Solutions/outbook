@@ -839,7 +839,8 @@ const submitBilling = async (payload, submittedByStaffId) => {
             contributors = []
         } = payload;
 
-        const safeEngagementModel = engagement_model ? String(engagement_model).slice(0, 490) : '';
+        const safeEngagementModel = engagement_model ? String(engagement_model).slice(0, 990) : '';
+        const safeNomismaDescription = nomisma_description ? String(nomisma_description).slice(0, 990) : '';
 
         // Validation
         if (!customer_id || !client_id || !service_id || !period_label || (net_amount === undefined || net_amount === null)) {
@@ -990,7 +991,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 discount_amt,
                 net_amount,
                 currency,
-                nomisma_description,
+                safeNomismaDescription,
                 finalManagerId,
                 editSubmissionId
             ];
@@ -1132,7 +1133,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
             discount_amt,
             net_amount,
             currency,
-            nomisma_description,
+            safeNomismaDescription,
             submittedByStaffId,
             finalManagerId
         ];
