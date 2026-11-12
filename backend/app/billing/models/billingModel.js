@@ -839,6 +839,8 @@ const submitBilling = async (payload, submittedByStaffId) => {
             contributors = []
         } = payload;
 
+        const safeEngagementModel = engagement_model ? String(engagement_model).slice(0, 490) : '';
+
         // Validation
         if (!customer_id || !client_id || !service_id || !period_label || (net_amount === undefined || net_amount === null)) {
             await connection.rollback();
@@ -981,7 +983,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 period_label,
                 period_end || null,
                 dedupeKey,
-                typeof engagement_model === 'object' ? JSON.stringify(engagement_model) : String(engagement_model),
+                safeEngagementModel,
                 typeof calc_json === 'object' ? JSON.stringify(calc_json) : String(calc_json),
                 gross_amount,
                 discount_pct,
@@ -1123,7 +1125,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
             period_label,
             period_end || null,
             dedupeKey,
-            typeof engagement_model === 'object' ? JSON.stringify(engagement_model) : String(engagement_model),
+            safeEngagementModel,
             typeof calc_json === 'object' ? JSON.stringify(calc_json) : String(calc_json),
             gross_amount,
             discount_pct,
