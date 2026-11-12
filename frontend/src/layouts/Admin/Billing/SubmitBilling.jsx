@@ -19,9 +19,9 @@ export const SubmitBilling = () => {
   const [practice, setPractice] = useState(
     editData?.customer_id
       ? {
-          value: editData.customer_id,
-          label: editData.customer_name || ("Customer #" + editData.customer_id),
-        }
+        value: editData.customer_id,
+        label: editData.customer_name || ("Customer #" + editData.customer_id),
+      }
       : null
   );
   const [customersList, setCustomersList] = useState([]);
@@ -209,23 +209,23 @@ export const SubmitBilling = () => {
   const [clientsList, setClientsList] = useState(
     editData?.client_id
       ? [
-          {
-            value: editData.client_id,
-            label: editData.client_name || ("Client #" + editData.client_id),
-            client_id: editData.client_id,
-            customer_id: editData.customer_id,
-          },
-        ]
+        {
+          value: editData.client_id,
+          label: editData.client_name || ("Client #" + editData.client_id),
+          client_id: editData.client_id,
+          customer_id: editData.customer_id,
+        },
+      ]
       : []
   );
   const [selectedClient, setSelectedClient] = useState(
     editData?.client_id
       ? {
-          value: editData.client_id,
-          label: editData.client_name || ("Client #" + editData.client_id),
-          client_id: editData.client_id,
-          customer_id: editData.customer_id,
-        }
+        value: editData.client_id,
+        label: editData.client_name || ("Client #" + editData.client_id),
+        client_id: editData.client_id,
+        customer_id: editData.customer_id,
+      }
       : null
   );
   const [loadingClients, setLoadingClients] = useState(false);
@@ -237,19 +237,19 @@ export const SubmitBilling = () => {
   const [servicesList, setServicesList] = useState(
     editData?.service_id
       ? [
-          {
-            value: editData.service_id,
-            label: editData.service_name || ("Service #" + editData.service_id),
-          },
-        ]
+        {
+          value: editData.service_id,
+          label: editData.service_name || ("Service #" + editData.service_id),
+        },
+      ]
       : []
   );
   const [selectedService, setSelectedService] = useState(
     editData?.service_id
       ? {
-          value: editData.service_id,
-          label: editData.service_name || ("Service #" + editData.service_id),
-        }
+        value: editData.service_id,
+        label: editData.service_name || ("Service #" + editData.service_id),
+      }
       : null
   );
   const [loadingServices, setLoadingServices] = useState(false);
@@ -315,7 +315,7 @@ export const SubmitBilling = () => {
     if (typeof parsedCalc === 'string') {
       try {
         parsedCalc = JSON.parse(parsedCalc);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     if (parsedCalc && typeof parsedCalc === 'object') {
@@ -409,8 +409,8 @@ export const SubmitBilling = () => {
           // Auto-select model or match editData engagement_model
           if (editData && editData.engagement_model) {
             const editModelNames = String(editData.engagement_model).toLowerCase();
-            const matched = formatted.filter(f => 
-              editModelNames.includes((f.value || '').toLowerCase()) || 
+            const matched = formatted.filter(f =>
+              editModelNames.includes((f.value || '').toLowerCase()) ||
               editModelNames.includes((f.model?.label || '').toLowerCase())
             );
             if (matched.length > 0) {
@@ -803,8 +803,8 @@ export const SubmitBilling = () => {
   const activeEngagementsList = Array.isArray(selectedEngagement)
     ? selectedEngagement
     : selectedEngagement?.model
-    ? [selectedEngagement]
-    : [];
+      ? [selectedEngagement]
+      : [];
 
   // Helper to find model by type
   const getSelectedModelData = (type) => {
@@ -980,8 +980,8 @@ export const SubmitBilling = () => {
 
   // Check if exactly 100% and exact net amount is distributed
   // If 100% discount is applied (netAmount === 0), contributor allocation is not required (£0 billable)
-  const isFullyAllocated = netAmount === 0 
-    ? true 
+  const isFullyAllocated = netAmount === 0
+    ? true
     : (totalAllocatedPct === 100 && Math.abs(totalAllocatedAmt - netAmount) < 0.001);
 
   // Distribute equally across current contributors
@@ -989,7 +989,7 @@ export const SubmitBilling = () => {
     if (!contributors || contributors.length === 0) return;
     const count = contributors.length;
     const equalPct = parseFloat((100 / count).toFixed(2));
-    
+
     // Distribute percentages so they sum to exactly 100%
     setContributors(
       contributors.map((c, idx) => {
@@ -1402,7 +1402,7 @@ export const SubmitBilling = () => {
         await sweatalert.fire({
           icon: "success",
           title: editSubmissionId ? "Billing Updated!" : "Billing Submitted!",
-          text: editSubmissionId ? `Billing of £${netAmount.toFixed(2)} updated successfully.` : `Billing of £${netAmount.toFixed(2)} submitted successfully. Sent to your Line Manager for approval.`,
+          text: editSubmissionId ? `Billing of £${netAmount.toFixed(2)} updated successfully.` : `Billing of £${netAmount.toFixed(2)} submitted successfully. Sent to your Account Manager for approval.`,
           confirmButtonColor: "#26bdf0",
         });
         navigate("/admin/billing/dashboard");
@@ -2010,9 +2010,8 @@ export const SubmitBilling = () => {
                                         type="number" onWheel={(e) => e.target.blur()}
                                         min="0"
                                         max={fteModelData.details.number_of_accountants}
-                                        className={`form-control form-control-sm text-center ${
-                                          (parseFloat(fteAccountantQty) || 0) > parseFloat(fteModelData.details.number_of_accountants) ? "is-invalid border-danger text-danger fw-bold" : ""
-                                        }`}
+                                        className={`form-control form-control-sm text-center ${(parseFloat(fteAccountantQty) || 0) > parseFloat(fteModelData.details.number_of_accountants) ? "is-invalid border-danger text-danger fw-bold" : ""
+                                          }`}
                                         value={fteAccountantQty}
                                         onChange={(e) => setFteAccountantQty(e.target.value)}
                                       />
@@ -2041,9 +2040,8 @@ export const SubmitBilling = () => {
                                         type="number" onWheel={(e) => e.target.blur()}
                                         min="0"
                                         max={fteModelData.details.number_of_bookkeepers}
-                                        className={`form-control form-control-sm text-center ${
-                                          (parseFloat(fteBookkeeperQty) || 0) > parseFloat(fteModelData.details.number_of_bookkeepers) ? "is-invalid border-danger text-danger fw-bold" : ""
-                                        }`}
+                                        className={`form-control form-control-sm text-center ${(parseFloat(fteBookkeeperQty) || 0) > parseFloat(fteModelData.details.number_of_bookkeepers) ? "is-invalid border-danger text-danger fw-bold" : ""
+                                          }`}
                                         value={fteBookkeeperQty}
                                         onChange={(e) => setFteBookkeeperQty(e.target.value)}
                                       />
@@ -2072,9 +2070,8 @@ export const SubmitBilling = () => {
                                         type="number" onWheel={(e) => e.target.blur()}
                                         min="0"
                                         max={fteModelData.details.number_of_payroll_experts}
-                                        className={`form-control form-control-sm text-center ${
-                                          (parseFloat(ftePayrollQty) || 0) > parseFloat(fteModelData.details.number_of_payroll_experts) ? "is-invalid border-danger text-danger fw-bold" : ""
-                                        }`}
+                                        className={`form-control form-control-sm text-center ${(parseFloat(ftePayrollQty) || 0) > parseFloat(fteModelData.details.number_of_payroll_experts) ? "is-invalid border-danger text-danger fw-bold" : ""
+                                          }`}
                                         value={ftePayrollQty}
                                         onChange={(e) => setFtePayrollQty(e.target.value)}
                                       />
@@ -2103,9 +2100,8 @@ export const SubmitBilling = () => {
                                         type="number" onWheel={(e) => e.target.blur()}
                                         min="0"
                                         max={fteModelData.details.number_of_tax_experts}
-                                        className={`form-control form-control-sm text-center ${
-                                          (parseFloat(fteTaxQty) || 0) > parseFloat(fteModelData.details.number_of_tax_experts) ? "is-invalid border-danger text-danger fw-bold" : ""
-                                        }`}
+                                        className={`form-control form-control-sm text-center ${(parseFloat(fteTaxQty) || 0) > parseFloat(fteModelData.details.number_of_tax_experts) ? "is-invalid border-danger text-danger fw-bold" : ""
+                                          }`}
                                         value={fteTaxQty}
                                         onChange={(e) => setFteTaxQty(e.target.value)}
                                       />
@@ -2134,9 +2130,8 @@ export const SubmitBilling = () => {
                                         type="number" onWheel={(e) => e.target.blur()}
                                         min="0"
                                         max={fteModelData.details.number_of_admin_staff}
-                                        className={`form-control form-control-sm text-center ${
-                                          (parseFloat(fteAdminQty) || 0) > parseFloat(fteModelData.details.number_of_admin_staff) ? "is-invalid border-danger text-danger fw-bold" : ""
-                                        }`}
+                                        className={`form-control form-control-sm text-center ${(parseFloat(fteAdminQty) || 0) > parseFloat(fteModelData.details.number_of_admin_staff) ? "is-invalid border-danger text-danger fw-bold" : ""
+                                          }`}
                                         value={fteAdminQty}
                                         onChange={(e) => setFteAdminQty(e.target.value)}
                                       />
@@ -2290,9 +2285,8 @@ export const SubmitBilling = () => {
                                 min="0"
                                 step="1"
                                 max={customMaxJobs > 0 ? customMaxJobs : undefined}
-                                className={`form-control shadow-sm rounded-pill ${
-                                  customJobsCount !== "" && customMaxJobs > 0 && customJobsCountNum > customMaxJobs ? "is-invalid border-danger text-danger fw-bold" : ""
-                                }`}
+                                className={`form-control shadow-sm rounded-pill ${customJobsCount !== "" && customMaxJobs > 0 && customJobsCountNum > customMaxJobs ? "is-invalid border-danger text-danger fw-bold" : ""
+                                  }`}
                                 placeholder={customMaxJobs > 0 ? `Max: ${customMaxJobs}` : "e.g. 5"}
                                 value={customJobsCount}
                                 onKeyDown={(e) => {
@@ -2353,7 +2347,7 @@ export const SubmitBilling = () => {
                               <input
                                 type="number" onWheel={(e) => e.target.blur()}
                                 min="0"
-                                  step="any"
+                                step="any"
                                 className="form-control shadow-sm rounded-pill pe-4"
                                 placeholder="e.g. 10"
                                 value={discountPct}
@@ -2394,9 +2388,8 @@ export const SubmitBilling = () => {
                             </label>
                             <input
                               type="text"
-                              className={`form-control bg-light fw-bold rounded-pill ${
-                                discountAmt > 0 ? "text-danger" : "text-muted"
-                              }`}
+                              className={`form-control bg-light fw-bold rounded-pill ${discountAmt > 0 ? "text-danger" : "text-muted"
+                                }`}
                               readOnly
                               value={
                                 discountAmt > 0
@@ -2599,9 +2592,8 @@ export const SubmitBilling = () => {
                           Total Allocated:
                         </span>
                         <span
-                          className={`fw-bold ${
-                            isFullyAllocated ? "text-success" : "text-danger"
-                          }`}
+                          className={`fw-bold ${isFullyAllocated ? "text-success" : "text-danger"
+                            }`}
                           style={{ fontSize: "15px" }}
                         >
                           £{totalAllocatedAmt.toFixed(2)} of £{netAmount.toFixed(2)} ({totalAllocatedPct}% {isFullyAllocated ? "✓" : totalAllocatedPct > 100 ? "⚠ Exceeds 100% — must be 100%" : "— must be 100%"})
