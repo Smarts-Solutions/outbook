@@ -940,7 +940,7 @@ export const SubmitBilling = () => {
 
   // Exact penny-balanced calculation of contributor values
   const getBalancedContributors = (list, net) => {
-    if (!list || list.length === 0 || net <= 0) return { list: [], totalAmt: 0, totalPct: 0, remAmt: 0, remPct: 0 };
+    if (!list || list.length === 0) return { list: [], totalAmt: 0, totalPct: 0, remAmt: 0, remPct: 0 };
 
     let totalPct = 0;
     let totalAmt = 0;
@@ -978,8 +978,8 @@ export const SubmitBilling = () => {
   const remainingAmt = balanced.remAmt;
   const remainingPct = balanced.remPct;
 
-  // Check if exactly 100% and exact net amount is distributed (0.00001 mismatch not allowed)
-  const isFullyAllocated = netAmount > 0 && totalAllocatedPct === 100 && Math.abs(totalAllocatedAmt - netAmount) < 0.001;
+  // Check if exactly 100% and exact net amount is distributed (supports 100% discount where netAmount === 0)
+  const isFullyAllocated = totalAllocatedPct === 100 && (netAmount === 0 || Math.abs(totalAllocatedAmt - netAmount) < 0.001);
 
   // Distribute equally across current contributors
   const handleDistributeEqually = () => {

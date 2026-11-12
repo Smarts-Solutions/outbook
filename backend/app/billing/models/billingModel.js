@@ -840,7 +840,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
         } = payload;
 
         // Validation
-        if (!customer_id || !client_id || !service_id || !period_label || !net_amount) {
+        if (!customer_id || !client_id || !service_id || !period_label || (net_amount === undefined || net_amount === null)) {
             await connection.rollback();
             return {
                 status: false,
