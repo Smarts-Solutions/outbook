@@ -565,12 +565,15 @@ const BillingApprovals = () => {
               <i className="ti-eye text-primary" />
             </button>
 
-            {/* Edit in Submit Billing Screen (Only when Pending Manager Approval and user has management rights) */}
-            {canManage && row.status === "Pending Manager Approval" && (
+            {/* Edit in Submit Billing Screen:
+                1) When Pending Manager Approval: visible to Manager/Admin with management rights
+                2) When Returned: ONLY visible to the user who submitted the bill (isSubmitter), or Admin */}
+            {((canManage && row.status === "Pending Manager Approval") ||
+              (row.status === "Returned" && (isSubmitter || isAdmin))) && (
               <button
                 type="button"
                 className="edit-icon rounded-pills border-warning"
-                title="Edit Submission"
+                title={row.status === "Returned" ? "Edit and Re-submit Returned Bill" : "Edit Submission"}
                 onClick={() => openEditModal(row)}
               >
                 <i className="ti-pencil-alt text-warning" />

@@ -940,6 +940,24 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 return { status: false, message: "Submission to edit was not found." };
             }
 
+            // Authorization check: If Returned, only the original submitter (or Admin) can re-submit
+            if (existing[0].status === 'Returned') {
+                const isOriginalSubmitter = Number(existing[0].submitted_by) === Number(submittedByStaffId);
+                const [userRoleRow] = await connection.execute(
+                    `SELECT role_id FROM staffs WHERE id = ? LIMIT 1`,
+                    [submittedByStaffId]
+                );
+                const isAdmin = userRoleRow.length > 0 && [1, 2].includes(Number(userRoleRow[0].role_id));
+
+                if (!isOriginalSubmitter && !isAdmin) {
+                    await connection.rollback();
+                    return {
+                        status: false,
+                        message: "Only the user who originally submitted this bill (or an Admin) can edit and re-submit it."
+                    };
+                }
+            }
+
             // Preserve manager_id and original submitter if not provided
             if (!finalManagerId) {
                 finalManagerId = existing[0].manager_id;
@@ -948,6 +966,9 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 // If still null, try finding customer account manager or staff's manager
                 finalManagerId = await getDesignatedManagerForSubmission(connection, customer_id, existing[0].submitted_by || staff_user_id);
             }
+
+            // If the bill was Returned, editing and re-submitting changes status back to 'Pending Manager Approval'
+            const newStatus = existing[0].status === 'Returned' ? 'Pending Manager Approval' : existing[0].status;
 
             const updateSubQuery = `
                 UPDATE billing_submissions SET
@@ -969,6 +990,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
                     currency = ?,
                     nomisma_description = ?,
                     manager_id = ?,
+                    status = ?,
                     manager_edited = 1,
                     updated_at = NOW()
                 WHERE id = ?
@@ -993,6 +1015,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 currency,
                 safeNomismaDescription,
                 finalManagerId,
+                newStatus,
                 editSubmissionId
             ];
 
