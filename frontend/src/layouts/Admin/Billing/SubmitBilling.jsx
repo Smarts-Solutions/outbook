@@ -330,8 +330,18 @@ export const SubmitBilling = () => {
         if (parsedCalc.fte.tax != null) setFteTaxQty(String(parsedCalc.fte.tax));
         if (parsedCalc.fte.admin != null) setFteAdminQty(String(parsedCalc.fte.admin));
       }
-      if (parsedCalc.percentage && parsedCalc.percentage.base != null) {
-        setPercentageBaseAmount(String(parsedCalc.percentage.base));
+      if (parsedCalc.percentage) {
+        if (Array.isArray(parsedCalc.percentage.items)) {
+          const baseMap = {};
+          parsedCalc.percentage.items.forEach((item) => {
+            if (item.key && item.base != null) {
+              baseMap[item.key] = String(item.base);
+            }
+          });
+          setPercentageBaseAmounts(baseMap);
+        } else if (parsedCalc.percentage.base != null) {
+          setPercentageBaseAmount(String(parsedCalc.percentage.base));
+        }
       }
       if (parsedCalc.customised && parsedCalc.customised.count != null) {
         setCustomJobsCount(String(parsedCalc.customised.count));
@@ -596,8 +606,25 @@ export const SubmitBilling = () => {
           };
 
           if (editData?.service_id) {
-            const foundService = formatted.find(s => s.value === editData.service_id);
+            let foundService = formatted.find(s => s.value === editData.service_id);
+            if (!foundService) {
+              foundService = formatted[0]; // fallback to first if not matching
+            }
             if (foundService) {
+              // Ensure editData's period_type and period_date are in the service's period_types so dropdowns display them
+              if (editData.period_type && editData.period_date) {
+                if (!Array.isArray(foundService.period_types)) {
+                  foundService.period_types = [];
+                }
+                let ptObj = foundService.period_types.find(p => p.type === editData.period_type);
+                if (!ptObj) {
+                  ptObj = { type: editData.period_type, dates: [] };
+                  foundService.period_types.push(ptObj);
+                }
+                if (!ptObj.dates.includes(editData.period_date)) {
+                  ptObj.dates.unshift(editData.period_date);
+                }
+              }
               applyServicePeriods(foundService);
             }
           } else if (formatted.length === 1) {
@@ -605,12 +632,21 @@ export const SubmitBilling = () => {
           }
         } else {
           if (editData?.service_id) {
-            setServicesList([
-              {
-                value: editData.service_id,
-                label: editData.service_name || ("Service #" + editData.service_id),
-              },
-            ]);
+            const fallbackService = {
+              value: editData.service_id,
+              label: editData.service_name || ("Service #" + editData.service_id),
+              period_types: editData.period_type && editData.period_date ? [{
+                type: editData.period_type,
+                dates: [editData.period_date]
+              }] : [],
+            };
+            setServicesList([fallbackService]);
+            setSelectedService(fallbackService);
+            if (editData.period_type) setPeriodType(editData.period_type);
+            if (editData.period_date) {
+              setRawDateValue(editData.period_date);
+              setPeriodDate(editData.period_date);
+            }
           } else {
             setServicesList([]);
           }
@@ -1840,10 +1876,25 @@ export const SubmitBilling = () => {
                   {(() => {
                     const isServiceSelected = Boolean(selectedService && selectedService.value);
                     const availablePeriodTypes = selectedService?.period_types && selectedService.period_types.length > 0
-                      ? selectedService.period_types
+                      ? [...selectedService.period_types]
                       : [];
+
+                    // In Edit mode, if editData period_type is not in the list, ensure it's available
+                    if (editData?.period_type && !availablePeriodTypes.some(pt => pt.type === editData.period_type)) {
+                      availablePeriodTypes.unshift({
+                        type: editData.period_type,
+                        dates: editData.period_date ? [editData.period_date] : []
+                      });
+                    }
+
                     const currentTypeObj = availablePeriodTypes.find((pt) => pt.type === periodType);
-                    const availableDates = currentTypeObj ? currentTypeObj.dates : [];
+                    let availableDates = currentTypeObj && Array.isArray(currentTypeObj.dates) ? [...currentTypeObj.dates] : [];
+
+                    // In Edit mode, ensure editData period_date is in availableDates
+                    if (editData?.period_date && !availableDates.includes(editData.period_date)) {
+                      availableDates.unshift(editData.period_date);
+                    }
+
                     const hasJobPeriods = availablePeriodTypes.length > 0;
 
                     return (
