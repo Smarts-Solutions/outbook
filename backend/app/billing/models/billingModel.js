@@ -6,6 +6,36 @@ const {
     buildAssignedJobsTempTable 
 } = require('../../utils/helper');
 
+// Helper to get Line Manager Staff IDs safely without infinite recursion / loops
+const getLineManageStaffIdsSafe = async (staffId) => {
+    try {
+        if (!staffId) return [];
+        const [all] = await pool.query('SELECT staff_by, staff_to FROM line_managers WHERE staff_to != staff_by');
+        const graph = new Map();
+        for (const r of all) {
+            if (!graph.has(r.staff_to)) graph.set(r.staff_to, []);
+            graph.get(r.staff_to).push(r.staff_by);
+        }
+        const visited = new Set();
+        const queue = [staffId];
+        while (queue.length > 0) {
+            const cur = queue.shift();
+            const parents = graph.get(cur) || [];
+            for (const p of parents) {
+                if (!visited.has(p)) {
+                    visited.add(p);
+                    queue.push(p);
+                }
+            }
+        }
+        visited.add(staffId);
+        return Array.from(visited);
+    } catch (err) {
+        console.error('Error in getLineManageStaffIdsSafe:', err);
+        return staffId ? [staffId] : [];
+    }
+};
+
 // 1. Get Active Customers (with Admin/SuperAdmin full access & Staff role-based filtering)
 const getActiveCustomers = async (StaffUserId, search = '', page = null, limit = null) => {
     try {
@@ -56,7 +86,7 @@ const getActiveCustomers = async (StaffUserId, search = '', page = null, limit =
         }
 
         // Other Staff roles: view only assigned customers via LineManager hierarchy and temp_assigned_jobs_staff
-        const LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
+        const LineManageStaffId = await getLineManageStaffIdsSafe(StaffUserId);
         const lineManagerIds = (LineManageStaffId && LineManageStaffId.length > 0) ? LineManageStaffId.join(',') : '0';
 
         const connection = await pool.getConnection();
@@ -313,7 +343,7 @@ const getCustomerEngagementDetails = async (customerId, staffUserId = null) => {
 };
 
 
-// 4. Get Clients for a Customer
+// 4. Get Clients for a Customer (with Staff RBAC filtering matching ClientList)
 const getClientsByCustomer = async (customerId, StaffUserId = null, search = '', page = null, limit = null) => {
     try {
         if (!customerId) return { status: true, data: [] };
@@ -325,18 +355,81 @@ const getClientsByCustomer = async (customerId, StaffUserId = null, search = '',
             limitClause = ` LIMIT ${Number(limit)} OFFSET ${Number(offset)}`;
         }
 
-        let query = `
-            SELECT 
-                id AS client_id, 
-                customer_id, 
-                trading_name 
-            FROM clients 
-            WHERE status = '1' AND customer_id = ? AND trading_name LIKE ?
-            ORDER BY trading_name ASC
-            ${limitClause}
-        `;
-        const [rows] = await pool.execute(query, [customerId, searchTerm]);
-        return { status: true, data: rows };
+        // If no user id provided, return all active clients of customer
+        if (!StaffUserId) {
+            const query = `
+                SELECT 
+                    id AS client_id, 
+                    customer_id, 
+                    trading_name 
+                FROM clients 
+                WHERE status = '1' AND customer_id = ? AND trading_name LIKE ?
+                ORDER BY trading_name ASC
+                ${limitClause}
+            `;
+            const [rows] = await pool.execute(query, [customerId, searchTerm]);
+            return { status: true, data: rows };
+        }
+
+        // Check Role & Permissions (permission 34 = client view all permission)
+        const rows = await QueryRoleHelperFunction(StaffUserId);
+        const [RoleAccess] = await pool.execute(
+            'SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?',
+            [rows[0]?.role_id || 0, 34]
+        );
+
+        // SUPERADMIN or permission 34 -> View all active clients of this customer
+        if (rows.length > 0 && (rows[0].role_name === 'SUPERADMIN' || RoleAccess.length > 0)) {
+            const query = `
+                SELECT 
+                    id AS client_id, 
+                    customer_id, 
+                    trading_name 
+                FROM clients 
+                WHERE status = '1' AND customer_id = ? AND trading_name LIKE ?
+                ORDER BY trading_name ASC
+                ${limitClause}
+            `;
+            const [data] = await pool.execute(query, [customerId, searchTerm]);
+            return { status: true, data };
+        }
+
+        // Other Staff roles: Filter clients by staff assignment / LineManager hierarchy matching clientModel.getClient
+        const LineManageStaffId = await getLineManageStaffIdsSafe(StaffUserId);
+        const lineManagerIds = (LineManageStaffId && LineManageStaffId.length > 0) ? LineManageStaffId.join(',') : '0';
+
+        const connection = await pool.getConnection();
+        try {
+            await buildAssignedJobsTempTable(connection, LineManageStaffId);
+
+            const query = `
+                SELECT DISTINCT
+                    clients.id AS client_id,
+                    clients.customer_id,
+                    clients.trading_name
+                FROM clients
+                JOIN customers ON customers.id = clients.customer_id
+                LEFT JOIN temp_assigned_jobs_staff 
+                    ON temp_assigned_jobs_staff.client_id = clients.id 
+                    AND temp_assigned_jobs_staff.staff_id IN (${lineManagerIds})
+                WHERE clients.status = '1'
+                  AND clients.customer_id = ?
+                  AND clients.trading_name LIKE ?
+                  AND (
+                    clients.staff_created_id IN (${lineManagerIds})
+                    OR customers.staff_id IN (${lineManagerIds})
+                    OR customers.account_manager_id IN (${lineManagerIds})
+                    OR temp_assigned_jobs_staff.staff_id IN (${lineManagerIds})
+                  )
+                ORDER BY clients.trading_name ASC
+                ${limitClause}
+            `;
+
+            const [data] = await connection.execute(query, [customerId, searchTerm]);
+            return { status: true, data };
+        } finally {
+            connection.release();
+        }
     } catch (error) {
         console.error("Error fetching clients by customer:", error);
         return { status: false, message: error.message };
@@ -582,7 +675,7 @@ const extractJobPeriodInfo = (job) => {
         if (y) return { period_type: "Year", period_date: y, raw_value: y };
     }
 
-    // Fallback: Check if generic year_end column has value
+    // Fallback 1: Check if generic year_end column has value
     if (job.year_end && String(job.year_end).trim() && job.year_end !== '0000-00-00') {
         const strVal = String(job.year_end).trim();
         return {
@@ -592,27 +685,115 @@ const extractJobPeriodInfo = (job) => {
         };
     }
 
+    // Fallback 2: Check date_received_on
+    if (job.date_received_on) {
+        const d = job.date_received_on;
+        const strDate = typeof d === 'object' && d.toISOString ? d.toISOString().split('T')[0] : String(d).split('T')[0];
+        if (strDate && strDate !== '0000-00-00') {
+            return {
+                period_type: "Date Received",
+                period_date: strDate,
+                raw_value: strDate
+            };
+        }
+    }
+
+    // Fallback 3: Check created_at
+    if (job.created_at) {
+        const d = job.created_at;
+        const strDate = typeof d === 'object' && d.toISOString ? d.toISOString().split('T')[0] : String(d).split('T')[0];
+        if (strDate && strDate !== '0000-00-00') {
+            return {
+                period_type: "Created Date",
+                period_date: strDate,
+                raw_value: strDate
+            };
+        }
+    }
+
     return null;
 };
 
 // 8. Get Services from existing jobs for a given client with dynamic period types and dates
-const getServicesByClient = async (clientId) => {
+// If StaffUserId is provided and staff is not SUPERADMIN/all_jobs, filters jobs to those visible to this staff
+const getServicesByClient = async (clientId, StaffUserId = null) => {
     try {
         if (!clientId) {
             return { status: true, data: [] };
         }
 
-        // Fetch all jobs for this client ordered latest to oldest
-        const query = `
-            SELECT 
-                j.*,
-                s.name AS service_name
-            FROM jobs j
-            JOIN services s ON j.service_id = s.id
-            WHERE j.client_id = ?
-            ORDER BY j.id DESC
-        `;
-        const [jobs] = await pool.execute(query, [clientId]);
+        let jobs = [];
+
+        // Check staff permissions if StaffUserId is provided
+        let canViewAllJobs = false;
+        if (!StaffUserId) {
+            canViewAllJobs = true;
+        } else {
+            const rows = await QueryRoleHelperFunction(StaffUserId);
+            const [RoleAccess] = await pool.execute(
+                'SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?',
+                [rows[0]?.role_id || 0, 35]
+            );
+            if (rows.length > 0 && (rows[0].role_name === 'SUPERADMIN' || RoleAccess.length > 0)) {
+                canViewAllJobs = true;
+            }
+        }
+
+        if (canViewAllJobs) {
+            // Fetch all jobs for this client ordered latest to oldest
+            const query = `
+                SELECT 
+                    j.*,
+                    s.name AS service_name
+                FROM jobs j
+                JOIN services s ON j.service_id = s.id
+                WHERE j.client_id = ?
+                ORDER BY j.id DESC
+            `;
+            const [rows] = await pool.execute(query, [clientId]);
+            jobs = rows;
+        } else {
+            // Filter jobs strictly visible to this staff on /admin/client/profile
+            const LineManageStaffId = await getLineManageStaffIdsSafe(StaffUserId);
+            const lineManagerIds = (LineManageStaffId && LineManageStaffId.length > 0) ? LineManageStaffId.join(',') : '0';
+
+            const connection = await pool.getConnection();
+            try {
+                await buildAssignedJobsTempTable(connection, LineManageStaffId);
+
+                const query = `
+                    SELECT 
+                        j.*,
+                        s.name AS service_name
+                    FROM jobs j
+                    JOIN services s ON j.service_id = s.id
+                    LEFT JOIN temp_assigned_jobs_staff 
+                        ON temp_assigned_jobs_staff.job_id = j.id 
+                        AND temp_assigned_jobs_staff.staff_id IN (${lineManagerIds})
+                    LEFT JOIN clients cl ON j.client_id = cl.id
+                    LEFT JOIN customers cu ON j.customer_id = cu.id
+                    WHERE j.client_id = ?
+                      AND (
+                        temp_assigned_jobs_staff.staff_id IN (${lineManagerIds})
+                        OR j.staff_created_id IN (${lineManagerIds})
+                        OR cl.staff_created_id IN (${lineManagerIds})
+                        OR cu.staff_id IN (${lineManagerIds})
+                        OR cu.account_manager_id IN (${lineManagerIds})
+                      )
+                      AND (
+                        (temp_assigned_jobs_staff.source IS NULL OR temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
+                        OR j.service_id = temp_assigned_jobs_staff.service_id_assign
+                      )
+                    GROUP BY j.id
+                    ORDER BY j.id DESC
+                `;
+
+                const [rows] = await connection.execute(query, [clientId]);
+                jobs = rows;
+            } finally {
+                connection.release();
+            }
+        }
 
         // Group jobs by service_id and extract distinct period options
         const serviceMap = new Map();
