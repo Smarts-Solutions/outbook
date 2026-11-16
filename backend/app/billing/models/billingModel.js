@@ -1547,6 +1547,13 @@ const getSubmissionsForApprovals = async (staffUserId, status = null) => {
 
             rows.forEach(r => {
                 r.contributors = contribMap[r.id] || [];
+                // Ensure period_label and period_date are formatted to DD/MM/YYYY
+                if (r.period_label) {
+                    r.period_label = formatDateToDDMMYYYY(r.period_label);
+                }
+                if (r.period_date) {
+                    r.period_date = formatDateToDDMMYYYY(r.period_date);
+                }
                 try {
                     r.calc_json = typeof r.calc_json === 'string' ? JSON.parse(r.calc_json) : r.calc_json;
                 } catch (e) {
