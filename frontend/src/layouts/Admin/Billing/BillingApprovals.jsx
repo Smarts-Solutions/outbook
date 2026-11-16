@@ -13,6 +13,21 @@ import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal"
 import { Check, CheckCheck, Eye, RotateCcw, Edit, X, Clock } from "lucide-react";
 import sweatalert from "sweetalert2";
 
+// Helper to format ISO dates (YYYY-MM-DD) to DD/MM/YYYY
+export const formatPeriodDisplay = (val) => {
+  if (!val) return "-";
+  const s = String(val).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    const parts = s.split("-");
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  if (/^\d{4}-\d{2}-\d{2}\s+to\s+\d{4}-\d{2}-\d{2}$/.test(s)) {
+    const parts = s.split(/\s+to\s+/);
+    return `${formatPeriodDisplay(parts[0])} to ${formatPeriodDisplay(parts[1])}`;
+  }
+  return s;
+};
+
 const BillingApprovals = () => {
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState("all");
@@ -350,12 +365,12 @@ const BillingApprovals = () => {
     },
     {
       name: "Period",
-      selector: (row) => row.period_label,
+      selector: (row) => formatPeriodDisplay(row.period_label),
       sortable: true,
       minWidth: "130px",
       cell: (row) => (
         <span className="badge bg-light text-dark border">
-          {row.period_label || "-"}
+          {formatPeriodDisplay(row.period_label)}
         </span>
       ),
     },
@@ -698,7 +713,7 @@ const BillingApprovals = () => {
                   </span>
                   <div className="mt-1">
                     <span className="badge bg-white text-primary border px-2 py-1 fw-bold fs-12">
-                      {viewDetailsModal.period_label || "-"}
+                      {formatPeriodDisplay(viewDetailsModal.period_label)}
                     </span>
                   </div>
                 </div>
@@ -970,7 +985,7 @@ const BillingApprovals = () => {
             <div className="alert alert-info py-2 px-3 small mb-3">
               <strong>Client:</strong> {editingSubmission.client_name || "-"} |{" "}
               <strong>Service:</strong> {editingSubmission.service_name || "-"} |{" "}
-              <strong>Period:</strong> {editingSubmission.period_label || "-"}
+              <strong>Period:</strong> {formatPeriodDisplay(editingSubmission.period_label)}
             </div>
 
             <div className="row g-3 mb-3">

@@ -6,6 +6,7 @@ import { convertDate1 } from "../../../Utils/Comman_function";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
 import { Check, Eye, FileText, CheckCircle, Undo2 } from "lucide-react";
 import sweatalert from "sweetalert2";
+import { formatPeriodDisplay } from "./BillingApprovals";
 
 const CreditControl = () => {
   const [invoices, setInvoices] = useState([]);
@@ -295,12 +296,12 @@ const CreditControl = () => {
     },
     {
       name: "Period",
-      selector: (row) => row.period_label || row.periodLabel,
+      selector: (row) => formatPeriodDisplay(row.period_label || row.periodLabel),
       sortable: true,
       minWidth: "130px",
       cell: (row) => (
         <span className="badge bg-light text-dark border">
-          {row.period_label || row.periodLabel || "-"}
+          {formatPeriodDisplay(row.period_label || row.periodLabel)}
         </span>
       ),
     },
@@ -726,7 +727,7 @@ const CreditControl = () => {
                   </span>
                   <div className="mt-1">
                     <span className="badge bg-white text-primary border px-2 py-1 fw-bold fs-12">
-                      {viewDetailsModal.period_label || "-"}
+                      {formatPeriodDisplay(viewDetailsModal.period_label)}
                     </span>
                   </div>
                 </div>
