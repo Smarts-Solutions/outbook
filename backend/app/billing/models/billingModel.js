@@ -516,6 +516,33 @@ const getJobTypesByService = async (serviceId = null) => {
     }
 };
 
+// Helper to format any date or date range to dd/mm/yyyy
+const formatDateToDDMMYYYY = (val) => {
+    if (!val) return val;
+    val = String(val).trim();
+    // 1. Single ISO date: YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+        const parts = val.split('-');
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    // 2. Date range: YYYY-MM-DD to YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}\s+to\s+\d{4}-\d{2}-\d{2}$/.test(val)) {
+        const parts = val.split(/\s+to\s+/);
+        return `${formatDateToDDMMYYYY(parts[0])} to ${formatDateToDDMMYYYY(parts[1])}`;
+    }
+    // 3. Formats like "31 Aug 2025" or "31-Aug-2025"
+    if (/^[0-9]{1,2}[ -][A-Za-z]{3,}[ -][0-9]{4}$/.test(val)) {
+        const d = new Date(val);
+        if (!isNaN(d.getTime())) {
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+    }
+    return val;
+};
+
 // Helper function to extract period type and period date/value from a job row's Other Data
 const extractJobPeriodInfo = (job) => {
     if (!job) return null;
@@ -535,10 +562,11 @@ const extractJobPeriodInfo = (job) => {
         const d = job.Year_Ending_id_1 || job.Audit_Year_Ending_id_27 || job.year_end;
         if (d && d !== '0000-00-00') {
             const strDate = typeof d === 'object' && d.toISOString ? d.toISOString().split('T')[0] : String(d).split('T')[0];
+            const formattedDate = formatDateToDDMMYYYY(strDate);
             return {
                 period_type: "Year End",
-                period_date: strDate,
-                raw_value: strDate
+                period_date: formattedDate,
+                raw_value: formattedDate
             };
         }
     }
@@ -549,7 +577,8 @@ const extractJobPeriodInfo = (job) => {
         if (freq === 'Daily' && (job.Day_Date_id_2 || job.Day_Date_id_32)) {
             const d = job.Day_Date_id_2 || job.Day_Date_id_32;
             const strDate = typeof d === 'object' && d.toISOString ? d.toISOString().split('T')[0] : String(d).split('T')[0];
-            return { period_type: "Daily", period_date: strDate, raw_value: strDate };
+            const formattedDate = formatDateToDDMMYYYY(strDate);
+            return { period_type: "Daily", period_date: formattedDate, raw_value: formattedDate };
         }
         if (freq === 'Weekly') {
             const w = job.Week_id_2 || job.Week_id_32;
@@ -594,7 +623,9 @@ const extractJobPeriodInfo = (job) => {
             const toD = job.Other_ToDate_id_2 || job.Other_ToDate_id_32;
             const strFrom = fromD ? (typeof fromD === 'object' && fromD.toISOString ? fromD.toISOString().split('T')[0] : String(fromD).split('T')[0]) : '';
             const strTo = toD ? (typeof toD === 'object' && toD.toISOString ? toD.toISOString().split('T')[0] : String(toD).split('T')[0]) : '';
-            const label = `${strFrom} to ${strTo}`.trim();
+            const fmtFrom = formatDateToDDMMYYYY(strFrom);
+            const fmtTo = formatDateToDDMMYYYY(strTo);
+            const label = `${fmtFrom} to ${fmtTo}`.trim();
             if (label) return { period_type: "Other", period_date: label, raw_value: label };
         }
     }
@@ -646,11 +677,12 @@ const extractJobPeriodInfo = (job) => {
     if (sId === 8 && (job.Period_Ending_Date_id_8 || job.Filing_Date_id_8)) {
         const d = job.Period_Ending_Date_id_8 || job.Filing_Date_id_8;
         const strDate = typeof d === 'object' && d.toISOString ? d.toISOString().split('T')[0] : String(d).split('T')[0];
+        const formattedDate = formatDateToDDMMYYYY(strDate);
         const freq = job.Filing_Frequency_id_8 ? String(job.Filing_Frequency_id_8).trim() : 'Period Ending';
         return {
             period_type: freq,
-            period_date: strDate,
-            raw_value: strDate
+            period_date: formattedDate,
+            raw_value: formattedDate
         };
     }
 
@@ -660,7 +692,9 @@ const extractJobPeriodInfo = (job) => {
         const toD = job.Management_Accounts_ToDate_id_6;
         const strFrom = fromD ? (typeof fromD === 'object' && fromD.toISOString ? fromD.toISOString().split('T')[0] : String(fromD).split('T')[0]) : '';
         const strTo = toD ? (typeof toD === 'object' && toD.toISOString ? toD.toISOString().split('T')[0] : String(toD).split('T')[0]) : '';
-        const label = `${strFrom} to ${strTo}`.trim();
+        const fmtFrom = formatDateToDDMMYYYY(strFrom);
+        const fmtTo = formatDateToDDMMYYYY(strTo);
+        const label = `${fmtFrom} to ${fmtTo}`.trim();
         const freq = job.Management_Accounts_Frequency_id_6 ? String(job.Management_Accounts_Frequency_id_6).trim() : 'Management Accounts';
         return {
             period_type: freq,
@@ -678,10 +712,11 @@ const extractJobPeriodInfo = (job) => {
     // Fallback 1: Check if generic year_end column has value
     if (job.year_end && String(job.year_end).trim() && job.year_end !== '0000-00-00') {
         const strVal = String(job.year_end).trim();
+        const formattedDate = formatDateToDDMMYYYY(strVal);
         return {
             period_type: "Year End",
-            period_date: strVal,
-            raw_value: strVal
+            period_date: formattedDate,
+            raw_value: formattedDate
         };
     }
 
@@ -690,10 +725,11 @@ const extractJobPeriodInfo = (job) => {
         const d = job.date_received_on;
         const strDate = typeof d === 'object' && d.toISOString ? d.toISOString().split('T')[0] : String(d).split('T')[0];
         if (strDate && strDate !== '0000-00-00') {
+            const formattedDate = formatDateToDDMMYYYY(strDate);
             return {
                 period_type: "Date Received",
-                period_date: strDate,
-                raw_value: strDate
+                period_date: formattedDate,
+                raw_value: formattedDate
             };
         }
     }
@@ -703,10 +739,11 @@ const extractJobPeriodInfo = (job) => {
         const d = job.created_at;
         const strDate = typeof d === 'object' && d.toISOString ? d.toISOString().split('T')[0] : String(d).split('T')[0];
         if (strDate && strDate !== '0000-00-00') {
+            const formattedDate = formatDateToDDMMYYYY(strDate);
             return {
                 period_type: "Created Date",
-                period_date: strDate,
-                raw_value: strDate
+                period_date: formattedDate,
+                raw_value: formattedDate
             };
         }
     }
@@ -1023,8 +1060,12 @@ const submitBilling = async (payload, submittedByStaffId) => {
         const safeEngagementModel = engagement_model ? String(engagement_model).slice(0, 990) : '';
         const safeNomismaDescription = nomisma_description ? String(nomisma_description).slice(0, 990) : '';
 
+        // Format period_date and period_label to DD/MM/YYYY if they are ISO or other dates
+        const formattedPeriodDate = formatDateToDDMMYYYY(period_date);
+        const formattedPeriodLabel = formatDateToDDMMYYYY(period_label);
+
         // Validation
-        if (!customer_id || !client_id || !service_id || !period_label || (net_amount === undefined || net_amount === null)) {
+        if (!customer_id || !client_id || !service_id || !formattedPeriodLabel || (net_amount === undefined || net_amount === null)) {
             await connection.rollback();
             return {
                 status: false,
@@ -1103,7 +1144,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
         }
 
         // Dedupe Key for duplicate prevention (Rule 5)
-        const dedupeKey = `${client_id}_${service_id}_${period_label}`;
+        const dedupeKey = `${client_id}_${service_id}_${formattedPeriodLabel}`;
 
         // Check if submission exists
         let finalManagerId = manager_id;
@@ -1183,8 +1224,8 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 service_id,
                 job_id || null,
                 period_type,
-                period_date,
-                period_label,
+                formattedPeriodDate,
+                formattedPeriodLabel,
                 period_end || null,
                 dedupeKey,
                 safeEngagementModel,
@@ -1245,7 +1286,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
                     submission_id: editSubmissionId,
                     net_amount,
                     currency,
-                    period_label,
+                    period_label: formattedPeriodLabel,
                     status: existing[0].status
                 }
             };
@@ -1265,7 +1306,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
             return {
                 status: false,
                 isDuplicate: true,
-                message: `Billing has already been submitted for this client & service for period ${period_label} (Status: ${existing[0].status}).`
+                message: `Billing has already been submitted for this client & service for period ${formattedPeriodLabel} (Status: ${existing[0].status}).`
             };
         }
 
@@ -1326,8 +1367,8 @@ const submitBilling = async (payload, submittedByStaffId) => {
             service_id,
             job_id || null,
             period_type,
-            period_date,
-            period_label,
+            formattedPeriodDate,
+            formattedPeriodLabel,
             period_end || null,
             dedupeKey,
             safeEngagementModel,
