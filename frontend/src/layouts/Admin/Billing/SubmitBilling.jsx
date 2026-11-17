@@ -2749,8 +2749,8 @@ export const SubmitBilling = () => {
                       fontSize: "13px",
                     }}
                   >
-                    On submit, this goes to <strong>{customerMeta?.account_manager || customerMeta?.line_manager || "Account Manager"}</strong> for approval,
-                    then to Credit Control.
+                    On submit, this goes to <strong>{customerMeta?.account_manager || customerMeta?.line_manager || "Account Manager"}</strong> for approval.
+                  
                   </div>
 
                   {/* Bottom Actions for Step 3 */}
