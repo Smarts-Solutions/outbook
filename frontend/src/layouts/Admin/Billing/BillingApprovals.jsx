@@ -365,13 +365,29 @@ const BillingApprovals = () => {
     },
     {
       name: "Period",
-      selector: (row) => formatPeriodDisplay(row.period_label),
+      selector: (row) => `${row.period_type ? row.period_type + ': ' : ''}${formatPeriodDisplay(row.period_label || row.period_date)}`,
       sortable: true,
-      minWidth: "130px",
+      minWidth: "160px",
       cell: (row) => (
-        <span className="badge bg-light text-dark border">
-          {formatPeriodDisplay(row.period_label)}
-        </span>
+        <div className="d-flex flex-column gap-1 py-1">
+          {row.period_type && (
+            <span
+              className="badge px-2 py-0 fw-semibold text-wrap align-self-start"
+              style={{
+                backgroundColor: "#e8f4fd",
+                color: "#0284c7",
+                border: "1px solid #bae6fd",
+                fontSize: "10.5px",
+                lineHeight: "16px"
+              }}
+            >
+              {row.period_type}
+            </span>
+          )}
+          <span className="badge bg-light text-dark border align-self-start">
+            {formatPeriodDisplay(row.period_label || row.period_date)}
+          </span>
+        </div>
       ),
     },
     {
@@ -711,9 +727,22 @@ const BillingApprovals = () => {
                   <span className="text-muted small text-uppercase fw-semibold" style={{ fontSize: "11px", letterSpacing: "0.5px" }}>
                     Billing Period
                   </span>
-                  <div className="mt-1">
+                  <div className="mt-1 d-flex align-items-center gap-1 flex-wrap">
+                    {viewDetailsModal.period_type && (
+                      <span
+                        className="badge px-2 py-1 fw-semibold"
+                        style={{
+                          backgroundColor: "#e8f4fd",
+                          color: "#0284c7",
+                          border: "1px solid #bae6fd",
+                          fontSize: "11px",
+                        }}
+                      >
+                        {viewDetailsModal.period_type}
+                      </span>
+                    )}
                     <span className="badge bg-white text-primary border px-2 py-1 fw-bold fs-12">
-                      {formatPeriodDisplay(viewDetailsModal.period_label)}
+                      {formatPeriodDisplay(viewDetailsModal.period_label || viewDetailsModal.period_date)}
                     </span>
                   </div>
                 </div>
@@ -985,7 +1014,13 @@ const BillingApprovals = () => {
             <div className="alert alert-info py-2 px-3 small mb-3">
               <strong>Client:</strong> {editingSubmission.client_name || "-"} |{" "}
               <strong>Service:</strong> {editingSubmission.service_name || "-"} |{" "}
-              <strong>Period:</strong> {formatPeriodDisplay(editingSubmission.period_label)}
+              <strong>Period:</strong>{" "}
+              {editingSubmission.period_type ? (
+                <span className="badge bg-light text-primary border me-1 fw-semibold">
+                  {editingSubmission.period_type}
+                </span>
+              ) : null}
+              <span>{formatPeriodDisplay(editingSubmission.period_label || editingSubmission.period_date)}</span>
             </div>
 
             <div className="row g-3 mb-3">
