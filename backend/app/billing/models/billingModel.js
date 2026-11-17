@@ -213,7 +213,6 @@ const getCustomerEngagementDetails = async (customerId, staffUserId = null) => {
         `;
 
         const [rows] = await pool.execute(query, [customerId]);
-        console.log("getCustomerEngagementDetails rows found:", rows.length, rows[0]);
 
         if (rows.length === 0) {
             return { 
@@ -1740,16 +1739,37 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote) 
                     </div>
                 `;
 
-                // Await email delivery directly with timeout protection so connection stays alive and delivery succeeds on the 1st attempt
-                try {
-                    await Promise.race([
-                        commonEmail(toEmail, subjectEmail, htmlEmail),
-                        new Promise((_, reject) => setTimeout(() => reject(new Error("SMTP timeout after 8 seconds")), 8000))
-                    ]);
-                    console.log(`[Billing Email] Return notification email sent successfully to ${toEmail} for submission #${submissionId}`);
-                } catch (mailErr) {
-                    console.error(`[Billing Email] Failed or timed out sending return email to ${toEmail}:`, mailErr?.message || mailErr);
-                }
+                // Retry logic for Cloud/Dev environments (Office 365 greylisting/transient error mitigation)
+                const sendReturnEmailWithRetry = async (recipients, subject, html, maxAttempts = 3) => {
+                    console.log(`[Billing Email] Initiating return email send to: ${recipients} for submission #${submissionId}`);
+                    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                        console.log(`[Billing Email] Sending attempt ${attempt}/${maxAttempts}...`);
+                        try {
+                            const sent = await Promise.race([
+                                commonEmail(recipients, subject, html),
+                                new Promise((_, reject) => setTimeout(() => reject(new Error("SMTP timeout after 10s")), 10000))
+                            ]);
+                            if (sent) {
+                                console.log(`[Billing Email] SUCCESS: Return email sent on attempt ${attempt} to ${recipients}`);
+                                return true;
+                            } else {
+                                console.warn(`[Billing Email] Attempt ${attempt} returned false (nodemailer failed).`);
+                            }
+                        } catch (attemptErr) {
+                            console.error(`[Billing Email] Attempt ${attempt} encountered error:`, attemptErr?.message || attemptErr);
+                        }
+
+                        if (attempt < maxAttempts) {
+                            const delayMs = attempt * 1500;
+                            console.log(`[Billing Email] Waiting ${delayMs}ms before attempt ${attempt + 1}...`);
+                            await new Promise(res => setTimeout(res, delayMs));
+                        }
+                    }
+                    console.error(`[Billing Email] FAILED: All ${maxAttempts} attempts exhausted to send return email.`);
+                    return false;
+                };
+
+                await sendReturnEmailWithRetry(toEmail, subjectEmail, htmlEmail);
             }
         } catch (emailQueryErr) {
             console.error("[Billing Email] Error fetching submitter details for email notification:", emailQueryErr);
