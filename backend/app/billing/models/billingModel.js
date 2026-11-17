@@ -572,14 +572,16 @@ const extractJobPeriodInfo = (job) => {
 
     // 3. Service 2 (Bookkeeping) & Service 32 (Aus - Bookkeeping)
     if (sId === 2 || sId === 32) {
-        const freq = (sId === 2 ? job.Bookkeeping_Frequency_id_2 : job.Period_id_32) || '';
-        if (freq === 'Daily' && (job.Day_Date_id_2 || job.Day_Date_id_32)) {
+        const rawFreq = (sId === 2 ? job.Bookkeeping_Frequency_id_2 : job.Period_id_32) || '';
+        const freq = String(rawFreq).trim().toLowerCase();
+
+        if ((freq === 'daily' || freq === 'day') && (job.Day_Date_id_2 || job.Day_Date_id_32)) {
             const d = job.Day_Date_id_2 || job.Day_Date_id_32;
             const strDate = typeof d === 'object' && d.toISOString ? d.toISOString().split('T')[0] : String(d).split('T')[0];
             const formattedDate = formatDateToDDMMYYYY(strDate);
             return { period_type: "Daily", period_date: formattedDate, raw_value: formattedDate };
         }
-        if (freq === 'Weekly') {
+        if (freq === 'weekly' || freq === 'week') {
             const w = job.Week_id_2 || job.Week_id_32;
             const m = job.Week_Month_id_2 || job.Week_Month_id_32;
             const y = job.Week_Year_id_2 || job.Week_Year_id_32;
@@ -588,7 +590,7 @@ const extractJobPeriodInfo = (job) => {
                 return { period_type: "Weekly", period_date: label, raw_value: label };
             }
         }
-        if (freq === 'Fortnightly' || freq === 'Fortnight') {
+        if (freq === 'fortnightly' || freq === 'fortnight') {
             const fn = job.Fortnight_id_2 || job.Fortnight_id_32;
             const m = job.Fortnight_Month_id_2 || job.Fortnight_Month_id_32;
             const y = job.Fortnight_Year_id_2 || job.Fortnight_Year_id_32;
@@ -597,7 +599,7 @@ const extractJobPeriodInfo = (job) => {
                 return { period_type: "Fortnightly", period_date: label, raw_value: label };
             }
         }
-        if (freq === 'Monthly') {
+        if (freq === 'monthly' || freq === 'month') {
             const m = job.Month_id_2 || job.Month_id_32;
             const y = job.Month_Year_id_2 || job.Month_Year_id_32;
             if (m || y) {
@@ -605,7 +607,7 @@ const extractJobPeriodInfo = (job) => {
                 return { period_type: "Monthly", period_date: label, raw_value: label };
             }
         }
-        if (freq === 'Quarterly') {
+        if (freq === 'quarterly' || freq === 'quarter') {
             const q = job.Quarter_id_2 || job.Quarter_id_32;
             const y = job.Quarter_Year_id_2 || job.Quarter_Year_id_32;
             if (q || y) {
@@ -613,11 +615,11 @@ const extractJobPeriodInfo = (job) => {
                 return { period_type: "Quarterly", period_date: label, raw_value: label };
             }
         }
-        if (freq === 'Yearly' && (job.Year_id_2 || job.Year_id_32)) {
+        if ((freq === 'yearly' || freq === 'year') && (job.Year_id_2 || job.Year_id_32)) {
             const y = String(job.Year_id_2 || job.Year_id_32).trim();
             if (y) return { period_type: "Yearly", period_date: y, raw_value: y };
         }
-        if (freq === 'Other' && (job.Other_FromDate_id_2 || job.Other_ToDate_id_2 || job.Other_FromDate_id_32 || job.Other_ToDate_id_32)) {
+        if (freq === 'other' && (job.Other_FromDate_id_2 || job.Other_ToDate_id_2 || job.Other_FromDate_id_32 || job.Other_ToDate_id_32)) {
             const fromD = job.Other_FromDate_id_2 || job.Other_FromDate_id_32;
             const toD = job.Other_ToDate_id_2 || job.Other_ToDate_id_32;
             const strFrom = fromD ? (typeof fromD === 'object' && fromD.toISOString ? fromD.toISOString().split('T')[0] : String(fromD).split('T')[0]) : '';
@@ -631,8 +633,10 @@ const extractJobPeriodInfo = (job) => {
 
     // 4. Service 3 (Payroll) & Service 31 (Aus - Payroll)
     if (sId === 3 || sId === 31) {
-        const freq = (sId === 3 ? job.Payroll_Frequency_id_3 : job.Payroll_Frequency_id_31) || '';
-        if (freq === 'Weekly') {
+        const rawFreq = (sId === 3 ? job.Payroll_Frequency_id_3 : job.Payroll_Frequency_id_31) || '';
+        const freq = String(rawFreq).trim().toLowerCase();
+
+        if (freq === 'weekly' || freq === 'week') {
             const w = job.Payroll_Week_id_3 || job.Payroll_Week_id_31;
             const m = job.Payroll_Week_Month_id_3 || job.Payroll_Week_Month_id_31;
             const y = job.Payroll_Week_Year_id_3 || job.Payroll_Week_Year_id_31;
@@ -641,7 +645,7 @@ const extractJobPeriodInfo = (job) => {
                 return { period_type: "Weekly", period_date: label, raw_value: label };
             }
         }
-        if (freq === 'Fortnightly') {
+        if (freq === 'fortnightly' || freq === 'fortnight') {
             const fn = job.Payroll_Fortnight_id_3 || job.Payroll_Fortnight_id_31;
             const m = job.Payroll_Fortnight_Month_id_3 || job.Payroll_Fortnight_Month_id_31;
             const y = job.Payroll_Fortnight_Year_id_3 || job.Payroll_Fortnight_Year_id_31;
@@ -650,7 +654,7 @@ const extractJobPeriodInfo = (job) => {
                 return { period_type: "Fortnightly", period_date: label, raw_value: label };
             }
         }
-        if (freq === 'Monthly') {
+        if (freq === 'monthly' || freq === 'month') {
             const m = job.Payroll_Month_id_3 || job.Payroll_Month_id_31;
             const y = job.Payroll_Month_Year_id_3 || job.Payroll_Month_Year_id_31;
             if (m || y) {
@@ -658,7 +662,7 @@ const extractJobPeriodInfo = (job) => {
                 return { period_type: "Monthly", period_date: label, raw_value: label };
             }
         }
-        if (freq === 'Quarterly') {
+        if (freq === 'quarterly' || freq === 'quarter') {
             const q = job.Payroll_Quarter_id_3 || job.Payroll_Quarter_id_31;
             const y = job.Payroll_Quarter_Year_id_3 || job.Payroll_Quarter_Year_id_31;
             if (q || y) {
@@ -666,7 +670,7 @@ const extractJobPeriodInfo = (job) => {
                 return { period_type: "Quarterly", period_date: label, raw_value: label };
             }
         }
-        if (freq === 'Yearly' && (job.Payroll_Year_id_3 || job.Payroll_Year_id_31)) {
+        if ((freq === 'yearly' || freq === 'year') && (job.Payroll_Year_id_3 || job.Payroll_Year_id_31)) {
             const y = String(job.Payroll_Year_id_3 || job.Payroll_Year_id_31).trim();
             if (y) return { period_type: "Yearly", period_date: y, raw_value: y };
         }
@@ -706,6 +710,21 @@ const extractJobPeriodInfo = (job) => {
     if ((sId === 28 || sId === 33) && (job.Year_id_28 || job.Year_id_33)) {
         const y = String(job.Year_id_28 || job.Year_id_33).trim();
         if (y) return { period_type: "Year", period_date: y, raw_value: y };
+    }
+
+    // 8. Services without custom "Other Data" form (e.g. Service 5: Admin Support, Service 7: Company Secretarial)
+    // For these services, if date_received_on or created_at exists, use it so the service is available for billing!
+    if (sId === 5 || sId === 7) {
+        if (job.date_received_on || job.created_at) {
+            const d = job.date_received_on || job.created_at;
+            const strDate = typeof d === 'object' && d.toISOString ? d.toISOString().split('T')[0] : String(d).split('T')[0];
+            const formattedDate = formatDateToDDMMYYYY(strDate);
+            return {
+                period_type: "Date Received",
+                period_date: formattedDate,
+                raw_value: formattedDate
+            };
+        }
     }
 
     // Only return period info if service-specific Other Data fields had values.
