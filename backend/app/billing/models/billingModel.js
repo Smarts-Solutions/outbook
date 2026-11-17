@@ -1636,7 +1636,7 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote) 
                  returned_by = ?,
                  returned_at = NOW()
              WHERE id = ? AND status = 'Pending Manager Approval'`,
-            [returnNote.trim(), managerUserId, submissionId]
+            [returnNote.trim(), managerUserId || null, submissionId]
         );
 
         if (result.affectedRows === 0) {
@@ -1668,7 +1668,7 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote) 
                  LEFT JOIN staffs st_sub ON bs.submitted_by = st_sub.id
                  LEFT JOIN staffs st_mgr ON st_mgr.id = ?
                  WHERE bs.id = ?`,
-                [managerUserId, submissionId]
+                [managerUserId || null, submissionId]
             );
 
             if (subDetails && subDetails.length > 0) {
@@ -1677,8 +1677,8 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote) 
                 const toEmail = "shaktijatpnp09@gmail.com, vikaspnpinfotech@gmail.com";
                 const customerName = item.customer_name || 'Customer';
                 const periodLabel = item.period_label || 'Current Period';
-                const managerName = item.manager_name || 'Approving Manager';
-                const submitterName = item.submitter_name || 'Team Member';
+                const managerName = (item.manager_name && item.manager_name.trim()) ? item.manager_name : 'Approving Manager';
+                const submitterName = (item.submitter_name && item.submitter_name.trim()) ? item.submitter_name : 'Team Member';
                 const actualSubmitterEmail = item.submitter_email || 'N/A';
                 const note = returnNote.trim();
 
@@ -1740,10 +1740,16 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote) 
                     </div>
                 `;
 
-                // Send email asynchronously so that API response remains fast
-                commonEmail(toEmail, subjectEmail, htmlEmail)
-                    .then(() => console.log(`[Billing Email] Return notification email sent to ${toEmail} for submission #${submissionId}`))
-                    .catch((mailErr) => console.error(`[Billing Email] Failed to send return email to ${toEmail}:`, mailErr));
+                // Await email delivery directly with timeout protection so connection stays alive and delivery succeeds on the 1st attempt
+                try {
+                    await Promise.race([
+                        commonEmail(toEmail, subjectEmail, htmlEmail),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error("SMTP timeout after 8 seconds")), 8000))
+                    ]);
+                    console.log(`[Billing Email] Return notification email sent successfully to ${toEmail} for submission #${submissionId}`);
+                } catch (mailErr) {
+                    console.error(`[Billing Email] Failed or timed out sending return email to ${toEmail}:`, mailErr?.message || mailErr);
+                }
             }
         } catch (emailQueryErr) {
             console.error("[Billing Email] Error fetching submitter details for email notification:", emailQueryErr);
