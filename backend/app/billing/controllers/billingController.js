@@ -175,7 +175,8 @@ const getJobTypes = async (req, res) => {
 const getServicesByClient = async (req, res) => {
     try {
         const clientId = req.body?.client_id || req.query?.client_id || null;
-        const result = await billingModel.getServicesByClient(clientId);
+        const staffUserId = req.body?.StaffUserId || req.userId || null;
+        const result = await billingModel.getServicesByClient(clientId, staffUserId);
         if (!result.status) {
             return res.status(500).json({ status: false, message: result.message });
         }

@@ -569,7 +569,7 @@ export const SubmitBilling = () => {
       try {
         setLoadingServices(true);
         const res = await getServicesByClientBilling(
-          { client_id: selectedClient.value },
+          { client_id: selectedClient.value, StaffUserId: staffDetails?.id || staffDetails?.staff_id },
           getAuthToken()
         );
         if (res && res.status && Array.isArray(res.data)) {
