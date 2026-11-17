@@ -709,45 +709,8 @@ const extractJobPeriodInfo = (job) => {
         if (y) return { period_type: "Year", period_date: y, raw_value: y };
     }
 
-    // Fallback 1: Check if generic year_end column has value
-    if (job.year_end && String(job.year_end).trim() && job.year_end !== '0000-00-00') {
-        const strVal = String(job.year_end).trim();
-        const formattedDate = formatDateToDDMMYYYY(strVal);
-        return {
-            period_type: "Year End",
-            period_date: formattedDate,
-            raw_value: formattedDate
-        };
-    }
-
-    // Fallback 2: Check date_received_on
-    if (job.date_received_on) {
-        const d = job.date_received_on;
-        const strDate = typeof d === 'object' && d.toISOString ? d.toISOString().split('T')[0] : String(d).split('T')[0];
-        if (strDate && strDate !== '0000-00-00') {
-            const formattedDate = formatDateToDDMMYYYY(strDate);
-            return {
-                period_type: "Date Received",
-                period_date: formattedDate,
-                raw_value: formattedDate
-            };
-        }
-    }
-
-    // Fallback 3: Check created_at
-    if (job.created_at) {
-        const d = job.created_at;
-        const strDate = typeof d === 'object' && d.toISOString ? d.toISOString().split('T')[0] : String(d).split('T')[0];
-        if (strDate && strDate !== '0000-00-00') {
-            const formattedDate = formatDateToDDMMYYYY(strDate);
-            return {
-                period_type: "Created Date",
-                period_date: formattedDate,
-                raw_value: formattedDate
-            };
-        }
-    }
-
+    // Only return period info if service-specific Other Data fields had values.
+    // Do NOT fallback to date_received_on or created_at if Other Data is blank.
     return null;
 };
 
