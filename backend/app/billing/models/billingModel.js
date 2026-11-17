@@ -1691,8 +1691,11 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote) 
 
             if (subDetails && subDetails.length > 0) {
                 const item = subDetails[0];
-                // For testing/now: send all return emails to specified addresses
-                const toEmail = "shaktijatpnp09@gmail.com, vikaspnpinfotech@gmail.com";
+                // For testing: primary to shaktijatpnp09@gmail.com, cc to vikaspnpinfotech@gmail.com
+                // Separating into 'to' and 'cc' prevents Microsoft 365 outbound queue/relay delays
+                const primaryTo = "shaktijatpnp09@gmail.com";
+                const ccTo = "vikaspnpinfotech@gmail.com";
+
                 const customerName = item.customer_name || 'Customer';
                 const periodLabel = item.period_label || 'Current Period';
                 const managerName = (item.manager_name && item.manager_name.trim()) ? item.manager_name : 'Approving Manager';
@@ -1759,37 +1762,49 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote) 
                     </div>
                 `;
 
-                // Retry logic for Cloud/Dev environments (Office 365 greylisting/transient error mitigation)
-                const sendReturnEmailWithRetry = async (recipients, subject, html, maxAttempts = 3) => {
-                    console.log(`[Billing Email] Initiating return email send to: ${recipients} for submission #${submissionId}`);
+                // Retry logic for Cloud/Dev environments with explicit primary + cc separation
+                const sendReturnEmailWithRetry = async (to, cc, subject, html, maxAttempts = 3) => {
+                    console.log(`[Billing Email] ==================== RETURN EMAIL DISPATCH ====================`);
+                    console.log(`[Billing Email] Submission ID: #${submissionId}`);
+                    console.log(`[Billing Email] Primary TO: ${to}`);
+                    console.log(`[Billing Email] CC: ${cc}`);
+                    console.log(`[Billing Email] Subject: "${subject}"`);
+                    console.log(`[Billing Email] Submitter: ${submitterName} (${actualSubmitterEmail})`);
+                    console.log(`[Billing Email] Manager: ${managerName}`);
+                    
                     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-                        console.log(`[Billing Email] Sending attempt ${attempt}/${maxAttempts}...`);
+                        console.log(`[Billing Email] >>> Attempt ${attempt}/${maxAttempts} sending now...`);
+                        const startTime = Date.now();
                         try {
                             const sent = await Promise.race([
-                                commonEmail(recipients, subject, html),
+                                commonEmail(to, subject, html, cc),
                                 new Promise((_, reject) => setTimeout(() => reject(new Error("SMTP timeout after 10s")), 10000))
                             ]);
+                            const elapsed = Date.now() - startTime;
                             if (sent) {
-                                console.log(`[Billing Email] SUCCESS: Return email sent on attempt ${attempt} to ${recipients}`);
+                                console.log(`[Billing Email] SUCCESS on attempt ${attempt} in ${elapsed}ms! Email delivered to SMTP.`);
+                                console.log(`[Billing Email] ==============================================================`);
                                 return true;
                             } else {
-                                console.warn(`[Billing Email] Attempt ${attempt} returned false (nodemailer failed).`);
+                                console.warn(`[Billing Email] WARNING: Attempt ${attempt} failed in ${elapsed}ms (commonEmail returned false).`);
                             }
                         } catch (attemptErr) {
-                            console.error(`[Billing Email] Attempt ${attempt} encountered error:`, attemptErr?.message || attemptErr);
+                            const elapsed = Date.now() - startTime;
+                            console.error(`[Billing Email] ERROR on attempt ${attempt} in ${elapsed}ms:`, attemptErr?.message || attemptErr);
                         }
 
                         if (attempt < maxAttempts) {
                             const delayMs = attempt * 1500;
-                            console.log(`[Billing Email] Waiting ${delayMs}ms before attempt ${attempt + 1}...`);
+                            console.log(`[Billing Email] Pausing ${delayMs}ms before retry...`);
                             await new Promise(res => setTimeout(res, delayMs));
                         }
                     }
                     console.error(`[Billing Email] FAILED: All ${maxAttempts} attempts exhausted to send return email.`);
+                    console.log(`[Billing Email] ==============================================================`);
                     return false;
                 };
 
-                await sendReturnEmailWithRetry(toEmail, subjectEmail, htmlEmail);
+                await sendReturnEmailWithRetry(primaryTo, ccTo, subjectEmail, htmlEmail);
             }
         } catch (emailQueryErr) {
             console.error("[Billing Email] Error fetching submitter details for email notification:", emailQueryErr);
