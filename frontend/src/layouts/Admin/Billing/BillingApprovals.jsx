@@ -185,7 +185,18 @@ const BillingApprovals = () => {
     });
 
     if (isConfirmed && text) {
+      if (returningId) return; // Prevent duplicate concurrent return triggers
       try {
+        setReturningId(row.id);
+        sweatalert.fire({
+          title: "Reverting...",
+          text: "Processing return and sending notification...",
+          allowOutsideClick: false,
+          didOpen: () => {
+            sweatalert.showLoading();
+          },
+        });
+
         const payload = {
           StaffUserId: staffDetails?.id || null,
           submission_id: row.id,
@@ -210,6 +221,8 @@ const BillingApprovals = () => {
         }
       } catch (err) {
         console.error("Return error:", err);
+      } finally {
+        setReturningId(null);
       }
     }
   };

@@ -1681,7 +1681,8 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote) 
                 const actualSubmitterEmail = item.submitter_email || 'N/A';
                 const note = returnNote.trim();
 
-                const subjectEmail = `Billing Submission Returned - ${customerName}`;
+                const clientPart = item.client_name ? ` - ${item.client_name}` : '';
+                const subjectEmail = `Billing Submission Returned - ${customerName}${clientPart}`;
                 const htmlEmail = `
                     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; color: #1e293b; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
                         <!-- Header with Outbooks Primary Cyan/Teal Brand Color -->
