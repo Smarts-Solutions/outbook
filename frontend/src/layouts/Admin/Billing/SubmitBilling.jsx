@@ -829,7 +829,6 @@ export const SubmitBilling = () => {
       manager: "Ravi Manager",
       currency: "GBP",
       rate: 22.0,
-      subTitle: "Demo Accountants LLP — Adhoc — Accounts Finalisation",
     },
     peak_fte: {
       client: "Peak Digital Ltd (Acorn Accountancy LLP)",
@@ -2583,16 +2582,7 @@ export const SubmitBilling = () => {
                             Assigned staff (Reviewer, Allocated To, Allocated To Other) and staff who logged timesheet
                           </small>
                         </div>
-                        {contributors.length > 1 && (
-                          <button
-                            type="button"
-                            className="btn btn-sm btn-outline-primary fw-medium rounded-pill px-3 shadow-sm"
-                            onClick={handleDistributeEqually}
-                            title="Distribute 100% equally among all selected contributors"
-                          >
-                            ⚡ Distribute Equally
-                          </button>
-                        )}
+                       
                       </div>
 
                       <div className="row g-2 mb-2 text-muted small fw-medium">
