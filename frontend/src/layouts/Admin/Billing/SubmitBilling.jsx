@@ -568,6 +568,8 @@ export const SubmitBilling = () => {
     const fetchClientServices = async () => {
       try {
         setLoadingServices(true);
+        const staffDetailsStr = localStorage.getItem("staffDetails");
+        const staffDetails = staffDetailsStr ? JSON.parse(staffDetailsStr) : null;
         const res = await getServicesByClientBilling(
           { client_id: selectedClient.value, StaffUserId: staffDetails?.id || staffDetails?.staff_id },
           getAuthToken()
