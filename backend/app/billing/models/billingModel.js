@@ -720,13 +720,22 @@ const getJobsByCustomerOrClient = async (customerId, clientId = null, serviceId 
                     ms.name AS status_name,
                     s.name AS service_name,
                     jt.type AS job_type_name,
-                    ${jobCodeExpr} AS job_code_id
+                    ${jobCodeExpr} AS job_code_id,
+                    bs_chk.id AS existing_billing_id,
+                    bs_chk.status AS existing_billing_status
                 FROM jobs j
                 LEFT JOIN customers c ON j.customer_id = c.id
                 LEFT JOIN clients cl ON j.client_id = cl.id
                 LEFT JOIN services s ON j.service_id = s.id
                 LEFT JOIN job_types jt ON j.job_type_id = jt.id
                 LEFT JOIN master_status ms ON j.status_type = ms.id
+                LEFT JOIN (
+                    SELECT job_id, id, status
+                    FROM billing_submissions
+                    WHERE id IN (
+                        SELECT MAX(id) FROM billing_submissions WHERE job_id IS NOT NULL AND status != 'Rejected' GROUP BY job_id
+                    )
+                ) bs_chk ON bs_chk.job_id = j.id
                 WHERE 1 = 1
             `;
             const params = [];
@@ -790,13 +799,22 @@ const getJobsByCustomerOrClient = async (customerId, clientId = null, serviceId 
                         ms.name AS status_name,
                         s.name AS service_name,
                         jt.type AS job_type_name,
-                        ${jobCodeExpr} AS job_code_id
+                        ${jobCodeExpr} AS job_code_id,
+                        bs_chk.id AS existing_billing_id,
+                        bs_chk.status AS existing_billing_status
                     FROM jobs j
                     LEFT JOIN customers c ON j.customer_id = c.id
                     LEFT JOIN clients cl ON j.client_id = cl.id
                     LEFT JOIN services s ON j.service_id = s.id
                     LEFT JOIN job_types jt ON j.job_type_id = jt.id
                     LEFT JOIN master_status ms ON j.status_type = ms.id
+                    LEFT JOIN (
+                        SELECT job_id, id, status
+                        FROM billing_submissions
+                        WHERE id IN (
+                            SELECT MAX(id) FROM billing_submissions WHERE job_id IS NOT NULL AND status != 'Rejected' GROUP BY job_id
+                        )
+                    ) bs_chk ON bs_chk.job_id = j.id
                     LEFT JOIN temp_assigned_jobs_staff 
                         ON temp_assigned_jobs_staff.job_id = j.id 
                         AND temp_assigned_jobs_staff.staff_id IN (${lineManagerIds})

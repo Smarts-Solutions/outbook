@@ -595,7 +595,7 @@ const BillingApprovals = () => {
     },
     {
       name: "Created At",
-      selector: (row) => row.submitted_at,
+      selector: (row) => row.submitted_at ? convertDate1(row.submitted_at) : "",
       sortable: true,
       minWidth: "160px",
       cell: (row) => (
@@ -606,7 +606,7 @@ const BillingApprovals = () => {
     },
     {
       name: "Save Date",
-      selector: (row) => row.save_date,
+      selector: (row) => row.save_date ? convertDate1(row.save_date) : "",
       sortable: true,
       minWidth: "140px",
       cell: (row) => (
@@ -617,7 +617,7 @@ const BillingApprovals = () => {
     },
     {
       name: "Submit Date",
-      selector: (row) => row.submit_date,
+      selector: (row) => row.submit_date ? convertDate1(row.submit_date) : "",
       sortable: true,
       minWidth: "140px",
       cell: (row) => (

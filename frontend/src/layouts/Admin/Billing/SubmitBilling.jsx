@@ -708,11 +708,15 @@ export const SubmitBilling = () => {
             if (j.status_name) {
               label += ` [${j.status_name}]`;
             }
+            if (j.existing_billing_status) {
+              label += ` (Billing: ${j.existing_billing_status})`;
+            }
             return {
               value: j.job_id,
               label: label,
               raw_job: j,
               status_name: j.status_name || null,
+              existing_billing_status: j.existing_billing_status || null,
             };
           });
 
@@ -2183,6 +2187,24 @@ export const SubmitBilling = () => {
                         options={jobsList}
                         value={selectedJob}
                         onChange={(selected) => {
+                          if (selected?.raw_job?.existing_billing_status) {
+                            const isSameAsEditing = editData?.job_id && (Number(editData.job_id) === Number(selected.value));
+                            if (!isSameAsEditing) {
+                              const existingStatus = selected.raw_job.existing_billing_status;
+                              sweatalert.fire({
+                                icon: "warning",
+                                title: "Billing Already Exists!",
+                                html: `A billing submission for this job has already been created.<br/><br/><b>Status:</b> <span class="badge bg-primary text-white">${existingStatus}</span><br/><br/>You cannot submit a duplicate bill for this job. If changes are needed, please edit the existing entry from the <b>Approvals</b> tab.`,
+                                confirmButtonText: "Okay",
+                                confirmButtonColor: "#0070ba",
+                              });
+                              setSelectedJob(null);
+                              setPeriodType("");
+                              setRawDateValue("");
+                              setPeriodDate("");
+                              return;
+                            }
+                          }
                           setSelectedJob(selected);
                           if (selected?.raw_job?.period_type) {
                             const pType = selected.raw_job.period_type;

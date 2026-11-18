@@ -5,6 +5,7 @@ import "react-data-table-component-extensions/dist/index.css";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { Download, Plus } from "lucide-react";
+import dayjs from "dayjs";
 import "./BillingDatatable.css";
 
 const BillingDatatable = ({
@@ -94,21 +95,56 @@ const BillingDatatable = ({
     if (colNameStr === "s.no") {
       return String(rowIndex + 1);
     }
+
+    let val = undefined;
     if (typeof col.selector === "function") {
       try {
-        const val = col.selector(row, rowIndex);
-        if (val !== undefined && val !== null) return String(val);
+        val = col.selector(row, rowIndex);
       } catch (e) {
         // ignore
       }
     }
-    const colKey = col.id || (typeof col.name === "string" ? col.name.toLowerCase().replace(/[^a-z0-9]/g, "") : "");
-    for (const k of Object.keys(row)) {
-      if (colKey && k.toLowerCase().replace(/[^a-z0-9]/g, "") === colKey) {
-        return row[k] !== undefined && row[k] !== null ? String(row[k]) : "";
+    if (val === undefined || val === null) {
+      const colKey = col.id || (typeof col.name === "string" ? col.name.toLowerCase().replace(/[^a-z0-9]/g, "") : "");
+      for (const k of Object.keys(row)) {
+        if (colKey && k.toLowerCase().replace(/[^a-z0-9]/g, "") === colKey) {
+          val = row[k];
+          break;
+        }
       }
     }
-    return "";
+
+    if (val === undefined || val === null) return "";
+
+    // If value is a Date or ISO timestamp string, format to DD-MM-YYYY
+    const isDateCol = colNameStr.includes("date") || colNameStr.includes("at");
+    if (typeof val === "string") {
+      const trimmed = val.trim();
+      // Match ISO strings like 2026-11-18T12:14:26.000Z or YYYY-MM-DD
+      if (/^\d{4}-\d{2}-\d{2}(T|\s|$)/.test(trimmed)) {
+        const parsed = dayjs(trimmed);
+        if (parsed.isValid()) {
+          return parsed.format("DD-MM-YYYY");
+        }
+      }
+    } else if (val instanceof Date) {
+      const parsed = dayjs(val);
+      if (parsed.isValid()) {
+        return parsed.format("DD-MM-YYYY");
+      }
+    } else if (typeof val === "number" && isDateCol && val > 1000000000) {
+      const parsed = dayjs(val);
+      if (parsed.isValid()) {
+        return parsed.format("DD-MM-YYYY");
+      }
+    }
+
+    // If column is Gross Amount, Net Amount, or Amount, ensure clean 2 decimal places if number
+    if (typeof val === "number" && (colNameStr.includes("amount") || colNameStr.includes("gross") || colNameStr.includes("net"))) {
+      return val.toFixed(2);
+    }
+
+    return String(val);
   };
 
   const getCleanExportData = () => {

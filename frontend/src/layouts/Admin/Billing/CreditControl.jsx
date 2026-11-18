@@ -541,18 +541,18 @@ const CreditControl = () => {
     },
     {
       name: "Created At",
-      selector: (row) => row.submitted_at,
+      selector: (row) => row.submitted_at ? convertDate1(row.submitted_at) : "",
       sortable: true,
       minWidth: "140px",
       cell: (row) => (
         <div className="text-muted text-nowrap" style={{ whiteSpace: "nowrap" }}>
-          {row.submitted_at ? convertDate1(row.submitted_at) : "30-10-2026"}
+          {row.submitted_at ? convertDate1(row.submitted_at) : "—"}
         </div>
       ),
     },
     {
       name: "Save Date",
-      selector: (row) => row.save_date,
+      selector: (row) => row.save_date ? convertDate1(row.save_date) : "",
       sortable: true,
       minWidth: "140px",
       cell: (row) => (
@@ -563,7 +563,7 @@ const CreditControl = () => {
     },
     {
       name: "Submit Date",
-      selector: (row) => row.submit_date,
+      selector: (row) => row.submit_date ? convertDate1(row.submit_date) : "",
       sortable: true,
       minWidth: "140px",
       cell: (row) => (
@@ -639,7 +639,7 @@ const CreditControl = () => {
     },
     {
       name: "Bill Date",
-      selector: (row) => row.billDate,
+      selector: (row) => row.billDate ? convertDate1(row.billDate) : "",
       sortable: true,
       minWidth: "110px",
       width: "120px",
@@ -647,7 +647,7 @@ const CreditControl = () => {
     },
     {
       name: "Amount",
-      selector: (row) => row.amount,
+      selector: (row) => parseFloat(row.amount || 0).toFixed(2),
       sortable: true,
       minWidth: "120px",
       cell: (row) => (
