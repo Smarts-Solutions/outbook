@@ -1046,8 +1046,47 @@ const getServicesByClient = async (clientId, StaffUserId = null) => {
 
 
 // 8.1 Get Timesheet & Job Contributors (Staff assigned as Reviewer, Allocated To, Allocated To Other in jobs + Staff who logged timesheets in current/selected period)
-const getTimesheetContributors = async (customerId, clientId, serviceId, periodDate = null) => {
+const getTimesheetContributors = async (customerId, clientId, serviceId, periodDate = null, jobId = null) => {
     try {
+        // If a specific job is selected, fetch STRICTLY the reviewer, allocated_to, and allocated_to_other for THIS selected job!
+        if (jobId) {
+            const queryJobStaff = `
+                SELECT DISTINCT
+                    s.id AS staff_id,
+                    CONCAT(s.first_name, ' ', s.last_name) AS staff_name,
+                    s.email AS staff_email
+                FROM staffs s
+                WHERE s.id IN (
+                    -- Reviewer from this selected job
+                    SELECT j.reviewer
+                    FROM jobs j
+                    WHERE j.id = ? AND j.reviewer IS NOT NULL AND j.reviewer > 0
+
+                    UNION
+
+                    -- Allocated To from this selected job
+                    SELECT j.allocated_to
+                    FROM jobs j
+                    WHERE j.id = ? AND j.allocated_to IS NOT NULL AND j.allocated_to > 0
+
+                    UNION
+
+                    -- Allocated To (Other) from job_allowed_staffs for this selected job
+                    SELECT jas.staff_id
+                    FROM job_allowed_staffs jas
+                    WHERE jas.job_id = ? AND jas.staff_id IS NOT NULL AND jas.staff_id > 0
+                )
+                ORDER BY staff_name ASC
+            `;
+
+            const [rows] = await pool.execute(queryJobStaff, [jobId, jobId, jobId]);
+            return {
+                status: true,
+                data: rows,
+                fallbackStaff: []
+            };
+        }
+
         if (!customerId || !clientId) {
             return { status: true, data: [] };
         }

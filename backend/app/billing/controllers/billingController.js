@@ -209,8 +209,9 @@ const getTimesheetContributors = async (req, res) => {
         const clientId = req.body?.client_id || req.query?.client_id || null;
         const serviceId = req.body?.service_id || req.query?.service_id || null;
         const periodDate = req.body?.period_date || req.query?.period_date || null;
+        const jobId = req.body?.job_id || req.query?.job_id || null;
 
-        const result = await billingModel.getTimesheetContributors(customerId, clientId, serviceId, periodDate);
+        const result = await billingModel.getTimesheetContributors(customerId, clientId, serviceId, periodDate, jobId);
         if (!result.status) {
             return res.status(500).json({ status: false, message: result.message });
         }

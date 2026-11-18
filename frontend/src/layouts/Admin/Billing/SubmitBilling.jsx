@@ -1001,6 +1001,7 @@ export const SubmitBilling = () => {
           client_id: selectedClient.value,
           service_id: selectedService?.value || null,
           period_date: periodDate || null,
+          job_id: selectedJob?.value || null,
         };
 
         const res = await getTimesheetContributorsBilling(payload, getAuthToken());
@@ -1037,7 +1038,7 @@ export const SubmitBilling = () => {
     };
 
     fetchTimesheetStaff();
-  }, [practice, selectedClient, selectedService, periodDate]);
+  }, [practice, selectedClient, selectedService, selectedJob, periodDate]);
 
   const engagementsData = {
     alpha_adhoc: {
