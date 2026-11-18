@@ -124,7 +124,14 @@ const getJobs = async (req, res) => {
         const clientId = req.body?.client_id || req.query?.client_id || null;
         const serviceId = req.body?.service_id || req.query?.service_id || null;
         const staffUserId = req.body?.StaffUserId || req.userId || req.user?.id || null;
-        const statusType = req.body?.status_type || req.query?.status_type || '6';
+        // Default to all Completed stage statuses:
+        // 6: Completed - Completed
+        // 7: Completed - Draft Sent
+        // 17: Completed - Update Sent
+        // 18: Completed - Filed with Companies House and HMRC
+        // 19: Completed - Filed with Companies House
+        // 20: Completed - Filed with HMRC
+        const statusType = req.body?.status_type || req.query?.status_type || ['6', '7', '17', '18', '19', '20'];
 
         const result = await billingModel.getJobsByCustomerOrClient(customerId, clientId, serviceId, staffUserId, statusType);
         if (!result.status) {

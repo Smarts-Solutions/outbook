@@ -689,7 +689,7 @@ export const SubmitBilling = () => {
             client_id: selectedClient.value,
             service_id: selectedService.value,
             StaffUserId: currentStaffId,
-            status_type: "6", // Only Completed - Completed
+            status_type: ["6", "7", "17", "18", "19", "20"], // All Completed statuses (Completed, Draft Sent, Update Sent, Filed, etc.)
           },
           getAuthToken()
         );
