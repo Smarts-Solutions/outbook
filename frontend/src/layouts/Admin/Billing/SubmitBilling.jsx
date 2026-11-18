@@ -705,10 +705,14 @@ export const SubmitBilling = () => {
             if (j.job_type_name) {
               label += ` - ${j.job_type_name}`;
             }
+            if (j.status_name) {
+              label += ` [${j.status_name}]`;
+            }
             return {
               value: j.job_id,
               label: label,
               raw_job: j,
+              status_name: j.status_name || null,
             };
           });
 
@@ -732,11 +736,19 @@ export const SubmitBilling = () => {
               if (pDate) {
                 setRawDateValue(pDate);
                 setPeriodDate(pDate);
+              } else if (editData?.period_date && editData?.job_id === jobItem.value) {
+                // If this is the job being edited and editData has the manually selected date, preserve it!
+                setRawDateValue(editData.period_date);
+                setPeriodDate(editData.period_date);
               } else {
                 // If date was not filled in job's other data, keep date empty so user can select manually
                 setRawDateValue("");
                 setPeriodDate("");
               }
+            } else if (editData?.period_type && editData?.job_id === jobItem.value) {
+              setPeriodType(editData.period_type);
+              setRawDateValue(editData.period_date || "");
+              setPeriodDate(editData.period_date || "");
             }
           };
 
@@ -2142,9 +2154,25 @@ export const SubmitBilling = () => {
 
                     {/* Job Dropdown (Filtered to Completed Jobs for selected Customer, Client & Service with Staff Access) */}
                     <div className="col-lg-4 col-md-12">
-                      <label className="form-label text-muted small mb-1 fw-medium">
-                        Job
-                      </label>
+                      <div className="d-flex align-items-center justify-content-between mb-1">
+                        <label className="form-label text-muted small mb-0 fw-medium">
+                          Job
+                        </label>
+                        {selectedJob?.raw_job?.status_name && (
+                          <span
+                            className="badge px-2 py-0 fw-semibold align-self-center"
+                            style={{
+                              backgroundColor: "#e8f5e9",
+                              color: "#2e7d32",
+                              border: "1px solid #c8e6c9",
+                              fontSize: "11px",
+                              lineHeight: "17px",
+                            }}
+                          >
+                            {selectedJob.raw_job.status_name}
+                          </span>
+                        )}
+                      </div>
                       <Select
                         isClearable={true}
                         closeMenuOnSelect={true}
@@ -2223,8 +2251,10 @@ export const SubmitBilling = () => {
                     const currentTypeObj = availablePeriodTypes.find((pt) => pt.type === periodType);
                     let availableDates = [];
 
-                    // 1. If the selected job itself has a filled period_date, that date is the primary option
-                    if (selectedJob?.raw_job?.period_date && periodType === selectedJob.raw_job.period_type) {
+                    // 1. Check if the selected job has a pre-filled period date from its Other Data
+                    const isJobDateFixed = Boolean(selectedJob?.raw_job?.period_date);
+
+                    if (isJobDateFixed && periodType === selectedJob.raw_job.period_type) {
                       availableDates = [selectedJob.raw_job.period_date];
                     } else if (currentTypeObj && Array.isArray(currentTypeObj.dates) && currentTypeObj.dates.length > 0) {
                       availableDates = [...currentTypeObj.dates];
@@ -2235,8 +2265,8 @@ export const SubmitBilling = () => {
                       availableDates.unshift(editData.period_date);
                     }
 
-                    // 3. Always merge standard selectable options for this period type so user can manually choose any date/year
-                    if (periodType) {
+                    // 3. Only merge standard selectable options if job Other Data doesn't already have a fixed date
+                    if (periodType && !isJobDateFixed) {
                       const stdOptions = getStandardOptionsForPeriodType(periodType);
                       if (stdOptions && stdOptions.length > 0) {
                         for (const opt of stdOptions) {
@@ -2258,7 +2288,7 @@ export const SubmitBilling = () => {
                           </label>
                           <select
                             className="form-select shadow-sm rounded-pill"
-                            disabled={!isServiceSelected || !selectedJob}
+                            disabled={!isServiceSelected || !selectedJob || isJobDateFixed}
                             value={periodType || ""}
                             onChange={(e) => {
                               const newType = e.target.value;
@@ -2292,14 +2322,21 @@ export const SubmitBilling = () => {
                           </select>
                         </div>
 
-                        {/* 2. Period Date / Values Dropdown (Always Dropdown, Non-editable) */}
+                        {/* 2. Period Date / Values Dropdown (Disabled if auto-filled from job) */}
                         <div className="col-lg-6 col-md-6">
-                          <label className="form-label text-muted small mb-1 fw-medium">
-                            Period Date 
-                          </label>
+                          <div className="d-flex align-items-center justify-content-between mb-1">
+                            <label className="form-label text-muted small mb-0 fw-medium">
+                              Period Date 
+                            </label>
+                            {isJobDateFixed && (
+                              <span className="badge bg-light text-muted border" style={{ fontSize: "10.5px" }}>
+                                Auto-filled from Job
+                              </span>
+                            )}
+                          </div>
                           <select
-                            className="form-select shadow-sm rounded-pill"
-                            disabled={!isServiceSelected || !selectedJob || !periodType || availableDates.length === 0}
+                            className={`form-select shadow-sm rounded-pill ${isJobDateFixed ? "bg-light text-dark fw-medium" : ""}`}
+                            disabled={!isServiceSelected || !selectedJob || !periodType || availableDates.length === 0 || isJobDateFixed}
                             value={periodDate || ""}
                             onChange={(e) => {
                               setPeriodDate(e.target.value);
