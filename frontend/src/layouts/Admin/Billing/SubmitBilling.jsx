@@ -951,6 +951,7 @@ export const SubmitBilling = () => {
 
   // Step 3 Multi-Model Dynamic Form States
   const [submitting, setSubmitting] = useState(false);
+  const [saveAction, setSaveAction] = useState(null); // 'save' (Draft) or 'submit' (Approval)
   // 1. Adhoc states: Selected role and hours
   const [adhocRole, setAdhocRole] = useState("adhoc_accountants");
   const [adhocHours, setAdhocHours] = useState("");
@@ -1438,8 +1439,11 @@ export const SubmitBilling = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (submitType = "submit") => {
+    if (typeof submitType === "object" && submitType.preventDefault) {
+      submitType.preventDefault();
+      submitType = "submit";
+    }
 
     if (!practice || !practice.value) {
       sweatalert.fire({
@@ -1597,17 +1601,29 @@ export const SubmitBilling = () => {
     }
 
     // Confirmation Popup before submission
+    const isDraftAction = submitType === "save";
     const isFullDiscount = discountPctNum === 100;
+
+    let confirmTitle = isDraftAction ? "Save as Draft?" : (editSubmissionId ? "Update Billing?" : "Submit Billing?");
+    let confirmText = isDraftAction
+      ? "Draft saves keep the billing editable. Would you like to save this draft?"
+      : isFullDiscount
+        ? "You are applying a 100% discount to this bill. Are you sure you want to submit it?"
+        : (editSubmissionId ? "Are you sure you want to update this billing submission?" : "Are you sure you want to submit this billing for approval?");
+    let confirmBtn = isDraftAction
+      ? "Yes, Save Draft"
+      : isFullDiscount
+        ? "Yes, Submit with 100% Discount"
+        : (editSubmissionId ? "Yes, Update" : "Yes, Submit");
+
     const confirmResult = await sweatalert.fire({
       icon: isFullDiscount ? "warning" : "question",
-      title: isFullDiscount ? "100% Discount Applied" : (editSubmissionId ? "Update Billing?" : "Submit Billing?"),
-      text: isFullDiscount
-        ? "You are applying a 100% discount to this bill. Are you sure you want to submit it?"
-        : (editSubmissionId ? "Are you sure you want to update this billing submission?" : "Are you sure you want to submit this billing for approval?"),
+      title: confirmTitle,
+      text: confirmText,
       showCancelButton: true,
-      confirmButtonText: isFullDiscount ? "Yes, Submit with 100% Discount" : (editSubmissionId ? "Yes, Update" : "Yes, Submit"),
+      confirmButtonText: confirmBtn,
       cancelButtonText: "Cancel",
-      confirmButtonColor: isFullDiscount ? "#ea5455" : "#26bdf0",
+      confirmButtonColor: isFullDiscount ? "#ea5455" : isDraftAction ? "#26bdf0" : "#28c76f",
       cancelButtonColor: "#6c757d",
     });
 
@@ -1617,6 +1633,7 @@ export const SubmitBilling = () => {
 
     try {
       setSubmitting(true);
+      setSaveAction(submitType);
 
       const staffDetailsStr = localStorage.getItem("staffDetails");
       const staffDetails = staffDetailsStr ? JSON.parse(staffDetailsStr) : null;
@@ -1684,6 +1701,7 @@ export const SubmitBilling = () => {
         currency: "GBP",
         nomisma_description: nomismaDescription,
         remark: remarkText ? remarkText.trim() : null,
+        action: submitType,
         // Keep existing manager_id if editing an existing submission, or backend will resolve staff's Line Manager
         manager_id: editData?.manager_id || null,
         contributors: contributors.map((c, idx) => {
@@ -1705,10 +1723,21 @@ export const SubmitBilling = () => {
       const res = await submitBillingApi(payload, token);
 
       if (res && res.status) {
+        const successTitle = isDraftAction
+          ? "Draft Saved!"
+          : editSubmissionId
+            ? "Billing Updated!"
+            : "Billing Submitted!";
+        const successText = isDraftAction
+          ? `Billing draft of £${netAmount.toFixed(2)} saved successfully.`
+          : editSubmissionId
+            ? `Billing of £${netAmount.toFixed(2)} updated successfully.`
+            : `Billing of £${netAmount.toFixed(2)} submitted successfully. Sent to your Account Manager for approval.`;
+
         await sweatalert.fire({
           icon: "success",
-          title: editSubmissionId ? "Billing Updated!" : "Billing Submitted!",
-          text: editSubmissionId ? `Billing of £${netAmount.toFixed(2)} updated successfully.` : `Billing of £${netAmount.toFixed(2)} submitted successfully. Sent to your Account Manager for approval.`,
+          title: successTitle,
+          text: successText,
           confirmButtonColor: "#26bdf0",
         });
         navigate("/admin/billing/dashboard");
@@ -1722,8 +1751,8 @@ export const SubmitBilling = () => {
       } else {
         sweatalert.fire({
           icon: "error",
-          title: "Submission Failed",
-          text: res?.message || "Something went wrong while submitting billing.",
+          title: isDraftAction ? "Save Failed" : "Submission Failed",
+          text: res?.message || "Something went wrong while processing billing.",
           confirmButtonColor: "#26bdf0",
         });
       }
@@ -1737,6 +1766,7 @@ export const SubmitBilling = () => {
       });
     } finally {
       setSubmitting(false);
+      setSaveAction(null);
     }
   };
 
@@ -2281,7 +2311,7 @@ export const SubmitBilling = () => {
                   <div className="d-flex align-items-center justify-content-between pt-4 mt-4 border-top">
                     <button
                       type="button"
-                      className="btn btn-outline-secondary d-flex align-items-center gap-2 px-3 py-2 fw-medium rounded-pill shadow-sm"
+                      className="btn btn-outline-info d-flex align-items-center gap-2 px-4 py-2 fw-semibold rounded-pill shadow-sm"
                       onClick={() => setSubmitStep(1)}
                     >
                       <ArrowLeft size={16} /> Back
@@ -3066,6 +3096,13 @@ export const SubmitBilling = () => {
                     </p>
                   )}
 
+                  {/* Timesheet-style Helper Note */}
+                  <div className="d-flex align-items-center mb-3">
+                    <p className="text-muted small mb-0">
+                      Draft saves keep the billing editable. Submitting locks it for manager review.
+                    </p>
+                  </div>
+
                   {/* Approval info callout */}
                   <div
                     className="p-3 mb-4 rounded"
@@ -3076,26 +3113,41 @@ export const SubmitBilling = () => {
                     }}
                   >
                     On submit, this goes to <strong>{customerMeta?.account_manager || customerMeta?.line_manager || "Account Manager"}</strong> for approval.
-                  
                   </div>
 
-                  {/* Bottom Actions for Step 3 */}
+                  {/* Bottom Actions for Step 3 (Save Draft & Submit buttons) */}
                   <div className="d-flex align-items-center justify-content-between pt-4 mt-4 border-top">
                     <button
                       type="button"
-                      className="btn btn-outline-secondary d-flex align-items-center gap-2 px-3 py-2 fw-medium rounded-pill shadow-sm"
+                      className="btn btn-outline-info d-flex align-items-center gap-2 px-4 py-2 fw-semibold rounded-pill shadow-sm"
                       onClick={() => setSubmitStep(2)}
+                      disabled={submitting}
                     >
                       <ArrowLeft size={16} /> Back
                     </button>
-                    <button
-                      type="button"
-                      className="btn btn-info text-white px-4 py-2 fw-semibold rounded-pill shadow-sm"
-                      disabled={grandTotal <= 0 || !isFullyAllocated || submitting}
-                      onClick={handleSubmit}
-                    >
-                      {submitting ? "Saving..." : editSubmissionId ? "Update Billing" : "Submit for approval"}
-                    </button>
+                    <div className="d-flex align-items-center gap-2">
+                      {/* Save Draft Button (like Timesheet) */}
+                      <button
+                        type="button"
+                        className="btn btn-outline-info d-flex align-items-center gap-2 px-4 py-2 fw-semibold rounded-pill shadow-sm"
+                        disabled={grandTotal <= 0 || !isFullyAllocated || submitting}
+                        onClick={() => handleSubmit("save")}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+                        {submitting && saveAction === "save" ? "Saving..." : "Save Draft"}
+                      </button>
+
+                      {/* Submit for Approval Button */}
+                      <button
+                        type="button"
+                        className="btn btn-info text-white d-flex align-items-center gap-2 px-4 py-2 fw-semibold rounded-pill shadow-sm"
+                        disabled={grandTotal <= 0 || !isFullyAllocated || submitting}
+                        onClick={() => handleSubmit("submit")}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path><path d="M7 3v4a1 1 0 0 0 1 1h7"></path></svg>
+                        {submitting && saveAction === "submit" ? "Submitting..." : editSubmissionId ? "Update & Submit" : "Submit"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}

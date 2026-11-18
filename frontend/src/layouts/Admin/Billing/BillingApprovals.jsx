@@ -540,6 +540,22 @@ const BillingApprovals = () => {
             </span>
           );
         }
+        if (st === "draft") {
+          return (
+            <span
+              className="badge px-3 py-1 fw-bold d-inline-flex align-items-center gap-1 shadow-sm text-nowrap"
+              style={{
+                backgroundColor: "#f5f5f5",
+                color: "#595959",
+                border: "1px solid #d9d9d9",
+                fontSize: "12px",
+                whiteSpace: "nowrap"
+              }}
+            >
+              Draft
+            </span>
+          );
+        }
         if (st.includes("reject")) {
           return (
             <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1 fw-bold d-inline-flex align-items-center gap-1 text-nowrap" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
@@ -610,14 +626,16 @@ const BillingApprovals = () => {
             </button>
 
             {/* Edit in Submit Billing Screen:
-                1) When Pending Manager Approval: visible to Manager/Admin with management rights
-                2) When Returned: ONLY visible to the user who submitted the bill (isSubmitter), or Admin */}
-            {((canManage && row.status === "Pending Manager Approval") ||
+                1) When Draft: visible to the Submitter or Admin
+                2) When Pending Manager Approval: visible to Manager/Admin with management rights
+                3) When Returned: ONLY visible to the user who submitted the bill (isSubmitter), or Admin */}
+            {((row.status === "Draft" && (isSubmitter || isAdmin)) ||
+              (canManage && row.status === "Pending Manager Approval") ||
               (row.status === "Returned" && (isSubmitter || isAdmin))) && (
               <button
                 type="button"
                 className="edit-icon rounded-pills border-warning"
-                title={row.status === "Returned" ? "Edit and Re-submit Returned Bill" : "Edit Submission"}
+                title={row.status === "Draft" ? "Edit & Submit Draft" : row.status === "Returned" ? "Edit and Re-submit Returned Bill" : "Edit Submission"}
                 onClick={() => openEditModal(row)}
               >
                 <i className="ti-pencil-alt text-warning" />

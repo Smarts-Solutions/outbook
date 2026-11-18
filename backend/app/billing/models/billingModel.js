@@ -1202,8 +1202,12 @@ const submitBilling = async (payload, submittedByStaffId) => {
             nomisma_description,
             remark = null,
             manager_id = null,
-            contributors = []
+            contributors = [],
+            action = 'submit' // 'save' (Draft) or 'submit' (Pending Manager Approval)
         } = payload;
+
+        const isDraft = action === 'save' || payload.status === 'Draft';
+        const targetStatus = isDraft ? 'Draft' : 'Pending Manager Approval';
 
         const safeEngagementModel = engagement_model ? String(engagement_model).slice(0, 990) : '';
         const safeNomismaDescription = nomisma_description ? String(nomisma_description).slice(0, 990) : '';
@@ -1337,8 +1341,10 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 finalManagerId = await getDesignatedManagerForSubmission(connection, customer_id, existing[0].submitted_by || staff_user_id);
             }
 
-            // If the bill was Returned, editing and re-submitting changes status back to 'Pending Manager Approval'
-            const newStatus = existing[0].status === 'Returned' ? 'Pending Manager Approval' : existing[0].status;
+            // Status calculation for edit/re-submit:
+            // If action is 'save', status becomes 'Draft'
+            // If action is 'submit', status becomes 'Pending Manager Approval'
+            const newStatus = isDraft ? 'Draft' : 'Pending Manager Approval';
 
             const updateSubQuery = `
                 UPDATE billing_submissions SET
@@ -1442,11 +1448,12 @@ const submitBilling = async (payload, submittedByStaffId) => {
             };
         }
 
-        // Check if live submission already exists (not Returned and not Superseded)
+        // Check if live submission already exists (not Draft, not Returned and not Superseded)
+        // If existing is Draft, user can overwrite/update it, or if it's already submitted (Pending / Approved) prevent duplicate
         const [existing] = await connection.execute(
             `SELECT id, status, period_label FROM billing_submissions 
              WHERE dedupe_key = ? 
-             AND status NOT IN ('Returned', 'Rejected', 'Superseded') 
+             AND status NOT IN ('Draft', 'Returned', 'Rejected', 'Superseded') 
              LIMIT 1`,
             [dedupeKey]
         );
@@ -1509,7 +1516,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 submitted_by,
                 submitted_at,
                 manager_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending Manager Approval', ?, NOW(), ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)
         `;
 
         const subParams = [
@@ -1531,6 +1538,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
             currency,
             safeNomismaDescription,
             remark ? String(remark).trim() : null,
+            targetStatus,
             submittedByStaffId,
             finalManagerId
         ];
