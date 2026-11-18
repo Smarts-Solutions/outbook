@@ -1394,7 +1394,6 @@ const submitBilling = async (payload, submittedByStaffId) => {
                     period_type = ?,
                     period_date = ?,
                     period_label = ?,
-                    period_end = ?,
                     dedupe_key = ?,
                     engagement_model = ?,
                     calc_json = ?,
@@ -1420,7 +1419,6 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 period_type,
                 formattedPeriodDate,
                 formattedPeriodLabel,
-                period_end || null,
                 dedupeKey,
                 safeEngagementModel,
                 typeof calc_json === 'object' ? JSON.stringify(calc_json) : String(calc_json),
@@ -1540,7 +1538,6 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 period_type,
                 period_date,
                 period_label,
-                period_end,
                 dedupe_key,
                 engagement_model,
                 calc_json,
@@ -1555,7 +1552,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 submitted_by,
                 submitted_at,
                 manager_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)
         `;
 
         const subParams = [
@@ -1566,7 +1563,6 @@ const submitBilling = async (payload, submittedByStaffId) => {
             period_type,
             formattedPeriodDate,
             formattedPeriodLabel,
-            period_end || null,
             dedupeKey,
             safeEngagementModel,
             typeof calc_json === 'object' ? JSON.stringify(calc_json) : String(calc_json),
