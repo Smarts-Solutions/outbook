@@ -1406,6 +1406,8 @@ const submitBilling = async (payload, submittedByStaffId) => {
                     remark = ?,
                     manager_id = ?,
                     status = ?,
+                    save_date = IF(? = 'save', NOW(), save_date),
+                    submit_date = IF(? = 'submit', NOW(), submit_date),
                     manager_edited = 1,
                     updated_at = NOW()
                 WHERE id = ?
@@ -1431,6 +1433,8 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 remark ? String(remark).trim() : null,
                 finalManagerId,
                 newStatus,
+                action,
+                action,
                 editSubmissionId
             ];
 
@@ -1551,8 +1555,10 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 status,
                 submitted_by,
                 submitted_at,
+                save_date,
+                submit_date,
                 manager_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?)
         `;
 
         const subParams = [
@@ -1575,6 +1581,8 @@ const submitBilling = async (payload, submittedByStaffId) => {
             remark ? String(remark).trim() : null,
             targetStatus,
             submittedByStaffId,
+            action === 'save' ? new Date() : (action === 'submit' ? new Date() : null),
+            action === 'submit' ? new Date() : null,
             finalManagerId
         ];
 
@@ -1652,6 +1660,14 @@ const getSubmissionsForApprovals = async (staffUserId, status = null) => {
                 bs.service_id,
                 s.name AS service_name,
                 bs.job_id,
+                IF(j.id IS NOT NULL, CONCAT(
+                    SUBSTRING(IFNULL(c.trading_name, ''), 1, 3), '_',
+                    SUBSTRING(IFNULL(cl.trading_name, ''), 1, 3), '_',
+                    SUBSTRING(IFNULL(jt.type, ''), 1, 4), '_',
+                    SUBSTRING(IFNULL(j.job_id, ''), 1, 15)
+                ), NULL) AS job_name,
+                j.client_job_code,
+                jt.type AS job_type_name,
                 bs.period_type,
                 bs.period_date,
                 bs.period_label,
@@ -1667,6 +1683,8 @@ const getSubmissionsForApprovals = async (staffUserId, status = null) => {
                 bs.status,
                 bs.submitted_by,
                 bs.submitted_at,
+                bs.save_date,
+                bs.submit_date,
                 CONCAT(st_sub.first_name, ' ', st_sub.last_name) AS submitted_by_name,
                 bs.manager_id,
                 CONCAT(st_mgr.first_name, ' ', st_mgr.last_name) AS manager_name,
@@ -1684,6 +1702,8 @@ const getSubmissionsForApprovals = async (staffUserId, status = null) => {
             LEFT JOIN customers c ON bs.customer_id = c.id
             LEFT JOIN clients cl ON bs.client_id = cl.id
             LEFT JOIN services s ON bs.service_id = s.id
+            LEFT JOIN jobs j ON bs.job_id = j.id
+            LEFT JOIN job_types jt ON j.job_type_id = jt.id
             LEFT JOIN staffs st_sub ON bs.submitted_by = st_sub.id
             LEFT JOIN staffs st_mgr ON bs.manager_id = st_mgr.id
             WHERE 1 = 1

@@ -434,6 +434,21 @@ const CreditControl = () => {
       ),
     },
     {
+      name: "Job Name",
+      selector: (row) => row.job_name || (row.job_id ? `Job #${row.job_id}` : "—"),
+      sortable: true,
+      minWidth: "170px",
+      cell: (row) => (
+        <div
+          title={row.job_name || (row.job_id ? `Job #${row.job_id}` : "—")}
+          style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+          className="fw-medium text-dark"
+        >
+          {row.job_name || (row.job_id ? `Job #${row.job_id}` : "—")}
+        </div>
+      ),
+    },
+    {
       name: "Period",
       selector: (row) => `${(row.period_type || row.periodType) ? (row.period_type || row.periodType) + ': ' : ''}${formatPeriodDisplay(row.period_label || row.periodLabel || row.period_date)}`,
       sortable: true,
@@ -528,10 +543,32 @@ const CreditControl = () => {
       name: "Created At",
       selector: (row) => row.submitted_at,
       sortable: true,
-      minWidth: "120px",
+      minWidth: "140px",
       cell: (row) => (
-        <div className="text-muted">
+        <div className="text-muted text-nowrap" style={{ whiteSpace: "nowrap" }}>
           {row.submitted_at ? convertDate1(row.submitted_at) : "30-10-2026"}
+        </div>
+      ),
+    },
+    {
+      name: "Save Date",
+      selector: (row) => row.save_date,
+      sortable: true,
+      minWidth: "140px",
+      cell: (row) => (
+        <div title={row.save_date || "-"} className="text-muted text-nowrap" style={{ whiteSpace: "nowrap" }}>
+          {row.save_date ? convertDate1(row.save_date) : "—"}
+        </div>
+      ),
+    },
+    {
+      name: "Submit Date",
+      selector: (row) => row.submit_date,
+      sortable: true,
+      minWidth: "140px",
+      cell: (row) => (
+        <div title={row.submit_date || "-"} className="text-muted text-nowrap" style={{ whiteSpace: "nowrap" }}>
+          {row.submit_date ? convertDate1(row.submit_date) : "—"}
         </div>
       ),
     },
@@ -890,6 +927,30 @@ const CreditControl = () => {
                   </span>
                   <div className="fw-semibold text-dark fs-13 mt-1">
                     {viewDetailsModal.service_name || "-"}
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <span className="text-muted small text-uppercase fw-semibold" style={{ fontSize: "11px", letterSpacing: "0.5px" }}>
+                    Job Name
+                  </span>
+                  <div className="fw-semibold text-dark fs-13 mt-1">
+                    {viewDetailsModal.job_name || (viewDetailsModal.job_id ? `Job #${viewDetailsModal.job_id}` : "—")}
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <span className="text-muted small text-uppercase fw-semibold" style={{ fontSize: "11px", letterSpacing: "0.5px" }}>
+                    Save Date
+                  </span>
+                  <div className="text-muted fs-13 mt-1">
+                    {viewDetailsModal.save_date ? convertDate1(viewDetailsModal.save_date) : "—"}
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <span className="text-muted small text-uppercase fw-semibold" style={{ fontSize: "11px", letterSpacing: "0.5px" }}>
+                    Submit Date
+                  </span>
+                  <div className="text-muted fs-13 mt-1">
+                    {viewDetailsModal.submit_date ? convertDate1(viewDetailsModal.submit_date) : "—"}
                   </div>
                 </div>
                 <div className="col-md-6">

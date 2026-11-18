@@ -1476,6 +1476,16 @@ export const SubmitBilling = () => {
       return;
     }
 
+    if (!selectedJob || !selectedJob.value) {
+      sweatalert.fire({
+        icon: "warning",
+        title: "Job Required",
+        text: "Please select a completed Job in Step 2.",
+        confirmButtonColor: "#26bdf0",
+      });
+      return;
+    }
+
     if (grandTotal <= 0) {
       sweatalert.fire({
         icon: "warning",
@@ -1821,6 +1831,16 @@ export const SubmitBilling = () => {
       return false;
     }
 
+    if (!selectedJob || !selectedJob.value) {
+      sweatalert.fire({
+        icon: "warning",
+        title: "Job Required",
+        text: "Please select a completed Job before continuing.",
+        confirmButtonColor: "#26bdf0",
+      });
+      return false;
+    }
+
     if (!periodType) {
       sweatalert.fire({
         icon: "warning",
@@ -1969,7 +1989,7 @@ export const SubmitBilling = () => {
                   <div className="d-flex align-items-center justify-content-end pt-4 mt-3 border-top">
                     <button
                       type="button"
-                      className="btn btn-info text-white d-flex align-items-center gap-2 px-4 py-2 fw-semibold rounded-pill shadow-sm"
+                      className="btn btn-info text-white d-flex align-items-center gap-2"
                       onClick={handleStep1Continue}
                     >
                       Continue <ArrowRight size={16} />
@@ -2312,14 +2332,14 @@ export const SubmitBilling = () => {
                   <div className="d-flex align-items-center justify-content-between pt-4 mt-4 border-top">
                     <button
                       type="button"
-                      className="btn btn-outline-info d-flex align-items-center gap-2 px-4 py-2 fw-semibold rounded-pill shadow-sm"
+                      className="btn btn-outline-info d-flex align-items-center gap-2"
                       onClick={() => setSubmitStep(1)}
                     >
                       <ArrowLeft size={16} /> Back
                     </button>
                     <button
                       type="button"
-                      className="btn btn-info text-white d-flex align-items-center gap-2 px-4 py-2 fw-semibold rounded-pill shadow-sm"
+                      className="btn btn-info text-white d-flex align-items-center gap-2"
                       onClick={handleStep2Continue}
                     >
                       Continue <ArrowRight size={16} />
@@ -3097,55 +3117,48 @@ export const SubmitBilling = () => {
                     </p>
                   )}
 
-                  {/* Timesheet-style Helper Note */}
-                  <div className="d-flex align-items-center mb-3">
-                    <p className="text-muted small mb-0">
-                      Draft saves keep the billing editable. Submitting locks it for manager review.
-                    </p>
-                  </div>
-
-                  {/* Approval info callout */}
-                  <div
-                    className="p-3 mb-4 rounded"
-                    style={{
-                      backgroundColor: "#f0f9ff",
-                      borderLeft: "4px solid #26bdf0",
-                      fontSize: "13px",
-                    }}
-                  >
-                    On submit, this goes to <strong>{customerMeta?.account_manager || customerMeta?.line_manager || "Account Manager"}</strong> for approval.
-                  </div>
-
-                  {/* Bottom Actions for Step 3 (Save Draft & Submit buttons) */}
-                  <div className="d-flex align-items-center justify-content-between pt-4 mt-4 border-top">
-                    <button
-                      type="button"
-                      className="btn btn-outline-info d-flex align-items-center gap-2 px-4 py-2 fw-semibold rounded-pill shadow-sm"
-                      onClick={() => setSubmitStep(2)}
-                      disabled={submitting}
-                    >
-                      <ArrowLeft size={16} /> Back
-                    </button>
-                    <div className="d-flex align-items-center gap-2">
-                      {/* Save Draft Button (like Timesheet) */}
+                  {/* Timesheet-style Bottom Action Section */}
+                  <div className="timesheet-submit-div mt-4 pt-3 border-top">
+                    <div className="timesheet-submit-div-left d-flex align-items-center gap-3">
                       <button
                         type="button"
-                        className="btn btn-outline-info d-flex align-items-center gap-2 px-4 py-2 fw-semibold rounded-pill shadow-sm"
+                        className="btn btn-outline-info d-flex align-items-center gap-2"
+                        onClick={() => setSubmitStep(2)}
+                        disabled={submitting}
+                      >
+                        <ArrowLeft size={16} /> Back
+                      </button>
+                      <p className="mb-0 text-muted" style={{ fontSize: "13.5px" }}>
+                        Draft saves keep the billing editable. Submitting locks it for manager review.
+                      </p>
+                    </div>
+
+                    <div className="timesheet-submit-div-right">
+                      {/* Save Draft Button (Exact match with Timesheet Save button) */}
+                      <button
+                        type="button"
+                        className="btn btn-info text-white d-flex align-items-center gap-2"
                         disabled={grandTotal <= 0 || !isFullyAllocated || submitting}
                         onClick={() => handleSubmit("save")}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check">
+                          <path d="M20 6 9 17l-5-5"></path>
+                        </svg>
                         {submitting && saveAction === "save" ? "Saving..." : "Save Draft"}
                       </button>
 
-                      {/* Submit for Approval Button */}
+                      {/* Submit for Approval Button (Exact match with Timesheet Submit button) */}
                       <button
                         type="button"
-                        className="btn btn-info text-white d-flex align-items-center gap-2 px-4 py-2 fw-semibold rounded-pill shadow-sm"
+                        className="btn btn-outline-success d-flex align-items-center gap-2"
                         disabled={grandTotal <= 0 || !isFullyAllocated || submitting}
                         onClick={() => handleSubmit("submit")}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path><path d="M7 3v4a1 1 0 0 0 1 1h7"></path></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-save">
+                          <path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path>
+                          <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path>
+                          <path d="M7 3v4a1 1 0 0 0 1 1h7"></path>
+                        </svg>
                         {submitting && saveAction === "submit" ? "Submitting..." : editSubmissionId ? "Update & Submit" : "Submit"}
                       </button>
                     </div>

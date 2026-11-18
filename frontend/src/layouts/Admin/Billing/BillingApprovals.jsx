@@ -377,6 +377,20 @@ const BillingApprovals = () => {
       ),
     },
     {
+      name: "Job Name",
+      selector: (row) => row.job_name || (row.job_id ? `Job #${row.job_id}` : "—"),
+      sortable: true,
+      minWidth: "180px",
+      cell: (row) => (
+        <div
+          title={row.job_name || (row.job_id ? `Job #${row.job_id}` : "—")}
+          className="text-break py-1 fw-medium text-dark"
+        >
+          {row.job_name || (row.job_id ? `Job #${row.job_id}` : "—")}
+        </div>
+      ),
+    },
+    {
       name: "Period",
       selector: (row) => `${row.period_type ? row.period_type + ': ' : ''}${formatPeriodDisplay(row.period_label || row.period_date)}`,
       sortable: true,
@@ -591,6 +605,28 @@ const BillingApprovals = () => {
       ),
     },
     {
+      name: "Save Date",
+      selector: (row) => row.save_date,
+      sortable: true,
+      minWidth: "140px",
+      cell: (row) => (
+        <div title={row.save_date || "-"} className="text-muted text-nowrap" style={{ whiteSpace: "nowrap" }}>
+          {row.save_date ? convertDate1(row.save_date) : "—"}
+        </div>
+      ),
+    },
+    {
+      name: "Submit Date",
+      selector: (row) => row.submit_date,
+      sortable: true,
+      minWidth: "140px",
+      cell: (row) => (
+        <div title={row.submit_date || "-"} className="text-muted text-nowrap" style={{ whiteSpace: "nowrap" }}>
+          {row.submit_date ? convertDate1(row.submit_date) : "—"}
+        </div>
+      ),
+    },
+    {
       name: "Actions",
       minWidth: "220px",
       width: "220px",
@@ -752,6 +788,30 @@ const BillingApprovals = () => {
                   </span>
                   <div className="fw-semibold text-dark fs-13 mt-1">
                     {viewDetailsModal.service_name || "-"}
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <span className="text-muted small text-uppercase fw-semibold" style={{ fontSize: "11px", letterSpacing: "0.5px" }}>
+                    Job Name
+                  </span>
+                  <div className="fw-semibold text-dark fs-13 mt-1">
+                    {viewDetailsModal.job_name || (viewDetailsModal.job_id ? `Job #${viewDetailsModal.job_id}` : "—")}
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <span className="text-muted small text-uppercase fw-semibold" style={{ fontSize: "11px", letterSpacing: "0.5px" }}>
+                    Save Date
+                  </span>
+                  <div className="text-muted fs-13 mt-1">
+                    {viewDetailsModal.save_date ? convertDate1(viewDetailsModal.save_date) : "—"}
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <span className="text-muted small text-uppercase fw-semibold" style={{ fontSize: "11px", letterSpacing: "0.5px" }}>
+                    Submit Date
+                  </span>
+                  <div className="text-muted fs-13 mt-1">
+                    {viewDetailsModal.submit_date ? convertDate1(viewDetailsModal.submit_date) : "—"}
                   </div>
                 </div>
                 <div className="col-md-6">
