@@ -361,6 +361,11 @@ export const SubmitBilling = () => {
         }))
       );
     }
+
+    // 8. Remark
+    if (editData.remark != null) {
+      setRemarkText(editData.remark);
+    }
   }, [editData]);
 
 
@@ -491,6 +496,7 @@ export const SubmitBilling = () => {
     setPercentageBaseAmounts({});
     setCustomJobsCount("");
     setDiscountPct("");
+    setRemarkText("");
     setContributors([]);
     setTimesheetStaffList([]);
   };
@@ -965,6 +971,9 @@ export const SubmitBilling = () => {
 
   // 5. Discount % state (Optional percentage discount applied on Gross Amount)
   const [discountPct, setDiscountPct] = useState("");
+
+  // Optional Remark state
+  const [remarkText, setRemarkText] = useState(editData?.remark || "");
 
   // Contributors State & Staff Options from Timesheet
   const [contributors, setContributors] = useState([]);
@@ -1674,6 +1683,7 @@ export const SubmitBilling = () => {
         net_amount: netAmount,
         currency: "GBP",
         nomisma_description: nomismaDescription,
+        remark: remarkText ? remarkText.trim() : null,
         // Keep existing manager_id if editing an existing submission, or backend will resolve staff's Line Manager
         manager_id: editData?.manager_id || null,
         contributors: contributors.map((c, idx) => {
@@ -3029,6 +3039,23 @@ export const SubmitBilling = () => {
                           Revenue allocation incomplete ({totalAllocatedPct}% of 100%). Remaining {remainingPct}% (£{remainingAmt.toFixed(2)}) must be allocated.
                         </div>
                       )}
+                    </div>
+                  </div>
+
+                  {/* Optional Remark Section (Matching Timesheet Style) */}
+                  <div className="card border mb-4">
+                    <div className="card-body p-3">
+                      <label className="form-label text-dark fw-semibold mb-1" style={{ fontSize: "14px" }}>
+                        Final Remark <span className="text-muted fw-normal" style={{ fontSize: "12px" }}>(Optional)</span>
+                      </label>
+                      <textarea
+                        className="form-control shadow-sm"
+                        placeholder="e.g. Completed all assigned billing tasks or specific notes for this period..."
+                        style={{ minHeight: "75px", borderRadius: "10px", fontSize: "13px" }}
+                        value={remarkText || ""}
+                        onChange={(e) => setRemarkText(e.target.value)}
+                        disabled={submitting}
+                      ></textarea>
                     </div>
                   </div>
 

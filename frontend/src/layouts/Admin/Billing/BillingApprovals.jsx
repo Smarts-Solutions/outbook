@@ -973,6 +973,16 @@ const BillingApprovals = () => {
               </div>
             )}
 
+            {/* Submitter Remark if available */}
+            {viewDetailsModal.remark && (
+              <div className="alert alert-info py-2 px-3 mb-3 border-info shadow-sm" style={{ backgroundColor: "#f0f9ff" }}>
+                <div className="fw-bold fs-13 mb-1 text-info">
+                  Submitter Remark:
+                </div>
+                <div className="small text-dark">{viewDetailsModal.remark}</div>
+              </div>
+            )}
+
             {/* Revert / Return Note if available */}
             {viewDetailsModal.return_note && (
               <div className="alert alert-danger py-2 px-3 mb-3 border-danger shadow-sm">

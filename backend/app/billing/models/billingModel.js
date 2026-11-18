@@ -1200,6 +1200,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
             net_amount = 0,
             currency = 'GBP',
             nomisma_description,
+            remark = null,
             manager_id = null,
             contributors = []
         } = payload;
@@ -1358,6 +1359,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
                     net_amount = ?,
                     currency = ?,
                     nomisma_description = ?,
+                    remark = ?,
                     manager_id = ?,
                     status = ?,
                     manager_edited = 1,
@@ -1383,6 +1385,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 net_amount,
                 currency,
                 safeNomismaDescription,
+                remark ? String(remark).trim() : null,
                 finalManagerId,
                 newStatus,
                 editSubmissionId
@@ -1501,11 +1504,12 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 net_amount,
                 currency,
                 nomisma_description,
+                remark,
                 status,
                 submitted_by,
                 submitted_at,
                 manager_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending Manager Approval', ?, NOW(), ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending Manager Approval', ?, NOW(), ?)
         `;
 
         const subParams = [
@@ -1526,6 +1530,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
             net_amount,
             currency,
             safeNomismaDescription,
+            remark ? String(remark).trim() : null,
             submittedByStaffId,
             finalManagerId
         ];
@@ -1615,6 +1620,7 @@ const getSubmissionsForApprovals = async (staffUserId, status = null) => {
                 bs.net_amount,
                 bs.currency,
                 bs.nomisma_description,
+                bs.remark,
                 bs.status,
                 bs.submitted_by,
                 bs.submitted_at,
