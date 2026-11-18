@@ -2275,7 +2275,7 @@ export const SubmitBilling = () => {
                         {/* 2. Period Date / Values Dropdown (Always Dropdown, Non-editable) */}
                         <div className="col-lg-6 col-md-6">
                           <label className="form-label text-muted small mb-1 fw-medium">
-                            Period Date {periodDate ? `(${periodDate})` : ""}
+                            Period Date 
                           </label>
                           <select
                             className="form-select shadow-sm rounded-pill"
