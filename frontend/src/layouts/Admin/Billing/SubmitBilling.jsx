@@ -592,20 +592,17 @@ export const SubmitBilling = () => {
           }
           setServicesList(formatted);
 
-          // Auto-select service and its latest period / date from jobs
-          const applyServicePeriods = (srv) => {
-            if (!srv) return;
-            setSelectedService(srv);
-            if (editData?.period_type && editData?.period_date) {
-              setPeriodType(editData.period_type);
-              setRawDateValue(editData.period_date);
-              setPeriodDate(editData.period_date);
-            } else if (srv.latest_period_type && srv.latest_period_date) {
-              setPeriodType(srv.latest_period_type);
-              setRawDateValue(srv.latest_period_date);
-              setPeriodDate(srv.latest_period_date);
-            }
-          };
+          // Only pre-fill period from editData if editing
+          if (editData?.period_type && editData?.period_date) {
+            setPeriodType(editData.period_type);
+            setRawDateValue(editData.period_date);
+            setPeriodDate(editData.period_date);
+          } else {
+            // Do NOT auto-fill period from service; wait for Job selection
+            setPeriodType("");
+            setRawDateValue("");
+            setPeriodDate("");
+          }
 
           if (editData?.service_id) {
             let foundService = formatted.find(s => s.value === editData.service_id);
@@ -613,6 +610,7 @@ export const SubmitBilling = () => {
               foundService = formatted[0]; // fallback to first if not matching
             }
             if (foundService) {
+              setSelectedService(foundService);
               // Ensure editData's period_type and period_date are in the service's period_types so dropdowns display them
               if (editData.period_type && editData.period_date) {
                 if (!Array.isArray(foundService.period_types)) {
@@ -627,10 +625,9 @@ export const SubmitBilling = () => {
                   ptObj.dates.unshift(editData.period_date);
                 }
               }
-              applyServicePeriods(foundService);
             }
           } else if (formatted.length === 1) {
-            applyServicePeriods(formatted[0]);
+            setSelectedService(formatted[0]);
           }
         } else {
           if (editData?.service_id) {
@@ -719,34 +716,47 @@ export const SubmitBilling = () => {
 
           setJobsList(formatted);
 
-          // Auto-select if editData has job_id or if exactly 1 completed job found
+          // Auto-select job only in edit mode if editData.job_id is present
+          const applyJobPeriod = (jobItem) => {
+            if (!jobItem) return;
+            const pType = jobItem.raw_job?.period_type;
+            const pDate = jobItem.raw_job?.period_date;
+            if (pType) {
+              setPeriodType(pType);
+              if (pDate) {
+                setRawDateValue(pDate);
+                setPeriodDate(pDate);
+              } else {
+                // If date was not filled in job's other data, keep date empty so user can select manually
+                setRawDateValue("");
+                setPeriodDate("");
+              }
+            }
+          };
+
           if (editData?.job_id) {
             const found = formatted.find((item) => item.value === editData.job_id);
             if (found) {
               setSelectedJob(found);
-              if (found.raw_job?.period_type && found.raw_job?.period_date) {
-                setPeriodType(found.raw_job.period_type);
-                setRawDateValue(found.raw_job.period_date);
-                setPeriodDate(found.raw_job.period_date);
-              }
-            }
-          } else if (formatted.length === 1) {
-            const onlyJob = formatted[0];
-            setSelectedJob(onlyJob);
-            if (onlyJob.raw_job?.period_type && onlyJob.raw_job?.period_date) {
-              setPeriodType(onlyJob.raw_job.period_type);
-              setRawDateValue(onlyJob.raw_job.period_date);
-              setPeriodDate(onlyJob.raw_job.period_date);
+              applyJobPeriod(found);
             }
           } else if (selectedJob) {
-            // Keep selected if still in list, else null
+            // Keep user selected job if still in list, else null
             const stillValid = formatted.find((item) => item.value === selectedJob.value);
             setSelectedJob(stillValid || null);
-            if (stillValid && stillValid.raw_job?.period_type && stillValid.raw_job?.period_date) {
-              setPeriodType(stillValid.raw_job.period_type);
-              setRawDateValue(stillValid.raw_job.period_date);
-              setPeriodDate(stillValid.raw_job.period_date);
+            if (stillValid) {
+              applyJobPeriod(stillValid);
+            } else {
+              setPeriodType("");
+              setRawDateValue("");
+              setPeriodDate("");
             }
+          } else {
+            // No auto-selection when user creates new billing: let user choose job explicitly
+            setSelectedJob(null);
+            setPeriodType("");
+            setRawDateValue("");
+            setPeriodDate("");
           }
         } else {
           setJobsList([]);
@@ -828,6 +838,98 @@ export const SubmitBilling = () => {
     const numberOfDays = Math.floor((d - oneJan) / (24 * 60 * 60 * 1000));
     const week = Math.ceil((d.getDay() + 1 + numberOfDays) / 7);
     return `${d.getFullYear()}-W${String(week).padStart(2, "0")}`;
+  };
+
+  // Helper to get fallback options for standard period types if job or service doesn't have populated dates
+  const getStandardOptionsForPeriodType = (pType) => {
+    if (!pType) return [];
+    const t = String(pType).trim().toLowerCase();
+    const currentYear = new Date().getFullYear();
+
+    // 1. Tax Year (Matching Create Job options exactly)
+    if (t === "tax year") {
+      return [
+        "2018/19", "2019/20", "2020/21", "2021/22", "2022/23",
+        "2023/24", "2024/25", "2025/26", "2026/27", "2027/28"
+      ];
+    }
+
+    // 2. Year End (Recent year ends for Accounts Production, Audit, etc.)
+    if (t === "year end" || t === "year ending") {
+      const list = [];
+      for (let y = currentYear + 1; y >= currentYear - 5; y--) {
+        list.push(`31/03/${y}`);
+        list.push(`30/04/${y}`);
+        list.push(`31/05/${y}`);
+        list.push(`31/12/${y}`);
+      }
+      return list;
+    }
+
+    // 3. Quarterly (Matching Job Other Data quarters: Q1, Q2, Q3, Q4)
+    if (t === "quarterly" || t === "quarter") {
+      const list = [];
+      for (let y = currentYear + 1; y >= currentYear - 4; y--) {
+        ["Q1", "Q2", "Q3", "Q4"].forEach(q => list.push(`${q} ${y}`));
+      }
+      return list;
+    }
+
+    // 4. Year / Yearly (Aus Compliance, Aus SMSF, etc.)
+    if (t === "year" || t === "yearly") {
+      const list = [];
+      for (let y = currentYear + 1; y >= currentYear - 5; y--) {
+        list.push(String(y));
+      }
+      return list;
+    }
+
+    // 5. Monthly (Matching Job Other Data: Month Year)
+    if (t === "monthly" || t === "month") {
+      const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const list = [];
+      for (let y = currentYear; y >= currentYear - 3; y--) {
+        for (let m = 11; m >= 0; m--) {
+          list.push(`${months[m]} ${y}`);
+        }
+      }
+      return list;
+    }
+
+    // 6. Weekly (Week, Month, Year matching Job Other Data)
+    if (t === "weekly" || t === "week") {
+      const list = [];
+      const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      for (let w = 1; w <= 4; w++) {
+        list.push(`Week ${w}, ${months[new Date().getMonth()]}, ${currentYear}`);
+      }
+      for (let w = 1; w <= 52; w++) {
+        list.push(`Week ${w}, ${currentYear}`);
+      }
+      return list;
+    }
+
+    // 7. Fortnightly (1st Half / 2nd Half, Month, Year matching Job Other Data)
+    if (t === "fortnightly" || t === "fortnight") {
+      const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const list = [];
+      for (let m = 0; m < 12; m++) {
+        list.push(`1st Half, ${months[m]}, ${currentYear}`);
+        list.push(`2nd Half, ${months[m]}, ${currentYear}`);
+      }
+      return list;
+    }
+
+    // 8. Period Ending / VAT
+    if (t === "period ending") {
+      const list = [];
+      for (let y = currentYear + 1; y >= currentYear - 3; y--) {
+        ["31/03", "30/06", "30/09", "31/12"].forEach(d => list.push(`${d}/${y}`));
+      }
+      return list;
+    }
+
+    return [];
   };
 
   // Step 2 Form State
@@ -1960,15 +2062,10 @@ export const SubmitBilling = () => {
                           setSelectedJob(null);
                           setJobsList([]);
                           resetStep3States();
-                          if (selected?.latest_period_type && selected?.latest_period_date) {
-                            setPeriodType(selected.latest_period_type);
-                            setRawDateValue(selected.latest_period_date);
-                            setPeriodDate(selected.latest_period_date);
-                          } else if (selected?.latest_year_end) {
-                            setPeriodType("Year End");
-                            setRawDateValue(selected.latest_year_end);
-                            setPeriodDate(formatPeriodDate("Year End", selected.latest_year_end));
-                          }
+                          // Period should be determined by the selected Job, so reset period on service change
+                          setPeriodType("");
+                          setRawDateValue("");
+                          setPeriodDate("");
                         }}
                         placeholder={
                           !selectedClient
@@ -1998,10 +2095,23 @@ export const SubmitBilling = () => {
                         value={selectedJob}
                         onChange={(selected) => {
                           setSelectedJob(selected);
-                          if (selected?.raw_job?.period_type && selected?.raw_job?.period_date) {
-                            setPeriodType(selected.raw_job.period_type);
-                            setRawDateValue(selected.raw_job.period_date);
-                            setPeriodDate(selected.raw_job.period_date);
+                          if (selected?.raw_job?.period_type) {
+                            const pType = selected.raw_job.period_type;
+                            const pDate = selected.raw_job.period_date;
+                            setPeriodType(pType);
+                            if (pDate) {
+                              setRawDateValue(pDate);
+                              setPeriodDate(pDate);
+                            } else {
+                              // If date was not filled in job's other data, keep date empty so user selects manually
+                              setRawDateValue("");
+                              setPeriodDate("");
+                            }
+                          } else {
+                            // If user cleared job dropdown
+                            setPeriodType("");
+                            setRawDateValue("");
+                            setPeriodDate("");
                           }
                         }}
                         placeholder={
@@ -2026,17 +2136,17 @@ export const SubmitBilling = () => {
                       ? [...selectedService.period_types]
                       : [];
 
-                    // If a job is selected and has period_type/period_date, ensure it is available in options
-                    if (selectedJob?.raw_job?.period_type && selectedJob?.raw_job?.period_date) {
+                    // If a job is selected and has period_type, ensure it is available in options
+                    if (selectedJob?.raw_job?.period_type) {
                       const jType = selectedJob.raw_job.period_type;
                       const jDate = selectedJob.raw_job.period_date;
                       let matchType = availablePeriodTypes.find(pt => pt.type === jType);
                       if (!matchType) {
                         availablePeriodTypes.unshift({
                           type: jType,
-                          dates: [jDate]
+                          dates: jDate ? [jDate] : []
                         });
-                      } else if (!matchType.dates.includes(jDate)) {
+                      } else if (jDate && !matchType.dates.includes(jDate)) {
                         matchType.dates = [jDate, ...matchType.dates];
                       }
                     }
@@ -2050,16 +2160,30 @@ export const SubmitBilling = () => {
                     }
 
                     const currentTypeObj = availablePeriodTypes.find((pt) => pt.type === periodType);
-                    let availableDates = currentTypeObj && Array.isArray(currentTypeObj.dates) ? [...currentTypeObj.dates] : [];
+                    let availableDates = [];
 
-                    // If a job is selected, ensure its period_date is included in availableDates
-                    if (selectedJob?.raw_job?.period_date && periodType === selectedJob.raw_job.period_type && !availableDates.includes(selectedJob.raw_job.period_date)) {
-                      availableDates.unshift(selectedJob.raw_job.period_date);
+                    // 1. If the selected job itself has a filled period_date, that date is the primary option
+                    if (selectedJob?.raw_job?.period_date && periodType === selectedJob.raw_job.period_type) {
+                      availableDates = [selectedJob.raw_job.period_date];
+                    } else if (currentTypeObj && Array.isArray(currentTypeObj.dates) && currentTypeObj.dates.length > 0) {
+                      availableDates = [...currentTypeObj.dates];
                     }
 
-                    // In Edit mode, ensure editData period_date is in availableDates
+                    // 2. In Edit mode, ensure editData period_date is in availableDates
                     if (editData?.period_date && !availableDates.includes(editData.period_date)) {
                       availableDates.unshift(editData.period_date);
+                    }
+
+                    // 3. Always merge standard selectable options for this period type so user can manually choose any date/year
+                    if (periodType) {
+                      const stdOptions = getStandardOptionsForPeriodType(periodType);
+                      if (stdOptions && stdOptions.length > 0) {
+                        for (const opt of stdOptions) {
+                          if (!availableDates.includes(opt)) {
+                            availableDates.push(opt);
+                          }
+                        }
+                      }
                     }
 
                     const hasJobPeriods = availablePeriodTypes.length > 0;
@@ -2073,7 +2197,7 @@ export const SubmitBilling = () => {
                           </label>
                           <select
                             className="form-select shadow-sm rounded-pill"
-                            disabled={!isServiceSelected || !hasJobPeriods}
+                            disabled={!isServiceSelected || !selectedJob}
                             value={periodType || ""}
                             onChange={(e) => {
                               const newType = e.target.value;
@@ -2084,13 +2208,17 @@ export const SubmitBilling = () => {
                                 setRawDateValue(firstVal);
                                 setPeriodDate(firstVal);
                               } else {
-                                setRawDateValue("");
-                                setPeriodDate("");
+                                const stdDates = getStandardOptionsForPeriodType(newType);
+                                const firstVal = stdDates && stdDates.length > 0 ? stdDates[0] : "";
+                                setRawDateValue(firstVal);
+                                setPeriodDate(firstVal);
                               }
                             }}
                           >
                             {!isServiceSelected ? (
                               <option value="">Please select a service first</option>
+                            ) : !selectedJob ? (
+                              <option value="">Please select a job first</option>
                             ) : !hasJobPeriods ? (
                               <option value="">No Billing Period Found</option>
                             ) : (
@@ -2110,7 +2238,7 @@ export const SubmitBilling = () => {
                           </label>
                           <select
                             className="form-select shadow-sm rounded-pill"
-                            disabled={!isServiceSelected || !hasJobPeriods || availableDates.length === 0}
+                            disabled={!isServiceSelected || !selectedJob || !periodType || availableDates.length === 0}
                             value={periodDate || ""}
                             onChange={(e) => {
                               setPeriodDate(e.target.value);
@@ -2119,14 +2247,19 @@ export const SubmitBilling = () => {
                           >
                             {!isServiceSelected ? (
                               <option value="">Please select a service first</option>
+                            ) : !selectedJob ? (
+                              <option value="">Please select a job first</option>
                             ) : availableDates.length === 0 ? (
                               <option value="">No dates available</option>
                             ) : (
-                              availableDates.map((dVal) => (
-                                <option key={dVal} value={dVal}>
-                                  {dVal}
-                                </option>
-                              ))
+                              <>
+                                <option value="">-- Select Period Date --</option>
+                                {availableDates.map((dVal) => (
+                                  <option key={dVal} value={dVal}>
+                                    {dVal}
+                                  </option>
+                                ))}
+                              </>
                             )}
                           </select>
                         </div>

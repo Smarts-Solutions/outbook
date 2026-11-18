@@ -647,8 +647,31 @@ const extractJobPeriodInfo = (job) => {
         }
     }
 
-    // Only return period info if service-specific Other Data fields had values.
-    // Do NOT fallback to date_received_on or created_at if Other Data is blank.
+    // Fallback: If service has an identifiable period type but date was not filled in Other Data,
+    // still return the period_type with period_date = null so the frontend can allow manual date selection!
+    const defaultPeriodType = getDefaultPeriodTypeByService(sId);
+    if (defaultPeriodType) {
+        return {
+            period_type: defaultPeriodType,
+            period_date: null,
+            raw_value: null
+        };
+    }
+
+    return null;
+};
+
+// Helper function to resolve default period type for any service ID
+const getDefaultPeriodTypeByService = (serviceId) => {
+    const sId = Number(serviceId);
+    if (sId === 4) return "Tax Year";
+    if (sId === 1 || sId === 27 || sId === 37 || sId === 38) return "Year End";
+    if (sId === 2 || sId === 32) return "Monthly";
+    if (sId === 3 || sId === 31) return "Monthly";
+    if (sId === 8) return "Period Ending";
+    if (sId === 6) return "Management Accounts";
+    if (sId === 28 || sId === 33) return "Year";
+    if (sId === 5 || sId === 7 || sId === 29 || sId === 30) return "Date Received";
     return null;
 };
 
@@ -957,17 +980,15 @@ const getServicesByClient = async (clientId, StaffUserId = null) => {
             const sId = job.service_id;
             const periodInfo = extractJobPeriodInfo(job);
 
-            // If this job has no Other Data period/date, skip this job
-            if (!periodInfo || !periodInfo.period_type || !periodInfo.period_date) {
-                continue;
-            }
+            const pType = periodInfo?.period_type || getDefaultPeriodTypeByService(sId) || null;
+            const pDate = periodInfo?.period_date || null;
 
             if (!serviceMap.has(sId)) {
                 serviceMap.set(sId, {
                     service_id: sId,
                     service_name: job.service_name,
-                    latest_period_type: periodInfo.period_type,
-                    latest_period_date: periodInfo.period_date,
+                    latest_period_type: pType,
+                    latest_period_date: pDate,
                     // Structure: { [period_type]: [period_date1, period_date2, ...] }
                     period_types: {},
                     period_options: [] // flat list of { period_type, period_date, job_id }
@@ -975,21 +996,29 @@ const getServicesByClient = async (clientId, StaffUserId = null) => {
             }
 
             const sObj = serviceMap.get(sId);
-            const pType = periodInfo.period_type;
-            const pDate = periodInfo.period_date;
-
-            if (!sObj.period_types[pType]) {
-                sObj.period_types[pType] = [];
+            if (!sObj.latest_period_type && pType) {
+                sObj.latest_period_type = pType;
             }
-            if (!sObj.period_types[pType].includes(pDate)) {
-                sObj.period_types[pType].push(pDate);
+            if (!sObj.latest_period_date && pDate) {
+                sObj.latest_period_date = pDate;
             }
 
-            sObj.period_options.push({
-                job_id: job.id,
-                period_type: pType,
-                period_date: pDate
-            });
+            if (pType) {
+                if (!sObj.period_types[pType]) {
+                    sObj.period_types[pType] = [];
+                }
+                if (pDate && !sObj.period_types[pType].includes(pDate)) {
+                    sObj.period_types[pType].push(pDate);
+                }
+            }
+
+            if (pType || pDate) {
+                sObj.period_options.push({
+                    job_id: job.id,
+                    period_type: pType,
+                    period_date: pDate
+                });
+            }
         }
 
         // Only return services that have at least one valid period/date from their jobs!
