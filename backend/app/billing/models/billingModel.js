@@ -435,86 +435,6 @@ const getClientsByCustomer = async (customerId, StaffUserId = null, search = '',
     }
 };
 
-// 5. Get Jobs for a Customer and/or Client
-const getJobsByCustomerOrClient = async (customerId, clientId = null) => {
-    try {
-        if (!customerId && !clientId) return { status: true, data: [] };
-
-        let query = `
-            SELECT 
-                j.id AS job_id,
-                j.customer_id,
-                j.client_id,
-                j.service_id,
-                j.job_type_id,
-                j.job_id AS raw_job_id,
-                j.client_job_code,
-                s.name AS service_name,
-                jt.type AS job_type_name,
-                CONCAT(
-                    SUBSTRING(c.trading_name, 1, 3), '_',
-                    SUBSTRING(cl.trading_name, 1, 3), '_',
-                    SUBSTRING(jt.type, 1, 4), '_',
-                    SUBSTRING(j.job_id, 1, 15)
-                ) AS job_code_id
-            FROM jobs j
-            LEFT JOIN customers c ON j.customer_id = c.id
-            LEFT JOIN clients cl ON j.client_id = cl.id
-            LEFT JOIN services s ON j.service_id = s.id
-            LEFT JOIN job_types jt ON j.job_type_id = jt.id
-            WHERE 1 = 1
-        `;
-        const params = [];
-
-        if (customerId) {
-            query += ` AND j.customer_id = ?`;
-            params.push(customerId);
-        }
-        if (clientId) {
-            query += ` AND j.client_id = ?`;
-            params.push(clientId);
-        }
-
-        query += ` ORDER BY j.id DESC`;
-
-        const [rows] = await pool.execute(query, params);
-        return { status: true, data: rows };
-    } catch (error) {
-        console.error("Error fetching jobs for billing:", error);
-        return { status: false, message: error.message };
-    }
-};
-
-// 6. Get Services (all active)
-const getAllActiveServices = async () => {
-    try {
-        const query = `SELECT id, name FROM services WHERE deleted = '0' ORDER BY name ASC`;
-        const [rows] = await pool.execute(query);
-        return { status: true, data: rows };
-    } catch (error) {
-        console.error("Error fetching services:", error);
-        return { status: false, message: error.message };
-    }
-};
-
-// 7. Get Job Types (optionally filtered by service_id)
-const getJobTypesByService = async (serviceId = null) => {
-    try {
-        let query = `SELECT id, service_id, type FROM job_types WHERE 1 = 1`;
-        const params = [];
-        if (serviceId) {
-            query += ` AND service_id = ?`;
-            params.push(serviceId);
-        }
-        query += ` ORDER BY type ASC`;
-        const [rows] = await pool.execute(query, params);
-        return { status: true, data: rows };
-    } catch (error) {
-        console.error("Error fetching job types:", error);
-        return { status: false, message: error.message };
-    }
-};
-
 // Helper to format any date or date range to dd/mm/yyyy
 const formatDateToDDMMYYYY = (val) => {
     if (!val) return val;
@@ -730,6 +650,223 @@ const extractJobPeriodInfo = (job) => {
     // Only return period info if service-specific Other Data fields had values.
     // Do NOT fallback to date_received_on or created_at if Other Data is blank.
     return null;
+};
+
+
+// 5. Get Jobs for a Customer and/or Client (with optional service, staff access control & status filtering)
+const getJobsByCustomerOrClient = async (customerId, clientId = null, serviceId = null, StaffUserId = null, statusType = '6') => {
+    try {
+        if (!customerId && !clientId) return { status: true, data: [] };
+
+        // Check staff permissions if StaffUserId is provided
+        let canViewAllJobs = false;
+        if (!StaffUserId) {
+            canViewAllJobs = true;
+        } else {
+            const rows = await QueryRoleHelperFunction(StaffUserId);
+            const [RoleAccess] = await pool.execute(
+                'SELECT * FROM `role_permissions` WHERE role_id = ? AND permission_id = ?',
+                [rows[0]?.role_id || 0, 35]
+            );
+            if (rows.length > 0 && (rows[0].role_name === 'SUPERADMIN' || RoleAccess.length > 0)) {
+                canViewAllJobs = true;
+            }
+        }
+
+        const jobCodeExpr = `
+            CONCAT(
+                SUBSTRING(IFNULL(c.trading_name, ''), 1, 3), '_',
+                SUBSTRING(IFNULL(cl.trading_name, ''), 1, 3), '_',
+                SUBSTRING(IFNULL(jt.type, ''), 1, 4), '_',
+                SUBSTRING(IFNULL(j.job_id, ''), 1, 15)
+            )
+        `;
+
+        if (canViewAllJobs) {
+            let query = `
+                SELECT 
+                    j.*,
+                    j.id AS job_id,
+                    j.customer_id,
+                    j.client_id,
+                    j.service_id,
+                    j.job_type_id,
+                    j.job_id AS raw_job_id,
+                    j.client_job_code,
+                    j.status_type,
+                    ms.name AS status_name,
+                    s.name AS service_name,
+                    jt.type AS job_type_name,
+                    ${jobCodeExpr} AS job_code_id
+                FROM jobs j
+                LEFT JOIN customers c ON j.customer_id = c.id
+                LEFT JOIN clients cl ON j.client_id = cl.id
+                LEFT JOIN services s ON j.service_id = s.id
+                LEFT JOIN job_types jt ON j.job_type_id = jt.id
+                LEFT JOIN master_status ms ON j.status_type = ms.id
+                WHERE 1 = 1
+            `;
+            const params = [];
+
+            if (customerId) {
+                query += ` AND j.customer_id = ?`;
+                params.push(customerId);
+            }
+            if (clientId) {
+                query += ` AND j.client_id = ?`;
+                params.push(clientId);
+            }
+            if (serviceId) {
+                query += ` AND j.service_id = ?`;
+                params.push(serviceId);
+            }
+            if (statusType) {
+                if (Array.isArray(statusType)) {
+                    const placeholders = statusType.map(() => '?').join(',');
+                    query += ` AND j.status_type IN (${placeholders})`;
+                    params.push(...statusType);
+                } else if (String(statusType).toLowerCase() !== 'all') {
+                    query += ` AND j.status_type = ?`;
+                    params.push(statusType);
+                }
+            }
+
+            query += ` ORDER BY j.id DESC`;
+
+            const [rows] = await pool.execute(query, params);
+            const enriched = rows.map((job) => {
+                const periodInfo = extractJobPeriodInfo(job);
+                return {
+                    ...job,
+                    period_type: periodInfo?.period_type || null,
+                    period_date: periodInfo?.period_date || null,
+                    period_raw: periodInfo?.raw_value || null,
+                };
+            });
+            return { status: true, data: enriched };
+        } else {
+            // Other Staff roles: Filter jobs strictly visible to this staff via LineManager hierarchy and temporary assigned jobs table
+            const LineManageStaffId = await getLineManageStaffIdsSafe(StaffUserId);
+            const lineManagerIds = (LineManageStaffId && LineManageStaffId.length > 0) ? LineManageStaffId.join(',') : '0';
+
+            const connection = await pool.getConnection();
+            try {
+                await buildAssignedJobsTempTable(connection, LineManageStaffId);
+
+                let query = `
+                    SELECT 
+                        j.*,
+                        j.id AS job_id,
+                        j.customer_id,
+                        j.client_id,
+                        j.service_id,
+                        j.job_type_id,
+                        j.job_id AS raw_job_id,
+                        j.client_job_code,
+                        j.status_type,
+                        ms.name AS status_name,
+                        s.name AS service_name,
+                        jt.type AS job_type_name,
+                        ${jobCodeExpr} AS job_code_id
+                    FROM jobs j
+                    LEFT JOIN customers c ON j.customer_id = c.id
+                    LEFT JOIN clients cl ON j.client_id = cl.id
+                    LEFT JOIN services s ON j.service_id = s.id
+                    LEFT JOIN job_types jt ON j.job_type_id = jt.id
+                    LEFT JOIN master_status ms ON j.status_type = ms.id
+                    LEFT JOIN temp_assigned_jobs_staff 
+                        ON temp_assigned_jobs_staff.job_id = j.id 
+                        AND temp_assigned_jobs_staff.staff_id IN (${lineManagerIds})
+                    WHERE 1 = 1
+                      AND (
+                        temp_assigned_jobs_staff.staff_id IN (${lineManagerIds})
+                        OR j.staff_created_id IN (${lineManagerIds})
+                        OR cl.staff_created_id IN (${lineManagerIds})
+                        OR c.staff_id IN (${lineManagerIds})
+                        OR c.account_manager_id IN (${lineManagerIds})
+                      )
+                      AND (
+                        (temp_assigned_jobs_staff.source IS NULL OR temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci)
+                        OR j.service_id = temp_assigned_jobs_staff.service_id_assign
+                      )
+                `;
+
+                const params = [];
+
+                if (customerId) {
+                    query += ` AND j.customer_id = ?`;
+                    params.push(customerId);
+                }
+                if (clientId) {
+                    query += ` AND j.client_id = ?`;
+                    params.push(clientId);
+                }
+                if (serviceId) {
+                    query += ` AND j.service_id = ?`;
+                    params.push(serviceId);
+                }
+                if (statusType) {
+                    if (Array.isArray(statusType)) {
+                        const placeholders = statusType.map(() => '?').join(',');
+                        query += ` AND j.status_type IN (${placeholders})`;
+                        params.push(...statusType);
+                    } else if (String(statusType).toLowerCase() !== 'all') {
+                        query += ` AND j.status_type = ?`;
+                        params.push(statusType);
+                    }
+                }
+
+                query += ` GROUP BY j.id ORDER BY j.id DESC`;
+
+                const [rows] = await connection.execute(query, params);
+                const enriched = rows.map((job) => {
+                    const periodInfo = extractJobPeriodInfo(job);
+                    return {
+                        ...job,
+                        period_type: periodInfo?.period_type || null,
+                        period_date: periodInfo?.period_date || null,
+                        period_raw: periodInfo?.raw_value || null,
+                    };
+                });
+                return { status: true, data: enriched };
+            } finally {
+                connection.release();
+            }
+        }
+    } catch (error) {
+        console.error("Error fetching jobs for billing:", error);
+        return { status: false, message: error.message };
+    }
+};
+
+// 6. Get Services (all active)
+const getAllActiveServices = async () => {
+    try {
+        const query = `SELECT id, name FROM services WHERE deleted = '0' ORDER BY name ASC`;
+        const [rows] = await pool.execute(query);
+        return { status: true, data: rows };
+    } catch (error) {
+        console.error("Error fetching services:", error);
+        return { status: false, message: error.message };
+    }
+};
+
+// 7. Get Job Types (optionally filtered by service_id)
+const getJobTypesByService = async (serviceId = null) => {
+    try {
+        let query = `SELECT id, service_id, type FROM job_types WHERE 1 = 1`;
+        const params = [];
+        if (serviceId) {
+            query += ` AND service_id = ?`;
+            params.push(serviceId);
+        }
+        query += ` ORDER BY type ASC`;
+        const [rows] = await pool.execute(query, params);
+        return { status: true, data: rows };
+    } catch (error) {
+        console.error("Error fetching job types:", error);
+        return { status: false, message: error.message };
+    }
 };
 
 // 8. Get Services from existing jobs for a given client with dynamic period types and dates

@@ -664,6 +664,112 @@ export const SubmitBilling = () => {
     fetchClientServices();
   }, [selectedClient]);
 
+  // Fetch Completed Jobs when Customer, Client, and Service are selected
+  useEffect(() => {
+    if (!practice?.value || !selectedClient?.value || !selectedService?.value) {
+      setJobsList([]);
+      setSelectedJob(null);
+      return;
+    }
+
+    let isSubscribed = true;
+    const fetchCompletedJobs = async () => {
+      try {
+        setLoadingJobs(true);
+        const staffDetailsStr = localStorage.getItem("staffDetails");
+        const staffDetails = staffDetailsStr ? JSON.parse(staffDetailsStr) : null;
+        const currentStaffId = staffDetails?.id || staffDetails?.staff_id;
+
+        const res = await getJobsBilling(
+          {
+            customer_id: practice.value,
+            client_id: selectedClient.value,
+            service_id: selectedService.value,
+            StaffUserId: currentStaffId,
+            status_type: "6", // Only Completed - Completed
+          },
+          getAuthToken()
+        );
+
+        if (!isSubscribed) return;
+
+        if (res && res.status && Array.isArray(res.data)) {
+          const formatted = res.data.map((j) => {
+            let label = j.job_code_id || ("Job #" + j.job_id);
+            if (j.client_job_code) {
+              label += ` (${j.client_job_code})`;
+            }
+            if (j.job_type_name) {
+              label += ` - ${j.job_type_name}`;
+            }
+            return {
+              value: j.job_id,
+              label: label,
+              raw_job: j,
+            };
+          });
+
+          // If editing and editData has job_id not currently in list, keep it
+          if (editData?.job_id && !formatted.some((item) => item.value === editData.job_id)) {
+            formatted.unshift({
+              value: editData.job_id,
+              label: editData.job_name || ("Job #" + editData.job_id),
+            });
+          }
+
+          setJobsList(formatted);
+
+          // Auto-select if editData has job_id or if exactly 1 completed job found
+          if (editData?.job_id) {
+            const found = formatted.find((item) => item.value === editData.job_id);
+            if (found) {
+              setSelectedJob(found);
+              if (found.raw_job?.period_type && found.raw_job?.period_date) {
+                setPeriodType(found.raw_job.period_type);
+                setRawDateValue(found.raw_job.period_date);
+                setPeriodDate(found.raw_job.period_date);
+              }
+            }
+          } else if (formatted.length === 1) {
+            const onlyJob = formatted[0];
+            setSelectedJob(onlyJob);
+            if (onlyJob.raw_job?.period_type && onlyJob.raw_job?.period_date) {
+              setPeriodType(onlyJob.raw_job.period_type);
+              setRawDateValue(onlyJob.raw_job.period_date);
+              setPeriodDate(onlyJob.raw_job.period_date);
+            }
+          } else if (selectedJob) {
+            // Keep selected if still in list, else null
+            const stillValid = formatted.find((item) => item.value === selectedJob.value);
+            setSelectedJob(stillValid || null);
+            if (stillValid && stillValid.raw_job?.period_type && stillValid.raw_job?.period_date) {
+              setPeriodType(stillValid.raw_job.period_type);
+              setRawDateValue(stillValid.raw_job.period_date);
+              setPeriodDate(stillValid.raw_job.period_date);
+            }
+          }
+        } else {
+          setJobsList([]);
+          setSelectedJob(null);
+        }
+      } catch (err) {
+        console.error("Error fetching completed jobs:", err);
+        if (isSubscribed) {
+          setJobsList([]);
+          setSelectedJob(null);
+        }
+      } finally {
+        if (isSubscribed) setLoadingJobs(false);
+      }
+    };
+
+    fetchCompletedJobs();
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [practice, selectedClient, selectedService]);
+
   // Format helper for dynamic calendar / period dates
   const formatPeriodDate = (type, val) => {
     if (!val) return "";
@@ -1784,10 +1890,10 @@ export const SubmitBilling = () => {
                     </div>
                   </div>
 
-                  {/* Form fields: Client Name & Service Type (from client's jobs) */}
+                  {/* Form fields: Client Name, Service Type, and Job Dropdown */}
                   <div className="row g-4 mb-4">
                     {/* Client Name Dropdown */}
-                    <div className="col-lg-6 col-md-6">
+                    <div className="col-lg-4 col-md-6">
                       <label className="form-label text-muted small mb-1 fw-medium">
                         Client Name
                       </label>
@@ -1803,6 +1909,8 @@ export const SubmitBilling = () => {
                         onChange={(selected) => {
                           setSelectedClient(selected);
                           setSelectedService(null);
+                          setSelectedJob(null);
+                          setJobsList([]);
                           resetStep3States();
                         }}
                         onInputChange={(val, actionMeta) => handleClientSearch(val, actionMeta)}
@@ -1834,7 +1942,7 @@ export const SubmitBilling = () => {
                     </div>
 
                     {/* Services Dropdown (populated from client's jobs) */}
-                    <div className="col-lg-6 col-md-6">
+                    <div className="col-lg-4 col-md-6">
                       <label className="form-label text-muted small mb-1 fw-medium">
                         Service
                       </label>
@@ -1849,6 +1957,8 @@ export const SubmitBilling = () => {
                         value={selectedService}
                         onChange={(selected) => {
                           setSelectedService(selected);
+                          setSelectedJob(null);
+                          setJobsList([]);
                           resetStep3States();
                           if (selected?.latest_period_type && selected?.latest_period_date) {
                             setPeriodType(selected.latest_period_type);
@@ -1871,14 +1981,65 @@ export const SubmitBilling = () => {
                         }
                       />
                     </div>
+
+                    {/* Job Dropdown (Filtered to Completed Jobs for selected Customer, Client & Service with Staff Access) */}
+                    <div className="col-lg-4 col-md-12">
+                      <label className="form-label text-muted small mb-1 fw-medium">
+                        Job
+                      </label>
+                      <Select
+                        isClearable={true}
+                        closeMenuOnSelect={true}
+                        className="shadow-sm select-staff rounded-pill"
+                        isSearchable={true}
+                        isLoading={loadingJobs}
+                        isDisabled={!selectedService || loadingJobs}
+                        options={jobsList}
+                        value={selectedJob}
+                        onChange={(selected) => {
+                          setSelectedJob(selected);
+                          if (selected?.raw_job?.period_type && selected?.raw_job?.period_date) {
+                            setPeriodType(selected.raw_job.period_type);
+                            setRawDateValue(selected.raw_job.period_date);
+                            setPeriodDate(selected.raw_job.period_date);
+                          }
+                        }}
+                        placeholder={
+                          !selectedClient
+                            ? "Select client first..."
+                            : !selectedService
+                              ? "Select service first..."
+                              : loadingJobs
+                                ? "Loading completed jobs..."
+                                : jobsList.length === 0
+                                  ? "No completed jobs found"
+                                  : "Select Job..."
+                        }
+                      />
+                    </div>
                   </div>
 
                   {/* Billing Period row */}
                   {(() => {
                     const isServiceSelected = Boolean(selectedService && selectedService.value);
-                    const availablePeriodTypes = selectedService?.period_types && selectedService.period_types.length > 0
+                    let availablePeriodTypes = selectedService?.period_types && selectedService.period_types.length > 0
                       ? [...selectedService.period_types]
                       : [];
+
+                    // If a job is selected and has period_type/period_date, ensure it is available in options
+                    if (selectedJob?.raw_job?.period_type && selectedJob?.raw_job?.period_date) {
+                      const jType = selectedJob.raw_job.period_type;
+                      const jDate = selectedJob.raw_job.period_date;
+                      let matchType = availablePeriodTypes.find(pt => pt.type === jType);
+                      if (!matchType) {
+                        availablePeriodTypes.unshift({
+                          type: jType,
+                          dates: [jDate]
+                        });
+                      } else if (!matchType.dates.includes(jDate)) {
+                        matchType.dates = [jDate, ...matchType.dates];
+                      }
+                    }
 
                     // In Edit mode, if editData period_type is not in the list, ensure it's available
                     if (editData?.period_type && !availablePeriodTypes.some(pt => pt.type === editData.period_type)) {
@@ -1890,6 +2051,11 @@ export const SubmitBilling = () => {
 
                     const currentTypeObj = availablePeriodTypes.find((pt) => pt.type === periodType);
                     let availableDates = currentTypeObj && Array.isArray(currentTypeObj.dates) ? [...currentTypeObj.dates] : [];
+
+                    // If a job is selected, ensure its period_date is included in availableDates
+                    if (selectedJob?.raw_job?.period_date && periodType === selectedJob.raw_job.period_type && !availableDates.includes(selectedJob.raw_job.period_date)) {
+                      availableDates.unshift(selectedJob.raw_job.period_date);
+                    }
 
                     // In Edit mode, ensure editData period_date is in availableDates
                     if (editData?.period_date && !availableDates.includes(editData.period_date)) {

@@ -122,7 +122,11 @@ const getJobs = async (req, res) => {
     try {
         const customerId = req.body?.customer_id || req.query?.customer_id || null;
         const clientId = req.body?.client_id || req.query?.client_id || null;
-        const result = await billingModel.getJobsByCustomerOrClient(customerId, clientId);
+        const serviceId = req.body?.service_id || req.query?.service_id || null;
+        const staffUserId = req.body?.StaffUserId || req.userId || req.user?.id || null;
+        const statusType = req.body?.status_type || req.query?.status_type || '6';
+
+        const result = await billingModel.getJobsByCustomerOrClient(customerId, clientId, serviceId, staffUserId, statusType);
         if (!result.status) {
             return res.status(500).json({ status: false, message: result.message });
         }
