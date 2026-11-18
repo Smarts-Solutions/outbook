@@ -2192,6 +2192,64 @@ const markSubmissionBilled = async (submissionId, staffUserId, billNumber, billD
     }
 };
 
+// 14.b Bulk Mark Submissions as Billed
+const markSubmissionsBulkBilled = async (submissionIds, staffUserId, billNumber, billDate, dueDate = null) => {
+    try {
+        if (!Array.isArray(submissionIds) || submissionIds.length === 0) {
+            return { status: false, message: 'Please select at least one submission to bill.' };
+        }
+        if (!billDate) {
+            return { status: false, message: 'Bill date is required.' };
+        }
+
+        const calculatedDueDate = dueDate || new Date(new Date(billDate).getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        const placeholders = submissionIds.map(() => '?').join(',');
+
+        let query = ``;
+        let params = [];
+
+        if (billNumber && billNumber.trim()) {
+            query = `UPDATE billing_submissions 
+                     SET status = 'Invoiced',
+                         nomisma_bill_number = ?,
+                         nomisma_bill_date = ?,
+                         due_date = ?,
+                         cc_approved_by = ?,
+                         cc_approved_at = NOW(),
+                         updated_at = NOW()
+                     WHERE id IN (${placeholders}) AND status IN ('Pending Credit Control Approval', 'Approved')`;
+            params = [billNumber.trim(), billDate, calculatedDueDate, staffUserId, ...submissionIds];
+        } else {
+            // Auto-generate INV-<id> for each if common billNumber is blank
+            query = `UPDATE billing_submissions 
+                     SET status = 'Invoiced',
+                         nomisma_bill_number = CONCAT('INV-', id),
+                         nomisma_bill_date = ?,
+                         due_date = ?,
+                         cc_approved_by = ?,
+                         cc_approved_at = NOW(),
+                         updated_at = NOW()
+                     WHERE id IN (${placeholders}) AND status IN ('Pending Credit Control Approval', 'Approved')`;
+            params = [billDate, calculatedDueDate, staffUserId, ...submissionIds];
+        }
+
+        const [result] = await pool.execute(query, params);
+
+        if (result.affectedRows === 0) {
+            return { status: false, message: 'No eligible submissions were updated. They may already be billed or not approved yet.' };
+        }
+
+        return {
+            status: true,
+            message: `${result.affectedRows} ${result.affectedRows === 1 ? 'bill' : 'bills'} generated and marked as invoiced successfully.`,
+            data: { updatedCount: result.affectedRows }
+        };
+    } catch (error) {
+        console.error('Error in bulk marking submissions as billed:', error);
+        return { status: false, message: error.message };
+    }
+};
+
 // 15. Record or Clear Payment for Invoiced Submission
 const recordInvoicePayment = async (submissionId, staffUserId, paidDate = null) => {
     try {
@@ -2372,6 +2430,7 @@ module.exports = {
     managerRejectSubmission,
     managerEditSubmission,
     markSubmissionBilled,
+    markSubmissionsBulkBilled,
     recordInvoicePayment,
     checkApproverAccess,
     getBillingDashboardMetrics

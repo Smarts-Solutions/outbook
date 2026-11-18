@@ -45,7 +45,7 @@ const BillingDatatable = ({
   const processedColumns = useMemo(() => {
     const hasSno = columns.some(
       (c) =>
-        c.name &&
+        typeof c?.name === "string" &&
         ["s.no", "s. no", "sno", "sr.no", "#"].includes(
           c.name.trim().toLowerCase()
         )
@@ -77,7 +77,8 @@ const BillingDatatable = ({
 
   // Helper to extract clean value for export
   const getCellValue = (row, col, rowIndex) => {
-    if (col.name?.toLowerCase() === "s.no") {
+    const colNameStr = typeof col.name === "string" ? col.name.trim().toLowerCase() : "";
+    if (colNameStr === "s.no") {
       return String(rowIndex + 1);
     }
     if (typeof col.selector === "function") {
@@ -88,9 +89,9 @@ const BillingDatatable = ({
         // ignore
       }
     }
-    const colKey = col.id || col.name?.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const colKey = col.id || (typeof col.name === "string" ? col.name.toLowerCase().replace(/[^a-z0-9]/g, "") : "");
     for (const k of Object.keys(row)) {
-      if (k.toLowerCase().replace(/[^a-z0-9]/g, "") === colKey) {
+      if (colKey && k.toLowerCase().replace(/[^a-z0-9]/g, "") === colKey) {
         return row[k] !== undefined && row[k] !== null ? String(row[k]) : "";
       }
     }
@@ -100,7 +101,7 @@ const BillingDatatable = ({
   const getCleanExportData = () => {
     const validCols = processedColumns.filter(
       (c) =>
-        c.name &&
+        typeof c.name === "string" &&
         !["action", "actions", ""].includes(c.name.trim().toLowerCase())
     );
 
@@ -138,12 +139,8 @@ const BillingDatatable = ({
 
   const lastIndex = processedColumns.length - 1;
   let actionColumn = false;
-  if (
-    [
-      "actions",
-      "action",
-    ].includes(processedColumns[lastIndex]?.name?.toLowerCase())
-  ) {
+  const lastColName = typeof processedColumns[lastIndex]?.name === "string" ? processedColumns[lastIndex]?.name?.toLowerCase() : "";
+  if (["actions", "action"].includes(lastColName)) {
     actionColumn = true;
   }
 

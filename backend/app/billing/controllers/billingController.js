@@ -385,17 +385,31 @@ const managerEditSubmission = async (req, res) => {
     }
 };
 
-// 14. Mark Submission as Billed Controller
+// 14. Mark Submission as Billed Controller (Supports Single & Bulk)
 const markSubmissionBilled = async (req, res) => {
     try {
         const staffUserId = req.body?.StaffUserId || req.userId || req.user?.id || null;
         const submissionId = req.body?.submission_id || req.params?.id || null;
+        const submissionIds = req.body?.submission_ids || null;
         const billNumber = req.body?.bill_number || req.body?.billNumber || '';
         const billDate = req.body?.bill_date || req.body?.billDate || '';
         const dueDate = req.body?.due_date || req.body?.dueDate || null;
 
+        // If bulk submissionIds provided
+        if (Array.isArray(submissionIds) && submissionIds.length > 0) {
+            const result = await billingModel.markSubmissionsBulkBilled(submissionIds, staffUserId, billNumber, billDate, dueDate);
+            if (!result.status) {
+                return res.status(400).json({ status: false, message: result.message });
+            }
+            return res.status(200).json({
+                status: true,
+                message: result.message,
+                data: result.data
+            });
+        }
+
         if (!submissionId) {
-            return res.status(400).json({ status: false, message: "submission_id is required" });
+            return res.status(400).json({ status: false, message: "submission_id or submission_ids is required" });
         }
 
         const result = await billingModel.markSubmissionBilled(submissionId, staffUserId, billNumber, billDate, dueDate);

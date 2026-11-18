@@ -13,6 +13,7 @@ const CreditControl = () => {
   const [readyToInvoiceList, setReadyToInvoiceList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [viewDetailsModal, setViewDetailsModal] = useState(null);
+  const [selectedSubmissionIds, setSelectedSubmissionIds] = useState([]);
   const billingMonth = "Sep-26";
 
   const staffDetailsStr = localStorage.getItem("staffDetails");
@@ -42,6 +43,7 @@ const CreditControl = () => {
           return st === "pending credit control approval" || st === "approved";
         });
         setReadyToInvoiceList(approvedForCredit);
+        setSelectedSubmissionIds((prev) => prev.filter((id) => approvedForCredit.some((item) => item.id === id)));
 
         // 2. Invoiced Register: entries that have been billed / invoiced
         const invoicedList = res.data
@@ -157,6 +159,7 @@ const CreditControl = () => {
             text: `Invoice #${formValues.billNumber} generated successfully and moved to Invoice Register.`,
             confirmButtonColor: "#26bdf0",
           });
+          setSelectedSubmissionIds((prev) => prev.filter((id) => id !== row.id));
           fetchCreditControlSubmissions();
         } else {
           sweatalert.fire({
@@ -168,6 +171,93 @@ const CreditControl = () => {
         }
       } catch (err) {
         console.error("Generate bill error:", err);
+      }
+    }
+  };
+
+  // Bulk Generate Bill for selected rows
+  const handleBulkGenerateBill = async () => {
+    if (!selectedSubmissionIds.length) {
+      sweatalert.fire({
+        icon: "warning",
+        title: "No Rows Selected",
+        text: "Please select at least one row from Ready To Invoice table.",
+        confirmButtonColor: "#26bdf0",
+      });
+      return;
+    }
+
+    const selectedRows = readyToInvoiceList.filter((r) => selectedSubmissionIds.includes(r.id));
+    const totalAmount = selectedRows.reduce((acc, r) => acc + parseFloat(r.net_amount || 0), 0);
+    const today = new Date().toISOString().split("T")[0];
+    const defaultBillNum = `INV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const { value: formValues, isConfirmed } = await sweatalert.fire({
+      title: `Bulk Generate Bills (${selectedRows.length} Items)`,
+      html: `
+        <div class="text-start fs-13 mb-3 p-2 rounded" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
+          <div class="mb-1"><strong>Selected Bills:</strong> ${selectedRows.length} items</div>
+          <div class="mb-1"><strong>Combined Net Amount:</strong> £${totalAmount.toFixed(2)}</div>
+          <div class="text-muted" style="font-size: 11.5px;">All selected submissions will be marked as invoiced with the specified bill date and invoice prefix/number.</div>
+        </div>
+        <div class="text-start mb-2">
+          <label class="form-label small fw-bold mb-1">Common Bill / Invoice # (or Prefix) *</label>
+          <input id="swal-bulk-bill-num" class="form-control form-control-sm" value="${defaultBillNum}" placeholder="e.g. ${defaultBillNum}" />
+          <span class="text-muted" style="font-size: 11px;">Single bill # will apply to all, or leave formatted for batch group</span>
+        </div>
+        <div class="text-start">
+          <label class="form-label small fw-bold mb-1">Bill Date *</label>
+          <input id="swal-bulk-bill-date" type="date" class="form-control form-control-sm" value="${today}" />
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: `Generate Bills (${selectedRows.length})`,
+      confirmButtonColor: "#26bdf0",
+      cancelButtonText: "Cancel",
+      preConfirm: () => {
+        const billNumber = document.getElementById("swal-bulk-bill-num").value;
+        const billDate = document.getElementById("swal-bulk-bill-date").value;
+        if (!billNumber || !billNumber.trim()) {
+          sweatalert.showValidationMessage("Please enter a Bill Number or Prefix!");
+          return false;
+        }
+        if (!billDate) {
+          sweatalert.showValidationMessage("Please select a Bill Date!");
+          return false;
+        }
+        return { billNumber: billNumber.trim(), billDate };
+      },
+    });
+
+    if (isConfirmed && formValues) {
+      try {
+        const payload = {
+          StaffUserId: staffDetails?.id || null,
+          submission_ids: selectedSubmissionIds,
+          billNumber: formValues.billNumber,
+          billDate: formValues.billDate,
+        };
+
+        const res = await markSubmissionBilledApi(payload, getAuthToken());
+        if (res && res.status) {
+          sweatalert.fire({
+            icon: "success",
+            title: "Bulk Invoices Raised!",
+            text: res.message || `${selectedRows.length} bills generated successfully and moved to Invoice Register.`,
+            confirmButtonColor: "#26bdf0",
+          });
+          setSelectedSubmissionIds([]);
+          fetchCreditControlSubmissions();
+        } else {
+          sweatalert.fire({
+            icon: "error",
+            title: "Failed",
+            text: res?.message || "Could not raise bulk invoices.",
+            confirmButtonColor: "#26bdf0",
+          });
+        }
+      } catch (err) {
+        console.error("Bulk generate bill error:", err);
       }
     }
   };
@@ -240,7 +330,56 @@ const CreditControl = () => {
   };
 
   // Ready To Invoice Datatable Columns matching Approvals standard
+  const isAllReadySelected = readyToInvoiceList.length > 0 && selectedSubmissionIds.length === readyToInvoiceList.length;
+  const isIndeterminate = selectedSubmissionIds.length > 0 && !isAllReadySelected;
+
+  const handleSelectAllToggle = () => {
+    if (isAllReadySelected) {
+      setSelectedSubmissionIds([]);
+    } else {
+      setSelectedSubmissionIds(readyToInvoiceList.map((r) => r.id));
+    }
+  };
+
+  const handleRowCheckboxToggle = (rowId) => {
+    setSelectedSubmissionIds((prev) =>
+      prev.includes(rowId) ? prev.filter((id) => id !== rowId) : [...prev, rowId]
+    );
+  };
+
   const readyColumns = [
+    {
+      name: (
+        <div className="d-flex align-items-center justify-content-center w-100" title="Select All">
+          <input
+            type="checkbox"
+            className="form-check-input mt-0 cursor-pointer"
+            style={{ width: "16px", height: "16px", cursor: "pointer" }}
+            checked={isAllReadySelected}
+            ref={(el) => {
+              if (el) el.indeterminate = isIndeterminate;
+            }}
+            onChange={handleSelectAllToggle}
+          />
+        </div>
+      ),
+      width: "55px",
+      minWidth: "55px",
+      sortable: false,
+      ignoreRowClick: true,
+      cell: (row) => (
+        <div className="d-flex align-items-center justify-content-center w-100">
+          <input
+            type="checkbox"
+            className="form-check-input mt-0 cursor-pointer"
+            style={{ width: "16px", height: "16px", cursor: "pointer" }}
+            checked={selectedSubmissionIds.includes(row.id)}
+            onChange={() => handleRowCheckboxToggle(row.id)}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      ),
+    },
     {
       name: "Submitted By",
       selector: (row) => row.submitted_by_name,
@@ -415,15 +554,17 @@ const CreditControl = () => {
             <i className="ti-eye text-primary" />
           </button>
 
-          {/* Raise Bill Button */}
-          <button
-            type="button"
-            className="btn btn-sm btn-info text-white py-1 px-3 fs-12 rounded-pill shadow-xs d-inline-flex align-items-center gap-1 fw-medium text-nowrap"
-            style={{ whiteSpace: "nowrap" }}
-            onClick={() => handleGenerateBill(row)}
-          >
-            <FileText size={13} className="flex-shrink-0" /> Generate Bill
-          </button>
+          {/* Raise Bill Button - only visible if 0 or 1 row is selected. If multiple (>1) selected, individual button hides and top bulk button is used */}
+          {selectedSubmissionIds.length <= 1 && (
+            <button
+              type="button"
+              className="btn btn-sm btn-info text-white py-1 px-3 fs-12 rounded-pill shadow-xs d-inline-flex align-items-center gap-1 fw-medium text-nowrap"
+              style={{ whiteSpace: "nowrap" }}
+              onClick={() => handleGenerateBill(row)}
+            >
+              <FileText size={13} className="flex-shrink-0" /> Generate Bill
+            </button>
+          )}
         </div>
       ),
     },
@@ -676,6 +817,17 @@ const CreditControl = () => {
                 data={readyToInvoiceList}
                 loading={loading}
                 filter={true}
+                actionButton={
+                  selectedSubmissionIds.length > 1 ? (
+                    <button
+                      type="button"
+                      className="btn btn-info text-white fw-bold d-flex align-items-center gap-2 py-1 px-3 fs-13 rounded-pill shadow-sm"
+                      onClick={handleBulkGenerateBill}
+                    >
+                      <FileText size={15} /> Generate Bill ({selectedSubmissionIds.length})
+                    </button>
+                  ) : null
+                }
                 exportFileName={`Ready_To_Invoice_${billingMonth}`}
                 noDataText="Nothing approved and waiting to be billed right now."
               />
