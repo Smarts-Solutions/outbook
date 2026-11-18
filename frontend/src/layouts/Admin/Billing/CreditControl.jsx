@@ -821,10 +821,10 @@ const CreditControl = () => {
                   selectedSubmissionIds.length > 1 ? (
                     <button
                       type="button"
-                      className="btn btn-info text-white fw-bold d-flex align-items-center gap-2 py-1 px-3 fs-13 rounded-pill shadow-sm"
+                      className="btn btn-outline-info fw-bold border-3 d-flex align-items-center gap-1 py-1 px-3 fs-13"
                       onClick={handleBulkGenerateBill}
                     >
-                      <FileText size={15} /> Generate Bill ({selectedSubmissionIds.length})
+                      <FileText size={16} /> Generate Bill ({selectedSubmissionIds.length})
                     </button>
                   ) : null
                 }

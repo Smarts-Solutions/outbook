@@ -72,6 +72,19 @@ const BillingDatatable = ({
       ),
     };
 
+    // If the first column is a checkbox column (e.g. selection column without string name or isSelection), place checkbox first, then S.No
+    const firstCol = columns[0];
+    const isFirstColCheckbox =
+      firstCol &&
+      (typeof firstCol.name !== "string" ||
+        firstCol.isSelection ||
+        firstCol.width === "50px" ||
+        firstCol.width === "55px");
+
+    if (isFirstColCheckbox) {
+      return [firstCol, snoColumn, ...columns.slice(1)];
+    }
+
     return [snoColumn, ...columns];
   }, [columns, includeSno, pagination, currentPage, rowsPerPage]);
 
