@@ -699,18 +699,6 @@ export const SubmitBilling = () => {
         if (res && res.status && Array.isArray(res.data)) {
           const formatted = res.data.map((j) => {
             let label = j.job_code_id || ("Job #" + j.job_id);
-            if (j.client_job_code) {
-              label += ` (${j.client_job_code})`;
-            }
-            if (j.job_type_name) {
-              label += ` - ${j.job_type_name}`;
-            }
-            if (j.status_name) {
-              label += ` [${j.status_name}]`;
-            }
-            if (j.existing_billing_status) {
-              label += ` (Billing: ${j.existing_billing_status})`;
-            }
             return {
               value: j.job_id,
               label: label,
