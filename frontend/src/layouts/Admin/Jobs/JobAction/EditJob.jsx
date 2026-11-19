@@ -408,6 +408,8 @@ const EditJob = () => {
       Week_Year_id_2: null,
       Week_Month_id_2: null,
       Week_id_2: null,
+      Week_FromDate_id_2: null,
+      Week_ToDate_id_2: null,
       Fortnight_Year_id_2: null,
       Fortnight_Month_id_2: null,
       Fortnight_id_2: null,
@@ -422,6 +424,8 @@ const EditJob = () => {
       Payroll_Week_Year_id_3: null,
       Payroll_Week_Month_id_3: null,
       Payroll_Week_id_3: null,
+      Payroll_Week_FromDate_id_3: null,
+      Payroll_Week_ToDate_id_3: null,
       Payroll_Fortnight_Year_id_3: null,
       Payroll_Fortnight_Month_id_3: null,
       Payroll_Fortnight_id_3: null,
@@ -443,6 +447,8 @@ const EditJob = () => {
       Week_Year_id_32: null,
       Week_Month_id_32: null,
       Week_id_32: null,
+      Week_FromDate_id_32: null,
+      Week_ToDate_id_32: null,
       Fortnight_Year_id_32: null,
       Fortnight_Month_id_32: null,
       Fortnight_id_32: null,
@@ -458,6 +464,8 @@ const EditJob = () => {
       Payroll_Week_Year_id_31: null,
       Payroll_Week_Month_id_31: null,
       Payroll_Week_id_31: null,
+      Payroll_Week_FromDate_id_31: null,
+      Payroll_Week_ToDate_id_31: null,
       Payroll_Fortnight_Year_id_31: null,
       Payroll_Fortnight_Month_id_31: null,
       Payroll_Fortnight_id_31: null,
@@ -699,6 +707,8 @@ const EditJob = () => {
               Week_Year_id_2: response.data.Week_Year_id_2 ?? null,
               Week_Month_id_2: response.data.Week_Month_id_2 ?? null,
               Week_id_2: response.data.Week_id_2 ?? null,
+              Week_FromDate_id_2: response.data.Week_FromDate_id_2 ?? null,
+              Week_ToDate_id_2: response.data.Week_ToDate_id_2 ?? null,
               Fortnight_Year_id_2: response.data.Fortnight_Year_id_2 ?? null,
               Fortnight_Month_id_2: response.data.Fortnight_Month_id_2 ?? null,
               Fortnight_id_2: response.data.Fortnight_id_2 ?? null,
@@ -714,6 +724,8 @@ const EditJob = () => {
               Payroll_Week_Month_id_3:
                 response.data.Payroll_Week_Month_id_3 ?? null,
               Payroll_Week_id_3: response.data.Payroll_Week_id_3 ?? null,
+              Payroll_Week_FromDate_id_3: response.data.Payroll_Week_FromDate_id_3 ?? null,
+              Payroll_Week_ToDate_id_3: response.data.Payroll_Week_ToDate_id_3 ?? null,
               Payroll_Fortnight_Year_id_3:
                 response.data.Payroll_Fortnight_Year_id_3 ?? null,
               Payroll_Fortnight_Month_id_3:
@@ -738,6 +750,8 @@ const EditJob = () => {
               Week_Year_id_32: response.data.Week_Year_id_32 ?? null,
               Week_Month_id_32: response.data.Week_Month_id_32 ?? null,
               Week_id_32: response.data.Week_id_32 ?? null,
+              Week_FromDate_id_32: response.data.Week_FromDate_id_32 ?? null,
+              Week_ToDate_id_32: response.data.Week_ToDate_id_32 ?? null,
               Fortnight_Year_id_32: response.data.Fortnight_Year_id_32 ?? null,
               Fortnight_Month_id_32:
                 response.data.Fortnight_Month_id_32 ?? null,
@@ -756,6 +770,8 @@ const EditJob = () => {
               Payroll_Week_Month_id_31:
                 response.data.Payroll_Week_Month_id_31 ?? null,
               Payroll_Week_id_31: response.data.Payroll_Week_id_31 ?? null,
+              Payroll_Week_FromDate_id_31: response.data.Payroll_Week_FromDate_id_31 ?? null,
+              Payroll_Week_ToDate_id_31: response.data.Payroll_Week_ToDate_id_31 ?? null,
               Payroll_Fortnight_Year_id_31:
                 response.data.Payroll_Fortnight_Year_id_31 ?? null,
               Payroll_Fortnight_Month_id_31:
@@ -1171,7 +1187,13 @@ const EditJob = () => {
     if (name === "Bookkeeping_Frequency_id_2") {
       const allFrequencyFields = {
         Daily: ["Day_Date_id_2"],
-        Weekly: ["Week_Year_id_2", "Week_Month_id_2", "Week_id_2"],
+        Weekly: [
+          "Week_Year_id_2",
+          "Week_Month_id_2",
+          "Week_id_2",
+          "Week_FromDate_id_2",
+          "Week_ToDate_id_2",
+        ],
         Fortnightly: [
           "Fortnight_Year_id_2",
           "Fortnight_Month_id_2",
@@ -1317,6 +1339,42 @@ const EditJob = () => {
           ...prevState,
           SLADeadlineDate: date.toISOString().split("T")[0],
         }));
+      }
+    }
+
+    const weeklyDatePairs = {
+      Week_FromDate_id_2: "Week_ToDate_id_2",
+      Payroll_Week_FromDate_id_3: "Payroll_Week_ToDate_id_3",
+      Week_FromDate_id_32: "Week_ToDate_id_32",
+      Payroll_Week_FromDate_id_31: "Payroll_Week_ToDate_id_31",
+    };
+
+    if (weeklyDatePairs[name]) {
+      const toDateField = weeklyDatePairs[name];
+      if (value) {
+        const fromD = new Date(value);
+        if (!isNaN(fromD.getTime())) {
+          fromD.setDate(fromD.getDate() + 6);
+          const yyyy = fromD.getFullYear();
+          const mm = String(fromD.getMonth() + 1).padStart(2, "0");
+          const dd = String(fromD.getDate()).padStart(2, "0");
+          const toDateVal = `${yyyy}-${mm}-${dd}`;
+          setJobData((prevState) => ({
+            ...prevState,
+            [name]: value,
+            [toDateField]: toDateVal,
+          }));
+          validate(name, value);
+          return;
+        }
+      } else {
+        setJobData((prevState) => ({
+          ...prevState,
+          [name]: "",
+          [toDateField]: "",
+        }));
+        validate(name, value);
+        return;
       }
     }
 
@@ -2106,6 +2164,19 @@ const EditJob = () => {
           options: ["Week 1", "Week 2", "Week 3", "Week 4"],
           showIf: { Bookkeeping_Frequency_id_2: "Weekly" },
         },
+        {
+          name: "From Date",
+          key: "Week_FromDate_id_2",
+          type: "date",
+          showIf: { Bookkeeping_Frequency_id_2: "Weekly" },
+        },
+        {
+          name: "To Date",
+          key: "Week_ToDate_id_2",
+          type: "date",
+          disabled: true,
+          showIf: { Bookkeeping_Frequency_id_2: "Weekly" },
+        },
         // Fortnight
         {
           name: "Year",
@@ -2320,6 +2391,19 @@ const EditJob = () => {
           key: "Payroll_Week_id_3",
           type: "dropdown",
           options: ["Week 1", "Week 2", "Week 3", "Week 4"],
+          showIf: { Payroll_Frequency_id_3: "Weekly" },
+        },
+        {
+          name: "From Date",
+          key: "Payroll_Week_FromDate_id_3",
+          type: "date",
+          showIf: { Payroll_Frequency_id_3: "Weekly" },
+        },
+        {
+          name: "To Date",
+          key: "Payroll_Week_ToDate_id_3",
+          type: "date",
+          disabled: true,
           showIf: { Payroll_Frequency_id_3: "Weekly" },
         },
 
@@ -2607,6 +2691,19 @@ const EditJob = () => {
           options: ["Week 1", "Week 2", "Week 3", "Week 4"],
           showIf: { Period_id_32: "Week" },
         },
+        {
+          name: "From Date",
+          key: "Week_FromDate_id_32",
+          type: "date",
+          showIf: { Period_id_32: "Week" },
+        },
+        {
+          name: "To Date",
+          key: "Week_ToDate_id_32",
+          type: "date",
+          disabled: true,
+          showIf: { Period_id_32: "Week" },
+        },
         // Fortnight
         {
           name: "Year",
@@ -2712,6 +2809,19 @@ const EditJob = () => {
           key: "Payroll_Week_id_31",
           type: "dropdown",
           options: ["Week 1", "Week 2", "Week 3", "Week 4"],
+          showIf: { Payroll_Frequency_id_31: "Weekly" },
+        },
+        {
+          name: "From Date",
+          key: "Payroll_Week_FromDate_id_31",
+          type: "date",
+          showIf: { Payroll_Frequency_id_31: "Weekly" },
+        },
+        {
+          name: "To Date",
+          key: "Payroll_Week_ToDate_id_31",
+          type: "date",
+          disabled: true,
           showIf: { Payroll_Frequency_id_31: "Weekly" },
         },
 
@@ -4702,8 +4812,9 @@ const EditJob = () => {
                                                     name={field.key}
                                                     min={field.min}
                                                     max={field.max}
+                                                    disabled={field.disabled || false}
                                                     onKeyDown={(e) => field.type === "date" && e.preventDefault()}
-                                                    onClick={(e) => field.type === "date" && e.target.showPicker()}
+                                                    onClick={(e) => field.type === "date" && !field.disabled && e.target.showPicker && e.target.showPicker()}
                                                     onChange={(e) =>
                                                       HandleChange(e)
                                                     }

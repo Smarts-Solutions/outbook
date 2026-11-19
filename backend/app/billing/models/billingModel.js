@@ -502,6 +502,16 @@ const extractJobPeriodInfo = (job) => {
             return { period_type: "Daily", period_date: formattedDate, raw_value: formattedDate };
         }
         if (freq === 'weekly' || freq === 'week') {
+            const fromD = job.Week_FromDate_id_2 || job.Week_FromDate_id_32;
+            const toD = job.Week_ToDate_id_2 || job.Week_ToDate_id_32;
+            if (fromD || toD) {
+                const strFrom = fromD ? (typeof fromD === 'object' && fromD.toISOString ? fromD.toISOString().split('T')[0] : String(fromD).split('T')[0]) : '';
+                const strTo = toD ? (typeof toD === 'object' && toD.toISOString ? toD.toISOString().split('T')[0] : String(toD).split('T')[0]) : '';
+                const fmtFrom = formatDateToDDMMYYYY(strFrom);
+                const fmtTo = formatDateToDDMMYYYY(strTo);
+                const label = `${fmtFrom} to ${fmtTo}`.trim();
+                if (label && label !== 'to') return { period_type: "Weekly", period_date: label, raw_value: label };
+            }
             const w = job.Week_id_2 || job.Week_id_32;
             const m = job.Week_Month_id_2 || job.Week_Month_id_32;
             const y = job.Week_Year_id_2 || job.Week_Year_id_32;
@@ -557,6 +567,16 @@ const extractJobPeriodInfo = (job) => {
         const freq = String(rawFreq).trim().toLowerCase();
 
         if (freq === 'weekly' || freq === 'week') {
+            const fromD = job.Payroll_Week_FromDate_id_3 || job.Payroll_Week_FromDate_id_31;
+            const toD = job.Payroll_Week_ToDate_id_3 || job.Payroll_Week_ToDate_id_31;
+            if (fromD || toD) {
+                const strFrom = fromD ? (typeof fromD === 'object' && fromD.toISOString ? fromD.toISOString().split('T')[0] : String(fromD).split('T')[0]) : '';
+                const strTo = toD ? (typeof toD === 'object' && toD.toISOString ? toD.toISOString().split('T')[0] : String(toD).split('T')[0]) : '';
+                const fmtFrom = formatDateToDDMMYYYY(strFrom);
+                const fmtTo = formatDateToDDMMYYYY(strTo);
+                const label = `${fmtFrom} to ${fmtTo}`.trim();
+                if (label && label !== 'to') return { period_type: "Weekly", period_date: label, raw_value: label };
+            }
             const w = job.Payroll_Week_id_3 || job.Payroll_Week_id_31;
             const m = job.Payroll_Week_Month_id_3 || job.Payroll_Week_Month_id_31;
             const y = job.Payroll_Week_Year_id_3 || job.Payroll_Week_Year_id_31;
