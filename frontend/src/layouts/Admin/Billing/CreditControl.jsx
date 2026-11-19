@@ -101,6 +101,78 @@ const CreditControl = () => {
     );
   };
 
+  // Helper to format Calculation Breakdown for export & table view
+  const formatCalculationBreakdown = (calcJson) => {
+    if (!calcJson) return "—";
+    let parsed = calcJson;
+    if (typeof parsed === "string") {
+      try {
+        parsed = JSON.parse(parsed);
+      } catch (e) {
+        return parsed;
+      }
+    }
+    if (!parsed || typeof parsed !== "object") return "—";
+
+    const parts = [];
+
+    // 1. Adhoc / Hourly
+    if (parsed.adhoc && (parsed.adhoc.hours || parsed.adhoc.total)) {
+      const role = (parsed.adhoc.role || "Standard").replace(/_/g, " ");
+      const hrs = parsed.adhoc.hours || 0;
+      const rate = parseFloat(parsed.adhoc.rate || 0).toFixed(2);
+      const subtotal = parseFloat(parsed.adhoc.total || 0).toFixed(2);
+      parts.push(`Adhoc: ${role} (${hrs} hrs @ £${rate}/hr = £${subtotal})`);
+    }
+
+    // 2. FTE Staffing
+    if (parsed.fte && (parsed.fte.total || Object.values(parsed.fte).some((v) => v > 0))) {
+      const roles = [
+        { label: "Accountants", qty: parsed.fte.accountants },
+        { label: "Bookkeepers", qty: parsed.fte.bookkeepers },
+        { label: "Payroll", qty: parsed.fte.payroll },
+        { label: "Tax", qty: parsed.fte.tax },
+        { label: "Admin", qty: parsed.fte.admin },
+      ].filter((r) => r.qty > 0);
+
+      const rolesText = roles.length > 0 
+        ? roles.map((r) => `${r.label}: ${r.qty}`).join(", ")
+        : "Dedicated FTE";
+      const subtotal = parseFloat(parsed.fte.total || 0).toFixed(2);
+      parts.push(`FTE: ${rolesText} (£${subtotal})`);
+    }
+
+    // 3. Percentage Model
+    if (parsed.percentage && (parsed.percentage.total || parsed.percentage.items?.length > 0 || parsed.percentage.base)) {
+      if (Array.isArray(parsed.percentage.items) && parsed.percentage.items.length > 0) {
+        const itemTexts = parsed.percentage.items
+          .filter((it) => it.base > 0 || it.subtotal > 0)
+          .map((it) => `${it.label || it.key} (Base £${parseFloat(it.base || 0).toFixed(2)} @ ${it.pct}% = £${parseFloat(it.subtotal || 0).toFixed(2)})`);
+        if (itemTexts.length > 0) {
+          parts.push(`Percentage: ${itemTexts.join(", ")}`);
+        } else {
+          const subtotal = parseFloat(parsed.percentage.total || 0).toFixed(2);
+          parts.push(`Percentage Model (£${subtotal})`);
+        }
+      } else {
+        const base = parseFloat(parsed.percentage.base || 0).toFixed(2);
+        const pct = parsed.percentage.pct || 0;
+        const subtotal = parseFloat(parsed.percentage.total || 0).toFixed(2);
+        parts.push(`Percentage: Base £${base} @ ${pct}% = £${subtotal}`);
+      }
+    }
+
+    // 4. Customised Pricing
+    if (parsed.customised && (parsed.customised.count || parsed.customised.total)) {
+      const count = parsed.customised.count || 0;
+      const costPerJob = parseFloat(parsed.customised.costPerJob || 0).toFixed(2);
+      const subtotal = parseFloat(parsed.customised.total || 0).toFixed(2);
+      parts.push(`Customised: ${count} Jobs @ £${costPerJob}/Job = £${subtotal}`);
+    }
+
+    return parts.length > 0 ? parts.join(" | ") : "—";
+  };
+
   // Generate Bill Modal (prompts for Bill Number and Bill Date)
   const handleGenerateBill = async (row) => {
     const today = new Date().toISOString().split("T")[0];
@@ -496,7 +568,7 @@ const CreditControl = () => {
       minWidth: "120px",
       cell: (row) => (
         <span className="text-dark">
-          £{parseFloat(row.gross_amount || row.net_amount || row.net || 0).toFixed(2)}
+          €{parseFloat(row.gross_amount || row.net_amount || row.net || 0).toFixed(2)}
         </span>
       ),
     },
@@ -523,8 +595,7 @@ const CreditControl = () => {
       minWidth: "120px",
       cell: (row) => (
         <span className="fw-bold text-info fs-6">
-          {row.currency === "AUD" ? "AUD " : "£"}
-          {parseFloat(row.net_amount || row.net || 0).toFixed(2)}
+          €{parseFloat(row.net_amount || row.net || 0).toFixed(2)}
         </span>
       ),
     },
@@ -549,6 +620,128 @@ const CreditControl = () => {
           {row.submitted_at ? convertDate1(row.submitted_at) : "—"}
         </div>
       ),
+    },
+    {
+      name: "Action",
+      selector: (row) => {
+        const st = (row.status || "").toLowerCase();
+        if (st.includes("return")) {
+          return `Returned by ${row.returned_by_name || "Manager"}`;
+        }
+        if (st.includes("reject")) {
+          return `Rejected by ${row.returned_by_name || row.manager_name || "Manager"}`;
+        }
+        const isApproved = st.includes("approved") || st.includes("credit control") || st === "invoiced";
+        if (isApproved) {
+          return `Approved by ${row.manager_name || "Manager"}`;
+        }
+        return "—";
+      },
+      sortable: true,
+      minWidth: "180px",
+      cell: (row) => {
+        const st = (row.status || "").toLowerCase();
+        if (st.includes("return")) {
+          const name = row.returned_by_name || "Manager";
+          return (
+            <div className="d-flex flex-column gap-1 py-1 align-items-start">
+              <span
+                className="badge px-2 py-0 fw-semibold text-nowrap"
+                style={{
+                  backgroundColor: "#ffebee",
+                  color: "#c62828",
+                  border: "1px solid #ffcdd2",
+                  fontSize: "10.5px",
+                  lineHeight: "16px",
+                }}
+              >
+                Returned by
+              </span>
+              <span className="text-dark fw-medium text-nowrap" title={name} style={{ whiteSpace: "nowrap" }}>
+                {name}
+              </span>
+            </div>
+          );
+        }
+        if (st.includes("reject")) {
+          const name = row.returned_by_name || row.manager_name || "Manager";
+          return (
+            <div className="d-flex flex-column gap-1 py-1 align-items-start">
+              <span
+                className="badge px-2 py-0 fw-semibold text-nowrap"
+                style={{
+                  backgroundColor: "#ffebee",
+                  color: "#c62828",
+                  border: "1px solid #ffcdd2",
+                  fontSize: "10.5px",
+                  lineHeight: "16px",
+                }}
+              >
+                Rejected by
+              </span>
+              <span className="text-dark fw-medium text-nowrap" title={name} style={{ whiteSpace: "nowrap" }}>
+                {name}
+              </span>
+            </div>
+          );
+        }
+        const isApproved = st.includes("approved") || st.includes("credit control") || st === "invoiced";
+        if (isApproved) {
+          const name = row.manager_name || "Manager";
+          return (
+            <div className="d-flex flex-column gap-1 py-1 align-items-start">
+              <span
+                className="badge px-2 py-0 fw-semibold text-nowrap"
+                style={{
+                  backgroundColor: "#e8f5e9",
+                  color: "#2e7d32",
+                  border: "1px solid #c8e6c9",
+                  fontSize: "10.5px",
+                  lineHeight: "16px",
+                }}
+              >
+                Approved by
+              </span>
+              <span className="text-dark fw-medium text-nowrap" title={name} style={{ whiteSpace: "nowrap" }}>
+                {name}
+              </span>
+            </div>
+          );
+        }
+        return <span className="text-muted small">—</span>;
+      },
+    },
+    {
+      name: "Action Date",
+      selector: (row) => {
+        const st = (row.status || "").toLowerCase();
+        if (st.includes("return") && row.returned_at) {
+          return convertDate1(row.returned_at);
+        }
+        const isApproved = st.includes("approved") || st.includes("credit control") || st === "invoiced";
+        return isApproved && row.manager_approved_at ? convertDate1(row.manager_approved_at) : "—";
+      },
+      sortable: true,
+      minWidth: "140px",
+      cell: (row) => {
+        const st = (row.status || "").toLowerCase();
+        if (st.includes("return") && row.returned_at) {
+          return (
+            <div title={row.returned_at} className="text-dark fw-medium text-nowrap" style={{ whiteSpace: "nowrap" }}>
+              {convertDate1(row.returned_at)}
+            </div>
+          );
+        }
+        const isApproved = st.includes("approved") || st.includes("credit control") || st === "invoiced";
+        if (isApproved && row.manager_approved_at) {
+          return (
+            <div title={row.manager_approved_at} className="text-dark fw-medium text-nowrap" style={{ whiteSpace: "nowrap" }}>
+              {convertDate1(row.manager_approved_at)}
+            </div>
+          );
+        }
+        return <span className="text-muted small">—</span>;
+      },
     },
     {
       name: "Save Date",

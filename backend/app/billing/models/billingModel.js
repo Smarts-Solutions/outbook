@@ -1711,6 +1711,7 @@ const getSubmissionsForApprovals = async (staffUserId, status = null) => {
                 bs.manager_changes_json,
                 bs.return_note,
                 bs.returned_by,
+                CONCAT(st_ret.first_name, ' ', st_ret.last_name) AS returned_by_name,
                 bs.returned_at,
                 bs.nomisma_bill_number,
                 bs.nomisma_bill_date,
@@ -1724,6 +1725,7 @@ const getSubmissionsForApprovals = async (staffUserId, status = null) => {
             LEFT JOIN job_types jt ON j.job_type_id = jt.id
             LEFT JOIN staffs st_sub ON bs.submitted_by = st_sub.id
             LEFT JOIN staffs st_mgr ON bs.manager_id = st_mgr.id
+            LEFT JOIN staffs st_ret ON bs.returned_by = st_ret.id
             WHERE 1 = 1
         `;
 

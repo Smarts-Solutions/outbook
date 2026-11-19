@@ -139,9 +139,15 @@ const BillingDatatable = ({
       }
     }
 
-    // If column is Gross Amount, Net Amount, or Amount, ensure clean 2 decimal places if number
+    // If column is Gross Amount, Net Amount, or Amount, format with Euro sign (€) and 2 decimal places
     if (typeof val === "number" && (colNameStr.includes("amount") || colNameStr.includes("gross") || colNameStr.includes("net"))) {
-      return val.toFixed(2);
+      return `€${val.toFixed(2)}`;
+    }
+    if (typeof val === "string" && (colNameStr.includes("amount") || colNameStr.includes("gross") || colNameStr.includes("net"))) {
+      const num = parseFloat(val);
+      if (!isNaN(num)) {
+        return `€${num.toFixed(2)}`;
+      }
     }
 
     return String(val);
@@ -151,7 +157,8 @@ const BillingDatatable = ({
     const validCols = processedColumns.filter(
       (c) =>
         typeof c.name === "string" &&
-        !["action", "actions", ""].includes(c.name.trim().toLowerCase())
+        !c.button &&
+        !["actions", ""].includes(c.name.trim().toLowerCase())
     );
 
     return data.map((row, rowIndex) => {

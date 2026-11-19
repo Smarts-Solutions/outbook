@@ -13,6 +13,7 @@ export const SubmitBilling = () => {
   const location = useLocation();
   const editData = location.state?.editSubmission || null;
   const [editSubmissionId, setEditSubmissionId] = useState(editData?.id || null);
+  const [editStatus, setEditStatus] = useState(editData?.status || null);
   const [submitStep, setSubmitStep] = useState(1);
 
   // Form State
@@ -264,6 +265,7 @@ export const SubmitBilling = () => {
   useEffect(() => {
     if (!editData) return;
     setEditSubmissionId(editData.id);
+    setEditStatus(editData.status || null);
 
     // 1. Practice / Customer
     if (editData.customer_id) {
@@ -1610,6 +1612,20 @@ export const SubmitBilling = () => {
         icon: "warning",
         title: "Revenue Allocation Incomplete",
         text: `Revenue split across contributors must total exactly 100% (£${netAmount.toFixed(2)}). Currently allocated: ${totalAllocatedPct}% (£${totalAllocatedAmt.toFixed(2)}). Remaining: £${remainingAmt.toFixed(2)} (${remainingPct}%).`,
+        confirmButtonColor: "#26bdf0",
+      });
+      return;
+    }
+
+    // If this submission was already submitted (e.g. Pending Manager Approval, Returned, etc.), draft save is not permitted
+    const isAlreadySubmitted = Boolean(
+      editSubmissionId && editStatus && String(editStatus).toLowerCase() !== "draft"
+    );
+    if (submitType === "save" && isAlreadySubmitted) {
+      sweatalert.fire({
+        icon: "warning",
+        title: "Draft Not Allowed",
+        text: "This billing has already been submitted for approval and cannot be converted back to a draft. Please use 'Update & Submit'.",
         confirmButtonColor: "#26bdf0",
       });
       return;
@@ -3182,17 +3198,19 @@ export const SubmitBilling = () => {
 
                     <div className="timesheet-submit-div-right">
                       {/* Save Draft Button (Exact match with Timesheet Save button) */}
-                      <button
-                        type="button"
-                        className="btn btn-info text-white d-flex align-items-center gap-2"
-                        disabled={grandTotal <= 0 || !isFullyAllocated || submitting}
-                        onClick={() => handleSubmit("save")}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check">
-                          <path d="M20 6 9 17l-5-5"></path>
-                        </svg>
-                        {submitting && saveAction === "save" ? "Saving..." : "Save Draft"}
-                      </button>
+                      {(!editSubmissionId || !editStatus || String(editStatus).toLowerCase() === "draft") && (
+                        <button
+                          type="button"
+                          className="btn btn-info text-white d-flex align-items-center gap-2"
+                          disabled={grandTotal <= 0 || !isFullyAllocated || submitting}
+                          onClick={() => handleSubmit("save")}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check">
+                            <path d="M20 6 9 17l-5-5"></path>
+                          </svg>
+                          {submitting && saveAction === "save" ? "Saving..." : "Save Draft"}
+                        </button>
+                      )}
 
                       {/* Submit for Approval Button (Exact match with Timesheet Submit button) */}
                       <button
