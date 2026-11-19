@@ -86,17 +86,27 @@ const CreditControl = () => {
   const renderModelBadges = (modelStr) => {
     if (!modelStr) return <span className="badge bg-light text-dark border">—</span>;
     const parts = modelStr.split(",").map((p) => p.trim()).filter(Boolean);
+    if (!parts.length) return <span className="badge bg-light text-dark border">—</span>;
+
+    // Show 1 badge, and if more, show +X more badge
     return (
-      <div className="d-flex flex-wrap gap-1">
-        {parts.map((part, idx) => (
+      <div className="d-flex align-items-center gap-1 flex-wrap">
+        <span
+          className="badge bg-white text-dark border px-2 py-1 shadow-xs fw-medium text-truncate text-start"
+          style={{ fontSize: "11px", maxWidth: "160px" }}
+          title={parts[0]}
+        >
+          {parts[0]}
+        </span>
+        {parts.length > 1 && (
           <span
-            key={idx}
-            className="badge bg-white text-dark border px-2 py-1 shadow-xs fw-medium text-wrap"
-            style={{ fontSize: "11px", whiteSpace: "normal", textAlign: "left" }}
+            className="badge bg-light text-muted border px-2 py-1 fw-semibold cursor-pointer"
+            style={{ fontSize: "10.5px" }}
+            title={parts.slice(1).join("\n")}
           >
-            {part}
+            +{parts.length - 1} more
           </span>
-        ))}
+        )}
       </div>
     );
   };
@@ -456,9 +466,9 @@ const CreditControl = () => {
       name: "Submitted By",
       selector: (row) => row.submitted_by_name,
       sortable: true,
-      minWidth: "150px",
+      minWidth: "160px",
       cell: (row) => (
-        <div title={row.submitted_by_name || `Staff #${row.submitted_by}`}>
+        <div title={row.submitted_by_name || `Staff #${row.submitted_by}`} className="text-break py-1">
           {row.submitted_by_name || `Staff #${row.submitted_by}`}
         </div>
       ),
@@ -467,13 +477,13 @@ const CreditControl = () => {
       name: "Customer Name",
       selector: (row) => row.customer_name || row.practice,
       sortable: true,
-      minWidth: "170px",
+      minWidth: "180px",
       cell: (row) => (
         <div
-          title={row.customer_name || row.practice || "-"}
-          style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+          title={row.customer_name || row.practice || `Customer #${row.customer_id}`}
+          className="text-break py-1"
         >
-          {row.customer_name || row.practice || "-"}
+          {row.customer_name || row.practice || `Customer #${row.customer_id}`}
         </div>
       ),
     },
@@ -481,13 +491,13 @@ const CreditControl = () => {
       name: "Client Name",
       selector: (row) => row.client_name || row.client,
       sortable: true,
-      minWidth: "170px",
+      minWidth: "180px",
       cell: (row) => (
         <div
-          title={row.client_name || row.client || "-"}
-          style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+          title={row.client_name || row.client || `Client #${row.client_id}`}
+          className="text-break py-1"
         >
-          {row.client_name || row.client || "-"}
+          {row.client_name || row.client || `Client #${row.client_id}`}
         </div>
       ),
     },
@@ -495,11 +505,11 @@ const CreditControl = () => {
       name: "Service Name",
       selector: (row) => row.service_name || row.assignmentName,
       sortable: true,
-      minWidth: "160px",
+      minWidth: "170px",
       cell: (row) => (
         <div
           title={row.service_name || row.assignmentName || "Service"}
-          style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+          className="text-break py-1"
         >
           {row.service_name || row.assignmentName || "Service"}
         </div>
@@ -509,12 +519,11 @@ const CreditControl = () => {
       name: "Job Name",
       selector: (row) => row.job_name || (row.job_id ? `Job #${row.job_id}` : "—"),
       sortable: true,
-      minWidth: "170px",
+      minWidth: "180px",
       cell: (row) => (
         <div
           title={row.job_name || (row.job_id ? `Job #${row.job_id}` : "—")}
-          style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-          className="fw-medium text-dark"
+          className="text-break py-1 fw-medium text-dark"
         >
           {row.job_name || (row.job_id ? `Job #${row.job_id}` : "—")}
         </div>
@@ -554,7 +563,7 @@ const CreditControl = () => {
       name: "Model",
       selector: (row) => row.engagement_model || row.model,
       sortable: true,
-      minWidth: "180px",
+      minWidth: "170px",
       cell: (row) => (
         <div className="py-2">
           {renderModelBadges(row.engagement_model || row.model)}
@@ -562,12 +571,23 @@ const CreditControl = () => {
       ),
     },
     {
+      name: "Account Manager",
+      selector: (row) => row.manager_name,
+      sortable: true,
+      minWidth: "160px",
+      cell: (row) => (
+        <div title={row.manager_name || "-"} className="text-break py-1">
+          {row.manager_name || "-"}
+        </div>
+      ),
+    },
+    {
       name: "Gross Amount",
       selector: (row) => row.gross_amount,
       sortable: true,
-      minWidth: "120px",
+      minWidth: "130px",
       cell: (row) => (
-        <span className="text-dark">
+        <span className="text-dark fw-semibold">
           €{parseFloat(row.gross_amount || row.net_amount || row.net || 0).toFixed(2)}
         </span>
       ),
@@ -592,7 +612,7 @@ const CreditControl = () => {
       name: "Net Amount",
       selector: (row) => parseFloat(row.net_amount || row.net || 0),
       sortable: true,
-      minWidth: "120px",
+      minWidth: "130px",
       cell: (row) => (
         <span className="fw-bold text-info fs-6">
           €{parseFloat(row.net_amount || row.net || 0).toFixed(2)}
@@ -600,25 +620,47 @@ const CreditControl = () => {
       ),
     },
     {
+      name: "Revenue Split",
+      selector: (row) => (row.contributors || []).map((c) => `${c.staff_name} (${parseFloat(c.pct).toFixed(0)}%)`).join(", "),
+      minWidth: "220px",
+      cell: (row) => {
+        const list = row.contributors || [];
+        if (!list.length) return <span className="text-muted small">—</span>;
+
+        // Show 1 contributor badge, and if more, show +X more badge
+        const first = list[0];
+        return (
+          <div className="d-flex align-items-center gap-1 flex-wrap">
+            <span
+              className="badge bg-white text-dark border fw-normal text-truncate text-start"
+              style={{ lineHeight: "1.4", padding: "4px 8px", fontSize: "11.5px", maxWidth: "160px" }}
+              title={`${first.staff_name} (${parseFloat(first.pct).toFixed(0)}%)`}
+            >
+              {first.staff_name} <span className="fw-semibold text-primary">({parseFloat(first.pct).toFixed(0)}%)</span>
+            </span>
+            {list.length > 1 && (
+              <span
+                className="badge bg-light text-muted border px-2 py-1 fw-semibold cursor-pointer"
+                style={{ fontSize: "11px" }}
+                title={list.slice(1).map((c) => `${c.staff_name} (${parseFloat(c.pct).toFixed(0)}%)`).join("\n")}
+                onClick={() => setViewDetailsModal(row)}
+              >
+                +{list.length - 1} more
+              </span>
+            )}
+          </div>
+        );
+      },
+    },
+    {
       name: "Status",
       selector: (row) => row.status,
       sortable: true,
-      minWidth: "170px",
+      minWidth: "260px",
       cell: (row) => (
-        <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1">
-          <Check size={13} /> Sent to Credit Control
+        <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 fw-bold d-inline-flex align-items-center gap-1 text-nowrap" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
+          <Check size={14} /> Sent to Credit Control
         </span>
-      ),
-    },
-    {
-      name: "Created At",
-      selector: (row) => row.submitted_at ? convertDate1(row.submitted_at) : "",
-      sortable: true,
-      minWidth: "140px",
-      cell: (row) => (
-        <div className="text-muted text-nowrap" style={{ whiteSpace: "nowrap" }}>
-          {row.submitted_at ? convertDate1(row.submitted_at) : "—"}
-        </div>
       ),
     },
     {
