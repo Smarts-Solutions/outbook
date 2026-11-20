@@ -5209,6 +5209,7 @@ const getJobCustomReport1 = async (Report) => {
     engagement_model,
     customer_account_manager_officer,
     status_updation_date,
+    date_of_completion,
     Transactions_Posting_id_2,
     Number_of_Bank_Transactions_id_2,
     Number_of_Journal_Entries_id_2,
@@ -5300,6 +5301,7 @@ const getJobCustomReport1 = async (Report) => {
     "engagement_model",
     "customer_account_manager_officer",
     "status_updation_date",
+    "date_of_completion",
     "Transactions_Posting_id_2",
     "Number_of_Bank_Transactions_id_2",
     "Number_of_Journal_Entries_id_2",
@@ -5426,6 +5428,11 @@ const getJobCustomReport1 = async (Report) => {
           GROUPBY != ""
             ? (GROUPBY += " , raw.status_updation_date")
             : `GROUP BY raw.status_updation_date`;
+      } else if (g === "date_of_completion") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.date_of_completion")
+            : `GROUP BY raw.date_of_completion`;
       } else if (g === "Transactions_Posting_id_2") {
         GROUPBY =
           GROUPBY != ""
@@ -5708,6 +5715,9 @@ const getJobCustomReport1 = async (Report) => {
     }
     if (!["", null, undefined].includes(status_updation_date)) {
       orWhere.push(`raw.status_updation_date = '${status_updation_date}'`);
+    }
+    if (!["", null, undefined].includes(date_of_completion)) {
+      orWhere.push(`raw.date_of_completion = '${date_of_completion}'`);
     }
     if (!["", null, undefined].includes(Transactions_Posting_id_2)) {
       orWhere.push(
@@ -5896,6 +5906,7 @@ const getJobCustomReport1 = async (Report) => {
                 DATE_FORMAT(raw.date_received_on, '%d/%m/%Y') AS date_received_on,
                 DATE_FORMAT(raw.allocated_on, '%d/%m/%Y') AS allocated_on,
                 DATE_FORMAT(raw.status_updation_date, '%d/%m/%Y') AS status_updation_date,
+                raw.date_of_completion,
                 raw.job_priority,
                 raw.engagement_model,
                 raw.Transactions_Posting_id_2,
@@ -5977,6 +5988,18 @@ const getJobCustomReport1 = async (Report) => {
                     j.engagement_model AS engagement_model,
                     j.customer_contact_details_id,
                     j.status_updation_date,
+                    CASE 
+                      WHEN j.status_type IN (6, 7, 17, 18, 19, 20) THEN 
+                        COALESCE(
+                          (SELECT DATE_FORMAT(MAX(jsu.status_update_date), '%d/%m/%Y') 
+                           FROM job_status_updation jsu 
+                           JOIN master_status ms2 ON jsu.status_type = ms2.id 
+                           WHERE jsu.job_id = j.id AND ms2.name LIKE '%Completed%'),
+                          DATE_FORMAT(j.status_updation_date, '%d/%m/%Y'),
+                          DATE_FORMAT(j.updated_at, '%d/%m/%Y')
+                        )
+                      ELSE '-' 
+                    END AS date_of_completion,
                     j.Transactions_Posting_id_2,
                     j.Number_of_Bank_Transactions_id_2,
                     j.Number_of_Journal_Entries_id_2,
@@ -6064,6 +6087,7 @@ const getJobCustomReport1 = async (Report) => {
                 DATE_FORMAT(raw.date_received_on, '%d/%m/%Y') AS date_received_on,
                 DATE_FORMAT(raw.allocated_on, '%d/%m/%Y') AS allocated_on,
                 DATE_FORMAT(raw.status_updation_date, '%d/%m/%Y') AS status_updation_date,
+                raw.date_of_completion,
                 raw.job_priority,
                 raw.engagement_model,
                 raw.Transactions_Posting_id_2,
@@ -6145,6 +6169,18 @@ const getJobCustomReport1 = async (Report) => {
                     j.engagement_model AS engagement_model,
                     j.customer_contact_details_id,
                     j.status_updation_date,
+                    CASE 
+                      WHEN j.status_type IN (6, 7, 17, 18, 19, 20) THEN 
+                        COALESCE(
+                          (SELECT DATE_FORMAT(MAX(jsu.status_update_date), '%d/%m/%Y') 
+                           FROM job_status_updation jsu 
+                           JOIN master_status ms2 ON jsu.status_type = ms2.id 
+                           WHERE jsu.job_id = j.id AND ms2.name LIKE '%Completed%'),
+                          DATE_FORMAT(j.status_updation_date, '%d/%m/%Y'),
+                          DATE_FORMAT(j.updated_at, '%d/%m/%Y')
+                        )
+                      ELSE '-' 
+                    END AS date_of_completion,
                     j.Transactions_Posting_id_2,
                     j.Number_of_Bank_Transactions_id_2,
                     j.Number_of_Journal_Entries_id_2,
@@ -6262,6 +6298,7 @@ const getJobCustomReport1 = async (Report) => {
         engagement_model: "engagement_model",
         customer_account_manager_officer: "customer_account_manager_officer",
         status_updation_date: "status_updation_date",
+        date_of_completion: "date_of_completion",
         Transactions_Posting_id_2: "Transactions_Posting_id_2",
         Number_of_Bank_Transactions_id_2: "Number_of_Bank_Transactions_id_2",
         Number_of_Journal_Entries_id_2: "Number_of_Journal_Entries_id_2",
@@ -6354,6 +6391,7 @@ const getJobCustomReport1 = async (Report) => {
           engagement_model: r.engagement_model,
           customer_account_manager_officer: r.customer_account_manager_officer,
           status_updation_date: r.status_updation_date,
+          date_of_completion: r.date_of_completion,
           Transactions_Posting_id_2: r.Transactions_Posting_id_2,
           Number_of_Bank_Transactions_id_2: r.Number_of_Bank_Transactions_id_2,
           Number_of_Journal_Entries_id_2: r.Number_of_Journal_Entries_id_2,
@@ -6442,6 +6480,7 @@ const getJobCustomReport1 = async (Report) => {
       row["customer_account_manager_officer"] =
         g.customer_account_manager_officer;
       row["status_updation_date"] = g.status_updation_date;
+      row["date_of_completion"] = g.date_of_completion;
       row["Transactions_Posting_id_2"] = g.Transactions_Posting_id_2;
       row["Number_of_Bank_Transactions_id_2"] =
         g.Number_of_Bank_Transactions_id_2;
@@ -6575,6 +6614,7 @@ const getJobCustomReport = async (Report) => {
     engagement_model,
     customer_account_manager_officer,
     status_updation_date,
+    date_of_completion,
     Transactions_Posting_id_2,
     Number_of_Bank_Transactions_id_2,
     Number_of_Journal_Entries_id_2,
@@ -6666,6 +6706,7 @@ const getJobCustomReport = async (Report) => {
     "engagement_model",
     "customer_account_manager_officer",
     "status_updation_date",
+    "date_of_completion",
     "Transactions_Posting_id_2",
     "Number_of_Bank_Transactions_id_2",
     "Number_of_Journal_Entries_id_2",
@@ -6792,6 +6833,11 @@ const getJobCustomReport = async (Report) => {
           GROUPBY != ""
             ? (GROUPBY += " , raw.status_updation_date")
             : `GROUP BY raw.status_updation_date`;
+      } else if (g === "date_of_completion") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.date_of_completion")
+            : `GROUP BY raw.date_of_completion`;
       } else if (g === "Transactions_Posting_id_2") {
         GROUPBY =
           GROUPBY != ""
@@ -7075,6 +7121,9 @@ const getJobCustomReport = async (Report) => {
     if (!["", null, undefined].includes(status_updation_date)) {
       orWhere.push(`raw.status_updation_date = '${status_updation_date}'`);
     }
+    if (!["", null, undefined].includes(date_of_completion)) {
+      orWhere.push(`raw.date_of_completion = '${date_of_completion}'`);
+    }
     if (!["", null, undefined].includes(Transactions_Posting_id_2)) {
       orWhere.push(
         `raw.Transactions_Posting_id_2 = ${Transactions_Posting_id_2}`,
@@ -7273,6 +7322,7 @@ const getJobCustomReport = async (Report) => {
                 DATE_FORMAT(raw.date_received_on, '%d/%m/%Y') AS date_received_on,
                 DATE_FORMAT(raw.allocated_on, '%d/%m/%Y') AS allocated_on,
                 DATE_FORMAT(raw.status_updation_date, '%d/%m/%Y') AS status_updation_date,
+                raw.date_of_completion,
                 raw.job_priority,
                 raw.engagement_model,
                 raw.Transactions_Posting_id_2,
@@ -7354,6 +7404,18 @@ const getJobCustomReport = async (Report) => {
                     j.engagement_model AS engagement_model,
                     j.customer_contact_details_id,
                     j.status_updation_date,
+                    CASE 
+                      WHEN j.status_type IN (6, 7, 17, 18, 19, 20) THEN 
+                        COALESCE(
+                          (SELECT DATE_FORMAT(MAX(jsu.status_update_date), '%d/%m/%Y') 
+                           FROM job_status_updation jsu 
+                           JOIN master_status ms2 ON jsu.status_type = ms2.id 
+                           WHERE jsu.job_id = j.id AND ms2.name LIKE '%Completed%'),
+                          DATE_FORMAT(j.status_updation_date, '%d/%m/%Y'),
+                          DATE_FORMAT(j.updated_at, '%d/%m/%Y')
+                        )
+                      ELSE '-' 
+                    END AS date_of_completion,
                     j.Transactions_Posting_id_2,
                     j.Number_of_Bank_Transactions_id_2,
                     j.Number_of_Journal_Entries_id_2,
@@ -7436,6 +7498,18 @@ const getJobCustomReport = async (Report) => {
                     j.engagement_model AS engagement_model,
                     j.customer_contact_details_id,
                     j.status_updation_date,
+                    CASE 
+                      WHEN j.status_type IN (6, 7, 17, 18, 19, 20) THEN 
+                        COALESCE(
+                          (SELECT DATE_FORMAT(MAX(jsu.status_update_date), '%d/%m/%Y') 
+                           FROM job_status_updation jsu 
+                           JOIN master_status ms2 ON jsu.status_type = ms2.id 
+                           WHERE jsu.job_id = j.id AND ms2.name LIKE '%Completed%'),
+                          DATE_FORMAT(j.status_updation_date, '%d/%m/%Y'),
+                          DATE_FORMAT(j.updated_at, '%d/%m/%Y')
+                        )
+                      ELSE '-' 
+                    END AS date_of_completion,
                     j.Transactions_Posting_id_2,
                     j.Number_of_Bank_Transactions_id_2,
                     j.Number_of_Journal_Entries_id_2,
@@ -7513,6 +7587,7 @@ const getJobCustomReport = async (Report) => {
                 DATE_FORMAT(raw.date_received_on, '%d/%m/%Y') AS date_received_on,
                 DATE_FORMAT(raw.allocated_on, '%d/%m/%Y') AS allocated_on,
                 DATE_FORMAT(raw.status_updation_date, '%d/%m/%Y') AS status_updation_date,
+                raw.date_of_completion,
                 raw.job_priority,
                 raw.engagement_model,
                 raw.Transactions_Posting_id_2,
@@ -7594,6 +7669,18 @@ const getJobCustomReport = async (Report) => {
                     j.engagement_model AS engagement_model,
                     j.customer_contact_details_id,
                     j.status_updation_date,
+                    CASE 
+                      WHEN j.status_type IN (6, 7, 17, 18, 19, 20) THEN 
+                        COALESCE(
+                          (SELECT DATE_FORMAT(MAX(jsu.status_update_date), '%d/%m/%Y') 
+                           FROM job_status_updation jsu 
+                           JOIN master_status ms2 ON jsu.status_type = ms2.id 
+                           WHERE jsu.job_id = j.id AND ms2.name LIKE '%Completed%'),
+                          DATE_FORMAT(j.status_updation_date, '%d/%m/%Y'),
+                          DATE_FORMAT(j.updated_at, '%d/%m/%Y')
+                        )
+                      ELSE '-' 
+                    END AS date_of_completion,
                     j.Transactions_Posting_id_2,
                     j.Number_of_Bank_Transactions_id_2,
                     j.Number_of_Journal_Entries_id_2,
@@ -7670,6 +7757,7 @@ const getJobCustomReport = async (Report) => {
                 DATE_FORMAT(raw.date_received_on, '%d/%m/%Y') AS date_received_on,
                 DATE_FORMAT(raw.allocated_on, '%d/%m/%Y') AS allocated_on,
                 DATE_FORMAT(raw.status_updation_date, '%d/%m/%Y') AS status_updation_date,
+                raw.date_of_completion,
                 raw.job_priority,
                 raw.engagement_model,
                 raw.Transactions_Posting_id_2,
@@ -7747,6 +7835,18 @@ const getJobCustomReport = async (Report) => {
                     j.engagement_model AS engagement_model,
                     j.customer_contact_details_id,
                     j.status_updation_date,
+                    CASE 
+                      WHEN j.status_type IN (6, 7, 17, 18, 19, 20) THEN 
+                        COALESCE(
+                          (SELECT DATE_FORMAT(MAX(jsu.status_update_date), '%d/%m/%Y') 
+                           FROM job_status_updation jsu 
+                           JOIN master_status ms2 ON jsu.status_type = ms2.id 
+                           WHERE jsu.job_id = j.id AND ms2.name LIKE '%Completed%'),
+                          DATE_FORMAT(j.status_updation_date, '%d/%m/%Y'),
+                          DATE_FORMAT(j.updated_at, '%d/%m/%Y')
+                        )
+                      ELSE '-' 
+                    END AS date_of_completion,
                     j.Transactions_Posting_id_2,
                     j.Number_of_Bank_Transactions_id_2,
                     j.Number_of_Journal_Entries_id_2,
@@ -7868,6 +7968,7 @@ const getJobCustomReport = async (Report) => {
         engagement_model: "engagement_model",
         customer_account_manager_officer: "customer_account_manager_officer",
         status_updation_date: "status_updation_date",
+        date_of_completion: "date_of_completion",
         Transactions_Posting_id_2: "Transactions_Posting_id_2",
         Number_of_Bank_Transactions_id_2: "Number_of_Bank_Transactions_id_2",
         Number_of_Journal_Entries_id_2: "Number_of_Journal_Entries_id_2",
@@ -7960,6 +8061,7 @@ const getJobCustomReport = async (Report) => {
           engagement_model: r.engagement_model,
           customer_account_manager_officer: r.customer_account_manager_officer,
           status_updation_date: r.status_updation_date,
+          date_of_completion: r.date_of_completion,
           Transactions_Posting_id_2: r.Transactions_Posting_id_2,
           Number_of_Bank_Transactions_id_2: r.Number_of_Bank_Transactions_id_2,
           Number_of_Journal_Entries_id_2: r.Number_of_Journal_Entries_id_2,
@@ -8048,6 +8150,7 @@ const getJobCustomReport = async (Report) => {
       row["customer_account_manager_officer"] =
         g.customer_account_manager_officer;
       row["status_updation_date"] = g.status_updation_date;
+      row["date_of_completion"] = g.date_of_completion;
       row["Transactions_Posting_id_2"] = g.Transactions_Posting_id_2;
       row["Number_of_Bank_Transactions_id_2"] =
         g.Number_of_Bank_Transactions_id_2;
@@ -8181,6 +8284,7 @@ const getJobCustomReport2 = async (Report) => {
     engagement_model,
     customer_account_manager_officer,
     status_updation_date,
+    date_of_completion,
     Transactions_Posting_id_2,
     Number_of_Bank_Transactions_id_2,
     Number_of_Journal_Entries_id_2,
@@ -8272,6 +8376,7 @@ const getJobCustomReport2 = async (Report) => {
     "engagement_model",
     "customer_account_manager_officer",
     "status_updation_date",
+    "date_of_completion",
     "Transactions_Posting_id_2",
     "Number_of_Bank_Transactions_id_2",
     "Number_of_Journal_Entries_id_2",
@@ -8398,6 +8503,11 @@ const getJobCustomReport2 = async (Report) => {
           GROUPBY != ""
             ? (GROUPBY += " , raw.status_updation_date")
             : `GROUP BY raw.status_updation_date`;
+      } else if (g === "date_of_completion") {
+        GROUPBY =
+          GROUPBY != ""
+            ? (GROUPBY += " , raw.date_of_completion")
+            : `GROUP BY raw.date_of_completion`;
       } else if (g === "Transactions_Posting_id_2") {
         GROUPBY =
           GROUPBY != ""
@@ -8681,6 +8791,9 @@ const getJobCustomReport2 = async (Report) => {
     if (!["", null, undefined].includes(status_updation_date)) {
       orWhere.push(`raw.status_updation_date = '${status_updation_date}'`);
     }
+    if (!["", null, undefined].includes(date_of_completion)) {
+      orWhere.push(`raw.date_of_completion = '${date_of_completion}'`);
+    }
     if (!["", null, undefined].includes(Transactions_Posting_id_2)) {
       orWhere.push(
         `raw.Transactions_Posting_id_2 = ${Transactions_Posting_id_2}`,
@@ -8879,6 +8992,7 @@ const getJobCustomReport2 = async (Report) => {
                 DATE_FORMAT(raw.date_received_on, '%d/%m/%Y') AS date_received_on,
                 DATE_FORMAT(raw.allocated_on, '%d/%m/%Y') AS allocated_on,
                 DATE_FORMAT(raw.status_updation_date, '%d/%m/%Y') AS status_updation_date,
+                raw.date_of_completion,
                 raw.job_priority,
                 raw.engagement_model,
                 raw.Transactions_Posting_id_2,
@@ -8960,6 +9074,18 @@ const getJobCustomReport2 = async (Report) => {
                     j.engagement_model AS engagement_model,
                     j.customer_contact_details_id,
                     j.status_updation_date,
+                    CASE 
+                      WHEN j.status_type IN (6, 7, 17, 18, 19, 20) THEN 
+                        COALESCE(
+                          (SELECT DATE_FORMAT(MAX(jsu.status_update_date), '%d/%m/%Y') 
+                           FROM job_status_updation jsu 
+                           JOIN master_status ms2 ON jsu.status_type = ms2.id 
+                           WHERE jsu.job_id = j.id AND ms2.name LIKE '%Completed%'),
+                          DATE_FORMAT(j.status_updation_date, '%d/%m/%Y'),
+                          DATE_FORMAT(j.updated_at, '%d/%m/%Y')
+                        )
+                      ELSE '-' 
+                    END AS date_of_completion,
                     j.Transactions_Posting_id_2,
                     j.Number_of_Bank_Transactions_id_2,
                     j.Number_of_Journal_Entries_id_2,
@@ -9042,6 +9168,18 @@ const getJobCustomReport2 = async (Report) => {
                     j.engagement_model AS engagement_model,
                     j.customer_contact_details_id,
                     j.status_updation_date,
+                    CASE 
+                      WHEN j.status_type IN (6, 7, 17, 18, 19, 20) THEN 
+                        COALESCE(
+                          (SELECT DATE_FORMAT(MAX(jsu.status_update_date), '%d/%m/%Y') 
+                           FROM job_status_updation jsu 
+                           JOIN master_status ms2 ON jsu.status_type = ms2.id 
+                           WHERE jsu.job_id = j.id AND ms2.name LIKE '%Completed%'),
+                          DATE_FORMAT(j.status_updation_date, '%d/%m/%Y'),
+                          DATE_FORMAT(j.updated_at, '%d/%m/%Y')
+                        )
+                      ELSE '-' 
+                    END AS date_of_completion,
                     j.Transactions_Posting_id_2,
                     j.Number_of_Bank_Transactions_id_2,
                     j.Number_of_Journal_Entries_id_2,
@@ -9118,6 +9256,7 @@ const getJobCustomReport2 = async (Report) => {
                 DATE_FORMAT(raw.date_received_on, '%d/%m/%Y') AS date_received_on,
                 DATE_FORMAT(raw.allocated_on, '%d/%m/%Y') AS allocated_on,
                 DATE_FORMAT(raw.status_updation_date, '%d/%m/%Y') AS status_updation_date,
+                raw.date_of_completion,
                 raw.job_priority,
                 raw.engagement_model,
                 raw.Transactions_Posting_id_2,
@@ -9199,6 +9338,18 @@ const getJobCustomReport2 = async (Report) => {
                     j.engagement_model AS engagement_model,
                     j.customer_contact_details_id,
                     j.status_updation_date,
+                    CASE 
+                      WHEN j.status_type IN (6, 7, 17, 18, 19, 20) THEN 
+                        COALESCE(
+                          (SELECT DATE_FORMAT(MAX(jsu.status_update_date), '%d/%m/%Y') 
+                           FROM job_status_updation jsu 
+                           JOIN master_status ms2 ON jsu.status_type = ms2.id 
+                           WHERE jsu.job_id = j.id AND ms2.name LIKE '%Completed%'),
+                          DATE_FORMAT(j.status_updation_date, '%d/%m/%Y'),
+                          DATE_FORMAT(j.updated_at, '%d/%m/%Y')
+                        )
+                      ELSE '-' 
+                    END AS date_of_completion,
                     j.Transactions_Posting_id_2,
                     j.Number_of_Bank_Transactions_id_2,
                     j.Number_of_Journal_Entries_id_2,
@@ -9275,6 +9426,7 @@ const getJobCustomReport2 = async (Report) => {
                 DATE_FORMAT(raw.date_received_on, '%d/%m/%Y') AS date_received_on,
                 DATE_FORMAT(raw.allocated_on, '%d/%m/%Y') AS allocated_on,
                 DATE_FORMAT(raw.status_updation_date, '%d/%m/%Y') AS status_updation_date,
+                raw.date_of_completion,
                 raw.job_priority,
                 raw.engagement_model,
                 raw.Transactions_Posting_id_2,
@@ -9352,6 +9504,18 @@ const getJobCustomReport2 = async (Report) => {
                     j.engagement_model AS engagement_model,
                     j.customer_contact_details_id,
                     j.status_updation_date,
+                    CASE 
+                      WHEN j.status_type IN (6, 7, 17, 18, 19, 20) THEN 
+                        COALESCE(
+                          (SELECT DATE_FORMAT(MAX(jsu.status_update_date), '%d/%m/%Y') 
+                           FROM job_status_updation jsu 
+                           JOIN master_status ms2 ON jsu.status_type = ms2.id 
+                           WHERE jsu.job_id = j.id AND ms2.name LIKE '%Completed%'),
+                          DATE_FORMAT(j.status_updation_date, '%d/%m/%Y'),
+                          DATE_FORMAT(j.updated_at, '%d/%m/%Y')
+                        )
+                      ELSE '-' 
+                    END AS date_of_completion,
                     j.Transactions_Posting_id_2,
                     j.Number_of_Bank_Transactions_id_2,
                     j.Number_of_Journal_Entries_id_2,
@@ -9473,6 +9637,7 @@ const getJobCustomReport2 = async (Report) => {
         engagement_model: "engagement_model",
         customer_account_manager_officer: "customer_account_manager_officer",
         status_updation_date: "status_updation_date",
+        date_of_completion: "date_of_completion",
         Transactions_Posting_id_2: "Transactions_Posting_id_2",
         Number_of_Bank_Transactions_id_2: "Number_of_Bank_Transactions_id_2",
         Number_of_Journal_Entries_id_2: "Number_of_Journal_Entries_id_2",
@@ -9565,6 +9730,7 @@ const getJobCustomReport2 = async (Report) => {
           engagement_model: r.engagement_model,
           customer_account_manager_officer: r.customer_account_manager_officer,
           status_updation_date: r.status_updation_date,
+          date_of_completion: r.date_of_completion,
           Transactions_Posting_id_2: r.Transactions_Posting_id_2,
           Number_of_Bank_Transactions_id_2: r.Number_of_Bank_Transactions_id_2,
           Number_of_Journal_Entries_id_2: r.Number_of_Journal_Entries_id_2,
@@ -9653,6 +9819,7 @@ const getJobCustomReport2 = async (Report) => {
       row["customer_account_manager_officer"] =
         g.customer_account_manager_officer;
       row["status_updation_date"] = g.status_updation_date;
+      row["date_of_completion"] = g.date_of_completion;
       row["Transactions_Posting_id_2"] = g.Transactions_Posting_id_2;
       row["Number_of_Bank_Transactions_id_2"] =
         g.Number_of_Bank_Transactions_id_2;

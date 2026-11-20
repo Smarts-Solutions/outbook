@@ -2144,7 +2144,7 @@ const getJobCustomReport = async (Report) => {
 
   const ALLOWED_GROUP_FIELDS = [
     "job_id", "customer_id", "client_id", "account_manager_id", "allocated_to_id", "reviewer_id", "allocated_to_other_id", "service_id", "job_type_id", "status_type_id", "employee_number",
-    "date_received_on", "allocated_on", "job_priority", "engagement_model", "customer_account_manager_officer", "status_updation_date", "Transactions_Posting_id_2", "Number_of_Bank_Transactions_id_2", "Number_of_Journal_Entries_id_2", "Number_of_Other_Transactions_id_2", "Number_of_Petty_Cash_Transactions_id_2", "Number_of_Purchase_Invoices_id_2", "Number_of_Sales_Invoices_id_2", "Number_of_Total_Transactions_id_2", "submission_deadline", "Tax_Year_id_4", "If_Sole_Trader_Who_is_doing_Bookkeeping_id_4", "Whose_Tax_Return_is_it_id_4", "Type_of_Payslip_id_3", "Year_Ending_id_1", "Bookkeeping_Frequency_id_2", "CIS_Frequency_id_3", "Filing_Frequency_id_8", "Management_Accounts_Frequency_id_6", "Payroll_Frequency_id_3", "budgeted_hours", "feedback_incorporation_time", "review_time", "total_preparation_time", "total_time", "due_on", "customer_deadline_date", "expected_delivery_date", "internal_deadline_date", "sla_deadline_date", "Management_Accounts_FromDate_id_6", "Management_Accounts_ToDate_id_6",
+    "date_received_on", "allocated_on", "job_priority", "engagement_model", "customer_account_manager_officer", "status_updation_date", "date_of_completion", "Transactions_Posting_id_2", "Number_of_Bank_Transactions_id_2", "Number_of_Journal_Entries_id_2", "Number_of_Other_Transactions_id_2", "Number_of_Petty_Cash_Transactions_id_2", "Number_of_Purchase_Invoices_id_2", "Number_of_Sales_Invoices_id_2", "Number_of_Total_Transactions_id_2", "submission_deadline", "Tax_Year_id_4", "If_Sole_Trader_Who_is_doing_Bookkeeping_id_4", "Whose_Tax_Return_is_it_id_4", "Type_of_Payslip_id_3", "Year_Ending_id_1", "Bookkeeping_Frequency_id_2", "CIS_Frequency_id_3", "Filing_Frequency_id_8", "Management_Accounts_Frequency_id_6", "Payroll_Frequency_id_3", "budgeted_hours", "feedback_incorporation_time", "review_time", "total_preparation_time", "total_time", "due_on", "customer_deadline_date", "expected_delivery_date", "internal_deadline_date", "sla_deadline_date", "Management_Accounts_FromDate_id_6", "Management_Accounts_ToDate_id_6",
     "staff_full_name", "role", "staff_email", "line_manager", "staff_status",
   ];
 
@@ -2247,6 +2247,7 @@ const getJobCustomReport = async (Report) => {
       SELECT 
           j.id AS job_id, j.job_id AS job_code_id,
           j.date_received_on, j.allocated_on, j.job_priority, j.engagement_model, j.customer_contact_details_id, j.status_updation_date,
+          CASE WHEN j.status_type IN (6, 7, 17, 18, 19, 20) THEN COALESCE((SELECT DATE_FORMAT(MAX(jsu.status_update_date), '%d/%m/%Y') FROM job_status_updation jsu JOIN master_status ms2 ON jsu.status_type = ms2.id WHERE jsu.job_id = j.id AND ms2.name LIKE '%Completed%'), DATE_FORMAT(j.status_updation_date, '%d/%m/%Y'), DATE_FORMAT(j.updated_at, '%d/%m/%Y')) ELSE '-' END AS date_of_completion,
           j.Transactions_Posting_id_2, j.Number_of_Bank_Transactions_id_2, j.Number_of_Journal_Entries_id_2, j.Number_of_Other_Transactions_id_2, j.Number_of_Petty_Cash_Transactions_id_2, j.Number_of_Purchase_Invoices_id_2, j.Number_of_Sales_Invoices_id_2, j.Number_of_Total_Transactions_id_2,
           j.submission_deadline, j.Tax_Year_id_4, j.If_Sole_Trader_Who_is_doing_Bookkeeping_id_4, j.Whose_Tax_Return_is_it_id_4, j.Type_of_Payslip_id_3, j.Year_Ending_id_1, j.Bookkeeping_Frequency_id_2, j.CIS_Frequency_id_3, j.Filing_Frequency_id_8, j.Management_Accounts_Frequency_id_6, j.Payroll_Frequency_id_3,
           j.budgeted_hours, j.feedback_incorporation_time, j.review_time, j.total_preparation_time, j.total_time, j.due_on, j.customer_deadline_date, j.expected_delivery_date, j.internal_deadline_date, j.sla_deadline_date, j.Management_Accounts_FromDate_id_6, j.Management_Accounts_ToDate_id_6,
@@ -2329,6 +2330,7 @@ const getJobCustomReport = async (Report) => {
       engagement_model: "engagement_model",
       customer_account_manager_officer: "customer_account_manager_officer",
       status_updation_date: "status_updation_date",
+      date_of_completion: "date_of_completion",
       Transactions_Posting_id_2: "Transactions_Posting_id_2",
       Number_of_Bank_Transactions_id_2: "Number_of_Bank_Transactions_id_2",
       Number_of_Journal_Entries_id_2: "Number_of_Journal_Entries_id_2",
