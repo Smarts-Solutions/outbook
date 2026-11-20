@@ -397,6 +397,13 @@ const JobStatus = () => {
       sortable: true,
     },
     {
+      name: "Date of Completion",
+      cell: (row) => <div title={row.date_of_completion || "-"}>{row.date_of_completion || "-"}</div>,
+      selector: (row) => row.date_of_completion || "-",
+      reorder: false,
+      sortable: true,
+    },
+    {
       name: "Allocated To",
       cell: (row) => <div title={row.allocated_name}>{row.allocated_name}</div>,
       selector: (row) => row.allocated_name,
@@ -696,6 +703,9 @@ const JobStatus = () => {
 
       // 26. Status
       rowData["Status"] = item.status || "-";
+
+      // Date of Completion
+      rowData["Date of Completion"] = item.date_of_completion || "-";
 
       // 27. Allocated To
       rowData["Allocated To"] = item.allocated_name || "-";

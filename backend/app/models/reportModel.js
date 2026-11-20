@@ -147,6 +147,18 @@ const jobStatusReports = async (Report) => {
         job_types.id AS job_type_id,
         job_types.type AS job_type_name,
         master_status.name AS status,
+        CASE 
+          WHEN jobs.status_type IN (6, 7, 17, 18, 19, 20) THEN 
+            COALESCE(
+              (SELECT DATE_FORMAT(MAX(jsu.status_update_date), '%d/%m/%Y') 
+               FROM job_status_updation jsu 
+               JOIN master_status ms2 ON jsu.status_type = ms2.id 
+               WHERE jsu.job_id = jobs.id AND ms2.name LIKE '%Completed%'),
+              DATE_FORMAT(jobs.status_updation_date, '%d/%m/%Y'),
+              DATE_FORMAT(jobs.updated_at, '%d/%m/%Y')
+            )
+          ELSE '-' 
+        END AS date_of_completion,
         staffs2.id AS reviewer_id,
         CONCAT(staffs2.first_name, ' ', staffs2.last_name) AS reviewer_name,
         staffs.id AS allocated_id,
@@ -1048,6 +1060,18 @@ const reportCountJob = async (Report) => {
         CONCAT(staffs4.first_name, ' ', staffs4.last_name) AS job_created_by,
         DATE_FORMAT(jobs.created_at, '%d/%m/%Y') AS created_at,
         master_status.name AS status,
+        CASE 
+          WHEN jobs.status_type IN (6, 7, 17, 18, 19, 20) THEN 
+            COALESCE(
+              (SELECT DATE_FORMAT(MAX(jsu.status_update_date), '%d/%m/%Y') 
+               FROM job_status_updation jsu 
+               JOIN master_status ms2 ON jsu.status_type = ms2.id 
+               WHERE jsu.job_id = jobs.id AND ms2.name LIKE '%Completed%'),
+              DATE_FORMAT(jobs.status_updation_date, '%d/%m/%Y'),
+              DATE_FORMAT(jobs.updated_at, '%d/%m/%Y')
+            )
+          ELSE '-' 
+        END AS date_of_completion,
         ${jobCodeExpr} AS job_code_id
 
         FROM 

@@ -254,6 +254,7 @@ const   JobStatus = () => {
                 Object.assign(rowData, {
                     "Job Type": item.job_type_name || "-",
                     "Status": statusName,
+                    "Date of Completion": item.date_of_completion || "-",
                     "Client Contact Person": (item.account_manager_officer_first_name || "") + " " + (item.account_manager_officer_last_name || "") || "-",
                     "Client Job Code": item.client_job_code || "-",
                     // "Outbook Account Manager": (item.outbooks_acount_manager_first_name || "") + " " + (item.outbooks_acount_manager_last_name || "") || "-",
@@ -461,6 +462,17 @@ const   JobStatus = () => {
         </div>
       ),
       width: "325px",
+    },
+    {
+      name: "Date of Completion",
+      cell: (row) => (
+        <div title={row.date_of_completion || "-"}>
+          {row.date_of_completion || "-"}
+        </div>
+      ),
+      selector: (row) => row.date_of_completion || "-",
+      sortable: true,
+      minWidth: "150px",
     },
 
     {
