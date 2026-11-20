@@ -518,7 +518,7 @@ const BillingApprovals = () => {
       minWidth: "130px",
       cell: (row) => (
         <span className="text-dark fw-semibold">
-          €{parseFloat(row.gross_amount || row.net_amount || 0).toFixed(2)}
+          £{parseFloat(row.gross_amount || row.net_amount || 0).toFixed(2)}
         </span>
       ),
     },
@@ -545,7 +545,7 @@ const BillingApprovals = () => {
       minWidth: "130px",
       cell: (row) => (
         <span className="fw-bold text-info fs-6">
-          €{parseFloat(row.net_amount || 0).toFixed(2)}
+          £{parseFloat(row.net_amount || 0).toFixed(2)}
         </span>
       ),
     },
@@ -1050,7 +1050,7 @@ const BillingApprovals = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {viewDetailsModal.calc_json.adhoc && (
+                      {viewDetailsModal.calc_json.adhoc && (Number(viewDetailsModal.calc_json.adhoc.hours) > 0 || Number(viewDetailsModal.calc_json.adhoc.total) > 0) && (
                         <tr>
                           <td className="px-3 py-2">
                             <span
@@ -1077,7 +1077,7 @@ const BillingApprovals = () => {
                           </td>
                         </tr>
                       )}
-                      {viewDetailsModal.calc_json.fte && (
+                      {viewDetailsModal.calc_json.fte && (Number(viewDetailsModal.calc_json.fte.total) > 0 || [viewDetailsModal.calc_json.fte.accountants, viewDetailsModal.calc_json.fte.bookkeepers, viewDetailsModal.calc_json.fte.payroll, viewDetailsModal.calc_json.fte.tax, viewDetailsModal.calc_json.fte.admin].some(v => Number(v) > 0)) && (
                         <tr>
                           <td className="px-3 py-2">
                             <span
@@ -1095,12 +1095,12 @@ const BillingApprovals = () => {
                           <td className="px-3 py-2 text-dark fs-13">
                             {(() => {
                               const roles = [
-                                { label: "Accountants", qty: viewDetailsModal.calc_json.fte.accountants },
-                                { label: "Bookkeepers", qty: viewDetailsModal.calc_json.fte.bookkeepers },
-                                { label: "Payroll", qty: viewDetailsModal.calc_json.fte.payroll },
-                                { label: "Tax", qty: viewDetailsModal.calc_json.fte.tax },
-                                { label: "Admin", qty: viewDetailsModal.calc_json.fte.admin },
-                              ].filter((r) => r.qty > 0);
+                                { label: "Accountants", qty: viewDetailsModal.calc_json.fte.accountants, fee: viewDetailsModal.calc_json.fte.fee_per_accountant },
+                                { label: "Bookkeepers", qty: viewDetailsModal.calc_json.fte.bookkeepers, fee: viewDetailsModal.calc_json.fte.fee_per_bookkeeper },
+                                { label: "Payroll", qty: viewDetailsModal.calc_json.fte.payroll, fee: viewDetailsModal.calc_json.fte.fee_per_payroll },
+                                { label: "Tax", qty: viewDetailsModal.calc_json.fte.tax, fee: viewDetailsModal.calc_json.fte.fee_per_tax },
+                                { label: "Admin", qty: viewDetailsModal.calc_json.fte.admin, fee: viewDetailsModal.calc_json.fte.fee_per_admin },
+                              ].filter((r) => Number(r.qty) > 0);
 
                               if (roles.length > 0) {
                                 return (
@@ -1108,6 +1108,7 @@ const BillingApprovals = () => {
                                     {roles.map((r, idx) => (
                                       <span key={idx} className="badge bg-light text-dark border me-1">
                                         {r.label}: <strong>{r.qty}</strong>
+                                        {Number(r.fee) > 0 && <span className="text-muted ms-1">(@ £{parseFloat(r.fee).toFixed(2)})</span>}
                                       </span>
                                     ))}
                                   </span>
@@ -1121,7 +1122,7 @@ const BillingApprovals = () => {
                           </td>
                         </tr>
                       )}
-                      {viewDetailsModal.calc_json.percentage && (
+                      {viewDetailsModal.calc_json.percentage && (Number(viewDetailsModal.calc_json.percentage.total) > 0 || Number(viewDetailsModal.calc_json.percentage.base) > 0 || (Array.isArray(viewDetailsModal.calc_json.percentage.items) && viewDetailsModal.calc_json.percentage.items.some(it => Number(it.base) > 0 || Number(it.subtotal) > 0))) && (
                         <tr>
                           <td className="px-3 py-2">
                             <span
@@ -1161,7 +1162,7 @@ const BillingApprovals = () => {
                           </td>
                         </tr>
                       )}
-                      {viewDetailsModal.calc_json.customised && (
+                      {viewDetailsModal.calc_json.customised && (Number(viewDetailsModal.calc_json.customised.count) > 0 || Number(viewDetailsModal.calc_json.customised.total) > 0) && (
                         <tr>
                           <td className="px-3 py-2">
                             <span

@@ -1689,10 +1689,15 @@ export const SubmitBilling = () => {
         fte: fteModelData ? {
           total: fteTotal,
           accountants: fteAccountantQty !== "" ? parseFloat(fteAccountantQty) || 0 : 0,
+          fee_per_accountant: parseFloat(fteModelData.details?.fee_per_accountant || 0),
           bookkeepers: fteBookkeeperQty !== "" ? parseFloat(fteBookkeeperQty) || 0 : 0,
+          fee_per_bookkeeper: parseFloat(fteModelData.details?.fee_per_bookkeeper || 0),
           payroll: ftePayrollQty !== "" ? parseFloat(ftePayrollQty) || 0 : 0,
+          fee_per_payroll: parseFloat(fteModelData.details?.fee_per_payroll_expert || 0),
           tax: fteTaxQty !== "" ? parseFloat(fteTaxQty) || 0 : 0,
+          fee_per_tax: parseFloat(fteModelData.details?.fee_per_tax_expert || 0),
           admin: fteAdminQty !== "" ? parseFloat(fteAdminQty) || 0 : 0,
+          fee_per_admin: parseFloat(fteModelData.details?.fee_per_admin_staff || 0),
         } : null,
         percentage: percentageModelData ? {
           items: percentageFieldsList.map((f) => ({

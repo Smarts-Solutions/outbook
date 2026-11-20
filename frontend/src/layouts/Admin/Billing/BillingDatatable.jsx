@@ -139,14 +139,24 @@ const BillingDatatable = ({
       }
     }
 
-    // If column is Gross Amount, Net Amount, or Amount, format with Euro sign (€) and 2 decimal places
+    // If column is Discount, format with % sign
+    if (colNameStr === "discount" || colNameStr.includes("discount")) {
+      const num = parseFloat(val);
+      if (!isNaN(num)) {
+        return num > 0 ? `${num}%` : "0%";
+      }
+    }
+
+    // If column is Gross Amount, Net Amount, or Amount, ensure clean 2 decimal places with currency if applicable
     if (typeof val === "number" && (colNameStr.includes("amount") || colNameStr.includes("gross") || colNameStr.includes("net"))) {
-      return `€${val.toFixed(2)}`;
+      const curr = row.currency === "AUD" ? "AUD " : "£";
+      return `${curr}${val.toFixed(2)}`;
     }
     if (typeof val === "string" && (colNameStr.includes("amount") || colNameStr.includes("gross") || colNameStr.includes("net"))) {
       const num = parseFloat(val);
       if (!isNaN(num)) {
-        return `€${num.toFixed(2)}`;
+        const curr = row.currency === "AUD" ? "AUD " : "£";
+        return `${curr}${num.toFixed(2)}`;
       }
     }
 
@@ -161,11 +171,173 @@ const BillingDatatable = ({
         !["actions", ""].includes(c.name.trim().toLowerCase())
     );
 
+    // Check if any row in data contains calculation breakdown information (calc_json)
+    const hasAnyCalcJson = data.some((r) => {
+      if (!r || !r.calc_json) return false;
+      if (typeof r.calc_json === "object") return Object.keys(r.calc_json).length > 0;
+      if (typeof r.calc_json === "string") {
+        try {
+          const parsed = JSON.parse(r.calc_json);
+          return parsed && typeof parsed === "object" && Object.keys(parsed).length > 0;
+        } catch (e) {
+          return false;
+        }
+      }
+      return false;
+    });
+
     return data.map((row, rowIndex) => {
       const rowObj = {};
+
+      // Parse calc_json if present
+      let calc = row.calc_json;
+      if (typeof calc === "string") {
+        try {
+          calc = JSON.parse(calc);
+        } catch (e) {
+          calc = null;
+        }
+      }
+
+      const curr = row.currency === "AUD" ? "AUD " : "£";
+
+      // Extract only active calculated models (where calculation was actually performed)
+      const activeModels = [];
+
+      // 1. Adhoc
+      if (calc?.adhoc && (Number(calc.adhoc.hours) > 0 || Number(calc.adhoc.total) > 0)) {
+        const role = (calc.adhoc.role || "Standard").replace(/_/g, " ");
+        const hrs = calc.adhoc.hours || 0;
+        const rate = parseFloat(calc.adhoc.rate || 0).toFixed(2);
+        const subtotal = parseFloat(calc.adhoc.total || 0).toFixed(2);
+        activeModels.push({
+          modelKey: "Adhoc",
+          modelName: "Adhoc / Hourly",
+          details: `${role} — ${hrs} Hrs @ ${curr}${rate}/Hr`,
+          subtotal: `${curr}${subtotal}`,
+        });
+      }
+
+      // 2. FTE
+      if (calc?.fte && (Number(calc.fte.total) > 0 || (calc.fte.accountants > 0 || calc.fte.bookkeepers > 0 || calc.fte.payroll > 0 || calc.fte.tax > 0 || calc.fte.admin > 0))) {
+        const roles = [
+          { label: "Accountants", qty: calc.fte.accountants, fee: calc.fte.fee_per_accountant },
+          { label: "Bookkeepers", qty: calc.fte.bookkeepers, fee: calc.fte.fee_per_bookkeeper },
+          { label: "Payroll", qty: calc.fte.payroll, fee: calc.fte.fee_per_payroll },
+          { label: "Tax", qty: calc.fte.tax, fee: calc.fte.fee_per_tax },
+          { label: "Admin", qty: calc.fte.admin, fee: calc.fte.fee_per_admin },
+        ].filter((r) => r.qty > 0);
+
+        const subtotal = parseFloat(calc.fte.total || 0).toFixed(2);
+        const rolesText = roles.length > 0
+          ? roles
+              .map((r) => {
+                const feeNum = parseFloat(r.fee || 0);
+                if (feeNum > 0) {
+                  const roleTotal = (r.qty * feeNum).toFixed(2);
+                  return `${r.label}: ${r.qty} @ ${curr}${feeNum.toFixed(2)} = ${curr}${roleTotal}`;
+                }
+                return `${r.label}: ${r.qty}`;
+              })
+              .join("; ")
+          : "Dedicated FTE Resource Allocation";
+
+        activeModels.push({
+          modelKey: "FTE",
+          modelName: "FTE Staffing",
+          details: rolesText,
+          subtotal: `${curr}${subtotal}`,
+        });
+      }
+
+      // 3. Percentage
+      if (calc?.percentage && (Number(calc.percentage.total) > 0 || Number(calc.percentage.base) > 0 || (Array.isArray(calc.percentage.items) && calc.percentage.items.some((it) => it.base > 0 || it.subtotal > 0)))) {
+        let details = "";
+        if (Array.isArray(calc.percentage.items) && calc.percentage.items.length > 0) {
+          const activeItems = calc.percentage.items.filter((it) => it.base > 0 || it.subtotal > 0);
+          details = activeItems.length > 0
+            ? activeItems
+                .map((it) => `${it.label || it.key}: Base ${curr}${parseFloat(it.base || 0).toFixed(2)} @ ${it.pct}% = ${curr}${parseFloat(it.subtotal || 0).toFixed(2)}`)
+                .join("; ")
+            : `Base ${curr}${parseFloat(calc.percentage.base || 0).toFixed(2)} @ ${calc.percentage.pct || 0}%`;
+        } else {
+          details = `Base ${curr}${parseFloat(calc.percentage.base || 0).toFixed(2)} @ ${calc.percentage.pct || 0}%`;
+        }
+        const subtotal = parseFloat(calc.percentage.total || 0).toFixed(2);
+        activeModels.push({
+          modelKey: "Percentage",
+          modelName: "Percentage Model",
+          details,
+          subtotal: `${curr}${subtotal}`,
+        });
+      }
+
+      // 4. Customised
+      if (calc?.customised && (Number(calc.customised.count) > 0 || Number(calc.customised.total) > 0)) {
+        const cnt = calc.customised.count || 0;
+        const cost = parseFloat(calc.customised.costPerJob || 0).toFixed(2);
+        const jobLabel = Number(cnt) === 1 ? "Job" : "Jobs";
+        const subtotal = parseFloat(calc.customised.total || 0).toFixed(2);
+        activeModels.push({
+          modelKey: "Customised",
+          modelName: "Customised Pricing",
+          details: `${cnt} ${jobLabel} @ ${curr}${cost}/Job`,
+          subtotal: `${curr}${subtotal}`,
+        });
+      }
+
       validCols.forEach((col) => {
-        rowObj[col.name] = getCellValue(row, col, rowIndex);
+        const colName = col.name.trim();
+        const colNameLower = colName.toLowerCase();
+
+        // 1. If this is the "Model" column and we have active calculated models, show only the models that were actually calculated
+        if (colNameLower === "model" && activeModels.length > 0) {
+          rowObj[col.name] = activeModels.map((m) => m.modelName).join(", ");
+        } else if (colNameLower === "revenue split" || colNameLower.includes("revenue split") || colNameLower.includes("distribution")) {
+          // Format full distribution with name, percentage and allocated amount
+          const list = row.contributors || [];
+          if (Array.isArray(list) && list.length > 0) {
+            const netAmt = parseFloat(row.net_amount || row.net || 0);
+            rowObj[col.name] = list
+              .map((c) => {
+                const pct = parseFloat(c.pct || 0);
+                const allocAmt = (netAmt * pct) / 100;
+                return `${c.staff_name || "Staff"} (${pct.toFixed(0)}% - ${curr}${allocAmt.toFixed(2)})`;
+              })
+              .join(", ");
+          } else {
+            rowObj[col.name] = getCellValue(row, col, rowIndex);
+          }
+        } else {
+          rowObj[col.name] = getCellValue(row, col, rowIndex);
+        }
+
+        // 2. If this is the "Discount" column, immediately insert "Discount Amount" right after it
+        if (colNameLower === "discount") {
+          const gross = parseFloat(row.gross_amount || 0);
+          const discPct = parseFloat(row.discount_pct || 0);
+          const discAmt = row.discount_amt !== undefined && row.discount_amt !== null
+            ? parseFloat(row.discount_amt)
+            : (gross * discPct) / 100;
+          rowObj["Discount Amount"] = `${curr}${discAmt.toFixed(2)}`;
+        }
       });
+
+      // Each active calculated model gets its own cell / column directly named after the model
+      if (hasAnyCalcJson) {
+        if (activeModels.length > 0) {
+          activeModels.forEach((m) => {
+            rowObj[`${m.modelName} Calculation`] = `${m.details} = ${m.subtotal}`;
+          });
+        } else {
+          rowObj["Calculation Breakdown"] = "—";
+        }
+      }
+
+      // Add Final Remark column in export (if available show text, else "-")
+      const finalRemarkVal = row.remark || row.final_remark || row.submitter_remark;
+      rowObj["Final Remark"] = finalRemarkVal && String(finalRemarkVal).trim() ? String(finalRemarkVal).trim() : "-";
+
       return rowObj;
     });
   };
