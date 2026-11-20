@@ -765,7 +765,7 @@ const JobInformationPage = ({ job_id, getAccessDataJob, goto }) => {
   // Years (last 5 + current)
   const getLastFiveYears = () => {
     const currentYear = new Date().getFullYear();
-    return Array.from({ length: 6 }, (_, i) => (currentYear - i).toString());
+    return Array.from({ length: 8 }, (_, i) => (currentYear + 1 - i).toString());
   };
 
   // Months
