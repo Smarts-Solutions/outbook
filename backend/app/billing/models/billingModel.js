@@ -3,8 +3,103 @@ const { commonEmail } = require('../../utils/commonEmail');
 const { 
     LineManageStaffIdHelperFunction, 
     QueryRoleHelperFunction, 
-    buildAssignedJobsTempTable 
+    buildAssignedJobsTempTable,
+    SatffLogUpdateOperation
 } = require('../../utils/helper');
+
+// Helper to log billing actions in staff_logs without exposing submission ID
+const logBillingAction = async ({ staffId, actionType, customerName, clientName, jobName, returnNote, submissionId, ip = '' }) => {
+    try {
+        if (!staffId) return;
+
+        // Fetch staff name
+        let staffName = 'Staff';
+        const [staffRows] = await pool.execute('SELECT first_name, last_name FROM staffs WHERE id = ?', [staffId]);
+        if (staffRows.length > 0) {
+            staffName = `${staffRows[0].first_name || ''} ${staffRows[0].last_name || ''}`.trim();
+        }
+
+        const custStr = customerName || 'Unknown Customer';
+        const clientStr = clientName || 'Unknown Client';
+        const jobStr = jobName ? `, Job: ${jobName}` : '';
+
+        let logMessage = '';
+        switch (actionType) {
+            case 'submit':
+                logMessage = `${staffName} submitted billing for Customer: ${custStr}, Client: ${clientStr}${jobStr}`;
+                break;
+            case 'draft':
+                logMessage = `${staffName} saved draft billing for Customer: ${custStr}, Client: ${clientStr}${jobStr}`;
+                break;
+            case 'edit':
+                logMessage = `${staffName} edited billing details for Customer: ${custStr}, Client: ${clientStr}${jobStr}`;
+                break;
+            case 'approve':
+                logMessage = `${staffName} approved billing for Customer: ${custStr}, Client: ${clientStr}${jobStr}`;
+                break;
+            case 'return':
+                logMessage = `${staffName} returned billing for Customer: ${custStr}, Client: ${clientStr}${jobStr}. Reason: "${returnNote || ''}"`;
+                break;
+            case 'generate_bill':
+                logMessage = `${staffName} generated bill for Customer: ${custStr}, Client: ${clientStr}${jobStr}`;
+                break;
+            case 'mark_paid':
+                logMessage = `${staffName} marked invoice as Paid for Customer: ${custStr}, Client: ${clientStr}`;
+                break;
+            case 'undo_paid':
+                logMessage = `${staffName} reverted invoice payment status to Outstanding for Customer: ${custStr}, Client: ${clientStr}`;
+                break;
+            default:
+                logMessage = `${staffName} performed ${actionType} on billing for Customer: ${custStr}, Client: ${clientStr}${jobStr}`;
+        }
+
+        const currentDate = new Date();
+        await SatffLogUpdateOperation({
+            staff_id: staffId,
+            ip: ip || '',
+            date: currentDate.toISOString().split('T')[0],
+            module_name: 'billing',
+            log_message: logMessage,
+            permission_type: actionType,
+            module_id: submissionId || 0
+        });
+    } catch (err) {
+        console.error('Error logging billing action:', err);
+    }
+};
+
+// Helper to get submission details for logging
+const getSubmissionDetailsForLog = async (connOrPool, submissionId) => {
+    try {
+        const query = `
+            SELECT 
+                bs.id,
+                bs.customer_id,
+                c.trading_name AS customer_name,
+                bs.client_id,
+                cl.trading_name AS client_name,
+                bs.job_id,
+                IF(j.id IS NOT NULL, CONCAT(
+                    SUBSTRING(IFNULL(c.trading_name, ''), 1, 3), '_',
+                    SUBSTRING(IFNULL(cl.trading_name, ''), 1, 3), '_',
+                    SUBSTRING(IFNULL(jt.type, ''), 1, 4), '_',
+                    SUBSTRING(IFNULL(j.job_id, ''), 1, 15)
+                ), NULL) AS job_name
+            FROM billing_submissions bs
+            LEFT JOIN customers c ON bs.customer_id = c.id
+            LEFT JOIN clients cl ON bs.client_id = cl.id
+            LEFT JOIN jobs j ON bs.job_id = j.id
+            LEFT JOIN job_types jt ON j.job_type_id = jt.id
+            WHERE bs.id = ?
+            LIMIT 1
+        `;
+        const [rows] = await connOrPool.execute(query, [submissionId]);
+        return rows[0] || null;
+    } catch (err) {
+        console.error('Error getting submission details for log:', err);
+        return null;
+    }
+};
 
 // Helper to get Line Manager Staff IDs safely without infinite recursion / loops
 const getLineManageStaffIdsSafe = async (staffId) => {
@@ -1553,6 +1648,23 @@ const submitBilling = async (payload, submittedByStaffId) => {
             }
 
             await connection.commit();
+
+            // Log Billing Edit/Update Action
+            try {
+                const subDetails = await getSubmissionDetailsForLog(pool, editSubmissionId);
+                await logBillingAction({
+                    staffId: submittedByStaffId,
+                    actionType: action === 'save' ? 'draft' : 'edit',
+                    customerName: subDetails?.customer_name,
+                    clientName: subDetails?.client_name,
+                    jobName: subDetails?.job_name,
+                    submissionId: editSubmissionId,
+                    ip: payload.ip || ''
+                });
+            } catch (logErr) {
+                console.error("Error creating billing edit log:", logErr);
+            }
+
             return {
                 status: true,
                 message: "Billing submission updated successfully.",
@@ -1697,6 +1809,22 @@ const submitBilling = async (payload, submittedByStaffId) => {
         }
 
         await connection.commit();
+
+        // Log Billing Submit or Save as Draft Action
+        try {
+            const subDetails = await getSubmissionDetailsForLog(pool, submissionId);
+            await logBillingAction({
+                staffId: submittedByStaffId,
+                actionType: action === 'save' ? 'draft' : 'submit',
+                customerName: subDetails?.customer_name,
+                clientName: subDetails?.client_name,
+                jobName: subDetails?.job_name,
+                submissionId: submissionId,
+                ip: payload.ip || ''
+            });
+        } catch (logErr) {
+            console.error("Error creating billing submission log:", logErr);
+        }
 
         return {
             status: true,
@@ -1879,7 +2007,7 @@ const getSubmissionsForApprovals = async (staffUserId, status = null) => {
 };
 
 // 11. Manager Approve Action
-const managerApproveSubmission = async (submissionId, managerUserId) => {
+const managerApproveSubmission = async (submissionId, managerUserId, ip = '') => {
     try {
         const isApproveAll = submissionId === 'all' || submissionId === 'ALL';
         
@@ -1887,6 +2015,33 @@ const managerApproveSubmission = async (submissionId, managerUserId) => {
             const roleRows = await QueryRoleHelperFunction(managerUserId);
             const role = (roleRows && roleRows.length > 0) ? String(roleRows[0].role_name || '').toUpperCase() : '';
             const isAdmin = ['SUPERADMIN', 'ADMIN', 'SUPER ADMIN'].includes(role) || Number(roleRows[0]?.role_id) === 1 || Number(roleRows[0]?.role_id) === 2;
+
+            // Fetch IDs to be approved for logging
+            let selectPendingQuery = `SELECT bs.id FROM billing_submissions bs LEFT JOIN customers c ON bs.customer_id = c.id WHERE bs.status = 'Pending Manager Approval'`;
+            let selectPendingParams = [];
+            if (!isAdmin) {
+                const subordinateStaffIds = await getSubordinateStaffIds(managerUserId);
+                if (subordinateStaffIds.length > 0) {
+                    const subPlaceholders = subordinateStaffIds.map(() => '?').join(',');
+                    selectPendingQuery += ` AND (
+                        bs.manager_id = ?
+                        OR c.account_manager_id = ?
+                        OR bs.submitted_by = ?
+                        OR bs.submitted_by IN (${subPlaceholders})
+                        OR bs.manager_id IN (${subPlaceholders})
+                        OR c.account_manager_id IN (${subPlaceholders})
+                    )`;
+                    selectPendingParams.push(managerUserId, managerUserId, managerUserId, ...subordinateStaffIds, ...subordinateStaffIds, ...subordinateStaffIds);
+                } else {
+                    selectPendingQuery += ` AND (
+                        bs.manager_id = ?
+                        OR c.account_manager_id = ?
+                        OR bs.submitted_by = ?
+                    )`;
+                    selectPendingParams.push(managerUserId, managerUserId, managerUserId);
+                }
+            }
+            const [pendingRows] = await pool.execute(selectPendingQuery, selectPendingParams);
 
             let allQuery = `
                 UPDATE billing_submissions bs
@@ -1922,11 +2077,33 @@ const managerApproveSubmission = async (submissionId, managerUserId) => {
             }
 
             const [allResult] = await pool.execute(allQuery, allParams);
+
+            // Log each approved submission
+            for (const row of pendingRows) {
+                try {
+                    const subDetails = await getSubmissionDetailsForLog(pool, row.id);
+                    await logBillingAction({
+                        staffId: managerUserId,
+                        actionType: 'approve',
+                        customerName: subDetails?.customer_name,
+                        clientName: subDetails?.client_name,
+                        jobName: subDetails?.job_name,
+                        submissionId: row.id,
+                        ip
+                    });
+                } catch (e) {
+                    console.error("Bulk approve log error for ID", row.id, e);
+                }
+            }
+
             return {
                 status: true,
                 message: `${allResult.affectedRows} submission(s) approved and sent to Credit Control.`
             };
         }
+
+        // Fetch details before or for log
+        const subDetails = await getSubmissionDetailsForLog(pool, submissionId);
 
         const [result] = await pool.execute(
             `UPDATE billing_submissions 
@@ -1944,6 +2121,21 @@ const managerApproveSubmission = async (submissionId, managerUserId) => {
             };
         }
 
+        // Log Approval Action
+        try {
+            await logBillingAction({
+                staffId: managerUserId,
+                actionType: 'approve',
+                customerName: subDetails?.customer_name,
+                clientName: subDetails?.client_name,
+                jobName: subDetails?.job_name,
+                submissionId: submissionId,
+                ip
+            });
+        } catch (logErr) {
+            console.error("Error creating billing approve log:", logErr);
+        }
+
         return {
             status: true,
             message: "Submission approved by manager and sent to Credit Control."
@@ -1955,11 +2147,14 @@ const managerApproveSubmission = async (submissionId, managerUserId) => {
 };
 
 // 12. Manager Return Action (Rejection with note)
-const managerReturnSubmission = async (submissionId, managerUserId, returnNote) => {
+const managerReturnSubmission = async (submissionId, managerUserId, returnNote, ip = '') => {
     try {
         if (!returnNote || !returnNote.trim()) {
             return { status: false, message: "A reason is required to return an entry." };
         }
+
+        // Fetch details for logging
+        const subLogDetails = await getSubmissionDetailsForLog(pool, submissionId);
 
         const [result] = await pool.execute(
             `UPDATE billing_submissions 
@@ -1976,6 +2171,22 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote) 
                 status: false,
                 message: "Submission not found or already processed."
             };
+        }
+
+        // Log Return Action
+        try {
+            await logBillingAction({
+                staffId: managerUserId,
+                actionType: 'return',
+                customerName: subLogDetails?.customer_name,
+                clientName: subLogDetails?.client_name,
+                jobName: subLogDetails?.job_name,
+                returnNote: returnNote.trim(),
+                submissionId: submissionId,
+                ip
+            });
+        } catch (logErr) {
+            console.error("Error creating billing return log:", logErr);
         }
 
         // Fetch details to send email notification to the submitter
@@ -2170,7 +2381,7 @@ const managerRejectSubmission = async (submissionId, managerUserId, reason = '')
 };
 
 // 13. Manager Edit Submission Action
-const managerEditSubmission = async (submissionId, managerUserId, editData) => {
+const managerEditSubmission = async (submissionId, managerUserId, editData, ip = '') => {
     const connection = await pool.getConnection();
     await connection.beginTransaction();
     try {
@@ -2275,6 +2486,23 @@ const managerEditSubmission = async (submissionId, managerUserId, editData) => {
         }
 
         await connection.commit();
+
+        // Log Edit Action
+        try {
+            const subLogDetails = await getSubmissionDetailsForLog(pool, submissionId);
+            await logBillingAction({
+                staffId: managerUserId,
+                actionType: 'edit',
+                customerName: subLogDetails?.customer_name,
+                clientName: subLogDetails?.client_name,
+                jobName: subLogDetails?.job_name,
+                submissionId: submissionId,
+                ip
+            });
+        } catch (logErr) {
+            console.error("Error creating billing manager edit log:", logErr);
+        }
+
         return {
             status: true,
             message: "Submission updated successfully.",
@@ -2292,7 +2520,7 @@ const managerEditSubmission = async (submissionId, managerUserId, editData) => {
 
 
 // 14. Mark Submission as Billed (Generate Invoice in billing_submissions)
-const markSubmissionBilled = async (submissionId, staffUserId, billNumber, billDate, dueDate = null) => {
+const markSubmissionBilled = async (submissionId, staffUserId, billNumber, billDate, dueDate = null, ip = '') => {
     try {
         if (!billNumber || !billNumber.trim()) {
             return { status: false, message: 'Bill number is required.' };
@@ -2302,6 +2530,9 @@ const markSubmissionBilled = async (submissionId, staffUserId, billNumber, billD
         }
 
         const calculatedDueDate = dueDate || new Date(new Date(billDate).getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+        // Fetch details for logging
+        const subLogDetails = await getSubmissionDetailsForLog(pool, submissionId);
 
         const [result] = await pool.execute(
             `UPDATE billing_submissions 
@@ -2320,6 +2551,21 @@ const markSubmissionBilled = async (submissionId, staffUserId, billNumber, billD
             return { status: false, message: 'Submission not found or already billed/processed.' };
         }
 
+        // Log Generate Bill Action
+        try {
+            await logBillingAction({
+                staffId: staffUserId,
+                actionType: 'generate_bill',
+                customerName: subLogDetails?.customer_name,
+                clientName: subLogDetails?.client_name,
+                jobName: subLogDetails?.job_name,
+                submissionId: submissionId,
+                ip
+            });
+        } catch (logErr) {
+            console.error("Error creating generate bill log:", logErr);
+        }
+
         return {
             status: true,
             message: 'Bill generated and marked as invoiced successfully.',
@@ -2332,7 +2578,7 @@ const markSubmissionBilled = async (submissionId, staffUserId, billNumber, billD
 };
 
 // 14.b Bulk Mark Submissions as Billed
-const markSubmissionsBulkBilled = async (submissionIds, staffUserId, billNumber, billDate, dueDate = null) => {
+const markSubmissionsBulkBilled = async (submissionIds, staffUserId, billNumber, billDate, dueDate = null, ip = '') => {
     try {
         if (!Array.isArray(submissionIds) || submissionIds.length === 0) {
             return { status: false, message: 'Please select at least one submission to bill.' };
@@ -2378,6 +2624,24 @@ const markSubmissionsBulkBilled = async (submissionIds, staffUserId, billNumber,
             return { status: false, message: 'No eligible submissions were updated. They may already be billed or not approved yet.' };
         }
 
+        // Log bulk generate bill for each
+        for (const sid of submissionIds) {
+            try {
+                const subLogDetails = await getSubmissionDetailsForLog(pool, sid);
+                await logBillingAction({
+                    staffId: staffUserId,
+                    actionType: 'generate_bill',
+                    customerName: subLogDetails?.customer_name,
+                    clientName: subLogDetails?.client_name,
+                    jobName: subLogDetails?.job_name,
+                    submissionId: sid,
+                    ip
+                });
+            } catch (e) {
+                console.error("Bulk generate bill log error for ID", sid, e);
+            }
+        }
+
         return {
             status: true,
             message: `${result.affectedRows} ${result.affectedRows === 1 ? 'bill' : 'bills'} generated and marked as invoiced successfully.`,
@@ -2390,8 +2654,11 @@ const markSubmissionsBulkBilled = async (submissionIds, staffUserId, billNumber,
 };
 
 // 15. Record or Clear Payment for Invoiced Submission
-const recordInvoicePayment = async (submissionId, staffUserId, paidDate = null) => {
+const recordInvoicePayment = async (submissionId, staffUserId, paidDate = null, ip = '') => {
     try {
+        // Fetch details before update for logging
+        const subLogDetails = await getSubmissionDetailsForLog(pool, submissionId);
+
         const [result] = await pool.execute(
             `UPDATE billing_submissions 
              SET paid_date = ?,
@@ -2402,6 +2669,21 @@ const recordInvoicePayment = async (submissionId, staffUserId, paidDate = null) 
 
         if (result.affectedRows === 0) {
             return { status: false, message: 'Invoiced submission not found.' };
+        }
+
+        // Log Mark Paid or Undo Paid Action
+        try {
+            await logBillingAction({
+                staffId: staffUserId,
+                actionType: paidDate ? 'mark_paid' : 'undo_paid',
+                customerName: subLogDetails?.customer_name,
+                clientName: subLogDetails?.client_name,
+                jobName: subLogDetails?.job_name,
+                submissionId: submissionId,
+                ip
+            });
+        } catch (logErr) {
+            console.error("Error creating payment log:", logErr);
         }
 
         return {

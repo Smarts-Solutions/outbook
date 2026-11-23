@@ -237,7 +237,8 @@ const submitBilling = async (req, res) => {
             });
         }
 
-        const payload = req.body;
+        const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || req.ip || '';
+        const payload = { ...req.body, ip };
         const result = await billingModel.submitBilling(payload, staffUserId);
 
         if (!result.status) {
@@ -295,12 +296,13 @@ const managerApproveSubmission = async (req, res) => {
     try {
         const staffUserId = req.body?.StaffUserId || req.userId || req.user?.id || null;
         const submissionId = req.body?.submission_id || req.params?.id || null;
+        const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || req.ip || '';
 
         if (!submissionId) {
             return res.status(400).json({ status: false, message: "submission_id is required" });
         }
 
-        const result = await billingModel.managerApproveSubmission(submissionId, staffUserId);
+        const result = await billingModel.managerApproveSubmission(submissionId, staffUserId, ip);
         if (!result.status) {
             return res.status(400).json({ status: false, message: result.message });
         }
@@ -320,6 +322,7 @@ const managerReturnSubmission = async (req, res) => {
         const staffUserId = req.body?.StaffUserId || req.userId || req.user?.id || null;
         const submissionId = req.body?.submission_id || req.params?.id || null;
         const returnNote = req.body?.return_note || req.body?.note || '';
+        const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || req.ip || '';
 
         if (!submissionId) {
             return res.status(400).json({ status: false, message: "submission_id is required" });
@@ -328,7 +331,7 @@ const managerReturnSubmission = async (req, res) => {
             return res.status(400).json({ status: false, message: "Reason (return_note) is required" });
         }
 
-        const result = await billingModel.managerReturnSubmission(submissionId, staffUserId, returnNote);
+        const result = await billingModel.managerReturnSubmission(submissionId, staffUserId, returnNote, ip);
         if (!result.status) {
             return res.status(400).json({ status: false, message: result.message });
         }
@@ -373,12 +376,13 @@ const managerEditSubmission = async (req, res) => {
         const staffUserId = req.body?.StaffUserId || req.userId || req.user?.id || null;
         const submissionId = req.body?.submission_id || req.params?.id || null;
         const editData = req.body?.editData || req.body || {};
+        const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || req.ip || '';
 
         if (!submissionId) {
             return res.status(400).json({ status: false, message: "submission_id is required" });
         }
 
-        const result = await billingModel.managerEditSubmission(submissionId, staffUserId, editData);
+        const result = await billingModel.managerEditSubmission(submissionId, staffUserId, editData, ip);
         if (!result.status) {
             return res.status(400).json({ status: false, message: result.message });
         }
@@ -402,10 +406,11 @@ const markSubmissionBilled = async (req, res) => {
         const billNumber = req.body?.bill_number || req.body?.billNumber || '';
         const billDate = req.body?.bill_date || req.body?.billDate || '';
         const dueDate = req.body?.due_date || req.body?.dueDate || null;
+        const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || req.ip || '';
 
         // If bulk submissionIds provided
         if (Array.isArray(submissionIds) && submissionIds.length > 0) {
-            const result = await billingModel.markSubmissionsBulkBilled(submissionIds, staffUserId, billNumber, billDate, dueDate);
+            const result = await billingModel.markSubmissionsBulkBilled(submissionIds, staffUserId, billNumber, billDate, dueDate, ip);
             if (!result.status) {
                 return res.status(400).json({ status: false, message: result.message });
             }
@@ -420,7 +425,7 @@ const markSubmissionBilled = async (req, res) => {
             return res.status(400).json({ status: false, message: "submission_id or submission_ids is required" });
         }
 
-        const result = await billingModel.markSubmissionBilled(submissionId, staffUserId, billNumber, billDate, dueDate);
+        const result = await billingModel.markSubmissionBilled(submissionId, staffUserId, billNumber, billDate, dueDate, ip);
         if (!result.status) {
             return res.status(400).json({ status: false, message: result.message });
         }
@@ -441,12 +446,13 @@ const recordInvoicePayment = async (req, res) => {
         const staffUserId = req.body?.StaffUserId || req.userId || req.user?.id || null;
         const submissionId = req.body?.submission_id || req.params?.id || null;
         const paidDate = req.body?.paid_date || req.body?.paidDate || null;
+        const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || req.ip || '';
 
         if (!submissionId) {
             return res.status(400).json({ status: false, message: "submission_id is required" });
         }
 
-        const result = await billingModel.recordInvoicePayment(submissionId, staffUserId, paidDate);
+        const result = await billingModel.recordInvoicePayment(submissionId, staffUserId, paidDate, ip);
         if (!result.status) {
             return res.status(400).json({ status: false, message: result.message });
         }
