@@ -17,9 +17,20 @@ export const BillingHeader = ({ activeTab }) => {
   const staffDetails = staffDetailsStr ? JSON.parse(staffDetailsStr) : null;
   const roleId = Number(staffDetails?.role_id);
   const roleName = (staffDetails?.role_name || "").toLowerCase();
+  let localRole = "";
+  try {
+    localRole = (JSON.parse(localStorage.getItem("role") || '""') || "").toLowerCase();
+  } catch (e) {
+    localRole = (localStorage.getItem("role") || "").toLowerCase();
+  }
+
+  // Allowed specific Staff IDs for Credit Control: 56, 134, 38, 444
+  const currentStaffId = Number(staffDetails?.id);
+  const creditControlAllowedStaffIds = [56, 134, 38, 444];
+  const canAccessCreditControl = isSuperAdmin || creditControlAllowedStaffIds.includes(currentStaffId);
 
   // Super Admin (1) / Admin (2)
-  const isAdmin = roleId === 1 || roleId === 2 || roleName.includes("admin") || roleName.includes("superadmin");
+  const isAdmin = isSuperAdmin || roleId === 2 || roleName.includes("admin") || localRole.includes("admin");
 
   // Read job create permission from localStorage accessData if present
   const checkJobCreateFromLocal = () => {
@@ -145,12 +156,16 @@ export const BillingHeader = ({ activeTab }) => {
   ];
 
   // Role & Hierarchy based visibility:
-  // 1. Admin & Super Admin: All active tabs (Dashboard, Submit, Approvals, Credit Control)
-  // 2. Staff / User:
+  // 1. Credit Control: Visible to Super Admin AND Staff IDs [56, 134, 38, 444]
+  // 2. Admin: Dashboard, Submit, Approvals
+  // 3. Staff / User:
   //    - "My Dashboard": Always visible
   //    - "Submit Billing": Only visible if user has job create permission (`canCreateJob`)
-  //    - "Approvals": Only visible if user is a Line Manager (`canApprove`)
+  //    - "Approvals": Only visible if user is a Line Manager (`canApprove`) or has create permissions
   const tabsList = allTabs.filter((tab) => {
+    if (tab.id === "credit") {
+      return canAccessCreditControl;
+    }
     if (isAdmin) return true;
     if (tab.id === "dashboard") return true;
     if (tab.id === "submit") return canCreateJob;

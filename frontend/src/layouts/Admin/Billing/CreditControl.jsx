@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import BillingHeader from "./BillingHeader";
 import BillingDatatable from "./BillingDatatable";
 import { getSubmissionsForApprovalsApi, markSubmissionBilledApi, recordInvoicePaymentApi } from "../../../Services/Billing/BillingService";
 import { convertDate1 } from "../../../Utils/Comman_function";
 import CommanModal from "../../../Components/ExtraComponents/Modals/CommanModal";
-import { Check, Eye, FileText, CheckCircle, Undo2 } from "lucide-react";
+import { Check, Eye, FileText, CheckCircle, Undo2, ShieldAlert } from "lucide-react";
 import sweatalert from "sweetalert2";
 import { formatPeriodDisplay } from "./BillingApprovals";
 
 const CreditControl = () => {
+  const navigate = useNavigate();
   const [invoices, setInvoices] = useState([]);
   const [readyToInvoiceList, setReadyToInvoiceList] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -18,6 +20,20 @@ const CreditControl = () => {
 
   const staffDetailsStr = localStorage.getItem("staffDetails");
   const staffDetails = staffDetailsStr ? JSON.parse(staffDetailsStr) : null;
+  const roleId = Number(staffDetails?.role_id);
+  const roleName = (staffDetails?.role_name || "").toLowerCase();
+  let localRole = "";
+  try {
+    localRole = (JSON.parse(localStorage.getItem("role") || '""') || "").toLowerCase();
+  } catch (e) {
+    localRole = (localStorage.getItem("role") || "").toLowerCase();
+  }
+
+  // Strictly check if current logged-in user is Super Admin or in allowed Staff IDs [56, 134, 38, 444]
+  const isSuperAdmin = roleId === 1 || roleName === "superadmin" || localRole === "superadmin";
+  const currentStaffId = Number(staffDetails?.id);
+  const creditControlAllowedStaffIds = [56, 134, 38, 444];
+  const canAccessCreditControl = isSuperAdmin || creditControlAllowedStaffIds.includes(currentStaffId);
 
   const getAuthToken = () => {
     try {
@@ -971,6 +987,40 @@ const CreditControl = () => {
   const outstandingCount = invoices.filter((i) => !i.paidDate && i.status !== "Overdue").length;
   const overdueCount = invoices.filter((i) => !i.paidDate && i.status === "Overdue").length;
   const paidPct = totalInvoices > 0 ? Math.round((paidCount / totalInvoices) * 100) : 0;
+
+  // If neither Superadmin nor one of the allowed Staff IDs (56, 134, 38, 444), block access
+  if (!canAccessCreditControl) {
+    return (
+      <div>
+        <div className="container-fluid">
+          <BillingHeader activeTab="dashboard" />
+          <div className="row justify-content-center mt-5">
+            <div className="col-lg-6 col-md-8 text-center py-5">
+              <div className="card shadow-sm border-0 rounded-4 p-5">
+                <div className="mb-3 d-flex justify-content-center">
+                  <div className="p-3 bg-danger-subtle text-danger rounded-circle">
+                    <ShieldAlert size={48} />
+                  </div>
+                </div>
+                <h4 className="fw-bold text-dark mb-2">Access Restricted</h4>
+                <p className="text-muted mb-4">
+                  The Credit Control panel is strictly restricted to authorized staff only.
+                </p>
+                <div>
+                  <button
+                    className="btn btn-primary rounded-pill px-4"
+                    onClick={() => navigate("/admin/billing/dashboard")}
+                  >
+                    Go to My Dashboard
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

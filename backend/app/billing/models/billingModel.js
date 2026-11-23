@@ -435,10 +435,43 @@ const getClientsByCustomer = async (customerId, StaffUserId = null, search = '',
     }
 };
 
+// Helper to safely format a date or date-like value to ISO string (YYYY-MM-DD)
+const safeDateToISO = (d) => {
+    if (!d) return null;
+    if (typeof d === 'string') {
+        const trimmed = d.trim();
+        if (!trimmed || trimmed === '0000-00-00' || trimmed.toLowerCase() === 'invalid date') return null;
+        if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
+            return trimmed.split('T')[0].split(' ')[0];
+        }
+        const parsed = new Date(trimmed);
+        if (!isNaN(parsed.getTime())) {
+            return parsed.toISOString().split('T')[0];
+        }
+        return null;
+    }
+    if (typeof d === 'object') {
+        if (d instanceof Date) {
+            if (isNaN(d.getTime())) return null;
+            return d.toISOString().split('T')[0];
+        }
+        if (d.toISOString && typeof d.toISOString === 'function') {
+            try {
+                const iso = d.toISOString();
+                return iso ? iso.split('T')[0] : null;
+            } catch (e) {
+                return null;
+            }
+        }
+    }
+    return null;
+};
+
 // Helper to format any date or date range to dd/mm/yyyy
 const formatDateToDDMMYYYY = (val) => {
     if (!val) return val;
     val = String(val).trim();
+    if (val === '0000-00-00' || val.toLowerCase() === 'invalid date') return null;
     // 1. Single ISO date: YYYY-MM-DD
     if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
         const parts = val.split('-');
@@ -479,8 +512,8 @@ const extractJobPeriodInfo = (job) => {
     // 2. Service 1 (Accounts Production) or Service 27 (Audit) -> Year Ending
     if ((sId === 1 || sId === 27) && (job.Year_Ending_id_1 || job.Audit_Year_Ending_id_27 || job.year_end)) {
         const d = job.Year_Ending_id_1 || job.Audit_Year_Ending_id_27 || job.year_end;
-        if (d && d !== '0000-00-00') {
-            const strDate = typeof d === 'object' && d.toISOString ? d.toISOString().split('T')[0] : String(d).split('T')[0];
+        const strDate = safeDateToISO(d);
+        if (strDate) {
             const formattedDate = formatDateToDDMMYYYY(strDate);
             return {
                 period_type: "Year End",
@@ -495,20 +528,20 @@ const extractJobPeriodInfo = (job) => {
         const rawFreq = (sId === 2 ? job.Bookkeeping_Frequency_id_2 : job.Period_id_32) || '';
         const freq = String(rawFreq).trim().toLowerCase();
 
-        if ((freq === 'daily' || freq === 'day') && (job.Day_Date_id_2 || job.Day_Date_id_32)) {
+        if (freq === 'daily' || freq === 'day') {
             const d = job.Day_Date_id_2 || job.Day_Date_id_32;
-            const strDate = typeof d === 'object' && d.toISOString ? d.toISOString().split('T')[0] : String(d).split('T')[0];
-            const formattedDate = formatDateToDDMMYYYY(strDate);
+            const strDate = safeDateToISO(d);
+            const formattedDate = strDate ? formatDateToDDMMYYYY(strDate) : null;
             return { period_type: "Daily", period_date: formattedDate, raw_value: formattedDate };
         }
         if (freq === 'weekly' || freq === 'week') {
             const fromD = job.Week_FromDate_id_2 || job.Week_FromDate_id_32;
             const toD = job.Week_ToDate_id_2 || job.Week_ToDate_id_32;
-            if (fromD || toD) {
-                const strFrom = fromD ? (typeof fromD === 'object' && fromD.toISOString ? fromD.toISOString().split('T')[0] : String(fromD).split('T')[0]) : '';
-                const strTo = toD ? (typeof toD === 'object' && toD.toISOString ? toD.toISOString().split('T')[0] : String(toD).split('T')[0]) : '';
-                const fmtFrom = formatDateToDDMMYYYY(strFrom);
-                const fmtTo = formatDateToDDMMYYYY(strTo);
+            const strFrom = safeDateToISO(fromD);
+            const strTo = safeDateToISO(toD);
+            if (strFrom || strTo) {
+                const fmtFrom = strFrom ? formatDateToDDMMYYYY(strFrom) : '';
+                const fmtTo = strTo ? formatDateToDDMMYYYY(strTo) : '';
                 const label = `${fmtFrom} to ${fmtTo}`.trim();
                 if (label && label !== 'to') return { period_type: "Weekly", period_date: label, raw_value: label };
             }
@@ -519,6 +552,7 @@ const extractJobPeriodInfo = (job) => {
                 const label = [w, m, y].filter(Boolean).join(', ');
                 return { period_type: "Weekly", period_date: label, raw_value: label };
             }
+            return { period_type: "Weekly", period_date: null, raw_value: null };
         }
         if (freq === 'fortnightly' || freq === 'fortnight') {
             const fn = job.Fortnight_id_2 || job.Fortnight_id_32;
@@ -528,6 +562,7 @@ const extractJobPeriodInfo = (job) => {
                 const label = [fn, m, y].filter(Boolean).join(', ');
                 return { period_type: "Fortnightly", period_date: label, raw_value: label };
             }
+            return { period_type: "Fortnightly", period_date: null, raw_value: null };
         }
         if (freq === 'monthly' || freq === 'month') {
             const m = job.Month_id_2 || job.Month_id_32;
@@ -536,6 +571,7 @@ const extractJobPeriodInfo = (job) => {
                 const label = [m, y].filter(Boolean).join(' ');
                 return { period_type: "Monthly", period_date: label, raw_value: label };
             }
+            return { period_type: "Monthly", period_date: null, raw_value: null };
         }
         if (freq === 'quarterly' || freq === 'quarter') {
             const q = job.Quarter_id_2 || job.Quarter_id_32;
@@ -544,20 +580,21 @@ const extractJobPeriodInfo = (job) => {
                 const label = [q, y].filter(Boolean).join(' ');
                 return { period_type: "Quarterly", period_date: label, raw_value: label };
             }
+            return { period_type: "Quarterly", period_date: null, raw_value: null };
         }
-        if ((freq === 'yearly' || freq === 'year') && (job.Year_id_2 || job.Year_id_32)) {
-            const y = String(job.Year_id_2 || job.Year_id_32).trim();
-            if (y) return { period_type: "Yearly", period_date: y, raw_value: y };
+        if (freq === 'yearly' || freq === 'year') {
+            const y = String(job.Year_id_2 || job.Year_id_32 || '').trim();
+            return { period_type: "Yearly", period_date: y || null, raw_value: y || null };
         }
-        if (freq === 'other' && (job.Other_FromDate_id_2 || job.Other_ToDate_id_2 || job.Other_FromDate_id_32 || job.Other_ToDate_id_32)) {
+        if (freq === 'other') {
             const fromD = job.Other_FromDate_id_2 || job.Other_FromDate_id_32;
             const toD = job.Other_ToDate_id_2 || job.Other_ToDate_id_32;
-            const strFrom = fromD ? (typeof fromD === 'object' && fromD.toISOString ? fromD.toISOString().split('T')[0] : String(fromD).split('T')[0]) : '';
-            const strTo = toD ? (typeof toD === 'object' && toD.toISOString ? toD.toISOString().split('T')[0] : String(toD).split('T')[0]) : '';
-            const fmtFrom = formatDateToDDMMYYYY(strFrom);
-            const fmtTo = formatDateToDDMMYYYY(strTo);
+            const strFrom = safeDateToISO(fromD);
+            const strTo = safeDateToISO(toD);
+            const fmtFrom = strFrom ? formatDateToDDMMYYYY(strFrom) : '';
+            const fmtTo = strTo ? formatDateToDDMMYYYY(strTo) : '';
             const label = `${fmtFrom} to ${fmtTo}`.trim();
-            if (label) return { period_type: "Other", period_date: label, raw_value: label };
+            return { period_type: "Other", period_date: (label && label !== 'to') ? label : null, raw_value: label || null };
         }
     }
 
@@ -569,11 +606,11 @@ const extractJobPeriodInfo = (job) => {
         if (freq === 'weekly' || freq === 'week') {
             const fromD = job.Payroll_Week_FromDate_id_3 || job.Payroll_Week_FromDate_id_31;
             const toD = job.Payroll_Week_ToDate_id_3 || job.Payroll_Week_ToDate_id_31;
-            if (fromD || toD) {
-                const strFrom = fromD ? (typeof fromD === 'object' && fromD.toISOString ? fromD.toISOString().split('T')[0] : String(fromD).split('T')[0]) : '';
-                const strTo = toD ? (typeof toD === 'object' && toD.toISOString ? toD.toISOString().split('T')[0] : String(toD).split('T')[0]) : '';
-                const fmtFrom = formatDateToDDMMYYYY(strFrom);
-                const fmtTo = formatDateToDDMMYYYY(strTo);
+            const strFrom = safeDateToISO(fromD);
+            const strTo = safeDateToISO(toD);
+            if (strFrom || strTo) {
+                const fmtFrom = strFrom ? formatDateToDDMMYYYY(strFrom) : '';
+                const fmtTo = strTo ? formatDateToDDMMYYYY(strTo) : '';
                 const label = `${fmtFrom} to ${fmtTo}`.trim();
                 if (label && label !== 'to') return { period_type: "Weekly", period_date: label, raw_value: label };
             }
@@ -584,6 +621,7 @@ const extractJobPeriodInfo = (job) => {
                 const label = [w, m, y].filter(Boolean).join(', ');
                 return { period_type: "Weekly", period_date: label, raw_value: label };
             }
+            return { period_type: "Weekly", period_date: null, raw_value: null };
         }
         if (freq === 'fortnightly' || freq === 'fortnight') {
             const fn = job.Payroll_Fortnight_id_3 || job.Payroll_Fortnight_id_31;
@@ -593,6 +631,7 @@ const extractJobPeriodInfo = (job) => {
                 const label = [fn, m, y].filter(Boolean).join(', ');
                 return { period_type: "Fortnightly", period_date: label, raw_value: label };
             }
+            return { period_type: "Fortnightly", period_date: null, raw_value: null };
         }
         if (freq === 'monthly' || freq === 'month') {
             const m = job.Payroll_Month_id_3 || job.Payroll_Month_id_31;
@@ -601,6 +640,7 @@ const extractJobPeriodInfo = (job) => {
                 const label = [m, y].filter(Boolean).join(' ');
                 return { period_type: "Monthly", period_date: label, raw_value: label };
             }
+            return { period_type: "Monthly", period_date: null, raw_value: null };
         }
         if (freq === 'quarterly' || freq === 'quarter') {
             const q = job.Payroll_Quarter_id_3 || job.Payroll_Quarter_id_31;
@@ -609,19 +649,21 @@ const extractJobPeriodInfo = (job) => {
                 const label = [q, y].filter(Boolean).join(' ');
                 return { period_type: "Quarterly", period_date: label, raw_value: label };
             }
+            return { period_type: "Quarterly", period_date: null, raw_value: null };
         }
-        if ((freq === 'yearly' || freq === 'year') && (job.Payroll_Year_id_3 || job.Payroll_Year_id_31)) {
-            const y = String(job.Payroll_Year_id_3 || job.Payroll_Year_id_31).trim();
-            if (y) return { period_type: "Yearly", period_date: y, raw_value: y };
+        if (freq === 'yearly' || freq === 'year') {
+            const y = String(job.Payroll_Year_id_3 || job.Payroll_Year_id_31 || '').trim();
+            return { period_type: "Yearly", period_date: y || null, raw_value: y || null };
         }
     }
 
     // 5. Service 8 (VAT Returns)
-    if (sId === 8 && (job.Period_Ending_Date_id_8 || job.Filing_Date_id_8)) {
+    if (sId === 8) {
+        const rawFreq = job.Filing_Frequency_id_8 ? String(job.Filing_Frequency_id_8).trim() : '';
+        const freq = rawFreq || 'Period Ending';
         const d = job.Period_Ending_Date_id_8 || job.Filing_Date_id_8;
-        const strDate = typeof d === 'object' && d.toISOString ? d.toISOString().split('T')[0] : String(d).split('T')[0];
-        const formattedDate = formatDateToDDMMYYYY(strDate);
-        const freq = job.Filing_Frequency_id_8 ? String(job.Filing_Frequency_id_8).trim() : 'Period Ending';
+        const strDate = safeDateToISO(d);
+        const formattedDate = strDate ? formatDateToDDMMYYYY(strDate) : null;
         return {
             period_type: freq,
             period_date: formattedDate,
@@ -630,19 +672,19 @@ const extractJobPeriodInfo = (job) => {
     }
 
     // 6. Service 6 (Management Accounts)
-    if (sId === 6 && (job.Management_Accounts_FromDate_id_6 || job.Management_Accounts_ToDate_id_6)) {
+    if (sId === 6) {
+        const rawFreq = job.Management_Accounts_Frequency_id_6 ? String(job.Management_Accounts_Frequency_id_6).trim() : '';
         const fromD = job.Management_Accounts_FromDate_id_6;
         const toD = job.Management_Accounts_ToDate_id_6;
-        const strFrom = fromD ? (typeof fromD === 'object' && fromD.toISOString ? fromD.toISOString().split('T')[0] : String(fromD).split('T')[0]) : '';
-        const strTo = toD ? (typeof toD === 'object' && toD.toISOString ? toD.toISOString().split('T')[0] : String(toD).split('T')[0]) : '';
-        const fmtFrom = formatDateToDDMMYYYY(strFrom);
-        const fmtTo = formatDateToDDMMYYYY(strTo);
+        const strFrom = safeDateToISO(fromD);
+        const strTo = safeDateToISO(toD);
+        const fmtFrom = strFrom ? formatDateToDDMMYYYY(strFrom) : '';
+        const fmtTo = strTo ? formatDateToDDMMYYYY(strTo) : '';
         const label = `${fmtFrom} to ${fmtTo}`.trim();
-        const freq = job.Management_Accounts_Frequency_id_6 ? String(job.Management_Accounts_Frequency_id_6).trim() : 'Management Accounts';
         return {
-            period_type: freq,
-            period_date: label,
-            raw_value: label
+            period_type: rawFreq || null,
+            period_date: (label && label !== 'to') ? label : null,
+            raw_value: label || null
         };
     }
 
@@ -657,8 +699,8 @@ const extractJobPeriodInfo = (job) => {
     if (sId === 5 || sId === 7) {
         if (job.date_received_on || job.created_at) {
             const d = job.date_received_on || job.created_at;
-            const strDate = typeof d === 'object' && d.toISOString ? d.toISOString().split('T')[0] : String(d).split('T')[0];
-            const formattedDate = formatDateToDDMMYYYY(strDate);
+            const strDate = safeDateToISO(d);
+            const formattedDate = strDate ? formatDateToDDMMYYYY(strDate) : null;
             return {
                 period_type: "Date Received",
                 period_date: formattedDate,
@@ -667,16 +709,13 @@ const extractJobPeriodInfo = (job) => {
         }
     }
 
-    // Fallback: If service has an identifiable period type but date was not filled in Other Data,
-    // still return the period_type with period_date = null so the frontend can allow manual date selection!
-    const defaultPeriodType = getDefaultPeriodTypeByService(sId);
-    if (defaultPeriodType) {
-        return {
-            period_type: defaultPeriodType,
-            period_date: null,
-            raw_value: null
-        };
-    }
+    // Fallback: If service has an identifiable fixed period type (like Personal Tax Return -> Tax Year, Accounts Production -> Year End)
+    // where there is NO frequency dropdown in Job Other Data, return the fixed period_type.
+    // For services with a frequency dropdown (Bookkeeping, Payroll, Management Accounts, VAT),
+    // if user did NOT select a frequency in Job Other Data, return period_type = null so user chooses it in Billing!
+    if (sId === 4) return { period_type: "Tax Year", period_date: null, raw_value: null };
+    if (sId === 1 || sId === 27 || sId === 37 || sId === 38) return { period_type: "Year End", period_date: null, raw_value: null };
+    if (sId === 28 || sId === 33) return { period_type: "Yearly", period_date: null, raw_value: null };
 
     return null;
 };
@@ -689,7 +728,7 @@ const getDefaultPeriodTypeByService = (serviceId) => {
     if (sId === 2 || sId === 32) return "Monthly";
     if (sId === 3 || sId === 31) return "Monthly";
     if (sId === 8) return "Period Ending";
-    if (sId === 6) return "Management Accounts";
+    if (sId === 6) return "Monthly";
     if (sId === 28 || sId === 33) return "Year";
     if (sId === 5 || sId === 7 || sId === 29 || sId === 30) return "Date Received";
     return null;
@@ -1265,6 +1304,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
             client_id,
             service_id,
             job_id = null,
+            job_ids = null,
             period_type = 'Month',
             period_date,
             period_label,
@@ -1288,6 +1328,19 @@ const submitBilling = async (payload, submittedByStaffId) => {
 
         const safeEngagementModel = engagement_model ? String(engagement_model).slice(0, 990) : '';
         const safeNomismaDescription = nomisma_description ? String(nomisma_description).slice(0, 990) : '';
+
+        // Normalize job_id and job_ids
+        let primaryJobId = job_id;
+        let jobIdsString = null;
+        if (Array.isArray(job_ids) && job_ids.length > 0) {
+            jobIdsString = job_ids.join(',');
+            if (!primaryJobId) primaryJobId = job_ids[0];
+        } else if (typeof job_ids === 'string' && job_ids.trim()) {
+            jobIdsString = job_ids.trim();
+            if (!primaryJobId) primaryJobId = jobIdsString.split(',')[0].trim();
+        } else if (primaryJobId) {
+            jobIdsString = String(primaryJobId);
+        }
 
         // Format period_date and period_label to DD/MM/YYYY if they are ISO or other dates
         const formattedPeriodDate = formatDateToDDMMYYYY(period_date);
@@ -1429,6 +1482,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
                     client_id = ?,
                     service_id = ?,
                     job_id = ?,
+                    job_ids = ?,
                     period_type = ?,
                     period_date = ?,
                     period_label = ?,
@@ -1455,7 +1509,8 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 customer_id,
                 client_id,
                 service_id,
-                job_id || null,
+                primaryJobId || null,
+                jobIdsString || null,
                 period_type,
                 formattedPeriodDate,
                 formattedPeriodLabel,
@@ -1577,6 +1632,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 client_id,
                 service_id,
                 job_id,
+                job_ids,
                 period_type,
                 period_date,
                 period_label,
@@ -1596,14 +1652,15 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 save_date,
                 submit_date,
                 manager_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?)
         `;
 
         const subParams = [
             customer_id,
             client_id,
             service_id,
-            job_id || null,
+            primaryJobId || null,
+            jobIdsString || null,
             period_type,
             formattedPeriodDate,
             formattedPeriodLabel,
@@ -1953,6 +2010,7 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote) 
                     s.name AS service_name,
                     st_sub.email AS submitter_email,
                     CONCAT(st_sub.first_name, ' ', st_sub.last_name) AS submitter_name,
+                    st_mgr.email AS manager_email,
                     CONCAT(st_mgr.first_name, ' ', st_mgr.last_name) AS manager_name
                  FROM billing_submissions bs
                  LEFT JOIN customers c ON bs.customer_id = c.id
@@ -1966,10 +2024,16 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote) 
 
             if (subDetails && subDetails.length > 0) {
                 const item = subDetails[0];
-                // For testing: primary to shaktijatpnp09@gmail.com, cc to vikaspnpinfotech@gmail.com
-                // Separating into 'to' and 'cc' prevents Microsoft 365 outbound queue/relay delays
-                const primaryTo = "shaktijatpnp09@gmail.com";
-                const ccTo = "vikaspnpinfotech@gmail.com";
+                // Send email strictly to the staff who submitted the bill (NO CC to anyone else)
+                const primaryTo = item.submitter_email ? item.submitter_email.trim() : null;
+
+                if (!primaryTo) {
+                    console.warn(`[Billing Email] No submitter email found for submission #${submissionId}. Skipping email dispatch.`);
+                    return {
+                        status: true,
+                        message: "Submission returned for correction (Email skipped: submitter email not found)."
+                    };
+                }
 
                 const customerName = item.customer_name || 'Customer';
                 const periodLabel = item.period_label || 'Current Period';
@@ -2037,22 +2101,20 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote) 
                     </div>
                 `;
 
-                // Retry logic for Cloud/Dev environments with explicit primary + cc separation
-                const sendReturnEmailWithRetry = async (to, cc, subject, html, maxAttempts = 3) => {
+                // Retry logic for Cloud/Dev environments
+                const sendReturnEmailWithRetry = async (to, subject, html, maxAttempts = 3) => {
                     console.log(`[Billing Email] ==================== RETURN EMAIL DISPATCH ====================`);
                     console.log(`[Billing Email] Submission ID: #${submissionId}`);
-                    console.log(`[Billing Email] Primary TO: ${to}`);
-                    console.log(`[Billing Email] CC: ${cc}`);
+                    console.log(`[Billing Email] Recipient TO: ${to} (Submitter only)`);
                     console.log(`[Billing Email] Subject: "${subject}"`);
-                    console.log(`[Billing Email] Submitter: ${submitterName} (${actualSubmitterEmail})`);
-                    console.log(`[Billing Email] Manager: ${managerName}`);
+                    console.log(`[Billing Email] Submitter: ${submitterName}`);
                     
                     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
                         console.log(`[Billing Email] >>> Attempt ${attempt}/${maxAttempts} sending now...`);
                         const startTime = Date.now();
                         try {
                             const sent = await Promise.race([
-                                commonEmail(to, subject, html, cc),
+                                commonEmail(to, subject, html, null),
                                 new Promise((_, reject) => setTimeout(() => reject(new Error("SMTP timeout after 10s")), 10000))
                             ]);
                             const elapsed = Date.now() - startTime;
@@ -2079,7 +2141,7 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote) 
                     return false;
                 };
 
-                await sendReturnEmailWithRetry(primaryTo, ccTo, subjectEmail, htmlEmail);
+                await sendReturnEmailWithRetry(primaryTo, subjectEmail, htmlEmail);
             }
         } catch (emailQueryErr) {
             console.error("[Billing Email] Error fetching submitter details for email notification:", emailQueryErr);
