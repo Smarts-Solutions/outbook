@@ -7944,8 +7944,8 @@ const getJobCustomReport = async (Report) => {
             LIMIT ${limit} OFFSET ${offset}
         `;
 
-    console.log("fromDate ---> ", fromDate, "toDate ", toDate);
-    console.log("unpivotSQL", unpivotSQL);
+    // console.log("fromDate ---> ", fromDate, "toDate ", toDate);
+    // console.log("unpivotSQL", unpivotSQL);
 
     //console.log("GROUPBY ---->> ", GROUPBY);
 
@@ -9613,8 +9613,8 @@ const getJobCustomReport2 = async (Report) => {
             LIMIT ${limit} OFFSET ${offset}
         `;
 
-    console.log("fromDate ---> ", fromDate, "toDate ", toDate);
-    console.log("unpivotSQL", unpivotSQL);
+    // console.log("fromDate ---> ", fromDate, "toDate ", toDate);
+    // console.log("unpivotSQL", unpivotSQL);
 
     //console.log("GROUPBY ---->> ", GROUPBY);
 
