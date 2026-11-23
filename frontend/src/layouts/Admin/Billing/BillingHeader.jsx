@@ -24,6 +24,9 @@ export const BillingHeader = ({ activeTab }) => {
     localRole = (localStorage.getItem("role") || "").toLowerCase();
   }
 
+  // Superadmin check: roleId === 1 or role_name === 'superadmin'
+  const isSuperAdmin = roleId === 1 || roleName === "superadmin" || localRole === "superadmin";
+
   // Allowed specific Staff IDs for Credit Control: 56, 134, 38, 444
   const currentStaffId = Number(staffDetails?.id);
   const creditControlAllowedStaffIds = [56, 134, 38, 444];
