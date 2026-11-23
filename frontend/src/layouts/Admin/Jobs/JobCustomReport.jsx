@@ -2697,7 +2697,7 @@ function JobCustomReport() {
                       )}
                     </div>
                   ),
-                  minWidth: "130px"
+                  minWidth: col === "date_of_completion" ? "220px" : "130px"
                 })) || []
               }
               data={showData?.rows || []}

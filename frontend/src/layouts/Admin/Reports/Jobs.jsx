@@ -472,7 +472,7 @@ const   JobStatus = () => {
       ),
       selector: (row) => row.date_of_completion || "-",
       sortable: true,
-      minWidth: "150px",
+      minWidth: "220px",
     },
 
     {

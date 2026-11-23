@@ -402,6 +402,7 @@ const JobStatus = () => {
       selector: (row) => row.date_of_completion || "-",
       reorder: false,
       sortable: true,
+      minWidth: "220px",
     },
     {
       name: "Allocated To",
