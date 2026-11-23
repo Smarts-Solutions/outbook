@@ -1304,6 +1304,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
             client_id,
             service_id,
             job_id = null,
+            job_ids = null,
             period_type = 'Month',
             period_date,
             period_label,
@@ -1327,6 +1328,19 @@ const submitBilling = async (payload, submittedByStaffId) => {
 
         const safeEngagementModel = engagement_model ? String(engagement_model).slice(0, 990) : '';
         const safeNomismaDescription = nomisma_description ? String(nomisma_description).slice(0, 990) : '';
+
+        // Normalize job_id and job_ids
+        let primaryJobId = job_id;
+        let jobIdsString = null;
+        if (Array.isArray(job_ids) && job_ids.length > 0) {
+            jobIdsString = job_ids.join(',');
+            if (!primaryJobId) primaryJobId = job_ids[0];
+        } else if (typeof job_ids === 'string' && job_ids.trim()) {
+            jobIdsString = job_ids.trim();
+            if (!primaryJobId) primaryJobId = jobIdsString.split(',')[0].trim();
+        } else if (primaryJobId) {
+            jobIdsString = String(primaryJobId);
+        }
 
         // Format period_date and period_label to DD/MM/YYYY if they are ISO or other dates
         const formattedPeriodDate = formatDateToDDMMYYYY(period_date);
@@ -1468,6 +1482,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
                     client_id = ?,
                     service_id = ?,
                     job_id = ?,
+                    job_ids = ?,
                     period_type = ?,
                     period_date = ?,
                     period_label = ?,
@@ -1494,7 +1509,8 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 customer_id,
                 client_id,
                 service_id,
-                job_id || null,
+                primaryJobId || null,
+                jobIdsString || null,
                 period_type,
                 formattedPeriodDate,
                 formattedPeriodLabel,
@@ -1616,6 +1632,7 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 client_id,
                 service_id,
                 job_id,
+                job_ids,
                 period_type,
                 period_date,
                 period_label,
@@ -1635,14 +1652,15 @@ const submitBilling = async (payload, submittedByStaffId) => {
                 save_date,
                 submit_date,
                 manager_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?)
         `;
 
         const subParams = [
             customer_id,
             client_id,
             service_id,
-            job_id || null,
+            primaryJobId || null,
+            jobIdsString || null,
             period_type,
             formattedPeriodDate,
             formattedPeriodLabel,
