@@ -23,11 +23,12 @@ export const JobStatusReport = createAsyncThunk(
 
       const StaffUserId = JSON.parse(localStorage.getItem("staffDetails"));
 
-      // ✅ pagination + search pass-through
+      // ✅ pagination + search + report_type pass-through
       const updatedReq = {
         page: req?.page || 1,
         limit: req?.limit || 10,
         search: req?.search || "",
+        report_type: req?.report_type || "my-report",
         ip: IP_Data,
         StaffUserId: StaffUserId.id,
       };

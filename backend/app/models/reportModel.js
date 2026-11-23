@@ -10,12 +10,19 @@ const {
 } = require("../utils/helper");
 
 const jobStatusReports = async (Report) => {
-  const { StaffUserId, page = 1, limit = 10, search = "" } = Report;
+  const { StaffUserId, page = 1, limit = 10, search = "", report_type = "my-report" } = Report;
   const offset = (page - 1) * limit;
 
   let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
-
   const rows = await QueryRoleHelperFunction(StaffUserId);
+
+  let targetStaffIds = [];
+  if (report_type === "my-report") {
+    targetStaffIds = [Number(StaffUserId)];
+  } else {
+    // manager-review: all subordinates + manager
+    targetStaffIds = [...new Set(LineManageStaffId)];
+  }
 
   const jobCodeExpr = `
     CONCAT(
@@ -89,7 +96,7 @@ const jobStatusReports = async (Report) => {
       ...new Set(LineManageStaffId),
     ];
     const connection = await pool.getConnection();
-    await buildAssignedJobsTempTable(connection, LineManageStaffId);
+    await buildAssignedJobsTempTable(connection, targetStaffIds);
 
 
 
@@ -198,7 +205,7 @@ const jobStatusReports = async (Report) => {
       LEFT JOIN drafts ON drafts.job_id = jobs.id
     `;
 
-    if (isSuperAdmin) {
+    if (isSuperAdmin && report_type !== "my-report") {
       const dataQuery = `
         ${baseSelect}
         WHERE 1=1
@@ -271,13 +278,15 @@ const jobStatusReports = async (Report) => {
       };
     }
 
+    const targetStaffIdsStr = targetStaffIds.join(",");
+
     const dataQuery = `
       ${baseSelect}
       WHERE(
         (   
-         temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
-         OR jobs.staff_created_id IN(${LineManageStaffId})
-         OR clients.staff_created_id IN(${LineManageStaffId}))
+         temp_assigned_jobs_staff.staff_id IN (${targetStaffIdsStr})
+         OR jobs.staff_created_id IN(${targetStaffIdsStr})
+         OR clients.staff_created_id IN(${targetStaffIdsStr}))
          AND (
             temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
@@ -307,9 +316,9 @@ const jobStatusReports = async (Report) => {
       LEFT JOIN staffs ON jobs.allocated_to = staffs.id
       WHERE(
         (   
-         temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId})
-         OR jobs.staff_created_id IN(${LineManageStaffId})
-         OR clients.staff_created_id IN(${LineManageStaffId}))
+         temp_assigned_jobs_staff.staff_id IN (${targetStaffIdsStr})
+         OR jobs.staff_created_id IN(${targetStaffIdsStr})
+         OR clients.staff_created_id IN(${targetStaffIdsStr}))
          AND (
             temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
             OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
@@ -1097,7 +1106,7 @@ const reportCountJob = async (Report) => {
         LEFT JOIN staffs AS staffs4 ON jobs.staff_created_id = staffs4.id
       `;
 
-    if (isSuperAdmin) {
+    if (isSuperAdmin && report_type !== "my-report") {
       const dataQuery = `
         ${baseSelect}
         WHERE jobs.id IN (${cleaneJob_ids})

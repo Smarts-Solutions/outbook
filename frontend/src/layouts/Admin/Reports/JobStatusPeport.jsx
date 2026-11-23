@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Datatable from "../../../Components/ExtraComponents/Datatable";
 import { JobStatusReport } from "../../../ReduxStore/Slice/Report/ReportSlice";
+import { Staff } from "../../../ReduxStore/Slice/Staff/staffSlice";
 import { useDispatch } from "react-redux";
 import { convertDate } from "../../../Utils/Comman_function";
 import ReactPaginate from "react-paginate";
@@ -30,33 +31,72 @@ const JobStatus = () => {
   const [loading, setLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
+  // Tabs: "my-report" | "manager-review"
+  const [activeTab, setActiveTab] = useState("my-report");
+  const [lineMangerData, setLineMangerData] = useState([]);
+
+  const isManagerReviewVisible =
+    ["SUPERADMIN", "ADMIN", "MANAGEMENT"].includes(role?.toUpperCase()) ||
+    (lineMangerData && lineMangerData.length > 0) ||
+    Number(staffDetails?.id || staffDetails?.staff_id) === 622;
+
+  useEffect(() => {
+    const fetchLineManagerData = async () => {
+      try {
+        const response = await dispatch(
+          Staff({ req: { action: "get_line_manager" }, authToken: token })
+        ).unwrap();
+        if (response.status) {
+          setLineMangerData(response.data?.data || response.data || []);
+        } else {
+          setLineMangerData([]);
+        }
+      } catch (error) {
+        setLineMangerData([]);
+      }
+    };
+    fetchLineManagerData();
+  }, [dispatch, token]);
+
   const handlePageChange = (selected) => {
     const newPage = selected.selected + 1;
     setCurrentPage(newPage);
-    // GetJobStatus(newPage, pageSize, searchTerm);
   };
 
   const handlePageSizeChange = (event) => {
     const newSize = parseInt(event.target.value, 10);
     setPageSize(newSize);
     setCurrentPage(1);
-    // GetJobStatus(1, newSize, searchTerm);
   };
 
   const handleSearchChange = (term) => {
     setSearchTerm(term);
     setCurrentPage(1);
-    // GetJobStatus(1, pageSize, term);
+  };
+
+  const handleTabChange = (tab) => {
+    if (tab === activeTab) return;
+    setActiveTab(tab);
+    setCurrentPage(1);
+    setSearchTerm("");
   };
 
   useEffect(() => {
-    GetJobStatus(currentPage, pageSize, searchTerm);
-  }, [currentPage, pageSize, searchTerm]);
+    GetJobStatus(currentPage, pageSize, searchTerm, activeTab);
+  }, [currentPage, pageSize, searchTerm, activeTab]);
 
-  const GetJobStatus = async (page = 1, limit = 10, search = "") => {
+  const GetJobStatus = async (
+    page = 1,
+    limit = 10,
+    search = "",
+    reportType = activeTab
+  ) => {
     setLoading(true);
 
-    const data = { req: { page, limit, search }, authToken: token };
+    const data = {
+      req: { page, limit, search, report_type: reportType },
+      authToken: token,
+    };
     await dispatch(JobStatusReport(data))
       .unwrap()
       .then((res) => {
@@ -65,6 +105,7 @@ const JobStatus = () => {
           setTotalRecords(res.data.total || 0);
         } else {
           setJobStatusData([]);
+          setTotalRecords(0);
         }
       })
       .catch((err) => {
@@ -503,7 +544,7 @@ const JobStatus = () => {
     setIsExporting(true);
     try {
       const data = {
-        req: { page: 1, limit: 1000000, search: searchTerm || "" },
+        req: { page: 1, limit: 1000000, search: searchTerm || "", report_type: activeTab },
         authToken: token,
       };
 
@@ -758,7 +799,8 @@ const JobStatus = () => {
       return rowData;
     });
 
-    downloadCSV(exportData, "Job Status Report.csv");
+    const reportName = activeTab === "manager-review" ? "Manager Review" : "My Report";
+    downloadCSV(exportData, `Job Status Report (${reportName}).csv`);
       } catch (err) {
         console.error("Export Processing Error:", err);
         alert("Failed to process export data!");
@@ -796,14 +838,39 @@ const JobStatus = () => {
   return (
     <div>
       <div className="report-data">
-        <div className="row">
-          <div className="col-md-7 mb-2">
-            <div className="tab-title">
-              <h3>Job Status Report</h3>
-            </div>
+        <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+          <div className="tab-title">
+            <h3 className="mb-0">Job Status Report</h3>
           </div>
+
+          <ul className="nav timesheet-tabs m-0" id="jobStatusTabs" role="tablist">
+            <li role="presentation">
+              <button
+                className={activeTab === "my-report" ? "active" : ""}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === "my-report"}
+                onClick={() => handleTabChange("my-report")}
+              >
+                My Report
+              </button>
+            </li>
+            {isManagerReviewVisible && (
+              <li role="presentation">
+                <button
+                  className={activeTab === "manager-review" ? "active" : ""}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === "manager-review"}
+                  onClick={() => handleTabChange("manager-review")}
+                >
+                  Manager Review
+                </button>
+              </li>
+            )}
+          </ul>
         </div>
-        <div className="datatable-wrapper mt-minus">
+        <div className="datatable-wrapper">
           <div className="d-flex justify-content-end mb-3">
 
             {Number(staffDetails?.id || staffDetails?.staff_id) !== 622 && JobStatusData && JobStatusData.length > 0 && (
