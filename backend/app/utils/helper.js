@@ -31,36 +31,36 @@ const SatffLogUpdateOperation = async (logData) => {
     LEFT JOIN 
         jobs ON staff_logs.module_name = 'job' AND staff_logs.module_id = jobs.id
     SET 
-        staff_logs.log_message_all = CONCAT(
-          CASE 
-            WHEN staffs.role_id = 12 THEN 'Customer User'
-            ELSE IFNULL(roles.role_name, 'STAFF')
-          END, ' ', 
-          staffs.first_name, ' ', 
-          staffs.last_name, ' ', 
-          staff_logs.log_message, ' ',
-          CASE 
-          
-            WHEN staff_logs.module_name = 'customer' THEN CONCAT('cust_', SUBSTRING(customers.trading_name, 1, 3), '_', customers.customer_code,'(',customers.trading_name ,')')
-    
-             WHEN staff_logs.module_name = 'client' THEN (
-              SELECT CONCAT('cli_', SUBSTRING(c.trading_name, 1, 3),'_', SUBSTRING(clients.trading_name, 1, 3),'_',clients.client_code,'(',clients.trading_name,')')
-              FROM customers c
-              JOIN clients cl ON c.id = cl.customer_id
-              WHERE cl.id = staff_logs.module_id
-            )
-    
-             WHEN staff_logs.module_name = 'job' THEN (
-              SELECT CONCAT(SUBSTRING(customers.trading_name, 1, 3),'_', SUBSTRING(clients.trading_name, 1, 3),'_',SUBSTRING(job_types.type, 1, 4), '_',jobs.job_id)
-              FROM jobs
-              JOIN clients ON jobs.client_id = clients.id
-              JOIN customers ON clients.customer_id = customers.id
-              LEFT JOIN job_types ON jobs.job_type_id = job_types.id
-              WHERE jobs.id = staff_logs.module_id
-            )
-            ELSE ''
-          END
-        )
+        staff_logs.log_message_all = CASE 
+          WHEN staff_logs.module_name = 'billing' THEN staff_logs.log_message
+          ELSE CONCAT(
+            CASE 
+              WHEN staffs.role_id = 12 THEN 'Customer User'
+              ELSE IFNULL(roles.role_name, 'STAFF')
+            END, ' ', 
+            staffs.first_name, ' ', 
+            staffs.last_name, ' ', 
+            staff_logs.log_message, ' ',
+            CASE 
+              WHEN staff_logs.module_name = 'customer' THEN CONCAT('cust_', SUBSTRING(customers.trading_name, 1, 3), '_', customers.customer_code,'(',customers.trading_name ,')')
+              WHEN staff_logs.module_name = 'client' THEN (
+                SELECT CONCAT('cli_', SUBSTRING(c.trading_name, 1, 3),'_', SUBSTRING(clients.trading_name, 1, 3),'_',clients.client_code,'(',clients.trading_name,')')
+                FROM customers c
+                JOIN clients cl ON c.id = cl.customer_id
+                WHERE cl.id = staff_logs.module_id
+              )
+              WHEN staff_logs.module_name = 'job' THEN (
+                SELECT CONCAT(SUBSTRING(customers.trading_name, 1, 3),'_', SUBSTRING(clients.trading_name, 1, 3),'_',SUBSTRING(job_types.type, 1, 4), '_',jobs.job_id)
+                FROM jobs
+                JOIN clients ON jobs.client_id = clients.id
+                JOIN customers ON clients.customer_id = customers.id
+                LEFT JOIN job_types ON jobs.job_type_id = job_types.id
+                WHERE jobs.id = staff_logs.module_id
+              )
+              ELSE ''
+            END
+          )
+        END
     WHERE staff_logs.id = ?;
 `;
       await pool.execute(queryUpdate, [result.insertId]);
