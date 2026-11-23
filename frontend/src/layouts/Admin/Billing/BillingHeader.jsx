@@ -24,8 +24,10 @@ export const BillingHeader = ({ activeTab }) => {
     localRole = (localStorage.getItem("role") || "").toLowerCase();
   }
 
-  // Superadmin check: roleId === 1 or role_name === 'superadmin'
-  const isSuperAdmin = roleId === 1 || roleName === "superadmin" || localRole === "superadmin";
+  // Allowed specific Staff IDs for Credit Control: 56, 134, 38, 444
+  const currentStaffId = Number(staffDetails?.id);
+  const creditControlAllowedStaffIds = [56, 134, 38, 444];
+  const canAccessCreditControl = isSuperAdmin || creditControlAllowedStaffIds.includes(currentStaffId);
 
   // Super Admin (1) / Admin (2)
   const isAdmin = isSuperAdmin || roleId === 2 || roleName.includes("admin") || localRole.includes("admin");
@@ -154,7 +156,7 @@ export const BillingHeader = ({ activeTab }) => {
   ];
 
   // Role & Hierarchy based visibility:
-  // 1. Credit Control: ONLY visible to Super Admin (`isSuperAdmin`)
+  // 1. Credit Control: Visible to Super Admin AND Staff IDs [56, 134, 38, 444]
   // 2. Admin: Dashboard, Submit, Approvals
   // 3. Staff / User:
   //    - "My Dashboard": Always visible
@@ -162,7 +164,7 @@ export const BillingHeader = ({ activeTab }) => {
   //    - "Approvals": Only visible if user is a Line Manager (`canApprove`) or has create permissions
   const tabsList = allTabs.filter((tab) => {
     if (tab.id === "credit") {
-      return isSuperAdmin;
+      return canAccessCreditControl;
     }
     if (isAdmin) return true;
     if (tab.id === "dashboard") return true;

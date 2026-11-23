@@ -29,8 +29,11 @@ const CreditControl = () => {
     localRole = (localStorage.getItem("role") || "").toLowerCase();
   }
 
-  // Strictly check if current logged-in user is Super Admin
+  // Strictly check if current logged-in user is Super Admin or in allowed Staff IDs [56, 134, 38, 444]
   const isSuperAdmin = roleId === 1 || roleName === "superadmin" || localRole === "superadmin";
+  const currentStaffId = Number(staffDetails?.id);
+  const creditControlAllowedStaffIds = [56, 134, 38, 444];
+  const canAccessCreditControl = isSuperAdmin || creditControlAllowedStaffIds.includes(currentStaffId);
 
   const getAuthToken = () => {
     try {
@@ -985,8 +988,8 @@ const CreditControl = () => {
   const overdueCount = invoices.filter((i) => !i.paidDate && i.status === "Overdue").length;
   const paidPct = totalInvoices > 0 ? Math.round((paidCount / totalInvoices) * 100) : 0;
 
-  // If not Superadmin, block access directly on this page
-  if (!isSuperAdmin) {
+  // If neither Superadmin nor one of the allowed Staff IDs (56, 134, 38, 444), block access
+  if (!canAccessCreditControl) {
     return (
       <div>
         <div className="container-fluid">
@@ -1001,7 +1004,7 @@ const CreditControl = () => {
                 </div>
                 <h4 className="fw-bold text-dark mb-2">Access Restricted</h4>
                 <p className="text-muted mb-4">
-                  The Credit Control panel is strictly restricted to <b>Super Admin</b> users only.
+                  The Credit Control panel is strictly restricted to authorized staff only.
                 </p>
                 <div>
                   <button
