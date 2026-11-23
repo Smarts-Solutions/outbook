@@ -17,9 +17,18 @@ export const BillingHeader = ({ activeTab }) => {
   const staffDetails = staffDetailsStr ? JSON.parse(staffDetailsStr) : null;
   const roleId = Number(staffDetails?.role_id);
   const roleName = (staffDetails?.role_name || "").toLowerCase();
+  let localRole = "";
+  try {
+    localRole = (JSON.parse(localStorage.getItem("role") || '""') || "").toLowerCase();
+  } catch (e) {
+    localRole = (localStorage.getItem("role") || "").toLowerCase();
+  }
+
+  // Superadmin check: roleId === 1 or role_name === 'superadmin'
+  const isSuperAdmin = roleId === 1 || roleName === "superadmin" || localRole === "superadmin";
 
   // Super Admin (1) / Admin (2)
-  const isAdmin = roleId === 1 || roleId === 2 || roleName.includes("admin") || roleName.includes("superadmin");
+  const isAdmin = isSuperAdmin || roleId === 2 || roleName.includes("admin") || localRole.includes("admin");
 
   // Read job create permission from localStorage accessData if present
   const checkJobCreateFromLocal = () => {
@@ -145,12 +154,16 @@ export const BillingHeader = ({ activeTab }) => {
   ];
 
   // Role & Hierarchy based visibility:
-  // 1. Admin & Super Admin: All active tabs (Dashboard, Submit, Approvals, Credit Control)
-  // 2. Staff / User:
+  // 1. Credit Control: ONLY visible to Super Admin (`isSuperAdmin`)
+  // 2. Admin: Dashboard, Submit, Approvals
+  // 3. Staff / User:
   //    - "My Dashboard": Always visible
   //    - "Submit Billing": Only visible if user has job create permission (`canCreateJob`)
-  //    - "Approvals": Only visible if user is a Line Manager (`canApprove`)
+  //    - "Approvals": Only visible if user is a Line Manager (`canApprove`) or has create permissions
   const tabsList = allTabs.filter((tab) => {
+    if (tab.id === "credit") {
+      return isSuperAdmin;
+    }
     if (isAdmin) return true;
     if (tab.id === "dashboard") return true;
     if (tab.id === "submit") return canCreateJob;

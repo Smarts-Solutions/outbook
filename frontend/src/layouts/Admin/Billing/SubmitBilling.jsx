@@ -106,15 +106,16 @@ export const SubmitBilling = () => {
   };
 
   const handleCustomerSearch = (value, { action }) => {
-    // Only search when user actually types (prevent react-select firing on input-blur or menu-close)
-    if (action !== "input-change") return;
+    // Only search when user types or clears text
+    if (action !== "input-change" && action !== "menu-close") return;
 
     clearTimeout(customerDebounceRef.current);
     customerDebounceRef.current = setTimeout(() => {
-      setCustomerSearch(value);
+      const searchTerm = value || "";
+      setCustomerSearch(searchTerm);
       setCustomerPage(1);
-      fetchCustomersPaginated({ searchValue: value, pageNo: 1, append: false });
-    }, 400);
+      fetchCustomersPaginated({ searchValue: searchTerm, pageNo: 1, append: false });
+    }, 300);
   };
 
   // ---------------- Client Infinite Scroll & Search States ----------------
@@ -196,15 +197,16 @@ export const SubmitBilling = () => {
   };
 
   const handleClientSearch = (value, { action }) => {
-    // Only search when user actually types (prevent react-select firing on input-blur or menu-close)
-    if (action !== "input-change") return;
+    // Only search when user types or clears text
+    if (action !== "input-change" && action !== "menu-close") return;
 
     clearTimeout(clientDebounceRef.current);
     clientDebounceRef.current = setTimeout(() => {
-      setClientSearch(value);
+      const searchTerm = value || "";
+      setClientSearch(searchTerm);
       setClientPage(1);
-      fetchClientsPaginated({ searchValue: value, pageNo: 1, append: false });
-    }, 400);
+      fetchClientsPaginated({ searchValue: searchTerm, pageNo: 1, append: false });
+    }, 300);
   };
 
   const [clientsList, setClientsList] = useState(
@@ -233,6 +235,12 @@ export const SubmitBilling = () => {
 
   const [jobsList, setJobsList] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
+  // Safe helper alias in case any leftover callback references setSelectedJobs
+  const setSelectedJobs = (val) => {
+    if (!val || (Array.isArray(val) && val.length === 0)) setSelectedJob(null);
+    else if (Array.isArray(val)) setSelectedJob(val[0]);
+    else setSelectedJob(val);
+  };
   const [loadingJobs, setLoadingJobs] = useState(false);
 
   const [servicesList, setServicesList] = useState(
@@ -852,13 +860,70 @@ export const SubmitBilling = () => {
     return `${d.getFullYear()}-W${String(week).padStart(2, "0")}`;
   };
 
+  // Helper to get all allowed frequency/period types for a service strictly based on Job Other Data
+  const getAllowedPeriodTypesForService = (serviceId) => {
+    const sId = Number(serviceId);
+    // Service 2: Bookkeeping & Service 32: Aus - Bookkeeping
+    // Job has: Bookkeeping Frequency -> Daily, Weekly, Fortnightly, Monthly, Quarterly, Yearly, Other
+    if (sId === 2 || sId === 32) {
+      return ["Daily", "Weekly", "Fortnightly", "Monthly", "Quarterly", "Yearly", "Other"];
+    }
+    // Service 3: Payroll & Service 31: Aus - Payroll
+    // Job has: Payroll Frequency -> Weekly, Fortnightly, Monthly, Quarterly, Yearly
+    if (sId === 3 || sId === 31) {
+      return ["Weekly", "Fortnightly", "Monthly", "Quarterly", "Yearly"];
+    }
+    // Service 4: Personal Tax Return
+    // Job has: Tax Year dropdown (e.g. 2024/25)
+    if (sId === 4) {
+      return ["Tax Year"];
+    }
+    // Service 1: Accounts Production, Service 27: Audit, Service 37: Accounts Finalisation, Service 38: Audit New
+    // Job has: Year Ending (Date)
+    if (sId === 1 || sId === 27 || sId === 37 || sId === 38) {
+      return ["Year End"];
+    }
+    // Service 8: VAT Returns
+    // Job has: Filing Frequency -> Monthly, Quarterly, Yearly
+    if (sId === 8) {
+      return ["Monthly", "Quarterly", "Yearly", "Period Ending"];
+    }
+    // Service 6: Management Accounts
+    // Job has: Management Accounts Frequency -> Quarterly, Yearly, Monthly, Weekly, Fortnightly, Other
+    if (sId === 6) {
+      return ["Quarterly", "Yearly", "Monthly", "Weekly", "Fortnightly", "Other"];
+    }
+    // Service 28: Aus - SMSF & Service 33: Aus - Compliance
+    // Job has: Year dropdown (e.g. 2025, 2024...)
+    if (sId === 28 || sId === 33) {
+      return ["Yearly"];
+    }
+    // Services without custom Other Data (e.g. Service 5: Admin Support, Service 7: Company Secretarial, etc.)
+    return ["Monthly", "Weekly", "Fortnightly", "Quarterly", "Yearly", "Year End", "Tax Year", "Date Received"];
+  };
+
   // Helper to get fallback options for standard period types if job or service doesn't have populated dates
   const getStandardOptionsForPeriodType = (pType) => {
     if (!pType) return [];
     const t = String(pType).trim().toLowerCase();
     const currentYear = new Date().getFullYear();
 
-    // 1. Tax Year (Matching Create Job options exactly)
+    // 0. Daily (Last 30 days)
+    if (t === "daily" || t === "day") {
+      const list = [];
+      const today = new Date();
+      for (let i = 0; i < 30; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        list.push(`${day}/${month}/${year}`);
+      }
+      return list;
+    }
+
+    // 1. Tax Year (Matching Personal Tax Return options exactly)
     if (t === "tax year") {
       return [
         "2018/19", "2019/20", "2020/21", "2021/22", "2022/23",
@@ -878,7 +943,7 @@ export const SubmitBilling = () => {
       return list;
     }
 
-    // 3. Quarterly (Matching Job Other Data quarters: Q1, Q2, Q3, Q4)
+    // 3. Quarterly (Matching Job Other Data: Q1 2026, Q2 2026, Q3 2026, Q4 2026)
     if (t === "quarterly" || t === "quarter") {
       const list = [];
       for (let y = currentYear + 1; y >= currentYear - 4; y--) {
@@ -887,7 +952,7 @@ export const SubmitBilling = () => {
       return list;
     }
 
-    // 4. Year / Yearly (Aus Compliance, Aus SMSF, etc.)
+    // 4. Year / Yearly (Matching Job Other Data Year dropdown: 2026, 2025...)
     if (t === "year" || t === "yearly") {
       const list = [];
       for (let y = currentYear + 1; y >= currentYear - 5; y--) {
@@ -896,7 +961,7 @@ export const SubmitBilling = () => {
       return list;
     }
 
-    // 5. Monthly (Matching Job Other Data: Month Year)
+    // 5. Monthly (Matching Job Other Data: Month Year e.g. "November 2026")
     if (t === "monthly" || t === "month") {
       const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
       const list = [];
@@ -908,26 +973,31 @@ export const SubmitBilling = () => {
       return list;
     }
 
-    // 6. Weekly (Week, Month, Year matching Job Other Data)
+    // 6. Weekly (Matching Job Other Data: Week, Month, Year e.g. "Week 1, November, 2026")
     if (t === "weekly" || t === "week") {
       const list = [];
       const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-      for (let w = 1; w <= 4; w++) {
-        list.push(`Week ${w}, ${months[new Date().getMonth()]}, ${currentYear}`);
-      }
-      for (let w = 1; w <= 52; w++) {
-        list.push(`Week ${w}, ${currentYear}`);
+      for (let y = currentYear; y >= currentYear - 2; y--) {
+        const startM = y === currentYear ? new Date().getMonth() : 11;
+        for (let m = startM; m >= 0; m--) {
+          for (let w = 4; w >= 1; w--) {
+            list.push(`Week ${w}, ${months[m]}, ${y}`);
+          }
+        }
       }
       return list;
     }
 
-    // 7. Fortnightly (1st Half / 2nd Half, Month, Year matching Job Other Data)
+    // 7. Fortnightly (Matching Job Other Data: Fortnight, Month, Year e.g. "1st Half, November, 2026")
     if (t === "fortnightly" || t === "fortnight") {
       const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
       const list = [];
-      for (let m = 0; m < 12; m++) {
-        list.push(`1st Half, ${months[m]}, ${currentYear}`);
-        list.push(`2nd Half, ${months[m]}, ${currentYear}`);
+      for (let y = currentYear; y >= currentYear - 2; y--) {
+        const startM = y === currentYear ? new Date().getMonth() : 11;
+        for (let m = startM; m >= 0; m--) {
+          list.push(`2nd Half, ${months[m]}, ${y}`);
+          list.push(`1st Half, ${months[m]}, ${y}`);
+        }
       }
       return list;
     }
@@ -954,6 +1024,73 @@ export const SubmitBilling = () => {
   const [rawDateValue, setRawDateValue] = useState(
     editData?.period_type === "Month" ? getTodayMonthValue() : ""
   );
+
+  // Structured sub-input states matching Job Other Data
+  const [subYear, setSubYear] = useState(String(new Date().getFullYear()));
+  const [subMonth, setSubMonth] = useState("November");
+  const [subWeek, setSubWeek] = useState("Week 1");
+  const [subFortnight, setSubFortnight] = useState("1st Half");
+  const [subQuarter, setSubQuarter] = useState("Q1");
+  const [subTaxYear, setSubTaxYear] = useState("2024/25");
+  const [subDailyDate, setSubDailyDate] = useState("");
+  const [subYearEndDate, setSubYearEndDate] = useState(`31/03/${new Date().getFullYear()}`);
+  const [subOtherFromDate, setSubOtherFromDate] = useState("");
+  const [subOtherToDate, setSubOtherToDate] = useState("");
+
+  // Synchronize periodDate whenever periodType or structured sub-input states change
+  useEffect(() => {
+    // If the job already has a fixed period_date from its Other Data and periodType matches, keep it fixed
+    if (selectedJob?.raw_job?.period_date && periodType === selectedJob.raw_job.period_type) {
+      setPeriodDate(selectedJob.raw_job.period_date);
+      setRawDateValue(selectedJob.raw_job.period_date);
+      return;
+    }
+
+    if (!periodType) return;
+    const pt = periodType.toLowerCase().trim();
+
+    if (pt === "weekly" || pt === "week") {
+      const val = `${subWeek}, ${subMonth}, ${subYear}`;
+      setPeriodDate(val);
+      setRawDateValue(val);
+    } else if (pt === "monthly" || pt === "month") {
+      const val = `${subMonth} ${subYear}`;
+      setPeriodDate(val);
+      setRawDateValue(val);
+    } else if (pt === "fortnightly" || pt === "fortnight") {
+      const val = `${subFortnight}, ${subMonth}, ${subYear}`;
+      setPeriodDate(val);
+      setRawDateValue(val);
+    } else if (pt === "quarterly" || pt === "quarter") {
+      const val = `${subQuarter} ${subYear}`;
+      setPeriodDate(val);
+      setRawDateValue(val);
+    } else if (pt === "yearly" || pt === "year") {
+      setPeriodDate(subYear);
+      setRawDateValue(subYear);
+    } else if (pt === "tax year") {
+      setPeriodDate(subTaxYear);
+      setRawDateValue(subTaxYear);
+    } else if (pt === "daily" || pt === "day") {
+      setPeriodDate(subDailyDate);
+      setRawDateValue(subDailyDate);
+    } else if (pt === "year end" || pt === "year ending") {
+      setPeriodDate(subYearEndDate);
+      setRawDateValue(subYearEndDate);
+    } else if (pt === "other") {
+      if (subOtherFromDate && subOtherToDate) {
+        const val = `${subOtherFromDate} to ${subOtherToDate}`;
+        setPeriodDate(val);
+        setRawDateValue(val);
+      } else if (subOtherFromDate) {
+        setPeriodDate(subOtherFromDate);
+        setRawDateValue(subOtherFromDate);
+      } else {
+        setPeriodDate("");
+        setRawDateValue("");
+      }
+    }
+  }, [periodType, subYear, subMonth, subWeek, subFortnight, subQuarter, subTaxYear, subDailyDate, subYearEndDate, subOtherFromDate, subOtherToDate, selectedJob]);
 
   // Step 3 Multi-Model Dynamic Form States
   const [submitting, setSubmitting] = useState(false);
@@ -1973,7 +2110,11 @@ export const SubmitBilling = () => {
                           }
                         }}
                         onMenuOpen={() => {
-                          if (customersList.length === 0) {
+                          if (customerSearch !== "") {
+                            setCustomerSearch("");
+                            setCustomerPage(1);
+                            fetchCustomersPaginated({ searchValue: "", pageNo: 1, append: false });
+                          } else if (customersList.length === 0) {
                             fetchCustomersPaginated({ searchValue: "", pageNo: 1, append: false });
                           }
                         }}
@@ -2112,8 +2253,11 @@ export const SubmitBilling = () => {
                           }
                         }}
                         onMenuOpen={() => {
-                          // Only fetch if not already loaded
-                          if (clientsList.length === 0 && practice) {
+                          if (clientSearch !== "") {
+                            setClientSearch("");
+                            setClientPage(1);
+                            fetchClientsPaginated({ searchValue: "", pageNo: 1, append: false });
+                          } else if (clientsList.length === 0 && practice) {
                             fetchClientsPaginated({ searchValue: "", pageNo: 1, append: false });
                           }
                         }}
@@ -2215,10 +2359,13 @@ export const SubmitBilling = () => {
                             }
                           }
                           setSelectedJob(selected);
-                          if (selected?.raw_job?.period_type) {
-                            const pType = selected.raw_job.period_type;
+                          const allowedTypes = selectedService?.value ? getAllowedPeriodTypesForService(selectedService.value) : [];
+                          const jType = selected?.raw_job?.period_type;
+                          const isValidJobType = Boolean(jType && allowedTypes.some(at => at.toLowerCase() === jType.toLowerCase()));
+
+                          if (isValidJobType) {
                             const pDate = selected.raw_job.period_date;
-                            setPeriodType(pType);
+                            setPeriodType(jType);
                             if (pDate) {
                               setRawDateValue(pDate);
                               setPeriodDate(pDate);
@@ -2228,7 +2375,8 @@ export const SubmitBilling = () => {
                               setPeriodDate("");
                             }
                           } else {
-                            // If user cleared job dropdown
+                            // If job has no frequency selected in Other Data, do NOT lock or force default!
+                            // Keep periodType empty so user selects the frequency from the dropdown
                             setPeriodType("");
                             setRawDateValue("");
                             setPeriodDate("");
@@ -2252,38 +2400,52 @@ export const SubmitBilling = () => {
                   {/* Billing Period row */}
                   {(() => {
                     const isServiceSelected = Boolean(selectedService && selectedService.value);
-                    let availablePeriodTypes = selectedService?.period_types && selectedService.period_types.length > 0
-                      ? [...selectedService.period_types]
-                      : [];
+                    const serviceAllowedTypes = selectedService?.value ? getAllowedPeriodTypesForService(selectedService.value) : [];
 
-                    // If a job is selected and has period_type, ensure it is available in options
+                    // Strictly build available period types from the service's allowed frequencies
+                    let availablePeriodTypes = serviceAllowedTypes.map((sType) => {
+                      const matched = (selectedService?.period_types || []).find(
+                        (pt) => pt.type?.toLowerCase() === sType.toLowerCase()
+                      );
+                      return matched || { type: sType, dates: [] };
+                    });
+
+                    // If a job is selected and has a valid period_type that is in serviceAllowedTypes
                     if (selectedJob?.raw_job?.period_type) {
                       const jType = selectedJob.raw_job.period_type;
                       const jDate = selectedJob.raw_job.period_date;
-                      let matchType = availablePeriodTypes.find(pt => pt.type === jType);
-                      if (!matchType) {
-                        availablePeriodTypes.unshift({
-                          type: jType,
-                          dates: jDate ? [jDate] : []
-                        });
-                      } else if (jDate && !matchType.dates.includes(jDate)) {
-                        matchType.dates = [jDate, ...matchType.dates];
+                      let matchType = availablePeriodTypes.find(
+                        (pt) => pt.type?.toLowerCase() === jType.toLowerCase()
+                      );
+                      if (matchType) {
+                        if (jDate && !matchType.dates.includes(jDate)) {
+                          matchType.dates = [jDate, ...matchType.dates];
+                        }
+                        // Move selected job's period type to the top
+                        availablePeriodTypes = [matchType, ...availablePeriodTypes.filter((pt) => pt !== matchType)];
                       }
                     }
 
-                    // In Edit mode, if editData period_type is not in the list, ensure it's available
-                    if (editData?.period_type && !availablePeriodTypes.some(pt => pt.type === editData.period_type)) {
-                      availablePeriodTypes.unshift({
-                        type: editData.period_type,
-                        dates: editData.period_date ? [editData.period_date] : []
-                      });
+                    // In Edit mode, if editData period_type is valid for this service, ensure it's available
+                    if (editData?.period_type && !availablePeriodTypes.some((pt) => pt.type === editData.period_type)) {
+                      if (serviceAllowedTypes.length === 0 || serviceAllowedTypes.some((st) => st.toLowerCase() === editData.period_type.toLowerCase())) {
+                        availablePeriodTypes.unshift({
+                          type: editData.period_type,
+                          dates: editData.period_date ? [editData.period_date] : []
+                        });
+                      }
                     }
 
                     const currentTypeObj = availablePeriodTypes.find((pt) => pt.type === periodType);
                     let availableDates = [];
 
-                    // 1. Check if the selected job has a pre-filled period date from its Other Data
-                    const isJobDateFixed = Boolean(selectedJob?.raw_job?.period_date);
+                    // 1. Check if the selected job already has a frequency defined from its Other Data
+                    const rawJobType = selectedJob?.raw_job?.period_type;
+                    const isJobFrequencyLocked = Boolean(
+                      rawJobType && serviceAllowedTypes.some(at => at.toLowerCase() === rawJobType.toLowerCase())
+                    );
+                    // Check if the selected job has a pre-filled period date from its Other Data
+                    const isJobDateFixed = Boolean(selectedJob?.raw_job?.period_date && isJobFrequencyLocked);
 
                     if (isJobDateFixed && periodType === selectedJob.raw_job.period_type) {
                       availableDates = [selectedJob.raw_job.period_date];
@@ -2296,101 +2458,432 @@ export const SubmitBilling = () => {
                       availableDates.unshift(editData.period_date);
                     }
 
-                    // 3. Only merge standard selectable options if job Other Data doesn't already have a fixed date
-                    if (periodType && !isJobDateFixed) {
-                      const stdOptions = getStandardOptionsForPeriodType(periodType);
-                      if (stdOptions && stdOptions.length > 0) {
-                        for (const opt of stdOptions) {
-                          if (!availableDates.includes(opt)) {
-                            availableDates.push(opt);
-                          }
-                        }
-                      }
-                    }
-
                     const hasJobPeriods = availablePeriodTypes.length > 0;
+                    const ptLower = (periodType || "").toLowerCase().trim();
+
+                    // Years list: 2026, 2025, 2024, 2023, 2022, 2021
+                    const yearsList = Array.from({ length: 6 }, (_, i) => String(new Date().getFullYear() - i));
+                    const monthsList = [
+                      "January", "February", "March", "April", "May", "June",
+                      "July", "August", "September", "October", "November", "December"
+                    ];
+                    const weeksList = ["Week 1", "Week 2", "Week 3", "Week 4"];
+                    const fortnightsList = ["1st Half", "2nd Half"];
+                    const quartersList = ["Q1", "Q2", "Q3", "Q4"];
+                    const taxYearsList = [
+                      "2018/19", "2019/20", "2020/21", "2021/22", "2022/23",
+                      "2023/24", "2024/25", "2025/26", "2026/27", "2027/28"
+                    ];
+                    const yearEndsList = (() => {
+                      const list = [];
+                      const curY = new Date().getFullYear();
+                      for (let y = curY + 1; y >= curY - 5; y--) {
+                        list.push(`31/03/${y}`);
+                        list.push(`30/04/${y}`);
+                        list.push(`31/05/${y}`);
+                        list.push(`31/12/${y}`);
+                      }
+                      return list;
+                    })();
 
                     return (
-                      <div className="row g-4 mb-4">
-                        {/* 1. Billing Period Dropdown */}
-                        <div className="col-lg-6 col-md-6">
-                          <label className="form-label text-muted small mb-1 fw-medium">
-                            Billing Period
-                          </label>
-                          <select
-                            className="form-select shadow-sm rounded-pill"
-                            disabled={!isServiceSelected || !selectedJob || isJobDateFixed}
-                            value={periodType || ""}
-                            onChange={(e) => {
-                              const newType = e.target.value;
-                              setPeriodType(newType);
-                              const foundTypeObj = availablePeriodTypes.find((pt) => pt.type === newType);
-                              if (foundTypeObj && foundTypeObj.dates && foundTypeObj.dates.length > 0) {
-                                const firstVal = foundTypeObj.dates[0];
-                                setRawDateValue(firstVal);
-                                setPeriodDate(firstVal);
-                              } else {
-                                const stdDates = getStandardOptionsForPeriodType(newType);
-                                const firstVal = stdDates && stdDates.length > 0 ? stdDates[0] : "";
-                                setRawDateValue(firstVal);
-                                setPeriodDate(firstVal);
-                              }
-                            }}
-                          >
-                            {!isServiceSelected ? (
-                              <option value="">Please select a service first</option>
-                            ) : !selectedJob ? (
-                              <option value="">Please select a job first</option>
-                            ) : !hasJobPeriods ? (
-                              <option value="">No Billing Period Found</option>
-                            ) : (
-                              availablePeriodTypes.map((pt) => (
-                                <option key={pt.type} value={pt.type}>
-                                  {pt.type}
-                                </option>
-                              ))
-                            )}
-                          </select>
-                        </div>
-
-                        {/* 2. Period Date / Values Dropdown (Disabled if auto-filled from job) */}
-                        <div className="col-lg-6 col-md-6">
-                          <div className="d-flex align-items-center justify-content-between mb-1">
-                            <label className="form-label text-muted small mb-0 fw-medium">
-                              Period Date 
-                            </label>
-                            {isJobDateFixed && (
-                              <span className="badge bg-light text-muted border" style={{ fontSize: "10.5px" }}>
-                                Auto-filled from Job
-                              </span>
-                            )}
+                      <div className="mb-4">
+                        <div className="row g-4 align-items-end">
+                          {/* 1. Billing Period Dropdown (Locked if Job has a frequency defined) */}
+                          <div className={ptLower === "weekly" || ptLower === "week" || ptLower === "fortnightly" || ptLower === "fortnight" ? "col-lg-3 col-md-6" : "col-lg-6 col-md-6"}>
+                            <div className="d-flex align-items-center justify-content-between mb-1">
+                              <label className="form-label text-muted small mb-0 fw-medium">
+                                Billing Period
+                              </label>
+                              {isJobFrequencyLocked && (
+                                <span className="badge bg-light text-muted border" style={{ fontSize: "10.5px" }}>
+                                  Frequency from Job
+                                </span>
+                              )}
+                            </div>
+                            <select
+                              className={`form-select shadow-sm rounded-pill ${isJobFrequencyLocked ? "bg-light text-dark fw-medium" : ""}`}
+                              disabled={!isServiceSelected || !selectedJob || isJobFrequencyLocked}
+                              value={periodType || ""}
+                              onChange={(e) => {
+                                const newType = e.target.value;
+                                setPeriodType(newType);
+                              }}
+                            >
+                              {!isServiceSelected ? (
+                                <option value="">Please select a service first</option>
+                              ) : !selectedJob ? (
+                                <option value="">Please select a job first</option>
+                              ) : !hasJobPeriods ? (
+                                <option value="">No Billing Period Found</option>
+                              ) : (
+                                <>
+                                  {!isJobFrequencyLocked && <option value="">-- Select Billing Period --</option>}
+                                  {availablePeriodTypes.map((pt) => (
+                                    <option key={pt.type} value={pt.type}>
+                                      {pt.type}
+                                    </option>
+                                  ))}
+                                </>
+                              )}
+                            </select>
                           </div>
-                          <select
-                            className={`form-select shadow-sm rounded-pill ${isJobDateFixed ? "bg-light text-dark fw-medium" : ""}`}
-                            disabled={!isServiceSelected || !selectedJob || !periodType || availableDates.length === 0 || isJobDateFixed}
-                            value={periodDate || ""}
-                            onChange={(e) => {
-                              setPeriodDate(e.target.value);
-                              setRawDateValue(e.target.value);
-                            }}
-                          >
-                            {!isServiceSelected ? (
-                              <option value="">Please select a service first</option>
-                            ) : !selectedJob ? (
-                              <option value="">Please select a job first</option>
-                            ) : availableDates.length === 0 ? (
-                              <option value="">No dates available</option>
-                            ) : (
-                              <>
-                                <option value="">-- Select Period Date --</option>
-                                {availableDates.map((dVal) => (
-                                  <option key={dVal} value={dVal}>
-                                    {dVal}
-                                  </option>
-                                ))}
-                              </>
-                            )}
-                          </select>
+
+                          {/* 2. Dynamic Period Inputs matching Create/Edit Job Other Data */}
+
+                          {/* CASE A: Fixed Period Date from Job */}
+                          {isJobDateFixed ? (
+                            <div className="col-lg-6 col-md-6">
+                              <div className="d-flex align-items-center justify-content-between mb-1">
+                                <label className="form-label text-muted small mb-0 fw-medium">
+                                  Period Date
+                                </label>
+                                <span className="badge bg-light text-muted border" style={{ fontSize: "10.5px" }}>
+                                  Auto-filled from Job
+                                </span>
+                              </div>
+                              <input
+                                type="text"
+                                className="form-control shadow-sm rounded-pill bg-light text-dark fw-medium"
+                                disabled={true}
+                                value={periodDate || ""}
+                              />
+                            </div>
+                          ) : (
+                            /* CASE B: When Date was NOT filled in Job, render exact Job-like sub-input dropdowns */
+                            <>
+                              {/* WEEKLY: Year, Month, Week (matching Job Weekly fields) */}
+                              {(ptLower === "weekly" || ptLower === "week") && (
+                                <>
+                                  <div className="col-lg-3 col-md-6">
+                                    <label className="form-label text-muted small mb-1 fw-medium">Year</label>
+                                    <select
+                                      className="form-select shadow-sm rounded-pill"
+                                      disabled={!isServiceSelected || !selectedJob}
+                                      value={subYear}
+                                      onChange={(e) => setSubYear(e.target.value)}
+                                    >
+                                      {yearsList.map((y) => (
+                                        <option key={y} value={y}>{y}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                  <div className="col-lg-3 col-md-6">
+                                    <label className="form-label text-muted small mb-1 fw-medium">Month</label>
+                                    <select
+                                      className="form-select shadow-sm rounded-pill"
+                                      disabled={!isServiceSelected || !selectedJob}
+                                      value={subMonth}
+                                      onChange={(e) => setSubMonth(e.target.value)}
+                                    >
+                                      {monthsList.map((m) => (
+                                        <option key={m} value={m}>{m}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                  <div className="col-lg-3 col-md-6">
+                                    <label className="form-label text-muted small mb-1 fw-medium">Week</label>
+                                    <select
+                                      className="form-select shadow-sm rounded-pill"
+                                      disabled={!isServiceSelected || !selectedJob}
+                                      value={subWeek}
+                                      onChange={(e) => setSubWeek(e.target.value)}
+                                    >
+                                      {weeksList.map((w) => (
+                                        <option key={w} value={w}>{w}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                </>
+                              )}
+
+                              {/* FORTNIGHTLY: Year, Month, Fortnight */}
+                              {(ptLower === "fortnightly" || ptLower === "fortnight") && (
+                                <>
+                                  <div className="col-lg-3 col-md-6">
+                                    <label className="form-label text-muted small mb-1 fw-medium">Year</label>
+                                    <select
+                                      className="form-select shadow-sm rounded-pill"
+                                      disabled={!isServiceSelected || !selectedJob}
+                                      value={subYear}
+                                      onChange={(e) => setSubYear(e.target.value)}
+                                    >
+                                      {yearsList.map((y) => (
+                                        <option key={y} value={y}>{y}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                  <div className="col-lg-3 col-md-6">
+                                    <label className="form-label text-muted small mb-1 fw-medium">Month</label>
+                                    <select
+                                      className="form-select shadow-sm rounded-pill"
+                                      disabled={!isServiceSelected || !selectedJob}
+                                      value={subMonth}
+                                      onChange={(e) => setSubMonth(e.target.value)}
+                                    >
+                                      {monthsList.map((m) => (
+                                        <option key={m} value={m}>{m}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                  <div className="col-lg-3 col-md-6">
+                                    <label className="form-label text-muted small mb-1 fw-medium">Fortnight</label>
+                                    <select
+                                      className="form-select shadow-sm rounded-pill"
+                                      disabled={!isServiceSelected || !selectedJob}
+                                      value={subFortnight}
+                                      onChange={(e) => setSubFortnight(e.target.value)}
+                                    >
+                                      {fortnightsList.map((f) => (
+                                        <option key={f} value={f}>{f}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                </>
+                              )}
+
+                              {/* MONTHLY: Year, Month */}
+                              {(ptLower === "monthly" || ptLower === "month") && (
+                                <>
+                                  <div className="col-lg-3 col-md-6">
+                                    <label className="form-label text-muted small mb-1 fw-medium">Year</label>
+                                    <select
+                                      className="form-select shadow-sm rounded-pill"
+                                      disabled={!isServiceSelected || !selectedJob}
+                                      value={subYear}
+                                      onChange={(e) => setSubYear(e.target.value)}
+                                    >
+                                      {yearsList.map((y) => (
+                                        <option key={y} value={y}>{y}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                  <div className="col-lg-3 col-md-6">
+                                    <label className="form-label text-muted small mb-1 fw-medium">Month</label>
+                                    <select
+                                      className="form-select shadow-sm rounded-pill"
+                                      disabled={!isServiceSelected || !selectedJob}
+                                      value={subMonth}
+                                      onChange={(e) => setSubMonth(e.target.value)}
+                                    >
+                                      {monthsList.map((m) => (
+                                        <option key={m} value={m}>{m}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                </>
+                              )}
+
+                              {/* QUARTERLY: Year, Quarter */}
+                              {(ptLower === "quarterly" || ptLower === "quarter") && (
+                                <>
+                                  <div className="col-lg-3 col-md-6">
+                                    <label className="form-label text-muted small mb-1 fw-medium">Year</label>
+                                    <select
+                                      className="form-select shadow-sm rounded-pill"
+                                      disabled={!isServiceSelected || !selectedJob}
+                                      value={subYear}
+                                      onChange={(e) => setSubYear(e.target.value)}
+                                    >
+                                      {yearsList.map((y) => (
+                                        <option key={y} value={y}>{y}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                  <div className="col-lg-3 col-md-6">
+                                    <label className="form-label text-muted small mb-1 fw-medium">Quarter</label>
+                                    <select
+                                      className="form-select shadow-sm rounded-pill"
+                                      disabled={!isServiceSelected || !selectedJob}
+                                      value={subQuarter}
+                                      onChange={(e) => setSubQuarter(e.target.value)}
+                                    >
+                                      {quartersList.map((q) => (
+                                        <option key={q} value={q}>{q}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                </>
+                              )}
+
+                              {/* YEARLY: Year */}
+                              {(ptLower === "yearly" || ptLower === "year") && (
+                                <div className="col-lg-6 col-md-6">
+                                  <label className="form-label text-muted small mb-1 fw-medium">Year</label>
+                                  <select
+                                    className="form-select shadow-sm rounded-pill"
+                                    disabled={!isServiceSelected || !selectedJob}
+                                    value={subYear}
+                                    onChange={(e) => setSubYear(e.target.value)}
+                                  >
+                                    {yearsList.map((y) => (
+                                      <option key={y} value={y}>{y}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                              )}
+
+                              {/* TAX YEAR: Tax Year dropdown */}
+                              {ptLower === "tax year" && (
+                                <div className="col-lg-6 col-md-6">
+                                  <label className="form-label text-muted small mb-1 fw-medium">Tax Year</label>
+                                  <select
+                                    className="form-select shadow-sm rounded-pill"
+                                    disabled={!isServiceSelected || !selectedJob}
+                                    value={subTaxYear}
+                                    onChange={(e) => setSubTaxYear(e.target.value)}
+                                  >
+                                    {taxYearsList.map((ty) => (
+                                      <option key={ty} value={ty}>{ty}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                              )}
+
+                              {/* YEAR END: Year End dropdown */}
+                              {(ptLower === "year end" || ptLower === "year ending") && (
+                                <div className="col-lg-6 col-md-6">
+                                  <label className="form-label text-muted small mb-1 fw-medium">Year End</label>
+                                  <select
+                                    className="form-select shadow-sm rounded-pill"
+                                    disabled={!isServiceSelected || !selectedJob}
+                                    value={subYearEndDate}
+                                    onChange={(e) => setSubYearEndDate(e.target.value)}
+                                  >
+                                    {yearEndsList.map((ye) => (
+                                      <option key={ye} value={ye}>{ye}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                              )}
+
+                              {/* DAILY: Date Calendar Picker */}
+                              {(ptLower === "daily" || ptLower === "day") && (
+                                <div className="col-lg-6 col-md-6">
+                                  <label className="form-label text-muted small mb-1 fw-medium">Select Date</label>
+                                  <input
+                                    type="date"
+                                    className="form-control shadow-sm rounded-pill"
+                                    disabled={!isServiceSelected || !selectedJob}
+                                    onKeyDown={(e) => e.preventDefault()}
+                                    onClick={(e) => !e.target.disabled && e.target.showPicker && e.target.showPicker()}
+                                    value={
+                                      subDailyDate && /^\d{2}\/\d{2}\/\d{4}$/.test(subDailyDate)
+                                        ? `${subDailyDate.split('/')[2]}-${subDailyDate.split('/')[1]}-${subDailyDate.split('/')[0]}`
+                                        : (subDailyDate && /^\d{4}-\d{2}-\d{2}$/.test(subDailyDate) ? subDailyDate : "")
+                                    }
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      if (val && /^\d{4}-\d{2}-\d{2}$/.test(val)) {
+                                        const parts = val.split('-');
+                                        const formatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                                        setSubDailyDate(formatted);
+                                      } else {
+                                        setSubDailyDate("");
+                                      }
+                                    }}
+                                  />
+                                </div>
+                              )}
+
+                              {/* OTHER: From Date & To Date Calendar Pickers (matching Job Other fields) */}
+                              {ptLower === "other" && (
+                                <>
+                                  <div className="col-lg-3 col-md-6">
+                                    <label className="form-label text-muted small mb-1 fw-medium">From Date</label>
+                                    <input
+                                      type="date"
+                                      className="form-control shadow-sm rounded-pill"
+                                      disabled={!isServiceSelected || !selectedJob}
+                                      onKeyDown={(e) => e.preventDefault()}
+                                      onClick={(e) => !e.target.disabled && e.target.showPicker && e.target.showPicker()}
+                                      value={
+                                        subOtherFromDate && /^\d{2}\/\d{2}\/\d{4}$/.test(subOtherFromDate)
+                                          ? `${subOtherFromDate.split('/')[2]}-${subOtherFromDate.split('/')[1]}-${subOtherFromDate.split('/')[0]}`
+                                          : (subOtherFromDate && /^\d{4}-\d{2}-\d{2}$/.test(subOtherFromDate) ? subOtherFromDate : "")
+                                      }
+                                      onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (val && /^\d{4}-\d{2}-\d{2}$/.test(val)) {
+                                          const parts = val.split('-');
+                                          const formatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                                          setSubOtherFromDate(formatted);
+                                        } else {
+                                          setSubOtherFromDate("");
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="col-lg-3 col-md-6">
+                                    <label className="form-label text-muted small mb-1 fw-medium">To Date</label>
+                                    <input
+                                      type="date"
+                                      className="form-control shadow-sm rounded-pill"
+                                      disabled={!isServiceSelected || !selectedJob}
+                                      onKeyDown={(e) => e.preventDefault()}
+                                      onClick={(e) => !e.target.disabled && e.target.showPicker && e.target.showPicker()}
+                                      value={
+                                        subOtherToDate && /^\d{2}\/\d{2}\/\d{4}$/.test(subOtherToDate)
+                                          ? `${subOtherToDate.split('/')[2]}-${subOtherToDate.split('/')[1]}-${subOtherToDate.split('/')[0]}`
+                                          : (subOtherToDate && /^\d{4}-\d{2}-\d{2}$/.test(subOtherToDate) ? subOtherToDate : "")
+                                      }
+                                      onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (val && /^\d{4}-\d{2}-\d{2}$/.test(val)) {
+                                          const parts = val.split('-');
+                                          const formatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                                          setSubOtherToDate(formatted);
+                                        } else {
+                                          setSubOtherToDate("");
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                </>
+                              )}
+
+                              {/* CASE C: No Period Type selected yet */}
+                              {!periodType && (
+                                <div className="col-lg-6 col-md-6">
+                                  <label className="form-label text-muted small mb-1 fw-medium">Period Date</label>
+                                  <input
+                                    type="text"
+                                    className="form-control shadow-sm rounded-pill bg-light"
+                                    placeholder="Please select Billing Period first..."
+                                    disabled={true}
+                                    value=""
+                                  />
+                                </div>
+                              )}
+
+                              {/* DEFAULT / FALLBACK */}
+                              {periodType &&
+                                ptLower !== "weekly" && ptLower !== "week" &&
+                                ptLower !== "monthly" && ptLower !== "month" &&
+                                ptLower !== "fortnightly" && ptLower !== "fortnight" &&
+                                ptLower !== "quarterly" && ptLower !== "quarter" &&
+                                ptLower !== "yearly" && ptLower !== "year" &&
+                                ptLower !== "tax year" &&
+                                ptLower !== "year end" && ptLower !== "year ending" &&
+                                ptLower !== "daily" && ptLower !== "day" &&
+                                ptLower !== "other" && (
+                                <div className="col-lg-6 col-md-6">
+                                  <label className="form-label text-muted small mb-1 fw-medium">Period Date</label>
+                                  <input
+                                    type="text"
+                                    className="form-control shadow-sm rounded-pill"
+                                    placeholder="Enter period date..."
+                                    disabled={!isServiceSelected || !selectedJob}
+                                    value={periodDate || ""}
+                                    onChange={(e) => {
+                                      setPeriodDate(e.target.value);
+                                      setRawDateValue(e.target.value);
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </>
+                          )}
                         </div>
                       </div>
                     );
