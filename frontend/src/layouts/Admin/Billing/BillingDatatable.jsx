@@ -186,6 +186,43 @@ const BillingDatatable = ({
       return false;
     });
 
+    // Pre-calculate all distinct model calculation column names across all rows in data
+    // so every row has consistent columns, and if a row doesn't have a model, it shows "-"
+    const allCalculatedModelNames = [];
+    if (hasAnyCalcJson) {
+      data.forEach((r) => {
+        let calc = r.calc_json;
+        if (typeof calc === "string") {
+          try {
+            calc = JSON.parse(calc);
+          } catch (e) {
+            calc = null;
+          }
+        }
+        if (!calc) return;
+        if (calc.adhoc && (Number(calc.adhoc.hours) > 0 || Number(calc.adhoc.total) > 0)) {
+          if (!allCalculatedModelNames.includes("Adhoc / Hourly Calculation")) {
+            allCalculatedModelNames.push("Adhoc / Hourly Calculation");
+          }
+        }
+        if (calc.fte && (Number(calc.fte.total) > 0 || (calc.fte.accountants > 0 || calc.fte.bookkeepers > 0 || calc.fte.payroll > 0 || calc.fte.tax > 0 || calc.fte.admin > 0))) {
+          if (!allCalculatedModelNames.includes("FTE Staffing Calculation")) {
+            allCalculatedModelNames.push("FTE Staffing Calculation");
+          }
+        }
+        if (calc.percentage && (Number(calc.percentage.total) > 0 || Number(calc.percentage.base) > 0 || (Array.isArray(calc.percentage.items) && calc.percentage.items.some((it) => it.base > 0 || it.subtotal > 0)))) {
+          if (!allCalculatedModelNames.includes("Percentage Model Calculation")) {
+            allCalculatedModelNames.push("Percentage Model Calculation");
+          }
+        }
+        if (calc.customised && (Number(calc.customised.count) > 0 || Number(calc.customised.total) > 0)) {
+          if (!allCalculatedModelNames.includes("Customised Pricing Calculation")) {
+            allCalculatedModelNames.push("Customised Pricing Calculation");
+          }
+        }
+      });
+    }
+
     return data.map((row, rowIndex) => {
       const rowObj = {};
 
@@ -323,18 +360,20 @@ const BillingDatatable = ({
         }
       });
 
-      // Each active calculated model gets its own cell / column directly named after the model
+      // 1. ALL model calculation columns come first across all models
+      // If a row has that model, it displays the calculation text; otherwise "-"
       if (hasAnyCalcJson) {
-        if (activeModels.length > 0) {
-          activeModels.forEach((m) => {
-            rowObj[`${m.modelName} Calculation`] = `${m.details} = ${m.subtotal}`;
+        if (allCalculatedModelNames.length > 0) {
+          allCalculatedModelNames.forEach((colName) => {
+            const foundModel = activeModels.find((m) => `${m.modelName} Calculation` === colName);
+            rowObj[colName] = foundModel ? `${foundModel.details} = ${foundModel.subtotal}` : "-";
           });
         } else {
           rowObj["Calculation Breakdown"] = "—";
         }
       }
 
-      // Add Final Remark column in export (if available show text, else "-")
+      // 2. Final Remark column ALWAYS comes after all model calculation columns
       const finalRemarkVal = row.remark || row.final_remark || row.submitter_remark;
       rowObj["Final Remark"] = finalRemarkVal && String(finalRemarkVal).trim() ? String(finalRemarkVal).trim() : "-";
 
