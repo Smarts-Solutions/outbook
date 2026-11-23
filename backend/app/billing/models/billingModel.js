@@ -2010,6 +2010,7 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote) 
                     s.name AS service_name,
                     st_sub.email AS submitter_email,
                     CONCAT(st_sub.first_name, ' ', st_sub.last_name) AS submitter_name,
+                    st_mgr.email AS manager_email,
                     CONCAT(st_mgr.first_name, ' ', st_mgr.last_name) AS manager_name
                  FROM billing_submissions bs
                  LEFT JOIN customers c ON bs.customer_id = c.id
@@ -2023,10 +2024,16 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote) 
 
             if (subDetails && subDetails.length > 0) {
                 const item = subDetails[0];
-                // For testing: primary to shaktijatpnp09@gmail.com, cc to vikaspnpinfotech@gmail.com
-                // Separating into 'to' and 'cc' prevents Microsoft 365 outbound queue/relay delays
-                const primaryTo = "shaktijatpnp09@gmail.com";
-                const ccTo = "vikaspnpinfotech@gmail.com";
+                // Send email strictly to the staff who submitted the bill (NO CC to anyone else)
+                const primaryTo = item.submitter_email ? item.submitter_email.trim() : null;
+
+                if (!primaryTo) {
+                    console.warn(`[Billing Email] No submitter email found for submission #${submissionId}. Skipping email dispatch.`);
+                    return {
+                        status: true,
+                        message: "Submission returned for correction (Email skipped: submitter email not found)."
+                    };
+                }
 
                 const customerName = item.customer_name || 'Customer';
                 const periodLabel = item.period_label || 'Current Period';
@@ -2094,22 +2101,20 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote) 
                     </div>
                 `;
 
-                // Retry logic for Cloud/Dev environments with explicit primary + cc separation
-                const sendReturnEmailWithRetry = async (to, cc, subject, html, maxAttempts = 3) => {
+                // Retry logic for Cloud/Dev environments
+                const sendReturnEmailWithRetry = async (to, subject, html, maxAttempts = 3) => {
                     console.log(`[Billing Email] ==================== RETURN EMAIL DISPATCH ====================`);
                     console.log(`[Billing Email] Submission ID: #${submissionId}`);
-                    console.log(`[Billing Email] Primary TO: ${to}`);
-                    console.log(`[Billing Email] CC: ${cc}`);
+                    console.log(`[Billing Email] Recipient TO: ${to} (Submitter only)`);
                     console.log(`[Billing Email] Subject: "${subject}"`);
-                    console.log(`[Billing Email] Submitter: ${submitterName} (${actualSubmitterEmail})`);
-                    console.log(`[Billing Email] Manager: ${managerName}`);
+                    console.log(`[Billing Email] Submitter: ${submitterName}`);
                     
                     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
                         console.log(`[Billing Email] >>> Attempt ${attempt}/${maxAttempts} sending now...`);
                         const startTime = Date.now();
                         try {
                             const sent = await Promise.race([
-                                commonEmail(to, subject, html, cc),
+                                commonEmail(to, subject, html, null),
                                 new Promise((_, reject) => setTimeout(() => reject(new Error("SMTP timeout after 10s")), 10000))
                             ]);
                             const elapsed = Date.now() - startTime;
@@ -2136,7 +2141,7 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote) 
                     return false;
                 };
 
-                await sendReturnEmailWithRetry(primaryTo, ccTo, subjectEmail, htmlEmail);
+                await sendReturnEmailWithRetry(primaryTo, subjectEmail, htmlEmail);
             }
         } catch (emailQueryErr) {
             console.error("[Billing Email] Error fetching submitter details for email notification:", emailQueryErr);
