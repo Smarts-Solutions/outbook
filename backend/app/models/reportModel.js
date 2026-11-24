@@ -6597,6 +6597,9 @@ const getJobCustomReport1 = async (Report) => {
     const columnsWeeks = [...groupBy, ...weeks, ...total_count];
     const finalRows = normalizeRows(columnsWeeks, outRows);
 
+    const totalGroupRecords = finalRows.length;
+    const paginatedRows = finalRows.slice(offset, offset + limit);
+
     const fixed = [...groupBy];
     const dynamic = columnsWeeks.filter((col) => !fixed.includes(col));
     const columnsWeeksDecOrder = [...fixed, ...dynamic?.reverse()];
@@ -6608,12 +6611,12 @@ const getJobCustomReport1 = async (Report) => {
         meta: { fromDate, toDate, groupBy, displayBy, timePeriod },
         //columns: columnsWeeks,
         columns: columnsWeeksDecOrder,
-        rows: finalRows,
+        rows: paginatedRows,
         pagination: {
-          total: totalCount,
+          total: totalGroupRecords,
           page: page,
           limit: limit,
-          totalPages: Math.ceil(totalCount / limit),
+          totalPages: Math.ceil(totalGroupRecords / limit),
           search,
         },
       },
@@ -7948,9 +7951,7 @@ const getJobCustomReport = async (Report) => {
             ) AS jao ON jao.job_id = raw.job_id
             ${tmpTableJoin}
             ${where}
-             ${GROUPBY}
             ORDER BY raw.job_id
-            LIMIT ${limit} OFFSET ${offset}
         `;
 
     // console.log("fromDate ---> ", fromDate, "toDate ", toDate);
@@ -8267,6 +8268,9 @@ const getJobCustomReport = async (Report) => {
     const columnsWeeks = [...groupBy, ...weeks, ...total_count];
     const finalRows = normalizeRows(columnsWeeks, outRows);
 
+    const totalGroupRecords = finalRows.length;
+    const paginatedRows = finalRows.slice(offset, offset + limit);
+
     const fixed = [...groupBy];
     const dynamic = columnsWeeks.filter((col) => !fixed.includes(col));
     const columnsWeeksDecOrder = [...fixed, ...dynamic?.reverse()];
@@ -8278,12 +8282,12 @@ const getJobCustomReport = async (Report) => {
         meta: { fromDate, toDate, groupBy, displayBy, timePeriod },
         //columns: columnsWeeks,
         columns: columnsWeeksDecOrder,
-        rows: finalRows,
+        rows: paginatedRows,
         pagination: {
-          total: totalCount,
+          total: totalGroupRecords,
           page: page,
           limit: limit,
-          totalPages: Math.ceil(totalCount / limit),
+          totalPages: Math.ceil(totalGroupRecords / limit),
           search,
         },
       },
@@ -9617,9 +9621,7 @@ const getJobCustomReport2 = async (Report) => {
             ) AS jao ON jao.job_id = raw.job_id
             ${tmpTableJoin}
             ${where}
-             ${GROUPBY}
             ORDER BY raw.job_id
-            LIMIT ${limit} OFFSET ${offset}
         `;
 
     // console.log("fromDate ---> ", fromDate, "toDate ", toDate);
@@ -9936,6 +9938,9 @@ const getJobCustomReport2 = async (Report) => {
     const columnsWeeks = [...groupBy, ...weeks, ...total_count];
     const finalRows = normalizeRows(columnsWeeks, outRows);
 
+    const totalGroupRecords = finalRows.length;
+    const paginatedRows = finalRows.slice(offset, offset + limit);
+
     const fixed = [...groupBy];
     const dynamic = columnsWeeks.filter((col) => !fixed.includes(col));
     const columnsWeeksDecOrder = [...fixed, ...dynamic?.reverse()];
@@ -9947,12 +9952,12 @@ const getJobCustomReport2 = async (Report) => {
         meta: { fromDate, toDate, groupBy, displayBy, timePeriod },
         //columns: columnsWeeks,
         columns: columnsWeeksDecOrder,
-        rows: finalRows,
+        rows: paginatedRows,
         pagination: {
-          total: totalCount,
+          total: totalGroupRecords,
           page: page,
           limit: limit,
-          totalPages: Math.ceil(totalCount / limit),
+          totalPages: Math.ceil(totalGroupRecords / limit),
           search,
         },
       },

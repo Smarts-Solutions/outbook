@@ -2305,9 +2305,7 @@ const getJobCustomReport = async (Report) => {
           sv.name AS service_name, jt.type AS job_type_name, st.name AS status_type_name, sf.employee_number AS employee_number
       ${baseJoinSQL}
       ${where}
-      ${GROUPBY}
       ORDER BY raw.job_id
-      LIMIT ${limit} OFFSET ${offset}
     `;
 
     const [rows] = await pool.execute(dataSQL, [fromDate, toDate]);
@@ -2433,6 +2431,9 @@ const getJobCustomReport = async (Report) => {
     const columnsWeeks = [...groupBy, ...weeks, ...total_count_header];
 
     const finalRows = normalizeRows(columnsWeeks, outRows);
+    const totalGroupRecords = finalRows.length;
+    const paginatedRows = finalRows.slice(offset, offset + limit);
+
     const fixed = [...groupBy];
     const dynamic = columnsWeeks.filter(col => !fixed.includes(col));
     const columnsWeeksDecOrder = [...fixed, ...dynamic.reverse()];
@@ -2443,8 +2444,8 @@ const getJobCustomReport = async (Report) => {
       data: {
         meta: { fromDate, toDate, groupBy, displayBy, timePeriod },
         columns: columnsWeeksDecOrder,
-        rows: finalRows,
-        pagination: { total: totalCount, page, limit, totalPages: Math.ceil(totalCount / limit) },
+        rows: paginatedRows,
+        pagination: { total: totalGroupRecords, page, limit, totalPages: Math.ceil(totalGroupRecords / limit) },
       },
     };
   } catch (err) {
