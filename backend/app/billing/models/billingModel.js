@@ -2237,7 +2237,17 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote, 
                 const note = returnNote.trim();
 
                 const clientPart = item.client_name ? ` - ${item.client_name}` : '';
-                const subjectEmail = `Billing Submission Returned - ${customerName}${clientPart}`;
+                // Format current return timestamp (e.g. "24 Nov 10:25 AM") so every return gets a unique subject and breaks Gmail conversation grouping/hierarchy
+                const now = new Date();
+                const returnTimeStr = now.toLocaleString('en-IN', {
+                    day: '2-digit',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                });
+                const subjectEmail = `Billing Submission Returned - ${customerName}${clientPart} [${returnTimeStr}]`;
                 const htmlEmail = `
                     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; color: #1e293b; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
                         <!-- Header with Outbooks Primary Cyan/Teal Brand Color -->
