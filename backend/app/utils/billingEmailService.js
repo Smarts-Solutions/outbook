@@ -54,16 +54,10 @@ const sendBillingReturnEmail = async (toEmail, subjectEmail, htmlEmail, submissi
         const messageId = `<billing-return-${submissionId}-${timestamp}@outbooks.com>`;
 
         const mailOptions = {
-            from: `"Outbooks Billing" <${fromEmail}>`,
+            from: fromEmail,
             to: toEmail.trim(),
             subject: subjectEmail,
             html: htmlEmail,
-            messageId: messageId,
-            headers: {
-                "X-Billing-Submission-Id": String(submissionId),
-                "X-Billing-Action": "RETURNED",
-                "X-Entity-Ref-ID": `billing-sub-${submissionId}`,
-            },
         };
 
         const info = await transporter.sendMail(mailOptions);
