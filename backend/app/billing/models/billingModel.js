@@ -2236,7 +2236,17 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote, 
                 const note = returnNote.trim();
 
                 const clientPart = item.client_name ? ` - ${item.client_name}` : '';
-                const subjectEmail = `Billing Submission Returned - ${customerName}${clientPart}`;
+                // Format current return timestamp (e.g. "24 Nov 10:25 AM") so every return gets a unique subject and breaks Gmail conversation grouping/hierarchy
+                const now = new Date();
+                const returnTimeStr = now.toLocaleString('en-IN', {
+                    day: '2-digit',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                });
+                const subjectEmail = `Billing Submission Returned - ${customerName}${clientPart} [${returnTimeStr}]`;
                 const htmlEmail = `
                     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; color: #1e293b; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
                         <!-- Header with Outbooks Primary Cyan/Teal Brand Color -->
@@ -2294,47 +2304,24 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote, 
                     </div>
                 `;
 
-                // Retry logic for Cloud/Dev environments
-                const sendReturnEmailWithRetry = async (to, subject, html, maxAttempts = 3) => {
-                    console.log(`[Billing Email] ==================== RETURN EMAIL DISPATCH ====================`);
-                    console.log(`[Billing Email] Submission ID: #${submissionId}`);
-                    console.log(`[Billing Email] Recipient TO: ${to} (Submitter only)`);
-                    console.log(`[Billing Email] Subject: "${subject}"`);
-                    console.log(`[Billing Email] Submitter: ${submitterName}`);
-                    
-                    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-                        console.log(`[Billing Email] >>> Attempt ${attempt}/${maxAttempts} sending now...`);
-                        const startTime = Date.now();
-                        try {
-                            const sent = await Promise.race([
-                                commonEmail(to, subject, html, null),
-                                new Promise((_, reject) => setTimeout(() => reject(new Error("SMTP timeout after 10s")), 10000))
-                            ]);
-                            const elapsed = Date.now() - startTime;
-                            if (sent) {
-                                console.log(`[Billing Email] SUCCESS on attempt ${attempt} in ${elapsed}ms! Email delivered to SMTP.`);
-                                console.log(`[Billing Email] ==============================================================`);
-                                return true;
-                            } else {
-                                console.warn(`[Billing Email] WARNING: Attempt ${attempt} failed in ${elapsed}ms (commonEmail returned false).`);
-                            }
-                        } catch (attemptErr) {
-                            const elapsed = Date.now() - startTime;
-                            console.error(`[Billing Email] ERROR on attempt ${attempt} in ${elapsed}ms:`, attemptErr?.message || attemptErr);
-                        }
+                // Send email directly using commonEmail (exact standard function used across the app)
+                console.log(`[Billing Email] ==================== RETURN EMAIL DISPATCH ====================`);
+                console.log(`[Billing Email] Submission ID: #${submissionId}`);
+                console.log(`[Billing Email] Recipient TO: ${primaryTo} (Submitter only)`);
+                console.log(`[Billing Email] Subject: "${subjectEmail}"`);
+                console.log(`[Billing Email] Submitter: ${submitterName}`);
 
-                        if (attempt < maxAttempts) {
-                            const delayMs = attempt * 1500;
-                            console.log(`[Billing Email] Pausing ${delayMs}ms before retry...`);
-                            await new Promise(res => setTimeout(res, delayMs));
-                        }
+                try {
+                    const sent = await commonEmail(primaryTo, subjectEmail, htmlEmail);
+                    if (sent) {
+                        console.log(`[Billing Email] SUCCESS: Return email delivered to SMTP for submission #${submissionId}`);
+                    } else {
+                        console.warn(`[Billing Email] WARNING: commonEmail returned false for submission #${submissionId}`);
                     }
-                    console.error(`[Billing Email] FAILED: All ${maxAttempts} attempts exhausted to send return email.`);
-                    console.log(`[Billing Email] ==============================================================`);
-                    return false;
-                };
-
-                await sendReturnEmailWithRetry(primaryTo, subjectEmail, htmlEmail);
+                } catch (mailErr) {
+                    console.error(`[Billing Email] ERROR sending return email for submission #${submissionId}:`, mailErr?.message || mailErr);
+                }
+                console.log(`[Billing Email] ==============================================================`);
             }
         } catch (emailQueryErr) {
             console.error("[Billing Email] Error fetching submitter details for email notification:", emailQueryErr);

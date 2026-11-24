@@ -206,9 +206,11 @@ const sendJobStatusOtp = async (data) => {
       const url = `https://graph.facebook.com/v17.0/${settings.whatsapp_phone_number_id}/messages`;
       const templateName = settings.whatsapp_template_name || "job_status_otp";
       
-      // Determine components based on template type
-      let components = [];
-      const isAuthOtpTemplate = templateName === "outbook_message" || templateName.toLowerCase().includes("otp");
+      // Meta WhatsApp Authentication OTP template structure (e.g. outbook_live_msg, outbook_message, or any OTP template)
+      // When "Copy Code" button is configured in Meta:
+      // - Body parameter: otpCode
+      // - Button component: sub_type "url", index "0", parameter text: otpCode
+      const isAuthOtpTemplate = true; // Since the template has a "Copy Code" button and OTP format
 
       if (templateName === "hello_world") {
         components = [];
@@ -277,33 +279,42 @@ const sendJobStatusOtp = async (data) => {
         return axios.post(url, payload, { headers });
       };
 
-      try {
-        // First try with 'en' (standard for English templates in Meta)
-        await sendWithPayload("en", components);
-        console.log(`WhatsApp OTP sent to ${settings.manager_otp_number}: OTP is ${otpCode}`);
-      } catch (firstErr) {
-        // If button component failed or rejected, try body-only parameter
-        if (isAuthOtpTemplate && components.length > 1) {
-          try {
-            const bodyOnlyComps = [{ type: "body", parameters: [{ type: "text", text: otpCode }] }];
-            await sendWithPayload("en", bodyOnlyComps);
-            console.log(`WhatsApp OTP sent to ${settings.manager_otp_number} (body-only): OTP is ${otpCode}`);
-            return { status: true, message: "OTP sent successfully." };
-          } catch (retryBodyErr) {
-            // Fallback to en_US
+      // Support both explicit language from settings or smart auto-fallbacks (en, en_US, en_GB)
+      const requestedLang = settings.whatsapp_language || "en";
+      const candidateLangs = Array.from(new Set([requestedLang, "en", "en_US", "en_GB"]));
+
+      let sendSuccess = false;
+      let lastErr = null;
+
+      // Try candidates with standard components, then fallback structures if template varies
+      for (const lang of candidateLangs) {
+        try {
+          await sendWithPayload(lang, components);
+          console.log(`WhatsApp OTP sent to ${settings.manager_otp_number} [Lang: ${lang}]: OTP is ${otpCode}`);
+          sendSuccess = true;
+          break;
+        } catch (err) {
+          lastErr = err;
+          const metaMsg = err.response?.data?.error?.message || err.message;
+          console.warn(`WhatsApp attempt failed for [Lang: ${lang}]: ${metaMsg}`);
+
+          // If component/parameter mismatch, try body-only with just otpCode as fallback
+          if (components.length > 1 || (components[0]?.parameters?.length > 1)) {
             try {
-              await sendWithPayload("en_US", components);
-              console.log(`WhatsApp OTP sent to ${settings.manager_otp_number} (en_US): OTP is ${otpCode}`);
-              return { status: true, message: "OTP sent successfully." };
-            } catch (retryLangErr) {
-              throw retryLangErr;
+              const bodyOnlySingleParam = [{ type: "body", parameters: [{ type: "text", text: otpCode }] }];
+              await sendWithPayload(lang, bodyOnlySingleParam);
+              console.log(`WhatsApp OTP sent to ${settings.manager_otp_number} (body-only fallback) [Lang: ${lang}]: OTP is ${otpCode}`);
+              sendSuccess = true;
+              break;
+            } catch (bodyErr) {
+              // continue trying next language
             }
           }
-        } else {
-          // Retry with en_US
-          await sendWithPayload("en_US", components);
-          console.log(`WhatsApp OTP sent to ${settings.manager_otp_number} (en_US): OTP is ${otpCode}`);
         }
+      }
+
+      if (!sendSuccess && lastErr) {
+        throw lastErr;
       }
     } else {
       console.log(`WhatsApp API not fully configured. OTP generated is ${otpCode}`);
