@@ -1,5 +1,6 @@
 const pool = require('../../config/database');
 const { commonEmail } = require('../../utils/commonEmail');
+const { sendBillingReturnEmail } = require('../../utils/billingEmailService');
 const { 
     LineManageStaffIdHelperFunction, 
     QueryRoleHelperFunction, 
@@ -2294,8 +2295,8 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote, 
                     </div>
                 `;
 
-                // Retry logic for Cloud/Dev environments
-                const sendReturnEmailWithRetry = async (to, subject, html, maxAttempts = 3) => {
+                // Dedicated return email dispatch using connection pool and anti-delay headers
+                const sendReturnEmailWithRetry = async (to, subject, html, maxAttempts = 2) => {
                     console.log(`[Billing Email] ==================== RETURN EMAIL DISPATCH ====================`);
                     console.log(`[Billing Email] Submission ID: #${submissionId}`);
                     console.log(`[Billing Email] Recipient TO: ${to} (Submitter only)`);
@@ -2307,8 +2308,8 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote, 
                         const startTime = Date.now();
                         try {
                             const sent = await Promise.race([
-                                commonEmail(to, subject, html, null),
-                                new Promise((_, reject) => setTimeout(() => reject(new Error("SMTP timeout after 10s")), 10000))
+                                sendBillingReturnEmail(to, subject, html, submissionId),
+                                new Promise((_, reject) => setTimeout(() => reject(new Error("SMTP timeout after 8s")), 8000))
                             ]);
                             const elapsed = Date.now() - startTime;
                             if (sent) {
@@ -2316,7 +2317,7 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote, 
                                 console.log(`[Billing Email] ==============================================================`);
                                 return true;
                             } else {
-                                console.warn(`[Billing Email] WARNING: Attempt ${attempt} failed in ${elapsed}ms (commonEmail returned false).`);
+                                console.warn(`[Billing Email] WARNING: Attempt ${attempt} failed in ${elapsed}ms (email returned false).`);
                             }
                         } catch (attemptErr) {
                             const elapsed = Date.now() - startTime;
@@ -2324,7 +2325,7 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote, 
                         }
 
                         if (attempt < maxAttempts) {
-                            const delayMs = attempt * 1500;
+                            const delayMs = 1000;
                             console.log(`[Billing Email] Pausing ${delayMs}ms before retry...`);
                             await new Promise(res => setTimeout(res, delayMs));
                         }
