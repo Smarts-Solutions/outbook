@@ -16,13 +16,7 @@ const jobStatusReports = async (Report) => {
   let LineManageStaffId = await LineManageStaffIdHelperFunction(StaffUserId);
   const rows = await QueryRoleHelperFunction(StaffUserId);
 
-  let targetStaffIds = [];
-  if (report_type === "my-report") {
-    targetStaffIds = [Number(StaffUserId)];
-  } else {
-    // manager-review: all subordinates + manager
-    targetStaffIds = [...new Set(LineManageStaffId)];
-  }
+  LineManageStaffId = [...new Set(LineManageStaffId)];
 
   const jobCodeExpr = `
     CONCAT(
@@ -96,7 +90,54 @@ const jobStatusReports = async (Report) => {
       ...new Set(LineManageStaffId),
     ];
     const connection = await pool.getConnection();
-    await buildAssignedJobsTempTable(connection, targetStaffIds);
+
+    let whereClause = "";
+    if (report_type === "my-report") {
+      if (isSuperAdmin) {
+        whereClause = "WHERE 1=1";
+      } else {
+        const loggedInId = Number(StaffUserId);
+        whereClause = `
+          WHERE (
+            jobs.staff_created_id = ${loggedInId}
+            OR jobs.allocated_to = ${loggedInId}
+            OR jobs.reviewer = ${loggedInId}
+            OR clients.staff_created_id = ${loggedInId}
+            OR customers.staff_id = ${loggedInId}
+            OR customers.account_manager_id = ${loggedInId}
+            OR EXISTS (
+              SELECT 1 FROM job_allowed_staffs jas 
+              WHERE jas.job_id = jobs.id AND jas.staff_id = ${loggedInId}
+            )
+            OR EXISTS (
+              SELECT 1 FROM customer_services cs
+              JOIN customer_service_account_managers csam ON csam.customer_service_id = cs.id
+              WHERE cs.customer_id = jobs.customer_id 
+              AND cs.service_id = jobs.service_id 
+              AND csam.account_manager_id = ${loggedInId}
+            )
+            OR EXISTS (
+              SELECT 1 FROM staff_portfolio sp
+              WHERE sp.customer_id = jobs.customer_id AND sp.staff_id = ${loggedInId}
+            )
+          )
+        `;
+      }
+    } else {
+      await buildAssignedJobsTempTable(connection, LineManageStaffId);
+      whereClause = `
+        WHERE(
+          (   
+           temp_assigned_jobs_staff.staff_id IN (${LineManageStaffId.join(",")})
+           OR jobs.staff_created_id IN(${LineManageStaffId.join(",")})
+           OR clients.staff_created_id IN(${LineManageStaffId.join(",")}))
+           AND (
+              temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+              OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
+            )
+         )
+      `;
+    }
 
 
 
@@ -191,7 +232,7 @@ const jobStatusReports = async (Report) => {
             JOIN staffs s ON s.id = jas.staff_id
             GROUP BY jas.job_id
         ) staff_list ON staff_list.job_id = jobs.id
-      LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = jobs.id
+      ${report_type === "my-report" ? "" : "LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = jobs.id"}
       LEFT JOIN clients ON jobs.client_id = clients.id
       LEFT JOIN customers ON jobs.customer_id = customers.id
       LEFT JOIN job_types ON jobs.job_type_id = job_types.id
@@ -278,20 +319,9 @@ const jobStatusReports = async (Report) => {
       };
     }
 
-    const targetStaffIdsStr = targetStaffIds.join(",");
-
     const dataQuery = `
       ${baseSelect}
-      WHERE(
-        (   
-         temp_assigned_jobs_staff.staff_id IN (${targetStaffIdsStr})
-         OR jobs.staff_created_id IN(${targetStaffIdsStr})
-         OR clients.staff_created_id IN(${targetStaffIdsStr}))
-         AND (
-            temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
-            OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
-          )
-       )
+      ${whereClause}
       AND customers.status = '1'    
       ${searchQuery}
       GROUP BY jobs.id
@@ -308,22 +338,13 @@ const jobStatusReports = async (Report) => {
     const countQuery = `
       SELECT COUNT(DISTINCT jobs.id) AS total
       FROM jobs
-      LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = jobs.id
+      ${report_type === "my-report" ? "" : "LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = jobs.id"}
       LEFT JOIN customers ON jobs.customer_id = customers.id
       LEFT JOIN clients ON jobs.client_id = clients.id
       LEFT JOIN job_types ON jobs.job_type_id = job_types.id
       LEFT JOIN services ON jobs.service_id = services.id
       LEFT JOIN staffs ON jobs.allocated_to = staffs.id
-      WHERE(
-        (   
-         temp_assigned_jobs_staff.staff_id IN (${targetStaffIdsStr})
-         OR jobs.staff_created_id IN(${targetStaffIdsStr})
-         OR clients.staff_created_id IN(${targetStaffIdsStr}))
-         AND (
-            temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
-            OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
-          )
-       )
+      ${whereClause}
       AND customers.status = '1' 
       ${searchQuery}
     `;
@@ -1185,22 +1206,60 @@ const reportCountJob = async (Report) => {
       };
     }
 
-    // Other Role Data
+    // Other Role Data / My Report
+    let filterCondition = "";
+    if (report_type === "my-report") {
+      if (isSuperAdmin) {
+        filterCondition = "";
+      } else {
+        const loggedInId = Number(StaffUserId);
+        filterCondition = `
+          AND (
+            jobs.staff_created_id = ${loggedInId}
+            OR jobs.allocated_to = ${loggedInId}
+            OR jobs.reviewer = ${loggedInId}
+            OR clients.staff_created_id = ${loggedInId}
+            OR customers.staff_id = ${loggedInId}
+            OR customers.account_manager_id = ${loggedInId}
+            OR EXISTS (
+              SELECT 1 FROM job_allowed_staffs jas 
+              WHERE jas.job_id = jobs.id AND jas.staff_id = ${loggedInId}
+            )
+            OR EXISTS (
+              SELECT 1 FROM customer_services cs
+              JOIN customer_service_account_managers csam ON csam.customer_service_id = cs.id
+              WHERE cs.customer_id = jobs.customer_id 
+              AND cs.service_id = jobs.service_id 
+              AND csam.account_manager_id = ${loggedInId}
+            )
+            OR EXISTS (
+              SELECT 1 FROM staff_portfolio sp
+              WHERE sp.customer_id = jobs.customer_id AND sp.staff_id = ${loggedInId}
+            )
+          )
+        `;
+      }
+    } else {
+      filterCondition = `
+        AND (
+          (   
+           assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
+           OR jobs.staff_created_id IN(${LineManageStaffId})
+           OR clients.staff_created_id IN(${LineManageStaffId})
+          )
+          AND (
+              assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+              OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          )
+         )
+      `;
+    }
+
     const dataQuery = `
       ${baseSelect}
       LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
       WHERE jobs.id IN (${cleaneJob_ids})
-      AND (
-        (   
-         assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
-         OR jobs.staff_created_id IN(${LineManageStaffId})
-         OR clients.staff_created_id IN(${LineManageStaffId})
-        )
-        AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
-            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
-        )
-       )
+      ${filterCondition}
       AND customers.status = '1'    
       ${searchQuery}
       GROUP BY jobs.id
@@ -1224,17 +1283,7 @@ const reportCountJob = async (Report) => {
       LEFT JOIN services ON jobs.service_id = services.id
       LEFT JOIN staffs ON jobs.allocated_to = staffs.id
       WHERE jobs.id IN (${cleaneJob_ids})
-      AND (
-        (   
-         assigned_jobs_staff_view.staff_id IN (${LineManageStaffId})
-         OR jobs.staff_created_id IN(${LineManageStaffId})
-         OR clients.staff_created_id IN(${LineManageStaffId})
-        )
-        AND (
-            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
-            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
-        )
-       )
+      ${filterCondition}
       AND customers.status = '1' 
       ${searchQuery}
     `;
