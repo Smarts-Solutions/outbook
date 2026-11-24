@@ -2201,6 +2201,12 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote, 
                     c.trading_name AS customer_name,
                     cl.trading_name AS client_name,
                     s.name AS service_name,
+                    IF(j.id IS NOT NULL, CONCAT(
+                        SUBSTRING(IFNULL(c.trading_name, ''), 1, 3), '_',
+                        SUBSTRING(IFNULL(cl.trading_name, ''), 1, 3), '_',
+                        SUBSTRING(IFNULL(jt.type, ''), 1, 4), '_',
+                        SUBSTRING(IFNULL(j.job_id, ''), 1, 15)
+                    ), NULL) AS job_name,
                     st_sub.email AS submitter_email,
                     CONCAT(st_sub.first_name, ' ', st_sub.last_name) AS submitter_name,
                     st_mgr.email AS manager_email,
@@ -2209,6 +2215,8 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote, 
                  LEFT JOIN customers c ON bs.customer_id = c.id
                  LEFT JOIN clients cl ON bs.client_id = cl.id
                  LEFT JOIN services s ON bs.service_id = s.id
+                 LEFT JOIN jobs j ON bs.job_id = j.id
+                 LEFT JOIN job_types jt ON j.job_type_id = jt.id
                  LEFT JOIN staffs st_sub ON bs.submitted_by = st_sub.id
                  LEFT JOIN staffs st_mgr ON st_mgr.id = ?
                  WHERE bs.id = ?`,
@@ -2236,72 +2244,100 @@ const managerReturnSubmission = async (submissionId, managerUserId, returnNote, 
                 const note = returnNote.trim();
 
                 const clientPart = item.client_name ? ` - ${item.client_name}` : '';
-                // Format current return timestamp (e.g. "24 Nov 10:25 AM") so every return gets a unique subject and breaks Gmail conversation grouping/hierarchy
-                const now = new Date();
-                const returnTimeStr = now.toLocaleString('en-IN', {
-                    day: '2-digit',
-                    month: 'short',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: true
-                });
-                const subjectEmail = `Billing Submission Returned - ${customerName}${clientPart} [${returnTimeStr}]`;
+                const subjectEmail = `Billing Submission Returned - ${customerName}${clientPart}`;
                 const htmlEmail = `
-                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; color: #1e293b; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-                        <!-- Header with Outbooks Primary Cyan/Teal Brand Color -->
-                        <div style="background: linear-gradient(135deg, #00a4bd 0%, #26bdf0 100%); padding: 22px 24px; color: #ffffff;">
-                            <h2 style="margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.3px; color: #ffffff;">Outbooks Billing</h2>
-                            <p style="margin: 4px 0 0 0; font-size: 13px; color: #e0f7fa;">Billing Submission Returned</p>
-                        </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Billing Submission Returned</title>
+</head>
+<body style="margin:0; padding:20px 0; background:#eef2f7; font-family:Segoe UI, Arial, sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td align="center">
+        <table width="520" cellpadding="0" cellspacing="0"
+          style="background:#ffffff; border-radius:14px; overflow:hidden; box-shadow:0 6px 24px rgba(0,0,0,0.08);">
+          <tr>
+            <td align="center"
+              style="background:linear-gradient(135deg,#00afef,#008acb); padding:26px 30px;">
+              <h1 style="margin:0; color:#fff; font-size:22px; font-weight:700;">
+                Billing Submission Returned
+              </h1>
+              <p style="margin:8px 0 0; color:rgba(255,255,255,0.9); font-size:14px; line-height:20px;">
+                Your submission requires updates before it can be approved.
+              </p>
+            </td>
+          </tr>
 
-                        <!-- Body Content -->
-                        <div style="padding: 24px;">
-                            <p style="margin: 0 0 14px 0; font-size: 15px;">Hi <strong>${submitterName}</strong>,</p>
-                            <p style="margin: 0 0 18px 0; color: #475569;">
-                                Your billing submission has been returned for review/correction by <strong>${managerName}</strong>.
-                            </p>
-                            
-                            <!-- Reason Box -->
-                            <div style="background-color: #fff1f2; border-left: 4px solid #f43f5e; border-radius: 6px; padding: 14px 16px; margin: 18px 0;">
-                                <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #e11d48; margin-bottom: 4px;">Return Reason / Note:</div>
-                                <div style="color: #334155; font-size: 14px; font-weight: 500; white-space: pre-wrap;">${note}</div>
-                            </div>
+          <tr>
+            <td style="padding:26px 30px;">
+              <p style="margin:0 0 14px 0; font-size:15px; color:#1e293b;">
+                Hi <strong>${submitterName}</strong>,
+              </p>
+              <p style="margin:0 0 18px 0; font-size:14px; color:#475569; line-height:22px;">
+                Your billing submission has been returned for review/correction by <strong>${managerName}</strong>.
+              </p>
 
-                            <!-- Details Table (Cleaned up: No Submission ID, Period, Engagement Model, Amount) -->
-                            <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; background-color: #f8fafc; border-radius: 8px; overflow: hidden; border: 1px solid #f1f5f9;">
-                                <tr>
-                                    <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; color: #64748b; width: 32%;">Submitted By:</td>
-                                    <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #0f172a;">${submitterName} <span style="font-size: 12px; font-weight: normal; color: #64748b;">(${actualSubmitterEmail})</span></td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; color: #64748b;">Customer:</td>
-                                    <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #0f172a;">${customerName}</td>
-                                </tr>
-                                ${item.client_name ? `
-                                <tr>
-                                    <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; color: #64748b;">Client:</td>
-                                    <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #0f172a;">${item.client_name}</td>
-                                </tr>` : ''}
-                                ${item.service_name ? `
-                                <tr>
-                                    <td style="padding: 10px 14px; color: #64748b;">Service:</td>
-                                    <td style="padding: 10px 14px; font-weight: 600; color: #0f172a;">${item.service_name}</td>
-                                </tr>` : ''}
-                            </table>
-
-                            <p style="margin: 22px 0 0 0; color: #475569; font-size: 13.5px;">
-                                Please visit the <strong>Submit Billing</strong> tab to make the required updates and submit again.
-                            </p>
-                        </div>
-
-                        <!-- Footer -->
-                        <div style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 14px 24px; text-align: center;">
-                            <p style="margin: 0; font-size: 12px; color: #94a3b8;">
-                                Outbooks Billing System • Automated Notification
-                            </p>
-                        </div>
+              <!-- Return Reason Box -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+                <tr>
+                  <td style="background:#fff1f2; border-left:4px solid #f43f5e; padding:12px 14px; border-radius:6px;">
+                    <div style="font-size:12px; font-weight:700; text-transform:uppercase; color:#e11d48; margin-bottom:4px;">
+                      Return Reason / Note:
                     </div>
+                    <div style="color:#334155; font-size:14px; line-height:20px; white-space:pre-wrap;">
+                      ${note}
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Details Table -->
+              <table width="100%" cellpadding="0" cellspacing="0"
+                style="background:#f9fbff; border:1px solid #e2e8f0; border-radius:10px; padding:14px 18px; margin-bottom:18px;">
+                <tr>
+                  <td style="padding:6px 0; font-size:13px; color:#64748b; width:35%;">Customer:</td>
+                  <td style="padding:6px 0; font-size:13px; color:#0f172a; font-weight:600;">${customerName}</td>
+                </tr>
+                ${item.client_name ? `
+                <tr>
+                  <td style="padding:6px 0; font-size:13px; color:#64748b; border-top:1px solid #f1f5f9;">Client:</td>
+                  <td style="padding:6px 0; font-size:13px; color:#0f172a; font-weight:600; border-top:1px solid #f1f5f9;">${item.client_name}</td>
+                </tr>` : ''}
+                ${item.service_name ? `
+                <tr>
+                  <td style="padding:6px 0; font-size:13px; color:#64748b; border-top:1px solid #f1f5f9;">Service:</td>
+                  <td style="padding:6px 0; font-size:13px; color:#0f172a; font-weight:600; border-top:1px solid #f1f5f9;">${item.service_name}</td>
+                </tr>` : ''}
+                ${item.job_name ? `
+                <tr>
+                  <td style="padding:6px 0; font-size:13px; color:#64748b; border-top:1px solid #f1f5f9;">Job:</td>
+                  <td style="padding:6px 0; font-size:13px; color:#0f172a; font-weight:600; border-top:1px solid #f1f5f9;">${item.job_name}</td>
+                </tr>` : ''}
+              </table>
+
+              <p style="margin:16px 0 0; font-size:13px; color:#64748b; line-height:20px;">
+                Please visit the <strong>Submit Billing</strong> tab to make the required updates and submit again.
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center"
+              style="padding:16px 25px; background:#f9fbfd; border-top:1px solid #e6edf5;">
+              <p style="margin:0; font-size:12px; line-height:18px; color:#8b98a9;">
+                Outbooks
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
                 `;
 
                 // Send email directly using commonEmail (exact standard function used across the app)
