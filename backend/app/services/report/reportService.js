@@ -83,6 +83,9 @@ else if(data.action == "staffStatusChangeUpdate"){
 else if(data.action == "saveFilters"){
   return reportModel.saveFilters(Report);
 }
+else if(data.action == "updateFilterName"){
+  return reportModel.updateFilterName(Report);
+}
 else if(data.action == "getAllFilters"){
   return reportModel.getAllFilters(Report);
 }
