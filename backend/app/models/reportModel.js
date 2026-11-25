@@ -250,6 +250,8 @@ const jobStatusReports = async (Report) => {
       const dataQuery = `
         ${baseSelect}
         WHERE 1=1
+        AND customers.status = '1'
+        AND (clients.status = '1' OR clients.id IS NULL)
         ${searchQuery}
         GROUP BY jobs.id
         ORDER BY jobs.id DESC
@@ -273,6 +275,8 @@ const jobStatusReports = async (Report) => {
         LEFT JOIN services ON jobs.service_id = services.id
         LEFT JOIN staffs ON jobs.allocated_to = staffs.id
         WHERE 1=1
+        AND customers.status = '1'
+        AND (clients.status = '1' OR clients.id IS NULL)
         ${searchQuery}
       `;
 
@@ -323,6 +327,7 @@ const jobStatusReports = async (Report) => {
       ${baseSelect}
       ${whereClause}
       AND customers.status = '1'    
+      AND (clients.status = '1' OR clients.id IS NULL)
       ${searchQuery}
       GROUP BY jobs.id
       ORDER BY jobs.id DESC
@@ -346,6 +351,7 @@ const jobStatusReports = async (Report) => {
       LEFT JOIN staffs ON jobs.allocated_to = staffs.id
       ${whereClause}
       AND customers.status = '1' 
+      AND (clients.status = '1' OR clients.id IS NULL)
       ${searchQuery}
     `;
 
@@ -1131,6 +1137,8 @@ const reportCountJob = async (Report) => {
       const dataQuery = `
         ${baseSelect}
         WHERE jobs.id IN (${cleaneJob_ids})
+        AND customers.status = '1'
+        AND (clients.status = '1' OR clients.id IS NULL)
         ${searchQuery}
         GROUP BY jobs.id
         ORDER BY jobs.id DESC
@@ -1152,6 +1160,8 @@ const reportCountJob = async (Report) => {
         LEFT JOIN services ON jobs.service_id = services.id
         LEFT JOIN staffs ON jobs.allocated_to = staffs.id
         WHERE jobs.id IN (${cleaneJob_ids})
+        AND customers.status = '1'
+        AND (clients.status = '1' OR clients.id IS NULL)
         ${searchQuery}
       `;
 
@@ -1261,6 +1271,7 @@ const reportCountJob = async (Report) => {
       WHERE jobs.id IN (${cleaneJob_ids})
       ${filterCondition}
       AND customers.status = '1'    
+      AND (clients.status = '1' OR clients.id IS NULL)
       ${searchQuery}
       GROUP BY jobs.id
       ORDER BY jobs.id DESC
@@ -1285,6 +1296,7 @@ const reportCountJob = async (Report) => {
       WHERE jobs.id IN (${cleaneJob_ids})
       ${filterCondition}
       AND customers.status = '1' 
+      AND (clients.status = '1' OR clients.id IS NULL)
       ${searchQuery}
     `;
 
@@ -5697,7 +5709,7 @@ const getJobCustomReport1 = async (Report) => {
 
     var { fromDate, toDate } = range;
 
-    let where = [`work_date BETWEEN ? AND ?`];
+    let where = [`work_date BETWEEN ? AND ?`, `c.status = '1'`, `(cl.status = '1' OR cl.id IS NULL)`];
 
     //let job_id = [1, 6]
 
@@ -7105,7 +7117,7 @@ const getJobCustomReport = async (Report) => {
 
     var { fromDate, toDate } = range;
 
-    let where = [`work_date BETWEEN ? AND ?`];
+    let where = [`work_date BETWEEN ? AND ?`, `c.status = '1'`, `(cl.status = '1' OR cl.id IS NULL)`];
 
     //let job_id = [1, 6]
 
@@ -8776,7 +8788,7 @@ const getJobCustomReport2 = async (Report) => {
 
     var { fromDate, toDate } = range;
 
-    let where = [`work_date BETWEEN ? AND ?`];
+    let where = [`work_date BETWEEN ? AND ?`, `c.status = '1'`, `(cl.status = '1' OR cl.id IS NULL)`];
 
     //let job_id = [1, 6]
 
