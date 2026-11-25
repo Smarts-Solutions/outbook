@@ -4274,38 +4274,19 @@ const capacityReport = async (Report) => {
 //////// ---------- Save Filters Start --------- ////////////
 const saveFilters = async (Report) => {
   const { data, StaffUserId } = Report;
-  const { id, type, filters } = data;
-  // console.log("Save Filters Report id:", id);
-  // console.log("Save Filters Report type:", type);
-  // console.log("Save Filters Report filters:", filters);
-  //   Save Filters Report filters: {
-  //   groupBy: [ 'staff_id' ],
-  //   internal_external: '0',
-  //   fieldsToDisplay: null,
-  //   fieldsToDisplayId: null,
-  //   staff_id: null,
-  //   customer_id: null,
-  //   client_id: null,
-  //   job_id: null,
-  //   task_id: null,
-  //   internal_job_id: null,
-  //   internal_task_id: null,
-  //   timePeriod: 'this_month',
-  //   displayBy: 'Weekly',
-  //   fromDate: null,
-  //   toDate: null
-  // }
+  const { id, type, filters, filter_name } = data;
 
   if (!["", null, undefined].includes(id)) {
     const query = `
         UPDATE timesheet_filter 
-        SET type = ?, staff_id = ?, filter_record = ?
+        SET type = ?, staff_id = ?, filter_record = ?, filter_name = ?
         WHERE id = ?
         `;
     const [result] = await pool.execute(query, [
       type,
       StaffUserId,
       JSON.stringify(filters),
+      filter_name || null,
       id,
     ]);
     return {
@@ -4315,16 +4296,43 @@ const saveFilters = async (Report) => {
     };
   } else {
     const query = `
-        INSERT INTO timesheet_filter (type,staff_id,filter_record)
-        VALUES (?, ?, ?)
+        INSERT INTO timesheet_filter (type, staff_id, filter_record, filter_name)
+        VALUES (?, ?, ?, ?)
         `;
     const [result] = await pool.execute(query, [
       type,
       StaffUserId,
       JSON.stringify(filters),
+      filter_name || null,
     ]);
     return { status: true, message: "Record added successfully", data: result };
   }
+};
+
+const updateFilterName = async (Report) => {
+  const { data, StaffUserId } = Report;
+  const { id, filter_name } = data;
+
+  if (["", null, undefined].includes(id)) {
+    return { status: false, message: "Filter ID is required." };
+  }
+
+  const query = `
+    UPDATE timesheet_filter 
+    SET filter_name = ?
+    WHERE id = ? AND staff_id = ?
+  `;
+  const [result] = await pool.execute(query, [
+    filter_name || null,
+    id,
+    StaffUserId,
+  ]);
+
+  return {
+    status: true,
+    message: "Filter name updated successfully.",
+    data: result,
+  };
 };
 
 const getAllFilters = async (Report) => {
@@ -9856,6 +9864,7 @@ module.exports = {
   staffRoleChangeUpdate,
   staffStatusChangeUpdate,
   saveFilters,
+  updateFilterName,
   getAllFilters,
   deleteFilterId,
   getStaffWithRole,
