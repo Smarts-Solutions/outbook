@@ -779,7 +779,7 @@ const Sidebar = () => {
                   </li>
                 )}
 
-                <li className={activeLink && activeLink.startsWith("/admin/billing") ? "active" : ""}>
+                {/* <li className={activeLink && activeLink.startsWith("/admin/billing") ? "active" : ""}>
                   <Link
                     to="/admin/billing"
                     aria-expanded="false"
@@ -790,7 +790,7 @@ const Sidebar = () => {
                     </span>
                     <span>Billing & Invoice</span>
                   </Link>
-                </li>
+                </li> */}
               </>
             )}
           </ul>
