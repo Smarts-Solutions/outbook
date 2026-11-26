@@ -4,6 +4,7 @@ const { parentPort } = require("worker_threads");
 const { commonEmail } = require("../utils/commonEmail");
 const { logEmail } = require("../utils/emailLogger");
 const xlsx = require('xlsx');
+const { createSummaryWorksheet } = require("../utils/reportAgeingHelper");
 
 /* ---------------- HELPERS ---------------- */
 
@@ -209,7 +210,8 @@ parentPort.on("message", async (rows) => {
         const shortDateStr = `Week ${weekNum} Month ${monthNum} Year ${yearNum}`;
 
         const wb = xlsx.utils.book_new();
-        xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(summaryData), "Summary");
+        const wsSummary = createSummaryWorksheet(summaryData, finalJobData, { groupBy: 'customer' });
+        xlsx.utils.book_append_sheet(wb, wsSummary, "Summary");
         xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(finalJobData), "WIP Not Updated 7 Days");
 
         const excelBuffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });

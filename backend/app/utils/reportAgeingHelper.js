@@ -150,17 +150,115 @@ function buildStatusAgeingMatrix(jobs) {
 }
 
 /**
+ * Builds clean, simple single-header matrix for Customers in DESCENDING order:
+ * Columns: [ "Customer Name", "Nov-26", "Oct-26", "Sep-26", ..., "Grand Total" ]
+ * Rows: Customer trading names with month-wise counts
+ * Right column: Customer-wise Total across months
+ * Bottom row: "Grand Total" with month-wise sums & overall total
+ */
+function buildCustomerAgeingMatrix(jobs) {
+  if (!jobs || !Array.isArray(jobs) || jobs.length === 0) {
+    return [];
+  }
+
+  const customerMap = {}; // customer -> { [sortKey]: count }
+  const monthColsMap = {}; // sortKey -> { year, monthIdx, label }
+  const allCustomers = new Set();
+
+  jobs.forEach(job => {
+    const customer = (job["Customer Name"] || job.customer_trading_name || job.customer_name || ' - ').trim();
+    allCustomers.add(customer);
+
+    const rawDate = job['Job Received On'] || job.job_received_on || job.date_received_on;
+    const ym = parseYearMonth(rawDate);
+
+    if (ym) {
+      const { year, monthIdx, sortKey } = ym;
+      const shortYr = String(year).slice(-2);
+      const label = `${MONTH_NAMES[monthIdx]}-${shortYr}`; // e.g. Nov-26
+
+      if (!monthColsMap[sortKey]) {
+        monthColsMap[sortKey] = { sortKey, label };
+      }
+
+      if (!customerMap[customer]) customerMap[customer] = {};
+      customerMap[customer][sortKey] = (customerMap[customer][sortKey] || 0) + 1;
+    }
+  });
+
+  // Sort months in DESCENDING order: Current month -> Last month -> Earlier...
+  const sortedMonthKeys = Object.keys(monthColsMap)
+    .map(Number)
+    .sort((a, b) => b - a);
+
+  if (sortedMonthKeys.length === 0) {
+    return [];
+  }
+
+  const rows = [];
+
+  // Title row
+  rows.push(["Customer wise report chart which shows the jobs ageing by received date"]);
+  rows.push([]); // blank separator
+
+  // Header Row: Customer Name, Nov-26, Oct-26, ..., Grand Total
+  const header = ["Customer Name"];
+  sortedMonthKeys.forEach(k => {
+    header.push(monthColsMap[k].label);
+  });
+  header.push("Grand Total");
+  rows.push(header);
+
+  // Customer rows (sorted alphabetically)
+  const sortedCustomers = Array.from(allCustomers).sort((a, b) => a.localeCompare(b));
+  const colTotals = new Array(sortedMonthKeys.length).fill(0);
+  let totalGrandSum = 0;
+
+  sortedCustomers.forEach(cust => {
+    const row = [cust];
+    let rowSum = 0;
+
+    sortedMonthKeys.forEach((k, idx) => {
+      const count = customerMap[cust] ? (customerMap[cust][k] || 0) : 0;
+      row.push(count > 0 ? count : "-");
+      colTotals[idx] += count;
+      rowSum += count;
+    });
+
+    row.push(rowSum > 0 ? rowSum : "-");
+    totalGrandSum += rowSum;
+    rows.push(row);
+  });
+
+  // Bottom Grand Total row
+  const bottomTotalRow = ["Grand Total"];
+  colTotals.forEach(val => {
+    bottomTotalRow.push(val > 0 ? val : "-");
+  });
+  bottomTotalRow.push(totalGrandSum > 0 ? totalGrandSum : "-");
+  rows.push(bottomTotalRow);
+
+  return rows;
+}
+
+/**
  * Creates Summary worksheet with:
  * 1) Top standard status count table
  * 2) 3 blank rows
  * 3) Simple, descending-month ageing table with horizontal & vertical Grand Totals
+ *    Supports groupBy: "status" (default) or "customer"
  */
-function createSummaryWorksheet(summaryData, finalJobData) {
+function createSummaryWorksheet(summaryData, finalJobData, options = {}) {
   const ws = xlsx.utils.json_to_sheet(
     summaryData && summaryData.length ? summaryData : [{ "Summary": "No data", "Total Count": 0 }]
   );
 
-  const matrix = buildStatusAgeingMatrix(finalJobData);
+  let matrix = [];
+  if (options.groupBy === 'customer') {
+    matrix = buildCustomerAgeingMatrix(finalJobData);
+  } else {
+    matrix = buildStatusAgeingMatrix(finalJobData);
+  }
 
   if (matrix && matrix.length > 0) {
     const existingRange = xlsx.utils.decode_range(ws['!ref'] || "A1:B1");
@@ -173,5 +271,6 @@ function createSummaryWorksheet(summaryData, finalJobData) {
 
 module.exports = {
   buildStatusAgeingMatrix,
+  buildCustomerAgeingMatrix,
   createSummaryWorksheet
 };
