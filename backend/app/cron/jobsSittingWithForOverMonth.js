@@ -1,11 +1,9 @@
 // Jobs Sitting With Staff For Over Month Report Email Worker
 const pool = require('../config/database');
-const { buildAssignedJobsTempTable } = require("../utils/helper");
 const { parentPort } = require("worker_threads");
 const { commonEmail } = require("../utils/commonEmail");
 const { logEmail } = require("../utils/emailLogger");
 const xlsx = require('xlsx');
-const { createSummaryWorksheet } = require("../utils/reportAgeingHelper");
 const convertDate = (date) => {
   if ([null, undefined, ''].includes(date)) {
     return "-";
@@ -56,75 +54,77 @@ parentPort.on("message", async (rows) => {
     parentPort.postMessage(`Total unique users: ${uniqueUsers.length}`);
 
     const query = `
-      SELECT 
+        SELECT 
         jobs.id AS id,
-        su.max_status_update_date AS current_status_date,
-        CONCAT(
-          SUBSTRING(customers.trading_name, 1, 3), '_',
-          SUBSTRING(clients.trading_name, 1, 3), '_',
-          SUBSTRING(job_types.type, 1, 4), '_',
-          SUBSTRING(jobs.job_id, 1, 15)
-        ) AS job_code_id,
+        (SELECT MAX(status_update_date) FROM job_status_updation WHERE job_id = jobs.id) AS current_status_date,
+          CONCAT(
+                SUBSTRING(customers.trading_name, 1, 3), '_',
+                SUBSTRING(clients.trading_name, 1, 3), '_',
+                SUBSTRING(job_types.type, 1, 4), '_',
+                SUBSTRING(jobs.job_id, 1, 15)
+                ) AS job_code_id,
         customers.id AS customer_id,
         customers.trading_name AS customer_trading_name,
         clients.id AS client_id,
         clients.trading_name AS client_trading_name,
         staffs3.id AS account_manager_id,
-        CONCAT(staffs3.first_name, ' ', staffs3.last_name) AS account_manager_name,
-        services.id AS service_id,
-        services.name AS service_name,
-        job_types.id AS job_type_id,
-        job_types.type AS job_type_name,
-        master_status.name AS status,
-        staffs2.id AS reviewer_id,
-        CONCAT(staffs2.first_name, ' ', staffs2.last_name) AS reviewer_name,
-        staffs.id AS allocated_id,
-        CONCAT(staffs.first_name, ' ', staffs.last_name) AS allocated_name,
-        CONCAT(staffs5.first_name, ' ', staffs5.last_name) AS created_by,   
-        DATE_FORMAT(jobs.filing_Companies_date, '%Y-%m-%d') AS filing_Companies_date,
-        DATE_FORMAT(jobs.internal_deadline_date, '%Y-%m-%d') AS internal_deadline_date,
-        DATE_FORMAT(jobs.customer_deadline_date, '%Y-%m-%d') AS customer_deadline_date,  
-        DATE_FORMAT(q.max_query_sent_date, '%Y-%m-%d') AS query_sent_date,
-        DATE_FORMAT(q.max_query_rec_date, '%Y-%m-%d') AS final_query_response_received_date,
-        DATE_FORMAT(d.max_draft_sent, '%Y-%m-%d') AS draft_sent_on,
-        DATE_FORMAT(d.max_final_draft, '%Y-%m-%d') AS final_draft_sent_on,
-        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS job_received_on,
-        jas.multiple_staff_names
-      FROM jobs
-      JOIN customers ON jobs.customer_id = customers.id AND customers.status = '1'
-      JOIN staffs AS staffs5 ON jobs.staff_created_id = staffs5.id
-      LEFT JOIN clients ON jobs.client_id = clients.id
-      LEFT JOIN job_types ON jobs.job_type_id = job_types.id
-      LEFT JOIN services ON jobs.service_id = services.id
-      LEFT JOIN staffs ON jobs.allocated_to = staffs.id
-      LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
-      LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-      LEFT JOIN master_status ON master_status.id = jobs.status_type
-      LEFT JOIN (
-        SELECT job_id, MAX(status_update_date) AS max_status_update_date
-        FROM job_status_updation
-        GROUP BY job_id
-      ) su ON su.job_id = jobs.id
-      LEFT JOIN (
-        SELECT job_id, MAX(query_sent_date) AS max_query_sent_date, MAX(final_query_response_received_date) AS max_query_rec_date
-        FROM queries
-        GROUP BY job_id
-      ) q ON q.job_id = jobs.id
-      LEFT JOIN (
-        SELECT job_id, MAX(draft_sent_on) AS max_draft_sent, MAX(final_draft_sent_on) AS max_final_draft
-        FROM drafts
-        GROUP BY job_id
-      ) d ON d.job_id = jobs.id
-      LEFT JOIN (
-        SELECT jas.job_id, GROUP_CONCAT(CONCAT(s.first_name, ' ', s.last_name) SEPARATOR '| ') AS multiple_staff_names
-        FROM job_allowed_staffs jas
-        JOIN staffs s ON jas.staff_id = s.id
-        GROUP BY jas.job_id
-      ) jas ON jas.job_id = jobs.id
-      WHERE jobs.date_received_on <= NOW() - INTERVAL 1 MONTH
+        CONCAT(
+          staffs3.first_name, ' ', staffs3.last_name) AS account_manager_name,
+          services.id AS service_id,
+          services.name AS service_name,
+          job_types.id AS job_type_id,
+          job_types.type AS job_type_name,
+          master_status.name AS status,
+          staffs2.id AS reviewer_id,
+          CONCAT(staffs2.first_name, ' ', staffs2.last_name) AS reviewer_name,
+          staffs.id AS allocated_id,
+          CONCAT(staffs.first_name, ' ', staffs.last_name) AS allocated_name,
+          CONCAT(staffs5.first_name, ' ', staffs5.last_name) AS created_by,   
+          DATE_FORMAT(jobs.filing_Companies_date, '%Y-%m-%d') AS filing_Companies_date,
+          DATE_FORMAT(jobs.internal_deadline_date, '%Y-%m-%d') AS internal_deadline_date,
+          DATE_FORMAT(jobs.customer_deadline_date, '%Y-%m-%d') AS customer_deadline_date,  
+          DATE_FORMAT(queries.query_sent_date, '%Y-%m-%d') AS query_sent_date,
+          DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
+          DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
+          DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
+          DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS job_received_on,
+        GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR '| ') AS multiple_staff_names
+        FROM 
+        jobs
+        JOIN staffs AS staffs5 ON jobs.staff_created_id = staffs5.id
+        LEFT JOIN 
+        job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
+        LEFT JOIN staffs AS staffs4 ON job_allowed_staffs.staff_id = staffs4.id
+        LEFT JOIN 
+        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN 
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN 
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN 
+        services ON jobs.service_id = services.id
+        LEFT JOIN 
+        staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN 
+        staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN 
+        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type
+        LEFT JOIN
+        queries ON queries.job_id = jobs.id
+        LEFT JOIN
+        drafts ON drafts.job_id = jobs.id
+        WHERE
+        customers.status = '1'
+        AND jobs.date_received_on <= NOW() - INTERVAL 1 MONTH
         AND jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
-      ORDER BY jobs.id DESC;
-    `;
+        GROUP BY jobs.id
+        ORDER BY 
+          jobs.id DESC;
+        `;
   const [result] = await pool.execute(query);
 
    if (!result.length) {
@@ -178,8 +178,8 @@ parentPort.on("message", async (rows) => {
         
         let finalJobData = jobDataList;
 
-        /* 👉 NON ADMIN USER */
-        if (![1, 2, 8].includes(user.role_id)) {
+        /* 👉 NON ADMIN USER (unless they created a matching job, in which case they get the full report) */
+        if (![1, 2, 8].includes(user.role_id) && !user.is_job_creator) {
           const res = await otherUserDataGet(user);
           if (!res.status) return;
           finalJobData = res.jobDataList;
@@ -221,8 +221,7 @@ parentPort.on("message", async (rows) => {
         const shortDateStr = `Week ${weekNum} Month ${monthNum} Year ${yearNum}`;
 
         const wb = xlsx.utils.book_new();
-        const wsSummary = createSummaryWorksheet(summaryData, finalJobData);
-        xlsx.utils.book_append_sheet(wb, wsSummary, "Summary");
+        xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(summaryData), "Summary");
         xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(finalJobData), "Sitting Over A Month");
 
         const excelBuffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
@@ -257,142 +256,135 @@ parentPort.on("message", async (rows) => {
 
 
 async function otherUserDataGet(row) {
-  const connection = await pool.getConnection();
-  try {
-    await buildAssignedJobsTempTable(connection, [row.id]);
 
-    const query = `
-      SELECT 
+  const query = `
+        SELECT 
         jobs.id AS id,
-        su.max_status_update_date AS current_status_date,
-        CONCAT(
-          SUBSTRING(customers.trading_name, 1, 3), '_',
-          SUBSTRING(clients.trading_name, 1, 3), '_',
-          SUBSTRING(job_types.type, 1, 4), '_',
-          SUBSTRING(jobs.job_id, 1, 15)
-        ) AS job_code_id,
+        (SELECT MAX(status_update_date) FROM job_status_updation WHERE job_id = jobs.id) AS current_status_date,
+          CONCAT(
+                SUBSTRING(customers.trading_name, 1, 3), '_',
+                SUBSTRING(clients.trading_name, 1, 3), '_',
+                SUBSTRING(job_types.type, 1, 4), '_',
+                SUBSTRING(jobs.job_id, 1, 15)
+                ) AS job_code_id,
         customers.id AS customer_id,
         customers.trading_name AS customer_trading_name,
         clients.id AS client_id,
         clients.trading_name AS client_trading_name,
         staffs3.id AS account_manager_id,
-        CONCAT(staffs3.first_name, ' ', staffs3.last_name) AS account_manager_name,
-        services.id AS service_id,
-        services.name AS service_name,
-        job_types.id AS job_type_id,
-        job_types.type AS job_type_name,
-        master_status.name AS status,
-        staffs2.id AS reviewer_id,
-        CONCAT(staffs2.first_name, ' ', staffs2.last_name) AS reviewer_name,
-        CONCAT(staffs5.first_name, ' ', staffs5.last_name) AS created_by,
-        staffs.id AS allocated_id,
-        CONCAT(staffs.first_name, ' ', staffs.last_name) AS allocated_name,    
-        DATE_FORMAT(jobs.filing_Companies_date, '%Y-%m-%d') AS filing_Companies_date,
-        DATE_FORMAT(jobs.internal_deadline_date, '%Y-%m-%d') AS internal_deadline_date,
-        DATE_FORMAT(jobs.customer_deadline_date, '%Y-%m-%d') AS customer_deadline_date,  
-        DATE_FORMAT(q.max_query_sent_date, '%Y-%m-%d') AS query_sent_date,
-        DATE_FORMAT(q.max_query_rec_date, '%Y-%m-%d') AS final_query_response_received_date,
-        DATE_FORMAT(d.max_draft_sent, '%Y-%m-%d') AS draft_sent_on,
-        DATE_FORMAT(d.max_final_draft, '%Y-%m-%d') AS final_draft_sent_on,
-        DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS job_received_on,
-        jas.multiple_staff_names,
-        temp_assigned_jobs_staff.source AS assigned_source,
-        temp_assigned_jobs_staff.service_id_assign AS service_id_assign,
+        CONCAT(
+          staffs3.first_name, ' ', staffs3.last_name) AS account_manager_name,
+          services.id AS service_id,
+          services.name AS service_name,
+          job_types.id AS job_type_id,
+          job_types.type AS job_type_name,
+          master_status.name AS status,
+          staffs2.id AS reviewer_id,
+          CONCAT(staffs2.first_name, ' ', staffs2.last_name) AS reviewer_name,
+          CONCAT(staffs5.first_name, ' ', staffs5.last_name) AS created_by,
+          staffs.id AS allocated_id,
+          CONCAT(staffs.first_name, ' ', staffs.last_name) AS allocated_name,    
+          DATE_FORMAT(jobs.filing_Companies_date, '%Y-%m-%d') AS filing_Companies_date,
+          DATE_FORMAT(jobs.internal_deadline_date, '%Y-%m-%d') AS internal_deadline_date,
+          DATE_FORMAT(jobs.customer_deadline_date, '%Y-%m-%d') AS customer_deadline_date,  
+          DATE_FORMAT(queries.query_sent_date, '%Y-%m-%d') AS query_sent_date,
+          DATE_FORMAT(queries.final_query_response_received_date, '%Y-%m-%d') AS final_query_response_received_date,
+          DATE_FORMAT(drafts.draft_sent_on, '%Y-%m-%d') AS draft_sent_on,
+          DATE_FORMAT(drafts.final_draft_sent_on, '%Y-%m-%d') AS final_draft_sent_on,
+          DATE_FORMAT(jobs.date_received_on, '%Y-%m-%d') AS job_received_on,
+        GROUP_CONCAT(CONCAT(staffs4.first_name, ' ', staffs4.last_name) SEPARATOR '| ') AS multiple_staff_names,
+        assigned_jobs_staff_view.source AS assigned_source,
+        assigned_jobs_staff_view.service_id_assign AS service_id_assign,
         jobs.service_id AS job_service_id,
-        temp_assigned_jobs_staff.staff_id AS temp_assigned_jobs_staff_id
-      FROM jobs
-      JOIN customers ON jobs.customer_id = customers.id AND customers.status = '1'
-      JOIN staffs AS staffs5 ON jobs.staff_created_id = staffs5.id
-      LEFT JOIN clients ON jobs.client_id = clients.id
-      LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.job_id = jobs.id
-      LEFT JOIN job_types ON jobs.job_type_id = job_types.id
-      LEFT JOIN services ON jobs.service_id = services.id
-      LEFT JOIN staffs ON jobs.allocated_to = staffs.id
-      LEFT JOIN staffs AS staffs2 ON jobs.reviewer = staffs2.id
-      LEFT JOIN staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
-      LEFT JOIN master_status ON master_status.id = jobs.status_type
-      LEFT JOIN (
-        SELECT job_id, MAX(status_update_date) AS max_status_update_date
-        FROM job_status_updation
-        GROUP BY job_id
-      ) su ON su.job_id = jobs.id
-      LEFT JOIN (
-        SELECT job_id, MAX(query_sent_date) AS max_query_sent_date, MAX(final_query_response_received_date) AS max_query_rec_date
-        FROM queries
-        GROUP BY job_id
-      ) q ON q.job_id = jobs.id
-      LEFT JOIN (
-        SELECT job_id, MAX(draft_sent_on) AS max_draft_sent, MAX(final_draft_sent_on) AS max_final_draft
-        FROM drafts
-        GROUP BY job_id
-      ) d ON d.job_id = jobs.id
-      LEFT JOIN (
-        SELECT jas.job_id, GROUP_CONCAT(CONCAT(s.first_name, ' ', s.last_name) SEPARATOR '| ') AS multiple_staff_names
-        FROM job_allowed_staffs jas
-        JOIN staffs s ON jas.staff_id = s.id
-        GROUP BY jas.job_id
-      ) jas ON jas.job_id = jobs.id
-      WHERE (
+        assigned_jobs_staff_view.staff_id AS assigned_jobs_staff_view_staff_id
+        FROM 
+        jobs
+        JOIN staffs AS staffs5 ON jobs.staff_created_id = staffs5.id
+        LEFT JOIN 
+        job_allowed_staffs ON job_allowed_staffs.job_id = jobs.id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.job_id = jobs.id
+        LEFT JOIN staffs AS staffs4 ON job_allowed_staffs.staff_id = staffs4.id
+        LEFT JOIN 
+        customer_contact_details ON jobs.customer_contact_details_id = customer_contact_details.id
+        LEFT JOIN 
+        clients ON jobs.client_id = clients.id
+        LEFT JOIN 
+        customers ON jobs.customer_id = customers.id
+        LEFT JOIN 
+        job_types ON jobs.job_type_id = job_types.id
+        LEFT JOIN 
+        services ON jobs.service_id = services.id
+        LEFT JOIN 
+        staffs ON jobs.allocated_to = staffs.id
+        LEFT JOIN 
+        staffs AS staffs2 ON jobs.reviewer = staffs2.id
+        LEFT JOIN 
+        staffs AS staffs3 ON jobs.account_manager_id = staffs3.id
+        LEFT JOIN 
+        master_status ON master_status.id = jobs.status_type
+        LEFT JOIN
+        queries ON queries.job_id = jobs.id
+        LEFT JOIN
+        drafts ON drafts.job_id = jobs.id
+        WHERE
+        customers.status = '1'
+        AND (
         jobs.date_received_on <= NOW() - INTERVAL 1 MONTH
         AND jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
-      )
-      AND (
-        (temp_assigned_jobs_staff.staff_id = ? AND (
-            temp_assigned_jobs_staff.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
-            OR jobs.service_id = temp_assigned_jobs_staff.service_id_assign
-        ))
-        OR jobs.staff_created_id = ?
-      )
-      GROUP BY jobs.id
-      ORDER BY jobs.id DESC;
-    `;
+        )
+        AND assigned_jobs_staff_view.staff_id = ${row?.id}  AND (
+            assigned_jobs_staff_view.source != 'assign_customer_service' COLLATE utf8mb4_unicode_ci
+            OR jobs.service_id = assigned_jobs_staff_view.service_id_assign
+          )
+        
+        GROUP BY jobs.id
+        ORDER BY 
+          jobs.id DESC;
+        `;
 
-    const [result] = await connection.execute(query, [row?.id, row?.id]);
+  const [result] = await pool.execute(query);
  
-    let jobDataList = [];
+  let jobDataList = [];
 
-    if (result && result.length > 0) {
-      result?.forEach(val => {
-        jobDataList.push({
-          "Job Id": val.job_code_id || ' - ',
-          "Job Received On": convertDate(val.job_received_on),
-          "Customer Name": val.customer_trading_name || ' - ',
-          "Account Manager": val.account_manager_name || ' - ',
-          "Clients": val.client_trading_name || ' - ',
-          "Service Type": val.service_name || ' - ',
-          "Job Type": val.job_type_name || ' - ',
-          "Status": val.status || ' - ',
-          "Days in Current Status": (() => {
-              if (!val.current_status_date) return "0 Day";
-              const ms = new Date() - new Date(val.current_status_date);
-              if (isNaN(ms) || ms < 0) return "0 Day";
-              const days = Math.floor(ms / (1000 * 60 * 60 * 24));
-              return `${days} Day${days > 1 ? 's' : ''}`;
-          })(),
-          "Allocated To": val.allocated_name || ' - ',
-          "Allocated to (Other)": val.multiple_staff_names || ' - ',
-          "Reviewer Name": val.reviewer_name || ' - ',
-          "Companies House Due Date": convertDate(val.filing_Companies_date),
-          "Internal Deadline": convertDate(val.internal_deadline_date),
-          "Customer Deadline": convertDate(val.customer_deadline_date),
-          "Initial Query Sent Date": convertDate(val.query_sent_date),
-          "Final Query Response Received Date": convertDate(val.final_query_response_received_date),
-          "First Draft Sent": convertDate(val.draft_sent_on),
-          "Final Draft Sent": convertDate(val.final_draft_sent_on),
-          "Created By": val.created_by || " - "
-        });
+  if (result && result.length > 0) {
+    result?.forEach(val => {
+      jobDataList.push({
+        "Job Id": val.job_code_id || ' - ',
+        "Job Received On": convertDate(val.job_received_on),
+        "Customer Name": val.customer_trading_name || ' - ',
+        "Account Manager": val.account_manager_name || ' - ',
+        "Clients": val.client_trading_name || ' - ',
+        "Service Type": val.service_name || ' - ',
+        "Job Type": val.job_type_name || ' - ',
+        "Status": val.status || ' - ',
+        "Days in Current Status": (() => {
+            if (!val.current_status_date) return "0 Day";
+            const ms = new Date() - new Date(val.current_status_date);
+            if (isNaN(ms) || ms < 0) return "0 Day";
+            const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+            return `${days} Day${days > 1 ? 's' : ''}`;
+        })(),
+        "Allocated To": val.allocated_name || ' - ',
+        "Allocated to (Other)": val.multiple_staff_names || ' - ',
+        "Reviewer Name": val.reviewer_name || ' - ',
+        "Companies House Due Date": convertDate(val.filing_Companies_date),
+        "Internal Deadline": convertDate(val.internal_deadline_date),
+        "Customer Deadline": convertDate(val.customer_deadline_date),
+        "Initial Query Sent Date": convertDate(val.query_sent_date),
+        "Final Query Response Received Date": convertDate(val.final_query_response_received_date),
+        "First Draft Sent": convertDate(val.draft_sent_on),
+        "Final Draft Sent": convertDate(val.final_draft_sent_on),
+        "Created By": val.created_by || " - "
       });
+    });
 
-      return { status: true, jobDataList };
-    } else {
-      return { status: false };
-    }
-  } catch (error) {
-    console.error("Error in jobsSittingWithForOverMonth otherUserDataGet:", error);
-    return { status: false };
-  } finally {
-    connection.release();
+    return { status: true, jobDataList };
   }
+
+  else {
+    return { status: false };
+  }
+
 }
 
 

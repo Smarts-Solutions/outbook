@@ -1,6 +1,5 @@
 console.log("Cron Job Initialized");
 const pool = require("../config/database");
-const { buildAssignedJobsTempTable } = require("../utils/helper");
 const cron = require("node-cron");
 const { Worker } = require("worker_threads");
 const { join } = require("path");
@@ -54,51 +53,49 @@ module.exports = (app) => {
    // 1 . WIP and To Be Started More Than 7 Days Report Email to Super Admin and Admin and Management Role Staffs
   cron.schedule( "30 8 * * *",async () => {
       ////////-----------Trigger Report Email --------------------//////
-      
-    console.log("Cron Job WIP and To Be Started More Than 7 Days Report Email to Super Admin and Admin and Management Role Staffs");    
+
+     
 
       if (process.env.NODE_APP_INSTANCE === "0") {
-        const connection = await pool.getConnection();
-        try {
-          const [activeStaffs] = await connection.execute(
-            "SELECT id FROM staffs WHERE status = '1' AND role_id NOT IN (1, 2, 8)"
-          );
-          const staffIds = activeStaffs.map(s => s.id);
-          await buildAssignedJobsTempTable(connection, staffIds);
+        const wipAndToBeStartedMoreThan_7_query = `
+            SELECT DISTINCT
+              staffs.id AS id,
+              CONCAT(first_name,' ',last_name) AS staff_fullname,
+              staffs.email AS staff_email,
+              roles.role AS staff_role,
+              roles.id AS role_id,
+              EXISTS (
+                SELECT 1 FROM jobs jc
+                WHERE jc.staff_created_id = staffs.id
+                  AND jc.status_type = 1
+                  AND DATE(jc.date_received_on) <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+              ) AS is_job_creator
+            FROM staffs
+            JOIN roles ON roles.id = staffs.role_id
+            LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
+            LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
+            WHERE
+            (jobs.status_type = 1 AND jobs.created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY))
+            OR roles.id IN (1, 2, 8)
+            OR EXISTS (
+              SELECT 1 FROM jobs jc
+              WHERE jc.staff_created_id = staffs.id
+                AND jc.status_type = 1
+                AND DATE(jc.date_received_on) <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+            )
+            ORDER BY staffs.id DESC;
+      `;
 
-          const wipAndToBeStartedMoreThan_7_query = `
-              SELECT DISTINCT
-                staffs.id AS id,
-                CONCAT(first_name,' ',last_name) AS staff_fullname,
-                staffs.email AS staff_email,
-                roles.role AS staff_role,
-                roles.id AS role_id
-              FROM staffs
-              JOIN roles ON roles.id = staffs.role_id
-              LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.staff_id = staffs.id
-              LEFT JOIN jobs ON (jobs.id = temp_assigned_jobs_staff.job_id OR jobs.staff_created_id = staffs.id)
-              WHERE
-              (jobs.status_type = 1 AND jobs.created_at <= DATE_SUB(CURDATE(), INTERVAL 7 DAY)) 
-              OR roles.id IN (1, 2, 8)
-              ORDER BY staffs.id DESC;
-          `;
+        const [wipAndToBeStartedMoreThan_7_result] = await pool.execute(
+          wipAndToBeStartedMoreThan_7_query,
+        );
 
-          const [wipAndToBeStartedMoreThan_7_result] = await connection.execute(
-            wipAndToBeStartedMoreThan_7_query,
-          );
-
-          wipAndToBeStartedMoreThan_7(wipAndToBeStartedMoreThan_7_result || []);
-        } catch (error) {
-          console.error("Error in wipAndToBeStartedMoreThan_7 cron:", error);
-        } finally {
-          connection.release();
-        }
+        wipAndToBeStartedMoreThan_7(wipAndToBeStartedMoreThan_7_result || []);
       }
  
     }
     , {
-     // timezone: "Europe/London"
-      timezone: "Asia/Kolkata"
+      timezone: "Europe/London"
     }
   );
 
@@ -107,45 +104,45 @@ module.exports = (app) => {
   cron.schedule( "35 8 * * *",async () => {
       ////////-----------Trigger Report Email --------------------//////
       if (process.env.NODE_APP_INSTANCE === "0") {
-        const connection = await pool.getConnection();
-        try {
-          const [activeStaffs] = await connection.execute(
-            "SELECT id FROM staffs WHERE status = '1' AND role_id NOT IN (1, 2, 8)"
-          );
-          const staffIds = activeStaffs.map(s => s.id);
-          await buildAssignedJobsTempTable(connection, staffIds);
+       
+      const expectedDeliveryDateChanged_query = `
+        SELECT DISTINCT
+        staffs.id AS id,
+        CONCAT(first_name,' ',last_name) AS staff_fullname,
+        staffs.email AS staff_email,
+        roles.role AS staff_role,
+        roles.id AS role_id,
+        EXISTS (
+          SELECT 1 FROM jobs jc
+          WHERE jc.staff_created_id = staffs.id
+            AND jc.expected_delivery_date <> jc.expected_delivery_date_old
+            AND jc.status_type NOT IN (8,15)
+        ) AS is_job_creator
+        FROM
+        staffs
+        JOIN roles ON roles.id = staffs.role_id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
+        LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
+        WHERE
+        (jobs.expected_delivery_date <> jobs.expected_delivery_date_old AND jobs.status_type NOT IN (8,15))
+        OR roles.id IN (1, 2, 8)
+        OR EXISTS (
+          SELECT 1 FROM jobs jc
+          WHERE jc.staff_created_id = staffs.id
+            AND jc.expected_delivery_date <> jc.expected_delivery_date_old
+            AND jc.status_type NOT IN (8,15)
+        )
+        GROUP BY staffs.id
+        ORDER BY
+          staffs.id DESC;
+        `;
 
-          const expectedDeliveryDateChanged_query = `
-            SELECT DISTINCT 
-            staffs.id AS id,
-            CONCAT(first_name,' ',last_name) AS staff_fullname,
-            staffs.email AS staff_email,
-            roles.role AS staff_role,
-            roles.id AS role_id
-            FROM 
-            staffs
-            JOIN roles ON roles.id = staffs.role_id
-            LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.staff_id = staffs.id
-            LEFT JOIN jobs ON (jobs.id = temp_assigned_jobs_staff.job_id OR jobs.staff_created_id = staffs.id)
-            WHERE
-            (jobs.expected_delivery_date <> jobs.expected_delivery_date_old AND jobs.status_type NOT IN (8, 15)) 
-            OR roles.id IN (1, 2, 8)
-            GROUP BY staffs.id
-            ORDER BY 
-              staffs.id DESC;
-          `;
-
-          const [expectedDeliveryDateChanged_result] = await connection.execute(
-            expectedDeliveryDateChanged_query,
-          );
-          expectedDeliveryDateChanged(expectedDeliveryDateChanged_result || []);
-        } catch (error) {
-          console.error("Error in expectedDeliveryDateChanged cron:", error);
-        } finally {
-          connection.release();
-        }
+      const [expectedDeliveryDateChanged_result] = await pool.execute(
+        expectedDeliveryDateChanged_query,
+      );
+       expectedDeliveryDateChanged(expectedDeliveryDateChanged_result || []);
       }
-  
+ 
     }
     , 
     {
@@ -158,46 +155,50 @@ module.exports = (app) => {
   cron.schedule( "40 8 * * *",async () => {
       ////////-----------Trigger Report Email --------------------//////
       if (process.env.NODE_APP_INSTANCE === "0") {
-        const connection = await pool.getConnection();
-        try {
-          const [activeStaffs] = await connection.execute(
-            "SELECT id FROM staffs WHERE status = '1' AND role_id NOT IN (1, 2, 8)"
-          );
-          const staffIds = activeStaffs.map(s => s.id);
-          await buildAssignedJobsTempTable(connection, staffIds);
+       
+       const missingPaperworkInMax2Days_query = `
+        SELECT DISTINCT
+        staffs.id AS id,
+        CONCAT(first_name,' ',last_name) AS staff_fullname,
+        staffs.email AS staff_email,
+        roles.role AS staff_role,
+        roles.id AS role_id,
+        EXISTS (
+          SELECT 1 FROM jobs jc
+          LEFT JOIN missing_logs ml ON jc.id = ml.job_id
+          WHERE jc.staff_created_id = staffs.id
+            AND DATE(jc.date_received_on) < CURDATE() - INTERVAL 2 DAY
+            AND jc.status_type = 2
+            AND ml.job_id IS NULL
+        ) AS is_job_creator
+        FROM
+        staffs
+        JOIN roles ON roles.id = staffs.role_id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
+        LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
+        LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
+        WHERE
+        ((jobs.created_at <= NOW() - INTERVAL 2 DAY) AND jobs.status_type NOT IN (2,6,7,8,15,17,18,19,20)
+        AND missing_logs.job_id IS NULL)  OR roles.id IN (1, 2, 8)
+        OR EXISTS (
+          SELECT 1 FROM jobs jc
+          LEFT JOIN missing_logs ml ON jc.id = ml.job_id
+          WHERE jc.staff_created_id = staffs.id
+            AND DATE(jc.date_received_on) < CURDATE() - INTERVAL 2 DAY
+            AND jc.status_type = 2
+            AND ml.job_id IS NULL
+        )
+        GROUP BY staffs.id
+        ORDER BY
+          staffs.id DESC;
+        `;
 
-          const missingPaperworkInMax2Days_query = `
-            SELECT DISTINCT
-            staffs.id AS id,
-            CONCAT(first_name,' ',last_name) AS staff_fullname,
-            staffs.email AS staff_email,
-            roles.role AS staff_role,
-            roles.id AS role_id
-            FROM 
-            staffs
-            JOIN roles ON roles.id = staffs.role_id
-            LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.staff_id = staffs.id
-            LEFT JOIN jobs ON (jobs.id = temp_assigned_jobs_staff.job_id OR jobs.staff_created_id = staffs.id)
-            LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
-            WHERE 
-            ((jobs.created_at <= NOW() - INTERVAL 2 DAY) AND jobs.status_type NOT IN (2,6,7,8,15,17,18,19,20)
-            AND missing_logs.job_id IS NULL)  OR roles.id IN (1, 2, 8)
-            GROUP BY staffs.id
-            ORDER BY 
-              staffs.id DESC;
-          `;
-
-          const [missingPaperworkInMax2Days_result] = await connection.execute(
-            missingPaperworkInMax2Days_query,
-          );
-          missingPaperworkInMax2Days(missingPaperworkInMax2Days_result || []);
-        } catch (error) {
-          console.error("Error in missingPaperworkInMax2Days cron:", error);
-        } finally {
-          connection.release();
-        }
+      const [missingPaperworkInMax2Days_result] = await pool.execute(
+        missingPaperworkInMax2Days_query,
+      );
+       missingPaperworkInMax2Days(missingPaperworkInMax2Days_result || []);
       }
-  
+ 
     }
     , 
     {
@@ -210,50 +211,51 @@ module.exports = (app) => {
   cron.schedule( "50 8 * * *",async () => {
       ////////-----------Trigger Report Email --------------------//////
       if (process.env.NODE_APP_INSTANCE === "0") {
-        const connection = await pool.getConnection();
-        try {
-          const [activeStaffs] = await connection.execute(
-            "SELECT id FROM staffs WHERE status = '1' AND role_id NOT IN (1, 2, 8)"
-          );
-          const staffIds = activeStaffs.map(s => s.id);
-          await buildAssignedJobsTempTable(connection, staffIds);
+       
+       
+      const jobsSittingWithForOverMonth_query = `
+        SELECT DISTINCT
+        staffs.id AS id,
+        CONCAT(first_name,' ',last_name) AS staff_fullname,
+        staffs.email AS staff_email,
+        roles.role AS staff_role,
+        roles.id AS role_id,
+        EXISTS (
+          SELECT 1 FROM jobs jc
+          WHERE jc.staff_created_id = staffs.id
+            AND jc.date_received_on <= NOW() - INTERVAL 1 MONTH
+            AND jc.status_type NOT IN (6,7,8,15,17,18,19,20)
+        ) AS is_job_creator
+        FROM
+        staffs
+        JOIN roles ON roles.id = staffs.role_id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
+        LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
+        LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
+        WHERE
+        (
+        jobs.created_at >= NOW() - INTERVAL 30 DAY
+        AND jobs.created_at <= NOW()
+        AND jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
+        )
+        OR roles.id IN (1, 2, 8)
+        OR EXISTS (
+          SELECT 1 FROM jobs jc
+          WHERE jc.staff_created_id = staffs.id
+            AND jc.date_received_on <= NOW() - INTERVAL 1 MONTH
+            AND jc.status_type NOT IN (6,7,8,15,17,18,19,20)
+        )
+        GROUP BY staffs.id
+        ORDER BY
+          staffs.id DESC;
+        `;
 
-          const jobsSittingWithForOverMonth_query = `
-            SELECT DISTINCT
-            staffs.id AS id,
-            CONCAT(first_name,' ',last_name) AS staff_fullname,
-            staffs.email AS staff_email,
-            roles.role AS staff_role,
-            roles.id AS role_id
-            FROM 
-            staffs
-            JOIN roles ON roles.id = staffs.role_id
-            LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.staff_id = staffs.id
-            LEFT JOIN jobs ON (jobs.id = temp_assigned_jobs_staff.job_id OR jobs.staff_created_id = staffs.id)
-            LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
-            WHERE
-            (
-            jobs.created_at >= NOW() - INTERVAL 30 DAY
-            AND jobs.created_at <= NOW()
-            AND jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
-            ) 
-            OR roles.id IN (1, 2, 8)
-            GROUP BY staffs.id
-            ORDER BY 
-              staffs.id DESC;
-          `;
-
-          const [jobsSittingWithForOverMonth_result] = await connection.execute(
-            jobsSittingWithForOverMonth_query,
-          );
-          jobsSittingWithForOverMonth(jobsSittingWithForOverMonth_result || []);
-        } catch (error) {
-          console.error("Error in jobsSittingWithForOverMonth cron:", error);
-        } finally {
-          connection.release();
-        }
+      const [jobsSittingWithForOverMonth_result] = await pool.execute(
+        jobsSittingWithForOverMonth_query,
+      );
+       jobsSittingWithForOverMonth(jobsSittingWithForOverMonth_result || []);
       }
-  
+ 
     }
     , 
     {
@@ -266,50 +268,53 @@ module.exports = (app) => {
   cron.schedule( "0 9 * * *",async () => {
       ////////-----------Trigger Report Email --------------------//////
       if (process.env.NODE_APP_INSTANCE === "0") {
-        const connection = await pool.getConnection();
-        try {
-          const [activeStaffs] = await connection.execute(
-            "SELECT id FROM staffs WHERE status = '1' AND role_id NOT IN (1, 2, 8)"
-          );
-          const staffIds = activeStaffs.map(s => s.id);
-          await buildAssignedJobsTempTable(connection, staffIds);
+       
+     
+      const JobsNotDeliveredWithin14Days_query = `
+        SELECT DISTINCT
+        staffs.id AS id,
+        CONCAT(first_name,' ',last_name) AS staff_fullname,
+        staffs.email AS staff_email,
+        roles.role AS staff_role,
+        roles.id AS role_id,
+        EXISTS (
+          SELECT 1 FROM jobs jc
+          WHERE jc.staff_created_id = staffs.id
+            AND DATE(jc.date_received_on) <= NOW() - INTERVAL 14 DAY
+            AND DATE(jc.date_received_on) <= NOW()
+            AND jc.status_type NOT IN (6,7,8,15,17,18,19,20)
+        ) AS is_job_creator
+        FROM
+        staffs
+        JOIN roles ON roles.id = staffs.role_id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
+        LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
+        LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
+        WHERE
+        (
+        jobs.date_received_on >= NOW() - INTERVAL 14 DAY
+        AND jobs.date_received_on <= NOW()
+        AND jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
+        )
+        OR roles.id IN (1, 2, 8)
+        OR EXISTS (
+          SELECT 1 FROM jobs jc
+          WHERE jc.staff_created_id = staffs.id
+            AND DATE(jc.date_received_on) <= NOW() - INTERVAL 14 DAY
+            AND DATE(jc.date_received_on) <= NOW()
+            AND jc.status_type NOT IN (6,7,8,15,17,18,19,20)
+        )
+        GROUP BY staffs.id
+        ORDER BY
+          staffs.id DESC;
+        `;
 
-          const JobsNotDeliveredWithin14Days_query = `
-            SELECT DISTINCT
-            staffs.id AS id,
-            CONCAT(first_name,' ',last_name) AS staff_fullname,
-            staffs.email AS staff_email,
-            roles.role AS staff_role,
-            roles.id AS role_id
-            FROM 
-            staffs
-            JOIN roles ON roles.id = staffs.role_id
-            LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.staff_id = staffs.id
-            LEFT JOIN jobs ON (jobs.id = temp_assigned_jobs_staff.job_id OR jobs.staff_created_id = staffs.id)
-            LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
-            WHERE
-            (
-            jobs.date_received_on >= NOW() - INTERVAL 14 DAY
-            AND jobs.date_received_on <= NOW()
-            AND jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
-            ) 
-            OR roles.id IN (1, 2, 8)
-            GROUP BY staffs.id
-            ORDER BY 
-              staffs.id DESC;
-          `;
-
-          const [JobsNotDeliveredWithin14Days_result] = await connection.execute(
-            JobsNotDeliveredWithin14Days_query,
-          );
-          JobsNotDeliveredWithin14Days(JobsNotDeliveredWithin14Days_result || []);
-        } catch (error) {
-          console.error("Error in JobsNotDeliveredWithin14Days cron:", error);
-        } finally {
-          connection.release();
-        }
+      const [JobsNotDeliveredWithin14Days_result] = await pool.execute(
+        JobsNotDeliveredWithin14Days_query,
+      );
+       JobsNotDeliveredWithin14Days(JobsNotDeliveredWithin14Days_result || []);
       }
-  
+ 
     }
     , 
     {
@@ -322,55 +327,55 @@ module.exports = (app) => {
   cron.schedule( "10 9 * * *",async () => {
       ////////-----------Trigger Report Email --------------------//////
       if (process.env.NODE_APP_INSTANCE === "0") {
-        const connection = await pool.getConnection();
-        try {
-          const [activeStaffs] = await connection.execute(
-            "SELECT id FROM staffs WHERE status = '1' AND role_id NOT IN (1, 2, 8)"
-          );
-          const staffIds = activeStaffs.map(s => s.id);
-          await buildAssignedJobsTempTable(connection, staffIds);
+       
+      const JobsNotDeliveredMissingPaperwork7Days_query = `
+        SELECT DISTINCT
+        staffs.id AS id,
+        CONCAT(first_name,' ',last_name) AS staff_fullname,
+        staffs.email AS staff_email,
+        roles.role AS staff_role,
+        roles.id AS role_id,
+        EXISTS (
+          SELECT 1 FROM jobs jc
+          WHERE jc.staff_created_id = staffs.id
+            AND jc.status_type = 2
+            AND jc.status_updation_date < CURDATE() - INTERVAL 7 DAY
+        ) AS is_job_creator
+        FROM
+        staffs
+        JOIN roles ON roles.id = staffs.role_id
+        LEFT JOIN assigned_jobs_staff_view ON assigned_jobs_staff_view.staff_id = staffs.id
+        LEFT JOIN jobs ON jobs.id = assigned_jobs_staff_view.job_id
+        LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
+        WHERE
+        (
+         jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
+         AND EXISTS (
+          SELECT 1
+          FROM missing_logs
+          WHERE missing_logs.job_id = jobs.id
+            AND missing_logs.status = '1'
+            AND missing_logs.missing_log_reviewed_date <= NOW() - INTERVAL 7 DAY
+        )
+        )
+        OR roles.id IN (1, 2, 8)
+        OR EXISTS (
+          SELECT 1 FROM jobs jc
+          WHERE jc.staff_created_id = staffs.id
+            AND jc.status_type = 2
+            AND jc.status_updation_date < CURDATE() - INTERVAL 7 DAY
+        )
+        GROUP BY staffs.id
+        ORDER BY
+          staffs.id DESC;
+        `;
 
-          const JobsNotDeliveredMissingPaperwork7Days_query = `
-            SELECT DISTINCT
-            staffs.id AS id,
-            CONCAT(first_name,' ',last_name) AS staff_fullname,
-            staffs.email AS staff_email,
-            roles.role AS staff_role,
-            roles.id AS role_id
-            FROM 
-            staffs
-            JOIN roles ON roles.id = staffs.role_id
-            LEFT JOIN temp_assigned_jobs_staff ON temp_assigned_jobs_staff.staff_id = staffs.id
-            LEFT JOIN jobs ON (jobs.id = temp_assigned_jobs_staff.job_id OR jobs.staff_created_id = staffs.id)
-            LEFT JOIN missing_logs ON jobs.id = missing_logs.job_id
-            WHERE
-            (
-            jobs.status_type NOT IN (6,7,8,15,17,18,19,20)
-            AND EXISTS (
-              SELECT 1
-              FROM missing_logs 
-              WHERE missing_logs.job_id = jobs.id
-                AND missing_logs.status = '1'
-                AND missing_logs.missing_log_reviewed_date <= NOW() - INTERVAL 7 DAY
-            )
-            ) 
-            OR roles.id IN (1, 2, 8)
-            GROUP BY staffs.id
-            ORDER BY 
-              staffs.id DESC;
-          `;
-
-          const [JobsNotDeliveredMissingPaperwork7Days_result] = await connection.execute(
-            JobsNotDeliveredMissingPaperwork7Days_query,
-          );
-          JobsNotDeliveredMissingPaperwork7Days(JobsNotDeliveredMissingPaperwork7Days_result || []);
-        } catch (error) {
-          console.error("Error in JobsNotDeliveredMissingPaperwork7Days cron:", error);
-        } finally {
-          connection.release();
-        }
+      const [JobsNotDeliveredMissingPaperwork7Days_result] = await pool.execute(
+        JobsNotDeliveredMissingPaperwork7Days_query,
+      );
+      JobsNotDeliveredMissingPaperwork7Days(JobsNotDeliveredMissingPaperwork7Days_result || []);
       }
-  
+ 
     }
     , 
     {
@@ -378,6 +383,7 @@ module.exports = (app) => {
     }
   );
 
+ 
 };
 
 // cron.schedule("* * * * *", async () => {
