@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useCustomerAccess } from "../../Utils/CustomerAccessContext";
-import { Briefcase, ChevronDown, ChevronRight, PieChart, Shield, User, Users, File, FileText, Clock, Clock1, Clock10Icon, Settings, LayoutGrid, UserCog, FileSliders, Receipt } from "lucide-react";
+import { Briefcase, ChevronDown, ChevronRight, PieChart, Shield, User, Users, File, FileText, Clock, Clock1, Clock10Icon, Settings, LayoutGrid, UserCog, FileSliders, Receipt, Send } from "lucide-react";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -589,6 +589,27 @@ const Sidebar = () => {
                         <span>Custom Job</span>
                       </Link>
                     </li>
+
+                    {role === "SUPERADMIN" && (
+                      <li
+                        className={
+                          activeLink === "/admin/reports/trigger-test" ? "active" : ""
+                        }
+                      >
+                        <Link
+                          to="/admin/reports/trigger-test"
+                          aria-expanded="false"
+                          onClick={(e) =>
+                            handleLinkClick(e, "/admin/reports/trigger-test")
+                          }
+                        >
+                          <span className="sidebar-icons">
+                            <Send size={18} />{" "}
+                          </span>
+                          <span>Trigger Reports Test</span>
+                        </Link>
+                      </li>
+                    )}
                   </ul>
                 </li>
 

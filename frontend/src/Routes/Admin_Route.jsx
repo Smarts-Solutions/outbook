@@ -8,6 +8,7 @@ import Profile from "../Components/Dashboard/Profile";
 
 import Dashboard from "../layouts/Admin/DashboardPage/Dashboard";
 import DashboardLinkData from "../layouts/Admin/DashboardPage/DashboardLinkData";
+import TriggerReportTest from "../layouts/Admin/Reports/TriggerReportTest";
 
 import Service from "../layouts/Admin/customer/customer_add_process/Service";
 import BillingDashboard from "../layouts/Admin/Billing/BillingDashboard";
@@ -332,6 +333,7 @@ const Admin_Route = () => {
               <Route path="/report/jobs" element={<Jobs />} />
               <Route path="/dashboard/data" element={<DashboardLinkData />} />
               <Route path="/testweeklyreport" element={<TextWeeklyReport />} />
+              <Route path="/reports/trigger-test" element={<TriggerReportTest />} />
             </Routes>
           </div>
         </div>

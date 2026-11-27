@@ -16,4 +16,5 @@ module.exports = function (app) {
     app.use("/customTimesheet", require("./customTimesheet/index.js"));
     app.use("/systemSettings", require("./systemSettings/systemSettingsRoutes"));
     app.use("/billing", require("../billing/routes/billingRoutes"));
+    app.use("/triggerTest", require("./triggerTest/triggerTestRoutes"));
 };
