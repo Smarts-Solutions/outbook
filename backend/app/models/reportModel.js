@@ -2880,10 +2880,7 @@ const getTimesheetReportData = async (Report) => {
         CONCAT(${groupLabelSQL}) AS group_label,
         CONCAT(s.first_name,' ',s.last_name) AS staff_name,
         c.trading_name AS customer_name,
-        CONCAT('cli_',
-               SUBSTRING(c.trading_name,1,3),'_',
-               SUBSTRING(cl.trading_name,1,3),'_',
-               SUBSTRING(cl.client_code,1,15)) AS client_name,
+        cl.trading_name AS client_name,
         CASE
           WHEN raw.task_type='1' THEN internal.name
           WHEN raw.task_type='2' THEN
