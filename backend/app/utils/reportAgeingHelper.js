@@ -104,47 +104,45 @@ function buildStatusAgeingMatrix(jobs) {
   }
 
   const rows = [];
+  const sortedStatuses = Array.from(allStatuses).sort((a, b) => a.localeCompare(b));
+  const isSingleStatus = sortedStatuses.length <= 1;
 
-  // Title row
-  rows.push(["Status wise report chart which shows the jobs ageing by received date"]);
-  rows.push([]); // blank separator
-
-  // Header Row: Status, Nov-26, Oct-26, ..., Grand Total
-  const header = ["Status"];
+  // Header Row: Status, Grand Total (Status Wise) [or Grand Total if single status], Nov-26, Oct-26, ...
+  const statusTotalColName = isSingleStatus ? "Grand Total" : "Grand Total (Status Wise)";
+  const header = ["Status", statusTotalColName];
   sortedMonthKeys.forEach(k => {
     header.push(monthColsMap[k].label);
   });
-  header.push("Grand Total");
   rows.push(header);
 
   // Status rows (sorted alphabetically)
-  const sortedStatuses = Array.from(allStatuses).sort((a, b) => a.localeCompare(b));
   const colTotals = new Array(sortedMonthKeys.length).fill(0);
   let totalGrandSum = 0;
 
   sortedStatuses.forEach(st => {
-    const row = [st];
     let rowSum = 0;
+    const monthCounts = [];
 
     sortedMonthKeys.forEach((k, idx) => {
       const count = statusMap[st] ? (statusMap[st][k] || 0) : 0;
-      row.push(count > 0 ? count : "-");
+      monthCounts.push(count > 0 ? count : "-");
       colTotals[idx] += count;
       rowSum += count;
     });
 
-    row.push(rowSum > 0 ? rowSum : "-");
     totalGrandSum += rowSum;
+    const row = [st, rowSum > 0 ? rowSum : "-", ...monthCounts];
     rows.push(row);
   });
 
-  // Bottom Grand Total row
-  const bottomTotalRow = ["Grand Total"];
-  colTotals.forEach(val => {
-    bottomTotalRow.push(val > 0 ? val : "-");
-  });
-  bottomTotalRow.push(totalGrandSum > 0 ? totalGrandSum : "-");
-  rows.push(bottomTotalRow);
+  // Bottom Grand Total row: only add if there are multiple statuses (for single status, the status row already shows the grand total)
+  if (!isSingleStatus) {
+    const bottomTotalRow = ["Grand Total (Month Wise)", totalGrandSum > 0 ? totalGrandSum : "-"];
+    colTotals.forEach(val => {
+      bottomTotalRow.push(val > 0 ? val : "-");
+    });
+    rows.push(bottomTotalRow);
+  }
 
   return rows;
 }
@@ -197,16 +195,11 @@ function buildCustomerAgeingMatrix(jobs) {
 
   const rows = [];
 
-  // Title row
-  rows.push(["Customer wise report chart which shows the jobs ageing by received date"]);
-  rows.push([]); // blank separator
-
-  // Header Row: Customer Name, Nov-26, Oct-26, ..., Grand Total
-  const header = ["Customer Name"];
+  // Header Row: Customer Name, Grand Total (Customer Wise), Nov-26, Oct-26, ...
+  const header = ["Customer Name", "Grand Total (Customer Wise)"];
   sortedMonthKeys.forEach(k => {
     header.push(monthColsMap[k].label);
   });
-  header.push("Grand Total");
   rows.push(header);
 
   // Customer rows (sorted alphabetically)
@@ -215,27 +208,26 @@ function buildCustomerAgeingMatrix(jobs) {
   let totalGrandSum = 0;
 
   sortedCustomers.forEach(cust => {
-    const row = [cust];
     let rowSum = 0;
+    const monthCounts = [];
 
     sortedMonthKeys.forEach((k, idx) => {
       const count = customerMap[cust] ? (customerMap[cust][k] || 0) : 0;
-      row.push(count > 0 ? count : "-");
+      monthCounts.push(count > 0 ? count : "-");
       colTotals[idx] += count;
       rowSum += count;
     });
 
-    row.push(rowSum > 0 ? rowSum : "-");
     totalGrandSum += rowSum;
+    const row = [cust, rowSum > 0 ? rowSum : "-", ...monthCounts];
     rows.push(row);
   });
 
-  // Bottom Grand Total row
-  const bottomTotalRow = ["Grand Total"];
+  // Bottom Grand Total row: "Grand Total (Month Wise)", overall total, then month-wise totals
+  const bottomTotalRow = ["Grand Total (Month Wise)", totalGrandSum > 0 ? totalGrandSum : "-"];
   colTotals.forEach(val => {
     bottomTotalRow.push(val > 0 ? val : "-");
   });
-  bottomTotalRow.push(totalGrandSum > 0 ? totalGrandSum : "-");
   rows.push(bottomTotalRow);
 
   return rows;
@@ -243,16 +235,11 @@ function buildCustomerAgeingMatrix(jobs) {
 
 /**
  * Creates Summary worksheet with:
- * 1) Top standard status count table
- * 2) 3 blank rows
- * 3) Simple, descending-month ageing table with horizontal & vertical Grand Totals
- *    Supports groupBy: "status" (default) or "customer"
+ * Simple, descending-month ageing table with horizontal & vertical Grand Totals
+ * (Status / Customer, Grand Total, and month-wise columns)
+ * Supports groupBy: "status" (default) or "customer"
  */
 function createSummaryWorksheet(summaryData, finalJobData, options = {}) {
-  const ws = xlsx.utils.json_to_sheet(
-    summaryData && summaryData.length ? summaryData : [{ "Summary": "No data", "Total Count": 0 }]
-  );
-
   let matrix = [];
   if (options.groupBy === 'customer') {
     matrix = buildCustomerAgeingMatrix(finalJobData);
@@ -261,12 +248,10 @@ function createSummaryWorksheet(summaryData, finalJobData, options = {}) {
   }
 
   if (matrix && matrix.length > 0) {
-    const existingRange = xlsx.utils.decode_range(ws['!ref'] || "A1:B1");
-    const startRow = existingRange.e.r + 4; // 3 empty lines gap
-    xlsx.utils.sheet_add_aoa(ws, matrix, { origin: { r: startRow, c: 0 } });
+    return xlsx.utils.aoa_to_sheet(matrix);
   }
 
-  return ws;
+  return xlsx.utils.aoa_to_sheet([["No data to display"]]);
 }
 
 module.exports = {

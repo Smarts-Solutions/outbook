@@ -4,6 +4,7 @@ const { parentPort } = require("worker_threads");
 const { commonEmail } = require("../utils/commonEmail");
 const xlsx = require('xlsx');
 const { logEmail } = require("../utils/emailLogger");
+const { createSummaryWorksheet } = require("../utils/reportAgeingHelper");
 
 const convertDate = (date) => {
   if ([null, undefined, ''].includes(date)) {
@@ -120,7 +121,7 @@ const generateExcelDataAndBuffer = async (result) => {
     const wb = xlsx.utils.book_new();
 
     // Add Summary tab FIRST
-    const wsSummary = xlsx.utils.json_to_sheet(summaryData.length ? summaryData : [{"Message": "No missing logs found"}]);
+    const wsSummary = createSummaryWorksheet(summaryData, jobsData, { groupBy: 'status' });
     xlsx.utils.book_append_sheet(wb, wsSummary, "Summary");
     
     // Add Jobs tab SECOND

@@ -209,8 +209,10 @@ parentPort.on("message", async (rows) => {
         const shortDateStr = `Week ${weekNum} Month ${monthNum} Year ${yearNum}`;
 
         const wb = xlsx.utils.book_new();
-        const wsSummary = createSummaryWorksheet(summaryData, finalJobData, { groupBy: 'customer' });
+        const wsSummary = createSummaryWorksheet(summaryData, finalJobData, { groupBy: 'status' });
         xlsx.utils.book_append_sheet(wb, wsSummary, "Summary");
+        const wsCustomerSummary = createSummaryWorksheet(summaryData, finalJobData, { groupBy: 'customer' });
+        xlsx.utils.book_append_sheet(wb, wsCustomerSummary, "Customer Wise Data");
         xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(finalJobData), "WIP Not Updated 7 Days");
 
         const excelBuffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
