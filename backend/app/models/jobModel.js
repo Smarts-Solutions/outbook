@@ -5956,6 +5956,8 @@ const copy_job = async (job) => {
     data.status_updation_date = new Date();
 
     //Other Data Field
+    data.expected_delivery_date = null;
+    data.expected_delivery_date_old = null;
     data.filing_Companies_required = "0";
     data.filing_Companies_date = null;
     data.filing_hmrc_required = "0"
